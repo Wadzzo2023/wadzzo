@@ -45,7 +45,7 @@ export async function createAsset({
 
   // issuer
   const issuerAcc = Keypair.random();
-  const distributorAcc = Keypair.fromSecret(env.DISTRIBUTOR_SECRET);
+  const distributorAcc = Keypair.fromSecret(env.STORAGE_SECRET);
 
   const asset = new Asset(code, issuerAcc.publicKey());
 
