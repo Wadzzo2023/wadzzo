@@ -7,7 +7,7 @@ import { useTagStore } from "~/lib/state/wallete/tag";
 export default function AllAsset() {
   const { selectedTag } = useTagStore();
 
-  const assets = api.wallate.asset.getAssets.useInfiniteQuery(
+  const assets = api.wallate.asset.getBancoinAssets.useInfiniteQuery(
     { limit: 10, tag: selectedTag },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
