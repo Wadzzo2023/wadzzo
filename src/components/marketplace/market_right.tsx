@@ -116,7 +116,7 @@ function OtherButtons() {
   }
 }
 
-function DisableFromMarketButton({
+export function DisableFromMarketButton({
   code,
   issuer,
 }: {
@@ -124,7 +124,7 @@ function DisableFromMarketButton({
   issuer: string;
 }) {
   const { setData } = useMarketRightStore();
-  const disable = api.marketplace.market.changeVisibilityMarketNft.useMutation({
+  const disable = api.marketplace.market.disableToMarketDB.useMutation({
     onSuccess() {
       setData(undefined);
     },
@@ -133,41 +133,13 @@ function DisableFromMarketButton({
   return (
     <button
       className="btn btn-secondary btn-sm my-2 w-full transition duration-500 ease-in-out"
-      onClick={() => disable.mutate({ code, issuer, visibility: false })}
+      onClick={() => disable.mutate({ code, issuer })}
     >
       {disable.isLoading && <span className="loading loading-spinner" />}
       DISABLE
     </button>
   );
 }
-
-// function DeleteButton({ path }: { path: string }) {
-//   const { status } = useSession();
-//   const { navPath } = useOpenStore();
-//   const { setRightData } = useRightStore();
-
-//   const utils = api.useContext();
-//   const deleteMutation = api.nft.deleteNFT.useMutation({
-//     onSuccess: async () => {
-//       await utils.market.getMarketNft.refetch();
-//       setRightData(undefined);
-//     },
-//   });
-
-//   if (status == "authenticated" && navPath == NAVIGATION.MARKETPLACE) {
-//     return (
-//       <button
-//         className="btn btn-secondary btn-sm w-full transition duration-500 ease-in-out"
-//         onClick={() => deleteMutation.mutate({ path })}
-//       >
-//         {deleteMutation.isLoading && (
-//           <span className="loading loading-spinner" />
-//         )}
-//         Delete
-//       </button>
-//     );
-//   }
-// }
 
 function MediaViewer(props: {
   color: string;
