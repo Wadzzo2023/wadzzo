@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import { z } from "zod";
 import { api } from "~/utils/api";
 import { clientsign, useConnectWalletStateStore } from "package/connect_wallet";
-import { clientSelect } from "~/lib/stellar/fan/utils";
 import { Plus } from "lucide-react";
 import Alert from "../../ui/alert";
 import { PLATFROM_ASSET, PLATFROM_FEE } from "~/lib/stellar/fan/constant";
@@ -43,42 +42,6 @@ export default function AddTierModal({ creator }: { creator: Creator }) {
   });
   const assetAmount = api.fan.trx.getAssetNumberforXlm.useQuery();
 
-  const trxMutation = api.fan.trx.createCreatorPageAsset.useMutation({
-    onSuccess: async (data) => {
-      if (data) {
-        // sign the transaction for fbgoogle
-
-        clientsign({
-          walletType,
-          presignedxdr: data.trx,
-          pubkey,
-          test: clientSelect(),
-        })
-          .then((res) => {
-            if (res) {
-              toast.success("popup success");
-              mutation.mutate({
-                name: getValues("name"),
-                featureDescription:
-                  getValues("featureDescription") || "No description",
-                escrow: data.escrow,
-                price: getValues("price"),
-              });
-            } else {
-              toast.error("Error signing transaction");
-            }
-          })
-          .catch((e) => console.log(e))
-          .finally(() => {
-            setIsModalOpen(false);
-          });
-      } else {
-        toast.error("Error creating tier");
-      }
-      setIsModalOpen(false);
-    },
-  });
-
   const {
     register,
     handleSubmit,
@@ -91,13 +54,7 @@ export default function AddTierModal({ creator }: { creator: Creator }) {
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof TierSchema>> = (data) => {
-    setIsModalOpen(true);
-
-    trxMutation.mutate({
-      code: getValues("name"),
-      signWith: needSign(),
-    });
-    // mutation.mutate(data);
+    mutation.mutate(data);
   };
 
   const handleModal = () => {
