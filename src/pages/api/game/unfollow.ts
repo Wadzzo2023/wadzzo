@@ -22,9 +22,16 @@ export default async function handler(
 
   const data = z.object({ brand_id: z.string() }).parse(req.body);
 
-  const creator = await db.creator.findUniqueOrThrow({
+  const creator = await db.creator.findUnique({
     where: { id: data.brand_id },
   });
+
+  if (!creator) {
+    res.status(404).json({
+      error: "creator not found",
+    });
+    return;
+  }
 
   const pubkey = token.sub;
 
