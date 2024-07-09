@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 
 export const CommentSchema = z.object({
   postId: z.number(),
+  parentId: z.number().optional(),
   content: z.string().min(5, { message: "Minimum 5 character is required!" }),
 });
 
@@ -40,10 +41,12 @@ export function AddComment({ postId }: { postId: number }) {
               className=" textarea textarea-bordered w-full"
             />
             <button className="btn" type="submit">
-              {commentM.isLoading && (
-                <span className="loading loading-spinner" />
+              {commentM.isLoading ? (
+                <span className="loading loading-spinner h-5 w-5" />
+              ) : (
+                <Send size={14} />
               )}
-              <Send size={14} /> Comment
+              Comment
             </button>
           </div>
           {errors.content && (
