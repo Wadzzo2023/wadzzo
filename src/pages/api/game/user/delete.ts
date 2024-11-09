@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 
-import { getSession } from "next-auth/react";
 import { db } from "~/server/db";
 
 export default async function handler(
@@ -8,14 +8,12 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   try {
-    const session = await getSession({ req });
+    const token = await getToken({ req });
 
-    if (session) {
-      const user = session.user;
-
+    if (token) {
       // delete all user data.
       const response = await db.locationConsumer.deleteMany({
-        where: { userId: user.id },
+        where: { userId: token.sub },
       });
 
       return res.status(204).end();
