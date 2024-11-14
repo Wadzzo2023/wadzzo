@@ -4,6 +4,7 @@ import {
   User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -26,6 +27,7 @@ import { Button } from "../shadcn/ui/button";
 
 function LoginPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [verifyEmail, setVerifyEmail] = useState(false);
 
   const sesssion = useSession();
 
@@ -71,12 +73,6 @@ function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-    control,
-    trigger,
-    watch,
-    reset,
-    setError,
-    clearErrors,
     getValues,
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,6 +86,7 @@ function LoginPage() {
         toast.success("User successfully logged in");
         resetPasswordMutation.reset();
 
+        // return;
         const res = await toast.promise(
           axios.get(USER_ACCOUNT_XDR_URL, {
             params: {
@@ -127,11 +124,18 @@ function LoginPage() {
       if (res?.error) {
         const error = res.error;
         if (error.includes(AuthErrorCodes.USER_DELETED)) {
-          registerUser(variables.email, variables.password);
+          alert("User not found");
+          // registerUser(variables.email, variables.password);
         } else if (error.includes(AuthErrorCodes.INVALID_PASSWORD)) {
-          toast.error("Invalidate Credential");
+          toast.error("Invalid Credential");
           setForgetPass(true);
-        } else toast.error(res.error);
+        } else if (error.includes("Email is not verified")) {
+          toast.error("Email is not verified, verification email sent");
+          setVerifyEmail(true);
+          // emailVerifiedMutation.mutate({ user: auth.currentUser });
+        } else {
+          toast.error(error);
+        }
       }
       // Invalidate and refetch
     },
@@ -139,10 +143,10 @@ function LoginPage() {
       const errorCode = error.code;
       if (errorCode == AuthErrorCodes.USER_DELETED) {
         // user is not signed In
-        registerUser(variables.email, variables.password);
+        // registerUser(variables.email, variables.password);
       } else if (errorCode == AuthErrorCodes.INVALID_PASSWORD) {
         // passowrd invalid
-        toast.error("Invalidate Credential");
+        toast.error("Invalid Credential");
         setForgetPass(true);
       } else {
         const errorMessage = error.message;
@@ -188,6 +192,7 @@ function LoginPage() {
 
   async function loginUser(email: string, password: string) {
     await auth.signOut();
+
     return await signIn("credentials", {
       redirect: false,
       password,
@@ -246,7 +251,7 @@ function LoginPage() {
                   {resetPasswordMutation.isLoading && (
                     <span className="loading loading-spinner"></span>
                   )}
-                  Forget Passowrd?
+                  Forget Password?
                 </a>
               </span>
             )}
@@ -256,6 +261,8 @@ function LoginPage() {
       {resetPasswordMutation.isSuccess && (
         <p>Check you email to reset password</p>
       )}
+
+      {verifyEmail && <p>Check your email to verify account.</p>}
       <Button disabled={submitMutation.isLoading} type="submit">
         {submitMutation.isLoading && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
