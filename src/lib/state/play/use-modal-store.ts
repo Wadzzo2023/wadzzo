@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { SubmissionAttachment, type Location, type LocationConsumer } from "@prisma/client";
+import {
+  SubmissionAttachment,
+  type Location,
+  type LocationConsumer,
+} from "@prisma/client";
+
+import { Horizon } from "@stellar/stellar-sdk";
 
 export type ModalType =
   | "send assets"
@@ -12,10 +18,11 @@ export type ModalType =
   | "share"
   | "upload file"
   | "edit bounty"
-  | 'view attachment'
+  | "view attachment"
+  | "transaction history"
 
 export interface ModalData {
-  pinId?: number;
+  pinId?: string;
   recipientId?: string;
   amount?: string;
   asset_code?: string;
@@ -30,6 +37,7 @@ export interface ModalData {
   bountyId?: number;
   attachment?: SubmissionAttachment[];
   submissionId?: number;
+  transaction?: Horizon.ServerApi.TransactionRecord
 }
 
 interface ModalStore {
