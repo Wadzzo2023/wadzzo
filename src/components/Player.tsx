@@ -63,11 +63,7 @@ export const Player: React.FC = () => {
 
     console.log('currentTrack', currentTrack)
     console.log('isPlaying', isPlaying)
-    useEffect(() => {
-        if (videoRef.current && currentTrack?.asset?.mediaUrl) {
-            videoRef.current.src = currentTrack.asset.mediaUrl;
-        }
-    }, [currentTrack]);
+
 
     if (!currentTrack || !isPlayerOpen) return null
 
