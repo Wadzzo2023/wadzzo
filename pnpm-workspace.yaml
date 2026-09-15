@@ -1,0 +1,13 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  bufferutil: true
+  core-js: true
+  esbuild: true
+  prisma: true
+  protobufjs: true
+  secp256k1: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true

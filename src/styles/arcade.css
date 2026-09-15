@@ -1,0 +1,1307 @@
+/**
+ * ── Wadzzo AR — arcade design layer ────────────────────────────────────────
+ *
+ * Loaded AFTER globals.css so it wins on equal specificity. globals.css keeps
+ * the shadcn primitives working; this file re-skins the whole token set into
+ * a green-tinted collector's HUD and adds the effects the app leans on:
+ * bevelled "card stock" surfaces, trading-card holo foil, scanlines, and a
+ * terrain grid.
+ *
+ * ## Two palettes, one set of names
+ *
+ * Was dark-only: a phone in direct sunlight is the app's single most common
+ * real-world condition (it's used outdoors, walking around, looking for
+ * drops), and a dim glowing HUD on a near-black ground is exactly the
+ * combination that washes out hardest under screen glare — the opposite of
+ * what was assumed when "outdoors" first motivated the dark-only palette.
+ *
+ * `:root` now holds the light palette as the bare default; `.dark` overrides
+ * it back to the original dark one. Which is present on `<html>` is decided
+ * in three layers, each a safety net for the one before it failing:
+ *
+ *   1. `_document.tsx` server-renders `class="dark"` unconditionally, so
+ *      dark is what a no-JS browser — or the first frame before any script
+ *      runs — always sees. Never blank, never a flash of unstyled light.
+ *   2. An inline, synchronous script in `_document.tsx`'s `<Head>` runs
+ *      before the page paints, reads the stored preference (`lib/ar/theme.ts`,
+ *      `wadzzo-ar-theme` in localStorage — "auto", "light" or "dark"),
+ *      resolves "auto" against `matchMedia('(prefers-color-scheme: light)')`,
+ *      and removes the `dark` class if the result is light. Runs once, before
+ *      React exists, specifically so there's no flash of the wrong theme
+ *      while hydration catches up.
+ *   3. `useTheme()` (same file) takes over from there: the settings toggle
+ *      calls its `setPreference`, which re-applies the class and persists the
+ *      choice; while the preference is "auto" it also listens for the OS
+ *      theme changing live and follows it without a reload.
+ *
+ * Using the `.dark` class rather than a bespoke attribute is deliberate, not
+ * just convenient — `tailwind.config.ts` already declares
+ * `darkMode: ["class"]`, so this is the one toggle every `dark:` utility in
+ * the project (present or future) already knows how to read, rather than a
+ * second, parallel mechanism nothing else agrees with.
+ *
+ * Not a literal inversion between the two palettes. Rarity and state colors
+ * are re-lightened by hand rather than mechanically flipped, because a
+ * straight L-channel invert of a hue tuned to glow on black (`--rarity-
+ * common`'s pale, low-saturation grey, for one) lands on something too
+ * washed-out to read as a color at all against white. Each one is picked to
+ * hold roughly the same contrast *ratio* against its new ground that the dark
+ * original held against black, not the same lightness number — checked with
+ * the WCAG relative-luminance formula, not eyeballed.
+ *
+ * Deliberately NOT touched: `.holo`, `.ar-scanlines`, `.ar-noise`,
+ * `.ar-vignette`. These are collectible-card decoration, not functional HUD
+ * chrome — `.holo` in particular leans on `mix-blend-mode: color-dodge`
+ * against a dark card face, which is a different effect (and needs a
+ * different technique, not a color swap) on a light one. Worth a follow-up
+ * if the light palette should extend to card art too; out of scope for
+ * "the HUD is unreadable in the sun," which is about text and button
+ * contrast, not trading-card foil.
+ */
+
+:root {
+  /* ── Ground ───────────────────────────────────────────────────────────── */
+  --ar-void: 140 25% 97%;
+  --ar-bg: 140 20% 95%;
+  --ar-surface: 0 0% 100%;
+  --ar-surface-2: 140 14% 96%;
+  --ar-surface-3: 140 10% 91%;
+  --ar-line: 140 10% 83%;
+  --ar-line-bright: 140 10% 70%;
+
+  /* ── Ink ──────────────────────────────────────────────────────────────── */
+  --ar-text: 150 30% 9%;
+  --ar-text-dim: 150 14% 30%;
+  --ar-text-faint: 150 8% 46%;
+
+  /* ── Brand energy — deepened from the source Wadzzo green #38C02B so it
+     still holds contrast on white; the dark palette's near-neon version is
+     tuned to glow on black and is too light to read as text or a thin
+     border on a light ground. ───────────────────────────────────────────── */
+  --ar-green: 118 70% 25%;
+  --ar-green-hot: 116 78% 20%;
+  --ar-green-deep: 120 55% 22%;
+  /* Text/icon color *on* a solid green fill (buttons, chips) — near-white
+     here, not the dark palette's near-black. That pairing is against the
+     green itself rather than the page ground: at this palette's much darker
+     L25% green, near-black ink drops to a 2.5:1 button that reads as
+     barely-there, where near-white holds 6.5:1. */
+  --ar-green-ink: 120 40% 97%;
+
+  /* ── Rarity ladder — same hues as the dark palette, relit for a white
+     ground ─────────────────────────────────────────────────────────────── */
+  --rarity-common: 200 14% 38%;
+  --rarity-rare: 199 85% 32%;
+  --rarity-epic: 272 62% 46%;
+  --rarity-legendary: 38 85% 30%;
+  --rarity-mythic: 322 72% 42%;
+
+  /* ── State ────────────────────────────────────────────────────────────── */
+  --ar-danger: 358 72% 42%;
+  --ar-locked: 220 10% 42%;
+
+  /* ── Geometry — same in both palettes, so declared once here rather than
+     duplicated into `.dark` too. ───────────────────────────────────────── */
+  --ar-r-sm: 10px;
+  --ar-r: 16px;
+  --ar-r-lg: 22px;
+  --ar-r-xl: 30px;
+
+  /* Real device insets. */
+  --ar-safe-top: env(safe-area-inset-top, 0px);
+  --ar-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /**
+   * How much room the top of a screen must leave clear.
+   *
+   * On a real phone that's the OS status bar, reported by the safe-area
+   * inset. Inside the desktop device shell there is no OS, so the app draws
+   * its own status bar (StatusBar.tsx, `lg:` only) and the inset has to be
+   * declared to match its height. Every screen offsets from this one token
+   * rather than hardcoding either number, so the two can't drift apart.
+   */
+  --ar-top-inset: env(safe-area-inset-top, 0px);
+
+  /* ── Re-point the shadcn tokens at the arcade palette — unconditional,
+     these just alias whichever `--ar-*` value is currently active. ───────── */
+  --background: var(--ar-bg);
+  --foreground: var(--ar-text);
+  --card: var(--ar-surface);
+  --card-foreground: var(--ar-text);
+  --popover: var(--ar-surface);
+  --popover-foreground: var(--ar-text);
+  --primary: var(--ar-green);
+  --primary-foreground: var(--ar-green-ink);
+  --secondary: var(--ar-surface-2);
+  --secondary-foreground: var(--ar-text);
+  --muted: var(--ar-surface-2);
+  --muted-foreground: var(--ar-text-dim);
+  --accent: var(--ar-surface-3);
+  --accent-foreground: var(--ar-text);
+  --destructive: var(--ar-danger);
+  --destructive-foreground: 0 0% 100%;
+  --border: var(--ar-line);
+  --input: var(--ar-line);
+  --ring: var(--ar-green);
+  --gold: var(--rarity-legendary);
+  --radius: 14px;
+}
+
+/* ── Night palette — the original, unconditional-by-design values, now an
+   override rather than the default. Only color tokens; geometry, insets and
+   the shadcn re-points above apply regardless of which one is active. ───── */
+.dark {
+  --ar-void: 152 30% 3%;
+  --ar-bg: 152 22% 5%;
+  --ar-surface: 152 16% 9%;
+  --ar-surface-2: 152 14% 13%;
+  --ar-surface-3: 152 12% 18%;
+  --ar-line: 152 12% 24%;
+  --ar-line-bright: 152 14% 34%;
+
+  --ar-text: 150 16% 96%;
+  --ar-text-dim: 150 8% 68%;
+  --ar-text-faint: 150 6% 45%;
+
+  /* Wadzzo green #38C02B, pushed electric for dark. */
+  --ar-green: 115 68% 52%;
+  --ar-green-hot: 110 90% 64%;
+  --ar-green-deep: 118 62% 28%;
+  --ar-green-ink: 120 80% 8%;
+
+  --rarity-common: 195 8% 62%;
+  --rarity-rare: 192 88% 56%;
+  --rarity-epic: 272 82% 66%;
+  --rarity-legendary: 42 96% 56%;
+  --rarity-mythic: 320 90% 64%;
+
+  --ar-danger: 358 74% 60%;
+  --ar-locked: 220 8% 48%;
+}
+
+/* Matches StatusBar's h-[52px]; both are `lg:` only. Theme-agnostic, so
+   unconditional on `:root` rather than duplicated per palette. */
+@media (min-width: 1024px) {
+  :root {
+    --ar-top-inset: 52px;
+  }
+}
+
+/* Glow effects read as emitted light against black; against white they're
+   just a soft colored blur under the text, which loses contrast right where
+   this palette exists to gain it. Flattened to a crisp, tight shadow that
+   still separates text from a busy background (a camera feed, a map)
+   without blurring its edges. The original, dark-tuned versions move under
+   `.dark` below rather than disappearing. */
+.text-glow,
+.text-glow-soft {
+  text-shadow: 0 1px 2px hsl(0 0% 0% / 0.18);
+}
+
+.ar-glow {
+  box-shadow:
+    0 0 0 1px hsl(var(--ar-green) / 0.55),
+    0 2px 10px -4px hsl(0 0% 0% / 0.25);
+}
+
+html {
+  background: hsl(var(--ar-void));
+  /* Never let a rubber-band scroll expose the page behind the app shell. */
+  overscroll-behavior: none;
+}
+
+/**
+ * Native form controls, scrollbars, etc. follow `.dark`'s presence directly
+ * rather than a `light dark` media-driven declaration — the theme here is a
+ * manual choice as often as a system-followed one (see `lib/ar/theme.ts`), and
+ * a browser that decided its own native chrome purely from
+ * `prefers-color-scheme` would show light scrollbars on top of a manually-
+ * chosen dark app, or the reverse. Keyed to the same class every `--ar-*`
+ * token already is, so the two can't drift apart.
+ */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  color: hsl(var(--ar-text));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* The app owns its own scroll containers; the document never scrolls. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Chrome text — tabs, counters, buttons, plates — is always the display cut. */
+.font-hud {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Surfaces — the "card stock" bevel
+   A light hairline along the top edge and a dark one along the bottom is the
+   cheapest convincing 3D in a flat renderer, and it survives any background.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-bevel {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--ar-surface-2)) 0%,
+    hsl(var(--ar-surface)) 100%
+  );
+  border: 1px solid hsl(var(--ar-line));
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.07),
+    inset 0 -1px 0 0 hsl(0 0% 0% / 0.5),
+    0 2px 0 0 hsl(var(--ar-void)),
+    0 8px 24px -8px hsl(0 0% 0% / 0.8);
+}
+
+/* Raised key-cap: sits on a visible 3px plinth that compresses when pressed. */
+.ar-key {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--ar-surface-3)) 0%,
+    hsl(var(--ar-surface)) 100%
+  );
+  border: 1px solid hsl(var(--ar-line-bright));
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.12),
+    0 3px 0 0 hsl(var(--ar-void)),
+    0 6px 16px -4px hsl(0 0% 0% / 0.9);
+  transition:
+    transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ar-key:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.06),
+    0 0 0 0 hsl(var(--ar-void)),
+    0 2px 8px -4px hsl(0 0% 0% / 0.9);
+}
+
+/**
+ * Filled key-cap variants.
+ *
+ * These live here rather than as `bg-gradient-to-b from-… to-…` utilities on
+ * the button because this file is loaded *after* Tailwind: `.ar-key`'s
+ * `background` shorthand resets `background-image`, so a gradient utility on
+ * the same element would silently lose and the button would render as an
+ * empty outline. Defining the filled state next to `.ar-key` keeps the cascade
+ * honest.
+ */
+.ar-key-primary {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--ar-green)) 0%,
+    hsl(var(--ar-green-deep)) 100%
+  );
+  border-color: hsl(var(--ar-green) / 0.75);
+  color: hsl(var(--ar-green-ink));
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.35),
+    0 3px 0 0 hsl(var(--ar-green-ink)),
+    0 8px 22px -6px hsl(var(--ar-green) / 0.7);
+}
+
+.ar-key-primary:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.2),
+    0 0 0 0 hsl(var(--ar-green-ink)),
+    0 2px 10px -4px hsl(var(--ar-green) / 0.6);
+}
+
+/**
+ * Light-palette gold key-cap.
+ *
+ * This used to be a bare `.ar-key-gold { color }` rule sitting *above* the
+ * `:root`/`.dark` split — which meant two things, both broken. It declared no
+ * background at all, so the button fell back to `.ar-key`'s near-white light
+ * gradient and printed near-white ink on it: the "Show redeem code" button was
+ * effectively invisible in light mode. And even with a fill added it would
+ * still have lost, because `.ar-key` is declared *later* in this file at equal
+ * specificity and its `background` shorthand would simply overwrite it — the
+ * exact trap the note above `.ar-key-primary` describes. Hence: full rule,
+ * declared after `.ar-key`, next to its dark counterpart.
+ *
+ * The ink is near-white rather than the dark version's near-black. Dark mode's
+ * `--rarity-legendary` is a bright L56% that dark ink sits on cleanly; this
+ * palette deepens it to L30% so it can also read as *text* on white, and
+ * near-black on that drops to ~2.9:1. No single lightness serves both jobs, so
+ * the two modes get opposite ink rather than one value that half-serves each.
+ * Near-white on L30% amber lands at ~5.3:1.
+ */
+.ar-key-gold {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--rarity-legendary)) 0%,
+    hsl(36 88% 24%) 100%
+  );
+  border-color: hsl(var(--rarity-legendary) / 0.75);
+  color: hsl(40 40% 97%);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.25),
+    0 3px 0 0 hsl(36 80% 16%),
+    0 8px 22px -6px hsl(var(--rarity-legendary) / 0.5);
+}
+
+.ar-key-gold:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.15),
+    0 0 0 0 hsl(36 80% 16%),
+    0 2px 10px -4px hsl(var(--rarity-legendary) / 0.45);
+}
+
+/* Dark-mode counterpart — near-black ink against the much brighter L56%
+   `--rarity-legendary` fill; see the doc comment above for the ink split. */
+.dark .ar-key-gold {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--rarity-legendary)) 0%,
+    hsl(36 95% 36%) 100%
+  );
+  border-color: hsl(var(--rarity-legendary) / 0.75);
+  color: hsl(30 90% 10%);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.4),
+    0 3px 0 0 hsl(30 80% 14%),
+    0 8px 22px -6px hsl(var(--rarity-legendary) / 0.7);
+}
+
+.dark .ar-key-gold:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.22),
+    0 0 0 0 hsl(30 80% 14%),
+    0 2px 10px -4px hsl(var(--rarity-legendary) / 0.6);
+}
+
+.ar-key-danger {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--ar-danger)) 0%,
+    hsl(358 70% 34%) 100%
+  );
+  border-color: hsl(var(--ar-danger) / 0.7);
+  color: hsl(0 0% 100%);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.28),
+    0 3px 0 0 hsl(358 70% 20%),
+    0 8px 22px -6px hsl(var(--ar-danger) / 0.6);
+}
+
+/* The raised AR launcher in the tab console — same reason, same fix. */
+.ar-key-launcher {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--ar-surface-3)) 0%,
+    hsl(var(--ar-void)) 100%
+  );
+  border-color: hsl(var(--ar-green) / 0.6);
+}
+
+/* Frosted overlay for anything floating above the map or camera feed. */
+.ar-glass {
+  background: hsl(var(--ar-surface) / 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid hsl(var(--ar-line) / 0.9);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
+    0 12px 32px -12px hsl(0 0% 0% / 0.9);
+}
+
+/**
+ * The bottom tab console's surface.
+ *
+ * Deliberately has **no `backdrop-filter`**, unlike `.ar-glass` above, for two
+ * independent reasons:
+ *
+ *  1. There is nothing behind it to blur. `<main>` reserves the bar's full
+ *     height as `pb-[80px]` (see `AppShell.tsx`), so screen content stops
+ *     *above* the bar rather than scrolling under it — measured at the DOM
+ *     level: content ends at the same y the bar begins. A blur with nothing
+ *     behind it costs a compositing layer and buys nothing.
+ *
+ *  2. It actively broke the bar's rounded top corners. WebKit does not clip a
+ *     `backdrop-filter` element to a rounded corner — not to its own
+ *     `border-radius`, and not to an ancestor's `border-radius` +
+ *     `overflow: hidden` either. The tint and border followed the curve while
+ *     the blur layer painted a full rectangle over them, so the corners
+ *     rendered square no matter which of the two elements carried the radius.
+ *
+ * A flat translucent fill gives the same visual weight here (its backdrop is a
+ * single flat color, so a blur of it would be that same color anyway) and
+ * rounds correctly.
+ */
+.ar-tabbar-surface {
+  background: hsl(var(--ar-surface) / 0.92);
+  border: 1px solid hsl(var(--ar-line) / 0.7);
+  box-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
+    0 12px 32px -12px hsl(0 0% 0% / 0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Glow
+   Bare selectors above the `:root`/`.dark` split are the light-palette,
+   flattened versions. These `.dark`-scoped ones are the original neon glow —
+   a colored halo genuinely reads as "emitting light" against black, which is
+   the entire point of the effect there.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dark .ar-glow {
+  box-shadow:
+    0 0 0 1px hsl(var(--ar-green) / 0.5),
+    0 0 18px -2px hsl(var(--ar-green) / 0.55),
+    0 0 46px -10px hsl(var(--ar-green) / 0.4);
+}
+
+.dark .text-glow {
+  text-shadow:
+    0 0 10px hsl(var(--ar-green) / 0.7),
+    0 0 34px hsl(var(--ar-green) / 0.35);
+}
+
+.dark .text-glow-soft {
+  text-shadow: 0 0 16px hsl(var(--ar-green) / 0.45);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Backdrops — terrain grid, film grain, CRT scanlines, vignette
+   All are ::before/::after layers so they never need an extra DOM node.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-grid {
+  background-image:
+    linear-gradient(hsl(var(--ar-green) / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--ar-green) / 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center center;
+}
+
+.ar-grid-fine {
+  background-image:
+    linear-gradient(hsl(var(--ar-green) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--ar-green) / 0.05) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.ar-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.ar-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    to bottom,
+    hsl(0 0% 0% / 0) 0px,
+    hsl(0 0% 0% / 0) 2px,
+    hsl(0 0% 0% / 0.28) 3px,
+    hsl(0 0% 0% / 0) 4px
+  );
+}
+
+.ar-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 90% at 50% 45%,
+    transparent 42%,
+    hsl(var(--ar-void) / 0.85) 100%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Holo foil
+   Three stacked layers over the card art, driven by pointer/gyro tilt through
+   --mx/--my (0-100% pointer position) and --pos (the foil's travel).
+   Technique adapted from simeydotme/pokemon-cards-css: a color-dodge rainbow
+   band for the foil, an overlay radial for the glare, and a color-dodge dot
+   lattice for the sparkle. Kept to gradients — no GIF, no image request.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.holo {
+  --mx: 50%;
+  --my: 50%;
+  --pos: 50% 50%;
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --card-opacity: 0;
+  --foil-opacity: 0.55;
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+}
+
+.holo:hover,
+.holo.is-interacting {
+  --card-opacity: 1;
+}
+
+.holo__foil,
+.holo__glare,
+.holo__sparkle {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 20;
+}
+
+/* ── Pokemon TCG Holo Foil: Simon Goellner multi-band prismatic shine ── */
+.holo__foil {
+  opacity: calc(var(--foil-opacity) * var(--card-opacity, 0.4));
+  mix-blend-mode: color-dodge;
+  background-position: var(--pos);
+  background-size: 350% 350%;
+  background-image: repeating-linear-gradient(
+    115deg,
+    hsl(350 90% 65% / 0.7) 0%,
+    hsl(42 96% 62% / 0.7) 7%,
+    hsl(115 80% 60% / 0.7) 14%,
+    hsl(180 88% 62% / 0.7) 21%,
+    hsl(215 90% 66% / 0.7) 28%,
+    hsl(275 85% 68% / 0.7) 35%,
+    hsl(325 90% 66% / 0.7) 42%,
+    hsl(350 90% 65% / 0.7) 50%
+  );
+  filter: brightness(1.15) contrast(1.35) saturate(1.3);
+  transition: opacity 0.3s ease;
+}
+
+/* ── Cosmic Glitter / Sparkles ── */
+.holo__sparkle {
+  opacity: calc(var(--foil-opacity) * var(--card-opacity, 0.4) * 0.85);
+  mix-blend-mode: color-dodge;
+  background-position: var(--pos);
+  background-image:
+    radial-gradient(
+      circle at 18% 28%,
+      hsl(0 0% 100% / 0.95) 0.8px,
+      transparent 1.6px
+    ),
+    radial-gradient(
+      circle at 72% 14%,
+      hsl(0 0% 100% / 0.9) 0.6px,
+      transparent 1.4px
+    ),
+    radial-gradient(
+      circle at 42% 74%,
+      hsl(0 0% 100% / 0.95) 0.9px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 86% 60%,
+      hsl(0 0% 100% / 0.85) 0.7px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 30% 90%,
+      hsl(0 0% 100% / 0.8) 0.5px,
+      transparent 1.2px
+    ),
+    radial-gradient(
+      circle at 60% 45%,
+      hsl(0 0% 100% / 0.9) 0.8px,
+      transparent 1.6px
+    );
+  background-size:
+    42px 42px,
+    58px 58px,
+    50px 50px,
+    68px 68px,
+    34px 34px,
+    60px 60px;
+  filter: brightness(1.4) contrast(1.7);
+  transition: opacity 0.3s ease;
+}
+
+/* ── Specular Surface Glare ── */
+.holo__glare {
+  z-index: 25;
+  mix-blend-mode: overlay;
+  opacity: calc(var(--card-opacity, 0.3) * 0.75);
+  background: radial-gradient(
+    farthest-corner circle at var(--mx) var(--my),
+    hsl(0 0% 100% / 0.7) 0%,
+    hsl(0 0% 100% / 0.25) 30%,
+    transparent 75%
+  );
+  filter: brightness(1.05) contrast(1.5);
+  transition: opacity 0.25s ease;
+}
+
+/* ── Rarity Foil Variations ── */
+.holo[data-rarity="common"] .holo__foil,
+.holo[data-rarity="common"] .holo__sparkle {
+  display: none;
+}
+.holo[data-rarity="common"] .holo__glare {
+  opacity: calc(var(--card-opacity, 0.25) * 0.4);
+}
+
+.holo[data-rarity="rare"] {
+  --foil-opacity: 0.45;
+}
+.holo[data-rarity="rare"] .holo__foil {
+  background-image: repeating-linear-gradient(
+    105deg,
+    hsl(190 90% 55% / 0.7) 0%,
+    hsl(215 95% 65% / 0.7) 12%,
+    hsl(175 90% 60% / 0.7) 25%,
+    hsl(190 90% 55% / 0.7) 38%
+  );
+}
+
+.holo[data-rarity="epic"] {
+  --foil-opacity: 0.65;
+}
+.holo[data-rarity="epic"] .holo__foil {
+  background-image: repeating-linear-gradient(
+    125deg,
+    hsl(272 85% 65% / 0.75) 0%,
+    hsl(315 88% 68% / 0.75) 10%,
+    hsl(220 90% 65% / 0.75) 20%,
+    hsl(272 85% 65% / 0.75) 30%
+  );
+}
+
+.holo[data-rarity="legendary"] {
+  --foil-opacity: 0.8;
+}
+.holo[data-rarity="legendary"] .holo__foil {
+  background-image: repeating-linear-gradient(
+    115deg,
+    hsl(42 98% 62% / 0.8) 0%,
+    hsl(28 95% 60% / 0.8) 8%,
+    hsl(56 95% 65% / 0.85) 16%,
+    hsl(180 85% 60% / 0.75) 24%,
+    hsl(42 98% 62% / 0.8) 32%
+  );
+}
+
+.holo[data-rarity="mythic"] {
+  --foil-opacity: 0.95;
+}
+.holo[data-rarity="mythic"] .holo__foil {
+  background-size: 450% 450%;
+  background-image: repeating-linear-gradient(
+    118deg,
+    hsl(320 95% 65% / 0.85) 0%,
+    hsl(270 95% 68% / 0.85) 8%,
+    hsl(210 95% 65% / 0.85) 16%,
+    hsl(160 90% 60% / 0.85) 24%,
+    hsl(95 90% 60% / 0.85) 32%,
+    hsl(45 98% 65% / 0.85) 40%,
+    hsl(10 95% 65% / 0.85) 48%,
+    hsl(320 95% 65% / 0.85) 56%
+  );
+}
+
+/* Spent cards lose their shine */
+.holo[data-spent="true"] .holo__foil,
+.holo[data-spent="true"] .holo__sparkle,
+.holo[data-spent="true"] .holo__glare {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Card internals — one layout, every size
+   ---------------------------------------------------------------------------
+   `HoloCard` is rendered at wildly different widths: ~104px in the profile
+   rail, ~168px in the two-column grids on /collection and /brands/[id], and
+   ~264px as the hero on a card's own page. Fixed pixel type cannot serve that
+   range — 12px is a reasonable title at 264px and an unreadable smear at 104px,
+   while type small enough for the rail is invisible in the hero.
+
+   So the card is a *container*, and everything inside it is sized in `cqw`
+   (1cqw = 1% of the card's own width). One layout, proportional at every size,
+   with no per-call-site props to keep in sync. Below 132px the layout itself
+   changes rather than just scaling down — see the container query at the
+   bottom of this section, and the "Card anatomy" block below for what the
+   layout actually is at full size.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tcg-face {
+  container-type: inline-size;
+  container-name: tcgcard;
+  /* Sits inside `.holo`'s rarity ring — see the geometry note on `.tcg-card`
+     for why this is deliberately smaller than the outer radius. */
+  border-radius: var(--tcg-r-inner, 12.5px);
+}
+
+/* A horizontal-rail card sized to match the two-column card grids exactly.
+   `/collection` and `/brands/[id]` lay cards out as `grid-cols-2 gap-3.5`
+   inside `px-5`; the rails on the profile and a card's own "More from"
+   section previously used ad-hoc fixed widths (104px, 118px), which landed
+   under the compact breakpoint below and rendered a visibly *different*
+   card — art-only, no header or abilities — right next to grids showing the
+   full one. Deriving the width from the same two-column maths keeps every
+   card in the app the same object at the same size, whichever container
+   it's in. */
+.card-rail-item {
+  flex: 0 0 auto;
+  width: calc((100% - 0.875rem) / 2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Card anatomy
+   ---------------------------------------------------------------------------
+   Real trading-card DNA, not a stack of boxed panels: only the art gets a
+   border. Everything else is separated by a hairline rule or plain spacing —
+   name row, then art, then a thin subtitle line, then attack-style ability
+   rows (icon · name · stat, description below), then a footer stat strip.
+   Front (the drop) and back (the creator) share this exact skeleton, which
+   is what makes them read as two faces of *one card* rather than two
+   differently-organised screens that happen to flip.
+
+   All sized in `cqw` (1cqw = 1% of the card's own container width) — see the
+   note above `.tcg-face` for why fixed px type can't serve a component
+   rendered from ~104px to ~264px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Name row: eyebrow + title, type badge at the right ─────────────────── */
+.tcg-name {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding: 3.4cqw 3.6cqw 1.6cqw;
+}
+.tcg-name__eyebrow {
+  display: block;
+  font-size: 2.2cqw;
+  letter-spacing: 0.22em;
+}
+.tcg-name__title {
+  margin-top: 0.4cqw;
+  font-size: 5.4cqw;
+  line-height: 1.05;
+}
+.tcg-name__badge {
+  width: 8cqw;
+  height: 8cqw;
+  border-width: max(1px, 0.3cqw);
+}
+
+/* ── Art: the one bordered element on the whole card ─────────────────────── */
+.tcg-art {
+  position: relative;
+  margin: 0 3.6cqw;
+  overflow: visible;
+}
+.tcg-art__frame {
+  position: relative;
+  overflow: hidden;
+  /* `max()` with a px floor: at 2.6cqw alone this read as barely-rounded —
+     practically square — on the smaller rail/grid cards, next to the
+     outer card's much softer fixed 14px corner. */
+  border-radius: max(10px, 5.2cqw);
+  border: max(1px, 0.5cqw) solid hsl(0 0% 100% / 0.16);
+  background: #000;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.85);
+}
+/* Corner chips — rarity + claim method on the front, verified/creator +
+   category on the back — overlapping the art's own border like TCG energy
+   symbols printed over the illustration edge, rather than plates sitting
+   flush on top of it. Capped to under half the art's width each so a long
+   second value truncates instead of colliding with the first. */
+.tcg-art__chip {
+  position: absolute;
+  bottom: -2.4cqw;
+  left: 2.6cqw;
+  z-index: 10;
+  display: flex;
+  max-width: calc(50% - 4.4cqw);
+  align-items: center;
+  gap: 1cqw;
+  height: 6.4cqw;
+  padding: 0 2cqw;
+  border-radius: 999px;
+  border: max(1px, 0.35cqw) solid hsl(var(--ar-void));
+  font-size: 2.6cqw;
+  letter-spacing: 0.1em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.tcg-art__chip--end {
+  left: auto;
+  right: 2.6cqw;
+}
+
+/* ── Creator-name line: one line, directly under the art, no box ─────────── */
+.tcg-subline {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6cqw;
+  margin: 4.6cqw 3.6cqw 0;
+  padding-bottom: 1.6cqw;
+  border-bottom: 1px solid hsl(0 0% 100% / 0.08);
+  font-size: 2.7cqw;
+}
+.tcg-subline__avatar {
+  width: 4.4cqw;
+  height: 4.4cqw;
+}
+
+/* ── Description: the card's one paragraph of real copy ──────────────────
+   Fills whatever room is left above the footer and crops rather than
+   pushing the footer off the bottom of the card. */
+.tcg-description {
+  flex: 1 1 0%;
+  min-height: 0;
+  margin: 0 3.6cqw;
+  padding: 2cqw 0;
+  font-size: 2.8cqw;
+  line-height: 1.5;
+}
+
+/* ── Footer: the stat strip a real card prints along the bottom edge ─────── */
+.tcg-footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: 1.8cqw 3.6cqw;
+  border-top: 1px solid hsl(0 0% 100% / 0.1);
+  background: hsl(0 0% 0% / 0.35);
+  font-size: 2.3cqw;
+  letter-spacing: 0.12em;
+}
+.tcg-footer__item {
+  display: flex;
+  align-items: center;
+  gap: 0.9cqw;
+  min-width: 0;
+}
+.tcg-footer__item--end {
+  justify-content: flex-end;
+}
+
+/* The overlay title is compact-only; the full card has a real name row.
+   Declared *before* the container query below — same specificity, so source
+   order decides, and this base `display: none` would otherwise override the
+   `display: flex` that compact mode is supposed to turn on. */
+.tcg-art__overlay {
+  display: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+  flex-direction: column;
+  gap: 0.5cqw;
+  padding: 6cqw 2.6cqw 2.2cqw;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.92), transparent);
+}
+
+/* Compact mode — the rail. Art carries the card; everything wordy is cut
+   rather than shrunk into illegibility. The title moves *onto* the art as an
+   overlay so a thumbnail still says what it is without a separate band
+   stealing height from the only part worth seeing at this size. */
+@container tcgcard (max-width: 132px) {
+  .tcg-name,
+  .tcg-subline,
+  .tcg-description,
+  .tcg-footer,
+  .tcg-art__chip {
+    display: none;
+  }
+  .tcg-art {
+    margin: 0;
+    flex: 1 1 0%;
+  }
+  .tcg-art__frame {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+  .tcg-art__overlay {
+    display: flex;
+  }
+}
+.tcg-art__overlay-title {
+  font-size: 6cqw;
+  line-height: 1.1;
+}
+.tcg-art__overlay-brand {
+  font-size: 4.4cqw;
+  letter-spacing: 0.1em;
+}
+/* ── Pokemon TCG 3D Card Flip & Layout ── */
+.tcg-card {
+  /* Corner geometry, in one place, because it has to *nest* rather than be
+     repeated. `.holo` carries a 1.5px rarity ring inside the outer radius, so
+     everything painted inside that ring needs a radius smaller by exactly the
+     ring's width. Every layer hardcoding the same 14px is what made the frame's
+     dark 5px border read as a blunt, squared-off corner: the inner curve was
+     wider than the space left for it, so it bulged out to meet the straight
+     edges instead of following them round. */
+  --tcg-r: 14px;
+  --tcg-ring: 1.5px;
+  --tcg-r-inner: calc(var(--tcg-r) - var(--tcg-ring));
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
+  border-radius: var(--tcg-r);
+}
+
+.tcg-card__rotator {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* Also what `.tcg-card__face`'s `border-radius: inherit` reads from — it
+     used to inherit from here while this had no radius at all, resolving to
+     0 and leaving the faces clipped to a square. */
+  border-radius: var(--tcg-r-inner);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tcg-card__face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Each face must FLATTEN, not preserve-3d.
+     `transform-style: preserve-3d` here was the cause of both faces being
+     visible at once: a preserve-3d element renders its descendants as
+     individual planes in the shared 3D space, so the parent's backface
+     culling no longer applies to them — the front's contents stayed painted
+     even while the front itself was rotated away, bleeding mirrored text
+     through the back. Flattening each face makes it a single plane that
+     `backface-visibility: hidden` can cull as one unit. Only the *rotator*
+     needs preserve-3d, and it still has it. */
+  transform-style: flat;
+  -webkit-transform-style: flat;
+}
+
+/* Back face: standard 3D back-facing (180deg) */
+.tcg-card__back {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* Front face: standard 3D front-facing (0deg) */
+.tcg-card__front {
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.tcg-card__front * {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.tcg-card__back * {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* ── Which face is actually painted ──────────────────────────────────────
+   `backface-visibility: hidden` alone is not reliable here. Safari kept
+   painting the rotated-away face, bleeding its mirrored text through the
+   visible one — reproduced with both `preserve-3d` and `flat` faces, so it
+   isn't only the flattening bug above.
+
+   This is the deterministic version: hide the away-facing side outright,
+   switched with a `0s` transition *delayed to the midpoint of the flip*
+   (0.325s of the 0.65s rotation). At that instant the card is edge-on and
+   effectively zero-width, so the swap is invisible — you get a clean flip
+   without depending on the compositor to cull anything. `backface-visibility`
+   stays as a second line of defence where it does work. */
+.tcg-card__face {
+  opacity: 1;
+  transition: opacity 0s linear 0.325s;
+}
+.tcg-card:not([data-flipped="true"]) .tcg-card__back {
+  opacity: 0;
+}
+.tcg-card[data-flipped="true"] .tcg-card__front {
+  opacity: 0;
+}
+
+/* Loading parks the rotator at 180deg without touching `data-flipped`, so the
+   same swap has to be stated for it directly. */
+.tcg-card.is-loading .tcg-card__front {
+  opacity: 0;
+}
+.tcg-card.is-loading .tcg-card__back {
+  opacity: 1;
+}
+
+/* Loading state: show card back facing forward (rotator at 180deg) */
+.tcg-card.is-loading .tcg-card__rotator {
+  transform: rotateY(180deg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes ar-pulse-ring {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+@keyframes ar-sweep {
+  0% {
+    transform: translateY(-110%);
+  }
+  100% {
+    transform: translateY(110%);
+  }
+}
+
+@keyframes ar-spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ar-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes ar-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ar-conic {
+  to {
+    --ar-angle: 360deg;
+  }
+}
+
+.animate-pulse-ring {
+  animation: ar-pulse-ring 2.2s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+}
+.animate-sweep {
+  animation: ar-sweep 2.6s linear infinite;
+}
+.animate-spin-slow {
+  animation: ar-spin-slow 9s linear infinite;
+}
+.animate-float {
+  animation: ar-float 4.5s ease-in-out infinite;
+}
+.animate-blink {
+  animation: ar-blink 1s steps(1) infinite;
+}
+
+/* The rotating conic ring on the AR launch button. Registering the angle as a
+   real custom property is what lets it animate — plain vars can't tween. */
+@property --ar-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.ar-conic-ring {
+  background: conic-gradient(
+    from var(--ar-angle),
+    transparent 0deg,
+    hsl(var(--ar-green) / 0.95) 60deg,
+    hsl(var(--ar-green-hot)) 110deg,
+    transparent 190deg,
+    transparent 360deg
+  );
+  animation: ar-conic 2.4s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Screen clip
+   The device screen has rounded corners and holds composited content: the
+   Mapbox WebGL canvas, the AR <video>, transformed cards. Safari does NOT
+   clip composited descendants to a rounded `overflow: hidden` ancestor — a
+   long-standing WebKit bug — so the map paints square corners straight
+   through the rounding, while Chrome renders it correctly.
+   `clip-path: inset()` is honoured for composited layers on every engine, so
+   the radius is declared here rather than as a Tailwind rounded-* utility,
+   and kept in lockstep with the bezel radii in DeviceFrame.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-screen-clip {
+  /* Phone: full bleed, nothing to round. */
+  border-radius: 0;
+
+  /*
+   * A no-op transform, purely to make this element a containing block for
+   * any `position: fixed` descendant — per spec, any element with a
+   * transform other than `none` becomes the reference box for fixed and
+   * absolute descendants instead of the viewport. Without it, anything
+   * portalled in here (see `[data-ar-app-frame]` — the wallet-connect
+   * dialog is the first example) would still measure `left/top: 50%` and
+   * `inset: 0` against the whole browser window, spanning past the phone on
+   * any screen wider than the device shell rather than centring inside it.
+   * Also gets clipped by this element's own `overflow: hidden` and
+   * `clip-path` for free, so a portalled modal respects the phone's rounded
+   * corners instead of squaring off past them.
+   */
+  transform: translateZ(0);
+}
+
+@media (min-width: 640px) {
+  .ar-screen-clip {
+    border-radius: 35px;
+    clip-path: inset(0 round 35px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ar-screen-clip {
+    border-radius: 45px;
+    clip-path: inset(0 round 45px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scroll containers — the document never scrolls, panes do.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.ar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.ar-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.ar-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mouse-only drag-to-scroll affordance (see useDragScroll). Gated on
+   `(pointer: fine)` so a touch device — where panning is native and free —
+   never shows a desktop cursor hint or fights the browser's own gesture. */
+@media (pointer: fine) {
+  .ar-scroll-x {
+    cursor: grab;
+  }
+  .ar-scroll-x.cursor-grabbing {
+    cursor: grabbing;
+  }
+}
+
+/* Mapbox ships its own chrome; the app supplies all of it. */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-bottom-right,
+.mapboxgl-ctrl-bottom-left {
+  display: none !important;
+}
+
+.mapboxgl-canvas:focus {
+  outline: none;
+}
+
+/* ── Loading skeletons ─────────────────────────────────────────────────────
+   A placeholder that reads as "this is arriving", not as an empty box. The
+   base is the same bevelled surface real cards sit on, with a light sweep
+   crossing it — motion is what separates "loading" from "broken", which is
+   the whole reason a skeleton beats a spinner here: it also holds the exact
+   space the real content will occupy, so nothing jumps when it lands. */
+.ar-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: hsl(var(--ar-surface-2));
+  border: 1px solid hsl(var(--ar-line));
+}
+
+.ar-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--ar-green) / 0.07) 45%,
+    hsl(var(--ar-green) / 0.13) 50%,
+    hsl(var(--ar-green) / 0.07) 55%,
+    transparent 100%
+  );
+  animation: ar-skeleton-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes ar-skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-ring,
+  .animate-sweep,
+  .animate-spin-slow,
+  .animate-float,
+  .ar-conic-ring,
+  .ar-skeleton::after {
+    animation: none !important;
+  }
+}

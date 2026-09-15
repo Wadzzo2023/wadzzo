@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+
+    /* Bundled projects */
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }],
+    "incremental": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"],
+      // The connect_wallet submodule's own source imports itself as
+      // "package/connect_wallet" (singular) everywhere — that's the path it
+      // was written against in the main Wadzzo app. This repo's submodule is
+      // checked out at "packages/connect_wallet" (plural) instead, per
+      // .gitmodules. Rather than rename the checked-out submodule directory
+      // to match every import site, this alias bridges the one path Wadzzo's
+      // own code already expects — Next.js reads tsconfig `paths` into its
+      // webpack/Turbopack resolver directly, so this fixes both
+      // type-checking and the actual runtime bundle.
+      "package/*": ["./packages/*"]
+    }
+  },
+  "include": [
+    ".eslintrc.cjs",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.js",
+    ".next/types/**/*.ts",
+    "test/**/*.ts|js"
+  ],
+  "exclude": ["node_modules"]
+}

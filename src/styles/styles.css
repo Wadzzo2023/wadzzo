@@ -1,0 +1,17 @@
+:root {
+  --hero-panel-start: hsl(142.1 76.2% 36.3%);
+  --hero-panel-end: hsl(240 10% 3.9%);
+}
+
+.dark {
+  --hero-panel-start: hsl(142 70% 50%);
+  --hero-panel-end: hsl(220 17% 17%);
+}
+
+.hero-panel-bg {
+  background-color: var(--hero-panel-start);
+}
+
+.img-transparent {
+  color: transparent;
+}

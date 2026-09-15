@@ -1,0 +1,140 @@
+import { motion } from "framer-motion";
+import { Compass, Crosshair, QrCode, RotateCw, Zap } from "lucide-react";
+
+import { cn } from "~/lib/utils";
+
+/**
+ * ── MapControls ────────────────────────────────────────────────────────────
+ *
+ * The right-hand rail. Recenter and refetch are welded into one capsule
+ * rather than two floating circles: they're the same gesture in a collector's
+ * head ("put me back and tell me what's here"), they're pressed in sequence,
+ * and one capsule costs half the thumb travel of two buttons.
+ *
+ * The rail sits above the nearby strip and below the filter row, on the right
+ * edge — the far side from the thumb's resting arc is deliberate for
+ * destructive-adjacent controls, but these are all cheap and reversible, so
+ * reach wins.
+ */
+export function MapControls({
+  onRecenter,
+  onRefetch,
+  onScan,
+  compassMode,
+  onToggleCompass,
+  refetching,
+  following,
+  autoCollect,
+  onToggleAutoCollect,
+}: {
+  onRecenter: () => void;
+  onRefetch: () => void;
+  onScan: () => void;
+  compassMode: boolean;
+  onToggleCompass: () => void;
+  refetching: boolean;
+  following: boolean;
+  autoCollect: boolean;
+  onToggleAutoCollect: () => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute right-3.5 top-1/2 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
+      {/* ── Recenter + refetch, one capsule ─────────────────────────── */}
+      <div className="ar-glass pointer-events-auto flex flex-col overflow-hidden rounded-full">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onRecenter}
+          aria-label={following ? "Following your location" : "Recenter on your location"}
+          aria-pressed={following}
+          className={cn(
+            "flex h-11 w-11 items-center justify-center transition-colors",
+            following
+              ? "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+              : "text-ar-dim hover:text-ar-text",
+          )}
+        >
+          <Crosshair size={19} strokeWidth={2.1} />
+        </motion.button>
+
+        <span aria-hidden className="mx-2.5 h-px bg-ar-line" />
+
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onRefetch}
+          aria-label="Refresh pins"
+          disabled={refetching}
+          className="flex h-11 w-11 items-center justify-center text-ar-dim transition-colors hover:text-ar-text disabled:opacity-60"
+        >
+          <motion.span
+            animate={refetching ? { rotate: 360 } : { rotate: 0 }}
+            transition={
+              refetching
+                ? { duration: 0.9, repeat: Infinity, ease: "linear" }
+                : { duration: 0.2 }
+            }
+          >
+            <RotateCw size={18} strokeWidth={2.1} />
+          </motion.span>
+        </motion.button>
+      </div>
+
+      {/* ── Auto-collect ────────────────────────────────────────────── */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={onToggleAutoCollect}
+        aria-label="Auto-collect"
+        aria-pressed={autoCollect}
+        className={cn(
+          "ar-glass pointer-events-auto relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+          autoCollect
+            ? "!border-ar-green/60 text-ar-green-hot ar-glow"
+            : "text-ar-dim hover:text-ar-text",
+        )}
+      >
+        {autoCollect && (
+          <span
+            aria-hidden
+            className="animate-pulse-ring absolute inset-0 rounded-full border border-ar-green-hot"
+          />
+        )}
+        <Zap
+          size={18}
+          strokeWidth={2.2}
+          className={cn(autoCollect && "fill-ar-green-hot/30")}
+        />
+      </motion.button>
+
+      {/* ── QR ──────────────────────────────────────────────────────── */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={onScan}
+        aria-label="Scan a QR code"
+        className="ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full text-ar-dim transition-colors hover:text-ar-text"
+      >
+        <QrCode size={18} strokeWidth={2.1} />
+      </motion.button>
+
+      {/* ── Compass map ─────────────────────────────────────────────────
+          Turns the map to your heading instead of holding north up. Lives
+          here rather than in the profile's settings list because this is
+          where it's used and — on iOS — where it can legally be switched on
+          at all: device-orientation permission is only granted from inside a
+          user gesture, so the tap that enables it has to be the tap that
+          asks. Switching it off returns the map to north. */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={onToggleCompass}
+        aria-label={compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"}
+        aria-pressed={compassMode}
+        className={cn(
+          "ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+          compassMode
+            ? "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+            : "text-ar-dim hover:text-ar-text",
+        )}
+      >
+        <Compass size={18} strokeWidth={2.1} />
+      </motion.button>
+    </div>
+  );
+}
