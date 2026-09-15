@@ -20,8 +20,7 @@ export default {
 		// actually taking effect. Both globs are kept since either path
 		// convention may exist depending on how a given project's submodule
 		// is checked out.
-		"./package/**/*.{jsx,tsx}",
-		"./packages/**/*.{ts,tsx}",
+		"./package/**/*.{jsx,tsx,ts}",
 	],
 
 	theme: {
