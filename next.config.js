@@ -41,10 +41,6 @@ const config = {
         source: "/.well-known/stellar.toml",
         destination: "/api/toml",
       },
-      {
-        source: "/s3-proxy/:path*",
-        destination: "https://actionverse.s3.amazonaws.com/:path*",
-      },
     ];
   },
 
