@@ -11,12 +11,6 @@ const withBundleAnalyzer = analyzer({
 /** @type {import("next").NextConfig} */
 const config = {
   transpilePackages: ["three"],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   reactStrictMode: true,
   images: {
     remotePatterns: [
