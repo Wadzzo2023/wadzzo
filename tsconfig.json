@@ -36,7 +36,7 @@
       // own code already expects — Next.js reads tsconfig `paths` into its
       // webpack/Turbopack resolver directly, so this fixes both
       // type-checking and the actual runtime bundle.
-      "package/*": ["./packages/*"]
+      "package/*": ["./package/*"]
     }
   },
   "include": [
