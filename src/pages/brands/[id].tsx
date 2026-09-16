@@ -11,11 +11,14 @@ import {
   StatRowSkeleton,
 } from "~/components/ui/Skeleton";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
-import { Chip, StatBlock } from "~/components/ui/Badges";
+import { StatBlock } from "~/components/ui/Badges";
 import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
-import { pinStatus } from "~/lib/ar/rarity";
 import { useAuth } from "~/lib/ar/store";
-import { useBrandsQuery, usePins, useToggleFollow } from "~/lib/ar/usePins";
+import {
+  useBrandPinsQuery,
+  useBrandsQuery,
+  useToggleFollow,
+} from "~/lib/ar/usePins";
 
 const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
@@ -50,7 +53,6 @@ export default function BrandDetail() {
   const id = typeof router.query.id === "string" ? router.query.id : null;
 
   const { brands, isLoading: brandsLoading } = useBrandsQuery();
-  const pins = usePins();
   const {
     toggle: toggleFollow,
     pendingId: followPendingId,
@@ -61,25 +63,27 @@ export default function BrandDetail() {
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const [tab, setTab] = useState<Tab>("live");
-  const [limit, setLimit] = useState(PAGE_SIZE);
 
   const brand = useMemo(
     () => brands.find((b) => b.id === id) ?? null,
     [brands, id],
   );
 
-  const theirs = useMemo(
-    () => (brand ? pins.filter((p) => p.brandId === brand.id) : []),
-    [pins, brand],
-  );
-  const live = useMemo(
-    () => theirs.filter((p) => pinStatus(p) === "collectible"),
-    [theirs],
-  );
-  const yours = useMemo(
-    () => (signedIn ? theirs.filter((p) => p.collected) : []),
-    [theirs, signedIn],
-  );
+  // Counts for the tab labels. These come from the two paginated queries'
+  // `total`, not from a client-side filter over every pin on the map — see
+  // `useBrandPinsQuery`.
+  const liveQuery = useBrandPinsQuery({
+    brandId: id,
+    tab: "live",
+    pageSize: PAGE_SIZE,
+  });
+  const yoursQuery = useBrandPinsQuery({
+    brandId: signedIn ? id : null,
+    tab: "yours",
+    pageSize: PAGE_SIZE,
+  });
+
+  const active = tab === "live" ? liveQuery : yoursQuery;
 
   // Same reasoning as the card page: absence is only true once the list has
   // actually loaded.
@@ -123,17 +127,8 @@ export default function BrandDetail() {
     );
   }
 
-  const shown = tab === "live" ? live : yours;
-
-  // A tab switch is a different list — carrying a grown limit across would
-  // mount a big slice of it immediately, which is the thing being avoided.
-  const switchTab = (next: Tab) => {
-    setTab(next);
-    setLimit(PAGE_SIZE);
-  };
-
-  const visible = shown.slice(0, limit);
-  const remaining = shown.length - visible.length;
+  const visible = active.pins;
+  const remaining = active.total - visible.length;
 
   return (
     <AppShell>
@@ -221,9 +216,9 @@ export default function BrandDetail() {
         <div className="mx-5 mt-4 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
           <StatBlock label="Followers" value={compact(brand.followers)} />
           <span className="h-8 w-px bg-ar-line" />
-          <StatBlock label="Live now" value={live.length} accent />
+          <StatBlock label="Live now" value={liveQuery.total} accent />
           <span className="h-8 w-px bg-ar-line" />
-          <StatBlock label="You hold" value={yours.length} />
+          <StatBlock label="You hold" value={yoursQuery.total} />
         </div>
 
         {/* A failed follow is otherwise silent — the button just returns to
@@ -271,11 +266,6 @@ export default function BrandDetail() {
             About
           </h2>
           <p className="text-[13px] leading-relaxed text-ar-dim">{brand.bio}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {brand.categories.map((c) => (
-              <Chip key={c}>{c}</Chip>
-            ))}
-          </div>
         </section>
 
         {/* ── Drops ────────────────────────────────────────────────── */}
@@ -283,16 +273,16 @@ export default function BrandDetail() {
           <SegmentedTabs
             layoutId="brand-detail-tabs"
             value={tab}
-            onChange={switchTab}
+            onChange={setTab}
             className="mx-5"
             tabs={[
-              { id: "live", label: "Live drops", count: live.length },
-              { id: "yours", label: "Your cards", count: yours.length },
+              { id: "live", label: "Live drops", count: liveQuery.total },
+              { id: "yours", label: "Your cards", count: yoursQuery.total },
             ]}
           />
 
           <div className="mt-4 px-5 pb-8">
-            {shown.length > 0 ? (
+            {visible.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 gap-3.5">
                   {visible.map((pin, i) => (
@@ -311,7 +301,8 @@ export default function BrandDetail() {
                     <ArButton
                       variant="outline"
                       size="md"
-                      onClick={() => setLimit((n) => n + PAGE_SIZE)}
+                      busy={active.isFetchingNextPage}
+                      onClick={() => void active.fetchNextPage()}
                     >
                       Show {Math.min(remaining, PAGE_SIZE)} more
                       <span className="ml-1 text-ar-faint">

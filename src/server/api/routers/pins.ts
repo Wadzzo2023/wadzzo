@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
-import { deriveRarity } from "~/lib/ar/rarity";
+import { deriveRarity, pinStatus } from "~/lib/ar/rarity";
 import type { ArPin } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
 import {
@@ -165,6 +165,111 @@ const rarityOfGroup = (group: GroupWithCreator) =>
     creatorTierPrices: group.creator.subscriptions.map((s) => s.price),
   });
 
+/** One include shape, so `list` and `byBrand` return identically-shaped pins. */
+const groupWithLocationsInclude = {
+  ...groupInclude,
+  locations: {
+    where: { hidden: false },
+    include: { consumers: { select: consumerSelect } },
+  },
+} as const;
+
+type GroupWithLocations = Prisma.LocationGroupGetPayload<{
+  include: typeof groupWithLocationsInclude;
+}>;
+
+/**
+ * The base "this drop is live" filter, as a function rather than a const
+ * because `endDate: { gte: new Date() }` has to be evaluated per request — a
+ * module-level object would freeze "now" at process start and slowly begin
+ * serving drops that have already ended.
+ */
+const liveGroupWhere = () =>
+  ({
+    // Everyone sees every gated drop — an anonymous viewer gets the same
+    // map, with the gated ones locked.
+    privacy: {
+      in: [ItemPrivacy.PUBLIC, ItemPrivacy.PRIVATE, ItemPrivacy.TIER],
+    },
+    approved: { equals: true },
+    endDate: { gte: new Date() },
+    remaining: { gt: 0 },
+    hidden: false,
+  }) satisfies Prisma.LocationGroupWhereInput;
+
+/**
+ * Flatten one drop into one `ArPin` per physical Location, which is how the
+ * map, the AR scene and the card grids all consume it.
+ *
+ * `lockReason` is passed in rather than computed here because it is a property
+ * of the *group*, not the location — and computing it needs a Horizon balance
+ * read, so doing it per-location would multiply one round trip by the number
+ * of points scattered inside the drop.
+ */
+function pinsOfGroup(
+  group: GroupWithLocations,
+  userId: string | null,
+  lockReason: string | null,
+): ArPin[] {
+  const rarity = rarityOfGroup(group);
+  const supply = supplyOf(group.limit);
+  const image =
+    group.optimizedImage ??
+    group.image ??
+    group.creator.profileUrl ??
+    WADZZO_ICON;
+
+  // For a single-collectible group, one claim anywhere in it collects every
+  // point in it for this user.
+  const groupClaim = userId
+    ? group.locations.flatMap((l) => l.consumers).find((c) => c.userId === userId)
+    : undefined;
+
+  return group.locations.map((location): ArPin => {
+    const ownClaim = userId
+      ? location.consumers.find((c) => c.userId === userId)
+      : undefined;
+    const claim = group.multiPin ? ownClaim : (ownClaim ?? groupClaim);
+
+    return {
+      id: location.id,
+      lat: location.latitude,
+      lng: location.longitude,
+      title: group.title,
+      description: group.description ?? "No description provided",
+      imageUrl: image,
+      link: group.link,
+
+      brandId: group.creatorId,
+      brandName: group.creator.name ?? "Unknown brand",
+      brandImageUrl: group.creator.profileUrl ?? WADZZO_ICON,
+
+      remaining: group.remaining,
+      supply,
+      rarity,
+
+      autoCollect: location.autoCollect,
+      // No column backs this yet — every drop the reference system can
+      // produce is claimed by standing near it.
+      detection: "gps",
+      endsAt: group.endDate.toISOString(),
+
+      collected: claim != null,
+      collectedAt:
+        claim?.claimedAt?.toISOString() ??
+        claim?.createdAt.toISOString() ??
+        null,
+      redeemCode: claim?.redeemCode ?? null,
+      isRedeemed: claim?.isRedeemed ?? null,
+      // A drop already collected is never locked — whatever gate it sat
+      // behind was cleared at claim time, and un-owning it later would be a
+      // strange thing for a collection to do.
+      locked: claim == null && lockReason != null,
+      lockReason: claim == null ? lockReason : null,
+    };
+  });
+}
+
 export const pinsRouter = createTRPCRouter({
   /**
    * Every drop the viewer may collect, flattened to one entry per physical
@@ -203,94 +308,121 @@ export const pinsRouter = createTRPCRouter({
 
       const groups = await ctx.db.locationGroup.findMany({
         where: {
-          // Everyone sees every gated drop — an anonymous viewer gets the
-          // same map, with the gated ones locked.
-          privacy: {
-            in: [ItemPrivacy.PUBLIC, ItemPrivacy.PRIVATE, ItemPrivacy.TIER],
-          },
-          approved: { equals: true },
-          endDate: { gte: new Date() },
-          remaining: { gt: 0 },
-          hidden: false,
+          ...liveGroupWhere(),
           locations: { some: { hidden: false } },
         },
-        include: {
-          ...groupInclude,
-          locations: {
-            where: { hidden: false },
-            include: { consumers: { select: consumerSelect } },
-          },
-        },
+        include: groupWithLocationsInclude,
       });
 
-      return groups.flatMap((group) => {
-        const lockReason = lockReasonFor(
+      return groups.flatMap((group) =>
+        pinsOfGroup(
           group,
-          followedCreatorIds,
-          account,
-          userId != null,
-        );
-        const rarity = rarityOfGroup(group);
-        const supply = supplyOf(group.limit);
-        const image =
-          group.optimizedImage ??
-          group.image ??
-          group.creator.profileUrl ??
-          WADZZO_ICON;
-
-        // For a single-collectible group, one claim anywhere in it collects
-        // every point in it for this user.
-        const groupClaim = userId
-          ? group.locations
-              .flatMap((l) => l.consumers)
-              .find((c) => c.userId === userId)
-          : undefined;
-
-        return group.locations.map((location): ArPin => {
-          const ownClaim = userId
-            ? location.consumers.find((c) => c.userId === userId)
-            : undefined;
-          const claim = group.multiPin ? ownClaim : (ownClaim ?? groupClaim);
-
-          return {
-            id: location.id,
-            lat: location.latitude,
-            lng: location.longitude,
-            title: group.title,
-            description: group.description ?? "No description provided",
-            imageUrl: image,
-            link: group.link,
-
-            brandId: group.creatorId,
-            brandName: group.creator.name ?? "Unknown brand",
-            brandImageUrl: group.creator.profileUrl ?? WADZZO_ICON,
-
-            remaining: group.remaining,
-            supply,
-            rarity,
-
-            autoCollect: location.autoCollect,
-            // No column backs this yet — every drop the reference system can
-            // produce is claimed by standing near it.
-            detection: "gps",
-            endsAt: group.endDate.toISOString(),
-
-            collected: claim != null,
-            collectedAt:
-              claim?.claimedAt?.toISOString() ??
-              claim?.createdAt.toISOString() ??
-              null,
-            redeemCode: claim?.redeemCode ?? null,
-            isRedeemed: claim?.isRedeemed ?? null,
-            // A drop already collected is never locked — whatever gate it sat
-            // behind was cleared at claim time, and un-owning it later would
-            // be a strange thing for a collection to do.
-            locked: claim == null && lockReason != null,
-            lockReason: claim == null ? lockReason : null,
-          };
-        });
-      });
+          userId,
+          lockReasonFor(group, followedCreatorIds, account, userId != null),
+        ),
+      );
     }),
+
+  /**
+   * One brand's drops, one page at a time.
+   *
+   * `list` returns every pin on the map, which the map and AR scene genuinely
+   * need. A brand's page does not: the Wadzzo account alone has 102 live
+   * drops, and shipping all of them so the client could slice off 24 was what
+   * put ~400 blended compositing layers on one page and had iOS Safari kill
+   * the tab. Only the requested page crosses the wire now.
+   *
+   * The slice is applied *after* pins are built rather than as SQL LIMIT, and
+   * that is deliberate rather than lazy. Which pins belong on each tab depends
+   * on `pinStatus`, which depends on `locked` — and lock state is resolved
+   * against the viewer's follow set and a live Horizon token balance, neither
+   * of which exists in the database to filter on. Offsetting in SQL would
+   * paginate a list that isn't the one being shown, so pages would silently
+   * come back short. Scoping the read to a single creator keeps that honest
+   * *and* bounded: one brand's groups, not the whole map.
+   */
+  byBrand: publicProcedure
+    .input(
+      z.object({
+        brandId: z.string().min(1),
+        tab: z.enum(["live", "yours"]).default("live"),
+        limit: z.number().int().min(1).max(48).default(24),
+        /**
+         * Offset of the first pin in this page. Named `cursor` because tRPC's
+         * `useInfiniteQuery` requires that field name, and an offset is a
+         * legitimate cursor here: the underlying order is stable (see the
+         * `orderBy` below), so position means the same thing between requests.
+         */
+        cursor: z.number().int().min(0).nullish(),
+      }),
+    )
+    .query(
+      async ({
+        ctx,
+        input,
+      }): Promise<{
+        pins: ArPin[];
+        total: number;
+        nextCursor: number | null;
+      }> => {
+        const userId = ctx.session?.user.id ?? null;
+        const offset = input.cursor ?? 0;
+
+        // "Your cards" is meaningless signed out, and answering it with an
+        // unfiltered page would be worse than answering it with nothing.
+        if (input.tab === "yours" && !userId) {
+          return { pins: [], total: 0, nextCursor: null };
+        }
+
+        const [followedCreatorIds, account] = await Promise.all([
+          userId
+            ? ctx.db.follow
+                .findMany({ where: { userId }, select: { creatorId: true } })
+                .then((rows) => new Set(rows.map((r) => r.creatorId)))
+            : Promise.resolve(new Set<string>()),
+          userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+        ]);
+
+        const groups = await ctx.db.locationGroup.findMany({
+          where: {
+            ...liveGroupWhere(),
+            creatorId: input.brandId,
+            locations: {
+              some:
+                input.tab === "yours"
+                  ? { hidden: false, consumers: { some: { userId: userId! } } }
+                  : { hidden: false },
+            },
+          },
+          include: groupWithLocationsInclude,
+          // Stable order, or a page boundary would reshuffle between requests
+          // and the same pin could arrive twice while another never does.
+          orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+        });
+
+        const all = groups.flatMap((group) =>
+          pinsOfGroup(
+            group,
+            userId,
+            lockReasonFor(group, followedCreatorIds, account, userId != null),
+          ),
+        );
+
+        const matching = all.filter((pin) =>
+          input.tab === "yours"
+            ? pin.collected
+            : pinStatus(pin) === "collectible",
+        );
+
+        const pins = matching.slice(offset, offset + input.limit);
+        const next = offset + pins.length;
+        return {
+          pins,
+          total: matching.length,
+          nextCursor: next < matching.length ? next : null,
+        };
+      },
+    ),
 
   /**
    * Claim one Location for the signed-in user.

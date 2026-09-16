@@ -4,12 +4,10 @@ import { useMemo, useState } from "react";
 
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
 import { ArButton } from "~/components/ui/ArButton";
-import { Chip } from "~/components/ui/Badges";
 import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { useAuth } from "~/lib/ar/store";
 import type { ArBrand } from "~/lib/ar/types";
 import { BrandRowSkeleton } from "~/components/ui/Skeleton";
-import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useBrandsQuery, useToggleFollow } from "~/lib/ar/usePins";
 
 const compact = (n: number) =>
@@ -38,19 +36,11 @@ export default function BrandsScreen() {
 
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"all" | "following">("all");
-  const [category, setCategory] = useState<string | null>(null);
-  const categoryRailRef = useDragScroll<HTMLDivElement>();
-
-  const categories = useMemo(
-    () => Array.from(new Set(brands.flatMap((b) => b.categories))).sort(),
-    [brands],
-  );
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     return brands.filter((b) => {
       if (tab === "following" && !b.followed) return false;
-      if (category && !b.categories.includes(category)) return false;
       if (!q) return true;
       return (
         b.name.toLowerCase().includes(q) ||
@@ -59,7 +49,7 @@ export default function BrandsScreen() {
         b.categories.some((c) => c.toLowerCase().includes(q))
       );
     });
-  }, [brands, query, tab, category]);
+  }, [brands, query, tab]);
 
   const followingCount = brands.filter((b) => b.followed).length;
 
@@ -111,25 +101,6 @@ export default function BrandsScreen() {
             },
           ]}
         />
-
-        {/* ── Categories ───────────────────────────────────────────── */}
-        <div
-          ref={categoryRailRef}
-          className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1"
-        >
-          <Chip active={category === null} onClick={() => setCategory(null)}>
-            Everything
-          </Chip>
-          {categories.map((c) => (
-            <Chip
-              key={c}
-              active={category === c}
-              onClick={() => setCategory(category === c ? null : c)}
-            >
-              {c}
-            </Chip>
-          ))}
-        </div>
 
         {/* ── List ─────────────────────────────────────────────────── */}
         {/* A failed follow is otherwise silent — the button just returns to

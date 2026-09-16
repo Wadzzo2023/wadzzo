@@ -225,6 +225,53 @@ export function usePins(): ArPin[] {
 }
 
 /**
+ * One brand's drops, paginated on the server.
+ *
+ * Deliberately not a client-side filter over `usePins()`. A brand page asks a
+ * narrow question — "what does *this* brand have out" — and answering it from
+ * the global pin list means downloading every drop on the map to throw nearly
+ * all of them away. The Wadzzo brand account alone has 102 live drops; a page
+ * that mounts all of them is what exhausted iOS Safari's GPU budget and killed
+ * the tab.
+ *
+ * Pages accumulate rather than replace: "Show more" should extend the grid, not
+ * swap it, so `keepPreviousData` holds the current page on screen while the
+ * next one is in flight instead of flashing the empty state.
+ */
+export function useBrandPinsQuery(args: {
+  brandId: string | null;
+  tab: "live" | "yours";
+  pageSize?: number;
+}) {
+  const query = api.pins.byBrand.useInfiniteQuery(
+    {
+      brandId: args.brandId ?? "",
+      tab: args.tab,
+      limit: args.pageSize ?? 24,
+    },
+    {
+      enabled: Boolean(args.brandId),
+      getNextPageParam: (last) => last.nextCursor,
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+    },
+  );
+
+  const pins = useMemo(
+    () => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS,
+    [query.data],
+  );
+
+  return {
+    ...query,
+    pins,
+    // Every page carries the same total, so the newest one is as good as any —
+    // and it's the freshest read of a number that can move while you page.
+    total: query.data?.pages.at(-1)?.total ?? 0,
+  };
+}
+
+/**
  * Pins for the two *discovery* surfaces — the map and the AR scene — with the
  * "Following only" preference applied.
  *
