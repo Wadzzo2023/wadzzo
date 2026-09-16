@@ -1,18 +1,21 @@
 import { ArrowUpDown, Search, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { HoloCard } from "~/components/cards/HoloCard";
 import { CardSkeleton, StatRowSkeleton } from "~/components/ui/Skeleton";
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
-import { ArLinkButton } from "~/components/ui/ArButton";
+import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { Chip, StatBlock } from "~/components/ui/Badges";
 import { RARITY_META, RARITY_ORDER } from "~/lib/ar/rarity";
 import { useAuth } from "~/lib/ar/store";
 import type { Rarity } from "~/lib/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
-import { usePinsQuery } from "~/lib/ar/usePins";
+import { useCollectedPinsQuery } from "~/lib/ar/usePins";
 import { cn } from "~/lib/utils";
+
+/** Cards mounted per page — same budget as the brand grid. */
+const PAGE_SIZE = 24;
 
 type Sort = "newest" | "rarest" | "brand";
 
@@ -39,61 +42,40 @@ const SORTS: { id: Sort; label: string }[] = [
 export default function CollectionScreen() {
   const router = useRouter();
   const signedIn = useAuth((s) => Boolean(s.user));
-  const { pins, isLoading: pinsLoading } = usePinsQuery();
-
   const [query, setQuery] = useState("");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [sort, setSort] = useState<Sort>("newest");
   const rarityRailRef = useDragScroll<HTMLDivElement>();
 
-  const collected = useMemo(
-    () => (signedIn ? pins.filter((p) => p.collected) : []),
-    [pins, signedIn],
-  );
+  // Search is a server query now, so every keystroke would otherwise be a
+  // request. A short debounce keeps typing to one round trip per pause; the
+  // input itself stays uncontrolled-feeling because `query` updates instantly
+  // and only the *fetch* waits.
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 250);
+    return () => clearTimeout(t);
+  }, [query]);
 
-  const stats = useMemo(() => {
-    const brands = new Set(collected.map((p) => p.brandId));
-    const best = collected.reduce<Rarity>((acc, p) => {
-      const r = p.rarity;
-      return RARITY_ORDER.indexOf(r) > RARITY_ORDER.indexOf(acc) ? r : acc;
-    }, "common");
-    return { total: collected.length, brands: brands.size, best };
-  }, [collected]);
+  const collection = useCollectedPinsQuery({
+    enabled: signedIn,
+    rarity,
+    query: debouncedQuery,
+    sort,
+    pageSize: PAGE_SIZE,
+  });
 
-  const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = collected.filter((p) => {
-      if (rarity !== "all" && p.rarity !== rarity) return false;
-      if (!q) return true;
-      return (
-        p.title.toLowerCase().includes(q) ||
-        p.brandName.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
-      );
-    });
-
-    return filtered.sort((a, b) => {
-      if (sort === "rarest") {
-        return RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity);
-      }
-      if (sort === "brand") return a.brandName.localeCompare(b.brandName);
-      return (
-        new Date(b.collectedAt ?? 0).getTime() -
-        new Date(a.collectedAt ?? 0).getTime()
-      );
-    });
-  }, [collected, query, rarity, sort]);
-
-  // Counts per rarity drive the filter row, so a tier you own none of can be
-  // dimmed instead of leading to an empty grid.
-  const counts = useMemo(() => {
-    const m = new Map<Rarity, number>();
-    collected.forEach((p) => {
-      const r = p.rarity;
-      m.set(r, (m.get(r) ?? 0) + 1);
-    });
-    return m;
-  }, [collected]);
+  const shown = collection.pins;
+  const facets = collection.facets;
+  const stats = {
+    total: facets?.total ?? 0,
+    brands: facets?.brands ?? 0,
+    best: facets?.best ?? ("common" as Rarity),
+  };
+  const remaining = collection.total - shown.length;
+  // Signed out there is nothing to fetch, so the query never runs and its
+  // `isLoading` would otherwise pin the screen on skeletons forever.
+  const loading = signedIn && collection.isLoading;
 
   return (
     <AppShell>
@@ -122,7 +104,7 @@ export default function CollectionScreen() {
         />
 
         {/* ── Stats ────────────────────────────────────────────────── */}
-        {pinsLoading ? (
+        {loading ? (
           <div className="mx-5">
             <StatRowSkeleton count={3} />
           </div>
@@ -182,10 +164,10 @@ export default function CollectionScreen() {
           className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1"
         >
           <Chip active={rarity === "all"} onClick={() => setRarity("all")}>
-            All {collected.length > 0 && `· ${collected.length}`}
+            All {stats.total > 0 && `· ${stats.total}`}
           </Chip>
           {RARITY_ORDER.map((r) => {
-            const n = counts.get(r) ?? 0;
+            const n = facets?.counts[r] ?? 0;
             return (
               <Chip
                 key={r}
@@ -207,29 +189,53 @@ export default function CollectionScreen() {
           {/* Four placeholder foils — enough to fill the fold, so the grid
               doesn't flash the "nothing collected yet" copy at someone who
               does in fact have cards. */}
-          {pinsLoading ? (
+          {loading ? (
             <div className="grid grid-cols-2 gap-3.5">
               {Array.from({ length: 4 }).map((_, i) => (
                 <CardSkeleton key={i} />
               ))}
             </div>
           ) : shown.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3.5">
-              {shown.map((pin, i) => (
-                <HoloCard
-                  key={pin.id}
-                  pin={pin}
-                  oneFace
-                  className="tcg-card--windowed"
-                  priority={i < 4}
-                  onClick={() => void router.push(`/collection/${pin.id}`)}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 gap-3.5">
+                {shown.map((pin, i) => (
+                  <HoloCard
+                    key={pin.id}
+                    pin={pin}
+                    oneFace
+                    className="tcg-card--windowed"
+                    priority={i < 4}
+                    onClick={() => void router.push(`/collection/${pin.id}`)}
+                  />
+                ))}
+
+                {/* The next page lands below the fold, so its placeholders go
+                    in the same grid — the cards already on screen stay put. */}
+                {collection.isFetchingNextPage &&
+                  Array.from({ length: Math.min(remaining, PAGE_SIZE) }).map(
+                    (_, i) => <CardSkeleton key={`next-${i}`} />,
+                  )}
+              </div>
+
+              {remaining > 0 && !collection.isFetchingNextPage && (
+                <div className="mt-5 flex justify-center">
+                  <ArButton
+                    variant="outline"
+                    size="md"
+                    onClick={() => void collection.fetchNextPage()}
+                  >
+                    Show {Math.min(remaining, PAGE_SIZE)} more
+                    <span className="ml-1 text-ar-faint">
+                      &middot; {remaining} left
+                    </span>
+                  </ArButton>
+                </div>
+              )}
+            </>
           ) : (
             <EmptyState
               signedIn={signedIn}
-              filtered={collected.length > 0}
+              filtered={stats.total > 0}
               onClear={() => {
                 setQuery("");
                 setRarity("all");

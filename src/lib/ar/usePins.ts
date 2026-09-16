@@ -7,7 +7,7 @@ import { clientSelect } from "~/lib/stellar/client-select";
 import { distanceMeters } from "./geo";
 import { pinStatus } from "./rarity";
 import { useSettings } from "./store";
-import type { ArBrand, ArPin, GeoFix } from "./types";
+import type { ArBrand, ArPin, GeoFix, Rarity } from "./types";
 
 /**
  * ── Pin state ──────────────────────────────────────────────────────────────
@@ -222,6 +222,54 @@ const EMPTY_PINS: ArPin[] = [];
 
 export function usePins(): ArPin[] {
   return usePinsQuery().pins;
+}
+
+/**
+ * The viewer's own cards, paginated on the server.
+ *
+ * Search, rarity filter and sort are sent to the server rather than applied
+ * here, because the client only ever holds one page — filtering a page would
+ * filter 24 cards instead of the collection. `keepPreviousData` holds the
+ * current grid on screen while a changed filter is in flight, so typing in the
+ * search box doesn't strobe the page empty between keystrokes.
+ */
+export function useCollectedPinsQuery(args: {
+  enabled: boolean;
+  rarity: Rarity | "all";
+  query: string;
+  sort: "newest" | "rarest" | "brand";
+  pageSize?: number;
+}) {
+  const query = api.pins.collected.useInfiniteQuery(
+    {
+      limit: args.pageSize ?? 24,
+      rarity: args.rarity,
+      query: args.query,
+      sort: args.sort,
+    },
+    {
+      enabled: args.enabled,
+      getNextPageParam: (last) => last.nextCursor,
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+      keepPreviousData: true,
+    },
+  );
+
+  const pins = useMemo(
+    () => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS,
+    [query.data],
+  );
+
+  const last = query.data?.pages.at(-1);
+  return {
+    ...query,
+    pins,
+    /** Matching the active filter — what pagination counts against. */
+    total: last?.total ?? 0,
+    /** The whole collection, unfiltered — drives the header stats and chips. */
+    facets: last?.facets,
+  };
 }
 
 /**

@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
-import { deriveRarity, pinStatus } from "~/lib/ar/rarity";
-import type { ArPin } from "~/lib/ar/types";
+import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
+import type { ArPin, Rarity } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
 import {
   createTRPCRouter,
@@ -207,74 +207,100 @@ const liveGroupWhere = () =>
  * read, so doing it per-location would multiply one round trip by the number
  * of points scattered inside the drop.
  */
+/** Everything an `ArPin` needs from its parent drop, resolved once per group. */
+function groupFacts(group: GroupWithLocations) {
+  return {
+    rarity: rarityOfGroup(group),
+    supply: supplyOf(group.limit),
+    image:
+      group.optimizedImage ??
+      group.image ??
+      group.creator.profileUrl ??
+      WADZZO_ICON,
+    // Deduped and sorted so the same drop reads the same way every render —
+    // the join can legitimately carry the same label twice via different rows.
+    tags: [...new Set(group.locationGroupTags.map((t) => t.tag.label))].sort(),
+  };
+}
+
+type GroupFacts = ReturnType<typeof groupFacts>;
+type Claim = GroupWithLocations["locations"][number]["consumers"][number];
+
+/** One physical point, as the app consumes it. */
+function toPin(
+  group: GroupWithLocations,
+  // Typed by what this actually reads rather than by either query's include
+  // shape — `collected` fetches a Location without its `consumers` (it has the
+  // claim already) and would not otherwise satisfy the wider type.
+  location: {
+    id: string;
+    latitude: number;
+    longitude: number;
+    autoCollect: boolean;
+  },
+  claim: Claim | undefined,
+  lockReason: string | null,
+  facts: GroupFacts,
+): ArPin {
+  return {
+    id: location.id,
+    lat: location.latitude,
+    lng: location.longitude,
+    title: group.title,
+    description: group.description ?? "No description provided",
+    imageUrl: facts.image,
+    link: group.link,
+
+    brandId: group.creatorId,
+    brandName: group.creator.name ?? "Unknown brand",
+    brandImageUrl: group.creator.profileUrl ?? WADZZO_ICON,
+
+    remaining: group.remaining,
+    supply: facts.supply,
+    rarity: facts.rarity,
+
+    autoCollect: location.autoCollect,
+    // No column backs this yet — every drop the reference system can produce
+    // is claimed by standing near it.
+    detection: "gps",
+    endsAt: group.endDate.toISOString(),
+
+    collected: claim != null,
+    collectedAt:
+      claim?.claimedAt?.toISOString() ?? claim?.createdAt.toISOString() ?? null,
+    redeemCode: claim?.redeemCode ?? null,
+    isRedeemed: claim?.isRedeemed ?? null,
+    // A drop already collected is never locked — whatever gate it sat behind
+    // was cleared at claim time, and un-owning it later would be a strange
+    // thing for a collection to do.
+    locked: claim == null && lockReason != null,
+    lockReason: claim == null ? lockReason : null,
+
+    tags: facts.tags,
+  };
+}
+
 function pinsOfGroup(
   group: GroupWithLocations,
   userId: string | null,
   lockReason: string | null,
 ): ArPin[] {
-  const rarity = rarityOfGroup(group);
-  const supply = supplyOf(group.limit);
-  // Deduped and sorted so the same drop reads the same way every render — the
-  // join can legitimately carry the same label twice via different tag rows.
-  const tags = [
-    ...new Set(group.locationGroupTags.map((t) => t.tag.label)),
-  ].sort();
-  const image =
-    group.optimizedImage ??
-    group.image ??
-    group.creator.profileUrl ??
-    WADZZO_ICON;
+  const facts = groupFacts(group);
 
   // For a single-collectible group, one claim anywhere in it collects every
   // point in it for this user.
   const groupClaim = userId
-    ? group.locations.flatMap((l) => l.consumers).find((c) => c.userId === userId)
+    ? group.locations
+        .flatMap((l) => l.consumers)
+        .find((c) => c.userId === userId)
     : undefined;
 
-  return group.locations.map((location): ArPin => {
+  return group.locations.map((location) => {
     const ownClaim = userId
       ? location.consumers.find((c) => c.userId === userId)
       : undefined;
     const claim = group.multiPin ? ownClaim : (ownClaim ?? groupClaim);
-
-    return {
-      id: location.id,
-      lat: location.latitude,
-      lng: location.longitude,
-      title: group.title,
-      description: group.description ?? "No description provided",
-      imageUrl: image,
-      link: group.link,
-
-      brandId: group.creatorId,
-      brandName: group.creator.name ?? "Unknown brand",
-      brandImageUrl: group.creator.profileUrl ?? WADZZO_ICON,
-
-      remaining: group.remaining,
-      supply,
-      rarity,
-
-      autoCollect: location.autoCollect,
-      // No column backs this yet — every drop the reference system can
-      // produce is claimed by standing near it.
-      detection: "gps",
-      endsAt: group.endDate.toISOString(),
-
-      collected: claim != null,
-      collectedAt:
-        claim?.claimedAt?.toISOString() ??
-        claim?.createdAt.toISOString() ??
-        null,
-      redeemCode: claim?.redeemCode ?? null,
-      isRedeemed: claim?.isRedeemed ?? null,
-      // A drop already collected is never locked — whatever gate it sat
-      // behind was cleared at claim time, and un-owning it later would be a
-      // strange thing for a collection to do.
-      locked: claim == null && lockReason != null,
-      lockReason: claim == null ? lockReason : null,
-
-      tags,
-    };
+    return toPin(group, location, claim, lockReason, facts);
   });
 }
 
@@ -448,6 +474,142 @@ export const pinsRouter = createTRPCRouter({
    *     list could otherwise claim a drop whose tier it no longer clears, or
    *     one it never could.
    */
+  /**
+   * The signed-in viewer's own cards, one page at a time.
+   *
+   * Driven off `LocationConsumer` — the viewer's actual claims — rather than
+   * by filtering `list` for `collected`. Three things follow from that, and
+   * all three are the point:
+   *
+   *  1. Cost scales with the collection, not the platform. The binder used to
+   *     download every approved drop in the world (~740 bytes each) and keep
+   *     the handful that were the viewer's.
+   *  2. One claim is one card. `list` marks *every* point in a non-`multiPin`
+   *     group collected once you claim any one of them — correct for the map,
+   *     where all five markers should go grey, but it meant a single claim on
+   *     a five-point drop rendered as five identical cards in the binder.
+   *  3. Owned cards stop vanishing. `list` only returns drops that are still
+   *     live (`endDate >= now`, `remaining > 0`), so a card silently left the
+   *     binder when its campaign ended. A claim is permanent; the card you
+   *     hold is yours whether or not the drop is still running.
+   *
+   * No Horizon read here, unlike `list` and `byBrand`: lock state is only ever
+   * about whether something *can* be claimed, and every row in this query
+   * already has been.
+   *
+   * Rarity is derived (`deriveRarity` needs the creator's whole tier ladder),
+   * so it is not a column and cannot be filtered, sorted or counted in SQL.
+   * Filtering and sorting therefore happen in memory over the viewer's own
+   * claims — bounded by their collection, which is the right size to hold.
+   */
+  collected: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(48).default(24),
+        cursor: z.number().int().min(0).nullish(),
+        rarity: z
+          .enum(["all", "common", "rare", "epic", "legendary", "mythic"])
+          .default("all"),
+        query: z.string().max(120).default(""),
+        sort: z.enum(["newest", "rarest", "brand"]).default("newest"),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const offset = input.cursor ?? 0;
+
+      const claims = await ctx.db.locationConsumer.findMany({
+        // `Location.locationGroupId` is nullable, so a point can exist with no
+        // drop behind it — no title, no art, no brand. Such a claim has
+        // nothing to render as a card, so it is excluded here rather than
+        // silently becoming an "Unknown brand" blank in someone's binder.
+        where: { userId, location: { locationGroup: { isNot: null } } },
+        include: {
+          location: {
+            include: { locationGroup: { include: groupWithLocationsInclude } },
+          },
+        },
+      });
+
+      const all = claims.flatMap((claim) => {
+        const group = claim.location.locationGroup;
+        // Narrowing for TypeScript; the `where` above already excluded these.
+        if (!group) return [];
+        return toPin(
+          group,
+          claim.location,
+          {
+            userId: claim.userId,
+            redeemCode: claim.redeemCode,
+            isRedeemed: claim.isRedeemed,
+            claimedAt: claim.claimedAt,
+            createdAt: claim.createdAt,
+          },
+          null,
+          groupFacts(group),
+        );
+      });
+
+      // Facets describe the whole collection, not the filtered view — the
+      // rarity chips have to be able to say "you own none of these" rather
+      // than disappearing once a filter is on.
+      const counts = RARITY_ORDER.reduce<Record<string, number>>((acc, r) => {
+        acc[r] = 0;
+        return acc;
+      }, {});
+      for (const pin of all) counts[pin.rarity] = (counts[pin.rarity] ?? 0) + 1;
+
+      const facets = {
+        total: all.length,
+        brands: new Set(all.map((p) => p.brandId)).size,
+        best: all.reduce<Rarity>(
+          (acc, p) =>
+            RARITY_ORDER.indexOf(p.rarity) > RARITY_ORDER.indexOf(acc)
+              ? p.rarity
+              : acc,
+          "common",
+        ),
+        counts,
+      };
+
+      const q = input.query.trim().toLowerCase();
+      const matching = all
+        .filter((pin) => {
+          if (input.rarity !== "all" && pin.rarity !== input.rarity) {
+            return false;
+          }
+          if (!q) return true;
+          return (
+            pin.title.toLowerCase().includes(q) ||
+            pin.brandName.toLowerCase().includes(q) ||
+            pin.description.toLowerCase().includes(q)
+          );
+        })
+        .sort((a, b) => {
+          if (input.sort === "rarest") {
+            return (
+              RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity)
+            );
+          }
+          if (input.sort === "brand") {
+            return a.brandName.localeCompare(b.brandName);
+          }
+          return (
+            new Date(b.collectedAt ?? 0).getTime() -
+            new Date(a.collectedAt ?? 0).getTime()
+          );
+        });
+
+      const pins = matching.slice(offset, offset + input.limit);
+      const next = offset + pins.length;
+      return {
+        pins,
+        total: matching.length,
+        nextCursor: next < matching.length ? next : null,
+        facets,
+      };
+    }),
+
   collect: protectedProcedure
     .input(
       z.object({
