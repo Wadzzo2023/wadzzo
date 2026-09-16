@@ -219,6 +219,8 @@ export default function CollectionScreen() {
                 <HoloCard
                   key={pin.id}
                   pin={pin}
+                  oneFace
+                  className="tcg-card--windowed"
                   priority={i < 4}
                   onClick={() => void router.push(`/collection/${pin.id}`)}
                 />

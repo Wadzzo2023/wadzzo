@@ -25,6 +25,7 @@ import { PackOpening } from "~/components/cards/PackOpening";
 import { AppShell } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import {
+  Chip,
   DETECTION_META,
   DetectionBadge,
   RarityPlate,
@@ -264,6 +265,16 @@ export default function CollectionDetail() {
           <p className="mt-2.5 text-center text-[13px] leading-relaxed text-ar-dim">
             {pin.description}
           </p>
+
+          {/* This drop's own tags. Optional-chained rather than assumed: the
+              field is new, and a pin cached by an older client predates it. */}
+          {pin.tags?.length ? (
+            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+              {pin.tags.map((t) => (
+                <Chip key={t}>{t}</Chip>
+              ))}
+            </div>
+          ) : null}
 
           <div className="mt-3.5 flex items-center justify-center gap-2">
             <Link

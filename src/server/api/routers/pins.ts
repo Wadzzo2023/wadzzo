@@ -168,6 +168,7 @@ const rarityOfGroup = (group: GroupWithCreator) =>
 /** One include shape, so `list` and `byBrand` return identically-shaped pins. */
 const groupWithLocationsInclude = {
   ...groupInclude,
+  locationGroupTags: { select: { tag: { select: { label: true } } } },
   locations: {
     where: { hidden: false },
     include: { consumers: { select: consumerSelect } },
@@ -213,6 +214,11 @@ function pinsOfGroup(
 ): ArPin[] {
   const rarity = rarityOfGroup(group);
   const supply = supplyOf(group.limit);
+  // Deduped and sorted so the same drop reads the same way every render — the
+  // join can legitimately carry the same label twice via different tag rows.
+  const tags = [
+    ...new Set(group.locationGroupTags.map((t) => t.tag.label)),
+  ].sort();
   const image =
     group.optimizedImage ??
     group.image ??
@@ -266,6 +272,8 @@ function pinsOfGroup(
       // strange thing for a collection to do.
       locked: claim == null && lockReason != null,
       lockReason: claim == null ? lockReason : null,
+
+      tags,
     };
   });
 }

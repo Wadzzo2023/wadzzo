@@ -758,6 +758,34 @@ body {
   border-radius: var(--tcg-r-inner, 12.5px);
 }
 
+/**
+ * Cards on a surface that can hold a lot of them — the brand grid, the binder.
+ *
+ * Paging bounds how many cards *mount*, but a viewer who keeps tapping "Show
+ * more" ends up with all of them mounted anyway, which is the state that was
+ * killing the tab: ~100 cards, each its own compositing layer, each stacking
+ * three `mix-blend-mode` foil layers. `content-visibility: auto` makes the
+ * browser skip rendering entirely — layout, paint, and crucially the blend
+ * compositing — for cards that are off screen, so GPU cost tracks what is
+ * actually visible rather than what is mounted. A screen holds four or five
+ * cards whether the grid has 24 in it or 102.
+ *
+ * Declared on `.tcg-card` itself rather than a wrapper on purpose:
+ * `content-visibility` implies paint containment, which clips what
+ * *descendants* paint outside the box. On the card itself its own rarity glow
+ * still paints normally; on a wrapper that glow would be cut off square.
+ *
+ * Safari picked this up in 18. Older engines simply render as they do today —
+ * no worse than before, which is why this needs no fallback.
+ */
+.tcg-card--windowed {
+  content-visibility: auto;
+  /* The `auto` keyword lets the browser reuse each card's real measured size
+     once it has been rendered once; the length is only the first guess, and
+     keeps the scrollbar from lurching before anything has been measured. */
+  contain-intrinsic-size: auto 320px;
+}
+
 /* A horizontal-rail card sized to match the two-column card grids exactly.
    `/collection` and `/brands/[id]` lay cards out as `grid-cols-2 gap-3.5`
    inside `px-5`; the rails on the profile and a card's own "More from"

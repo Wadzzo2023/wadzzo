@@ -84,6 +84,13 @@ export interface ArPin {
   locked: boolean;
   /** Why it's locked, phrased as the action that unlocks it. Null if open. */
   lockReason: string | null;
+
+  /**
+   * This drop's own `LocationTag` labels. Distinct from `ArBrand.categories`,
+   * which is the union of these across everything a brand has out — these are
+   * what *this* drop was tagged with.
+   */
+  tags: string[];
 }
 
 export interface ArBrand {

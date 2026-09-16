@@ -66,8 +66,15 @@ export function BrandRowSkeleton() {
 }
 
 /** Matches a `HoloCard` tile in the collection grid — portrait, 3:4. */
+/**
+ * Placeholder for a `HoloCard` in a grid.
+ *
+ * `aspect-[5/7]` rather than a rounder guess because that is exactly the card's
+ * own ratio — a skeleton of a different shape makes the whole grid jump when
+ * the real cards swap in, which reads as a glitch rather than as loading.
+ */
 export function CardSkeleton() {
-  return <Skeleton className="aspect-[3/4] w-full" rounded="rounded-ar-lg" />;
+  return <Skeleton className="aspect-[5/7] w-full" rounded="rounded-[14px]" />;
 }
 
 /** Matches a card in the map's nearby rail — same 168px width and 34×46 art. */

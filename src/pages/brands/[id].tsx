@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { AppShell } from "~/components/shell/AppShell";
 import {
+  CardSkeleton,
   Skeleton,
   SkeletonText,
   StatRowSkeleton,
@@ -282,7 +283,21 @@ export default function BrandDetail() {
           />
 
           <div className="mt-4 px-5 pb-8">
-            {visible.length > 0 ? (
+            {/* A grid still fetching its first page is not an empty grid.
+                Without this the "Nothing live right now" copy flashes on every
+                visit before the cards land, which reads as a brand with no
+                drops rather than as loading. */}
+            {active.isLoading ? (
+              <div
+                className="grid grid-cols-2 gap-3.5"
+                role="status"
+                aria-label="Loading drops"
+              >
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
+              </div>
+            ) : visible.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 gap-3.5">
                   {visible.map((pin, i) => (
@@ -290,18 +305,26 @@ export default function BrandDetail() {
                       key={pin.id}
                       pin={pin}
                       oneFace
+                      className="tcg-card--windowed"
                       priority={i < 2}
                       onClick={() => void router.push(`/collection/${pin.id}`)}
                     />
                   ))}
+
+                  {/* The next page lands *below* what's on screen, so its
+                      placeholders go in the same grid rather than replacing
+                      it — the cards you were already looking at stay put. */}
+                  {active.isFetchingNextPage &&
+                    Array.from({
+                      length: Math.min(remaining, PAGE_SIZE),
+                    }).map((_, i) => <CardSkeleton key={`next-${i}`} />)}
                 </div>
 
-                {remaining > 0 && (
+                {remaining > 0 && !active.isFetchingNextPage && (
                   <div className="mt-5 flex justify-center">
                     <ArButton
                       variant="outline"
                       size="md"
-                      busy={active.isFetchingNextPage}
                       onClick={() => void active.fetchNextPage()}
                     >
                       Show {Math.min(remaining, PAGE_SIZE)} more
