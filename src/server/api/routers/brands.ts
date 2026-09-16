@@ -83,7 +83,25 @@ function toArBrand(
     handle: row.vanityURL ?? shortHandle(row.id),
     tagline: null,
     bio: row.bio ?? "",
-    avatarUrl: row.pageAsset?.thumbnail ?? row.profileUrl ?? AVATAR_FALLBACK,
+    /**
+     * `profileUrl` first — it is the creator's actual profile picture, and it
+     * is what the main webapp shows on the same creator's page, so the two
+     * apps now agree on what a brand looks like.
+     *
+     * This used to prefer `pageAsset.thumbnail`, which is a different thing
+     * entirely: the artwork for the brand's *token*, not a portrait of the
+     * brand. Beyond being the wrong picture, it was the broken one — every
+     * creator's `profileUrl` is on S3 and resolves, while page-asset artwork
+     * lives on IPFS gateways, and the two brands whose thumbnails sit on the
+     * public `ipfs.io` gateway (R Brand, Wadzzo) rendered as broken images
+     * everywhere they appeared, because that gateway rate-limits and then
+     * blocks outright.
+     *
+     * Kept as the fallback rather than dropped: a creator who never uploaded
+     * a profile picture but does have a page asset is better represented by
+     * their token art than by the generic avatar icon.
+     */
+    avatarUrl: row.profileUrl ?? row.pageAsset?.thumbnail ?? AVATAR_FALLBACK,
     coverUrl: row.coverUrl,
     verified: row.approved === true,
     followed,
