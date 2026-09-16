@@ -23,6 +23,21 @@ const compact = (n: number) =>
 type Tab = "live" | "yours";
 
 /**
+ * How many cards the drops grid is willing to mount at once.
+ *
+ * `HoloCard` is expensive per instance in a way the markup doesn't advertise:
+ * each one establishes its own compositing layer (`perspective` +
+ * `preserve-3d` + a transform that is never `none`, even at rest) and stacks
+ * three `mix-blend-mode` foil layers over its art. Fine for a dozen. The
+ * Wadzzo brand account has 102 live drops, and mounting all of them put ~400
+ * blended layers, 309 images and 8k DOM nodes on a single page — enough to
+ * exhaust the GPU memory budget on iOS Safari, which kills the tab outright
+ * rather than degrading. Capping the mounted set bounds that cost regardless
+ * of how many drops a brand runs.
+ */
+const PAGE_SIZE = 24;
+
+/**
  * ── /brands/[id] ───────────────────────────────────────────────────────────
  *
  * A brand's page, split into what they have out right now and what you've
@@ -46,6 +61,7 @@ export default function BrandDetail() {
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const [tab, setTab] = useState<Tab>("live");
+  const [limit, setLimit] = useState(PAGE_SIZE);
 
   const brand = useMemo(
     () => brands.find((b) => b.id === id) ?? null,
@@ -108,6 +124,16 @@ export default function BrandDetail() {
   }
 
   const shown = tab === "live" ? live : yours;
+
+  // A tab switch is a different list — carrying a grown limit across would
+  // mount a big slice of it immediately, which is the thing being avoided.
+  const switchTab = (next: Tab) => {
+    setTab(next);
+    setLimit(PAGE_SIZE);
+  };
+
+  const visible = shown.slice(0, limit);
+  const remaining = shown.length - visible.length;
 
   return (
     <AppShell>
@@ -257,7 +283,7 @@ export default function BrandDetail() {
           <SegmentedTabs
             layoutId="brand-detail-tabs"
             value={tab}
-            onChange={setTab}
+            onChange={switchTab}
             className="mx-5"
             tabs={[
               { id: "live", label: "Live drops", count: live.length },
@@ -267,16 +293,34 @@ export default function BrandDetail() {
 
           <div className="mt-4 px-5 pb-8">
             {shown.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3.5">
-                {shown.map((pin, i) => (
-                  <HoloCard
-                    key={pin.id}
-                    pin={pin}
-                    priority={i < 2}
-                    onClick={() => void router.push(`/collection/${pin.id}`)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-3.5">
+                  {visible.map((pin, i) => (
+                    <HoloCard
+                      key={pin.id}
+                      pin={pin}
+                      oneFace
+                      priority={i < 2}
+                      onClick={() => void router.push(`/collection/${pin.id}`)}
+                    />
+                  ))}
+                </div>
+
+                {remaining > 0 && (
+                  <div className="mt-5 flex justify-center">
+                    <ArButton
+                      variant="outline"
+                      size="md"
+                      onClick={() => setLimit((n) => n + PAGE_SIZE)}
+                    >
+                      Show {Math.min(remaining, PAGE_SIZE)} more
+                      <span className="ml-1 text-ar-faint">
+                        &middot; {remaining} left
+                      </span>
+                    </ArButton>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="py-12 text-center">
                 <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
