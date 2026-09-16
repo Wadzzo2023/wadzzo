@@ -44,6 +44,7 @@ import {
 } from "~/lib/ar/usePins";
 import type { ArBrand, ArPin } from "~/lib/ar/types";
 import { cn } from "~/lib/utils";
+import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
 
@@ -281,11 +282,9 @@ export default function CollectionDetail() {
               href={`/brands/${pin.brandId}`}
               className="ar-glass flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 text-[12px] text-ar-dim transition-colors hover:text-ar-text"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <BrandAvatar
                 src={brand?.avatarUrl ?? pin.brandImageUrl}
-                alt=""
-                className="h-5 w-5 rounded-full object-cover ring-1 ring-white/15"
+                className="h-5 w-5 rounded-full ring-1 ring-white/15"
               />
               <span className="font-medium text-ar-text">{pin.brandName}</span>
               {brand?.verified && (

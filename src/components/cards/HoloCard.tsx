@@ -23,6 +23,7 @@ import { AR_CAPTURE_RADIUS } from "~/lib/ar/geo";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArBrand, ArPin, DetectionMethod } from "~/lib/ar/types";
 import { cn, nonBlank } from "~/lib/utils";
+import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
@@ -582,14 +583,12 @@ function PokemonTcgCreatorFront({
 
       <div className="tcg-art">
         <div className="tcg-art__frame aspect-[5/4]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <BrandAvatar
             src={avatarUrl}
             alt={creatorName}
             loading={priority ? "eager" : "lazy"}
-            decoding="async"
             onLoad={onImageLoaded}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full"
           />
           <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/15" />
 
@@ -816,12 +815,7 @@ function PokemonTcgFront({
       <div className="tcg-subline">
         <span className="flex min-w-0 items-center gap-[1.4cqw]">
           <span className="tcg-subline__avatar shrink-0 overflow-hidden rounded-full ring-1 ring-white/25">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={pin.brandImageUrl}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <BrandAvatar src={pin.brandImageUrl} className="h-full w-full" />
           </span>
           <span className="font-hud truncate font-semibold uppercase tracking-[0.12em] text-ar-text">
             {pin.brandName}

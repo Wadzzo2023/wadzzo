@@ -30,6 +30,7 @@ import {
   StatusBadge,
 } from "~/components/ui/Badges";
 import { BottomSheet } from "~/components/ui/BottomSheet";
+import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const MODES: { id: TravelMode; icon: typeof Bike; label: string }[] = [
   { id: "walk", icon: Footprints, label: "Walk" },
@@ -137,11 +138,9 @@ function PinSheetBody({
             href={`/brands/${pin.brandId}`}
             className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] text-ar-dim transition-colors hover:text-ar-text"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <BrandAvatar
               src={pin.brandImageUrl}
-              alt=""
-              className="h-4 w-4 rounded-full object-cover ring-1 ring-white/15"
+              className="h-4 w-4 rounded-full ring-1 ring-white/15"
             />
             <span className="truncate">{pin.brandName}</span>
           </Link>

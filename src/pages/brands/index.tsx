@@ -9,6 +9,7 @@ import { useAuth } from "~/lib/ar/store";
 import type { ArBrand } from "~/lib/ar/types";
 import { BrandRowSkeleton } from "~/components/ui/Skeleton";
 import { useBrandsQuery, useToggleFollow } from "~/lib/ar/usePins";
+import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
@@ -185,12 +186,9 @@ function BrandRow({
 
       <div className="relative flex items-center gap-3 p-3">
         <Link href={`/brands/${brand.id}`} className="shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <BrandAvatar
             src={brand.avatarUrl}
-            alt=""
-            loading="lazy"
-            className="h-[52px] w-[52px] rounded-[14px] object-cover ring-1 ring-white/15"
+            className="h-[52px] w-[52px] rounded-[14px] ring-1 ring-white/15"
           />
         </Link>
 

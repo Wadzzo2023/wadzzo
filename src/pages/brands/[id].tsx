@@ -3,6 +3,7 @@ import { BadgeCheck, ChevronLeft, Share2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
+import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { AppShell } from "~/components/shell/AppShell";
 import {
@@ -180,14 +181,18 @@ export default function BrandDetail() {
 
         {/* ── Identity ─────────────────────────────────────────────── */}
         <div className="relative -mt-11 px-5">
-          <motion.img
+          <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 24 }}
-            src={brand.avatarUrl}
-            alt=""
-            className="h-[84px] w-[84px] rounded-[22px] object-cover ring-[3px] ring-ar-bg"
-          />
+            className="w-fit"
+          >
+            <BrandAvatar
+              src={brand.avatarUrl}
+              loading="eager"
+              className="h-[84px] w-[84px] rounded-[22px] ring-[3px] ring-ar-bg"
+            />
+          </motion.div>
 
           <h1 className="mt-3 flex items-center gap-1.5 text-[21px] font-semibold leading-tight text-ar-text">
             <span className="min-w-0 truncate">{brand.name}</span>
