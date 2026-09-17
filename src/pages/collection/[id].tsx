@@ -22,6 +22,7 @@ import MapGL, { Marker } from "react-map-gl";
 import { ArPhotoFrame } from "~/components/ar/ArPhotoFrame";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { PackOpening } from "~/components/cards/PackOpening";
+import { PinQrCode } from "~/components/cards/PinQrCode";
 import { AppShell } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import {
@@ -344,6 +345,13 @@ export default function CollectionDetail() {
               Capture in AR
             </ArLinkButton>
           )}
+
+          {/* The drop's shareable code. Sits with the other actions because
+              that is what it is — a way to hand this drop to someone else,
+              next to the ways to go get it yourself. */}
+          <div className="pt-1">
+            <PinQrCode pinId={pin.id} title={pin.title} />
+          </div>
 
           {pin.collected && pin.redeemCode && (
             <ArButton

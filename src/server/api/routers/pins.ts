@@ -1,4 +1,4 @@
-import { ItemPrivacy, Prisma } from "@prisma/client";
+import { ItemPrivacy, Prisma, type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -301,6 +301,138 @@ function pinsOfGroup(
       : undefined;
     const claim = group.multiPin ? ownClaim : (ownClaim ?? groupClaim);
     return toPin(group, location, claim, lockReason, facts);
+  });
+}
+
+/**
+ * Everything both claim paths check, minus where the collector is standing.
+ *
+ * Kept separate from the geofence on purpose: the two entry points differ on
+ * *proof of presence* and nothing else. Walking up to a pin proves it with GPS;
+ * scanning its QR proves it by possession of a code that only exists in the
+ * physical place the creator put it. Eligibility (`lockReason`) is a different
+ * question — who may hold this drop — and applies to both.
+ */
+async function assertClaimable(db: PrismaClient, userId: string, locationId: string) {
+  const location = await db.location.findUnique({
+    where: { id: locationId },
+    include: { locationGroup: { include: groupInclude } },
+  });
+
+  const group = location?.locationGroup;
+  if (!location || !group || location.hidden) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+  }
+
+  // Same gate `list` applies, so a pin that was never claimable can't be
+  // claimed by calling this directly.
+  const now = new Date();
+  if (group.hidden || group.approved !== true || group.endDate < now) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "This drop isn't available",
+    });
+  }
+  if (group.startDate > now) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "This drop hasn't started yet",
+    });
+  }
+
+  // Eligibility, re-checked against live state — a client holding a stale pin
+  // list could otherwise claim a drop whose tier it no longer clears.
+  const [followedCreatorIds, account] = await Promise.all([
+    db.follow
+      .findMany({ where: { userId }, select: { creatorId: true } })
+      .then((rows) => new Set(rows.map((r) => r.creatorId))),
+    StellarAccount.createOrNull(userId),
+  ]);
+
+  const lockReason = lockReasonFor(group, followedCreatorIds, account, true);
+  if (lockReason) {
+    throw new TRPCError({ code: "FORBIDDEN", message: lockReason });
+  }
+
+  return { location, group };
+}
+
+/**
+ * The write half of a claim: refuse a duplicate, then take one unit of stock
+ * and write the consumer row in a single transaction.
+ */
+async function writeClaim(
+  db: PrismaClient,
+  userId: string,
+  location: { id: string },
+  group: { id: string; multiPin: boolean; remaining: number },
+) {
+  // ── multiPin semantics, exactly as the reference applies them ─────────
+  // true:  each Location is its own collectible, one claim per Location.
+  // false: the whole group is one collectible, one claim per group.
+  const priorClaim = await db.locationConsumer.findFirst({
+    where: group.multiPin
+      ? { userId, locationId: location.id }
+      : { userId, location: { locationGroupId: group.id } },
+    select: { id: true },
+  });
+  if (priorClaim) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "You've already collected this one",
+    });
+  }
+
+  // `redeemCode` is unique, so rather than check-then-insert (which races)
+  // we let the constraint arbitrate and retry the whole transaction on the
+  // rare collision. 32^6 ≈ 1.07bn, so this effectively never loops.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      return await db.$transaction(async (tx) => {
+        // Decrement first, guarded by `remaining > 0` in the WHERE so two
+        // simultaneous claims on the last item can't both succeed. A zero
+        // count means someone else took it between our read and here.
+        const claimed = await tx.locationGroup.updateMany({
+          where: { id: group.id, remaining: { gt: 0 } },
+          data: { remaining: { decrement: 1 } },
+        });
+        if (claimed.count === 0) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Every one of these has been claimed",
+          });
+        }
+
+        const consumer = await tx.locationConsumer.create({
+          data: {
+            userId,
+            locationId: location.id,
+            claimedAt: new Date(),
+            redeemCode: generateRedeemCode(),
+          },
+          select: { id: true, redeemCode: true, claimedAt: true },
+        });
+
+        return {
+          id: consumer.id,
+          redeemCode: consumer.redeemCode,
+          collectedAt: (consumer.claimedAt ?? new Date()).toISOString(),
+          remaining: Math.max(0, group.remaining - 1),
+        };
+      });
+    } catch (err) {
+      const isCodeCollision =
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002" &&
+        String(err.meta?.target ?? "").includes("redeemCode");
+      if (isCodeCollision) continue;
+      throw err;
+    }
+  }
+
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Could not allocate a redeem code",
   });
 }
 
@@ -621,47 +753,17 @@ export const pinsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      const { location, group } = await assertClaimable(
+        ctx.db,
+        userId,
+        input.locationId,
+      );
 
-      const location = await ctx.db.location.findUnique({
-        where: { id: input.locationId },
-        include: { locationGroup: { include: groupInclude } },
-      });
-
-      const group = location?.locationGroup;
-      if (!location || !group || location.hidden) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
-      }
-
-      // Same gate `list` applies, so a pin that was never claimable can't be
-      // claimed by calling this directly.
-      const now = new Date();
-      if (group.hidden || group.approved !== true || group.endDate < now) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "This drop isn't available",
-        });
-      }
-      if (group.startDate > now) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "This drop hasn't started yet",
-        });
-      }
-
-      // ── Hardening 2: eligibility, re-checked against live state ───────────
-      const [followedCreatorIds, account] = await Promise.all([
-        ctx.db.follow
-          .findMany({ where: { userId }, select: { creatorId: true } })
-          .then((rows) => new Set(rows.map((r) => r.creatorId))),
-        StellarAccount.createOrNull(userId),
-      ]);
-
-      const lockReason = lockReasonFor(group, followedCreatorIds, account, true);
-      if (lockReason) {
-        throw new TRPCError({ code: "FORBIDDEN", message: lockReason });
-      }
-
-      // ── Hardening 1: geofence ─────────────────────────────────────────────
+      // ── Geofence ──────────────────────────────────────────────────────────
+      // The client already hides the button out of range; this is what makes
+      // that mean something. `consume.ts` in the reference took only a
+      // location id and never checked where the caller was, so anything that
+      // could reach the API could claim every pin on the map without moving.
       const distance = distanceMeters(
         { lat: input.lat, lng: input.lng },
         { lat: location.latitude, lng: location.longitude },
@@ -673,72 +775,40 @@ export const pinsRouter = createTRPCRouter({
         });
       }
 
-      // ── multiPin semantics, exactly as the reference applies them ─────────
-      // true:  each Location is its own collectible, one claim per Location.
-      // false: the whole group is one collectible, one claim per group.
-      const priorClaim = await ctx.db.locationConsumer.findFirst({
-        where: group.multiPin
-          ? { userId, locationId: location.id }
-          : { userId, location: { locationGroupId: group.id } },
-        select: { id: true },
-      });
-      if (priorClaim) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "You've already collected this one",
-        });
-      }
+      return writeClaim(ctx.db, userId, location, group);
+    }),
 
-      // `redeemCode` is unique, so rather than check-then-insert (which races)
-      // we let the constraint arbitrate and retry the whole transaction on the
-      // rare collision. 32^6 ≈ 1.07bn, so this effectively never loops.
-      for (let attempt = 0; attempt < 5; attempt++) {
-        try {
-          return await ctx.db.$transaction(async (tx) => {
-            // Decrement first, guarded by `remaining > 0` in the WHERE so two
-            // simultaneous claims on the last item can't both succeed. A zero
-            // count means someone else took it between our read and here.
-            const claimed = await tx.locationGroup.updateMany({
-              where: { id: group.id, remaining: { gt: 0 } },
-              data: { remaining: { decrement: 1 } },
-            });
-            if (claimed.count === 0) {
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Every one of these has been claimed",
-              });
-            }
-
-            const consumer = await tx.locationConsumer.create({
-              data: {
-                userId,
-                locationId: location.id,
-                claimedAt: new Date(),
-                redeemCode: generateRedeemCode(),
-              },
-              select: { id: true, redeemCode: true, claimedAt: true },
-            });
-
-            return {
-              id: consumer.id,
-              redeemCode: consumer.redeemCode,
-              collectedAt: (consumer.claimedAt ?? new Date()).toISOString(),
-              remaining: Math.max(0, group.remaining - 1),
-            };
-          });
-        } catch (err) {
-          const isCodeCollision =
-            err instanceof Prisma.PrismaClientKnownRequestError &&
-            err.code === "P2002" &&
-            String(err.meta?.target ?? "").includes("redeemCode");
-          if (isCodeCollision) continue;
-          throw err;
-        }
-      }
-
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Could not allocate a redeem code",
-      });
+  /**
+   * Claim a pin by scanning its QR code.
+   *
+   * The QR replaces the geofence rather than escaping it. A creator prints or
+   * shares the code for a specific drop, and holding it is itself the proof of
+   * presence the GPS check would otherwise establish — the whole point is that
+   * this works indoors, in a basement, at a stall with no signal, where a fix
+   * is either unavailable or wrong by a hundred metres.
+   *
+   * Everything that is *not* about location still applies: the drop has to be
+   * approved, live, in stock, and the collector still has to clear whatever
+   * gate it sits behind (follow the brand, hold the tier). Scanning a
+   * followers-only drop you don't follow fails with the same "Follow this
+   * brand to unlock" as walking up to it would.
+   *
+   * ⚠ Trust model, stated plainly: the pin id *is* the credential. Anyone who
+   * obtains the code — a forwarded screenshot, a photo of a poster, the id
+   * read off a URL — can claim from anywhere. That is inherent to "print it
+   * and let people scan it", and it matches the reference implementation,
+   * which gates its equivalent on nothing at all. If a drop needs to resist
+   * that, it wants a per-scan token, not a static QR.
+   */
+  collectByQr: protectedProcedure
+    .input(z.object({ locationId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const { location, group } = await assertClaimable(
+        ctx.db,
+        userId,
+        input.locationId,
+      );
+      return writeClaim(ctx.db, userId, location, group);
     }),
 });

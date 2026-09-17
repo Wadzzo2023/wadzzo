@@ -201,6 +201,44 @@ export function useCollectPin() {
 }
 
 /**
+ * Claim a pin by its QR code.
+ *
+ * Separate from `useCollectPin` only because the server's two entry points
+ * differ on proof of presence — walking up proves it with GPS, scanning proves
+ * it by holding a code that exists in one physical place. Everything after
+ * that is identical, including the cache patch, so a code scanned at the
+ * counter shows the card as collected on the map and in the binder without a
+ * refetch.
+ */
+export function useCollectPinByQr() {
+  const utils = api.useUtils();
+
+  return api.pins.collectByQr.useMutation({
+    onSuccess: (result, variables) => {
+      utils.pins.list.setData(undefined, (prev) =>
+        prev?.map((pin) =>
+          pin.id === variables.locationId
+            ? {
+                ...pin,
+                collected: true,
+                collectedAt: result.collectedAt,
+                redeemCode: result.redeemCode,
+                isRedeemed: false,
+                remaining: result.remaining,
+                locked: false,
+                lockReason: null,
+              }
+            : pin,
+        ),
+      );
+      // The binder is its own query off the viewer's claims, so unlike the
+      // patch above it cannot be nudged — it has to go and look again.
+      void utils.pins.collected.invalidate();
+    },
+  });
+}
+
+/**
  * The live pin query, for screens that need to tell "still loading" apart from
  * "genuinely nothing here" — an empty map is a real state now, not just a
  * fixture that failed to render.

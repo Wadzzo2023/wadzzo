@@ -1,11 +1,14 @@
-import { motion } from "framer-motion";
-import { Camera, QrCode, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Camera, Check, Loader2, QrCode, TriangleAlert, X } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppShell } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
+import { useAuth } from "~/lib/ar/store";
 import { useCamera } from "~/lib/ar/useCamera";
+import { pinIdFromScan, useQrScanner } from "~/lib/ar/useQrScanner";
+import { useCollectPinByQr } from "~/lib/ar/usePins";
 
 /**
  * ── /scan ──────────────────────────────────────────────────────────────────
@@ -18,22 +21,97 @@ import { useCamera } from "~/lib/ar/useCamera";
  * camera app and deep-links straight to the pin. This is the in-app scanner
  * for someone who is already here and sees a code across the room.
  *
- * ── Milestone 1 note ──
- * The viewfinder and permission flow are real; decoding is not yet wired.
- * `jsqr` and `react-zxing` are both already in the dependency list — the
- * decode loop reads frames off this same video element into a canvas and
- * resolves to `/collection/<id>`.
+ * Two ways in, both landing here:
+ *
+ *   /scan            the in-app scanner — decodes off the viewfinder below.
+ *   /scan?pin=<id>   the deep link a printed code actually encodes, opened by
+ *                    the phone's own camera app. No camera needed on this
+ *                    screen at all; it claims straight away.
  */
+type Phase = "scanning" | "claiming" | "done" | "failed";
+
 export default function ScanScreen() {
   const router = useRouter();
-  const camera = useCamera({ enabled: true });
+  const deepLinkPin =
+    typeof router.query.pin === "string" ? router.query.pin : null;
+
+  // A deep link carries its own pin, so the camera would be a permission
+  // prompt for nothing.
+  const camera = useCamera({ enabled: !deepLinkPin });
   const [asked, setAsked] = useState(false);
 
+  const requireAuth = useAuth((s) => s.requireAuth);
+  const collectByQr = useCollectPinByQr();
+
+  const [phase, setPhase] = useState<Phase>("scanning");
+  const [message, setMessage] = useState<string | null>(null);
+
+  // The decoder fires on every frame a code is visible in, which for a code
+  // held steady is several times a second. Without this the first scan would
+  // send a burst of identical claims, and the ones after the first would each
+  // come back "You've already collected this one".
+  const handledRef = useRef<string | null>(null);
+
+  const claim = useCallback(
+    (locationId: string) => {
+      if (handledRef.current === locationId) return;
+      handledRef.current = locationId;
+
+      if (!requireAuth("collect")) {
+        handledRef.current = null;
+        return;
+      }
+
+      setPhase("claiming");
+      setMessage(null);
+      collectByQr.mutate(
+        { locationId },
+        {
+          onSuccess: () => {
+            setPhase("done");
+            setTimeout(() => {
+              void router.replace(`/collection/${locationId}`);
+            }, 1100);
+          },
+          onError: (err) => {
+            setPhase("failed");
+            setMessage(err.message);
+            // Let them try a different code without reloading the screen.
+            setTimeout(() => {
+              handledRef.current = null;
+              setPhase("scanning");
+              setMessage(null);
+            }, 3200);
+          },
+        },
+      );
+    },
+    [collectByQr, requireAuth, router],
+  );
+
+  // Deep link: claim as soon as the route is ready, no camera involved.
   useEffect(() => {
-    if (asked) return;
+    if (deepLinkPin) claim(deepLinkPin);
+  }, [deepLinkPin, claim]);
+
+  useEffect(() => {
+    if (deepLinkPin !== null || asked) return;
     setAsked(true);
     void camera.start();
-  }, [asked, camera]);
+  }, [asked, camera, deepLinkPin]);
+
+  useQrScanner({
+    video: camera.videoNode,
+    enabled: !deepLinkPin && phase === "scanning" && camera.isPlaying,
+    onResult: (text) => {
+      const id = pinIdFromScan(text);
+      if (!id) {
+        setMessage("That isn't a Wadzzo code.");
+        return;
+      }
+      claim(id);
+    },
+  });
 
   return (
     <AppShell tabs={false} bleed>
@@ -82,11 +160,15 @@ export default function ScanScreen() {
             ))}
           </svg>
 
-          {camera.isPlaying && (
+          {/* Animated with `y` (a transform) rather than `top`: animating a
+              position property relayouts the page on every frame, and doing
+              that on top of a decoding video preview is what makes the camera
+              visibly stutter. A transform is composited and costs nothing. */}
+          {camera.isPlaying && phase === "scanning" && (
             <motion.div
               aria-hidden
-              className="absolute inset-x-4 h-[2px] rounded-full bg-ar-green-hot shadow-[0_0_20px_4px_hsl(var(--ar-green)/0.85)]"
-              animate={{ top: ["6%", "94%", "6%"] }}
+              className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-ar-green-hot shadow-[0_0_12px_2px_hsl(var(--ar-green)/0.7)] will-change-transform"
+              animate={{ y: [14, 214, 14] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
           )}
@@ -101,6 +183,82 @@ export default function ScanScreen() {
         >
           <X size={17} strokeWidth={2.4} />
         </button>
+
+        {/* ── Claim status ──────────────────────────────────────────── */}
+        <AnimatePresence>
+          {phase !== "scanning" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 flex items-center justify-center bg-ar-void/80 px-8"
+              role="status"
+            >
+              <div className="ar-glass w-full max-w-[19rem] rounded-ar-lg p-6 text-center">
+                {phase === "claiming" && (
+                  <>
+                    <Loader2
+                      size={26}
+                      strokeWidth={2.4}
+                      className="mx-auto animate-spin text-ar-green-hot"
+                    />
+                    <p className="font-hud mt-3 text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+                      Claiming
+                    </p>
+                  </>
+                )}
+
+                {phase === "done" && (
+                  <>
+                    <motion.span
+                      initial={{ scale: 0.6 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 320, damping: 18 }}
+                      className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-ar-green/60 bg-ar-green/18 text-ar-green-hot"
+                    >
+                      <Check size={24} strokeWidth={3} />
+                    </motion.span>
+                    <p className="font-hud mt-3 text-[13px] font-bold uppercase tracking-[0.12em] text-ar-green-hot">
+                      Collected
+                    </p>
+                    <p className="mt-1.5 text-[11.5px] text-ar-dim">
+                      Opening your card…
+                    </p>
+                  </>
+                )}
+
+                {phase === "failed" && (
+                  <>
+                    <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-ar-danger/60 bg-ar-danger/15 text-ar-danger">
+                      <TriangleAlert size={22} strokeWidth={2.4} />
+                    </span>
+                    <p className="font-hud mt-3 text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+                      Couldn&apos;t collect
+                    </p>
+                    {/* Server messages are written to be shown as-is —
+                        "Follow this brand to unlock", "Every one of these has
+                        been claimed" — so they are, rather than being
+                        flattened into a generic failure. */}
+                    <p className="mt-1.5 text-[11.5px] leading-relaxed text-ar-dim">
+                      {message}
+                    </p>
+                    {deepLinkPin && (
+                      <ArLinkButton
+                        href={`/collection/${deepLinkPin}`}
+                        variant="outline"
+                        size="sm"
+                        block
+                        className="mt-3"
+                      >
+                        View the drop
+                      </ArLinkButton>
+                    )}
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div
           className="absolute inset-x-0 bottom-0 z-20 px-6"
@@ -119,11 +277,13 @@ export default function ScanScreen() {
                   : "Starting camera…"}
             </p>
             <p className="mx-auto mt-1.5 max-w-[17rem] text-[11.5px] leading-relaxed text-ar-dim">
-              {camera.isPlaying
-                ? "Storefront and indoor drops use a printed code — no location permission needed."
-                : camera.state === "denied"
-                  ? "Allow camera access for this site, then try again."
-                  : "One moment."}
+              {message && phase === "scanning"
+                ? message
+                : camera.isPlaying
+                  ? "Storefront and indoor drops use a printed code — no location permission needed."
+                  : camera.state === "denied"
+                    ? "Allow camera access for this site, then try again."
+                    : "One moment."}
             </p>
 
             {camera.state === "denied" && (
