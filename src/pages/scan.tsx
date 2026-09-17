@@ -160,16 +160,15 @@ export default function ScanScreen() {
             ))}
           </svg>
 
-          {/* Animated with `y` (a transform) rather than `top`: animating a
-              position property relayouts the page on every frame, and doing
-              that on top of a decoding video preview is what makes the camera
-              visibly stutter. A transform is composited and costs nothing. */}
+          {/* A CSS animation (`.ar-scan-sweep`), not a framer-motion one.
+              framer-motion recomputes the value on the main thread every
+              frame, so it stutters in step with the decode loop running
+              beside it — the two compete for the same thread. In CSS this is
+              handed to the compositor and keeps its own time regardless. */}
           {camera.isPlaying && phase === "scanning" && (
-            <motion.div
+            <div
               aria-hidden
-              className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-ar-green-hot shadow-[0_0_12px_2px_hsl(var(--ar-green)/0.7)] will-change-transform"
-              animate={{ y: [14, 214, 14] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="ar-scan-sweep absolute inset-x-4 top-0 h-[2px] rounded-full bg-ar-green-hot shadow-[0_0_12px_2px_hsl(var(--ar-green)/0.7)]"
             />
           )}
         </div>

@@ -1103,6 +1103,41 @@ body {
    Motion
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * The scanner's sweep line.
+ *
+ * A CSS animation rather than a JS-driven one on purpose. framer-motion
+ * computes each frame's value on the main thread, so while `/scan` is decoding
+ * camera frames the line visibly stutters — the animation and the decoder are
+ * competing for the same thread. Declared here, it is handed to the compositor
+ * and keeps its own time no matter how busy JS gets.
+ *
+ * Travel is in px, matching the 228px viewfinder, because a percentage
+ * translate resolves against the element's own 2px height rather than the box
+ * it sweeps.
+ */
+@keyframes ar-scan-sweep {
+  0%,
+  100% {
+    transform: translateY(14px);
+  }
+  50% {
+    transform: translateY(214px);
+  }
+}
+
+.ar-scan-sweep {
+  animation: ar-scan-sweep 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-scan-sweep {
+    animation: none;
+    transform: translateY(114px);
+  }
+}
+
 @keyframes ar-pulse-ring {
   0% {
     transform: scale(0.72);
