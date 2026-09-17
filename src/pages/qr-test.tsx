@@ -15,8 +15,8 @@ import { usePinsQuery } from "~/lib/ar/usePins";
  * device's camera.
  *
  * Every code here is real. It encodes `/scan?pin=<id>` against the origin the
- * page is served from, which is the same string `PinQrCode` prints for a
- * creator, so a successful scan here is a successful scan in production.
+ * page is served from — the same URL shape `collectByQr` expects — so a
+ * successful scan here is a successful scan in production.
  *
  * Two things worth watching while testing:
  *
