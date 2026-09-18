@@ -71,7 +71,25 @@ export default function ArScreen() {
   const collectPin = useCollectPin();
   const feedback = useFeedback();
 
-  const pins = useDiscoveryPins();
+  const discoveryPins = useDiscoveryPins();
+
+  /**
+   * The map shows a locked pin on purpose — with a lock badge and, on tap, the
+   * reason ("Follow this brand to unlock") — because a gated drop you can see
+   * but can't take yet is the whole incentive to follow a brand. That reads
+   * fine in a 2D list you're browsing.
+   *
+   * In the camera view it doesn't: a coin sitting right in front of you that
+   * turns out to be uncapturable the moment you reach for it is a dead end,
+   * not an invitation. So the AR scene only ever places pins the viewer can
+   * actually act on right now — `list` already resolves `locked` against
+   * their live follow state and token balance, so this is just reading that,
+   * not re-deriving it.
+   */
+  const pins = useMemo(
+    () => discoveryPins.filter((p) => !p.locked),
+    [discoveryPins],
+  );
 
   useEffect(() => {
     if (!captureError) return;
