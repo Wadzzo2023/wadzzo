@@ -74,21 +74,31 @@ export default function ArScreen() {
   const discoveryPins = useDiscoveryPins();
 
   /**
-   * The map shows a locked pin on purpose — with a lock badge and, on tap, the
-   * reason ("Follow this brand to unlock") — because a gated drop you can see
-   * but can't take yet is the whole incentive to follow a brand. That reads
-   * fine in a 2D list you're browsing.
+   * The map shows a locked, or already-collected, pin on purpose — a gated
+   * drop you can see but can't take yet is the whole incentive to follow a
+   * brand, and a collected one left visible (greyed) is a quiet "yes, you got
+   * that." Both read fine in a 2D list you're browsing.
    *
-   * In the camera view it doesn't: a coin sitting right in front of you that
-   * turns out to be uncapturable the moment you reach for it is a dead end,
-   * not an invitation. So the AR scene only ever places pins the viewer can
-   * actually act on right now — `list` already resolves `locked` against
-   * their live follow state and token balance, so this is just reading that,
-   * not re-deriving it.
+   * `/ar` is a different job: someone opens the camera specifically to go
+   * collect something. A coin in front of them that turns out to have
+   * nothing behind it — locked, or already theirs — is a dead end, not
+   * something to walk toward. So the scene only ever places pins they can
+   * actually capture *right now*. Both flags are already resolved
+   * server-side (`locked` against live follow state and token balance;
+   * `collected` — including `multiPin: false`'s "claiming any one point
+   * claims the whole group" rule — against their actual claims), so this
+   * only reads them, never re-derives them.
+   *
+   * One exception: the pin `focusPinId` (`?pin=`) asks for. That mode exists
+   * specifically to revisit a pin already in the collection — filtering it
+   * out here would make its one job impossible.
    */
   const pins = useMemo(
-    () => discoveryPins.filter((p) => !p.locked),
-    [discoveryPins],
+    () =>
+      discoveryPins.filter(
+        (p) => p.id === focusPinId || (!p.locked && !p.collected),
+      ),
+    [discoveryPins, focusPinId],
   );
 
   useEffect(() => {
