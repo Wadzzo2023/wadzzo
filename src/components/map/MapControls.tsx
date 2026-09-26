@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Compass, Crosshair, QrCode, RotateCw, Zap } from "lucide-react";
+import { Compass, Crosshair, RotateCw, Zap } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
@@ -19,7 +19,6 @@ import { cn } from "~/lib/utils";
 export function MapControls({
   onRecenter,
   onRefetch,
-  onScan,
   compassMode,
   onToggleCompass,
   refetching,
@@ -29,7 +28,6 @@ export function MapControls({
 }: {
   onRecenter: () => void;
   onRefetch: () => void;
-  onScan: () => void;
   compassMode: boolean;
   onToggleCompass: () => void;
   refetching: boolean;
@@ -102,16 +100,6 @@ export function MapControls({
           strokeWidth={2.2}
           className={cn(autoCollect && "fill-ar-green-hot/30")}
         />
-      </motion.button>
-
-      {/* ── QR ──────────────────────────────────────────────────────── */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={onScan}
-        aria-label="Scan a QR code"
-        className="ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full text-ar-dim transition-colors hover:text-ar-text"
-      >
-        <QrCode size={18} strokeWidth={2.1} />
       </motion.button>
 
       {/* ── Compass map ─────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import { MapControls } from "~/components/map/MapControls";
 import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
+import { ProfileButton } from "~/components/shell/ProfileButton";
 import { Chip } from "~/components/ui/Badges";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
@@ -376,12 +377,13 @@ export default function MapScreen() {
               </Chip>
             ))}
           </div>
+
+          <ProfileButton className="pointer-events-auto" />
         </div>
 
         <MapControls
           onRecenter={handleRecenter}
           onRefetch={handleRefetch}
-          onScan={() => void router.push("/scan")}
           compassMode={settings.compassMode}
           onToggleCompass={handleToggleCompass}
           refetching={refetching}

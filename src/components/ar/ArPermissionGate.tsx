@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Camera, Check, Compass, MapPin, Minus, X } from "lucide-react";
+
+import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
@@ -90,6 +92,13 @@ export function ArPermissionGate({
       >
         <X size={17} strokeWidth={2.4} />
       </button>
+
+      <div
+        className="absolute left-1/2 z-20 -translate-x-1/2"
+        style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
+      >
+        <CameraModeSwitch mode="ar" />
+      </div>
 
       {/* Tall enough to overflow on a short screen, so it needs the top inset
           as real padding rather than relying on `justify-center` to keep the

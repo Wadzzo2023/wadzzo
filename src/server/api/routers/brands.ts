@@ -190,6 +190,35 @@ export const brandsRouter = createTRPCRouter({
     );
   }),
 
+  /** One brand — for its page or a deep link, without fetching every brand. */
+  byId: publicProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .query(async ({ ctx, input }): Promise<ArBrand> => {
+      const userId = ctx.session?.user.id ?? null;
+      const creator = await ctx.db.creator.findFirst({
+        where: { id: input.id, pageAsset: { isNot: null } },
+        select: brandSelect,
+      });
+      if (!creator) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+      }
+      const [{ pinCounts, categories }, follow] = await Promise.all([
+        brandFacets(ctx.db, [creator.id]),
+        userId
+          ? ctx.db.follow.findFirst({
+              where: { userId, creatorId: creator.id },
+              select: { id: true },
+            })
+          : Promise.resolve(null),
+      ]);
+      return toArBrand(
+        creator,
+        Boolean(follow),
+        pinCounts.get(creator.id) ?? 0,
+        [...(categories.get(creator.id) ?? [])].sort(),
+      );
+    }),
+
   /** The brands this viewer follows — the `Following` filter's source. */
   followed: protectedProcedure.query(async ({ ctx }): Promise<ArBrand[]> => {
     const userId = ctx.session.user.id;

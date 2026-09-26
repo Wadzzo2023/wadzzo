@@ -490,6 +490,54 @@ export const pinsRouter = createTRPCRouter({
     }),
 
   /**
+   * One pin by its Location id — for a card page or a deep link, without
+   * shipping the whole map to find it (the mobile app can't afford `list`
+   * just to open one card).
+   *
+   * Unlike `list`, this does NOT require the drop to still be live: a card you
+   * own must keep resolving after its drop expires or sells out, and
+   * `pinStatus` already reports those states. It does still require admin
+   * approval — an unapproved drop is invisible everywhere.
+   */
+  byId: publicProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .query(async ({ ctx, input }): Promise<ArPin> => {
+      const userId = ctx.session?.user.id ?? null;
+      const location = await ctx.db.location.findUnique({
+        where: { id: input.id },
+        select: { locationGroupId: true },
+      });
+      const group = location?.locationGroupId
+        ? await ctx.db.locationGroup.findUnique({
+            where: { id: location.locationGroupId },
+            include: groupWithLocationsInclude,
+          })
+        : null;
+      if (!group || group.approved !== true) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
+      }
+
+      const [followedCreatorIds, account] = await Promise.all([
+        userId
+          ? ctx.db.follow
+              .findMany({ where: { userId }, select: { creatorId: true } })
+              .then((rows) => new Set(rows.map((r) => r.creatorId)))
+          : Promise.resolve(new Set<string>()),
+        userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+      ]);
+
+      const pin = pinsOfGroup(
+        group,
+        userId,
+        lockReasonFor(group, followedCreatorIds, account, userId != null),
+      ).find((p) => p.id === input.id);
+      if (!pin) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
+      }
+      return pin;
+    }),
+
+  /**
    * One brand's drops, one page at a time.
    *
    * `list` returns every pin on the map, which the map and AR scene genuinely

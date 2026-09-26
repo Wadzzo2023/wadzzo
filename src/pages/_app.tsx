@@ -30,6 +30,16 @@ const WadzzoAR: AppType = ({ Component, pageProps }) => {
   // Plays on a cold tab, not on client-side navigation back to the map.
   const [booting, setBooting] = useState(() => !hasBooted());
 
+  // The native app's Albedo bridge renders bare — it runs inside the app's
+  // WebView, where a simulated phone frame and boot sequence make no sense.
+  if (router.pathname === "/albedo") {
+    return (
+      <div className={fontVariables}>
+        <Component {...pageProps} />
+      </div>
+    );
+  }
+
   return (
     // No `session` prop: every page here is client-rendered (`ssr: false` on
     // the tRPC client too), so there's never a server-hydrated session to

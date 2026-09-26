@@ -79,7 +79,8 @@ export type GateIntent =
   | "profile"
   | "settings"
   | "redeem"
-  | "ar";
+  | "ar"
+  | "bounty";
 
 export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   collect: {
@@ -101,6 +102,10 @@ export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   redeem: {
     title: "Sign in to redeem",
     body: "Redeem codes are tied to the wallet that collected the pin.",
+  },
+  bounty: {
+    title: "Sign in to take part",
+    body: "Joining a bounty, sending an entry and talking to the brand all happen from your wallet — it's also where any reward lands.",
   },
   ar: {
     title: "Sign in to capture",

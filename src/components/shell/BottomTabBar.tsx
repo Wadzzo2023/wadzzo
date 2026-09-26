@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LayoutGrid, Map as MapIcon, Store, User } from "lucide-react";
+import { LayoutGrid, Map as MapIcon, Store, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import { cn } from "~/lib/utils";
 
 type Tab = {
@@ -16,9 +17,11 @@ const LEFT: Tab[] = [
   { href: "/collection", label: "Cards", icon: LayoutGrid },
 ];
 
+// Profile is not a tab — it's the avatar in each screen's header
+// (`ProfileButton`), which freed this slot for Bounty.
 const RIGHT: Tab[] = [
+  { href: "/bounty", label: "Bounty", icon: Trophy },
   { href: "/brands", label: "Brands", icon: Store },
-  { href: "/profile", label: "You", icon: User },
 ];
 
 /**
@@ -47,7 +50,9 @@ const RIGHT: Tab[] = [
 export function BottomTabBar() {
   const { pathname } = useRouter();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const arActive = isActive("/ar");
+  // QR is a mode of the same camera screen, reached from the AR tab.
+  const arActive = isActive("/ar") || isActive("/scan");
+  const { count: bountyAlerts } = useBountyAttention();
 
   return (
     <nav className="pointer-events-none absolute inset-x-0 bottom-0 z-40">
@@ -113,7 +118,12 @@ export function BottomTabBar() {
             <div aria-hidden className="w-[74px] shrink-0" />
 
             {RIGHT.map((tab) => (
-              <TabButton key={tab.href} tab={tab} active={isActive(tab.href)} />
+              <TabButton
+                key={tab.href}
+                tab={tab}
+                active={isActive(tab.href)}
+                dot={tab.href === "/bounty" && bountyAlerts > 0}
+              />
             ))}
           </div>
         </div>
@@ -122,7 +132,16 @@ export function BottomTabBar() {
   );
 }
 
-function TabButton({ tab, active }: { tab: Tab; active: boolean }) {
+function TabButton({
+  tab,
+  active,
+  dot = false,
+}: {
+  tab: Tab;
+  active: boolean;
+  /** Something behind this tab needs you — a win, a reply. */
+  dot?: boolean;
+}) {
   const Icon = tab.icon;
 
   return (
@@ -154,6 +173,12 @@ function TabButton({ tab, active }: { tab: Tab; active: boolean }) {
               : "text-ar-faint group-hover:text-ar-dim",
           )}
         />
+        {dot && (
+          <span
+            aria-hidden
+            className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+          />
+        )}
       </motion.span>
 
       <span

@@ -1,7 +1,10 @@
+import { ChevronLeft } from "lucide-react";
+import { useRouter } from "next/router";
 import { type ReactNode } from "react";
 
 import { cn } from "~/lib/utils";
 import { BottomTabBar } from "./BottomTabBar";
+import { ProfileButton } from "./ProfileButton";
 import { StatusBar } from "./StatusBar";
 
 /**
@@ -42,16 +45,23 @@ export function AppShell({
  * Standard screen header: title, optional eyebrow, optional trailing slot.
  * Sits above a scroll pane and does not scroll with it, so the screen you're
  * on is always named even three hundred cards down.
+ *
+ * Root screens end the header with the profile avatar — profile isn't a tab,
+ * so this is its one consistent place. A pushed screen (`back`) gets a back
+ * button instead and no avatar, since it's already off the root.
  */
 export function ScreenHeader({
   eyebrow,
   title,
   trailing,
+  back = false,
   className,
 }: {
   eyebrow?: string;
   title: string;
   trailing?: ReactNode;
+  /** Pushed screen: show a back button, hide the profile avatar. */
+  back?: boolean;
   className?: string;
 }) {
   return (
@@ -62,7 +72,8 @@ export function ScreenHeader({
       )}
       style={{ paddingTop: "calc(var(--ar-top-inset) + 16px)" }}
     >
-      <div className="min-w-0">
+      {back && <BackButton className="mb-0.5 self-end" />}
+      <div className="min-w-0 flex-1">
         {eyebrow && (
           <p className="font-hud mb-1 text-[10px] font-semibold uppercase tracking-[0.32em] text-ar-green">
             {eyebrow}
@@ -72,7 +83,35 @@ export function ScreenHeader({
           {title}
         </h1>
       </div>
-      {trailing && <div className="flex shrink-0 items-center gap-2">{trailing}</div>}
+      {(trailing ?? !back) && (
+        <div className="flex shrink-0 items-center gap-2">
+          {trailing}
+          {!back && <ProfileButton />}
+        </div>
+      )}
     </header>
+  );
+}
+
+/**
+ * Round glass back button. Opened straight from a shared link there's no
+ * in-app history to return to, so it falls back to the map.
+ */
+export function BackButton({ className }: { className?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      onClick={() => {
+        if (window.history.length > 1) router.back();
+        else void router.push("/map");
+      }}
+      aria-label="Back"
+      className={cn(
+        "ar-glass flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-text",
+        className,
+      )}
+    >
+      <ChevronLeft size={17} strokeWidth={2.4} />
+    </button>
   );
 }

@@ -3,6 +3,7 @@ import { Camera, Check, Loader2, QrCode, TriangleAlert, X } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
 import { AppShell } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { useAuth } from "~/lib/ar/store";
@@ -174,6 +175,16 @@ export default function ScanScreen() {
         </div>
 
         {/* ── Chrome ────────────────────────────────────────────────── */}
+        {/* No switch on a deep link: that path never opens the camera, it
+            just claims the code the phone's own camera already read. */}
+        {!deepLinkPin && (
+          <div
+            className="absolute left-1/2 z-20 -translate-x-1/2"
+            style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
+          >
+            <CameraModeSwitch mode="qr" />
+          </div>
+        )}
         <button
           onClick={() => router.back()}
           aria-label="Close scanner"

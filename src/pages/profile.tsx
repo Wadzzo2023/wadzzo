@@ -17,7 +17,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HoloCard } from "~/components/cards/HoloCard";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
+import {
+  AppShell,
+  BackButton,
+  ScreenHeader,
+} from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { StatBlock } from "~/components/ui/Badges";
 import { formatDistance } from "~/lib/ar/geo";
@@ -124,9 +128,10 @@ export default function ProfileScreen() {
   if (!user) return <SignedOut onSignIn={() => requireAuth("profile")} />;
 
   return (
-    <AppShell>
+    <AppShell tabs={false}>
       <div className="ar-scroll h-full">
         <ScreenHeader
+          back
           eyebrow="Your account"
           title="Profile"
           trailing={
@@ -580,7 +585,13 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
   ];
 
   return (
-    <AppShell>
+    <AppShell tabs={false}>
+      <div
+        className="absolute left-5 z-20"
+        style={{ top: "calc(var(--ar-top-inset) + 16px)" }}
+      >
+        <BackButton />
+      </div>
       <div className="ar-scroll relative flex h-full flex-col justify-center px-7">
         <div className="ar-grid pointer-events-none absolute inset-0 opacity-45 [mask-image:radial-gradient(60%_46%_at_50%_42%,black,transparent)]" />
         <div className="pointer-events-none absolute left-1/2 top-[36%] h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.2),transparent_64%)] blur-[60px]" />

@@ -1,3 +1,4 @@
+import { bountyRouter } from "./routers/bounty";
 import { brandsRouter } from "./routers/brands";
 import { pinsRouter } from "./routers/pins";
 import { userRouter } from "./routers/user";
@@ -7,6 +8,7 @@ export const appRouter = createTRPCRouter({
   pins: pinsRouter,
   brands: brandsRouter,
   user: userRouter,
+  bounty: bountyRouter,
 });
 
 export type AppRouter = typeof appRouter;

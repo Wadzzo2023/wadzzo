@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
+import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
 import {
   ArRadar,
   CompassStrip,
@@ -606,6 +607,13 @@ export function ArSceneWebGL({
             Exit
           </span>
         </button>
+
+        {/* Centred on the screen, not between its neighbours — Exit and
+            the radar are different widths. */}
+        <CameraModeSwitch
+          mode="ar"
+          className="absolute left-1/2 -translate-x-1/2"
+        />
 
         <ArRadar placed={placedForHud} heading={heading} />
       </div>

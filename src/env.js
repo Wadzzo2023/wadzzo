@@ -29,6 +29,9 @@ export const env = createEnv({
       process.env.VERCEL ? z.string() : z.string().url(),
     ),
     STORAGE_SECRET: z.string(),
+    // Signs mobile app session tokens (/api/mobile/v1). Falls back to
+    // NEXTAUTH_SECRET when unset; one of the two must exist at runtime.
+    MOBILE_JWT_SECRET: z.string().min(32).optional(),
     MOTHER_SECRET: z.string(),
     // Looked up by the connect_wallet submodule's custodial-signing path
     // (packages/connect_wallet/src/lib/stellar/get-acc-secret.ts) to fetch a
@@ -92,6 +95,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MAPBOX_API: process.env.NEXT_PUBLIC_MAPBOX_API,
     MOTHER_SECRET: process.env.MOTHER_SECRET,
     STORAGE_SECRET: process.env.STORAGE_SECRET,
+    MOBILE_JWT_SECRET: process.env.MOBILE_JWT_SECRET,
     RUBY_ACCOUNTS_SECRET: process.env.RUBY_ACCOUNTS_SECRET,
 
     // AWS
