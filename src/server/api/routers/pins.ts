@@ -179,6 +179,27 @@ type GroupWithLocations = Prisma.LocationGroupGetPayload<{
   include: typeof groupWithLocationsInclude;
 }>;
 
+/** Optional viewing area for `list`: a centre and a radius. */
+const areaInput = z.object({
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
+  radiusKm: z.number().positive().max(2000).optional(),
+});
+
+/**
+ * A lat/lng box around a circle, for an indexable pre-filter in Prisma.
+ * Longitude degrees shrink toward the poles, so the box widens with latitude;
+ * at the antimeridian it just clamps (no drops out there worth a split query).
+ */
+function boundingBox({ lat, lng, radiusKm }: { lat: number; lng: number; radiusKm: number }) {
+  const dLat = radiusKm / 111.32;
+  const dLng = radiusKm / (111.32 * Math.max(Math.cos((lat * Math.PI) / 180), 0.01));
+  return {
+    latitude: { gte: Math.max(lat - dLat, -90), lte: Math.min(lat + dLat, 90) },
+    longitude: { gte: Math.max(lng - dLng, -180), lte: Math.min(lng + dLng, 180) },
+  };
+}
+
 /**
  * The base "this drop is live" filter, as a function rather than a const
  * because `endDate: { gte: new Date() }` has to be evaluated per request — a
@@ -459,9 +480,14 @@ export const pinsRouter = createTRPCRouter({
    * brand or hold its token; one you never knew existed can't be.
    */
   list: publicProcedure
-    .input(z.object({}).optional())
-    .query(async ({ ctx }): Promise<ArPin[]> => {
+    .input(areaInput.optional())
+    .query(async ({ ctx, input }): Promise<ArPin[]> => {
       const userId = ctx.session?.user.id ?? null;
+      // Optional area (mobile): only pins within `radiusKm` of lat/lng. All
+      // three or none — the web (and older app builds) send none and still
+      // get every live pin.
+      const area = input?.lat != null && input.lng != null && input.radiusKm != null ? { lat: input.lat, lng: input.lng, radiusKm: input.radiusKm } : null;
+      const box = area ? boundingBox(area) : null;
 
       const [followedCreatorIds, account] = await Promise.all([
         userId
@@ -472,21 +498,30 @@ export const pinsRouter = createTRPCRouter({
         userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
       ]);
 
+      // The box narrows it in the database (both which drops, and which of
+      // their locations are loaded — with their consumers); the exact circle
+      // is applied after.
+      const locationWhere = { hidden: false, ...(box ?? {}) } satisfies Prisma.LocationWhereInput;
       const groups = await ctx.db.locationGroup.findMany({
         where: {
           ...liveGroupWhere(),
-          locations: { some: { hidden: false } },
+          locations: { some: locationWhere },
         },
-        include: groupWithLocationsInclude,
+        include: box
+          ? { ...groupWithLocationsInclude, locations: { ...groupWithLocationsInclude.locations, where: locationWhere } }
+          : groupWithLocationsInclude,
       });
 
-      return groups.flatMap((group) =>
+      const pins = groups.flatMap((group) =>
         pinsOfGroup(
           group,
           userId,
           lockReasonFor(group, followedCreatorIds, account, userId != null),
         ),
       );
+      return area
+        ? pins.filter((p) => distanceMeters(area, p) <= area.radiusKm * 1000)
+        : pins;
     }),
 
   /**

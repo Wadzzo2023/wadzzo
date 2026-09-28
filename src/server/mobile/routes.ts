@@ -130,7 +130,15 @@ export const ROUTES: Route[] = [
   },
 
   // ── Pins ────────────────────────────────────────────────────────────────
-  { method: "GET", path: "/pins", auth: "optional", handler: ({ caller }) => caller.pins.list() },
+  {
+    method: "GET",
+    path: "/pins",
+    auth: "optional",
+    // `?lat=&lng=&radiusKm=` → only pins in that circle. Without them (older
+    // app builds), every live pin, as before.
+    handler: ({ caller, query }) =>
+      caller.pins.list({ lat: num(query.lat), lng: num(query.lng), radiusKm: num(query.radiusKm) }),
+  },
   { method: "GET", path: "/pins/:id", auth: "optional", handler: ({ caller, params }) => caller.pins.byId({ id: params.id! }) },
   {
     method: "POST",
