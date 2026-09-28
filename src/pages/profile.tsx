@@ -195,7 +195,7 @@ export default function ProfileScreen() {
 
         {/* ── Totals ───────────────────────────────────────────────── */}
         <div className="mx-5 mt-3 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
-          <StatBlock label="Cards" value={collected.length} accent />
+          <StatBlock label="Collectibles" value={collected.length} accent />
           <span className="h-8 w-px bg-ar-line" />
           <StatBlock label="Following" value={following} />
           <span className="h-8 w-px bg-ar-line" />
@@ -208,7 +208,7 @@ export default function ProfileScreen() {
         {/* ── Rarity breakdown ─────────────────────────────────────── */}
         <section className="mt-5 px-5">
           <h2 className="font-hud mb-2.5 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
-            Binder breakdown
+            Collection breakdown
           </h2>
           <div className="ar-bevel space-y-2.5 rounded-ar p-3.5">
             {RARITY_ORDER.map((r) => {
@@ -244,10 +244,10 @@ export default function ProfileScreen() {
 
         {/* ── Recent ───────────────────────────────────────────────── */}
         {pinsLoading && (
-          <section className="mt-5" role="status" aria-label="Loading recent pulls">
+          <section className="mt-5" role="status" aria-label="Loading recent finds">
             <div className="flex items-baseline justify-between px-5">
               <h2 className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
-                Latest pulls
+                Latest finds
               </h2>
             </div>
             <div className="ar-scroll-x mt-2 flex gap-3.5 px-5 pb-2">
@@ -266,7 +266,7 @@ export default function ProfileScreen() {
           <section className="mt-5">
             <div className="flex items-baseline justify-between px-5">
               <h2 className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
-                Latest pulls
+                Latest finds
               </h2>
               <ArLinkButton href="/collection" variant="ghost" size="sm">
                 See all

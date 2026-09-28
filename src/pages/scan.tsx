@@ -232,7 +232,7 @@ export default function ScanScreen() {
                       Collected
                     </p>
                     <p className="mt-1.5 text-[11.5px] text-ar-dim">
-                      Opening your card…
+                      Opening your collectible…
                     </p>
                   </>
                 )}

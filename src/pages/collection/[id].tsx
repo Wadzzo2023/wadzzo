@@ -108,7 +108,7 @@ export default function CollectionDetail() {
     [pins, pin],
   );
 
-  // "Card not found" is a claim, and during the first fetch it's a false one —
+  // "Collectible not found" is a claim, and during the first fetch it's a false one —
   // the pin list simply hasn't arrived. Show the card's silhouette instead and
   // only assert absence once there's actually an answer.
   if (pinsLoading) {
@@ -117,7 +117,7 @@ export default function CollectionDetail() {
         <div
           className="ar-scroll h-full px-5"
           role="status"
-          aria-label="Loading card"
+          aria-label="Loading collectible"
         >
           <div className="mx-auto mt-16 max-w-[236px]">
             <Skeleton className="aspect-[3/4] w-full" rounded="rounded-ar-lg" />
@@ -143,7 +143,7 @@ export default function CollectionDetail() {
       <AppShell>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
           <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
-            Card not found
+            Collectible not found
           </p>
           <ArLinkButton href="/collection" variant="primary" size="md">
             Back to collection
@@ -211,7 +211,7 @@ export default function CollectionDetail() {
             </span>
           </button>
           <button
-            aria-label="Share this card"
+            aria-label="Share this collectible"
             onClick={() => {
               void navigator
                 .share?.({ title: pin.title, text: pin.description })

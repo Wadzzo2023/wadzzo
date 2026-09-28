@@ -81,7 +81,7 @@ export default function CollectionScreen() {
     <AppShell>
       <div className="flex h-full flex-col">
         <ScreenHeader
-          eyebrow="Your binder"
+          eyebrow="Your collection"
           title="Collection"
           trailing={
             <button
@@ -110,12 +110,12 @@ export default function CollectionScreen() {
           </div>
         ) : (
           <div className="mx-5 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
-            <StatBlock label="Cards" value={stats.total} accent />
+            <StatBlock label="Collectibles" value={stats.total} accent />
             <span className="h-8 w-px bg-ar-line" />
             <StatBlock label="Brands" value={stats.brands} />
             <span className="h-8 w-px bg-ar-line" />
             <StatBlock
-              label="Best pull"
+              label="Best find"
               value={
                 stats.total > 0 ? (
                   <span
@@ -142,7 +142,7 @@ export default function CollectionScreen() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search your cards"
+              placeholder="Search your collectibles"
               aria-label="Search your collection"
               className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
             />
@@ -264,7 +264,7 @@ function EmptyState({
           No matches
         </p>
         <p className="mt-1.5 max-w-[16rem] text-[12.5px] leading-relaxed text-ar-faint">
-          Nothing in your binder fits that search.
+          Nothing in your collection fits that search.
         </p>
         <button
           onClick={onClear}
@@ -291,7 +291,7 @@ function EmptyState({
 
       <Sparkles size={20} className="mb-3 text-ar-green-hot" strokeWidth={2} />
       <p className="font-hud text-[15px] font-bold uppercase tracking-[0.1em] text-ar-text">
-        {signedIn ? "Nothing collected yet" : "Your binder is waiting"}
+        {signedIn ? "Nothing collected yet" : "Your collection is waiting"}
       </p>
       <p className="mt-2 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
         {signedIn

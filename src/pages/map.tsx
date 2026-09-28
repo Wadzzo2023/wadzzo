@@ -1,15 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { HelpCircle, Satellite } from "lucide-react";
+import { CalendarDays, HelpCircle, Satellite } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
+import { FilterMenu } from "~/components/map/FilterMenu";
 import { MapControls } from "~/components/map/MapControls";
 import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
-import { Chip } from "~/components/ui/Badges";
+import { ArIconButton } from "~/components/ui/ArButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { LocationGate } from "~/components/shell/LocationGate";
@@ -19,7 +20,6 @@ import { useFeedback } from "~/lib/ar/feedback";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "~/lib/ar/types";
-import { useDragScroll } from "~/lib/ar/useDragScroll";
 import {
   GEO_REASON_TEXT,
   useGeolocation,
@@ -106,7 +106,6 @@ export default function MapScreen() {
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const mapRef = useRef<MapCanvasHandle>(null);
-  const filterRailRef = useDragScroll<HTMLDivElement>();
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
@@ -363,22 +362,23 @@ export default function MapScreen() {
             onExplain={setToast}
           />
 
-          <div
-            ref={filterRailRef}
-            className="ar-scroll-x pointer-events-auto flex min-w-0 flex-1 gap-1.5 pb-1"
-          >
-            {filters.map((f) => (
-              <Chip
-                key={f.id}
-                active={filter === f.id}
-                onClick={() => setFilter(f.id)}
-              >
-                {f.label}
-              </Chip>
-            ))}
-          </div>
+          <FilterMenu
+            filters={filters}
+            value={filter}
+            onChange={setFilter}
+            className="pointer-events-auto mr-auto"
+          />
 
-          <ProfileButton className="pointer-events-auto" />
+          {/* Events sits just under the avatar, centred on it. */}
+          <div className="relative">
+            <ProfileButton className="pointer-events-auto" />
+            <ArIconButton
+              icon={CalendarDays}
+              label="Events"
+              onClick={() => setToast("Events are coming soon")}
+              className="pointer-events-auto absolute right-0 top-[calc(100%+8px)] h-9 w-9"
+            />
+          </div>
         </div>
 
         <MapControls

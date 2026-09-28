@@ -230,7 +230,7 @@ function PinSheetBody({
             block
             icon={Package}
           >
-            View your card
+            View your collectible
           </ArLinkButton>
         ) : status === "collectible" && inRange ? (
           <ArButton

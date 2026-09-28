@@ -283,7 +283,7 @@ export default function BrandDetail() {
             className="mx-5"
             tabs={[
               { id: "live", label: "Live drops", count: liveQuery.total },
-              { id: "yours", label: "Your cards", count: yoursQuery.total },
+              { id: "yours", label: "Your collectibles", count: yoursQuery.total },
             ]}
           />
 

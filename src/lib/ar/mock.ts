@@ -51,7 +51,7 @@ export const MOCK_BRANDS: ArBrand[] = [
     name: "Museo Nocturne",
     handle: "museonocturne",
     tagline: "After-dark contemporary art.",
-    bio: "A museum that only opens when the sun goes down. Our pins sit on the works themselves — point your camera at the piece, not at a sign. Collect the full wing and the last card unlocks a members' preview.",
+    bio: "A museum that only opens when the sun goes down. Our pins sit on the works themselves — point your camera at the piece, not at a sign. Collect the full wing and the last collectible unlocks a members' preview.",
     avatarUrl: img("museo-a", 200, 200),
     coverUrl: img("museo-c", 1200, 600),
     verified: true,
@@ -96,7 +96,7 @@ export const MOCK_BRANDS: ArBrand[] = [
     name: "Atlas Tourism Board",
     handle: "visitatlas",
     tagline: "Official city trails and landmarks.",
-    bio: "Seventeen landmarks, one trail, no signage to deface. Every stop is image-recognition: point your camera at the monument and the card is yours.",
+    bio: "Seventeen landmarks, one trail, no signage to deface. Every stop is image-recognition: point your camera at the monument and the collectible is yours.",
     avatarUrl: img("atlas-a", 200, 200),
     coverUrl: img("atlas-c", 1200, 600),
     verified: true,
@@ -207,7 +207,7 @@ const PIN_SEEDS: PinSeed[] = [
     brand: B["brand-museo"]!,
     title: "Vantage — Oil on Linen",
     description:
-      "Point your camera at the canvas in the east wing. The card carries the artist's notes and a 40-second recording of them describing the piece.",
+      "Point your camera at the canvas in the east wing. The collectible carries the artist's notes and a 40-second recording of them describing the piece.",
     supply: 180,
     access: tier(50),
     dist: 54,
@@ -229,7 +229,7 @@ const PIN_SEEDS: PinSeed[] = [
   seed({
     id: "pin-relay-summit",
     brand: B["brand-relay"]!,
-    title: "Summit Card — Ridge Climb",
+    title: "Summit Collectible — Ridge Climb",
     description:
       "You only get this one by actually riding up here. 8% average over 2.1 km.",
     supply: 42,
@@ -269,7 +269,7 @@ const PIN_SEEDS: PinSeed[] = [
     brand: B["brand-museo"]!,
     title: "Kinetic Study No. 6",
     description:
-      "The moving sculpture in the atrium. Best collected when it's mid-cycle — the card art changes depending on the pose it was in.",
+      "The moving sculpture in the atrium. Best collected when it's mid-cycle — the art changes depending on the pose it was in.",
     supply: 220,
     access: tier(50),
     dist: 186,
@@ -359,7 +359,7 @@ const PIN_SEEDS: PinSeed[] = [
   seed({
     id: "pin-lumen-opening",
     brand: B["brand-lumen"]!,
-    title: "Opening Week Card",
+    title: "Opening Week Collectible",
     description:
       "Issued for seven days only when the Downtown bar opened. Won't be minted again.",
     supply: 500,
@@ -422,7 +422,7 @@ const PIN_SEEDS: PinSeed[] = [
     brand: B["brand-halcyon"]!,
     title: "Halcyon Mixtape Vol. 3",
     description:
-      "Ninety minutes, sequenced by the Thursday staff. The card links to the stream.",
+      "Ninety minutes, sequenced by the Thursday staff. The collectible links to the stream.",
     supply: 45,
     access: tier(250),
     dist: 820,

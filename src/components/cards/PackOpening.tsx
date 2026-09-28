@@ -207,7 +207,7 @@ export function PackOpening({
                 }}
               />
               <span className="font-hud absolute inset-0 flex items-center justify-center text-[7px] font-bold uppercase tracking-[0.3em] text-white/45">
-                Pull
+                Tear
               </span>
             </motion.div>
 
@@ -238,7 +238,7 @@ export function PackOpening({
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.18 }}
                   className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-3 focus-visible:outline-none"
-                  aria-label="Tear open the pack to reveal your card"
+                  aria-label="Tear open to reveal your collectible"
                 >
                   <WadzzoMark glow className="h-10 w-auto" />
 

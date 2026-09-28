@@ -14,7 +14,7 @@ type Tab = {
 
 const LEFT: Tab[] = [
   { href: "/map", label: "Map", icon: MapIcon },
-  { href: "/collection", label: "Cards", icon: LayoutGrid },
+  { href: "/collection", label: "Collection", icon: LayoutGrid },
 ];
 
 // Profile is not a tab — it's the avatar in each screen's header

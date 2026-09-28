@@ -191,7 +191,15 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         ))}
 
         {fix && (
-          <Marker longitude={fix.lng} latitude={fix.lat} anchor="center">
+          // Above every pin (10, selected 20): pins bunched around the user
+          // must never cover where they are. Click-through, so it can't
+          // block the pins it overlaps.
+          <Marker
+            longitude={fix.lng}
+            latitude={fix.lat}
+            anchor="center"
+            style={{ zIndex: 30, pointerEvents: "none" }}
+          >
             <UserPuck fix={fix} metersPerPixel={mpp} />
           </Marker>
         )}

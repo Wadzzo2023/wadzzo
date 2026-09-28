@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ScanLine } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
+import { CollectButton } from "~/components/ar/CollectButton";
 import {
   ArRadar,
   CompassStrip,
@@ -642,15 +643,10 @@ export function ArSceneWebGL({
               className="mx-auto max-w-[19rem]"
             >
               {capturable ? (
-                <ArButton
-                  variant="primary"
-                  size="lg"
-                  block
-                  icon={ScanLine}
+                <CollectButton
+                  title={placedTarget.pin.title}
                   onClick={() => onCapture(placedTarget.pin)}
-                >
-                  Capture
-                </ArButton>
+                />
               ) : (
                 <ArButton variant="outline" size="lg" block disabled>
                   {pinStatus(placedTarget.pin) === "collected"

@@ -101,7 +101,7 @@ export function WadzzoCardBack({
       {/* Bottom Footer Banner */}
       <div className="absolute inset-x-0 bottom-4 px-3 text-center">
         <span className="font-hud block text-[8px] font-semibold uppercase tracking-[0.26em] text-ar-dim">
-          {loading ? "INITIALIZING HOLO CARD…" : "AR COLLECTIBLE"}
+          {loading ? "INITIALIZING HOLOGRAM…" : "AR COLLECTIBLE"}
         </span>
         {pin ? (
           <p className="font-hud mt-0.5 text-[7px] uppercase tracking-[0.16em] text-ar-faint">
@@ -395,10 +395,10 @@ export function HoloCard({
           onClick={toggleFlip}
           aria-label={
             flipped
-              ? "Show the card front"
+              ? "Show the front"
               : creatorBack
                 ? "Show the creator on the back"
-                : "Show the card back"
+                : "Show the back"
           }
           className="ar-glass absolute -right-3 -top-3 z-30 flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold text-ar-dim shadow-md transition-transform active:scale-95"
         >
