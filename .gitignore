@@ -55,3 +55,5 @@ package-lock.json
 .vscode
 .kimchi
 .claude
+# macOS metadata files (the Data drive is exFAT)
+._*
