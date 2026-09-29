@@ -145,7 +145,7 @@ export const ROUTES: Route[] = [
     path: "/pins/search",
     auth: "optional",
     handler: ({ caller, query }) =>
-      caller.pins.search({ q: query.q ?? "", lat: num(query.lat), lng: num(query.lng), limit: num(query.limit) }),
+      caller.pins.search({ q: query.q ?? "", lat: num(query.lat), lng: num(query.lng), limit: num(query.limit), brandId: query.brandId ? query.brandId : undefined }),
   },
   { method: "GET", path: "/pins/:id", auth: "optional", handler: ({ caller, params }) => caller.pins.byId({ id: params.id! }) },
   {

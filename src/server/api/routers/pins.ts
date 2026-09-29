@@ -186,6 +186,8 @@ const areaInput = z.object({
   radiusKm: z.number().positive().max(2000).optional(),
   /** Only these pin types (website embeds); omitted or empty = all. */
   types: z.array(z.nativeEnum(PinType)).max(6).optional(),
+  /** Only this brand's pins (a website embed set to "only my brand"). */
+  brandId: z.string().min(1).optional(),
 });
 
 /**
@@ -546,6 +548,7 @@ export const pinsRouter = createTRPCRouter({
         where: {
           ...liveGroupWhere(),
           ...(input?.types?.length ? { type: { in: input.types } } : {}),
+          ...(input?.brandId ? { creatorId: input.brandId } : {}),
           locations: { some: locationWhere },
         },
         include: box
@@ -593,6 +596,8 @@ export const pinsRouter = createTRPCRouter({
         lat: z.number().min(-90).max(90).optional(),
         lng: z.number().min(-180).max(180).optional(),
         limit: z.number().int().min(1).max(30).default(20),
+        /** Only this brand's drops (a website embed set to "only my brand"). */
+        brandId: z.string().min(1).optional(),
       }),
     )
     .query(async ({ ctx, input }): Promise<ArPin[]> => {
@@ -604,6 +609,7 @@ export const pinsRouter = createTRPCRouter({
       const groups = await ctx.db.locationGroup.findMany({
         where: {
           ...liveGroupWhere(),
+          ...(input.brandId ? { creatorId: input.brandId } : {}),
           locations: { some: { hidden: false } },
           AND: terms.map((t) => ({
             OR: [

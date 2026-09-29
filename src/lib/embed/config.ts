@@ -19,6 +19,10 @@ export interface EmbedConfig {
   gestureMode: "COOPERATIVE" | "GREEDY";
   theme: "AUTO" | "LIGHT" | "DARK";
   accentColor: string;
+  /** "CREATOR" = only the embed owner's pins; "ALL" = every brand's. */
+  pinSource: "ALL" | "CREATOR";
+  /** The embed owner (a Creator id). Null only for a malformed preview. */
+  creatorId: string | null;
   pinTypes: ArPinType[];
   showFilterChips: boolean;
   showSearch: boolean;
@@ -75,6 +79,8 @@ export function normalizeConfig(raw: Record<string, unknown>, id: string): Embed
     gestureMode: raw.gestureMode === "GREEDY" ? "GREEDY" : "COOPERATIVE",
     theme: raw.theme === "LIGHT" || raw.theme === "DARK" ? raw.theme : "AUTO",
     accentColor: typeof raw.accentColor === "string" && HEX.test(raw.accentColor) ? raw.accentColor : "#39ff88",
+    pinSource: raw.pinSource === "CREATOR" ? "CREATOR" : "ALL",
+    creatorId: typeof raw.creatorId === "string" && raw.creatorId ? raw.creatorId : null,
     pinTypes,
     showFilterChips: raw.showFilterChips === true,
     showSearch: raw.showSearch !== false,
@@ -170,5 +176,9 @@ export function accentVars(hex: string): Record<string, string> {
     "--ar-green-ink": L > 55 ? "150 60% 6%" : "0 0% 100%",
   };
 }
+
+/** The brand to restrict pins to, or undefined for every brand. */
+export const brandFilter = (c: Pick<EmbedConfig, "pinSource" | "creatorId">) =>
+  c.pinSource === "CREATOR" && c.creatorId ? c.creatorId : undefined;
 
 export type EmbedEvent = "view" | "pinTap" | "open" | "events" | "bounties";

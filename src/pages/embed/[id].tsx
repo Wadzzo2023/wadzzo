@@ -12,6 +12,7 @@ import { applyTheme } from "~/lib/ar/theme";
 import type { ArPin, ArPinType, Coords, GeoFix } from "~/lib/ar/types";
 import {
   accentVars,
+  brandFilter,
   decodePreview,
   type EmbedConfig,
   type EmbedEvent,
@@ -154,7 +155,11 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
       }
     : null;
   const pinsQuery = api.pins.list.useQuery(
-    { ...(area ?? {}), types: config.pinTypes.length ? config.pinTypes : undefined },
+    {
+      ...(area ?? {}),
+      types: config.pinTypes.length ? config.pinTypes : undefined,
+      brandId: brandFilter(config),
+    },
     { enabled: area != null, keepPreviousData: true, staleTime: 60_000 },
   );
   const allPins = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
@@ -367,6 +372,7 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
         </div>
 
         <MapSearch
+          brandId={brandFilter(config)}
           open={searchOpen}
           onClose={() => setSearchOpen(false)}
           fix={meFix}

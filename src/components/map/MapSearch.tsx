@@ -41,12 +41,15 @@ export function MapSearch({
   fix,
   onPickPin,
   onPickPlace,
+  brandId,
 }: {
   open: boolean;
   onClose: () => void;
   fix: GeoFix | null;
   onPickPin: (pin: ArPin) => void;
   onPickPlace: (coords: Coords) => void;
+  /** Only this brand's drops (a website embed set to "only my brand"). */
+  brandId?: string;
 }) {
   const [query, setQuery] = useState("");
   const q = query.trim();
@@ -66,7 +69,7 @@ export function MapSearch({
   const debounced = term.q;
 
   const search = api.pins.search.useQuery(
-    { q: debounced, lat: term.near?.lat, lng: term.near?.lng, limit: 12 },
+    { q: debounced, lat: term.near?.lat, lng: term.near?.lng, limit: 12, brandId },
     { enabled: open && debounced.length >= 2, keepPreviousData: true, staleTime: 30_000 },
   );
   const pinsOn = open && q.length >= 2;
