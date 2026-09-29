@@ -36,8 +36,12 @@ export type PinStatus =
   | "locked"
   | "collectible";
 
+/** `LocationGroup.type` — what kind of stop the brand says this is. */
+export type ArPinType = "EVENT" | "BOUNTY" | "EXPERIENCE" | "LAUNCH" | "OTHER" | "LANDMARK";
+
 export interface ArPin {
   id: string;
+  type: ArPinType;
   lat: number;
   lng: number;
   title: string;

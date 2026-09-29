@@ -32,7 +32,9 @@ const WadzzoAR: AppType = ({ Component, pageProps }) => {
 
   // The native app's Albedo bridge renders bare — it runs inside the app's
   // WebView, where a simulated phone frame and boot sequence make no sense.
-  if (router.pathname === "/albedo") {
+  // Website embeds (`/embed/[id]`) live inside other sites' iframes: no phone
+  // frame, no boot animation, no sign-in dialog — just the map.
+  if (router.pathname === "/albedo" || router.pathname.startsWith("/embed")) {
     return (
       <div className={fontVariables}>
         <Component {...pageProps} />

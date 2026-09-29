@@ -1,4 +1,4 @@
-import { ItemPrivacy, Prisma, type PrismaClient } from "@prisma/client";
+import { ItemPrivacy, PinType, Prisma, type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -184,6 +184,8 @@ const areaInput = z.object({
   lat: z.number().min(-90).max(90).optional(),
   lng: z.number().min(-180).max(180).optional(),
   radiusKm: z.number().positive().max(2000).optional(),
+  /** Only these pin types (website embeds); omitted or empty = all. */
+  types: z.array(z.nativeEnum(PinType)).max(6).optional(),
 });
 
 /**
@@ -265,6 +267,7 @@ function toPin(
 ): ArPin {
   return {
     id: location.id,
+    type: group.type,
     lat: location.latitude,
     lng: location.longitude,
     title: group.title,
@@ -542,6 +545,7 @@ export const pinsRouter = createTRPCRouter({
       const groups = await ctx.db.locationGroup.findMany({
         where: {
           ...liveGroupWhere(),
+          ...(input?.types?.length ? { type: { in: input.types } } : {}),
           locations: { some: locationWhere },
         },
         include: box
