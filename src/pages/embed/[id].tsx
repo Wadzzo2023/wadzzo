@@ -146,13 +146,20 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
     return () => clearTimeout(t);
   }, [notice]);
 
-  // Area query, rounded so a nudge of the map reuses the cached answer.
+  // Area query, rounded so a nudge of the map reuses the cached answer, with
+  // a 15% margin so pins just off-screen are already there when you pan.
+  // `pins.list` caps the radius at 2000 km; a view wider than that (a whole
+  // country) drops the area and asks for every live pin instead — `{}`.
+  const MAX_RADIUS_KM = 2000;
+  const radiusKm = viewport ? Math.ceil(viewport.radiusKm * 1.15) : 0;
   const area = viewport
-    ? {
-        lat: Math.round(viewport.center.lat * 1000) / 1000,
-        lng: Math.round(viewport.center.lng * 1000) / 1000,
-        radiusKm: Math.ceil(viewport.radiusKm * 1.15),
-      }
+    ? radiusKm > MAX_RADIUS_KM
+      ? {}
+      : {
+          lat: Math.round(viewport.center.lat * 1000) / 1000,
+          lng: Math.round(viewport.center.lng * 1000) / 1000,
+          radiusKm,
+        }
     : null;
   const pinsQuery = api.pins.list.useQuery(
     {
