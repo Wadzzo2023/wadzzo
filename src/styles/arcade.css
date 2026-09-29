@@ -1227,6 +1227,13 @@ body {
   animation: ar-conic 2.4s linear infinite;
 }
 
+/* The launcher's arc sits inside the key: cut the conic disc down to a 3px
+   ring along its edge (matches the mobile app's Skia stroke). */
+.ar-conic-ring-inner {
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Screen clip
    The device screen has rounded corners and holds composited content: the

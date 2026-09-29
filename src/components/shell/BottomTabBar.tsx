@@ -2,6 +2,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LayoutGrid, Map as MapIcon, Store, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
+
+import { CameraLauncher } from "~/components/camera/CameraLauncher";
 
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import { cn } from "~/lib/utils";
@@ -49,50 +52,60 @@ const RIGHT: Tab[] = [
  */
 export function BottomTabBar() {
   const { pathname } = useRouter();
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
   // QR is a mode of the same camera screen, reached from the AR tab.
   const arActive = isActive("/ar") || isActive("/scan");
   const { count: bountyAlerts } = useBountyAttention();
+  // The AR button opens the camera launcher (AR · QR · Murals), same as the
+  // mobile app, instead of going straight to /ar.
+  const [launcherOpen, setLauncherOpen] = useState(false);
 
   return (
-    <nav className="pointer-events-none absolute inset-x-0 bottom-0 z-40">
-      <div className="relative mx-auto w-full max-w-[420px]">
-        {/* ── AR launcher ─────────────────────────────────────────────── */}
-        <div className="pointer-events-auto absolute -top-[26px] left-1/2 z-10 -translate-x-1/2">
-          <Link
-            href="/ar"
-            aria-label="Open AR view"
-            aria-current={arActive ? "page" : undefined}
-            className="group relative block h-[62px] w-[62px]"
-          >
-            {/* Rotating energy ring */}
-            <span
-              aria-hidden
-              className={cn(
-                "ar-conic-ring absolute -inset-[3px] rounded-full transition-opacity duration-300",
-                arActive ? "opacity-100" : "opacity-70 group-hover:opacity-100",
-              )}
-            />
-            {/* Expanding sonar pulse — only while AR is the live tab */}
-            {arActive && (
-              <span
-                aria-hidden
-                className="animate-pulse-ring absolute inset-0 rounded-full border border-ar-green-hot"
-              />
-            )}
-            <span
-              className={cn(
-                "ar-key ar-key-launcher absolute inset-0 flex items-center justify-center rounded-full",
-                arActive && "ar-glow",
-              )}
+    <>
+      <nav className="pointer-events-none absolute inset-x-0 bottom-0 z-40">
+        <div className="relative mx-auto w-full max-w-[420px]">
+          {/* ── AR launcher ─────────────────────────────────────────────── */}
+          <div className="pointer-events-auto absolute -top-[26px] left-1/2 z-10 -translate-x-1/2">
+            <button
+              type="button"
+              onClick={() => setLauncherOpen(true)}
+              aria-label="Open camera"
+              aria-haspopup="dialog"
+              aria-current={arActive ? "page" : undefined}
+              className="group relative block h-[62px] w-[62px]"
             >
-              <ArGlyph active={arActive} />
-            </span>
-          </Link>
-        </div>
+              {/* Expanding sonar pulse — only while AR is the live tab */}
+              {arActive && (
+                <span
+                  aria-hidden
+                  className="animate-pulse-ring absolute inset-0 rounded-full border border-ar-green-hot"
+                />
+              )}
+              <span
+                className={cn(
+                  "ar-key ar-key-launcher absolute inset-0 flex items-center justify-center rounded-full",
+                  arActive && "ar-glow",
+                )}
+              >
+                {/* Spinning arc INSIDE the key, just within its border —
+                    same as the mobile app (it used to be a halo outside). */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "ar-conic-ring ar-conic-ring-inner pointer-events-none absolute inset-[1.5px] rounded-full transition-opacity duration-300",
+                    arActive
+                      ? "opacity-100"
+                      : "opacity-[0.85] group-hover:opacity-100",
+                  )}
+                />
+                <ArGlyph active={arActive} />
+              </span>
+            </button>
+          </div>
 
-        {/* ── The bar ─────────────────────────────────────────────────── */}
-        {/* One element, rounded on top. `.ar-tabbar-surface` carries no
+          {/* ── The bar ─────────────────────────────────────────────────── */}
+          {/* One element, rounded on top. `.ar-tabbar-surface` carries no
             `backdrop-filter` — see its doc comment in arcade.css for why, but
             in short: nothing scrolls behind this bar for a blur to act on, and
             WebKit refuses to clip a backdrop-filtered layer to a rounded
@@ -105,30 +118,39 @@ export function BottomTabBar() {
             inside stays a fixed 64px tall regardless, so icons and labels
             don't drift toward whatever the safe-area measures on a given
             phone. */}
-        <div
-          className="ar-tabbar-surface pointer-events-auto relative rounded-t-ar-xl"
-          style={{ paddingBottom: "max(12px, var(--ar-safe-bottom))" }}
-        >
-          <div className="flex h-[64px] items-stretch px-1.5">
-            {LEFT.map((tab) => (
-              <TabButton key={tab.href} tab={tab} active={isActive(tab.href)} />
-            ))}
+          <div
+            className="ar-tabbar-surface pointer-events-auto relative rounded-t-ar-xl"
+            style={{ paddingBottom: "max(12px, var(--ar-safe-bottom))" }}
+          >
+            <div className="flex h-[64px] items-stretch px-1.5">
+              {LEFT.map((tab) => (
+                <TabButton
+                  key={tab.href}
+                  tab={tab}
+                  active={isActive(tab.href)}
+                />
+              ))}
 
-            {/* Reserved footprint under the raised AR launcher. */}
-            <div aria-hidden className="w-[74px] shrink-0" />
+              {/* Reserved footprint under the raised AR launcher. */}
+              <div aria-hidden className="w-[74px] shrink-0" />
 
-            {RIGHT.map((tab) => (
-              <TabButton
-                key={tab.href}
-                tab={tab}
-                active={isActive(tab.href)}
-                dot={tab.href === "/bounty" && bountyAlerts > 0}
-              />
-            ))}
+              {RIGHT.map((tab) => (
+                <TabButton
+                  key={tab.href}
+                  tab={tab}
+                  active={isActive(tab.href)}
+                  dot={tab.href === "/bounty" && bountyAlerts > 0}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      <CameraLauncher
+        open={launcherOpen}
+        onClose={() => setLauncherOpen(false)}
+      />
+    </>
   );
 }
 
@@ -154,8 +176,13 @@ function TabButton({
         <motion.span
           layoutId="tab-plate"
           aria-hidden
-          className="absolute inset-x-1 inset-y-[7px] rounded-[13px] border border-ar-green/35 bg-ar-green/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_18px_-4px_hsl(var(--ar-green)/0.5)]"
-          transition={{ type: "spring", stiffness: 520, damping: 38, mass: 0.7 }}
+          className="bg-ar-green/12 absolute inset-x-1 inset-y-[7px] rounded-[13px] border border-ar-green/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_18px_-4px_hsl(var(--ar-green)/0.5)]"
+          transition={{
+            type: "spring",
+            stiffness: 520,
+            damping: 38,
+            mass: 0.7,
+          }}
         />
       )}
 
