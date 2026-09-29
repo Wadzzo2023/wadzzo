@@ -139,6 +139,14 @@ export const ROUTES: Route[] = [
     handler: ({ caller, query }) =>
       caller.pins.list({ lat: num(query.lat), lng: num(query.lng), radiusKm: num(query.radiusKm) }),
   },
+  // Before /pins/:id — both are two segments and the first match wins.
+  {
+    method: "GET",
+    path: "/pins/search",
+    auth: "optional",
+    handler: ({ caller, query }) =>
+      caller.pins.search({ q: query.q ?? "", lat: num(query.lat), lng: num(query.lng), limit: num(query.limit) }),
+  },
   { method: "GET", path: "/pins/:id", auth: "optional", handler: ({ caller, params }) => caller.pins.byId({ id: params.id! }) },
   {
     method: "POST",
@@ -249,6 +257,79 @@ export const ROUTES: Route[] = [
     path: "/bounties/:id/thread",
     auth: "required",
     handler: (c) => c.caller.bounty.sendMessage({ ...(c.body as object), bountyId: idParam(c, "id") } as never),
+  },
+
+  // ── Events & announcements ──────────────────────────────────────────────
+  {
+    method: "GET",
+    path: "/events",
+    auth: "optional",
+    handler: ({ caller, query }) =>
+      caller.events.list({
+        when: query.when === "past" ? "past" : "upcoming",
+        following: query.following === "true",
+        brandId: query.brandId ? query.brandId : undefined,
+        limit: num(query.limit) ?? 20,
+        cursor: query.cursor ? query.cursor : null,
+      }),
+  },
+  { method: "GET", path: "/events/:id", auth: "optional", handler: (c) => c.caller.events.byId({ id: c.params.id! }) },
+  {
+    method: "POST",
+    path: "/events/:id/rsvp",
+    auth: "required",
+    handler: (c) => c.caller.events.rsvp({ ...(c.body as object), id: c.params.id! } as never),
+  },
+  {
+    method: "GET",
+    path: "/events/:id/comments",
+    auth: "optional",
+    handler: (c) => c.caller.events.comments({ kind: "event", id: c.params.id! }),
+  },
+  {
+    method: "POST",
+    path: "/events/:id/comments",
+    auth: "required",
+    handler: (c) =>
+      c.caller.events.addComment({ ...(c.body as object), target: { kind: "event", id: c.params.id! } } as never),
+  },
+  {
+    method: "DELETE",
+    path: "/event-comments/:commentId",
+    auth: "required",
+    handler: (c) => c.caller.events.deleteComment({ kind: "event", commentId: c.params.commentId! }),
+  },
+  {
+    method: "GET",
+    path: "/announcements",
+    auth: "optional",
+    handler: ({ caller, query }) =>
+      caller.events.announcements({
+        following: query.following === "true",
+        brandId: query.brandId ? query.brandId : undefined,
+        limit: num(query.limit) ?? 20,
+        cursor: query.cursor ? query.cursor : null,
+      }),
+  },
+  { method: "GET", path: "/announcements/:id", auth: "optional", handler: (c) => c.caller.events.announcement({ id: c.params.id! }) },
+  {
+    method: "GET",
+    path: "/announcements/:id/comments",
+    auth: "optional",
+    handler: (c) => c.caller.events.comments({ kind: "announcement", id: c.params.id! }),
+  },
+  {
+    method: "POST",
+    path: "/announcements/:id/comments",
+    auth: "required",
+    handler: (c) =>
+      c.caller.events.addComment({ ...(c.body as object), target: { kind: "announcement", id: c.params.id! } } as never),
+  },
+  {
+    method: "DELETE",
+    path: "/announcement-comments/:commentId",
+    auth: "required",
+    handler: (c) => c.caller.events.deleteComment({ kind: "announcement", commentId: c.params.commentId! }),
   },
 
   // ── Uploads (profile images) ────────────────────────────────────────────

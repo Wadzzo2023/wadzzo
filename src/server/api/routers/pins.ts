@@ -36,7 +36,7 @@ import {
  */
 
 /** Fallbacks, matching the main webapp so a brand's art is identical in both. */
-const WADZZO_ICON = "https://app.wadzzo.com/images/loading.png";
+export const WADZZO_ICON = "https://app.wadzzo.com/images/loading.png";
 
 /**
  * `LocationGroup.limit` is an inventory ceiling, not a scarcity choice — the
@@ -457,6 +457,43 @@ async function writeClaim(
   });
 }
 
+/**
+ * Relevance of one drop to a search, highest first. Every term already
+ * matched somewhere (the database enforced that); this only decides *how
+ * well*: a hit at the start of the title beats one buried in a description.
+ */
+function searchScore(
+  group: { title: string; description: string | null; creator: { name: string | null } },
+  tags: string[],
+  terms: string[],
+  phrase: string,
+) {
+  const title = group.title.toLowerCase();
+  const brand = (group.creator.name ?? "").toLowerCase();
+  const desc = (group.description ?? "").toLowerCase();
+  const tagText = tags.map((t) => t.toLowerCase());
+  const wordStart = (hay: string, t: string) => new RegExp(`(^|[^\\p{L}\\p{N}])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(hay);
+
+  let score = 0;
+  if (title === phrase) score += 40;
+  else if (title.startsWith(phrase)) score += 25;
+  else if (title.includes(phrase)) score += 15;
+  if (brand === phrase) score += 20;
+
+  for (const t of terms) {
+    if (title.startsWith(t)) score += 10;
+    else if (wordStart(title, t)) score += 8;
+    else if (title.includes(t)) score += 5;
+    if (brand.startsWith(t)) score += 7;
+    else if (brand.includes(t)) score += 4;
+    if (tagText.some((x) => x === t)) score += 6;
+    else if (tagText.some((x) => x.includes(t))) score += 3;
+    if (wordStart(desc, t)) score += 2;
+    else if (desc.includes(t)) score += 1;
+  }
+  return score;
+}
+
 export const pinsRouter = createTRPCRouter({
   /**
    * Every drop the viewer may collect, flattened to one entry per physical
@@ -534,6 +571,79 @@ export const pinsRouter = createTRPCRouter({
    * `pinStatus` already reports those states. It does still require admin
    * approval — an unapproved drop is invisible everywhere.
    */
+  /**
+   * Search every live drop the viewer can see — not just the ones the map has
+   * loaded for the current area — so a drop across town (or across the world)
+   * can be found by name.
+   *
+   * Matches title, brand name, description and tags. Each word typed must
+   * match somewhere; results are ranked by relevance (see `searchScore`), not
+   * distance. One result per drop: its nearest point to `lat`/`lng` when
+   * given, otherwise its first point. Same visibility and lock rules as
+   * `list`.
+   */
+  search: publicProcedure
+    .input(
+      z.object({
+        q: z.string().trim().min(2).max(80),
+        lat: z.number().min(-90).max(90).optional(),
+        lng: z.number().min(-180).max(180).optional(),
+        limit: z.number().int().min(1).max(30).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }): Promise<ArPin[]> => {
+      const userId = ctx.session?.user.id ?? null;
+      const phrase = input.q.toLowerCase().replace(/\s+/g, " ");
+      const terms = [...new Set(phrase.split(" ").filter((t) => t.length > 0))].slice(0, 6);
+      const contains = (t: string) => ({ contains: t, mode: "insensitive" as const });
+
+      const groups = await ctx.db.locationGroup.findMany({
+        where: {
+          ...liveGroupWhere(),
+          locations: { some: { hidden: false } },
+          AND: terms.map((t) => ({
+            OR: [
+              { title: contains(t) },
+              { description: contains(t) },
+              { creator: { name: contains(t) } },
+              { locationGroupTags: { some: { tag: { label: contains(t) } } } },
+            ],
+          })),
+        },
+        include: groupWithLocationsInclude,
+        // A generous candidate pool; relevance is decided below.
+        orderBy: { createdAt: "desc" },
+        take: 150,
+      });
+
+      const ranked = groups
+        .map((g) => ({ g, score: searchScore(g, groupFacts(g).tags, terms, phrase) }))
+        .sort((a, b) => b.score - a.score || a.g.title.localeCompare(b.g.title))
+        .slice(0, input.limit);
+      if (ranked.length === 0) return [];
+
+      // Only pay the Horizon balance read when a tier drop is actually in view.
+      const needsAccount = userId != null && ranked.some(({ g }) => g.privacy === ItemPrivacy.TIER);
+      const [followedCreatorIds, account] = await Promise.all([
+        userId
+          ? ctx.db.follow
+              .findMany({ where: { userId }, select: { creatorId: true } })
+              .then((rows) => new Set(rows.map((r) => r.creatorId)))
+          : Promise.resolve(new Set<string>()),
+        needsAccount ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+      ]);
+
+      const from = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null;
+      return ranked.flatMap(({ g }) => {
+        const pins = pinsOfGroup(g, userId, lockReasonFor(g, followedCreatorIds, account, userId != null));
+        if (pins.length === 0) return [];
+        const best = from
+          ? pins.reduce((a, b) => (distanceMeters(from, b) < distanceMeters(from, a) ? b : a))
+          : pins[0]!;
+        return [best];
+      });
+    }),
+
   byId: publicProcedure
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }): Promise<ArPin> => {

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
+import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { MapControls } from "~/components/map/MapControls";
 import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { PinSheet } from "~/components/map/PinSheet";
@@ -181,9 +182,16 @@ export default function MapScreen() {
     [visible, fix],
   );
 
+  // A drop picked from search may not be in the loaded list yet (or at all,
+  // under the viewer's Following-only preference) — its sheet falls back to
+  // the search result.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchPin, setSearchPin] = useState<ArPin | null>(null);
   const selected = useMemo(
-    () => pins.find((p) => p.id === selectedId) ?? null,
-    [pins, selectedId],
+    () =>
+      pins.find((p) => p.id === selectedId) ??
+      (searchPin?.id === selectedId ? searchPin : null),
+    [pins, selectedId, searchPin],
   );
 
   // ── Proximity feedback ─────────────────────────────────────────────────
@@ -362,6 +370,11 @@ export default function MapScreen() {
             onExplain={setToast}
           />
 
+          <MapSearchButton
+            onClick={() => setSearchOpen(true)}
+            className="pointer-events-auto"
+          />
+
           <FilterMenu
             filters={filters}
             value={filter}
@@ -375,7 +388,7 @@ export default function MapScreen() {
             <ArIconButton
               icon={CalendarDays}
               label="Events"
-              onClick={() => setToast("Events are coming soon")}
+              onClick={() => void router.push("/events")}
               className="pointer-events-auto absolute right-0 top-[calc(100%+8px)] h-9 w-9"
             />
           </div>
@@ -447,6 +460,30 @@ export default function MapScreen() {
           )}
         </AnimatePresence>
       </div>
+
+      <MapSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        fix={fix}
+        onPickPin={(pin) => {
+          // A match the current filter hides would open a sheet with no marker.
+          if (
+            filterPins([pin], filter, followedIds).length === 0 &&
+            !settings.followingOnly
+          ) {
+            setFilter("all");
+          }
+          setSearchPin(pin);
+          setSelectedId(pin.id);
+          setFollowing(false);
+          mapRef.current?.flyToPin(pin);
+        }}
+        onPickPlace={(coords) => {
+          setSelectedId(null);
+          setFollowing(false);
+          mapRef.current?.recenter(coords, { zoom: 15.5 });
+        }}
+      />
 
       <PinSheet
         pin={selected}

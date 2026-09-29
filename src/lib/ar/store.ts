@@ -80,7 +80,8 @@ export type GateIntent =
   | "settings"
   | "redeem"
   | "ar"
-  | "bounty";
+  | "bounty"
+  | "events";
 
 export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   collect: {
@@ -106,6 +107,10 @@ export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   bounty: {
     title: "Sign in to take part",
     body: "Joining a bounty, sending an entry and talking to the brand all happen from your wallet — it's also where any reward lands.",
+  },
+  events: {
+    title: "Sign in to join in",
+    body: "RSVPs and comments are saved to your account, so the brand knows who's coming.",
   },
   ar: {
     title: "Sign in to capture",
