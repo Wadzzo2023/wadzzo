@@ -57,3 +57,4 @@ package-lock.json
 .claude
 # macOS metadata files (the Data drive is exFAT)
 ._*
+.playwright-mcp/
