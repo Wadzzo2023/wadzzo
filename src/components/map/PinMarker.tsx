@@ -13,11 +13,12 @@ import { cn } from "~/lib/utils";
  * standing on a ground shadow so it reads as an object placed on the map
  * rather than a dot drawn onto it.
  *
- * Four states are legible at a glance without tapping anything:
- *   in range + claimable  full colour, sonar ring, floating
- *   out of range          same medallion, dimmed and grounded
- *   collected             desaturated with a gold tick
- *   locked / dead         flattened, padlock or no ring at all
+ * States read at a glance, with the same opacities as the brand portal:
+ *   available             100%  (sonar ring + floating when in range)
+ *   collected by you       80%  gold tick
+ *   locked (tier)          60%  padlock
+ *   expired / all claimed  40%  desaturated, no glow
+ * Shape says how it's collected: round = tap to collect, square = auto-collect.
  *
  * `inRange` is passed in rather than computed here because the map already
  * knows the distance to every pin and recomputing per marker per frame would
@@ -40,8 +41,12 @@ export function PinMarker({
   const meta = RARITY_META[rarity];
 
   const live = status === "collectible";
-  const dead = status === "expired" || status === "depleted";
+  const dead = status === "expired" || status === "depleted" || (pin.endsAt != null && new Date(pin.endsAt).getTime() < Date.now());
   const ring = dead ? "var(--ar-locked)" : meta.hsl;
+  // First match wins: expired beats collected, so an old pin you collected still reads as over.
+  const opacity = dead ? "opacity-40" : status === "locked" ? "opacity-60" : status === "collected" ? "opacity-80" : "opacity-100";
+  const outer = pin.autoCollect ? "rounded-[10px]" : "rounded-full";
+  const inner = pin.autoCollect ? "rounded-[6px]" : "rounded-full";
 
   return (
     <button
@@ -77,12 +82,12 @@ export function PinMarker({
           <>
             <span
               aria-hidden
-              className="animate-pulse-ring absolute inset-0 rounded-[14px] border-2"
+              className={cn("animate-pulse-ring absolute inset-0 border-2", outer)}
               style={{ borderColor: `hsl(${meta.hsl})` }}
             />
             <span
               aria-hidden
-              className="animate-pulse-ring absolute inset-0 rounded-[14px] border"
+              className={cn("animate-pulse-ring absolute inset-0 border", outer)}
               style={{ borderColor: `hsl(${meta.hsl})`, animationDelay: "1.1s" }}
             />
           </>
@@ -93,9 +98,10 @@ export function PinMarker({
           animate={{ scale: selected ? 1.22 : 1 }}
           transition={{ type: "spring", stiffness: 480, damping: 24 }}
           className={cn(
-            "relative flex h-[42px] w-[42px] items-center justify-center rounded-[14px] border-2 transition-opacity",
-            !live && "opacity-75",
-            dead && "opacity-45 saturate-0",
+            "relative flex h-[42px] w-[42px] items-center justify-center border-2 transition-opacity",
+            outer,
+            opacity,
+            dead && "saturate-0",
           )}
           style={{
             borderColor: `hsl(${ring})`,
@@ -122,8 +128,8 @@ export function PinMarker({
               onError={() => setFailed(true)}
               loading="lazy"
               className={cn(
-                "h-[30px] w-[30px] rounded-[9px] object-cover",
-                status === "collected" && "opacity-45 saturate-0",
+                "h-[30px] w-[30px] object-cover",
+                inner,
               )}
             />
           )}
