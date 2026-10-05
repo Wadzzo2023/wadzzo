@@ -32,6 +32,12 @@ const config = {
       // The browser build of transformers never touches these; keep webpack
       // from trying to resolve their native bits for the client bundle.
       config.resolve.alias = { ...config.resolve.alias, sharp$: false, "onnxruntime-node$": false };
+      // onnxruntime-web has `new URL("./ort.webgpu.bundle.min.mjs", import.meta.url)`,
+      // so webpack copies that ESM file into static/media as a plain asset and
+      // the minifier then fails on its `import.meta` (production builds only).
+      // The copy is never used: transformers.js points ONNX at the jsDelivr
+      // CDN for its .mjs/.wasm at runtime. So don't turn those URLs into assets.
+      config.module.rules.push({ test: /[\\/]onnxruntime-web[\\/]/, parser: { url: false } });
     }
     return config;
   },
