@@ -34,7 +34,7 @@ import type { Rarity } from "./types";
 let ctx: AudioContext | null = null;
 
 /** The shared AudioContext, created on first real use. Null if unsupported. */
-function audioContext(): AudioContext | null {
+export function audioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
   try {
     // Older iOS Safari only exposes the prefixed constructor.

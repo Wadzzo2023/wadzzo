@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import MapGL, { Marker, type MapRef } from "react-map-gl";
 import Supercluster from "supercluster";
 
+import { MuralMarker, type MapMural } from "~/components/map/MuralMarker";
 import { PinMarker } from "~/components/map/PinMarker";
 import { distanceMeters } from "~/lib/ar/geo";
 import { MAP_STYLE, useResolvedTheme } from "~/lib/ar/theme";
@@ -24,6 +25,9 @@ export interface Viewport {
 
 type Bounds = [number, number, number, number];
 
+/** Below this a street of murals is a smear of frames; pins carry the view. */
+const MURAL_MIN_ZOOM = 12;
+
 /**
  * ── EmbedMap ───────────────────────────────────────────────────────────────
  *
@@ -44,8 +48,12 @@ export const EmbedMap = forwardRef<
     onSelect: (id: string | null) => void;
     onViewport: (v: Viewport) => void;
     me: Coords | null;
+    /** Approved murals; drawn only once zoomed in far enough to read them. */
+    murals?: MapMural[];
+    selectedMuralId?: string | null;
+    onSelectMural?: (id: string) => void;
   }
->(function EmbedMap({ pins, initial, cooperative, selectedId, onSelect, onViewport, me }, ref) {
+>(function EmbedMap({ pins, initial, cooperative, selectedId, onSelect, onViewport, me, murals, selectedMuralId, onSelectMural }, ref) {
   const mapRef = useRef<MapRef | null>(null);
   const theme = useResolvedTheme();
   const [view, setView] = useState<{ bounds: Bounds; zoom: number } | null>(null);
@@ -158,6 +166,13 @@ export const EmbedMap = forwardRef<
         })}
 
         {selectedInCluster && selectedPin && <PinAt pin={selectedPin} selected onSelect={onSelect} />}
+
+        {(view?.zoom ?? initial.zoom) >= MURAL_MIN_ZOOM &&
+          murals?.map((m) => (
+            <Marker key={`mural-${m.id}`} longitude={m.longitude} latitude={m.latitude} anchor="bottom" style={{ zIndex: m.id === selectedMuralId ? 20 : 9 }}>
+              <MuralMarker mural={m} dailyLimit={Infinity} selected={m.id === selectedMuralId} onSelect={() => onSelectMural?.(m.id)} />
+            </Marker>
+          ))}
 
         {me && (
           <Marker longitude={me.lng} latitude={me.lat} anchor="center" style={{ zIndex: 30, pointerEvents: "none" }}>

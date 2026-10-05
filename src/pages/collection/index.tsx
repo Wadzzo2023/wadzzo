@@ -1,8 +1,10 @@
-import { ArrowUpDown, Search, Sparkles, X } from "lucide-react";
+import { ArrowUpDown, Frame, Search, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { HoloCard } from "~/components/cards/HoloCard";
+import { MuralCollection } from "~/components/murals/MuralCollection";
+import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { CardSkeleton, StatRowSkeleton } from "~/components/ui/Skeleton";
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
@@ -18,6 +20,7 @@ import { cn } from "~/lib/utils";
 const PAGE_SIZE = 24;
 
 type Sort = "newest" | "rarest" | "brand";
+type CollectionTab = "drops" | "murals";
 
 const SORTS: { id: Sort; label: string }[] = [
   { id: "newest", label: "Newest" },
@@ -42,6 +45,14 @@ const SORTS: { id: Sort; label: string }[] = [
 export default function CollectionScreen() {
   const router = useRouter();
   const signedIn = useAuth((s) => Boolean(s.user));
+  // Drops | Murals — in the URL so the camera's coin pill and back-navigation land on the right one.
+  const tab: CollectionTab = router.query.tab === "murals" ? "murals" : "drops";
+  const setTab = (t: CollectionTab) =>
+    void router.replace(
+      { pathname: router.pathname, query: t === "murals" ? { tab: t } : {} },
+      undefined,
+      { shallow: true },
+    );
   const [query, setQuery] = useState("");
   const [rarity, setRarity] = useState<Rarity | "all">("all");
   const [sort, setSort] = useState<Sort>("newest");
@@ -84,165 +95,186 @@ export default function CollectionScreen() {
           eyebrow="Your collection"
           title="Collection"
           trailing={
-            <button
-              onClick={() =>
-                setSort(
-                  (s) =>
-                    SORTS[
-                      (SORTS.findIndex((x) => x.id === s) + 1) % SORTS.length
-                    ]!.id,
-                )
-              }
-              className="ar-glass flex h-9 items-center gap-1.5 rounded-full px-3 text-ar-dim"
-            >
-              <ArrowUpDown size={13} strokeWidth={2.4} />
-              <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.12em]">
-                {SORTS.find((s) => s.id === sort)?.label}
-              </span>
-            </button>
+            tab === "drops" && (
+              <button
+                onClick={() =>
+                  setSort(
+                    (s) =>
+                      SORTS[
+                        (SORTS.findIndex((x) => x.id === s) + 1) % SORTS.length
+                      ]!.id,
+                  )
+                }
+                className="ar-glass flex h-9 items-center gap-1.5 rounded-full px-3 text-ar-dim"
+              >
+                <ArrowUpDown size={13} strokeWidth={2.4} />
+                <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.12em]">
+                  {SORTS.find((s) => s.id === sort)?.label}
+                </span>
+              </button>
+            )
           }
         />
 
-        {/* ── Stats ────────────────────────────────────────────────── */}
-        {loading ? (
-          <div className="mx-5">
-            <StatRowSkeleton count={3} />
-          </div>
+        <SegmentedTabs
+          tabs={[
+            { id: "drops", label: "Drops", icon: Sparkles },
+            { id: "murals", label: "Murals", icon: Frame },
+          ]}
+          value={tab}
+          onChange={setTab}
+          layoutId="collection-tab"
+          className="mx-5 mb-3"
+        />
+
+        {tab === "murals" ? (
+          <MuralCollection signedIn={signedIn} />
         ) : (
-          <div className="mx-5 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
-            <StatBlock label="Collectibles" value={stats.total} accent />
-            <span className="h-8 w-px bg-ar-line" />
-            <StatBlock label="Brands" value={stats.brands} />
-            <span className="h-8 w-px bg-ar-line" />
-            <StatBlock
-              label="Best find"
-              value={
-                stats.total > 0 ? (
-                  <span
-                    style={{ color: `hsl(${RARITY_META[stats.best].hsl})` }}
-                  >
-                    {RARITY_META[stats.best].short}
-                  </span>
-                ) : (
-                  "—"
-                )
-              }
-            />
-          </div>
-        )}
-
-        {/* ── Search ───────────────────────────────────────────────── */}
-        <div className="mx-5 mt-3">
-          <div className="ar-bevel flex h-11 items-center gap-2.5 rounded-ar px-3.5">
-            <Search
-              size={15}
-              strokeWidth={2.2}
-              className="shrink-0 text-ar-faint"
-            />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search your collectibles"
-              aria-label="Search your collection"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
-            />
-            {query && (
-              <button
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                className="shrink-0 text-ar-faint hover:text-ar-text"
-              >
-                <X size={15} strokeWidth={2.4} />
-              </button>
+          <>
+            {/* ── Stats ────────────────────────────────────────────────── */}
+            {loading ? (
+              <div className="mx-5">
+                <StatRowSkeleton count={3} />
+              </div>
+            ) : (
+              <div className="mx-5 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
+                <StatBlock label="Collectibles" value={stats.total} accent />
+                <span className="h-8 w-px bg-ar-line" />
+                <StatBlock label="Brands" value={stats.brands} />
+                <span className="h-8 w-px bg-ar-line" />
+                <StatBlock
+                  label="Best find"
+                  value={
+                    stats.total > 0 ? (
+                      <span
+                        style={{ color: `hsl(${RARITY_META[stats.best].hsl})` }}
+                      >
+                        {RARITY_META[stats.best].short}
+                      </span>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+              </div>
             )}
-          </div>
-        </div>
 
-        {/* ── Rarity filter ────────────────────────────────────────── */}
-        <div
-          ref={rarityRailRef}
-          className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1"
-        >
-          <Chip active={rarity === "all"} onClick={() => setRarity("all")}>
-            All {stats.total > 0 && `· ${stats.total}`}
-          </Chip>
-          {RARITY_ORDER.map((r) => {
-            const n = facets?.counts[r] ?? 0;
-            return (
-              <Chip
-                key={r}
-                active={rarity === r}
-                onClick={() => setRarity(r)}
-                className={cn(n === 0 && "opacity-40")}
-              >
-                <span style={{ color: `hsl(${RARITY_META[r].hsl})` }}>
-                  {RARITY_META[r].short}
-                </span>
-                {RARITY_META[r].label} {n > 0 && `· ${n}`}
+            {/* ── Search ───────────────────────────────────────────────── */}
+            <div className="mx-5 mt-3">
+              <div className="ar-bevel flex h-11 items-center gap-2.5 rounded-ar px-3.5">
+                <Search
+                  size={15}
+                  strokeWidth={2.2}
+                  className="shrink-0 text-ar-faint"
+                />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search your collectibles"
+                  aria-label="Search your collection"
+                  className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
+                />
+                {query && (
+                  <button
+                    onClick={() => setQuery("")}
+                    aria-label="Clear search"
+                    className="shrink-0 text-ar-faint hover:text-ar-text"
+                  >
+                    <X size={15} strokeWidth={2.4} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* ── Rarity filter ────────────────────────────────────────── */}
+            <div
+              ref={rarityRailRef}
+              className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1"
+            >
+              <Chip active={rarity === "all"} onClick={() => setRarity("all")}>
+                All {stats.total > 0 && `· ${stats.total}`}
               </Chip>
-            );
-          })}
-        </div>
+              {RARITY_ORDER.map((r) => {
+                const n = facets?.counts[r] ?? 0;
+                return (
+                  <Chip
+                    key={r}
+                    active={rarity === r}
+                    onClick={() => setRarity(r)}
+                    className={cn(n === 0 && "opacity-40")}
+                  >
+                    <span style={{ color: `hsl(${RARITY_META[r].hsl})` }}>
+                      {RARITY_META[r].short}
+                    </span>
+                    {RARITY_META[r].label} {n > 0 && `· ${n}`}
+                  </Chip>
+                );
+              })}
+            </div>
 
-        {/* ── Grid ─────────────────────────────────────────────────── */}
-        <div className="ar-scroll mt-4 flex-1 px-5 pb-6">
-          {/* Four placeholder foils — enough to fill the fold, so the grid
+            {/* ── Grid ─────────────────────────────────────────────────── */}
+            <div className="ar-scroll mt-4 flex-1 px-5 pb-6">
+              {/* Four placeholder foils — enough to fill the fold, so the grid
               doesn't flash the "nothing collected yet" copy at someone who
               does in fact have cards. */}
-          {loading ? (
-            <div className="grid grid-cols-2 gap-3.5">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <CardSkeleton key={i} />
-              ))}
-            </div>
-          ) : shown.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 gap-3.5">
-                {shown.map((pin, i) => (
-                  <HoloCard
-                    key={pin.id}
-                    pin={pin}
-                    oneFace
-                    className="tcg-card--windowed"
-                    priority={i < 4}
-                    onClick={() => void router.push(`/collection/${pin.id}`)}
-                  />
-                ))}
-
-                {/* The next page lands below the fold, so its placeholders go
-                    in the same grid — the cards already on screen stay put. */}
-                {collection.isFetchingNextPage &&
-                  Array.from({ length: Math.min(remaining, PAGE_SIZE) }).map(
-                    (_, i) => <CardSkeleton key={`next-${i}`} />,
-                  )}
-              </div>
-
-              {remaining > 0 && !collection.isFetchingNextPage && (
-                <div className="mt-5 flex justify-center">
-                  <ArButton
-                    variant="outline"
-                    size="md"
-                    onClick={() => void collection.fetchNextPage()}
-                  >
-                    Show {Math.min(remaining, PAGE_SIZE)} more
-                    <span className="ml-1 text-ar-faint">
-                      &middot; {remaining} left
-                    </span>
-                  </ArButton>
+              {loading ? (
+                <div className="grid grid-cols-2 gap-3.5">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <CardSkeleton key={i} />
+                  ))}
                 </div>
+              ) : shown.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    {shown.map((pin, i) => (
+                      <HoloCard
+                        key={pin.id}
+                        pin={pin}
+                        oneFace
+                        className="tcg-card--windowed"
+                        priority={i < 4}
+                        onClick={() =>
+                          void router.push(`/collection/${pin.id}`)
+                        }
+                      />
+                    ))}
+
+                    {/* The next page lands below the fold, so its placeholders go
+                    in the same grid — the cards already on screen stay put. */}
+                    {collection.isFetchingNextPage &&
+                      Array.from({
+                        length: Math.min(remaining, PAGE_SIZE),
+                      }).map((_, i) => <CardSkeleton key={`next-${i}`} />)}
+                  </div>
+
+                  {remaining > 0 && !collection.isFetchingNextPage && (
+                    <div className="mt-5 flex justify-center">
+                      <ArButton
+                        variant="outline"
+                        size="md"
+                        onClick={() => void collection.fetchNextPage()}
+                      >
+                        Show {Math.min(remaining, PAGE_SIZE)} more
+                        <span className="ml-1 text-ar-faint">
+                          &middot; {remaining} left
+                        </span>
+                      </ArButton>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <EmptyState
+                  signedIn={signedIn}
+                  filtered={stats.total > 0}
+                  onClear={() => {
+                    setQuery("");
+                    setRarity("all");
+                  }}
+                />
               )}
-            </>
-          ) : (
-            <EmptyState
-              signedIn={signedIn}
-              filtered={stats.total > 0}
-              onClear={() => {
-                setQuery("");
-                setRarity("all");
-              }}
-            />
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </AppShell>
   );

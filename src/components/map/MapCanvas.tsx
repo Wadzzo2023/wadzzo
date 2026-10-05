@@ -9,6 +9,7 @@ import {
   useResolvedTheme,
 } from "~/lib/ar/theme";
 import { cn } from "~/lib/utils";
+import { MuralMarker, type MapMural } from "./MuralMarker";
 import { PinMarker } from "./PinMarker";
 import { metersPerPixel, UserPuck } from "./UserPuck";
 
@@ -34,6 +35,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
 export interface MapCanvasHandle {
   recenter: (coords: Coords, opts?: { zoom?: number }) => void;
   flyToPin: (pin: ArPin) => void;
+  flyToMural: (mural: MapMural) => void;
   /** Turn the map back to north — used when compass mode is switched off. */
   resetBearing: () => void;
 }
@@ -52,10 +54,31 @@ interface Props {
    * leaves the map's bearing exactly as the viewer left it.
    */
   headingUp: number | null;
+  /** Murals layer (plan §7). Omitted = no murals drawn. */
+  murals?: MapMural[];
+  muralDailyLimit?: number;
+  selectedMuralId?: string | null;
+  onSelectMural?: (id: string) => void;
+  /** The visible area, on load and after every pan/zoom settles. */
+  onBoundsChange?: (b: { north: number; south: number; east: number; west: number }) => void;
 }
 
 export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
-  { pins, fix, center, selectedId, onSelect, following, onUserPan, headingUp },
+  {
+    pins,
+    fix,
+    center,
+    selectedId,
+    onSelect,
+    following,
+    onUserPan,
+    headingUp,
+    murals,
+    muralDailyLimit = 3,
+    selectedMuralId,
+    onSelectMural,
+    onBoundsChange,
+  },
   ref,
 ) {
   const mapRef = useRef<MapRef | null>(null);
@@ -75,9 +98,9 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     });
   }, []);
 
-  const flyToPin = useCallback((pin: ArPin) => {
+  const flyTo = useCallback((lat: number, lng: number) => {
     mapRef.current?.easeTo({
-      center: [pin.lng, pin.lat],
+      center: [lng, lat],
       zoom: 17.6,
       // Nudge the target above centre so the detail sheet doesn't cover it.
       offset: [0, -110],
@@ -85,6 +108,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
       essential: true,
     });
   }, []);
+  const flyToPin = useCallback((pin: ArPin) => flyTo(pin.lat, pin.lng), [flyTo]);
+  const flyToMural = useCallback((m: MapMural) => flyTo(m.latitude, m.longitude), [flyTo]);
 
   const resetBearing = useCallback(() => {
     lastBearing.current = null;
@@ -92,9 +117,9 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   }, []);
 
   useEffect(() => {
-    if (typeof ref === "function") ref({ recenter, flyToPin, resetBearing });
-    else if (ref) ref.current = { recenter, flyToPin, resetBearing };
-  }, [ref, recenter, flyToPin, resetBearing]);
+    if (typeof ref === "function") ref({ recenter, flyToPin, flyToMural, resetBearing });
+    else if (ref) ref.current = { recenter, flyToPin, flyToMural, resetBearing };
+  }, [ref, recenter, flyToPin, flyToMural, resetBearing]);
 
   // Follow the fix while the viewer hasn't taken the wheel.
   useEffect(() => {
@@ -136,6 +161,10 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   }, [headingUp, ready]);
 
   const onMove = (e: ViewStateChangeEvent) => setZoom(e.viewState.zoom);
+  const reportBounds = () => {
+    const b = mapRef.current?.getBounds();
+    if (b && onBoundsChange) onBoundsChange({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+  };
 
   if (!MAPBOX_TOKEN) {
     return <MapFallback pins={pins} onSelect={onSelect} selectedId={selectedId} />;
@@ -157,8 +186,12 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         }}
         mapStyle={MAP_STYLE[theme]}
         attributionControl={false}
-        onLoad={() => setReady(true)}
+        onLoad={() => {
+          setReady(true);
+          reportBounds();
+        }}
         onMove={onMove}
+        onMoveEnd={reportBounds}
         onDragStart={onUserPan}
         onClick={() => onSelect(null)}
         // A pitched map with 3D extrusions is what makes a city read as a
@@ -169,6 +202,23 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         reuseMaps
         style={{ width: "100%", height: "100%" }}
       >
+        {murals?.map((m) => (
+          <Marker
+            key={`mural-${m.id}`}
+            longitude={m.longitude}
+            latitude={m.latitude}
+            anchor="bottom"
+            style={{ zIndex: m.id === selectedMuralId ? 20 : 9 }}
+          >
+            <MuralMarker
+              mural={m}
+              dailyLimit={muralDailyLimit}
+              selected={m.id === selectedMuralId}
+              onSelect={() => onSelectMural?.(m.id)}
+            />
+          </Marker>
+        ))}
+
         {pins.map((pin) => (
           <Marker
             key={pin.id}

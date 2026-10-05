@@ -1,4 +1,5 @@
 import {
+  ChevronRight,
   Coins,
   Footprints,
   LogOut,
@@ -12,10 +13,12 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HoloCard } from "~/components/cards/HoloCard";
+import { MuralPackSettings } from "~/components/murals/MuralPackSettings";
 import { Skeleton } from "~/components/ui/Skeleton";
 import {
   AppShell,
@@ -109,6 +112,11 @@ export default function ProfileScreen() {
     staleTime: 30_000,
   });
 
+  const coins = api.coins.balance.useQuery(undefined, {
+    enabled: Boolean(user),
+    staleTime: 30_000,
+  });
+
   const collected = useMemo(
     () => (user ? pins.filter((p) => p.collected) : []),
     [pins, user],
@@ -192,6 +200,23 @@ export default function ProfileScreen() {
             </div>
           </div>
         </div>
+
+        {/* ── Wadzzo Coins (off-chain, from murals) ───────────────────
+            Its own gold row, apart from the on-chain balance above, so the
+            two never read as the same number. */}
+        <Link
+          href="/coins"
+          className="mx-5 mt-3 flex items-center gap-3 rounded-ar border border-gold/35 bg-gold/10 px-4 py-2.5 transition-colors hover:bg-gold/15"
+        >
+          <Coins size={16} strokeWidth={2.4} className="text-gold" />
+          <span className="font-hud flex-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-dim">
+            Wadzzo Coins
+          </span>
+          <span className="font-hud text-[16px] font-bold tabular-nums text-gold">
+            {(coins.data?.balance ?? 0).toLocaleString()}
+          </span>
+          <ChevronRight size={15} strokeWidth={2.4} className="text-ar-faint" />
+        </Link>
 
         {/* ── Totals ───────────────────────────────────────────────── */}
         <div className="mx-5 mt-3 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
@@ -392,6 +417,14 @@ export default function ProfileScreen() {
 
             {SHOW_FEEDBACK_TEST && <FeedbackTest />}
           </div>
+        </section>
+
+        {/* ── Mural pack ───────────────────────────────────────────── */}
+        <section className="mx-5 mt-4">
+          <p className="font-hud mb-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-ar-faint">
+            Downloads
+          </p>
+          <MuralPackSettings />
         </section>
 
         <div className="px-5 pb-8 pt-4">

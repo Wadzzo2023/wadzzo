@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { QrCode, ScanLine } from "lucide-react";
+import { Frame, QrCode, ScanLine } from "lucide-react";
 import { useRouter } from "next/router";
 
 import { cn } from "~/lib/utils";
@@ -7,15 +7,24 @@ import { cn } from "~/lib/utils";
 const MODES = [
   { id: "ar", href: "/ar", label: "AR", icon: ScanLine },
   { id: "qr", href: "/scan", label: "QR", icon: QrCode },
+  { id: "murals", href: "/murals", label: "ART", icon: Frame },
 ] as const;
+
+/** Murals wear the launcher tile's epic purple; the other two stay green. */
+const ACTIVE = {
+  ar: { pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]", icon: "text-ar-green-hot" },
+  qr: { pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]", icon: "text-ar-green-hot" },
+  murals: { pill: "border-rarity-epic/60 bg-rarity-epic/25 shadow-[0_0_14px_-4px_hsl(var(--rarity-epic)/0.8)]", icon: "text-rarity-epic" },
+} as const;
 
 export type CameraMode = (typeof MODES)[number]["id"];
 
 /**
  * ── CameraModeSwitch ───────────────────────────────────────────────────────
  *
- * The one camera behind the AR tab, two ways to use it: look around for
- * drops (AR) or point at a printed code (QR). They stay separate routes —
+ * The one camera behind the AR tab, three ways to use it: look around for
+ * drops (AR), point at a printed code (QR), or scan street art (Murals —
+ * labelled "ART" so three pills fit). They stay separate routes —
  * `/scan?pin=<id>` is what every printed code already encodes — and this
  * switch just moves between them.
  *
@@ -60,7 +69,7 @@ export function CameraModeSwitch({
             {active && (
               <motion.span
                 layoutId="camera-mode"
-                className="absolute inset-0 rounded-full border border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]"
+                className={cn("absolute inset-0 rounded-full border", ACTIVE[m.id].pill)}
                 transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.7 }}
               />
             )}
@@ -69,7 +78,7 @@ export function CameraModeSwitch({
               strokeWidth={2.5}
               className={cn(
                 "relative z-10",
-                active ? "text-ar-green-hot" : "text-ar-faint",
+                active ? ACTIVE[m.id].icon : "text-ar-faint",
               )}
             />
             <span

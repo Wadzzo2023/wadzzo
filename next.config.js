@@ -11,6 +11,45 @@ const withBundleAnalyzer = analyzer({
 /** @type {import("next").NextConfig} */
 const config = {
   transpilePackages: ["three"],
+
+  /**
+   * Murals: server-side MobileCLIP (src/server/murals/clip.ts). Native
+   * binaries can't go through webpack, so these load from node_modules at
+   * runtime; and only the Linux x64 onnxruntime build ships to Vercel
+   * (~45 MB instead of ~290 MB for every platform).
+   */
+  webpack(config, { isServer }) {
+    if (isServer) {
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
+        {
+          "@huggingface/transformers": "commonjs @huggingface/transformers",
+          "onnxruntime-node": "commonjs onnxruntime-node",
+          sharp: "commonjs sharp",
+        },
+      ];
+    } else {
+      // The browser build of transformers never touches these; keep webpack
+      // from trying to resolve their native bits for the client bundle.
+      config.resolve.alias = { ...config.resolve.alias, sharp$: false, "onnxruntime-node$": false };
+    }
+    return config;
+  },
+  experimental: {
+    // onnxruntime loads its .so by a computed path the tracer can't follow.
+    outputFileTracingIncludes: {
+      "/api/trpc/[trpc]": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
+      "/api/mobile/**": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
+    },
+    outputFileTracingExcludes: {
+      "*": [
+        "node_modules/**/onnxruntime-node/bin/napi-v6/darwin/**",
+        "node_modules/**/onnxruntime-node/bin/napi-v6/win32/**",
+        "node_modules/**/onnxruntime-node/bin/napi-v6/linux/arm64/**",
+        "node_modules/**/onnxruntime-web/**",
+      ],
+    },
+  },
   reactStrictMode: true,
   images: {
     remotePatterns: [

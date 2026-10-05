@@ -332,6 +332,62 @@ export const ROUTES: Route[] = [
     handler: (c) => c.caller.events.deleteComment({ kind: "announcement", commentId: c.params.commentId! }),
   },
 
+  // ── Murals + coins (docs/murals/plan.md §5.1) ──────────────────────────
+  // Bodies are validated by the tRPC procedures themselves.
+  {
+    method: "GET",
+    path: "/murals",
+    auth: "optional",
+    handler: ({ caller, query }) =>
+      caller.murals.inArea({
+        north: num(query.n)!,
+        south: num(query.s)!,
+        east: num(query.e)!,
+        west: num(query.w)!,
+        includeUnverified: query.unverified !== "false",
+      }),
+  },
+  // Before /murals/:id — both are two segments and the first match wins.
+  {
+    method: "GET",
+    path: "/murals/nearby",
+    auth: "optional",
+    handler: ({ caller, query }) => caller.murals.nearby({ lat: num(query.lat)!, lng: num(query.lng)! }),
+  },
+  {
+    method: "POST",
+    path: "/murals/scans",
+    auth: "required",
+    handler: ({ caller, body }) => caller.murals.startScan(body as never),
+  },
+  {
+    method: "POST",
+    path: "/murals/scans/:id/submit",
+    auth: "required",
+    handler: ({ caller, params, body }) => caller.murals.submitScan({ ...(body as object), sessionId: params.id! } as never),
+  },
+  { method: "GET", path: "/murals/:id", auth: "optional", handler: ({ caller, params }) => caller.murals.byId({ id: params.id! }) },
+  {
+    method: "PATCH",
+    path: "/murals/:id",
+    auth: "required",
+    handler: ({ caller, params, body }) => caller.murals.name({ ...(body as object), muralId: params.id! } as never),
+  },
+  {
+    method: "GET",
+    path: "/me/murals",
+    auth: "required",
+    handler: ({ caller, query }) => caller.murals.mine({ cursor: num(query.cursor) ?? 0, limit: num(query.limit) ?? 24 }),
+  },
+  { method: "GET", path: "/me/coins", auth: "required", handler: ({ caller }) => caller.coins.balance() },
+  {
+    method: "GET",
+    path: "/me/coins/history",
+    auth: "required",
+    handler: ({ caller, query }) =>
+      caller.coins.history({ cursor: query.cursor ? query.cursor : undefined, limit: num(query.limit) ?? 30 }),
+  },
+
   // ── Uploads (profile images) ────────────────────────────────────────────
   {
     method: "POST",

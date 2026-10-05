@@ -42,6 +42,9 @@ export const env = createEnv({
     AWS_BUCKET_REGION: z.string(),
     AWS_ACCESS_KEY: z.string(),
     AWS_SECRET_ACCESS_KEY: z.string(),
+    // Murals: Cloud Vision service-account JSON (one line). Optional outside
+    // production — the checks are skipped without it (src/server/murals/vision.ts).
+    GOOGLE_VISION_CREDENTIALS: z.string().optional(),
   },
 
   /**
@@ -103,6 +106,7 @@ export const env = createEnv({
     AWS_BUCKET_REGION: process.env.NEXT_AWS_BUCKET_REGION,
     AWS_ACCESS_KEY: process.env.NEXT_AWS_ACCESS_KEY,
     AWS_SECRET_ACCESS_KEY: process.env.NEXT_AWS_SECRET_ACCESS_KEY,
+    GOOGLE_VISION_CREDENTIALS: process.env.GOOGLE_VISION_CREDENTIALS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

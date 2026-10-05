@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Camera, Check, Compass, MapPin, Minus, X } from "lucide-react";
 
-import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
+import { CameraModeSwitch, type CameraMode } from "~/components/ar/CameraModeSwitch";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 
@@ -49,6 +49,27 @@ const ITEMS = [
   },
 ];
 
+/** Per-camera-mode wording. AR's is the default; Murals passes its own. */
+export type GateCopy = {
+  mode: CameraMode;
+  title: string;
+  body: string;
+  why?: Partial<Record<"camera" | "location" | "motion", string>>;
+  /** Per-mode override for the "unsupported" line (AR can fall back to drag; Murals can't). */
+  unsupported?: Partial<Record<"camera" | "location" | "motion", string>>;
+  cta: string;
+  footnote: string;
+};
+
+const AR_COPY: GateCopy = {
+  mode: "ar",
+  title: "Enter AR",
+  body: "Point your phone at the world and the drops around you appear where they actually are.",
+  cta: "Allow & enter AR",
+  footnote:
+    "Nothing from your camera leaves the device. Your position is only used to work out which drops are in range.",
+};
+
 /**
  * ── ArPermissionGate ───────────────────────────────────────────────────────
  *
@@ -67,11 +88,13 @@ export function ArPermissionGate({
   requesting,
   onRequest,
   error,
+  copy = AR_COPY,
 }: {
   states: Record<"camera" | "location" | "motion", PermState>;
   requesting: boolean;
   onRequest: () => void;
   error: string | null;
+  copy?: GateCopy;
 }) {
   const router = useRouter();
   const anyDenied = Object.values(states).some(
@@ -97,18 +120,21 @@ export function ArPermissionGate({
         className="absolute left-1/2 z-20 -translate-x-1/2"
         style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
       >
-        <CameraModeSwitch mode="ar" />
+        <CameraModeSwitch mode={copy.mode} />
       </div>
 
       {/* Tall enough to overflow on a short screen, so it needs the top inset
-          as real padding rather than relying on `justify-center` to keep the
-          viewfinder clear of the status bar and the island. */}
+          as real padding to keep the viewfinder clear of the status bar, the
+          island and the mode switch (which sits at inset + 14px, 36px tall). */}
       <div
-        className="ar-scroll relative z-10 flex flex-1 flex-col justify-center px-7 pb-10"
-        style={{ paddingTop: "calc(var(--ar-top-inset) + 24px)" }}
+        className="ar-scroll relative z-10 flex flex-1 flex-col px-7 pb-10"
+        style={{ paddingTop: "calc(var(--ar-top-inset) + 66px)" }}
       >
-        {/* Viewfinder mark */}
-        <div className="relative mx-auto mb-7 h-[88px] w-[88px]">
+        {/* Viewfinder mark. `mt-auto` here and `mb-auto` on the footnote
+            centre the column when it fits — and, unlike `justify-center`,
+            let it scroll from the top when it doesn't instead of pushing
+            the heading off-screen. */}
+        <div className="relative mx-auto mb-7 mt-auto h-[88px] w-[88px] shrink-0">
           <motion.svg
             viewBox="0 0 88 88"
             fill="none"
@@ -141,11 +167,10 @@ export function ArPermissionGate({
         </div>
 
         <h1 className="font-hud text-center text-[24px] font-bold leading-tight text-ar-text">
-          Enter AR
+          {copy.title}
         </h1>
         <p className="mx-auto mt-2 max-w-[19rem] text-center text-[13px] leading-relaxed text-ar-dim">
-          Point your phone at the world and the drops around you appear where
-          they actually are.
+          {copy.body}
         </p>
 
         <ul className="mt-7 space-y-2">
@@ -187,7 +212,10 @@ export function ArPermissionGate({
                     {title}
                   </p>
                   <p className="mt-1 text-[11.5px] leading-relaxed text-ar-faint">
-                    {FALLBACK_COPY[state] ?? why}
+                    {(state === "unsupported" ? copy.unsupported?.[key] : undefined) ??
+                      FALLBACK_COPY[state] ??
+                      copy.why?.[key] ??
+                      why}
                   </p>
 
                   {/* Location gets real per-platform steps rather than the
@@ -233,7 +261,7 @@ export function ArPermissionGate({
               ? "Asking…"
               : anyDenied
                 ? "Try again"
-                : "Allow & enter AR"}
+                : copy.cta}
           </ArButton>
           <ArButton
             variant="ghost"
@@ -245,9 +273,8 @@ export function ArPermissionGate({
           </ArButton>
         </div>
 
-        <p className="mt-5 text-center text-[10.5px] leading-relaxed text-ar-faint">
-          Nothing from your camera leaves the device. Your position is only
-          used to work out which drops are in range.
+        <p className="mb-auto mt-5 text-center text-[10.5px] leading-relaxed text-ar-faint">
+          {copy.footnote}
         </p>
       </div>
     </div>

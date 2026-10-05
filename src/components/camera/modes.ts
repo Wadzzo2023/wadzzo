@@ -10,7 +10,7 @@ export type CameraPerm = "camera" | "location";
 
 export type CameraModeDef = {
   id: CameraModeId;
-  href: "/ar" | "/scan" | null;
+  href: "/ar" | "/scan" | "/murals" | null;
   label: string;
   title: string;
   blurb: string;
@@ -48,14 +48,14 @@ export const CAMERA_MODES: CameraModeDef[] = [
   },
   {
     id: "murals",
-    href: null,
+    href: "/murals",
     label: "Murals",
     title: "Murals",
-    blurb: "Point at street art and watch it come alive.",
+    blurb: "Scan murals and street art to earn Wadzzo Coins.",
     icon: Frame,
     accent: "--rarity-epic",
     accentHot: "--rarity-epic",
-    needs: ["camera"],
+    needs: ["camera", "location"],
   },
 ];
 

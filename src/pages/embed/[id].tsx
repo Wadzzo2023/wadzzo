@@ -1,10 +1,11 @@
 import { formatDistanceToNowStrict } from "date-fns";
-import { CalendarDays, ExternalLink, LocateFixed, Lock, Minus, Navigation, Plus, Target, X } from "lucide-react";
+import { Frame, CalendarDays, ExternalLink, LocateFixed, Lock, Minus, Navigation, Plus, Target, X } from "lucide-react";
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { EmbedMap, type EmbedMapHandle, type Viewport } from "~/components/embed/EmbedMap";
+import type { MapMural } from "~/components/map/MuralMarker";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { RarityPlate } from "~/components/ui/Badges";
 import { distanceMeters, formatDistance } from "~/lib/ar/geo";
@@ -180,6 +181,34 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
   }, [allPins]);
 
   const selected = pins.find((p) => p.id === selectedId) ?? (searchPin?.id === selectedId ? searchPin : null);
+
+  // ── Murals (approved only; plan §7) ───────────────────────────────────
+  // Same viewport as the pins, as a box, rounded to ~1 km so pans reuse it.
+  // Skipped when zoomed far out — the map hides them there anyway.
+  const MURAL_MAX_RADIUS_KM = 40;
+  const muralBox =
+    config.showMurals && viewport && viewport.radiusKm <= MURAL_MAX_RADIUS_KM
+      ? (() => {
+          const r = viewport.radiusKm * 1.15;
+          const dLat = r / 111;
+          const dLng = r / (111 * Math.max(0.01, Math.cos((viewport.center.lat * Math.PI) / 180)));
+          const up = (v: number) => Math.ceil(v * 100) / 100;
+          const down = (v: number) => Math.floor(v * 100) / 100;
+          return {
+            north: up(viewport.center.lat + dLat),
+            south: down(viewport.center.lat - dLat),
+            east: up(viewport.center.lng + dLng),
+            west: down(viewport.center.lng - dLng),
+          };
+        })()
+      : null;
+  const muralsQuery = api.murals.inArea.useQuery(
+    { ...(muralBox ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: false },
+    { enabled: muralBox != null, keepPreviousData: true, staleTime: 60_000 },
+  );
+  const murals = config.showMurals ? (muralsQuery.data?.murals ?? []) : [];
+  const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
+  const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;
   const origin = me ?? viewport?.center ?? { lat: config.centerLat, lng: config.centerLng };
   const nearby = useMemo(
     () => [...pins].sort((a, b) => distanceMeters(origin, a) - distanceMeters(origin, b)).slice(0, 20),
@@ -190,6 +219,7 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
   const select = useCallback(
     (id: string | null) => {
       setSelectedId(id);
+      setSelectedMuralId(null);
       if (!id) return;
       track(config.id, "pinTap");
       const pin = pins.find((p) => p.id === id);
@@ -282,6 +312,13 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
             }
           }}
           me={me}
+          murals={murals}
+          selectedMuralId={selectedMuralId}
+          onSelectMural={(id) => {
+            setSelectedId(null);
+            setSelectedMuralId(id);
+            track(config.id, "pinTap");
+          }}
         />
 
         {/* Top bar */}
@@ -320,7 +357,7 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
 
         {/* Bottom: nearby strip (narrow), links, attribution */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col gap-2 p-3">
-          {config.showNearby && nearby.length > 0 && !selected && (
+          {config.showNearby && nearby.length > 0 && !selected && !selectedMural && (
             <div className="ar-scroll-x pointer-events-auto -mx-3 flex gap-2 px-3 md:hidden">
               {nearby.slice(0, 12).map((p) => (
                 <button
@@ -339,6 +376,16 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
                 </button>
               ))}
             </div>
+          )}
+
+          {selectedMural && (
+            <MuralPreviewCard
+              mural={selectedMural}
+              distance={me ? distanceMeters(me, { lat: selectedMural.latitude, lng: selectedMural.longitude }) : null}
+              openUrl={`/murals/${encodeURIComponent(selectedMural.id)}?ref=embed-${config.id}`}
+              onOpen={() => track(config.id, "open")}
+              onClose={() => setSelectedMuralId(null)}
+            />
           )}
 
           {selected && (
@@ -401,6 +448,70 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
 }
 
 // ── Pieces ────────────────────────────────────────────────────────────────
+
+/** A mural's card: public cover only, like everywhere outside the admin. */
+function MuralPreviewCard({
+  mural,
+  distance,
+  openUrl,
+  onOpen,
+  onClose,
+}: {
+  mural: MapMural;
+  distance: number | null;
+  openUrl: string;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="ar-glass pointer-events-auto relative w-full overflow-hidden rounded-3xl md:ml-auto md:w-[360px]">
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ar-void/60 text-white"
+      >
+        <X size={15} />
+      </button>
+      <div className="flex gap-3 p-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={mural.coverUrl} alt="" className="h-[96px] w-[78px] shrink-0 rounded-2xl border-2 border-rarity-epic object-cover" />
+        <div className="min-w-0 flex-1 pr-6">
+          <p className="font-hud flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-rarity-epic">
+            <Frame size={10} strokeWidth={2.6} /> Mural
+          </p>
+          <p className="line-clamp-2 text-[14.5px] font-semibold leading-snug">{mural.title}</p>
+          <p className="mt-0.5 truncate text-[11.5px] text-ar-dim">
+            {mural.artist ? `by ${mural.artist}` : "Street art"}
+          </p>
+          <p className="mt-1.5 text-[11px] text-ar-faint">
+            {distance != null ? `${formatDistance(distance)} away · ` : ""}
+            Scan it with the Wadzzo camera to earn coins
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-2 px-3 pb-3">
+        <a
+          href={openUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onOpen}
+          className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold uppercase tracking-[0.08em]"
+        >
+          Open in Wadzzo <ExternalLink size={14} strokeWidth={2.4} />
+        </a>
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${mural.latitude},${mural.longitude}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Directions"
+          className="ar-key flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ar-text"
+        >
+          <Navigation size={15} />
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function PreviewCard({
   pin,

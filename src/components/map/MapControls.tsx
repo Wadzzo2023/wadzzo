@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Compass, Crosshair, RotateCw, Zap } from "lucide-react";
+import { Compass, Crosshair, Frame, RotateCw, Zap } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
@@ -25,6 +25,8 @@ export function MapControls({
   following,
   autoCollect,
   onToggleAutoCollect,
+  muralLayer,
+  onCycleMuralLayer,
 }: {
   onRecenter: () => void;
   onRefetch: () => void;
@@ -34,6 +36,9 @@ export function MapControls({
   following: boolean;
   autoCollect: boolean;
   onToggleAutoCollect: () => void;
+  /** Murals on the map: every one, verified only, or hidden. */
+  muralLayer?: "all" | "verified" | "off";
+  onCycleMuralLayer?: () => void;
 }) {
   return (
     <div className="pointer-events-none absolute right-3.5 top-1/2 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
@@ -123,6 +128,28 @@ export function MapControls({
       >
         <Compass size={18} strokeWidth={2.1} />
       </motion.button>
+
+      {/* ── Murals layer ───────────────────────────────────────────────
+          One tap cycles all → verified only → hidden; the map's toast says
+          which, since a dashed vs solid icon is too subtle on its own. */}
+      {onCycleMuralLayer && (
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onCycleMuralLayer}
+          aria-label={
+            muralLayer === "off" ? "Murals hidden — show them" : muralLayer === "verified" ? "Showing verified murals — hide murals" : "Showing all murals — verified only"
+          }
+          className={cn(
+            "ar-glass pointer-events-auto relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+            muralLayer === "off" ? "text-ar-faint" : "text-rarity-epic",
+          )}
+        >
+          <Frame size={18} strokeWidth={2.1} className={cn(muralLayer === "off" && "opacity-50")} />
+          {muralLayer === "verified" && (
+            <span aria-hidden className="absolute bottom-1.5 right-1.5 h-2 w-2 rounded-full bg-ar-green-hot" />
+          )}
+        </motion.button>
+      )}
     </div>
   );
 }

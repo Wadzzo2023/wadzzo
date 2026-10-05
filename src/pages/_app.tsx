@@ -17,6 +17,7 @@ import "~/styles/arcade.css";
 import ConnectDialog from "package/connect_wallet/src/components/connect_dialog";
 
 import { BootSequence } from "~/components/boot/BootSequence";
+import { MuralPackHud } from "~/components/murals/MuralPackHud";
 import { AuthGate } from "~/components/auth/AuthGate";
 import { SessionSync } from "~/components/auth/SessionSync";
 import { DeviceFrame } from "~/components/shell/DeviceFrame";
@@ -99,6 +100,9 @@ const WadzzoAR: AppType = ({ Component, pageProps }) => {
           </motion.div>
 
           <AuthGate />
+
+          {/* Mural pack: background install + HUD pill + ready toast. */}
+          <MuralPackHud />
 
           {/* No presence wrapper needed: BootSequence has no `exit` prop — it
               plays its own iris-open inside `animate` and then unmounts itself

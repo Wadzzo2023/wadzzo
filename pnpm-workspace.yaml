@@ -5,6 +5,8 @@ allowBuilds:
   bufferutil: true
   core-js: true
   esbuild: true
+  # CPU binaries ship in the package; the script only fetches optional CUDA builds.
+  onnxruntime-node: false
   prisma: true
   protobufjs: true
   secp256k1: true

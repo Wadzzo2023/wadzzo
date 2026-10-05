@@ -21,7 +21,11 @@ import { AppShell } from "~/components/shell/AppShell";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { ArLinkButton } from "~/components/ui/ArButton";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { AR_CAPTURE_RADIUS, distanceMeters, formatDistance } from "~/lib/ar/geo";
+import {
+  AR_CAPTURE_RADIUS,
+  distanceMeters,
+  formatDistance,
+} from "~/lib/ar/geo";
 import { RARITY_META } from "~/lib/ar/rarity";
 import { MAP_STYLE, useResolvedTheme } from "~/lib/ar/theme";
 import type { TravelMode } from "~/lib/ar/types";
@@ -32,6 +36,7 @@ import {
 } from "~/lib/ar/useDirections";
 import { useGeolocation } from "~/lib/ar/useGeolocation";
 import { usePins } from "~/lib/ar/usePins";
+import { api } from "~/utils/api";
 import { cn } from "~/lib/utils";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
@@ -81,13 +86,22 @@ function stepIcon(step: RouteStep) {
  * Promising a bus the API knows nothing about would be worse than useless to
  * someone standing on a street corner.
  */
+/** Murals are scannable from this far (matches MuralSheet). */
+const MURAL_SCAN_FROM_M = 100;
+
 export default function DirectionsScreen() {
   const router = useRouter();
   const theme = useResolvedTheme();
   const id = typeof router.query.id === "string" ? router.query.id : null;
+  // `?kind=mural`: route to a mural instead of a drop (same screen, epic purple).
+  const isMural = router.query.kind === "mural";
 
-  const { fix, status: geoStatus, reason: geoReason, retry: retryLocation } =
-    useGeolocation();
+  const {
+    fix,
+    status: geoStatus,
+    reason: geoReason,
+    retry: retryLocation,
+  } = useGeolocation();
   const pins = usePins();
   const [mode, setMode] = useState<TravelMode>("walk");
 
@@ -104,7 +118,38 @@ export default function DirectionsScreen() {
     if (isTravelMode(modeFromUrl)) setMode(modeFromUrl);
   }, [router.isReady, modeFromUrl]);
 
-  const pin = useMemo(() => pins.find((p) => p.id === id) ?? null, [pins, id]);
+  const pin = useMemo(
+    () => (isMural ? null : (pins.find((p) => p.id === id) ?? null)),
+    [pins, id, isMural],
+  );
+  const muralQuery = api.murals.byId.useQuery(
+    { id: id ?? "" },
+    { enabled: isMural && Boolean(id) },
+  );
+  const mural = muralQuery.data?.mural;
+  const target = useMemo(
+    () =>
+      isMural
+        ? mural
+          ? {
+              lat: mural.latitude,
+              lng: mural.longitude,
+              title: mural.title,
+              subtitle: mural.artist ? `by ${mural.artist}` : "Mural",
+              imageUrl: mural.coverUrl,
+            }
+          : null
+        : pin
+          ? {
+              lat: pin.lat,
+              lng: pin.lng,
+              title: pin.title,
+              subtitle: pin.brandName,
+              imageUrl: pin.imageUrl,
+            }
+          : null,
+    [isMural, mural, pin],
+  );
 
   // Coarsened to ~11 m so a jittering GPS fix doesn't refetch (and redraw) the
   // route on every tick. The start of a route doesn't need metre precision.
@@ -125,7 +170,7 @@ export default function DirectionsScreen() {
     error: routeError,
   } = useDirections({
     from: origin,
-    to: pin ? { lat: pin.lat, lng: pin.lng } : null,
+    to: target ? { lat: target.lat, lng: target.lng } : null,
     mode,
     token: MAPBOX_TOKEN,
   });
@@ -133,7 +178,7 @@ export default function DirectionsScreen() {
   // Straight-line distance is the honest fallback while the route loads or if
   // Mapbox can't serve one — it's a real number, just a different one, and the
   // UI labels it as direct.
-  const crowFlies = pin && fix ? distanceMeters(fix, pin) : 0;
+  const crowFlies = target && fix ? distanceMeters(fix, target) : 0;
   const distance = route?.distance ?? crowFlies;
   const minutes = route ? Math.max(1, Math.round(route.duration / 60)) : null;
 
@@ -165,22 +210,28 @@ export default function DirectionsScreen() {
     );
   }
 
-  if (!pin) {
+  if (!target) {
     return (
       <AppShell>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
-            Pin not found
-          </p>
-          <ArLinkButton href="/map" variant="primary" size="md">
-            Back to the map
-          </ArLinkButton>
+          {isMural && muralQuery.isLoading ? (
+            <Skeleton className="h-6 w-40 rounded-full" />
+          ) : (
+            <>
+              <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
+                {isMural ? "Mural not found" : "Pin not found"}
+              </p>
+              <ArLinkButton href="/map" variant="primary" size="md">
+                Back to the map
+              </ArLinkButton>
+            </>
+          )}
         </div>
       </AppShell>
     );
   }
 
-  const meta = RARITY_META[pin.rarity];
+  const meta = RARITY_META[isMural ? "epic" : pin!.rarity];
 
   return (
     <AppShell tabs={false}>
@@ -191,8 +242,8 @@ export default function DirectionsScreen() {
             <MapGL
               mapboxAccessToken={MAPBOX_TOKEN}
               initialViewState={{
-                longitude: (fix.lng + pin.lng) / 2,
-                latitude: (fix.lat + pin.lat) / 2,
+                longitude: (fix.lng + target.lng) / 2,
+                latitude: (fix.lat + target.lat) / 2,
                 zoom: 14.6,
                 pitch: 40,
               }}
@@ -229,7 +280,11 @@ export default function DirectionsScreen() {
                 <span className="block h-4 w-4 rounded-full bg-ar-green-hot ring-[3px] ring-white/90" />
               </Marker>
 
-              <Marker longitude={pin.lng} latitude={pin.lat} anchor="center">
+              <Marker
+                longitude={target.lng}
+                latitude={target.lat}
+                anchor="center"
+              >
                 <span
                   className="flex h-8 w-8 items-center justify-center rounded-full border-2"
                   style={{
@@ -238,7 +293,11 @@ export default function DirectionsScreen() {
                     boxShadow: `0 0 20px hsl(${meta.hsl})`,
                   }}
                 >
-                  <Flag size={13} strokeWidth={2.6} style={{ color: `hsl(${meta.hsl})` }} />
+                  <Flag
+                    size={13}
+                    strokeWidth={2.6}
+                    style={{ color: `hsl(${meta.hsl})` }}
+                  />
                 </span>
               </Marker>
             </MapGL>
@@ -270,17 +329,25 @@ export default function DirectionsScreen() {
           <div className="mb-3 flex items-start gap-3">
             <div
               className="h-[52px] w-[38px] shrink-0 overflow-hidden rounded-[9px] border"
-              style={{ borderColor: `hsl(${meta.hsl}/0.55)` }}
+              style={{
+                borderColor: `hsl(${meta.hsl}/0.55)`,
+                borderStyle:
+                  isMural && mural?.status !== "APPROVED" ? "dashed" : "solid",
+              }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pin.imageUrl} alt="" className="h-full w-full object-cover" />
+              <img
+                src={target.imageUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="font-hud truncate text-[16px] font-bold leading-tight text-ar-text">
-                {pin.title}
+                {target.title}
               </h1>
               <p className="mt-0.5 truncate text-[11.5px] text-ar-faint">
-                {pin.brandName}
+                {target.subtitle}
               </p>
             </div>
           </div>
@@ -297,7 +364,7 @@ export default function DirectionsScreen() {
                   className={cn(
                     "flex flex-col items-center gap-1 rounded-[12px] border px-1 py-2.5 transition-colors",
                     active
-                      ? "border-ar-green/60 bg-ar-green/12 text-ar-green-hot"
+                      ? "bg-ar-green/12 border-ar-green/60 text-ar-green-hot"
                       : "border-ar-line bg-white/[0.03] text-ar-faint",
                   )}
                 >
@@ -339,9 +406,12 @@ export default function DirectionsScreen() {
           ) : (
             <div className="ar-bevel mt-3.5 flex items-center justify-between rounded-ar px-4 py-3">
               <div>
-                <p className="font-hud text-[22px] font-bold leading-none tabular-nums text-ar-green-hot text-glow-soft">
+                <p className="font-hud text-glow-soft text-[22px] font-bold tabular-nums leading-none text-ar-green-hot">
                   {minutes ?? "—"}
-                  <span className="text-[12px] font-medium text-ar-dim"> min</span>
+                  <span className="text-[12px] font-medium text-ar-dim">
+                    {" "}
+                    min
+                  </span>
                 </p>
                 <p className="font-hud mt-1 text-[9.5px] uppercase tracking-[0.16em] text-ar-faint">
                   {formatDistance(distance)}
@@ -356,10 +426,12 @@ export default function DirectionsScreen() {
               <div className="text-right">
                 <p className="font-hud text-[12px] font-bold text-ar-text">
                   {minutes !== null
-                    ? new Date(Date.now() + minutes * 60_000).toLocaleTimeString(
-                        [],
-                        { hour: "numeric", minute: "2-digit" },
-                      )
+                    ? new Date(
+                        Date.now() + minutes * 60_000,
+                      ).toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })
                     : "—"}
                 </p>
                 <p className="font-hud mt-1 text-[9.5px] uppercase tracking-[0.16em] text-ar-faint">
@@ -385,9 +457,15 @@ export default function DirectionsScreen() {
             <div className="ar-bevel divide-y divide-ar-line rounded-ar">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-3.5 py-3">
-                  <Skeleton className="h-8 w-8 shrink-0" rounded="rounded-[10px]" />
+                  <Skeleton
+                    className="h-8 w-8 shrink-0"
+                    rounded="rounded-[10px]"
+                  />
                   <Skeleton rounded="rounded-full" className="h-2.5 flex-1" />
-                  <Skeleton rounded="rounded-full" className="h-2.5 w-10 shrink-0" />
+                  <Skeleton
+                    rounded="rounded-full"
+                    className="h-2.5 w-10 shrink-0"
+                  />
                 </div>
               ))}
             </div>
@@ -416,14 +494,15 @@ export default function DirectionsScreen() {
             <div className="ar-bevel rounded-ar px-3.5 py-4 text-center">
               <p className="text-[12px] text-ar-faint">
                 No turn-by-turn for this route — head {formatDistance(distance)}{" "}
-                toward the pin.
+                toward the {isMural ? "mural" : "pin"}.
               </p>
             </div>
           )}
 
           <p className="mt-3 px-1 text-[11px] leading-relaxed text-ar-faint">
-            Get within {AR_CAPTURE_RADIUS} m and this pin becomes capturable in
-            AR.
+            {isMural
+              ? `Get within ${MURAL_SCAN_FROM_M} m and scan it with the Murals camera to earn Wadzzo Coins.`
+              : `Get within ${AR_CAPTURE_RADIUS} m and this pin becomes capturable in AR.`}
           </p>
 
           <div className="py-5">

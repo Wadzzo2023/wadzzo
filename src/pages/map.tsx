@@ -7,6 +7,7 @@ import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { MapControls } from "~/components/map/MapControls";
+import { MuralSheet } from "~/components/map/MuralSheet";
 import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
@@ -36,6 +37,7 @@ import {
   type PinFilterId,
 } from "~/lib/ar/usePins";
 import { cn } from "~/lib/utils";
+import { api } from "~/utils/api";
 
 /**
  * ── Map ────────────────────────────────────────────────────────────────────
@@ -284,9 +286,34 @@ export default function MapScreen() {
       .finally(() => setRefetching(false));
   }, [refetchPins]);
 
+  // ── Murals layer (docs/murals/plan.md §7) ────────────────────────────────
+  const [muralLayer, setMuralLayer] = useState<"all" | "verified" | "off">("all");
+  const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
+  const [bounds, setBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
+  // Rounded so a nudge of the map doesn't refetch; ~1 km grid.
+  const muralArea = bounds && {
+    north: Math.ceil(bounds.north * 100) / 100,
+    south: Math.floor(bounds.south * 100) / 100,
+    east: Math.ceil(bounds.east * 100) / 100,
+    west: Math.floor(bounds.west * 100) / 100,
+  };
+  const muralsQuery = api.murals.inArea.useQuery(
+    { ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: muralLayer === "all" },
+    { enabled: Boolean(muralArea) && muralLayer !== "off", keepPreviousData: true, staleTime: 60_000, refetchOnWindowFocus: false },
+  );
+  const murals = muralLayer === "off" ? [] : (muralsQuery.data?.murals ?? []);
+  const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;
+  const cycleMuralLayer = useCallback(() => {
+    const next = muralLayer === "all" ? "verified" : muralLayer === "verified" ? "off" : "all";
+    setMuralLayer(next);
+    setToast(next === "all" ? "Murals: all, incl. unverified" : next === "verified" ? "Murals: verified only" : "Murals hidden");
+    setSelectedMuralId(null);
+  }, [muralLayer]);
+
   const handleSelect = useCallback(
     (id: string | null) => {
       setSelectedId(id);
+      setSelectedMuralId(null);
       if (!id) return;
       const pin = pins.find((p) => p.id === id);
       if (pin) mapRef.current?.flyToPin(pin);
@@ -338,6 +365,17 @@ export default function MapScreen() {
           following={following}
           onUserPan={() => setFollowing(false)}
           headingUp={headingUp}
+          murals={murals}
+          muralDailyLimit={muralsQuery.data?.dailyLimit}
+          selectedMuralId={selectedMuralId}
+          onSelectMural={(id) => {
+            setSelectedId(null);
+            setSelectedMuralId(id);
+            setFollowing(false);
+            const m = murals.find((x) => x.id === id);
+            if (m) mapRef.current?.flyToMural(m);
+          }}
+          onBoundsChange={setBounds}
         />
 
         {/* No fix, no game: the map behind is centred on nothing meaningful,
@@ -402,6 +440,8 @@ export default function MapScreen() {
           refetching={refetching}
           following={following}
           autoCollect={settings.autoCollect}
+          muralLayer={muralLayer}
+          onCycleMuralLayer={cycleMuralLayer}
           onToggleAutoCollect={() => {
             if (!requireAuth("settings")) return;
             const turningOn = !settings.autoCollect;
@@ -483,6 +523,13 @@ export default function MapScreen() {
           setFollowing(false);
           mapRef.current?.recenter(coords, { zoom: 15.5 });
         }}
+      />
+
+      <MuralSheet
+        mural={selectedMural}
+        dailyLimit={muralsQuery.data?.dailyLimit ?? 3}
+        fix={fix}
+        onClose={() => setSelectedMuralId(null)}
       />
 
       <PinSheet

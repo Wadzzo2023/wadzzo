@@ -27,6 +27,8 @@ export interface EmbedConfig {
   showFilterChips: boolean;
   showSearch: boolean;
   showNearby: boolean;
+  /** Approved murals in view (wadzzoAR docs/murals/plan.md §7; on by default). */
+  showMurals: boolean;
   eventsLabel: string;
   eventsUrl: string | null;
   bountiesLabel: string;
@@ -85,6 +87,7 @@ export function normalizeConfig(raw: Record<string, unknown>, id: string): Embed
     showFilterChips: raw.showFilterChips === true,
     showSearch: raw.showSearch !== false,
     showNearby: raw.showNearby !== false,
+    showMurals: raw.showMurals !== false,
     eventsLabel: text(raw.eventsLabel, "Find Events"),
     eventsUrl: httpUrl(raw.eventsUrl),
     bountiesLabel: text(raw.bountiesLabel, "View Bounties"),

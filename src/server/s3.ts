@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 
@@ -69,4 +69,31 @@ export async function signEntryUpload({
   );
 
   return { uploadUrl, fileUrl: publicS3Url(key), fileName };
+}
+
+/**
+ * Murals: one presigned PUT per keyframe, under `murals/<sessionId>/`, so the
+ * server knows exactly which keys belong to which scan session and can fetch
+ * them back without trusting a URL from the client. The byte size isn't
+ * known up front, so the size cap is checked when the server reads them back.
+ */
+export async function signMuralFrames(sessionId: string, count: number) {
+  return Promise.all(
+    Array.from({ length: count }, async (_, i) => {
+      const key = `murals/${sessionId}/${i}-${crypto.randomBytes(8).toString("hex")}.jpg`;
+      const uploadUrl = await getSignedUrl(
+        s3Client,
+        new PutObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key, ContentType: "image/jpeg" }),
+        { expiresIn: EXPIRES_IN_SECONDS },
+      );
+      return { key, uploadUrl };
+    }),
+  );
+}
+
+/** Bytes of an object this app wrote (mural keyframes). */
+export async function getObjectBytes(key: string) {
+  const res = await s3Client.send(new GetObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key }));
+  if (!res.Body) throw new Error(`Empty S3 object ${key}`);
+  return Buffer.from(await res.Body.transformToByteArray());
 }

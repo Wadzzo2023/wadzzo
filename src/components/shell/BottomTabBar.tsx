@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { CameraLauncher } from "~/components/camera/CameraLauncher";
+import { PackRing } from "~/components/murals/PackRing";
 
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import { cn } from "~/lib/utils";
@@ -102,6 +103,10 @@ export function BottomTabBar() {
                 <ArGlyph active={arActive} />
               </span>
             </button>
+            {/* Mural pack "charging" the camera while it downloads. A sibling,
+                not a child: its % badge is its own button, and buttons can't
+                nest. Overlaid on the 62px key above. */}
+            <PackRing />
           </div>
 
           {/* ── The bar ─────────────────────────────────────────────────── */}

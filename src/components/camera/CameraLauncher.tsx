@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+import { packProgress, useMuralPack } from "~/lib/murals/pack";
 import {
   readCameraPermissions,
   type PermAnswers,
@@ -262,8 +263,34 @@ function BentoCard({
           {mode.blurb}
         </p>
         {!soon && <Readiness mode={mode} perms={perms} />}
+        {mode.id === "murals" && <PackChip />}
       </div>
     </motion.button>
+  );
+}
+
+/** Murals tile: the pack's install state, with a mini bar while it downloads. */
+function PackChip() {
+  const s = useMuralPack();
+  if (s.status === "ready") {
+    return (
+      <p className="font-hud mt-2 flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ar-green-hot">
+        <Check className="h-3 w-3" strokeWidth={3} /> Mural pack ready
+      </p>
+    );
+  }
+  if (s.status === "idle") return null;
+  const pct = Math.floor(packProgress(s) * 100);
+  return (
+    <div className="mt-2">
+      <p className="font-hud flex items-center justify-between text-[9.5px] font-bold uppercase tracking-[0.14em] text-rarity-epic">
+        <span>{s.status === "error" ? "Pack paused" : s.status === "verifying" ? "Verifying pack" : "Downloading pack"}</span>
+        <span className="tabular-nums">{s.status === "error" ? "" : `${pct}%`}</span>
+      </p>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ar-void/60">
+        <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-rarity-epic transition-[width] duration-300" style={{ width: `${Math.max(3, pct)}%` }} />
+      </div>
+    </div>
   );
 }
 

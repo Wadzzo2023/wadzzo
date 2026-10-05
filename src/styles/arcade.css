@@ -1138,6 +1138,171 @@ body {
   }
 }
 
+/* Murals camera: outline + turn guide. */
+@keyframes ar-outline-march {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+.ar-outline-march {
+  animation: ar-outline-march 0.9s linear infinite;
+  filter: drop-shadow(0 0 6px hsl(var(--rarity-epic) / 0.7));
+}
+.ar-outline-glow {
+  filter: drop-shadow(0 0 10px hsl(var(--rarity-epic) / 0.9));
+}
+@keyframes ar-outline-ghost {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.ar-outline-ghost {
+  animation: ar-outline-ghost 1.2s ease-in-out infinite;
+}
+
+@keyframes ar-chevron-left {
+  0% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+@keyframes ar-chevron-right {
+  0% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+.ar-chevron-left {
+  animation: ar-chevron-left 1s ease-out infinite;
+}
+.ar-chevron-right {
+  animation: ar-chevron-right 1s ease-out infinite;
+}
+
+@keyframes ar-ghost-phone-left {
+  0%,
+  15% {
+    transform: rotateY(0deg);
+  }
+  60%,
+  85% {
+    transform: rotateY(-38deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+@keyframes ar-ghost-phone-right {
+  0%,
+  15% {
+    transform: rotateY(0deg);
+  }
+  60%,
+  85% {
+    transform: rotateY(38deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+@keyframes ar-ghost-phone-centre {
+  0%,
+  100% {
+    transform: rotateY(-14deg);
+  }
+  50% {
+    transform: rotateY(14deg);
+  }
+}
+.ar-ghost-phone-left {
+  animation: ar-ghost-phone-left 1.6s ease-in-out infinite;
+}
+.ar-ghost-phone-right {
+  animation: ar-ghost-phone-right 1.6s ease-in-out infinite;
+}
+.ar-ghost-phone-centre {
+  animation: ar-ghost-phone-centre 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-outline-march,
+  .ar-outline-ghost,
+  .ar-chevron-left,
+  .ar-chevron-right,
+  .ar-ghost-phone-left,
+  .ar-ghost-phone-right,
+  .ar-ghost-phone-centre {
+    animation: none;
+  }
+}
+
+/* Mural pack bar: diagonal stripes marching left→right while downloading,
+   the classic game-loader look. */
+@keyframes ar-pack-stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 28px 0;
+  }
+}
+
+.ar-pack-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.55) 0 7px,
+    rgba(255, 255, 255, 0) 7px 14px
+  );
+  background-size: 28px 100%;
+  animation: ar-pack-stripes 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-pack-stripes {
+    animation: none;
+  }
+}
+
+/* Murals viewfinder: a slow breath while searching, so the screen reads as
+   "looking" without a sweep line competing with the art behind it. */
+@keyframes ar-mural-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+}
+
+.ar-mural-breathe {
+  animation: ar-mural-breathe 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-mural-breathe {
+    animation: none;
+  }
+}
+
 @keyframes ar-pulse-ring {
   0% {
     transform: scale(0.72);
