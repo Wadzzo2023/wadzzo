@@ -37,8 +37,12 @@ const THEME_COLOR: Record<ResolvedTheme, string> = {
  * basemap under light chrome — which is exactly the bug this fixes.
  */
 export const MAP_STYLE: Record<ResolvedTheme, string> = {
-  dark: "mapbox://styles/mapbox/dark-v11",
-  light: "mapbox://styles/mapbox/light-v11",
+  // "Wadzzo 3D Dark/Light" in Mapbox Studio (account: wadzzo) — Mapbox
+  // Standard (3D buildings, landmarks, lighting) with a custom colour theme
+  // generated from the arcade.css tokens (night / day light preset). Shared
+  // by web, the mobile app and brand-wadzzo. Recipe: docs/map-style.md.
+  dark: "mapbox://styles/wadzzo/cmuwbonsf00rv01sdcun4fhdu",
+  light: "mapbox://styles/wadzzo/cmuwc16ut00gz01sd6359b3sw",
 };
 
 function isThemePreference(value: unknown): value is ThemePreference {

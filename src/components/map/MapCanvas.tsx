@@ -1,5 +1,6 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MapGL, { Marker, type MapRef, type ViewStateChangeEvent } from "react-map-gl";
+import Supercluster, { type ClusterProperties } from "supercluster";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
@@ -9,20 +10,88 @@ import {
   useResolvedTheme,
 } from "~/lib/ar/theme";
 import { cn } from "~/lib/utils";
+import { ClusterBillboard } from "./ClusterBillboard";
 import { MuralMarker, type MapMural } from "./MuralMarker";
 import { PinMarker } from "./PinMarker";
 import { metersPerPixel, UserPuck } from "./UserPuck";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
 
+// Same grouping as the mobile app's map: zoomed out, pins that would overlap
+// become a ClusterBillboard; from CLUSTER_MAX_ZOOM in, every pin is itself.
+const CLUSTER_RADIUS = 70;
+const CLUSTER_MAX_ZOOM = 13;
+/** Safety cap on single markers on screen (nearest to the centre first). */
+const MAX_MARKERS = 80;
+const MAX_MURAL_MARKERS = 40;
+
+const EMPTY_MURALS: MapMural[] = [];
+
+type View = { bbox: [number, number, number, number]; zoom: number; center: Coords };
+type Group = { id: number; lng: number; lat: number; count: number; imgs: string[] };
+
+function useClusters<T>(
+  items: T[],
+  pos: (t: T) => Coords,
+  img: (t: T) => string | undefined,
+  view: View | null,
+  max: number,
+  keep: (t: T) => boolean,
+) {
+  const index = useMemo(() => {
+    const sc = new Supercluster<{ i: number; imgs: string[] }, { imgs: string[] }>({
+      radius: CLUSTER_RADIUS,
+      maxZoom: CLUSTER_MAX_ZOOM,
+      minPoints: 2,
+      map: (p) => ({ imgs: [...p.imgs] }),
+      reduce: (acc, p) => {
+        for (const u of p.imgs) if (acc.imgs.length < 4 && !acc.imgs.includes(u)) acc.imgs.push(u);
+      },
+    });
+    sc.load(
+      items.map((t, i) => {
+        const { lat, lng } = pos(t);
+        const u = img(t);
+        return { type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lng, lat] }, properties: { i, imgs: u ? [u] : [] } };
+      }),
+    );
+    return sc;
+    // pos/img are pure accessors; the index only depends on the items.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
+
+  const result = useMemo(() => {
+    if (!view || items.length === 0) return { singles: items.filter(keep).slice(0, max), groups: [] as Group[] };
+    const groups: Group[] = [];
+    const singles: { t: T; d: number }[] = [];
+    for (const f of index.getClusters(view.bbox, Math.floor(view.zoom))) {
+      const [lng, lat] = f.geometry.coordinates as [number, number];
+      if ("cluster" in f.properties && f.properties.cluster) {
+        const cp = f.properties as ClusterProperties & { imgs: string[] };
+        groups.push({ id: cp.cluster_id, lng, lat, count: cp.point_count, imgs: cp.imgs });
+      } else {
+        const t = items[(f.properties as { i: number }).i];
+        if (t) singles.push({ t, d: distanceMeters(view.center, { lat, lng }) });
+      }
+    }
+    const shown = singles.sort((a, b) => a.d - b.d).slice(0, max).map((x) => x.t);
+    // The selected one always has its own marker, even inside a group.
+    for (const t of items) if (keep(t) && !shown.includes(t)) shown.push(t);
+    return { singles: shown, groups };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, items, view, max, keep]);
+
+  return { ...result, index };
+}
+
 /**
  * ── MapCanvas ──────────────────────────────────────────────────────────────
  *
- * Mapbox with the app's chrome removed and its own colour graded on top:
- * `dark-v11` or `light-v11` as the base depending on the live theme, a green
- * wash and a faint terrain grid over it, and a vignette so the edges fall
- * away toward the device bezel. The stock styles are blue-grey and read as
- * "a map"; this reads as the app.
+ * Mapbox with the app's chrome removed: the "Wadzzo 3D" Standard styles
+ * (3D buildings, Wadzzo colour theme — see MAP_STYLE) per the live theme,
+ * with a faint terrain grid and a vignette so the edges fall away toward the
+ * device bezel. Zoomed out, pins and murals group into ClusterBillboards
+ * exactly like the mobile app's map.
  *
  * Follow mode is the interesting behaviour. While `following` is true the
  * camera eases to every new fix, so a puck on the move stays centred — that's
@@ -48,6 +117,8 @@ interface Props {
   onSelect: (id: string | null) => void;
   following: boolean;
   onUserPan: () => void;
+  /** The user touched the map while compass mode was on — the parent turns compass mode off. */
+  onCompassGesture?: () => void;
   /**
    * Rotate the map to the viewer's heading instead of holding north up — the
    * "Compass map" setting. Null when the compass is off or unavailable, which
@@ -72,6 +143,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     onSelect,
     following,
     onUserPan,
+    onCompassGesture,
     headingUp,
     murals,
     muralDailyLimit = 3,
@@ -85,6 +157,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   const lastBearing = useRef<number | null>(null);
   const [zoom, setZoom] = useState(16.4);
   const [ready, setReady] = useState(false);
+  /** Where the camera settled last — what the clusters are computed for. */
+  const [view, setView] = useState<View | null>(null);
   const theme = useResolvedTheme();
 
   // Imperative handle rather than prop-driven view state: a controlled
@@ -143,6 +217,10 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
    * 2° is comfortably above the sensor's resting jitter and well below what
    * reads as a deliberate turn.
    */
+  // Latest follow target, read by the compass easing below without re-running it.
+  const followTarget = useRef<[number, number] | null>(null);
+  followTarget.current = following && fix ? [fix.lng, fix.lat] : null;
+
   useEffect(() => {
     if (headingUp == null || !ready) return;
 
@@ -153,8 +231,11 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     }
     lastBearing.current = headingUp;
 
+    // Carry the centre too while following: a bearing-only easeTo would
+    // cancel the follow/re-centre easing mid-flight (it read as a double jump).
     mapRef.current?.easeTo({
       bearing: headingUp,
+      ...(followTarget.current ? { center: followTarget.current } : {}),
       duration: 260,
       essential: true,
     });
@@ -162,9 +243,32 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
 
   const onMove = (e: ViewStateChangeEvent) => setZoom(e.viewState.zoom);
   const reportBounds = () => {
-    const b = mapRef.current?.getBounds();
-    if (b && onBoundsChange) onBoundsChange({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+    const map = mapRef.current;
+    const b = map?.getBounds();
+    if (!map || !b) return;
+    onBoundsChange?.({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+    const c = map.getCenter();
+    setView({
+      bbox: [Math.max(b.getWest(), -180), Math.max(b.getSouth(), -85), Math.min(b.getEast(), 180), Math.min(b.getNorth(), 85)],
+      zoom: map.getZoom(),
+      center: { lat: c.lat, lng: c.lng },
+    });
   };
+
+  // ── What to draw: groups when zoomed out, single markers when close ──
+  const keepPin = useCallback((p: ArPin) => p.id === selectedId, [selectedId]);
+  const keepMural = useCallback((m: MapMural) => m.id === selectedMuralId, [selectedMuralId]);
+  const pinLayer = useClusters(pins, (p) => p, (p) => p.brandImageUrl || p.imageUrl, view, MAX_MARKERS, keepPin);
+  const muralLayer = useClusters(murals ?? EMPTY_MURALS, (m) => ({ lat: m.latitude, lng: m.longitude }), (m) => m.coverUrl, view, MAX_MURAL_MARKERS, keepMural);
+  const openGroup = useCallback((index: Supercluster, g: Group | undefined) => {
+    if (!g) return;
+    mapRef.current?.easeTo({
+      center: [g.lng, g.lat],
+      zoom: Math.min(index.getClusterExpansionZoom(g.id) + 0.3, 19),
+      duration: 650,
+      essential: true,
+    });
+  }, []);
 
   if (!MAPBOX_TOKEN) {
     return <MapFallback pins={pins} onSelect={onSelect} selectedId={selectedId} />;
@@ -193,16 +297,46 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         onMove={onMove}
         onMoveEnd={reportBounds}
         onDragStart={onUserPan}
+        // Any user drag / zoom / rotate while compass mode is on turns it off.
+        // (`originalEvent` is only set for user input, not our own easeTo.)
+        onMoveStart={(e) => {
+          if (e.originalEvent && headingUp != null) onCompassGesture?.();
+        }}
         onClick={() => onSelect(null)}
         // A pitched map with 3D extrusions is what makes a city read as a
         // place rather than a street diagram — worth the extra tiles.
         maxPitch={62}
-        minZoom={11}
+        // The whole world, like the app: zoomed out, pins group into
+        // billboards (and Standard turns into a globe).
+        minZoom={1}
         maxZoom={19.5}
         reuseMaps
         style={{ width: "100%", height: "100%" }}
       >
-        {murals?.map((m) => (
+        {muralLayer.groups.map((g) => (
+          <Marker key={`mg-${g.id}`} longitude={g.lng} latitude={g.lat} anchor="bottom" style={{ zIndex: 8 }}>
+            <ClusterBillboard
+              id={g.id}
+              count={g.count}
+              images={g.imgs}
+              tone="mural"
+              onOpen={(id) => openGroup(muralLayer.index, muralLayer.groups.find((x) => x.id === id))}
+            />
+          </Marker>
+        ))}
+
+        {pinLayer.groups.map((g) => (
+          <Marker key={`g-${g.id}`} longitude={g.lng} latitude={g.lat} anchor="bottom" style={{ zIndex: 9 }}>
+            <ClusterBillboard
+              id={g.id}
+              count={g.count}
+              images={g.imgs}
+              onOpen={(id) => openGroup(pinLayer.index, pinLayer.groups.find((x) => x.id === id))}
+            />
+          </Marker>
+        ))}
+
+        {muralLayer.singles.map((m) => (
           <Marker
             key={`mural-${m.id}`}
             longitude={m.longitude}
@@ -219,7 +353,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
           </Marker>
         ))}
 
-        {pins.map((pin) => (
+        {pinLayer.singles.map((pin) => (
           <Marker
             key={pin.id}
             longitude={pin.lng}
@@ -261,41 +395,19 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
 });
 
 /**
- * Colour grade over the tiles — the grid ties the map to the rest of the UI,
- * and the vignette lets the map fall off into the bezel instead of stopping
- * at a hard edge.
+ * Finish over the tiles — the grid ties the map to the rest of the UI, and
+ * the vignette lets the map fall off into the bezel instead of stopping at a
+ * hard edge.
  *
- * The tint itself has to flip with the theme, because a blend mode isn't
- * symmetric. The dark grade leans on `multiply` with a deep green, which can
- * only ever *darken* what's beneath it — correct over `dark-v11`, but over
- * the light basemap it dragged the whole map toward a muddy sage and buried
- * exactly the street names this grade is supposed to leave readable. Light
- * mode uses `screen` with the same hue instead, the mirror operation: it can
- * only lighten, so it lifts the tiles toward the page's off-white and tints
- * them without darkening anything.
+ * No colour wash any more: the basemap itself is now Wadzzo-coloured
+ * ("Wadzzo 3D" styles, see MAP_STYLE), and a green multiply/overlay on top of
+ * it double-tinted the map and made the web look different from the app.
  */
 function MapGrade({ theme }: { theme: ResolvedTheme }) {
   const dark = theme === "dark";
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
-      {/* Kept light on purpose: the grade should tint the tiles, not bury
-          them. Street names are wayfinding, and a collector walking to a pin
-          needs to read them. */}
-      <div
-        className={cn(
-          "absolute inset-0",
-          dark
-            ? "bg-[hsl(152_60%_10%)] opacity-30 mix-blend-multiply"
-            : "bg-[hsl(140_45%_92%)] opacity-[0.22] mix-blend-screen",
-        )}
-      />
-      <div
-        className={cn(
-          "absolute inset-0 bg-[hsl(115_70%_48%)] mix-blend-overlay",
-          dark ? "opacity-[0.13]" : "opacity-[0.07]",
-        )}
-      />
       <div
         className={cn(
           "ar-grid absolute inset-0",

@@ -1,29 +1,30 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Coords, TravelMode } from "./types";
 
 /**
  * ── Mapbox Directions ──────────────────────────────────────────────────────
  *
- * Real road-following routes, replacing the straight bearing and the three
- * invented turns the screen used to draw.
+ * Road-following routes for the Google-Maps-style directions screen
+ * (preview → live navigation, see `navigation.ts`).
  *
- * Ported from the main webapp's `play/map/direction` screen, which calls the
- * same endpoint with the same parameters.
+ * One fetch per profile (walking, cycling, driving), all three in parallel,
+ * each with up to two alternatives, Mapbox's spoken cues and banner text.
+ * That fills every mode chip with a real time and makes switching modes
+ * instant. Mobile keeps a copy in sync (wadzzoWebAR-public).
  *
  * ── Transit ──
- * Mapbox Directions has no transit profile — it serves walking, cycling and
- * driving only. Rather than drop the mode or quietly alias it to walking,
- * "transit" races every profile and keeps whichever actually gets you there
- * soonest. On a short hop that's usually walking; across town it's driving.
- * The resolved profile is returned so the UI can say which one won instead of
- * claiming a bus it knows nothing about.
+ * Mapbox Directions has no transit profile. "Transit" is whichever real
+ * profile gets you there soonest; the UI says which one won rather than
+ * promising a bus it knows nothing about.
  */
 
 const DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox";
 
 /** The profiles Mapbox actually serves. */
 export type MapboxProfile = "walking" | "cycling" | "driving";
+
+const PROFILES: MapboxProfile[] = ["walking", "cycling", "driving"];
 
 const PROFILE_FOR: Record<Exclude<TravelMode, "transit">, MapboxProfile> = {
   walk: "walking",
@@ -37,18 +38,36 @@ export const PROFILE_LABEL: Record<MapboxProfile, string> = {
   driving: "by car",
 };
 
+/** Something to say before the end of a step — "In 200 metres, turn right". */
+export interface VoiceCue {
+  /** Metres before the END of the step at which to say it. */
+  distanceAlong: number;
+  text: string;
+}
+
 export interface RouteStep {
   /** Mapbox's own phrasing — "Turn left onto Jamgora Road". */
   instruction: string;
+  /**
+   * Mapbox's banner text for the manoeuvre at the END of this step (i.e. the
+   * next step's turn) — "Jamgora Road", "Turn right". Show it while
+   * travelling this step. Empty when Mapbox gives none.
+   */
+  banner: string;
   /** `maneuver.type` + `modifier`, for picking an icon. */
   type: string;
   modifier?: string;
   distance: number;
   duration: number;
   name: string;
+  /** Where the manoeuvre happens, `[lng, lat]`. */
+  location: [number, number];
+  voice: VoiceCue[];
 }
 
 export interface Route {
+  /** Stable within one response: `${profile}-${index}`. */
+  id: string;
   /** Metres along the road, not the crow-flies distance. */
   distance: number;
   /** Seconds, from Mapbox's own traffic-free model. */
@@ -56,23 +75,29 @@ export interface Route {
   /** `[lng, lat]` pairs, ready to hand to a GeoJSON source. */
   coordinates: [number, number][];
   steps: RouteStep[];
-  /** Which profile produced this — the winner, when mode is transit. */
   profile: MapboxProfile;
+  /** Main roads, for "via Mirpur Road". */
+  summary: string;
+}
+
+interface MapboxStep {
+  distance: number;
+  duration: number;
+  name: string;
+  maneuver: { instruction: string; type: string; modifier?: string; location: [number, number] };
+  voiceInstructions?: { distanceAlongGeometry: number; announcement: string }[];
+  bannerInstructions?: { primary?: { text?: string } }[];
 }
 
 interface MapboxRoute {
   distance: number;
   duration: number;
   geometry: { coordinates: [number, number][] };
-  legs: {
-    steps: {
-      distance: number;
-      duration: number;
-      name: string;
-      maneuver: { instruction: string; type: string; modifier?: string };
-    }[];
-  }[];
+  legs: { summary?: string; steps: MapboxStep[] }[];
 }
+
+/** First non-empty string — Mapbox leaves names as "" rather than omitting them. */
+export const firstText = (...xs: (string | undefined)[]) => xs.find((x) => x?.trim()) ?? "";
 
 async function fetchProfile(
   profile: MapboxProfile,
@@ -80,49 +105,54 @@ async function fetchProfile(
   to: Coords,
   token: string,
   signal: AbortSignal,
-): Promise<Route | null> {
+): Promise<Route[]> {
   const url =
     `${DIRECTIONS_URL}/${profile}/` +
     `${from.lng},${from.lat};${to.lng},${to.lat}` +
-    `?geometries=geojson&steps=true&overview=full&access_token=${token}`;
+    `?alternatives=true&geometries=geojson&steps=true&overview=full` +
+    `&voice_instructions=true&voice_units=metric&banner_instructions=true&language=en` +
+    `&access_token=${token}`;
 
   const res = await fetch(url, { signal });
   if (!res.ok) {
     // 422 is Mapbox's "no route" (an island, a pedestrian-only lane for a
     // car). That's an answer, not a failure — the caller falls back.
-    if (res.status === 422) return null;
+    if (res.status === 422) return [];
     throw new Error(`Mapbox Directions failed (${res.status})`);
   }
 
   const json = (await res.json()) as { routes?: MapboxRoute[] };
-  const route = json.routes?.[0];
-  if (!route) return null;
-
-  return {
-    distance: route.distance,
-    duration: route.duration,
-    coordinates: route.geometry.coordinates,
+  return (json.routes ?? []).map((r, i) => ({
+    id: `${profile}-${i}`,
+    distance: r.distance,
+    duration: r.duration,
+    coordinates: r.geometry.coordinates,
     profile,
-    steps: (route.legs ?? []).flatMap((leg) =>
+    summary: (r.legs ?? []).map((l) => l.summary).filter(Boolean).join(", "),
+    steps: (r.legs ?? []).flatMap((leg) =>
       leg.steps.map((s) => ({
         instruction: s.maneuver.instruction,
+        banner: firstText(s.bannerInstructions?.[0]?.primary?.text),
         type: s.maneuver.type,
         modifier: s.maneuver.modifier,
         distance: s.distance,
         duration: s.duration,
         name: s.name,
+        location: s.maneuver.location,
+        voice: (s.voiceInstructions ?? []).map((v) => ({ distanceAlong: v.distanceAlongGeometry, text: v.announcement })),
       })),
     ),
-  };
+  }));
 }
 
+export type ModeTimes = Record<TravelMode, number | null>;
+
 /**
- * One route from `from` to `to` for the chosen mode.
+ * Routes from `from` to `to` for every mode at once; `routes` / `route` are
+ * the chosen mode's (fastest first), `select` picks an alternative.
  *
- * Refetches whenever the mode or the destination changes, but deliberately not
- * on every GPS tick — a route that redraws each second is unreadable, and the
- * start point only matters to within a few metres. The caller passes a fix
- * that's already been coarsened.
+ * Refetches when the origin or destination changes — the caller decides when
+ * the origin moves (on start, and on a reroute), never on every GPS tick.
  */
 export function useDirections({
   from,
@@ -135,73 +165,56 @@ export function useDirections({
   mode: TravelMode;
   token: string | undefined;
 }) {
-  const [route, setRoute] = useState<Route | null>(null);
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Primitive deps, so an object identity change doesn't refetch a route that
-  // hasn't actually moved.
-  const fromLat = from?.lat ?? null;
-  const fromLng = from?.lng ?? null;
-  const toLat = to?.lat ?? null;
-  const toLng = to?.lng ?? null;
+  // Primitive key, so an object identity change doesn't refetch.
+  const key = from && to ? `${from.lat},${from.lng}>${to.lat},${to.lng}` : null;
+  // Results remember which request they answer: loading is "the newest
+  // answer is for an older key", and the previous routes stay on screen
+  // (e.g. during a reroute) until the new ones land.
+  const [result, setResult] = useState<{ key: string; byProfile: Record<MapboxProfile, Route[]> } | null>(null);
+  const [picked, setPicked] = useState<{ key: string; id: string } | null>(null);
 
   useEffect(() => {
-    if (fromLat == null || fromLng == null || toLat == null || toLng == null) {
-      return;
-    }
-    if (!token) {
-      setError("No Mapbox token configured.");
-      return;
-    }
-
+    if (!key || !token || !from || !to) return;
     const controller = new AbortController();
-    const start = { lat: fromLat, lng: fromLng };
-    const end = { lat: toLat, lng: toLng };
-
-    setLoading(true);
-    setError(null);
-
-    const run = async () => {
-      try {
-        if (mode === "transit") {
-          // No transit profile exists; race the real ones and keep the
-          // fastest that actually returned a route.
-          const results = await Promise.all(
-            (["walking", "cycling", "driving"] as const).map((p) =>
-              fetchProfile(p, start, end, token, controller.signal).catch(
-                () => null,
-              ),
-            ),
-          );
-          const best = results
-            .filter((r): r is Route => r !== null)
-            .sort((a, b) => a.duration - b.duration)[0];
-          setRoute(best ?? null);
-          if (!best) setError("No route to this pin.");
-        } else {
-          const single = await fetchProfile(
-            PROFILE_FOR[mode],
-            start,
-            end,
-            token,
-            controller.signal,
-          );
-          setRoute(single);
-          if (!single) setError("No route to this pin for that mode.");
-        }
-      } catch (e) {
-        if (controller.signal.aborted) return;
-        setError(e instanceof Error ? e.message : "Could not load directions.");
-        setRoute(null);
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
-
-    void run();
+    const start = { lat: from.lat, lng: from.lng };
+    const end = { lat: to.lat, lng: to.lng };
+    void Promise.all(PROFILES.map((p) => fetchProfile(p, start, end, token, controller.signal).catch(() => [] as Route[]))).then(
+      ([walking, cycling, driving]) => {
+        if (!controller.signal.aborted) setResult({ key, byProfile: { walking: walking!, cycling: cycling!, driving: driving! } });
+      },
+    );
     return () => controller.abort();
-  }, [fromLat, fromLng, toLat, toLng, mode, token]);
+    // `key` encodes from/to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, token]);
 
-  return { route, isLoading, error };
+  const byProfile = result?.byProfile ?? null;
+  const isLoading = Boolean(key && token && result?.key !== key);
+  const select = useCallback((id: string) => setPicked(result ? { key: result.key, id } : null), [result]);
+
+  const routes = useMemo<Route[]>(() => {
+    if (!byProfile) return [];
+    if (mode !== "transit") return byProfile[PROFILE_FOR[mode]];
+    // Fastest real profile wins; its alternatives come with it.
+    const best = PROFILES.map((p) => byProfile[p]).filter((r) => r.length).sort((a, b) => a[0]!.duration - b[0]!.duration)[0];
+    return best ?? [];
+  }, [byProfile, mode]);
+
+  const modeTimes = useMemo<ModeTimes>(() => {
+    const t = (p: MapboxProfile) => byProfile?.[p][0]?.duration ?? null;
+    const all = PROFILES.map(t).filter((x): x is number => x != null);
+    return { walk: t("walking"), cycle: t("cycling"), drive: t("driving"), transit: all.length ? Math.min(...all) : null };
+  }, [byProfile]);
+
+  const route = routes.find((r) => picked?.key === result?.key && r.id === picked?.id) ?? routes[0] ?? null;
+  const nothing = byProfile && !byProfile.walking.length && !byProfile.cycling.length && !byProfile.driving.length;
+
+  return {
+    routes,
+    route,
+    select,
+    modeTimes,
+    isLoading,
+    error: !token ? "No Mapbox token configured." : nothing ? "No route to this place." : byProfile && !routes.length ? "No route for that mode." : null,
+  };
 }

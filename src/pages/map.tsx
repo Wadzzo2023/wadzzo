@@ -134,6 +134,9 @@ export default function MapScreen() {
    */
   const handleToggleCompass = useCallback(() => {
     const turningOn = !settings.compassMode;
+    // Turning on: back to you first, then the compass takes over.
+    // Turning on: follow you again — the follow easing re-centres (once); the compass then turns the map.
+    if (turningOn) setFollowing(true);
     settings.toggle("compassMode");
     if (turningOn) {
       void compass.request();
@@ -364,6 +367,12 @@ export default function MapScreen() {
           onSelect={handleSelect}
           following={following}
           onUserPan={() => setFollowing(false)}
+          onCompassGesture={() => {
+            // Touching the map hands rotation back to you: compass mode off (map stays where you left it).
+            if (!settings.compassMode) return;
+            settings.toggle("compassMode");
+            setToast("Compass off — you moved the map");
+          }}
           headingUp={headingUp}
           murals={murals}
           muralDailyLimit={muralsQuery.data?.dailyLimit}
