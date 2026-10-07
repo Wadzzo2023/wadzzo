@@ -14,6 +14,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { platformScope, type PlatformCtx } from "~/server/platform-scope";
 
 import { WADZZO_ICON } from "./pins";
 
@@ -113,18 +114,18 @@ function toAnnouncement(
   };
 }
 
-/** Throws NOT_FOUND unless the target exists and is still visible. */
-async function assertTarget(db: PrismaClient, target: z.infer<typeof TARGET>) {
+/** Throws NOT_FOUND unless the target exists, is still visible and is on this platform. */
+async function assertTarget(db: PrismaClient, target: z.infer<typeof TARGET>, ctx: PlatformCtx) {
   if (target.kind === "event") {
-    const row = await db.creatorEvent.findUnique({
-      where: { id: target.id },
+    const row = await db.creatorEvent.findFirst({
+      where: { id: target.id, ...platformScope(ctx) },
       select: { creatorId: true },
     });
     if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
     return row;
   }
   const row = await db.creatorAnnouncement.findFirst({
-    where: { id: target.id, ...liveAnnouncement(new Date()) },
+    where: { id: target.id, ...liveAnnouncement(new Date()), ...platformScope(ctx) },
     select: { creatorId: true },
   });
   if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Announcement not found" });
@@ -145,6 +146,7 @@ export const eventsRouter = createTRPCRouter({
       const userId = ctx.session?.user.id;
       const now = new Date();
       const where: Prisma.CreatorEventWhereInput = {
+        ...platformScope(ctx),
         endDate: input.when === "upcoming" ? { gte: now } : { lt: now },
         ...(input.brandId ? { creatorId: input.brandId } : {}),
       };
@@ -174,8 +176,8 @@ export const eventsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }): Promise<ArEventDetail> => {
       const userId = ctx.session?.user.id;
-      const row = await ctx.db.creatorEvent.findUnique({
-        where: { id: input.id },
+      const row = await ctx.db.creatorEvent.findFirst({
+        where: { id: input.id, ...platformScope(ctx) },
         include: {
           ...cardInclude(userId),
           _count: { select: { rsvps: true, comments: true } },
@@ -227,8 +229,8 @@ export const eventsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1), going: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const event = await ctx.db.creatorEvent.findUnique({
-        where: { id: input.id },
+      const event = await ctx.db.creatorEvent.findFirst({
+        where: { id: input.id, ...platformScope(ctx) },
         select: { id: true, endDate: true, capacity: true },
       });
       if (!event) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
@@ -289,6 +291,7 @@ export const eventsRouter = createTRPCRouter({
       const where: Prisma.CreatorAnnouncementWhereInput = {
         AND: [
           liveAnnouncement(new Date()),
+          platformScope(ctx),
           ...(input.brandId ? [{ creatorId: input.brandId }] : []),
           ...(input.following
             ? [{ creatorId: { in: await followedIds(ctx.db, ctx.session?.user.id) } }]
@@ -320,7 +323,7 @@ export const eventsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }): Promise<ArAnnouncement> => {
       const row = await ctx.db.creatorAnnouncement.findFirst({
-        where: { id: input.id, ...liveAnnouncement(new Date()) },
+        where: { id: input.id, ...liveAnnouncement(new Date()), ...platformScope(ctx) },
         include: { creator: { select: creatorSelect }, _count: { select: { comments: true } } },
       });
       if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Announcement not found" });
@@ -334,6 +337,12 @@ export const eventsRouter = createTRPCRouter({
     .query(async ({ ctx, input }): Promise<ArComment[]> => {
       const userId = ctx.session?.user.id;
       const author = { select: { id: true, name: true, image: true } };
+      // Another platform's comments aren't readable here (visibility rules unchanged otherwise).
+      if (!ctx.platform.isRoot) {
+        const where = { id: input.id, ...platformScope(ctx) };
+        const found = input.kind === "event" ? await ctx.db.creatorEvent.count({ where }) : await ctx.db.creatorAnnouncement.count({ where });
+        if (!found) throw new TRPCError({ code: "NOT_FOUND" });
+      }
       const rows =
         input.kind === "event"
           ? await ctx.db.eventComment.findMany({
@@ -361,7 +370,7 @@ export const eventsRouter = createTRPCRouter({
     .input(z.object({ target: TARGET, content: z.string().trim().min(1).max(1000) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      await assertTarget(ctx.db, input.target);
+      await assertTarget(ctx.db, input.target, ctx);
       const data = { userId, content: input.content };
       const row =
         input.target.kind === "event"

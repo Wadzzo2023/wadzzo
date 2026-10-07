@@ -21,6 +21,7 @@ import {
   type ScanPlatform,
   type ScanResult,
 } from "~/lib/murals/constants";
+import { getCurrentPlatform, platformScope } from "~/server/platform";
 import { getObjectBytes, publicS3Url, signMuralFrames } from "~/server/s3";
 
 import { dot, embedImage, muralScore } from "./clip";
@@ -100,10 +101,11 @@ export type SubmitScanInput = {
 
 type Candidate = Mural & { embeddings: { vector: number[] }[] };
 
-/** Best match among live-or-rejected murals within MATCH_RADIUS_M. */
+/** Best match among this platform's live-or-rejected murals within MATCH_RADIUS_M (every platform's on Wadzzo). */
 async function findMatch(db: Db | Prisma.TransactionClient, lat: number, lng: number, vectors: number[][]) {
+  const platform = await getCurrentPlatform();
   const candidates: Candidate[] = await db.mural.findMany({
-    where: { mergedIntoId: null, ...boxAround(lat, lng, MATCH_RADIUS_M) },
+    where: { mergedIntoId: null, ...platformScope({ platform }), ...boxAround(lat, lng, MATCH_RADIUS_M) },
     include: { embeddings: { select: { vector: true } } },
   });
   let best: { mural: Candidate; similarity: number } | null = null;
@@ -214,6 +216,7 @@ export async function submitScan(db: Db, userId: string, input: SubmitScanInput)
           longitude: input.lng,
           coverUrl: keyframes[1]!,
           discovererId: userId,
+          platformId: (await getCurrentPlatform()).id,
         },
       }));
     await tx.$executeRaw`SELECT id FROM "Mural" WHERE id = ${mural.id} FOR UPDATE`;
@@ -256,12 +259,15 @@ export async function submitScan(db: Db, userId: string, input: SubmitScanInput)
       },
     });
 
+    // coins land in the balance of the site they were earned on
+    const earnedOn = (await getCurrentPlatform()).id;
     let balance = await creditCoins(tx, {
       userId,
       amount: settings.coinsPerScan,
       reason: "MURAL_SCAN",
       muralId: mural.id,
       scanId: scan.id,
+      platformId: earnedOn,
     });
     if (bonus) {
       balance = await creditCoins(tx, {
@@ -270,6 +276,7 @@ export async function submitScan(db: Db, userId: string, input: SubmitScanInput)
         reason: "MURAL_DISCOVERY",
         muralId: mural.id,
         scanId: scan.id,
+        platformId: earnedOn,
         note: `Discoverer #${rank}`,
       });
     }

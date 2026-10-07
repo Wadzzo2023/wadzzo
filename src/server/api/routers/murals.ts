@@ -6,6 +6,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import { localDay, timeZoneAt } from "~/server/murals/geo";
 import { nameMural, startScan, submitScan } from "~/server/murals/scan";
 import { boxAround, getMuralSettings, LIVE_MURAL, toMuralCard } from "~/server/murals/service";
+import { platformScope } from "~/server/platform-scope";
 
 /**
  * ── murals ─────────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ export const muralsRouter = createTRPCRouter({
       const murals = await ctx.db.mural.findMany({
         where: {
           ...LIVE_MURAL,
+          ...platformScope(ctx),
           ...(input.includeUnverified ? {} : { status: "APPROVED" }),
           latitude: { gte: input.south, lte: input.north },
           longitude: input.west <= input.east ? { gte: input.west, lte: input.east } : undefined,
@@ -74,7 +76,7 @@ export const muralsRouter = createTRPCRouter({
   nearby: publicProcedure.input(z.object({ lat, lng })).query(async ({ ctx, input }) => {
     const settings = await getMuralSettings(ctx.db);
     const murals = await ctx.db.mural.findMany({
-      where: { ...LIVE_MURAL, ...boxAround(input.lat, input.lng, NEARBY_RADIUS_M) },
+      where: { ...LIVE_MURAL, ...platformScope(ctx), ...boxAround(input.lat, input.lng, NEARBY_RADIUS_M) },
       include: { embeddings: { select: { vector: true } } },
     });
     const inRange = murals
@@ -96,7 +98,7 @@ export const muralsRouter = createTRPCRouter({
   byId: publicProcedure.input(z.object({ id: z.string().min(1) })).query(async ({ ctx, input }) => {
     const settings = await getMuralSettings(ctx.db);
     const userId = ctx.session?.user.id;
-    const mural = await ctx.db.mural.findFirst({ where: { id: input.id, mergedIntoId: null } });
+    const mural = await ctx.db.mural.findFirst({ where: { id: input.id, mergedIntoId: null, ...platformScope(ctx) } });
     if (!mural) return null;
     // Rejected murals are hidden, except a "not a mural" one from the people
     // who scanned it — it stays (greyed) in their collection. Fraud: never.
@@ -165,7 +167,7 @@ export const muralsRouter = createTRPCRouter({
         by: ["muralId"],
         // Not `NOT: { rejectReason: "FRAUD" }` — SQL NOT on a NULL reason is
         // NULL, which would drop every mural that was never rejected.
-        where: { userId, mural: { mergedIntoId: null, OR: [{ rejectReason: null }, { rejectReason: { not: "FRAUD" } }] } },
+        where: { userId, mural: { mergedIntoId: null, ...platformScope(ctx), OR: [{ rejectReason: null }, { rejectReason: { not: "FRAUD" } }] } },
         _count: { _all: true },
         _sum: { coinsAwarded: true },
         _max: { createdAt: true },

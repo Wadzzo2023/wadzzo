@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import type { ArBrand } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
+import { platformScope } from "~/server/platform-scope";
 import {
   buildFollowTrustlineXdr,
   creatorAsset,
@@ -161,7 +162,8 @@ export const brandsRouter = createTRPCRouter({
     const userId = ctx.session?.user.id ?? null;
 
     const creators = await ctx.db.creator.findMany({
-      where: { pageAsset: { isNot: null } },
+      // this platform's brands; every platform's on web.wadzzo.com
+      where: { pageAsset: { isNot: null }, ...platformScope(ctx) },
       select: brandSelect,
       orderBy: { joinedAt: "desc" },
     });
@@ -196,7 +198,7 @@ export const brandsRouter = createTRPCRouter({
     .query(async ({ ctx, input }): Promise<ArBrand> => {
       const userId = ctx.session?.user.id ?? null;
       const creator = await ctx.db.creator.findFirst({
-        where: { id: input.id, pageAsset: { isNot: null } },
+        where: { id: input.id, pageAsset: { isNot: null }, ...platformScope(ctx) },
         select: brandSelect,
       });
       if (!creator) {
@@ -224,7 +226,7 @@ export const brandsRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
 
     const follows = await ctx.db.follow.findMany({
-      where: { userId },
+      where: { userId, creator: platformScope(ctx) },
       select: { creator: { select: brandSelect } },
     });
 
@@ -260,8 +262,8 @@ export const brandsRouter = createTRPCRouter({
         });
       }
 
-      const creator = await ctx.db.creator.findUnique({
-        where: { id: input.brandId },
+      const creator = await ctx.db.creator.findFirst({
+        where: { id: input.brandId, ...platformScope(ctx) },
         select: {
           pageAsset: { select: { code: true, issuer: true } },
           customPageAssetCodeIssuer: true,
@@ -318,8 +320,8 @@ export const brandsRouter = createTRPCRouter({
         });
       }
 
-      const creator = await ctx.db.creator.findUnique({
-        where: { id: input.brandId },
+      const creator = await ctx.db.creator.findFirst({
+        where: { id: input.brandId, ...platformScope(ctx) },
         select: {
           id: true,
           pageAsset: { select: { code: true, issuer: true } },

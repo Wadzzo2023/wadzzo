@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { eventIcs } from "~/lib/ar/events";
 import { db } from "~/server/db";
+import { getCurrentPlatform, platformScope } from "~/server/platform";
 
 /**
  * GET /api/events/:id/ics — the event as an iCalendar file, for "Add to
@@ -13,9 +14,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end();
   }
   const id = typeof req.query.id === "string" ? req.query.id : "";
+  const platform = await getCurrentPlatform();
   const row = id
-    ? await db.creatorEvent.findUnique({
-        where: { id },
+    ? await db.creatorEvent.findFirst({
+        where: { id, ...platformScope({ platform }) },
         include: { creator: { select: { name: true } } },
       })
     : null;

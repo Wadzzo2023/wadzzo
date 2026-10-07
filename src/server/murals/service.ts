@@ -37,13 +37,14 @@ export function toMuralCard(m: Mural, settings: Pick<MuralSettings, "confirmatio
  */
 export async function creditCoins(
   tx: Prisma.TransactionClient,
-  entry: { userId: string; amount: number; reason: CoinReason; muralId?: string; scanId?: string; note?: string },
+  /** platformId: the platform (site) the coins were earned on; each has its own balance */
+  entry: { userId: string; amount: number; reason: CoinReason; platformId: string; muralId?: string; scanId?: string; note?: string },
 ): Promise<number> {
   await tx.coinLedger.create({ data: entry });
   const { balance } = await tx.coinBalance.upsert({
-    where: { userId: entry.userId },
+    where: { userId_platformId: { userId: entry.userId, platformId: entry.platformId } },
     update: { balance: { increment: entry.amount } },
-    create: { userId: entry.userId, balance: entry.amount },
+    create: { userId: entry.userId, platformId: entry.platformId, balance: entry.amount },
   });
   return balance;
 }

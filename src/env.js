@@ -7,6 +7,11 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    /** White-label platform this deployment serves; a `Platform.id` (see src/server/platform.ts). */
+    PLATFORM_SLUG: z
+      .string()
+      .regex(/^[a-z0-9-]+$/)
+      .default("wadzzo"),
     DATABASE_URL: z
       .string()
       .url()
@@ -80,6 +85,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    PLATFORM_SLUG: process.env.PLATFORM_SLUG,
     NEXT_PUBLIC_SITE: process.env.NEXT_PUBLIC_SITE,
     NEXT_PUBLIC_PLATFORM_CREATOR_TERM:
       process.env.NEXT_PUBLIC_PLATFORM_CREATOR_TERM,

@@ -18,6 +18,7 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { getCurrentPlatform, recordUserPlatform } from "~/server/platform";
 import type { AuthCredentialType } from "~/types/auth";
 import { truncateString } from "~/utils/string";
 
@@ -197,9 +198,11 @@ async function dbUser(
   email?: string,
   signUpMethod?: string,
 ) {
+  const platform = await getCurrentPlatform();
   const user = await db.user.findUnique({ where: { id: pubkey } });
   // if user exists, check if email is set, if not set it
   if (user) {
+    await recordUserPlatform(platform, user.id, { signUpMethod, isNewUser: false });
     const profileEmail = user.email;
     if (!profileEmail && email) {
       await db.user.update({
@@ -226,8 +229,10 @@ async function dbUser(
         fromAppSignup: fromAppSign === "true" ? true : false,
         email: email,
         firstSignUpMethod: signUpMethod,
+        signupPlatformId: platform.id,
       },
     });
+    await recordUserPlatform(platform, data.id, { signUpMethod, isNewUser: true });
     return data;
   }
 }
@@ -248,6 +253,8 @@ async function getUserPublicKey({
         uid,
         email,
         from: env.NEXT_PUBLIC_ASSET_CODE ?? "ACTION",
+        // registered platforms are funded by their own account (stellar-accounts config/platforms)
+        platform: env.PLATFORM_SLUG,
         fromAppSign: fromAppSign ? "true" : "false",
       },
     },

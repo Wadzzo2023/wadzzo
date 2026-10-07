@@ -4,6 +4,7 @@ import type { Session } from "next-auth";
 import { appRouter } from "~/server/api/root";
 import { createInnerTRPCContext } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import { getCurrentPlatform } from "~/server/platform";
 
 import { verifyMobileToken } from "./token";
 
@@ -43,8 +44,8 @@ export async function mobileSession(req: NextApiRequest): Promise<Session | null
   };
 }
 
-export function callerFor(session: Session | null) {
-  return appRouter.createCaller(createInnerTRPCContext({ session }));
+export async function callerFor(session: Session | null) {
+  return appRouter.createCaller(createInnerTRPCContext({ session, platform: await getCurrentPlatform() }));
 }
 
-export type Caller = ReturnType<typeof callerFor>;
+export type Caller = Awaited<ReturnType<typeof callerFor>>;

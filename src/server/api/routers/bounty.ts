@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { StellarAccount } from "~/lib/stellar/account";
+import { inPlatformScope, platformScope, type PlatformCtx } from "~/server/platform-scope";
 import { PLATFORM_ASSET } from "~/lib/stellar/constant";
 import {
   createTRPCRouter,
@@ -182,13 +183,15 @@ async function loadForViewer(
   db: PrismaClient,
   bountyId: number,
   userId: string,
+  ctx: PlatformCtx,
 ) {
   const bounty = await db.bounty.findUnique({
     where: { id: bountyId },
     include: { participants: { where: { userId }, select: { id: true } } },
   });
   const joined = Boolean(bounty?.participants.length);
-  if (!bounty || (bounty.status !== "APPROVED" && !joined)) {
+  // Another platform's bounty doesn't exist here (web.wadzzo.com sees all).
+  if (!bounty || !inPlatformScope(ctx, bounty.platformId) || (bounty.status !== "APPROVED" && !joined)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
   }
   return { bounty, joined };
@@ -198,8 +201,9 @@ async function requireOpenMembership(
   db: PrismaClient,
   bountyId: number,
   userId: string,
+  ctx: PlatformCtx,
 ) {
-  const { bounty, joined } = await loadForViewer(db, bountyId, userId);
+  const { bounty, joined } = await loadForViewer(db, bountyId, userId, ctx);
   if (!joined) {
     throw new TRPCError({
       code: "FORBIDDEN",
@@ -254,6 +258,7 @@ export const bountyRouter = createTRPCRouter({
       const now = new Date();
 
       const where: Prisma.BountyWhereInput = {
+        ...platformScope(ctx),
         status: "APPROVED",
         currentWinnerCount: { lt: ctx.db.bounty.fields.totalWinner },
         AND: [
@@ -309,7 +314,7 @@ export const bountyRouter = createTRPCRouter({
   mine: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const joins = await ctx.db.bountyParticipant.findMany({
-      where: { userId },
+      where: { userId, bounty: platformScope(ctx) },
       orderBy: { joinedAt: "desc" },
       select: { bounty: { include: cardInclude(userId) } },
     });
@@ -329,7 +334,7 @@ export const bountyRouter = createTRPCRouter({
           },
         },
       });
-      if (!row) {
+      if (!row || !inPlatformScope(ctx, row.platformId)) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
       }
       const card = toCard(row);
@@ -351,7 +356,7 @@ export const bountyRouter = createTRPCRouter({
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { bounty, joined } = await loadForViewer(ctx.db, input.id, userId);
+      const { bounty, joined } = await loadForViewer(ctx.db, input.id, userId, ctx);
       if (joined) return { joined: true };
 
       if (bounty.creatorId === userId) {
@@ -382,7 +387,7 @@ export const bountyRouter = createTRPCRouter({
 
       try {
         await ctx.db.bountyParticipant.create({
-          data: { bountyId: bounty.id, userId },
+          data: { bountyId: bounty.id, userId, platformId: ctx.platform.id },
         });
       } catch (e) {
         // A double tap racing itself — the unique (bountyId, userId) index
@@ -429,7 +434,7 @@ export const bountyRouter = createTRPCRouter({
     .input(z.object({ bountyId: z.number().int(), ...ENTRY_INPUT }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const bounty = await requireOpenMembership(ctx.db, input.bountyId, userId);
+      const bounty = await requireOpenMembership(ctx.db, input.bountyId, userId, ctx);
       assertOwnMedia(input.medias);
 
       const entry = await ctx.db.bountySubmission.create({
@@ -464,7 +469,7 @@ export const bountyRouter = createTRPCRouter({
       if (!entry || entry.userId !== userId) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Entry not found" });
       }
-      await requireOpenMembership(ctx.db, entry.bountyId, userId);
+      await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
       assertOwnMedia(input.medias);
 
       await ctx.db.bountySubmission.update({
@@ -491,7 +496,7 @@ export const bountyRouter = createTRPCRouter({
       if (!entry || entry.userId !== userId) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Entry not found" });
       }
-      await requireOpenMembership(ctx.db, entry.bountyId, userId);
+      await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
       await ctx.db.bountySubmission.delete({ where: { id: input.entryId } });
       return { id: input.entryId };
     }),
@@ -515,7 +520,7 @@ export const bountyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await requireOpenMembership(ctx.db, input.bountyId, ctx.session.user.id);
+      await requireOpenMembership(ctx.db, input.bountyId, ctx.session.user.id, ctx);
       try {
         return await Promise.all(input.files.map((f) => signEntryUpload(f)));
       } catch (e) {
@@ -568,7 +573,7 @@ export const bountyRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { bounty } = await loadForViewer(ctx.db, input.bountyId, userId);
+      const { bounty } = await loadForViewer(ctx.db, input.bountyId, userId, ctx);
 
       if (input.parentId) {
         const parent = await ctx.db.bountyComment.findUnique({
@@ -643,7 +648,7 @@ export const bountyRouter = createTRPCRouter({
     .input(z.object({ bountyId: z.number().int() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { joined } = await loadForViewer(ctx.db, input.bountyId, userId);
+      const { joined } = await loadForViewer(ctx.db, input.bountyId, userId, ctx);
       if (!joined) return [];
       const doubt = await ctx.db.bountyDoubt.findFirst({
         where: { bountyId: input.bountyId, userId },
@@ -671,7 +676,7 @@ export const bountyRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { bounty, joined } = await loadForViewer(ctx.db, input.bountyId, userId);
+      const { bounty, joined } = await loadForViewer(ctx.db, input.bountyId, userId, ctx);
       if (!joined) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Join this bounty first" });
       }

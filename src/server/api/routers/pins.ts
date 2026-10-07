@@ -6,6 +6,7 @@ import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArPin, Rarity } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
+import { inPlatformScope, platformScope, type PlatformCtx } from "~/server/platform-scope";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -210,8 +211,10 @@ function boundingBox({ lat, lng, radiusKm }: { lat: number; lng: number; radiusK
  * module-level object would freeze "now" at process start and slowly begin
  * serving drops that have already ended.
  */
-const liveGroupWhere = () =>
+const liveGroupWhere = (ctx: PlatformCtx) =>
   ({
+    // This platform's drops; the root platform (web.wadzzo.com) shows every platform's.
+    ...platformScope(ctx),
     // Everyone sees every gated drop — an anonymous viewer gets the same
     // map, with the gated ones locked.
     privacy: {
@@ -339,14 +342,15 @@ function pinsOfGroup(
  * physical place the creator put it. Eligibility (`lockReason`) is a different
  * question — who may hold this drop — and applies to both.
  */
-async function assertClaimable(db: PrismaClient, userId: string, locationId: string) {
+async function assertClaimable(db: PrismaClient, userId: string, locationId: string, ctx: PlatformCtx) {
   const location = await db.location.findUnique({
     where: { id: locationId },
     include: { locationGroup: { include: groupInclude } },
   });
 
   const group = location?.locationGroup;
-  if (!location || !group || location.hidden) {
+  // Another platform's drop can't be claimed here (web.wadzzo.com may claim any).
+  if (!location || !group || location.hidden || !inPlatformScope(ctx, group.platformId)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
   }
 
@@ -392,6 +396,8 @@ async function writeClaim(
   userId: string,
   location: { id: string },
   group: { id: string; multiPin: boolean; remaining: number },
+  /** the platform (site) the claim was made on */
+  platformId: string,
 ) {
   // ── multiPin semantics, exactly as the reference applies them ─────────
   // true:  each Location is its own collectible, one claim per Location.
@@ -433,6 +439,7 @@ async function writeClaim(
           data: {
             userId,
             locationId: location.id,
+            platformId,
             claimedAt: new Date(),
             redeemCode: generateRedeemCode(),
           },
@@ -546,7 +553,7 @@ export const pinsRouter = createTRPCRouter({
       const locationWhere = { hidden: false, ...(box ?? {}) } satisfies Prisma.LocationWhereInput;
       const groups = await ctx.db.locationGroup.findMany({
         where: {
-          ...liveGroupWhere(),
+          ...liveGroupWhere(ctx),
           ...(input?.types?.length ? { type: { in: input.types } } : {}),
           ...(input?.brandId ? { creatorId: input.brandId } : {}),
           locations: { some: locationWhere },
@@ -608,7 +615,7 @@ export const pinsRouter = createTRPCRouter({
 
       const groups = await ctx.db.locationGroup.findMany({
         where: {
-          ...liveGroupWhere(),
+          ...liveGroupWhere(ctx),
           ...(input.brandId ? { creatorId: input.brandId } : {}),
           locations: { some: { hidden: false } },
           AND: terms.map((t) => ({
@@ -668,7 +675,7 @@ export const pinsRouter = createTRPCRouter({
             include: groupWithLocationsInclude,
           })
         : null;
-      if (!group || group.approved !== true) {
+      if (!group || group.approved !== true || !inPlatformScope(ctx, group.platformId)) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
       }
 
@@ -754,7 +761,7 @@ export const pinsRouter = createTRPCRouter({
 
         const groups = await ctx.db.locationGroup.findMany({
           where: {
-            ...liveGroupWhere(),
+            ...liveGroupWhere(ctx),
             creatorId: input.brandId,
             locations: {
               some:
@@ -858,7 +865,8 @@ export const pinsRouter = createTRPCRouter({
         // drop behind it — no title, no art, no brand. Such a claim has
         // nothing to render as a card, so it is excluded here rather than
         // silently becoming an "Unknown brand" blank in someone's binder.
-        where: { userId, location: { locationGroup: { isNot: null } } },
+        // Only this platform's cards (every platform's on web.wadzzo.com).
+        where: { userId, location: { locationGroup: ctx.platform.isRoot ? { isNot: null } : { is: platformScope(ctx) } } },
         include: {
           location: {
             include: { locationGroup: { include: groupWithLocationsInclude } },
@@ -960,6 +968,7 @@ export const pinsRouter = createTRPCRouter({
         ctx.db,
         userId,
         input.locationId,
+        ctx,
       );
 
       // ── Geofence ──────────────────────────────────────────────────────────
@@ -978,7 +987,7 @@ export const pinsRouter = createTRPCRouter({
         });
       }
 
-      return writeClaim(ctx.db, userId, location, group);
+      return writeClaim(ctx.db, userId, location, group, ctx.platform.id);
     }),
 
   /**
@@ -1011,7 +1020,8 @@ export const pinsRouter = createTRPCRouter({
         ctx.db,
         userId,
         input.locationId,
+        ctx,
       );
-      return writeClaim(ctx.db, userId, location, group);
+      return writeClaim(ctx.db, userId, location, group, ctx.platform.id);
     }),
 });

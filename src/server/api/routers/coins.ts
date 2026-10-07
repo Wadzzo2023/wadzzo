@@ -10,7 +10,10 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
  */
 export const coinsRouter = createTRPCRouter({
   balance: protectedProcedure.query(async ({ ctx }) => {
-    const row = await ctx.db.coinBalance.findUnique({ where: { userId: ctx.session.user.id } });
+    // each platform (site) has its own balance
+    const row = await ctx.db.coinBalance.findUnique({
+      where: { userId_platformId: { userId: ctx.session.user.id, platformId: ctx.platform.id } },
+    });
     return { balance: row?.balance ?? 0 };
   }),
 
@@ -18,7 +21,8 @@ export const coinsRouter = createTRPCRouter({
     .input(z.object({ cursor: z.string().optional(), limit: z.number().int().min(1).max(50).default(30) }))
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.coinLedger.findMany({
-        where: { userId: ctx.session.user.id },
+        // the same balance `balance` reads: coins earned on this platform
+        where: { userId: ctx.session.user.id, platformId: ctx.platform.id },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: input.limit + 1,
         ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),

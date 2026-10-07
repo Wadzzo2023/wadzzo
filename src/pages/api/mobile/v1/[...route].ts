@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       params,
       query,
       body: req.body,
-      caller: callerFor(session),
+      caller: await callerFor(session),
       session,
     });
     res.status(200).json(data ?? null);

@@ -7,6 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
+import type { Platform } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -15,6 +16,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { canAdminPlatform, getCurrentPlatform } from "~/server/platform";
 
 /**
  * 1. CONTEXT
@@ -26,6 +28,8 @@ import { db } from "~/server/db";
 
 interface CreateContextOptions {
   session: Session | null;
+  /** the white-label platform this deployment serves */
+  platform: Platform;
 }
 
 /**
@@ -41,6 +45,7 @@ interface CreateContextOptions {
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
+    platform: opts.platform,
     db,
   };
 };
@@ -55,10 +60,14 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
 
   // Get the session from the server using the getServerSession wrapper function
-  const session = await getServerAuthSession({ req, res });
+  const [session, platform] = await Promise.all([
+    getServerAuthSession({ req, res }),
+    getCurrentPlatform(),
+  ]);
 
   return createInnerTRPCContext({
     session,
+    platform,
   });
 };
 
@@ -135,9 +144,10 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (ctx.session && ctx.session.user) {
     const admin = await ctx.db.admin.findUnique({
       where: { id: ctx.session.user.id },
+      select: { platformId: true, platform: { select: { isRoot: true } } },
     });
 
-    if (!admin) throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!admin || !canAdminPlatform(admin, ctx.platform)) throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({
@@ -158,7 +168,7 @@ export const creatorProcedure = t.procedure.use(async ({ ctx, next }) => {
       where: { id: ctx.session.user.id },
     });
 
-    if (!creator) throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!creator || creator.platformId !== ctx.platform.id) throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({
