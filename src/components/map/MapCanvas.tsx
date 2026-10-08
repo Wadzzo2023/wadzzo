@@ -7,7 +7,7 @@ import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
 import {
   MAP_STYLE,
   type ResolvedTheme,
-  useResolvedTheme,
+  useResolvedTheme, useThemeRead,
 } from "~/lib/ar/theme";
 import { cn } from "~/lib/utils";
 import { ClusterBillboard } from "./ClusterBillboard";
@@ -160,6 +160,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   /** Where the camera settled last — what the clusters are computed for. */
   const [view, setView] = useState<View | null>(null);
   const theme = useResolvedTheme();
+  const themeRead = useThemeRead();
 
   // Imperative handle rather than prop-driven view state: a controlled
   // viewState re-renders every marker on every frame of a pan.
@@ -273,6 +274,9 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   if (!MAPBOX_TOKEN) {
     return <MapFallback pins={pins} onSelect={onSelect} selectedId={selectedId} />;
   }
+
+  // Don't create the map until the real theme is known (see useThemeRead).
+  if (!themeRead) return <div className="absolute inset-0" />;
 
   const mpp = metersPerPixel(fix?.lat ?? center.lat, zoom);
 

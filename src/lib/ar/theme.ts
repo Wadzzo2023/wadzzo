@@ -137,6 +137,18 @@ export function useResolvedTheme(): ResolvedTheme {
 }
 
 /**
+ * True once the real theme has been read from `<html>`. `useResolvedTheme`
+ * answers "dark" until its effect runs, so a map created straight away starts
+ * on the dark style and is swapped to the light one mid-load, which makes
+ * Mapbox Standard throw ("reading 'get'" in addImages). Maps wait for this.
+ */
+export function useThemeRead(): boolean {
+  const [read, setRead] = useState(false);
+  useEffect(() => setRead(true), []);
+  return read;
+}
+
+/**
  * Reads and writes the theme preference, applying it as it changes.
  *
  * Deliberately does *not* apply anything on its first render — the inline

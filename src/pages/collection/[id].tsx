@@ -34,7 +34,7 @@ import {
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { Skeleton, SkeletonText } from "~/components/ui/Skeleton";
 import { pinStatus, RARITY_META, timeRemaining } from "~/lib/ar/rarity";
-import { MAP_STYLE, useResolvedTheme } from "~/lib/ar/theme";
+import { MAP_STYLE, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import { useAuth } from "~/lib/ar/store";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import {
@@ -76,6 +76,7 @@ const dateFmt = (iso: string | null) =>
 export default function CollectionDetail() {
   const router = useRouter();
   const theme = useResolvedTheme();
+  const themeRead = useThemeRead();
   const id = typeof router.query.id === "string" ? router.query.id : null;
 
   const { pins, isLoading: pinsLoading } = usePinsQuery();
@@ -419,7 +420,7 @@ export default function CollectionDetail() {
           <SectionTitle>Where you found it</SectionTitle>
           <div className="relative h-[168px] overflow-hidden rounded-ar border border-ar-line">
             {MAPBOX_TOKEN ? (
-              <MapGL
+              themeRead && <MapGL
                 mapboxAccessToken={MAPBOX_TOKEN}
                 initialViewState={{
                   longitude: pin.lng,

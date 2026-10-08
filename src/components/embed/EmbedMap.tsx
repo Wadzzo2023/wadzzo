@@ -5,7 +5,7 @@ import Supercluster from "supercluster";
 import { MuralMarker, type MapMural } from "~/components/map/MuralMarker";
 import { PinMarker } from "~/components/map/PinMarker";
 import { distanceMeters } from "~/lib/ar/geo";
-import { MAP_STYLE, useResolvedTheme } from "~/lib/ar/theme";
+import { MAP_STYLE, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import type { ArPin, Coords } from "~/lib/ar/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
@@ -56,6 +56,7 @@ export const EmbedMap = forwardRef<
 >(function EmbedMap({ pins, initial, cooperative, selectedId, onSelect, onViewport, me, murals, selectedMuralId, onSelectMural }, ref) {
   const mapRef = useRef<MapRef | null>(null);
   const theme = useResolvedTheme();
+  const themeRead = useThemeRead();
   const [view, setView] = useState<{ bounds: Bounds; zoom: number } | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -117,6 +118,8 @@ export const EmbedMap = forwardRef<
       </div>
     );
   }
+
+  if (!themeRead) return <div className="absolute inset-0" />;
 
   return (
     <div className="absolute inset-0">
