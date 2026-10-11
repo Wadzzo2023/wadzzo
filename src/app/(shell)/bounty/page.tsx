@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { MessageCircle, Search, Trophy, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -57,7 +58,7 @@ export default function BountyScreen() {
     {
       getNextPageParam: (last) => last.nextCursor ?? undefined,
       enabled: segment === "explore",
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   );
   const mine = api.bounty.mine.useQuery(undefined, { enabled: Boolean(user) });

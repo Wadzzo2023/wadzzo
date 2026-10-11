@@ -100,8 +100,8 @@ export function NameMuralSheet({
             </label>
             {name.error && <p className="text-[12px] text-ar-danger">{name.error.message}</p>}
             <div className="space-y-2 pt-1">
-              <ArButton variant="primary" size="md" block type="submit" disabled={title.trim().length < 2 || name.isLoading}>
-                {name.isLoading ? "Saving…" : "Save name"}
+              <ArButton variant="primary" size="md" block type="submit" disabled={title.trim().length < 2 || name.isPending}>
+                {name.isPending ? "Saving…" : "Save name"}
               </ArButton>
               <ArButton variant="ghost" size="md" block type="button" onClick={onClose}>
                 Skip

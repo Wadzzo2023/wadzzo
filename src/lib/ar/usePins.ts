@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { clientsign } from "package/connect_wallet/src/lib/stellar/utils";
@@ -290,7 +291,7 @@ export function useCollectedPinsQuery(args: {
       getNextPageParam: (last) => last.nextCursor,
       refetchOnWindowFocus: false,
       staleTime: 60_000,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   );
 

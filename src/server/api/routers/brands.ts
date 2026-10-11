@@ -1,4 +1,5 @@
-import { NotificationType, type PrismaClient } from "@prisma/client";
+import { NotificationType } from "@prisma/client";
+import type { Db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -117,7 +118,7 @@ function toArBrand(
  * Live drop counts and tag labels for a set of creators, in two grouped
  * queries rather than per-brand round trips.
  */
-async function brandFacets(db: PrismaClient, creatorIds: string[]) {
+async function brandFacets(db: Db, creatorIds: string[]) {
   // Same definition of "live" the map uses, so a brand's count can't claim
   // pins the map won't show.
   const liveFilter = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Frame, CalendarDays, ExternalLink, LocateFixed, Lock, Minus, Navigation, Plus, Target, X } from "lucide-react";
 import type { GetServerSideProps } from "next";
@@ -170,7 +171,7 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
       types: config.pinTypes.length ? config.pinTypes : undefined,
       brandId: brandFilter(config),
     },
-    { enabled: area != null, keepPreviousData: true, staleTime: 60_000 },
+    { enabled: area != null, placeholderData: keepPreviousData, staleTime: 60_000 },
   );
   const allPins = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
   const pins = useMemo(
@@ -206,7 +207,7 @@ function Embed({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; 
       : null;
   const muralsQuery = api.murals.inArea.useQuery(
     { ...(muralBox ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: false },
-    { enabled: muralBox != null, keepPreviousData: true, staleTime: 60_000 },
+    { enabled: muralBox != null, placeholderData: keepPreviousData, staleTime: 60_000 },
   );
   const murals = config.showMurals ? (muralsQuery.data?.murals ?? []) : [];
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);

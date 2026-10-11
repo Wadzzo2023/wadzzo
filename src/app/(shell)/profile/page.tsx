@@ -156,7 +156,7 @@ export default function ProfileScreen() {
               </span>
               {platformBalance.isLoading ? (
                 <Skeleton className="h-[22px] w-20" rounded="rounded-[4px]" />
-              ) : platformBalance.isError ? (
+              ) : platformBalance.isError || !platformBalance.data ? (
                 <span className="font-hud text-[12px] font-bold text-ar-faint">
                   Couldn&rsquo;t load
                 </span>

@@ -27,7 +27,7 @@ export function DiscussionPanel({
 }) {
   const comments = api.bounty.comments.useQuery({ bountyId });
 
-  if (comments.isLoading) {
+  if (comments.isPending) {
     return (
       <div className="space-y-3" role="status" aria-label="Loading discussion">
         <Skeleton className="h-16 w-full" />
@@ -116,7 +116,7 @@ function CommentRow({
                 confirming ? remove.mutate({ commentId: comment.id }) : setConfirming(true)
               }
               onBlur={() => setConfirming(false)}
-              disabled={remove.isLoading}
+              disabled={remove.isPending}
               aria-label={confirming ? "Confirm delete" : "Delete comment"}
               className={cn(
                 "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em]",

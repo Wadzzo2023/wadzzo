@@ -40,7 +40,7 @@ export function EntriesPanel({
 }) {
   const entries = api.bounty.entries.useQuery({ bountyId });
 
-  if (entries.isLoading) {
+  if (entries.isPending) {
     return (
       <div className="space-y-3" role="status" aria-label="Loading entries">
         <Skeleton className="h-[132px] w-full" />
@@ -216,7 +216,7 @@ function EntryCard({
           <button
             onClick={() => (confirming ? remove.mutate({ entryId: entry.id }) : setConfirming(true))}
             onBlur={() => setConfirming(false)}
-            disabled={remove.isLoading}
+            disabled={remove.isPending}
             className={cn(
               "font-hud flex h-8 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-semibold uppercase tracking-[0.1em] disabled:opacity-50",
               confirming
@@ -225,7 +225,7 @@ function EntryCard({
             )}
           >
             <Trash2 size={11} strokeWidth={2.5} />
-            {remove.isLoading ? "Deleting…" : confirming ? "Tap to confirm" : "Delete"}
+            {remove.isPending ? "Deleting…" : confirming ? "Tap to confirm" : "Delete"}
           </button>
           {remove.error && (
             <span className="self-center text-[11px] text-ar-danger">{remove.error.message}</span>

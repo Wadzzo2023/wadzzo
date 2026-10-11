@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import MapGL, { Marker, type MapRef, type ViewStateChangeEvent } from "react-map-gl";
+import MapGL, { Marker, type MapRef, type ViewStateChangeEvent } from "react-map-gl/mapbox";
 import Supercluster, { type ClusterProperties } from "supercluster";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
@@ -261,7 +261,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   const keepMural = useCallback((m: MapMural) => m.id === selectedMuralId, [selectedMuralId]);
   const pinLayer = useClusters(pins, (p) => p, (p) => p.brandImageUrl || p.imageUrl, view, MAX_MARKERS, keepPin);
   const muralLayer = useClusters(murals ?? EMPTY_MURALS, (m) => ({ lat: m.latitude, lng: m.longitude }), (m) => m.coverUrl, view, MAX_MURAL_MARKERS, keepMural);
-  const openGroup = useCallback((index: Supercluster, g: Group | undefined) => {
+  const openGroup = useCallback((index: Supercluster<{ i: number; imgs: string[] }, { imgs: string[] }>, g: Group | undefined) => {
     if (!g) return;
     mapRef.current?.easeTo({
       center: [g.lng, g.lat],
@@ -304,7 +304,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         // Any user drag / zoom / rotate while compass mode is on turns it off.
         // (`originalEvent` is only set for user input, not our own easeTo.)
         onMoveStart={(e) => {
-          if (e.originalEvent && headingUp != null) onCompassGesture?.();
+          if ((e as { originalEvent?: unknown }).originalEvent && headingUp != null) onCompassGesture?.();
         }}
         onClick={() => onSelect(null)}
         // A pitched map with 3D extrusions is what makes a city read as a

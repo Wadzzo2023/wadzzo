@@ -19,7 +19,7 @@ import Link from "next/link";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useMemo, useState } from "react";
 import QRCode from "react-qr-code";
-import MapGL, { Marker } from "react-map-gl";
+import MapGL, { Marker } from "react-map-gl/mapbox";
 
 import { ArPhotoFrame } from "~/components/ar/ArPhotoFrame";
 import { HoloCard } from "~/components/cards/HoloCard";

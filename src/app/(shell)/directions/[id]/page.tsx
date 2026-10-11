@@ -32,10 +32,10 @@ import MapGL, {
   Layer,
   Marker,
   Source,
-  type MapLayerMouseEvent,
+  type MapMouseEvent,
   type MapRef,
   type ViewStateChangeEvent,
-} from "react-map-gl";
+} from "react-map-gl/mapbox";
 
 import { DirectionsLoading } from "~/components/directions/DirectionsLoading";
 import { DragSheet } from "~/components/directions/DragSheet";
@@ -513,7 +513,7 @@ export default function DirectionsScreen() {
 
   // Alternatives: click the grey line or its time bubble.
   const alts = routes.filter((r) => r.id !== route?.id);
-  const onMapClick = (e: MapLayerMouseEvent) => {
+  const onMapClick = (e: MapMouseEvent) => {
     const hit = e.features?.find(
       (f) => f.layer?.id === "alt-line" || f.layer?.id === "alt-casing",
     );
@@ -657,7 +657,7 @@ export default function DirectionsScreen() {
             // Any touch (pan, pinch, scroll, rotate) takes the wheel: the compass turns off and the
             // camera stops following. Re-centre or the compass button brings both back.
             onMoveStart={(e) => {
-              if (!navigating || !e.originalEvent) return;
+              if (!navigating || !(e as { originalEvent?: unknown }).originalEvent) return;
               setOrientation("north");
               setFollowing(false);
             }}

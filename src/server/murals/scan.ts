@@ -1,4 +1,5 @@
-import type { Mural, Prisma, PrismaClient } from "@prisma/client";
+import type { Mural, Prisma } from "@prisma/client";
+import type { Db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 
 import { distanceMeters } from "~/lib/ar/geo";
@@ -42,7 +43,6 @@ import { checkWithVision } from "./vision";
  * Cloud Vision units it cost, accepted or not.
  */
 
-type Db = PrismaClient;
 
 /** A later fix may drift from the start fix by at most this much. */
 const MAX_DRIFT_M = 100;

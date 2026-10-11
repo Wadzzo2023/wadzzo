@@ -48,5 +48,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "package/connect_wallet/node_modules"]
+  "exclude": ["node_modules", ".next", "package/connect_wallet/node_modules", "scripts"]
 }

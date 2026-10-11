@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useEffect } from "react";
@@ -62,7 +63,7 @@ export default function EventsScreen() {
     {
       getNextPageParam: (last) => last.nextCursor ?? undefined,
       enabled: segment === "events" && urlReady,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   );
   const announcements = api.events.announcements.useInfiniteQuery(
@@ -70,7 +71,7 @@ export default function EventsScreen() {
     {
       getNextPageParam: (last) => last.nextCursor ?? undefined,
       enabled: segment === "announcements" && urlReady,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   );
 

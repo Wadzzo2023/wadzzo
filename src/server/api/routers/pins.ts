@@ -1,4 +1,5 @@
-import { ItemPrivacy, PinType, Prisma, type PrismaClient } from "@prisma/client";
+import { ItemPrivacy, PinType, Prisma } from "@prisma/client";
+import type { Db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -342,7 +343,7 @@ function pinsOfGroup(
  * physical place the creator put it. Eligibility (`lockReason`) is a different
  * question — who may hold this drop — and applies to both.
  */
-async function assertClaimable(db: PrismaClient, userId: string, locationId: string, ctx: PlatformCtx) {
+async function assertClaimable(db: Db, userId: string, locationId: string, ctx: PlatformCtx) {
   const location = await db.location.findUnique({
     where: { id: locationId },
     include: { locationGroup: { include: groupInclude } },
@@ -392,7 +393,7 @@ async function assertClaimable(db: PrismaClient, userId: string, locationId: str
  * and write the consumer row in a single transaction.
  */
 async function writeClaim(
-  db: PrismaClient,
+  db: Db,
   userId: string,
   location: { id: string },
   group: { id: string; multiPin: boolean; remaining: number },

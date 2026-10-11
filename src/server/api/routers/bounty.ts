@@ -2,8 +2,8 @@ import {
   NotificationType,
   Prisma,
   UserRole,
-  type PrismaClient,
 } from "@prisma/client";
+import type { Db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -180,7 +180,7 @@ function assertOwnMedia(medias: { url: string }[]) {
  * already joined (a bounty can be pulled after the fact).
  */
 async function loadForViewer(
-  db: PrismaClient,
+  db: Db,
   bountyId: number,
   userId: string,
   ctx: PlatformCtx,
@@ -198,7 +198,7 @@ async function loadForViewer(
 }
 
 async function requireOpenMembership(
-  db: PrismaClient,
+  db: Db,
   bountyId: number,
   userId: string,
   ctx: PlatformCtx,
@@ -220,7 +220,7 @@ async function requireOpenMembership(
 }
 
 async function notifyCreator(
-  db: PrismaClient,
+  db: Db,
   args: {
     actorId: string;
     creatorId: string;

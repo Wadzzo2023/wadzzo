@@ -1,4 +1,5 @@
-import type { CoinReason, Mural, MuralSettings, Prisma, PrismaClient } from "@prisma/client";
+import type { CoinReason, Mural, MuralSettings, Prisma } from "@prisma/client";
+import type { Db as AppDb } from "~/server/db";
 
 import type { MuralCard } from "~/lib/murals/constants";
 
@@ -8,7 +9,7 @@ import type { MuralCard } from "~/lib/murals/constants";
  * Small pieces the scan pipeline and the read endpoints share.
  */
 
-type Db = PrismaClient | Prisma.TransactionClient;
+type Db = AppDb | Prisma.TransactionClient;
 
 /** The single settings row; created with the schema defaults on first use. */
 export function getMuralSettings(db: Db): Promise<MuralSettings> {

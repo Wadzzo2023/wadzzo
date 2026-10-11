@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import MapGL, { Marker, type MapRef } from "react-map-gl";
+import MapGL, { Marker, type MapRef } from "react-map-gl/mapbox";
 import Supercluster from "supercluster";
 
 import { MuralMarker, type MapMural } from "~/components/map/MuralMarker";

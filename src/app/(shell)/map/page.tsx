@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, HelpCircle, Satellite } from "lucide-react";
 import { useRouter } from "~/lib/navigation";
@@ -304,7 +305,7 @@ export default function MapScreen() {
   };
   const muralsQuery = api.murals.inArea.useQuery(
     { ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: muralLayer === "all" },
-    { enabled: Boolean(muralArea) && muralLayer !== "off", keepPreviousData: true, staleTime: 60_000, refetchOnWindowFocus: false },
+    { enabled: Boolean(muralArea) && muralLayer !== "off", placeholderData: keepPreviousData, staleTime: 60_000, refetchOnWindowFocus: false },
   );
   const murals = muralLayer === "off" ? [] : (muralsQuery.data?.murals ?? []);
   const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;

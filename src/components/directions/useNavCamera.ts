@@ -1,5 +1,5 @@
 import { useEffect, useRef, type RefObject } from "react";
-import type { MapRef } from "react-map-gl";
+import type { MapRef } from "react-map-gl/mapbox";
 
 /**
  * ── useNavCamera ───────────────────────────────────────────────────────────

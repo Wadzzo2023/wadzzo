@@ -1,4 +1,5 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import type { Db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -50,7 +51,7 @@ const TARGET = z.object({
   id: z.string().min(1),
 });
 
-async function followedIds(db: PrismaClient, userId: string | undefined) {
+async function followedIds(db: Db, userId: string | undefined) {
   if (!userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -115,7 +116,7 @@ function toAnnouncement(
 }
 
 /** Throws NOT_FOUND unless the target exists, is still visible and is on this platform. */
-async function assertTarget(db: PrismaClient, target: z.infer<typeof TARGET>, ctx: PlatformCtx) {
+async function assertTarget(db: Db, target: z.infer<typeof TARGET>, ctx: PlatformCtx) {
   if (target.kind === "event") {
     const row = await db.creatorEvent.findFirst({
       where: { id: target.id, ...platformScope(ctx) },

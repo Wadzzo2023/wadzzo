@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MapPin, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -70,7 +71,7 @@ export function MapSearch({
 
   const search = api.pins.search.useQuery(
     { q: debounced, lat: term.near?.lat, lng: term.near?.lng, limit: 12, brandId },
-    { enabled: open && debounced.length >= 2, keepPreviousData: true, staleTime: 30_000 },
+    { enabled: open && debounced.length >= 2, placeholderData: keepPreviousData, staleTime: 30_000 },
   );
   const pinsOn = open && q.length >= 2;
   const pinsLoading = pinsOn && (search.isFetching || debounced !== q);

@@ -584,10 +584,10 @@ function PrimaryAction({
           size="lg"
           variant="primary"
           icon={Users}
-          busy={join.isLoading}
+          busy={join.isPending}
           onClick={() => join.mutate({ id: bounty.id })}
         >
-          {join.isLoading ? "Joining" : "Join bounty"}
+          {join.isPending ? "Joining" : "Join bounty"}
         </ArButton>
       </>
     );
@@ -633,7 +633,7 @@ function Composer({
         utils.bounty.byId.invalidate({ id: bountyId }),
       ]),
   });
-  const pending = sendMessage.isLoading || addComment.isLoading;
+  const pending = sendMessage.isPending || addComment.isPending;
   const error = sendMessage.error ?? addComment.error;
 
   const submit = async () => {

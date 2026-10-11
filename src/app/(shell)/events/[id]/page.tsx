@@ -389,7 +389,7 @@ function RsvpAction({ event }: { event: ArEventDetail }) {
           size="lg"
           variant="outline"
           icon={Check}
-          busy={rsvp.isLoading}
+          busy={rsvp.isPending}
           onClick={() => rsvp.mutate({ id: event.id, going: false })}
         >
           You&rsquo;re going · Tap to cancel
@@ -403,7 +403,7 @@ function RsvpAction({ event }: { event: ArEventDetail }) {
           block
           size="lg"
           variant="primary"
-          busy={rsvp.isLoading}
+          busy={rsvp.isPending}
           onClick={() => {
             if (!user && !requireAuth("events")) return;
             rsvp.mutate({ id: event.id, going: true });

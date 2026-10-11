@@ -28,7 +28,7 @@ export function CommentsSection({ target }: { target: ArCommentTarget }) {
       </h2>
       <Composer target={target} />
       <div className="mt-4">
-        {comments.isLoading ? (
+        {comments.isPending ? (
           <div className="space-y-3" role="status" aria-label="Loading comments">
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
@@ -73,7 +73,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
 
   const submit = () => {
     const content = text.trim();
-    if (!content || add.isLoading) return;
+    if (!content || add.isPending) return;
     if (!requireAuth("events")) return;
     add.mutate({ target, content });
   };
@@ -119,7 +119,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
         />
         <button
           type="submit"
-          disabled={!text.trim() || add.isLoading}
+          disabled={!text.trim() || add.isPending}
           aria-label="Post comment"
           className="ar-key ar-key-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full disabled:opacity-40"
         >
@@ -167,7 +167,7 @@ function CommentRow({ comment, target }: { comment: ArComment; target: ArComment
                   : setConfirming(true)
               }
               onBlur={() => setConfirming(false)}
-              disabled={remove.isLoading}
+              disabled={remove.isPending}
               aria-label={confirming ? "Confirm delete" : "Delete comment"}
               className={cn(
                 "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em]",

@@ -1,6 +1,6 @@
-import type { Platform, Prisma, PrismaClient } from "@prisma/client";
+import type { Platform, Prisma } from "@prisma/client";
+import type { Db } from "~/server/db";
 
-type Db = PrismaClient;
 
 type AuditCtx = {
   db: Db;

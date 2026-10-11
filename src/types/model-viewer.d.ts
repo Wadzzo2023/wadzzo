@@ -17,7 +17,7 @@ export interface ModelViewerElement extends HTMLElement {
   activateAR: () => Promise<void>;
 }
 
-declare global {
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       "model-viewer": DetailedHTMLProps<
