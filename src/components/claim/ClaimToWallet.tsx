@@ -27,13 +27,27 @@ export function ClaimToWallet({ pinId }: { pinId: string }) {
   const claim = state.data;
   if (!claim) return null;
 
+  // A plain pin has no reward to deliver: collecting it was all there is.
+  if (claim.state === "none" || !claim.reward) {
+    return (
+      <div className="ar-bevel flex items-center gap-3 rounded-ar p-3.5">
+        <CheckCircle2 size={20} className="shrink-0 text-ar-green-hot" strokeWidth={2.2} />
+        <div className="min-w-0">
+          <p className="font-hud text-[13px] font-bold text-ar-text">Claimed</p>
+          <p className="text-[12px] text-ar-dim">You collected this pin.</p>
+        </div>
+      </div>
+    );
+  }
+  const reward = claim.reward;
+
   if (claim.state === "delivered") {
     return (
       <div className="ar-bevel flex items-center gap-3 rounded-ar p-3.5">
         <CheckCircle2 size={20} className="shrink-0 text-ar-green-hot" strokeWidth={2.2} />
         <div className="min-w-0">
           <p className="font-hud text-[13px] font-bold text-ar-text">In your wallet</p>
-          <p className="truncate text-[12px] text-ar-dim">{claim.item.name} is yours on Stellar.</p>
+          <p className="truncate text-[12px] text-ar-dim">{reward.name} is yours on Stellar.</p>
         </div>
       </div>
     );
@@ -42,9 +56,9 @@ export function ClaimToWallet({ pinId }: { pinId: string }) {
   return (
     <>
       <ArButton variant="primary" size="lg" block icon={Wallet} busy={claim.state === "pending"} onClick={() => setOpen(true)}>
-        {claim.state === "pending" ? "Claim in progress…" : "Claim to wallet"}
+        {claim.state === "pending" ? "Claim in progress…" : "Claim reward"}
       </ArButton>
-      <ClaimSheet open={open} onClose={() => setOpen(false)} consumerId={claim.consumerId} itemName={claim.item.name} pending={claim.state === "pending"} onDone={() => void state.refetch()} />
+      <ClaimSheet open={open} onClose={() => setOpen(false)} consumerId={claim.consumerId} itemName={reward.name} pending={claim.state === "pending"} onDone={() => void state.refetch()} />
     </>
   );
 }

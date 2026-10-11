@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { signWithFor } from "~/lib/stellar/follow-creator";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { prepareClaim, quoteClaim, settleClaim } from "~/server/stellar/claim";
+import { claimOverview, prepareClaim, quoteClaim, settleClaim } from "~/server/stellar/claim";
 
 const method = z.enum(["PLATFORM_ASSET", "XLM"]).default("PLATFORM_ASSET");
 
@@ -13,28 +13,11 @@ const method = z.enum(["PLATFORM_ASSET", "XLM"]).default("PLATFORM_ASSET");
  */
 export const claimRouter = createTRPCRouter({
   /**
-   * Can this collected pin be claimed? `pinId` is the pin's id as the app uses
-   * it (the location). Null when the viewer hasn't collected it or it has no item.
+   * What the viewer's collected pin offers: a reward to claim (an item or the brand's page
+   * token) and where that stands, or nothing (a plain pin). `pinId` is the pin's id as the app
+   * uses it (the location). Null when the viewer hasn't collected it.
    */
-  forPin: protectedProcedure.input(z.object({ pinId: z.string() })).query(async ({ ctx, input }) => {
-    const consumer = await ctx.db.locationConsumer.findFirst({
-      where: { userId: ctx.session.user.id, locationId: input.pinId },
-      select: {
-        id: true,
-        claimTxId: true,
-        location: { select: { locationGroup: { select: { asset: { select: { id: true, name: true, thumbnail: true } } } } } },
-      },
-    });
-    const item = consumer?.location.locationGroup?.asset;
-    if (!consumer || !item) return null;
-    let state: "available" | "pending" | "delivered" = "available";
-    if (consumer.claimTxId) {
-      const tx = await ctx.db.assetTransaction.findUnique({ where: { id: consumer.claimTxId }, select: { status: true, expiresAt: true } });
-      if (tx?.status === "SUCCESS") state = "delivered";
-      else if (tx?.status === "PENDING" && (!tx.expiresAt || tx.expiresAt > new Date())) state = "pending";
-    }
-    return { consumerId: consumer.id, item, state, txId: consumer.claimTxId };
-  }),
+  forPin: protectedProcedure.input(z.object({ pinId: z.string() })).query(({ ctx, input }) => claimOverview(ctx, ctx.session.user.id, input.pinId)),
 
   quote: protectedProcedure
     .input(z.object({ consumerId: z.string(), method }))

@@ -16,6 +16,7 @@ import {
   networkPassphrase,
 } from "~/lib/stellar/constant";
 import { WithSing, type SignUserType } from "~/lib/stellar/custodial-sign";
+import { creatorAsset } from "~/lib/stellar/follow-creator";
 import type { CostLine, Problem } from "~/lib/stellar/quote";
 import type { Db } from "~/server/db";
 import { inPlatformScope } from "~/server/platform-scope";
@@ -42,6 +43,22 @@ const sum = (lines: CostLine[]) => lines.filter((l) => l.inTotal).reduce((s, l) 
 
 /* ───────────────────────────── what's being claimed ───────────────────────────── */
 
+/** What a pin hands out: one of the brand's items, or its page token. */
+type Unit = {
+  kind: "item" | "page";
+  /** null for a page token (it has no Asset row) */
+  assetId: number | null;
+  name: string;
+  code: string;
+  issuer: string;
+  thumbnail: string | null;
+  limit: number | null;
+  mintedCount: number;
+  creatorId: string;
+  creatorName: string | null;
+  storagePub: string | null;
+};
+
 async function load(ctx: Ctx, userId: string, consumerId: string) {
   const consumer = await ctx.db.locationConsumer.findUnique({
     where: { id: consumerId },
@@ -56,19 +73,17 @@ async function load(ctx: Ctx, userId: string, consumerId: string) {
               id: true,
               title: true,
               platformId: true,
-              asset: {
+              pageAsset: true,
+              creator: {
                 select: {
                   id: true,
                   name: true,
-                  code: true,
-                  issuer: true,
-                  thumbnail: true,
-                  limit: true,
-                  mintedCount: true,
-                  creatorId: true,
-                  creator: { select: { id: true, name: true, storagePub: true } },
+                  storagePub: true,
+                  customPageAssetCodeIssuer: true,
+                  pageAsset: { select: { code: true, issuer: true, thumbnail: true } },
                 },
               },
+              asset: { select: { id: true, name: true, code: true, issuer: true, thumbnail: true, limit: true, mintedCount: true, creatorId: true } },
             },
           },
         },
@@ -79,31 +94,47 @@ async function load(ctx: Ctx, userId: string, consumerId: string) {
   if (consumer?.userId !== userId || !group || !inPlatformScope(ctx, group.platformId)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Collected pin not found" });
   }
-  return { consumer, group, asset: group.asset };
+
+  let unit: Unit | null = null;
+  const brand = group.creator;
+  if (group.asset) {
+    const a = group.asset;
+    unit = { kind: "item", assetId: a.id, name: a.name, code: a.code, issuer: a.issuer, thumbnail: a.thumbnail, limit: a.limit, mintedCount: a.mintedCount, creatorId: brand.id, creatorName: brand.name, storagePub: brand.storagePub };
+  } else if (group.pageAsset) {
+    const page = creatorAsset(brand);
+    if (page) {
+      unit = { kind: "page", assetId: null, name: `${brand.name} page token`, code: page.code, issuer: page.issuer, thumbnail: brand.pageAsset?.thumbnail ?? null, limit: null, mintedCount: 0, creatorId: brand.id, creatorName: brand.name, storagePub: brand.storagePub };
+    }
+  }
+  return { consumer, group, unit };
 }
 type Loaded = Awaited<ReturnType<typeof load>>;
-type ClaimAsset = NonNullable<Loaded["asset"]>;
 
-/** Copies held by unexpired PENDING transactions: minted ones count against supply, the rest against the brand's stock. */
-async function pendingFor(db: Db, assetId: number) {
+/** Copies held by unexpired PENDING claims/purchases/gifts: minted ones count against supply, the rest against the brand's stock. */
+async function pendingFor(db: Db, unit: Unit) {
   const rows = await db.assetTransaction.findMany({
-    where: { assetId, status: "PENDING", expiresAt: { gt: new Date() }, type: { in: ["PURCHASE", "CLAIM", "GIFT"] } },
+    where: {
+      status: "PENDING",
+      expiresAt: { gt: new Date() },
+      type: { in: ["PURCHASE", "CLAIM", "GIFT"] },
+      ...(unit.assetId != null ? { assetId: unit.assetId } : { assetId: null, creatorId: unit.creatorId }),
+    },
     select: { minted: true, quantity: true },
   });
   return { minting: rows.reduce((s, r) => s + r.minted, 0), fromStock: rows.reduce((s, r) => s + (r.quantity - r.minted), 0) };
 }
 
-/** Where the copy comes from: the brand's stock first, then minting up to the item's limit. */
-async function availability(ctx: Ctx, asset: ClaimAsset) {
-  const pending = await pendingFor(ctx.db, asset.id);
-  const stockAccount = asset.creator?.storagePub ?? platformStorageKeypair().publicKey();
+/** Where the copy comes from: the brand's stock first; an item can then be minted up to its limit (page tokens only come from stock). */
+async function availability(ctx: Ctx, unit: Unit) {
+  const pending = await pendingFor(ctx.db, unit);
+  const stockAccount = unit.storagePub ?? platformStorageKeypair().publicKey();
   const storage = await StellarAccount.load(stockAccount);
-  const stock = Math.max(0, Math.floor((storage?.tokenBalance(asset.code, asset.issuer) ?? 0) - pending.fromStock));
+  const stock = Math.max(0, Math.floor((storage?.tokenBalance(unit.code, unit.issuer) ?? 0) - pending.fromStock));
 
   let mintable = 0;
-  const issuer = await issuerKeypairFor(ctx.db, asset);
+  const issuer = unit.kind === "item" && unit.assetId != null ? await issuerKeypairFor(ctx.db, { id: unit.assetId, issuer: unit.issuer, creatorId: unit.creatorId }) : null;
   if (issuer) {
-    mintable = asset.limit == null ? Infinity : Math.max(0, asset.limit - asset.mintedCount - pending.minting);
+    mintable = unit.limit == null ? Infinity : Math.max(0, unit.limit - unit.mintedCount - pending.minting);
     if (mintable > 0 && !(await StellarAccount.load(issuer.publicKey()))) mintable = 0; // issuer not on-chain yet
   }
   const total = stock + mintable;
@@ -120,11 +151,25 @@ async function existingClaim(db: Db, claimTxId: string | null) {
   return null;
 }
 
+/**
+ * What a collected pin offers, for its detail page: nothing (a plain pin: collecting was the whole
+ * thing), or a reward — an item or the brand's page token — with whether it's still to claim,
+ * on its way, or already in the wallet.
+ */
+export async function claimOverview(ctx: Ctx, userId: string, pinId: string) {
+  const consumer = await ctx.db.locationConsumer.findFirst({ where: { userId, locationId: pinId }, select: { id: true } });
+  if (!consumer) return null;
+  const { consumer: c, unit } = await load(ctx, userId, consumer.id);
+  if (!unit) return { consumerId: consumer.id, reward: null, state: "none" as const, txId: null };
+  const state: "available" | "pending" | "delivered" = (await existingClaim(ctx.db, c.claimTxId)) ?? "available";
+  return { consumerId: consumer.id, reward: { kind: unit.kind, name: unit.name, thumbnail: unit.thumbnail }, state, txId: c.claimTxId };
+}
+
 /* ──────────────────────────────────── quote ──────────────────────────────────── */
 
 export type ClaimQuote = {
   method: ClaimMethod;
-  item: { id: number; name: string; thumbnail: string; creator: string | null } | null;
+  item: { id: number | null; kind: "item" | "page"; name: string; thumbnail: string | null; creator: string | null } | null;
   currency: string;
   lines: CostLine[];
   total: number;
@@ -141,20 +186,20 @@ export type ClaimQuote = {
 
 async function plan(ctx: Ctx, userId: string, consumerId: string, method: ClaimMethod) {
   const loaded = await load(ctx, userId, consumerId);
-  const { asset, consumer } = loaded;
+  const { unit: asset, consumer } = loaded;
   const problems: Problem[] = [];
 
   const state = (await existingClaim(ctx.db, consumer.claimTxId)) ?? "available";
   if (!asset) {
-    problems.push({ code: "NOT_FOR_SALE", message: "This pin has no item to claim." });
+    problems.push({ code: "NOT_FOR_SALE", message: "This pin has no reward to claim." });
     return { loaded, quote: emptyQuote(method, state, problems), avail: null, buyer: null, feeSource: "buyer" as const, needsTrust: false, platformPay: 0 };
   }
-  if (state === "delivered") problems.push({ code: "NOT_FOR_SALE", message: "This item is already in your wallet." });
+  if (state === "delivered") problems.push({ code: "NOT_FOR_SALE", message: "This reward is already in your wallet." });
   if (state === "pending") problems.push({ code: "NOT_FOR_SALE", message: "This claim is already in progress." });
 
   const [buyer, avail] = await Promise.all([StellarAccount.load(userId), availability(ctx, asset)]);
   if (!buyer) problems.push({ code: "ACCOUNT_INACTIVE", message: "Your wallet isn't active on Stellar yet. Add some XLM to activate it." });
-  if (!avail.available) problems.push({ code: "SOLD_OUT", message: "No copies are left to claim." });
+  if (!avail.available) problems.push({ code: "SOLD_OUT", message: asset.kind === "page" ? "No page tokens are left to claim." : "No copies are left to claim." });
 
   const needsTrust = !buyer?.hasTrustline(asset.code, asset.issuer);
   if (needsTrust && buyer && !buyer.canAddSubentries(1)) {
@@ -225,7 +270,7 @@ async function plan(ctx: Ctx, userId: string, consumerId: string, method: ClaimM
 
   const quote: ClaimQuote = {
     method,
-    item: { id: asset.id, name: asset.name, thumbnail: asset.thumbnail, creator: asset.creator?.name ?? null },
+    item: { id: asset.assetId, kind: asset.kind, name: asset.name, thumbnail: asset.thumbnail, creator: asset.creatorName },
     currency,
     lines,
     total,
@@ -250,8 +295,7 @@ export async function quoteClaim(ctx: Ctx, userId: string, consumerId: string, m
 
 /* ──────────────────────────────────── build ──────────────────────────────────── */
 
-async function stockKeypair(ctx: Ctx, asset: ClaimAsset) {
-  if (!asset.creatorId) return platformStorageKeypair();
+async function stockKeypair(ctx: Ctx, asset: Unit) {
   const kp = await storageKeypairFor(ctx.db, asset.creatorId);
   if (!kp) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "The brand's storage is unavailable." });
   return kp;
@@ -276,10 +320,11 @@ export async function prepareClaim(ctx: Ctx, { userId, consumerId, method, signW
     async (tx) => {
       const inner = { ...ctx, db: tx as unknown as Db };
       const first = await load(inner, userId, consumerId);
-      if (first.asset) await tx.$queryRaw`SELECT id FROM "Asset" WHERE id = ${first.asset.id} FOR UPDATE`;
+      if (first.unit?.assetId != null) await tx.$queryRaw`SELECT id FROM "Asset" WHERE id = ${first.unit.assetId} FOR UPDATE`;
+      else if (first.unit) await tx.$queryRaw`SELECT id FROM "Creator" WHERE id = ${first.unit.creatorId} FOR UPDATE`;
 
       const p = await plan(inner, userId, consumerId, method);
-      const asset = p.loaded.asset;
+      const asset = p.loaded.unit;
       if (!p.quote.ok || !asset || !p.avail || !p.buyer) return { ok: false as const, quote: p.quote };
 
       const mother = motherKeypair();
@@ -316,7 +361,7 @@ export async function prepareClaim(ctx: Ctx, { userId, consumerId, method, signW
       const row = await tx.assetTransaction.create({
         data: {
           type: "CLAIM",
-          assetId: asset.id,
+          assetId: asset.assetId,
           quantity: 1,
           minted: fromStock ? 0 : 1,
           buyerId: userId,
