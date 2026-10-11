@@ -32,4 +32,4 @@ The AR pin-collecting app. The web app (Next 16, App Router) is the phone-frame 
 
 ## Checks
 
-`pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` (use `SKIP_ENV_VALIDATION=1` when you only want to see it compile).
+`pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build`. `pnpm test:e2e` runs the claim end to end against the dev database and Stellar testnet with a throwaway collector (needs `.env.development`, including `ISSUER_ENCRYPTION_KEY`; it cleans up its rows) (use `SKIP_ENV_VALIDATION=1` only to see that it compiles: with validation skipped `NEXT_PUBLIC_STELLAR_PUBNET="false"` is read as true, so the output points at mainnet).

@@ -13,6 +13,7 @@
     "seed:murals": "node --env-file=.env.development --experimental-strip-types scripts/seed-murals.mts",
     "start": "next start",
     "test": "vitest run",
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
