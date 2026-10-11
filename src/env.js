@@ -38,6 +38,10 @@ export const env = createEnv({
     // NEXTAUTH_SECRET when unset; one of the two must exist at runtime.
     MOBILE_JWT_SECRET: z.string().min(32).optional(),
     MOTHER_SECRET: z.string(),
+    // AES-256 key (64 hex chars or base64) that decrypts creator issuer
+    // secrets — lets claims mint on demand. Must match the fan app and the
+    // brand portal. Without it only copies already in storage can be claimed.
+    ISSUER_ENCRYPTION_KEY: z.string().min(32).optional(),
     // Looked up by the connect_wallet submodule's custodial-signing path
     // (packages/connect_wallet/src/lib/stellar/get-acc-secret.ts) to fetch a
     // user's Stellar secret from the accounts service.
@@ -103,6 +107,7 @@ export const env = createEnv({
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     NEXT_PUBLIC_MAPBOX_API: process.env.NEXT_PUBLIC_MAPBOX_API,
     MOTHER_SECRET: process.env.MOTHER_SECRET,
+    ISSUER_ENCRYPTION_KEY: process.env.ISSUER_ENCRYPTION_KEY,
     STORAGE_SECRET: process.env.STORAGE_SECRET,
     MOBILE_JWT_SECRET: process.env.MOBILE_JWT_SECRET,
     RUBY_ACCOUNTS_SECRET: process.env.RUBY_ACCOUNTS_SECRET,
