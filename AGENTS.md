@@ -27,6 +27,7 @@ The AR pin-collecting app. The web app (Next 16, App Router) is the phone-frame 
 - `src/lib/navigation.ts` is a small shim (`useRouter`, `useQueryParams`) so older code written for `next/router` keeps working. Prefer `next/navigation` in new code.
 - API routes are route handlers: `/api/trpc/[trpc]`, `/api/auth/[...nextauth]`, `/api/mobile/v1/[...route]`, `/api/proxy-image`, `/api/embed/track`, `/api/events/[id]/ics`.
 - Server helpers take the app's `Db` type (from `~/server/db`), not `PrismaClient`.
+- **Claim to wallet** (`src/server/stellar/claim.ts`, router `claim`, UI `components/claim/ClaimToWallet.tsx`): collecting a pin only records the collect; claiming delivers the pin's item on-chain. The copy comes from the brand's storage stock first, otherwise it is minted for the collector (needs `ISSUER_ENCRYPTION_KEY`; limit respected). The collector pays the platform fee, the network fee and the 0.5 XLM reserve if needed, and the quote shows all of it first. Logged as an `AssetTransaction` of type `CLAIM`, linked from `LocationConsumer.claimTxId` (one claim per collect). Never touches `/api/mobile/v1`.
 - Notifications: `~/server/notify` (`notifyBrand`, `notifyFan`); the inbox UIs live in brand-wadzzo and wadzz0.
 
 ## Checks

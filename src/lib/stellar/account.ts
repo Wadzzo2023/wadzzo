@@ -1,34 +1,49 @@
-import { Horizon } from "@stellar/stellar-sdk";
+import { Asset, Horizon, NotFoundError } from "@stellar/stellar-sdk";
 
-import { STELLAR_URL } from "./constant";
+import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET, STELLAR_URL } from "./constant";
 
 /**
- * ── Stellar account balances ───────────────────────────────────────────────
+ * ── Stellar account ────────────────────────────────────────────────────────
  *
- * Ported from the main webapp's `lib/stellar/marketplace/test/Account.ts`,
- * trimmed to the two things the AR app needs: is this wallet holding enough of
- * a creator's page asset to clear a tier, and does it trust that asset at all.
+ * A loaded account with the questions every check asks: does it trust an
+ * asset, how much does it hold, and how much XLM is really spendable once
+ * reserves and open offers are set aside.
  *
  * Tier eligibility is deliberately read live from Horizon rather than from
  * anything in Postgres — there is no balance column on `User`, and a holding
  * can change without this app ever seeing the transaction.
  */
 
-type Balances = Awaited<
-  ReturnType<Horizon.Server["loadAccount"]>
->["balances"];
+export type Balances = Horizon.HorizonApi.AccountResponse["balances"];
+export type AssetRef = { code: string; issuer: string };
+
+export const horizon = () => new Horizon.Server(STELLAR_URL);
+export const toAsset = ({ code, issuer }: AssetRef) => new Asset(code, issuer);
 
 export class StellarAccount {
-  private balances: Balances;
+  private constructor(
+    readonly id: string,
+    readonly raw: Horizon.AccountResponse,
+  ) {}
 
-  private constructor(balances: Balances) {
-    this.balances = balances;
+  /** The account, or null when it doesn't exist on-chain yet. */
+  static async load(id: string): Promise<StellarAccount | null> {
+    try {
+      return new StellarAccount(id, await horizon().loadAccount(id));
+    } catch (e) {
+      if (e instanceof NotFoundError) return null;
+      throw e;
+    }
+  }
+
+  static async loadOrThrow(id: string, label = "Account"): Promise<StellarAccount> {
+    const acc = await StellarAccount.load(id);
+    if (!acc) throw new Error(`${label} ${id.slice(0, 6)}… is not active on Stellar`);
+    return acc;
   }
 
   static async create(pubkey: string) {
-    const server = new Horizon.Server(STELLAR_URL);
-    const account = await server.loadAccount(pubkey);
-    return new StellarAccount(account.balances);
+    return StellarAccount.loadOrThrow(pubkey);
   }
 
   /**
@@ -38,30 +53,81 @@ export class StellarAccount {
    */
   static async createOrNull(pubkey: string): Promise<StellarAccount | null> {
     try {
-      return await StellarAccount.create(pubkey);
+      return await StellarAccount.load(pubkey);
     } catch {
       return null;
     }
   }
 
-  getTokenBalance(code: string, issuer: string): number {
-    const asset = this.balances.find(
-      (balance) =>
-        (balance.asset_type === "credit_alphanum4" ||
-          balance.asset_type === "credit_alphanum12") &&
-        balance.asset_code === code &&
-        balance.asset_issuer === issuer,
-    );
-    return asset ? Number(asset.balance) : 0;
+  get balances(): Balances {
+    return this.raw.balances;
+  }
+
+  get subentries() {
+    return this.raw.subentry_count;
+  }
+
+  private line(code: string, issuer: string) {
+    return this.balances.find(
+      (b) =>
+        (b.asset_type === "credit_alphanum4" || b.asset_type === "credit_alphanum12") &&
+        b.asset_code === code &&
+        b.asset_issuer === issuer,
+    ) as Horizon.HorizonApi.BalanceLineAsset | undefined;
   }
 
   hasTrustline(code: string, issuer: string): boolean {
-    return this.balances.some(
-      (balance) =>
-        (balance.asset_type === "credit_alphanum4" ||
-          balance.asset_type === "credit_alphanum12") &&
-        balance.asset_code === code &&
-        balance.asset_issuer === issuer,
-    );
+    return Boolean(this.line(code, issuer));
+  }
+
+  /** Balance of an asset (0 without a trustline). */
+  tokenBalance(code: string, issuer: string): number {
+    return Number(this.line(code, issuer)?.balance ?? 0);
+  }
+
+  getTokenBalance(code: string, issuer: string): number {
+    return this.tokenBalance(code, issuer);
+  }
+
+  platformBalance() {
+    return this.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer);
+  }
+
+  trustsPlatformAsset() {
+    return this.hasTrustline(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer);
+  }
+
+  nativeBalance() {
+    const n = this.balances.find((b): b is Horizon.HorizonApi.BalanceLineNative => b.asset_type === "native");
+    return Number(n?.balance ?? 0);
+  }
+
+  /** XLM locked by the account itself: (2 + subentries + sponsoring − sponsored) × 0.5. */
+  minimumBalance() {
+    // Horizon returns these; the SDK's AccountResponse type just doesn't declare them.
+    const { num_sponsoring = 0, num_sponsored = 0 } = this.raw as unknown as { num_sponsoring?: number; num_sponsored?: number };
+    return (2 + this.subentries + num_sponsoring - num_sponsored) * BASE_RESERVE_XLM;
+  }
+
+  /** XLM that can be spent right now (balance − reserves − XLM locked in sell offers). */
+  spendableXlm() {
+    const n = this.balances.find((b): b is Horizon.HorizonApi.BalanceLineNative => b.asset_type === "native");
+    const selling = Number(n?.selling_liabilities ?? 0);
+    return Math.max(0, this.nativeBalance() - this.minimumBalance() - selling);
+  }
+
+  canAddSubentries(count = 1) {
+    return this.subentries + count <= MAX_SUBENTRIES;
+  }
+}
+
+/** Whether a transaction with this hash made it on-chain successfully (null = not found yet). */
+export async function transactionSucceeded(hash: string): Promise<boolean | null> {
+  try {
+    const tx = await horizon().transactions().transaction(hash).call();
+    return tx.successful;
+  } catch (e) {
+    if (e instanceof NotFoundError) return null;
+    throw e;
   }
 }

@@ -22,6 +22,7 @@ import QRCode from "react-qr-code";
 import MapGL, { Marker } from "react-map-gl/mapbox";
 
 import { ArPhotoFrame } from "~/components/ar/ArPhotoFrame";
+import { ClaimToWallet } from "~/components/claim/ClaimToWallet";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { PackOpening } from "~/components/cards/PackOpening";
 import { AppShell } from "~/components/shell/AppShell";
@@ -348,6 +349,8 @@ export default function CollectionDetail() {
               Capture in AR
             </ArLinkButton>
           )}
+
+          {pin.collected && <ClaimToWallet pinId={pin.id} />}
 
           {pin.collected && pin.redeemCode && (
             <ArButton
