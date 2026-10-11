@@ -400,7 +400,7 @@ export default function DirectionsScreen() {
       navStyle === "compass"
         ? { top: 0, bottom: 0, left: 0, right: 0 }
         : { top: 230, bottom: NAV_PEEK + 40, left: 0, right: 0 },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [navStyle],
   );
   /** Fly to "you", in the current look; the frame loop takes over after. `o` = the orientation being switched to (state is still the old one). */

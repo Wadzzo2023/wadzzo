@@ -140,7 +140,7 @@ export default function BrandDetail() {
       <div className="ar-scroll h-full">
         {/* ── Cover ────────────────────────────────────────────────── */}
         <div className="relative h-[188px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          { }
           {/* Not every creator has uploaded a cover; the gradient below
               carries the header on its own when they haven't. */}
           {brand.coverUrl && (

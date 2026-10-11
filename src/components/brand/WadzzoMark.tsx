@@ -19,7 +19,7 @@ export function WadzzoMark({
   glow?: boolean;
 } & MotionProps) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
+     
     <motion.img
       src="/brand/wadzzo-mark.png"
       alt="Wadzzo"

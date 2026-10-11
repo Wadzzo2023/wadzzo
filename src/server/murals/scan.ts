@@ -298,7 +298,7 @@ export async function submitScan(db: Db, userId: string, input: SubmitScanInput)
   }, { timeout: 15_000 });
 
   const { scanId, ...rest } = result as ScanResult & { scanId?: string };
-  return finish(rest as ScanResult, scanId);
+  return finish(rest, scanId);
 }
 
 // ── naming ──────────────────────────────────────────────────────────────────

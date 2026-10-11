@@ -67,7 +67,7 @@ function useClusters<T>(
     for (const f of index.getClusters(view.bbox, Math.floor(view.zoom))) {
       const [lng, lat] = f.geometry.coordinates as [number, number];
       if ("cluster" in f.properties && f.properties.cluster) {
-        const cp = f.properties as ClusterProperties & { imgs: string[] };
+        const cp = f.properties;
         groups.push({ id: cp.cluster_id, lng, lat, count: cp.point_count, imgs: cp.imgs });
       } else {
         const t = items[(f.properties as { i: number }).i];
@@ -78,7 +78,7 @@ function useClusters<T>(
     // The selected one always has its own marker, even inside a group.
     for (const t of items) if (keep(t) && !shown.includes(t)) shown.push(t);
     return { singles: shown, groups };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [index, items, view, max, keep]);
 
   return { ...result, index };

@@ -173,7 +173,7 @@ function BrandRow({
     <div className="ar-bevel relative overflow-hidden rounded-ar">
       {/* Cover bleed behind the row — brand identity without a whole hero. */}
       <div className="absolute inset-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+        { }
         {brand.coverUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img

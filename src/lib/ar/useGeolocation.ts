@@ -81,7 +81,7 @@ export function useGeolocation({ enabled = true }: { enabled?: boolean } = {}) {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+     
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setStatus("unavailable");
       setReason("unavailable");
@@ -149,7 +149,7 @@ export function useGeolocation({ enabled = true }: { enabled?: boolean } = {}) {
   return {
     fix,
     /** Null until there's a real fix — callers must handle its absence. */
-    center: fix ? ({ lat: fix.lat, lng: fix.lng } as Coords) : null,
+    center: fix ? ({ lat: fix.lat, lng: fix.lng }) : null,
     status,
     reason,
     retry,

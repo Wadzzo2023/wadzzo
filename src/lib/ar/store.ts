@@ -166,8 +166,8 @@ export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
       ...DEFAULT_SETTINGS,
-      set: (key, value) => set({ [key]: value } as Partial<SettingsState>),
-      toggle: (key) => set((s) => ({ [key]: !s[key] }) as Partial<SettingsState>),
+      set: (key, value) => set({ [key]: value }),
+      toggle: (key) => set((s) => ({ [key]: !s[key] })),
     }),
     { name: "wadzzo-ar-settings" },
   ),

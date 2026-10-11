@@ -88,7 +88,7 @@ export function useCamera({ enabled }: { enabled: boolean }) {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+     
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setState("unsupported");
       return false;

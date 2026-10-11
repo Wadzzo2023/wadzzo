@@ -184,7 +184,7 @@ export default function ArScreen() {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+     
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       // The watch in useGeolocation already triggers the location prompt; this
       // just gives the gate something to wait on before it steps aside.

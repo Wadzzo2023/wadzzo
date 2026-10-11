@@ -61,7 +61,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params, qu
   }
   res.setHeader("Content-Security-Policy", frameAncestors(row.allowedDomains));
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=300");
-  return { props: { config: normalizeConfig(row as unknown as Record<string, unknown>, row.id) } };
+  return { props: { config: normalizeConfig(row, row.id) } };
 };
 
 export default function EmbedPage(props: Props) {

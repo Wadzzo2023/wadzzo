@@ -21,7 +21,7 @@ export function detectPlatform(): Platform {
     /iPad|iPhone|iPod/.test(ua) ||
     (ua.includes("Macintosh") && navigator.maxTouchPoints > 1);
   if (isIOS) return "ios";
-  if (/Android/.test(ua)) return "android";
+  if (ua.includes('Android')) return "android";
   return "desktop";
 }
 

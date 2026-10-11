@@ -54,7 +54,7 @@ export default function AlbedoBridge() {
       iframe.style.cssText = "width:100%;height:100%;border:0;background:#fff";
       host.appendChild(iframe);
       return iframe.contentWindow;
-    }) as typeof window.open;
+    });
     return () => {
       window.open = original;
     };

@@ -114,7 +114,7 @@ export const ROUTES: Route[] = [
         rarity: query.rarity as never,
         query: query.query,
         sort: query.sort as never,
-      } as never),
+      }),
   },
   { method: "GET", path: "/me/following", auth: "required", handler: ({ caller }) => caller.brands.followed() },
   { method: "GET", path: "/me/bounties", auth: "required", handler: ({ caller }) => caller.bounty.mine() },
@@ -177,7 +177,7 @@ export const ROUTES: Route[] = [
         tab: (query.tab as "live" | "yours" | undefined) ?? "live",
         limit: num(query.limit),
         cursor: num(query.cursor),
-      } as never),
+      }),
   },
   {
     method: "POST",

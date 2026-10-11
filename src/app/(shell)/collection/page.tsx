@@ -84,7 +84,7 @@ export default function CollectionScreen() {
   const stats = {
     total: facets?.total ?? 0,
     brands: facets?.brands ?? 0,
-    best: facets?.best ?? ("common" as Rarity),
+    best: facets?.best ?? ("common"),
   };
   const remaining = collection.total - shown.length;
   // Signed out there is nothing to fetch, so the query never runs and its
