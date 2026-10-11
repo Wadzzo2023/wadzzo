@@ -476,7 +476,7 @@ async function writeClaimRow(
       const isCodeCollision =
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === "P2002" &&
-        String(err.meta?.target ?? "").includes("redeemCode");
+        (Array.isArray(err.meta?.target) ? err.meta.target.join(",") : typeof err.meta?.target === "string" ? err.meta.target : "").includes("redeemCode");
       if (isCodeCollision) continue;
       throw err;
     }

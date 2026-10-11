@@ -43,6 +43,8 @@ export default function AlbedoBridge() {
   const xdr = typeof query.xdr === "string" ? query.xdr : null;
 
   useEffect(() => {
+    // restored as-is on cleanup, so it must not be bound
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const original = window.open;
     window.open = ((url?: string | URL) => {
       const host = frameHost.current;
