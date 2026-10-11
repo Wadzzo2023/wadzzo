@@ -1,7 +1,124 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "tailwind-scrollbar-hide/v4";
 @import "./styles.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+/* The connect_wallet submodule's classes live outside src/. */
+@source "../../package";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens. Values point at the CSS variables set in :root / .dark (and
+ * re-pointed by arcade.css), so `inline` keeps utilities reading them live —
+ * switching the theme class swaps every colour without regenerating CSS.
+ */
+@theme inline {
+  /* Arcade ground + ink. Named `ar-*` so they never collide with the shadcn
+     semantic tokens, which are re-pointed at these in arcade.css. */
+  --color-ar-void: hsl(var(--ar-void));
+  --color-ar-bg: hsl(var(--ar-bg));
+  --color-ar-surface: hsl(var(--ar-surface));
+  --color-ar-surface-2: hsl(var(--ar-surface-2));
+  --color-ar-surface-3: hsl(var(--ar-surface-3));
+  --color-ar-line: hsl(var(--ar-line));
+  --color-ar-line-bright: hsl(var(--ar-line-bright));
+  --color-ar-text: hsl(var(--ar-text));
+  --color-ar-dim: hsl(var(--ar-text-dim));
+  --color-ar-faint: hsl(var(--ar-text-faint));
+  --color-ar-green: hsl(var(--ar-green));
+  --color-ar-green-hot: hsl(var(--ar-green-hot));
+  --color-ar-green-deep: hsl(var(--ar-green-deep));
+  --color-ar-green-ink: hsl(var(--ar-green-ink));
+  --color-ar-danger: hsl(var(--ar-danger));
+  --color-ar-locked: hsl(var(--ar-locked));
+
+  --color-rarity-common: hsl(var(--rarity-common));
+  --color-rarity-rare: hsl(var(--rarity-rare));
+  --color-rarity-epic: hsl(var(--rarity-epic));
+  --color-rarity-legendary: hsl(var(--rarity-legendary));
+  --color-rarity-mythic: hsl(var(--rarity-mythic));
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-gold: hsl(var(--gold));
+  --color-gold-foreground: hsl(var(--gold-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-display: var(--nf-display), system-ui, sans-serif;
+  --font-body: var(--nf-body), system-ui, sans-serif;
+
+  /* v3's bare `rounded` (0.25rem) is `rounded-base` now. */
+  --radius-base: 0.25rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-ar: var(--ar-r);
+  --radius-ar-lg: var(--ar-r-lg);
+  --radius-ar-xl: var(--ar-r-xl);
+
+  /* The phone the app pretends to be when it's shown on a desktop browser.
+     430x932 is the iPhone 17 Pro Max logical viewport — the largest common
+     phone, so nothing designed against it overflows a smaller one. */
+  --container-device: 430px;
+  --container-tablet: 600px;
+
+  --animate-gradient-x: gradient-x 3s ease infinite;
+  --animate-shimmer: shimmer 2s ease-in-out infinite;
+
+  @keyframes gradient-x {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+@utility h-device {
+  height: 932px;
+}
 
 @layer base {
   :root {
