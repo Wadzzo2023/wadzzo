@@ -41,20 +41,18 @@ const config = {
     }
     return config;
   },
-  experimental: {
-    // onnxruntime loads its .so by a computed path the tracer can't follow.
-    outputFileTracingIncludes: {
-      "/api/trpc/[trpc]": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
-      "/api/mobile/**": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
-    },
-    outputFileTracingExcludes: {
-      "*": [
-        "node_modules/**/onnxruntime-node/bin/napi-v6/darwin/**",
-        "node_modules/**/onnxruntime-node/bin/napi-v6/win32/**",
-        "node_modules/**/onnxruntime-node/bin/napi-v6/linux/arm64/**",
-        "node_modules/**/onnxruntime-web/**",
-      ],
-    },
+  // onnxruntime loads its .so by a computed path the tracer can't follow.
+  outputFileTracingIncludes: {
+    "/api/trpc/[trpc]": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
+    "/api/mobile/**": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
+  },
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/**/onnxruntime-node/bin/napi-v6/darwin/**",
+      "node_modules/**/onnxruntime-node/bin/napi-v6/win32/**",
+      "node_modules/**/onnxruntime-node/bin/napi-v6/linux/arm64/**",
+      "node_modules/**/onnxruntime-web/**",
+    ],
   },
   reactStrictMode: true,
   images: {
@@ -87,16 +85,6 @@ const config = {
         destination: "/api/toml",
       },
     ];
-  },
-
-  /**
-   * If you are using `appDir` then you must comment the below `i18n` config out.
-   *
-   * @see https://github.com/vercel/next.js/issues/41980
-   */
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
   },
 };
 

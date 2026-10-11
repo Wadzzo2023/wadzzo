@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Frame, QrCode, ScanLine } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 
 import { cn } from "~/lib/utils";
 

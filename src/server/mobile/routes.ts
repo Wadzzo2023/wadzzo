@@ -1,4 +1,3 @@
-import type { NextApiRequest } from "next";
 import type { Session } from "next-auth";
 import { z } from "zod";
 
@@ -8,7 +7,7 @@ import { authCredentialSchema } from "~/types/auth";
 
 import type { Caller } from "./context";
 import { followBrand } from "./follow";
-import { HttpError, rateLimit } from "./http";
+import { HttpError, clientIp, rateLimit } from "./http";
 import { signMobileToken } from "./token";
 
 /**
@@ -23,7 +22,7 @@ import { signMobileToken } from "./token";
 type Auth = "none" | "optional" | "required";
 
 type Ctx = {
-  req: NextApiRequest;
+  req: Request;
   params: Record<string, string>;
   query: Record<string, string | undefined>;
   body: unknown;
@@ -44,10 +43,7 @@ const idParam = (ctx: Ctx, key: string) => {
   if (!Number.isInteger(n)) throw new HttpError(400, "BAD_REQUEST", `Invalid ${key}`);
   return n;
 };
-const ip = (req: NextApiRequest) =>
-  (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
-  req.socket.remoteAddress ??
-  "unknown";
+const ip = clientIp;
 
 const collectBody = z.object({ lat: z.number(), lng: z.number() });
 const followBody = z.object({ signedXdr: z.string().min(1).optional() }).optional();

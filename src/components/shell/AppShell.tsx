@@ -1,5 +1,5 @@
 import { ChevronLeft } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { type ReactNode } from "react";
 
 import { cn } from "~/lib/utils";

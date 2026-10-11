@@ -7,7 +7,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { useEffect, useState } from "react";
 
 import { packProgress, useMuralPack } from "~/lib/murals/pack";

@@ -1,4 +1,3 @@
-import type { NextApiRequest } from "next";
 import type { Session } from "next-auth";
 
 import { appRouter } from "~/server/api/root";
@@ -16,8 +15,8 @@ import { verifyMobileToken } from "./token";
  * The token itself never expires (see token.ts); the user-row lookup here is
  * the one remaining gate, and it's what makes account deletion cut access.
  */
-export async function mobileSession(req: NextApiRequest): Promise<Session | null> {
-  const header = req.headers.authorization ?? "";
+export async function mobileSession(req: Request): Promise<Session | null> {
+  const header = req.headers.get("authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match?.[1]) return null;
 

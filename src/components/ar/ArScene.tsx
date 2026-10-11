@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, Navigation, ScanLine, Zap } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {

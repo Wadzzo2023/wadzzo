@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { LayoutGrid, Map as MapIcon, Store, Trophy } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { useState } from "react";
 
 import { CameraLauncher } from "~/components/camera/CameraLauncher";

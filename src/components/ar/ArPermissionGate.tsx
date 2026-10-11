@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Camera, Check, Compass, MapPin, Minus, X } from "lucide-react";
 
 import { CameraModeSwitch, type CameraMode } from "~/components/ar/CameraModeSwitch";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { useMemo } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";

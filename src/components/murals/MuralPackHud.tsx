@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Frame, X } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "~/lib/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { BottomSheet } from "~/components/ui/BottomSheet";

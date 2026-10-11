@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { verifyMessageSignature } from "@albedo-link/signature-verification";
 import axios from "axios";
-import { type GetServerSidePropsContext } from "next";
 
 import {
   getServerSession,
@@ -102,9 +101,4 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export const getServerAuthSession = () => getServerSession(authOptions);

@@ -9,7 +9,6 @@
 
 import type { Platform } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -56,12 +55,10 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts;
-
-  // Get the session from the server using the getServerSession wrapper function
+export const createTRPCContext = async () => {
+  // The session comes from the request's cookies (App Router: next/headers).
   const [session, platform] = await Promise.all([
-    getServerAuthSession({ req, res }),
+    getServerAuthSession(),
     getCurrentPlatform(),
   ]);
 

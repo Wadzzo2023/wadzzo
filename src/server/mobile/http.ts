@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import type { NextApiResponse } from "next";
 import { ZodError } from "zod";
 
 /**
@@ -37,31 +36,27 @@ function zodMessage(e: ZodError) {
   return path ? `${path}: ${issue.message}` : issue.message;
 }
 
-export function sendError(res: NextApiResponse, e: unknown) {
-  if (e instanceof HttpError) {
-    return res.status(e.status).json({ error: { code: e.code, message: e.message } });
-  }
-  if (e instanceof ZodError) {
-    return res.status(400).json({ error: { code: "BAD_REQUEST", message: zodMessage(e) } });
-  }
+const fail = (status: number, code: string, message: string) => Response.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
+
+/** Turns anything thrown while handling a request into the API's error response. */
+export function errorResponse(e: unknown): Response {
+  if (e instanceof HttpError) return fail(e.status, e.code, e.message);
+  if (e instanceof ZodError) return fail(400, "BAD_REQUEST", zodMessage(e));
   if (e instanceof TRPCError) {
     const message = e.cause instanceof ZodError ? zodMessage(e.cause) : e.message;
-    return res
-      .status(STATUS[e.code] ?? 500)
-      .json({ error: { code: e.code, message } });
+    return fail(STATUS[e.code] ?? 500, e.code, message);
   }
   // Firebase sign-in failures surface as "Firebase: Error (auth/…)." — keep
   // the code so the app can map it to friendly copy, like the old app did.
   const message = e instanceof Error ? e.message : String(e);
   const firebase = /\((auth\/[a-z-]+)\)/.exec(message)?.[1];
-  if (firebase) {
-    return res.status(401).json({ error: { code: firebase, message } });
-  }
+  if (firebase) return fail(401, firebase, message);
   console.error("[mobile api]", e);
-  return res
-    .status(500)
-    .json({ error: { code: "INTERNAL_SERVER_ERROR", message: "Something went wrong" } });
+  return fail(500, "INTERNAL_SERVER_ERROR", "Something went wrong");
 }
+
+/** The caller's address from the proxy headers (there's no socket in route handlers). */
+export const clientIp = (req: Request) => req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "unknown";
 
 /**
  * Tiny fixed-window limiter. In-memory, so per server instance — a speed bump
