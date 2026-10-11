@@ -8,6 +8,7 @@ import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArPin, Rarity } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
 import { inPlatformScope, platformScope, type PlatformCtx } from "~/server/platform-scope";
+import { notifyBrand } from "~/server/notify";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -393,6 +394,23 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
  * and write the consumer row in a single transaction.
  */
 async function writeClaim(
+  db: Db,
+  userId: string,
+  location: { id: string },
+  group: { id: string; multiPin: boolean; remaining: number },
+  /** the platform (site) the claim was made on */
+  platformId: string,
+) {
+  const claim = await writeClaimRow(db, userId, location, group, platformId);
+  // Tell the brand (best effort; never fails the collect).
+  const info = await db.locationGroup.findUnique({ where: { id: group.id }, select: { title: true, creatorId: true } }).catch(() => null);
+  if (info?.creatorId) {
+    await notifyBrand(db, { actorId: userId, type: "PIN_COLLECTED", entityId: 0, creatorId: info.creatorId, meta: { pin: info.title, groupId: group.id } });
+  }
+  return claim;
+}
+
+async function writeClaimRow(
   db: Db,
   userId: string,
   location: { id: string },
