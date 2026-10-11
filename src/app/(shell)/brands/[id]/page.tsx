@@ -151,7 +151,7 @@ export default function BrandDetail() {
               className="h-full w-full object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-ar-void/70 via-transparent to-ar-bg" />
+          <div className="absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
           <div className="ar-grid absolute inset-0 opacity-25" />
 
           <div

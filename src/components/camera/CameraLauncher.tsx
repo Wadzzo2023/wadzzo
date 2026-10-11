@@ -288,7 +288,7 @@ function PackChip() {
         <span className="tabular-nums">{s.status === "error" ? "" : `${pct}%`}</span>
       </p>
       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ar-void/60">
-        <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-rarity-epic transition-[width] duration-300" style={{ width: `${Math.max(3, pct)}%` }} />
+        <div className="h-full rounded-full bg-linear-to-r from-cyan-400 to-rarity-epic transition-[width] duration-300" style={{ width: `${Math.max(3, pct)}%` }} />
       </div>
     </div>
   );

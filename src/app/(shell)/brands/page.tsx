@@ -74,7 +74,7 @@ export default function BrandsScreen() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search brands"
               aria-label="Search brands"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
+              className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
             />
             {query && (
               <button
@@ -183,7 +183,7 @@ function BrandRow({
             className="h-full w-full object-cover opacity-[0.14]"
           />
         )}
-        <div className="via-ar-surface/92 absolute inset-0 bg-gradient-to-r from-ar-surface to-ar-surface/70" />
+        <div className="via-ar-surface/92 absolute inset-0 bg-linear-to-r from-ar-surface to-ar-surface/70" />
       </div>
 
       <div className="relative flex items-center gap-3 p-3">

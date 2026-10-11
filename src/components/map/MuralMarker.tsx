@@ -41,7 +41,7 @@ export function MuralMarker({
       }}
       aria-label={`${mural.title} — ${verified ? "mural" : "unverified mural"}`}
       className={cn(
-        "group relative flex h-[62px] w-[46px] cursor-pointer flex-col items-center focus-visible:outline-none",
+        "group relative flex h-[62px] w-[46px] cursor-pointer flex-col items-center focus-visible:outline-hidden",
         done ? "opacity-80" : !verified && "opacity-60",
         selected && "!opacity-100",
       )}

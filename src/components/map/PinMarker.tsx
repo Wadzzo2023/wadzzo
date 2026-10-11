@@ -55,7 +55,7 @@ export function PinMarker({
         onSelect();
       }}
       aria-label={`${pin.title} — ${pin.brandName}`}
-      className="group relative flex h-[58px] w-[52px] cursor-pointer items-start justify-center focus-visible:outline-none"
+      className="group relative flex h-[58px] w-[52px] cursor-pointer items-start justify-center focus-visible:outline-hidden"
     >
       {/* Ground shadow. Tightens when the medallion is grounded (out of
           range), which is what sells the height difference. */}

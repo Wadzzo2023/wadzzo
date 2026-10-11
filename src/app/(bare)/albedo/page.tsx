@@ -96,7 +96,7 @@ export default function AlbedoBridge() {
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center gap-5 bg-ar-bg px-8 text-center"
-      style={{ fontFamily: "var(--font-body)" }}
+      style={{ fontFamily: "var(--nf-body)" }}
     >
       <span className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-ar-green/40 bg-ar-green/15 text-ar-green-hot">
         <Wallet size={24} strokeWidth={2.2} />

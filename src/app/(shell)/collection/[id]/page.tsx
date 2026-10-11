@@ -201,7 +201,7 @@ export default function CollectionDetail() {
             transparent keeps both readable without flattening the rarity wash
             behind the hero. */}
         <div
-          className="sticky top-0 z-30 flex items-center justify-between bg-gradient-to-b from-ar-void via-ar-void/85 to-transparent px-4 pb-6"
+          className="sticky top-0 z-30 flex items-center justify-between bg-linear-to-b from-ar-void via-ar-void/85 to-transparent px-4 pb-6"
           style={{ paddingTop: "calc(var(--ar-top-inset) + 14px)" }}
         >
           <button
@@ -559,7 +559,7 @@ function CreatorInfoCard({
   followLabel?: string;
 }) {
   return (
-    <div className="ar-bevel relative overflow-hidden rounded-ar border border-ar-line/70 bg-gradient-to-b from-ar-surface-2/90 to-ar-surface p-3.5 shadow-md">
+    <div className="ar-bevel relative overflow-hidden rounded-ar border border-ar-line/70 bg-linear-to-b from-ar-surface-2/90 to-ar-surface p-3.5 shadow-md">
       {/* Brand cover bleed in background */}
       {brand?.coverUrl && (
         <div className="pointer-events-none absolute inset-0 opacity-[0.14]">

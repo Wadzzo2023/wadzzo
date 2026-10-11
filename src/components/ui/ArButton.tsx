@@ -51,7 +51,7 @@ const baseClass = (
     "font-hud relative inline-flex select-none items-center justify-center whitespace-nowrap",
     "font-semibold uppercase tracking-[0.08em] transition-colors",
     "disabled:pointer-events-none disabled:opacity-40",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
+    "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
     VARIANTS[variant],
     SIZES[size],
     block && "w-full",
@@ -141,7 +141,7 @@ export function ArIconButton({
       className={cn(
         "ar-glass relative flex h-11 w-11 items-center justify-center rounded-full",
         "text-ar-dim transition-colors hover:text-ar-text",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ar-green",
+        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green",
         active && "!border-ar-green/60 text-ar-green-hot ar-glow",
         className,
       )}

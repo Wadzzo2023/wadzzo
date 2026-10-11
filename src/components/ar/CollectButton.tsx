@@ -17,7 +17,7 @@ export function CollectButton({
       whileTap={{ scale: 0.92 }}
       onClick={onClick}
       aria-label={`Collect ${title}`}
-      className="mx-auto block h-[124px] w-[124px] rounded-ar focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ar-green"
+      className="mx-auto block h-[124px] w-[124px] rounded-ar focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green"
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- static art, same as the rest of the AR HUD */}
       <img

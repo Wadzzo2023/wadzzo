@@ -77,7 +77,7 @@ export function WadzzoCardBack({
 
       {/* Center Medallion with Wadzzo Logo */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full border-2 border-ar-green/50 bg-gradient-to-br from-ar-surface-3 via-ar-surface to-ar-void p-3 shadow-[0_0_24px_hsl(var(--ar-green)/0.4),inset_0_0_16px_rgba(0,0,0,0.85)]">
+        <div className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full border-2 border-ar-green/50 bg-linear-to-br from-ar-surface-3 via-ar-surface to-ar-void p-3 shadow-[0_0_24px_hsl(var(--ar-green)/0.4),inset_0_0_16px_rgba(0,0,0,0.85)]">
           {/* Animated orbiting rings */}
           <div
             className="absolute inset-1 animate-spin rounded-full border border-dashed border-ar-green/35"
@@ -116,7 +116,7 @@ export function WadzzoCardBack({
 
       {/* Shimmer sweep animation when in loading state */}
       {loading && (
-        <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-ar-green/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-linear-to-r from-transparent via-ar-green/20 to-transparent" />
       )}
 
       {/* Dynamic specular glare over the card back */}
@@ -299,7 +299,7 @@ export function HoloCard({
         className={cn(
           "holo group block w-full text-left",
           "rounded-[inherit] transition-colors duration-300",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
+          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
         )}
         data-rarity={rarity}
         data-spent={spent || undefined}
@@ -978,7 +978,7 @@ function StateStamp({ kind }: { kind: "collected" | "expired" | "locked" }) {
   return (
     <span
       className={cn(
-        "flex h-[20px] w-[20px] items-center justify-center rounded-full border backdrop-blur-sm",
+        "flex h-[20px] w-[20px] items-center justify-center rounded-full border backdrop-blur-xs",
         cls,
       )}
       aria-label={kind}

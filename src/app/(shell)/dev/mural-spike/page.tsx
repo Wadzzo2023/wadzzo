@@ -221,21 +221,21 @@ export default function MuralSpike() {
         }`}
       />
 
-      <div className="absolute inset-x-3 top-3 space-y-1 rounded-xl bg-black/60 p-3 font-mono text-[11px] leading-tight backdrop-blur">
+      <div className="absolute inset-x-3 top-3 space-y-1 rounded-xl bg-black/60 p-3 font-mono text-[11px] leading-tight backdrop-blur-sm">
         <div>backend {stats.backend ?? "—"} · load {stats.loadMs ? `${(stats.loadMs / 1000).toFixed(1)}s` : "—"} · dl {stats.downloadedMB?.toFixed(1) ?? "—"} MB</div>
         <div>encode {stats.encodeMs?.toFixed(0) ?? "—"} ms · loop {stats.fps?.toFixed(1) ?? "—"} fps (target {targetFps})</div>
         <div>score {pct}% · top “{stats.top ?? "—"}”</div>
         <div>yaw Δ {yawDelta == null ? "—" : `${yawDelta.toFixed(0)}°`} · sweep L {sweep.left ? "✓" : "·"} R {sweep.right ? "✓" : "·"}</div>
-        <div className="h-1.5 overflow-hidden rounded bg-white/20">
+        <div className="h-1.5 overflow-hidden rounded-base bg-white/20">
           <div className="h-full bg-fuchsia-400 transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
       {/* Scrim so the guidance stays readable over bright scenes. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/80 via-black/40 to-black/0" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-linear-to-t from-black/80 via-black/40 to-black/0" />
 
       <div className="absolute inset-x-3 bottom-6 space-y-3 text-center">
-        <div className="text-lg font-semibold drop-shadow">
+        <div className="text-lg font-semibold drop-shadow-sm">
           {phase === "idle" && "M0 spike — tap Start"}
           {phase === "loading" && `Getting the mural finder ready… ${loadPct}%`}
           {phase === "error" && `Error: ${error}`}

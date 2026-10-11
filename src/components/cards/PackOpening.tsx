@@ -237,7 +237,7 @@ export function PackOpening({
                   onClick={open}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.18 }}
-                  className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-3 focus-visible:outline-none"
+                  className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-3 focus-visible:outline-hidden"
                   aria-label="Tear open to reveal your collectible"
                 >
                   <WadzzoMark glow className="h-10 w-auto" />

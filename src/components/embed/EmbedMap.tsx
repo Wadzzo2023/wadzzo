@@ -155,7 +155,7 @@ export const EmbedMap = forwardRef<
                     const z = Math.min(index.getClusterExpansionZoom(props.cluster_id!), 18);
                     mapRef.current?.easeTo({ center: [lng, lat], zoom: z, duration: 500 });
                   }}
-                  className="font-hud flex items-center justify-center rounded-full border-2 border-ar-green bg-ar-green/25 text-[13px] font-bold text-ar-text backdrop-blur-sm transition-transform hover:scale-110"
+                  className="font-hud flex items-center justify-center rounded-full border-2 border-ar-green bg-ar-green/25 text-[13px] font-bold text-ar-text backdrop-blur-xs transition-transform hover:scale-110"
                   style={{ width: size, height: size, boxShadow: "0 0 0 4px hsl(var(--ar-green) / 0.18)" }}
                 >
                   {count}
@@ -181,7 +181,7 @@ export const EmbedMap = forwardRef<
           <Marker longitude={me.lng} latitude={me.lat} anchor="center" style={{ zIndex: 30, pointerEvents: "none" }}>
             <span className="relative flex h-5 w-5 items-center justify-center">
               <span className="absolute inset-0 animate-ping rounded-full bg-sky-400/50" />
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-sky-500 shadow" />
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-sky-500 shadow-sm" />
             </span>
           </Marker>
         )}

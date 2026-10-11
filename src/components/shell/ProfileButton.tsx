@@ -26,7 +26,7 @@ export function ProfileButton({ className }: { className?: string }) {
       aria-label={count > 0 ? `Profile, ${count} new` : "Profile"}
       className={cn(
         "ar-glass relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-dim",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ar-green",
+        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green",
         className,
       )}
     >

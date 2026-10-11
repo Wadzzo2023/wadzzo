@@ -26,14 +26,14 @@ export const displayFont = Chakra_Petch({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-display",
+  variable: "--nf-display",
 });
 
 export const bodyFont = Sora({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-body",
+  variable: "--nf-body",
 });
 
 /**

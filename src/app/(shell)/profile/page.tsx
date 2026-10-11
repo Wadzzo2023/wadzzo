@@ -180,7 +180,7 @@ export default function ProfileScreen() {
 
         {/* ── Identity ─────────────────────────────────────────────── */}
         <div className="relative mx-5 overflow-hidden rounded-ar-lg">
-          <div className="ar-grid absolute inset-0 bg-gradient-to-br from-ar-green/20 via-ar-surface to-ar-surface" />
+          <div className="ar-grid absolute inset-0 bg-linear-to-br from-ar-green/20 via-ar-surface to-ar-surface" />
           <div className="relative flex items-center gap-3.5 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -637,7 +637,7 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="-ml-4 block h-[104px] w-[74px] rounded-[12px] border border-ar-line-bright bg-gradient-to-br from-ar-surface-3 to-ar-surface first:ml-0"
+                className="-ml-4 block h-[104px] w-[74px] rounded-[12px] border border-ar-line-bright bg-linear-to-br from-ar-surface-3 to-ar-surface first:ml-0"
                 style={{
                   transform: `rotate(${(i - 1) * 9}deg) translateY(${Math.abs(i - 1) * 5}px)`,
                 }}

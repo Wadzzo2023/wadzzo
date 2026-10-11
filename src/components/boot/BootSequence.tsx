@@ -158,7 +158,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         <motion.span
           key={c.id}
           aria-hidden
-          className="absolute rounded-full border border-ar-green/40 bg-gradient-to-br from-ar-green/25 to-transparent"
+          className="absolute rounded-full border border-ar-green/40 bg-linear-to-br from-ar-green/25 to-transparent"
           style={{
             left: `${c.left}%`,
             top: `${c.top}%`,
@@ -186,7 +186,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         {phase === "ignite" && (
           <motion.div
             key="scan"
-            className="absolute inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-ar-green-hot to-transparent shadow-[0_0_30px_6px_hsl(var(--ar-green)/0.75)]"
+            className="absolute inset-x-0 h-[3px] bg-linear-to-r from-transparent via-ar-green-hot to-transparent shadow-[0_0_30px_6px_hsl(var(--ar-green)/0.75)]"
             initial={{ top: "-4%" }}
             animate={{ top: "104%" }}
             exit={{ opacity: 0 }}

@@ -115,7 +115,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
           rows={1}
           maxLength={1000}
           placeholder="Add a comment"
-          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-none placeholder:text-ar-faint"
+          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-hidden placeholder:text-ar-faint"
         />
         <button
           type="submit"

@@ -137,7 +137,7 @@ export function MapSearch({
                 aria-label="Search"
                 enterKeyHint="search"
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-[15px] text-ar-text outline-none placeholder:text-ar-faint"
+                className="min-w-0 flex-1 bg-transparent text-[15px] text-ar-text outline-hidden placeholder:text-ar-faint"
               />
               <button
                 onClick={query ? () => setQuery("") : close}

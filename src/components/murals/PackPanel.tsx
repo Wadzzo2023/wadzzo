@@ -56,7 +56,7 @@ export function PackBar({ progress, active, failed }: { progress: number; active
   return (
     <div className="relative h-3 overflow-hidden rounded-full border border-white/10 bg-ar-void/60">
       <motion.div
-        className={cn("absolute inset-y-0 left-0 rounded-full", failed ? "bg-ar-danger" : "bg-gradient-to-r from-cyan-400 via-rarity-epic to-fuchsia-500")}
+        className={cn("absolute inset-y-0 left-0 rounded-full", failed ? "bg-ar-danger" : "bg-linear-to-r from-cyan-400 via-rarity-epic to-fuchsia-500")}
         initial={false}
         animate={{ width: `${Math.max(2, progress * 100)}%` }}
         transition={{ type: "spring", stiffness: 120, damping: 24 }}

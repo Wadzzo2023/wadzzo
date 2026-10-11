@@ -197,7 +197,7 @@ export default function BountyDetailScreen() {
           </div>
 
           {/* ── Reward ───────────────────────────────────────────── */}
-          <div className="mx-5 mt-4 overflow-hidden rounded-ar-lg border border-ar-green/30 bg-gradient-to-br from-ar-green/15 via-ar-surface to-ar-surface">
+          <div className="mx-5 mt-4 overflow-hidden rounded-ar-lg border border-ar-green/30 bg-linear-to-br from-ar-green/15 via-ar-surface to-ar-surface">
             <div className="flex items-end justify-between px-4 pb-3 pt-3.5">
               <div>
                 <p className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ar-faint">
@@ -349,9 +349,9 @@ function Hero({ bounty }: { bounty: BountyDetail }) {
           ))}
         </div>
       ) : (
-        <div className="ar-grid h-full w-full bg-gradient-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
+        <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
       )}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ar-void/70 via-transparent to-ar-bg" />
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
 
       {images.length > 1 && (
         <div className="absolute bottom-11 left-1/2 flex -translate-x-1/2 gap-1.5">
@@ -685,7 +685,7 @@ function Composer({
           rows={1}
           maxLength={kind === "chat" ? 2000 : 1000}
           placeholder={placeholder}
-          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-none placeholder:text-ar-faint"
+          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-hidden placeholder:text-ar-faint"
         />
         <button
           type="submit"

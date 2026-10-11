@@ -83,7 +83,7 @@ export function NameMuralSheet({
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={80}
                 placeholder="e.g. Blue Heron"
-                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-none placeholder:text-ar-faint focus:border-rarity-epic/70"
+                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-hidden placeholder:text-ar-faint focus:border-rarity-epic/70"
               />
             </label>
             <label className="block">
@@ -95,7 +95,7 @@ export function NameMuralSheet({
                 onChange={(e) => setArtist(e.target.value)}
                 maxLength={80}
                 placeholder="Artist or crew"
-                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-none placeholder:text-ar-faint focus:border-rarity-epic/70"
+                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-hidden placeholder:text-ar-faint focus:border-rarity-epic/70"
               />
             </label>
             {name.error && <p className="text-[12px] text-ar-danger">{name.error.message}</p>}

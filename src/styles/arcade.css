@@ -228,7 +228,7 @@ html {
 }
 
 body {
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--nf-body), ui-sans-serif, system-ui, sans-serif;
   color: hsl(var(--ar-text));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -239,7 +239,7 @@ body {
 
 /* Chrome text — tabs, counters, buttons, plates — is always the display cut. */
 .font-hud {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--nf-display), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "tnum" 1;
   letter-spacing: 0.02em;
 }

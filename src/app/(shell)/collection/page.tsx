@@ -175,7 +175,7 @@ export default function CollectionScreen() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search your collectibles"
                   aria-label="Search your collection"
-                  className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
+                  className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
                 />
                 {query && (
                   <button

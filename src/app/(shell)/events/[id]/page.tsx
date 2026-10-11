@@ -181,9 +181,9 @@ function Hero({ event }: { event: ArEventDetail }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={event.coverImage} alt="" className="h-full w-full object-cover" />
       ) : (
-        <div className="ar-grid h-full w-full bg-gradient-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
+        <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
       )}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ar-void/70 via-transparent to-ar-bg" />
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
 
       <div
         className="absolute inset-x-0 top-0 flex items-center justify-between px-4"
@@ -220,7 +220,7 @@ function Hero({ event }: { event: ArEventDetail }) {
       {state && (
         <span
           className={cn(
-            "font-hud absolute bottom-10 right-5 inline-flex h-[22px] items-center gap-1 rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] backdrop-blur-sm",
+            "font-hud absolute bottom-10 right-5 inline-flex h-[22px] items-center gap-1 rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] backdrop-blur-xs",
             state === "live"
               ? "border-ar-green/60 bg-ar-green/20 text-ar-green-hot"
               : "border-ar-line bg-ar-surface/70 text-ar-dim",
@@ -348,7 +348,7 @@ function LinkedTile({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" />
         ) : (
-          <div className="ar-grid flex h-full w-full items-center justify-center bg-gradient-to-br from-ar-green/20 to-ar-surface">
+          <div className="ar-grid flex h-full w-full items-center justify-center bg-linear-to-br from-ar-green/20 to-ar-surface">
             {icon && <Target size={22} className="text-ar-green-hot" />}
           </div>
         )}

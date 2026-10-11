@@ -167,7 +167,7 @@ export function EntrySheet({
           rows={6}
           maxLength={5000}
           placeholder="What did you do? Links, context, anything the brand should know."
-          className="ar-bevel w-full resize-none rounded-ar p-3.5 text-[14px] leading-relaxed text-ar-text outline-none placeholder:text-ar-faint focus:border-ar-green/50"
+          className="ar-bevel w-full resize-none rounded-ar p-3.5 text-[14px] leading-relaxed text-ar-text outline-hidden placeholder:text-ar-faint focus:border-ar-green/50"
         />
 
         {/* ── Attachments ─────────────────────────────────────────── */}

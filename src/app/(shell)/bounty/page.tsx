@@ -144,7 +144,7 @@ export default function BountyScreen() {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search bounties or brands"
                     aria-label="Search bounties"
-                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-none placeholder:text-ar-faint"
+                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
                   />
                   {query && (
                     <button

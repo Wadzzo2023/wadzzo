@@ -47,7 +47,7 @@ export default function QrTestScreen() {
         <div className="px-5">
           <p className="text-[12.5px] leading-relaxed text-ar-dim">
             Scan any code below with another device. Each one encodes{" "}
-            <code className="rounded bg-white/[0.06] px-1 text-ar-text">
+            <code className="rounded-base bg-white/[0.06] px-1 text-ar-text">
               /scan?pin=&lt;id&gt;
             </code>{" "}
             — the same string a creator shares.

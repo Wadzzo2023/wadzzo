@@ -350,7 +350,7 @@ export default function MuralsScreen() {
 
         {/* Soft vignette so chrome reads over any wall. */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_42%,transparent_38%,hsl(var(--ar-void)/0.55)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-ar-void/85 via-ar-void/40 to-ar-void/0" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-linear-to-t from-ar-void/85 via-ar-void/40 to-ar-void/0" />
 
         {/* The outline replaces the static brackets once the art is found. */}
         {live && !(phase === "sweeping" ? sweepOutline : detector.outline) && (

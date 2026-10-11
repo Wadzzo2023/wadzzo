@@ -37,9 +37,9 @@ export function EventCard({ event }: { event: ArEventCard }) {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="ar-grid h-full w-full bg-gradient-to-br from-ar-green/20 via-ar-surface to-ar-surface" />
+          <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/20 via-ar-surface to-ar-surface" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-ar-surface via-ar-surface/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-ar-surface via-ar-surface/30 to-transparent" />
 
         <div className="ar-glass absolute left-2.5 top-2.5 flex w-12 flex-col items-center rounded-[12px] py-1.5">
           <span className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ar-green">
