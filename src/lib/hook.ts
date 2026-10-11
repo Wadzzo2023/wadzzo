@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { WalletType } from "package/connect_wallet";
+import { WalletType } from "package/connect_wallet/src/lib/enums";
 import { type SignUserType } from "~/lib/stellar/custodial-sign";
 
 // Email/Google/Facebook/Apple logins have no on-device keypair — the server
