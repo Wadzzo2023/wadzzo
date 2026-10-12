@@ -315,7 +315,7 @@ export const muralsAdminRouter = createTRPCRouter({
         // "" clears it back to the auto title / no artist.
         title: z.string().trim().max(80).nullable().transform((v) => (v === "" ? null : v)),
         artist: z.string().trim().max(80).nullable().transform((v) => (v === "" ? null : v)),
-        coverUrl: z.string().url().optional(),
+        coverUrl: z.url().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

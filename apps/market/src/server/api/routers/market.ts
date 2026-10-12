@@ -38,7 +38,7 @@ export type ListingCard = Prisma.MarketAssetGetPayload<{ select: typeof listingC
 
 const listingsInput = z.object({
   kind: z.enum(["all", "drops", "resale"]).default("all"),
-  mediaType: z.nativeEnum(MediaType).optional(),
+  mediaType: z.enum(MediaType).optional(),
   creatorId: z.string().optional(),
   search: z.string().trim().max(80).optional(),
   sort: z.enum(["new", "price_asc", "price_desc"]).default("new"),

@@ -72,8 +72,8 @@ export const qrRouter = createTRPCRouter({
                     )
                     .min(1, "At least one description is required")
                     .max(4, "Maximum 4 descriptions allowed"),
-                modelUrl: z.string().url("Invalid model URL"),
-                externalLink: z.string().url().optional(),
+                modelUrl: z.url("Invalid model URL"),
+                externalLink: z.url().optional(),
                 startDate: z.date(),
                 endDate: z.date(),
             }),
@@ -135,8 +135,8 @@ export const qrRouter = createTRPCRouter({
                 id: z.string(),
                 title: z.string().min(1, "Title is required").max(100, "Title too long").optional(),
                 description: z.string().min(1, "Description is required").max(500, "Description too long").optional(),
-                modelUrl: z.string().url().optional().nullable(),
-                externalLink: z.string().url().optional().nullable(),
+                modelUrl: z.url().optional().nullable(),
+                externalLink: z.url().optional().nullable(),
                 startDate: z.date().optional(),
                 endDate: z.date().optional(),
             }),

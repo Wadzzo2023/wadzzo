@@ -64,9 +64,9 @@ export const brandCreateRequestSchema = z.object({
     .min(2, "Vanity URL must be 2 characters or more")
     .max(30, "Vanity URL must be 30 characters or less")
     .regex(/^[^\s]+$/, "Vanity URL cannot contain spaces"),
-  profileUrl: z.string().url().optional(),
-  coverUrl: z.string().url().optional(),
-  assetThumbnail: z.string().url().optional(),
+  profileUrl: z.url().optional(),
+  coverUrl: z.url().optional(),
+  assetThumbnail: z.url().optional(),
 });
 export const CreatorAboutShema = z.object({
   description: z
@@ -891,7 +891,7 @@ export const creatorRouter = createTRPCRouter({
         z.object({
           type: z.literal("new"),
           code: z.string().regex(/^[A-Za-z0-9]{4,12}$/, "4–12 letters or numbers"),
-          thumbnail: z.string().url().optional(),
+          thumbnail: z.url().optional(),
         }),
         z.object({
           type: z.literal("custom"),

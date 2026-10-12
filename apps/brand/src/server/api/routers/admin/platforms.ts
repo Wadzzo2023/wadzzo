@@ -8,8 +8,8 @@ const PlatformInput = z.object({
   /** slug; must equal the deployment's PLATFORM_SLUG */
   id: z.string().regex(/^[a-z0-9-]{2,40}$/, "Lowercase letters, digits and dashes"),
   name: z.string().trim().min(1).max(80),
-  webUrl: z.string().url(),
-  brandUrl: z.string().url(),
+  webUrl: z.url(),
+  brandUrl: z.url(),
   assetCode: z.string().trim().max(12).nullable(),
   assetIssuer: z.string().trim().length(56).nullable(),
   active: z.boolean(),

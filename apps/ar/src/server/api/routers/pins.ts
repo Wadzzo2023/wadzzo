@@ -188,7 +188,7 @@ const areaInput = z.object({
   lng: z.number().min(-180).max(180).optional(),
   radiusKm: z.number().positive().max(2000).optional(),
   /** Only these pin types (website embeds); omitted or empty = all. */
-  types: z.array(z.nativeEnum(PinType)).max(6).optional(),
+  types: z.array(z.enum(PinType)).max(6).optional(),
   /** Only this brand's pins (a website embed set to "only my brand"). */
   brandId: z.string().min(1).optional(),
 });

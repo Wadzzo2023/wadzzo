@@ -10,7 +10,7 @@ export const activityRouter = createTRPCRouter({
     .input(
       z.object({
         role: z.enum(["all", "bought", "sold"]).default("all"),
-        type: z.nativeEnum(AssetTxType).optional(),
+        type: z.enum(AssetTxType).optional(),
         limit: z.number().int().min(1).max(50).default(20),
         cursor: z.string().nullish(),
       }),

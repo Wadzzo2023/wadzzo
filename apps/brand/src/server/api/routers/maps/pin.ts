@@ -70,13 +70,13 @@ export const createPinFormSchema = z.object({
     .refine((value) => !BADWORDS.some((word) => value.includes(word)), {
       message: "Input contains banned words.",
     }),
-  image: z.string().url().optional(),
+  image: z.url().optional(),
   startDate: z.date(),
   endDate: z
     .date()
     .min(new Date(new Date().setHours(0, 0, 0, 0)))
     .transform((date) => new Date(date.setHours(23, 59, 59, 999))),
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   autoCollect: z.boolean(),
   token: z.number().optional(),
   tokenAmount: z.number().nonnegative().optional(),
@@ -135,7 +135,7 @@ export const createAdminPinFormSchema = z.object({
     .refine((value) => !BADWORDS.some((word) => value.includes(word)), {
       message: "Input contains banned words.",
     }),
-  image: z.string().url().optional(),
+  image: z.url().optional(),
   startDate: z.date(),
   endDate: z.date().refine(
     (date) => {
@@ -145,7 +145,7 @@ export const createAdminPinFormSchema = z.object({
     },
     { message: "End date must be today or later" }
   ),
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   autoCollect: z.boolean(),
   token: z.number().optional(),
   tokenAmount: z.number().nonnegative().optional(),
@@ -381,9 +381,9 @@ export const pinRouter = createTRPCRouter({
           .object({
             title: z.string().trim().min(3).max(120),
             description: z.string().max(2000).nullable(),
-            image: z.string().url().nullable(),
-            link: z.string().url().nullable(),
-            type: z.nativeEnum(PinType),
+            image: z.url().nullable(),
+            link: z.url().nullable(),
+            type: z.enum(PinType),
             limit: z.number().int().min(0),
           })
           .optional(),

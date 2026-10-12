@@ -39,7 +39,7 @@ const ListQuerySchema = z.object({
 router.post("/enqueue", (req, res) => {
     const parse = EnqueueSchema.safeParse(req.body);
     if (!parse.success) {
-        res.status(400).json({ error: "Invalid request body", details: parse.error.flatten() });
+        res.status(400).json({ error: "Invalid request body", details: z.flattenError(parse.error) });
         return;
     }
 
@@ -74,7 +74,7 @@ router.get("/:id", (req, res) => {
 router.get("/", (req, res) => {
     const parse = ListQuerySchema.safeParse(req.query);
     if (!parse.success) {
-        res.status(400).json({ error: "Invalid query params", details: parse.error.flatten() });
+        res.status(400).json({ error: "Invalid query params", details: z.flattenError(parse.error) });
         return;
     }
 

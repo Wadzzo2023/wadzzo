@@ -30,7 +30,7 @@ type Asset = { code: string; issuer: string; balance: number; kind: Kind; itemId
 
 const KIND_LABEL: Record<Kind, string> = { PAGEASSET: "Page asset", PLATFORMASSET: "Platform", ITEM: "Item" };
 const isPubkey = (s: string) => /^G[A-Z2-7]{55}$/.test(s.trim());
-const isEmail = (s: string) => z.string().email().safeParse(s.trim()).success;
+const isEmail = (s: string) => z.email().safeParse(s.trim()).success;
 
 /** Gifts: send tokens to a fan — pick them from your followers or type their email / wallet. */
 export default function GiftsPage() {

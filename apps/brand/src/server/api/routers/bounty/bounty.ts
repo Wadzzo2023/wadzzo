@@ -60,7 +60,7 @@ export type PaymentMethod = z.infer<typeof PaymentMethodEnum>;
 
 const getAllBountyByUserIdInput = z.object({
   limit: z.number().min(1).max(100).default(10),
-  cursor: z.string().uuid().nullish(),
+  cursor: z.uuid().nullish(),
   search: z.string().optional(),
   sortBy: z
     .enum(["DATE_ASC", "DATE_DESC", "PRICE_ASC", "PRICE_DESC"])
@@ -351,7 +351,7 @@ export const BountyRoute = createTRPCRouter({
         cursor: z.number().nullish(),
         skip: z.number().optional(),
         search: z.string().optional(),
-        sortBy: z.nativeEnum(sortOptionEnum).optional(),
+        sortBy: z.enum(sortOptionEnum).optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
@@ -884,7 +884,7 @@ export const BountyRoute = createTRPCRouter({
           .string()
           .min(1, { message: "User ID can't be less than 0" }),
         submissionId: z.number(),
-        status: z.nativeEnum(SubmissionViewType),
+        status: z.enum(SubmissionViewType),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -981,7 +981,7 @@ export const BountyRoute = createTRPCRouter({
       z.object({
         BountyId: z.number(),
         title: z.string().min(1, { message: "Title can't be empty" }),
-        status: z.nativeEnum(BountyStatus).optional(),
+        status: z.enum(BountyStatus).optional(),
         requiredBalance: z
           .number()
           .min(0, { message: "Required Balance can't be less than 0" }),
@@ -1334,7 +1334,7 @@ export const BountyRoute = createTRPCRouter({
         chatUserId: z.string(),
         bountyId: z.number(),
         content: z.string().min(2, { message: "Message can't be empty" }), // The doubt message
-        role: z.nativeEnum(UserRole).optional(),
+        role: z.enum(UserRole).optional(),
         media: z.array(SubmissionMediaInfo).optional(),
       }),
     )
@@ -1425,7 +1425,7 @@ export const BountyRoute = createTRPCRouter({
       z.object({
         bountyId: z.number(),
         content: z.string().min(2, { message: "Message can't be empty" }), // The doubt message
-        role: z.nativeEnum(UserRole).optional(),
+        role: z.enum(UserRole).optional(),
         media: z.array(SubmissionMediaInfo).optional(),
       }),
     )

@@ -91,8 +91,8 @@ export const userRouter = createTRPCRouter({
       z.object({
         name: z.string().trim().min(2).max(100).optional(),
         bio: z.string().trim().max(200).nullable().optional(),
-        image: z.string().url().nullable().optional(),
-        coverImage: z.string().url().nullable().optional(),
+        image: z.url().nullable().optional(),
+        coverImage: z.url().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

@@ -21,7 +21,7 @@ export const NftFormSchema = z.object({
   description: z.string(),
   mediaUrl: z.string(),
   coverImgUrl: z.string().min(1, { message: "Thumbnail is required" }),
-  mediaType: z.nativeEnum(MediaType),
+  mediaType: z.enum(MediaType),
   price: z
     .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .nonnegative()

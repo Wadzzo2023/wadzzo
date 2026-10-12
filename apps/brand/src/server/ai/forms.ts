@@ -16,7 +16,7 @@ export const FILL_SCHEMAS = {
   pin: z.object({
     title: z.string().describe("Catchy pin title, max 60 chars"),
     description: z.string().describe("2–4 sentences: what it is and why walk there"),
-    type: z.nativeEnum(PinType),
+    type: z.enum(PinType),
     url: z.string().nullable().describe("A link only if the brand gave one"),
     startDate: localDateTime,
     endDate: localDateTime,
@@ -31,7 +31,7 @@ export const FILL_SCHEMAS = {
   hotspot: z.object({
     title: z.string().describe("Catchy title shown on every dropped pin, max 60 chars"),
     description: z.string().describe("2–4 sentences"),
-    type: z.nativeEnum(PinType),
+    type: z.enum(PinType),
     url: z.string().nullable(),
     hotspotStartDate: localDateTime,
     hotspotEndDate: localDateTime,
@@ -80,7 +80,7 @@ export const FILL_SCHEMAS = {
     name: z.string().describe("Collectible name, max 60 chars"),
     description: z.string().describe("2–4 sentences on what buyers get"),
     code: z.string().describe("On-chain asset code: 4–12 letters A–Z only, uppercase, derived from the name"),
-    mediaType: z.nativeEnum(MediaType),
+    mediaType: z.enum(MediaType),
     limit: z.number().int().min(1).describe("Supply"),
     priceUSD: z.number().min(0),
     imagePrompt,

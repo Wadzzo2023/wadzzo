@@ -6,7 +6,7 @@ import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { isOwnS3Url, signImageUpload } from "~/server/s3";
 
-const imageUrl = z.string().url().refine(isOwnS3Url, "Upload the image first");
+const imageUrl = z.url().refine(isOwnS3Url, "Upload the image first");
 
 /** My profile, and public fan profiles. */
 export const userRouter = createTRPCRouter({

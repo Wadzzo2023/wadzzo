@@ -51,10 +51,10 @@ export const createPinFormSchema = z.object({
                 message: "Input contains banned words.",
             },
         ),
-    image: z.string().url().optional(),
+    image: z.url().optional(),
     startDate: z.date(),
     endDate: z.date().min(new Date(new Date().setHours(0, 0, 0, 0)), "End date cannot be in the past"),
-    url: z.string().url("Please enter a valid URL").optional(),
+    url: z.url("Please enter a valid URL").optional(),
     autoCollect: z.boolean(),
     token: z.number().optional(),
     tokenAmount: z.number().nonnegative().optional(),
@@ -63,7 +63,7 @@ export const createPinFormSchema = z.object({
     pinCollectionLimit: z.number().min(1, "Collection limit must be greater than 0"),
     tier: z.string().optional(),
     multiPin: z.boolean().default(false),
-    type: z.nativeEnum(PinType).default(PinType.OTHER),
+    type: z.enum(PinType).default(PinType.OTHER),
     tags: z.array(z.string()).default([]),
 
 })

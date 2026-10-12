@@ -309,9 +309,9 @@ export const trxRouter = createTRPCRouter({
       amount: z.number({
         error: (issue) => (issue.input === undefined ? "Amount is required" : "Amount must be a number"),
       }).int().positive(),
-      assetCode: z.string().nonempty(),
-      assetIssuer: z.string().nonempty(),
-      assetType: z.nativeEnum(assetType),
+      assetCode: z.string().min(1),
+      assetIssuer: z.string().min(1),
+      assetType: z.enum(assetType),
       signWith: custodialSignerSchema,
     }))
     .mutation(async ({ input, ctx }) => {

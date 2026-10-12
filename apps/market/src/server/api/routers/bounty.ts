@@ -50,7 +50,7 @@ import {
  */
 
 const ENTRY_MEDIA = z.object({
-  url: z.string().url(),
+  url: z.url(),
   name: z.string().max(255),
   size: z.number().int().nonnegative().max(MAX_ENTRY_FILE_BYTES),
   type: z.string().max(120),

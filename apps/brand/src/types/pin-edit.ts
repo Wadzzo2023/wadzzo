@@ -36,9 +36,9 @@ export const updateMapFormSchema = z.object({
         .date()
         .min(new Date(new Date().setHours(0, 0, 0, 0)), "End date cannot be in the past")
         .optional(),
-    url: z.string().url().optional(),
+    url: z.url().optional(),
     autoCollect: z.boolean(),
     multiPin: z.boolean().optional(),
     pinRemainingLimit: z.number().optional(),
-    type: z.nativeEnum(PinTypeEnum).default(PinTypeEnum.OTHER), // Added new type field
+    type: z.enum(PinTypeEnum).default(PinTypeEnum.OTHER), // Added new type field
 })

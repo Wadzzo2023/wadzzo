@@ -33,7 +33,7 @@ export const ActionEditsInput = z.object({
   keep: z.array(z.string()).max(200).optional(),
   defaults: z
     .object({
-      type: z.nativeEnum(PinType),
+      type: z.enum(PinType),
       startDate: day,
       endDate: day,
       autoCollect: z.boolean(),
@@ -212,7 +212,7 @@ const HotspotDraftInput = z
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
     radiusMetres: z.number().min(50).max(50_000),
-    type: z.nativeEnum(PinType),
+    type: z.enum(PinType),
     startDate: day,
     endDate: day,
     dropEveryDays: z.number().int().min(1).max(365),

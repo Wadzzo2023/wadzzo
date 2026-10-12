@@ -8,14 +8,14 @@ import {
 } from "~/server/api/trpc";
 import { getBlurData } from "~/utils/serverUtils";
 export const AdminAssetFormSchema = z.object({
-  logoUrl: z.string().url(),
+  logoUrl: z.url(),
   code: z
     .string()
     .min(4, { message: "Must be a minimum of 4 characters" })
     .max(12, { message: "Must be a maximum of 12 characters" }),
   issuer: z.string(),
   description: z.string(),
-  link: z.string().url(),
+  link: z.url(),
   tags: z.string(),
 
   litemint: z.string().optional(),

@@ -15,7 +15,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 
 const formSchema = z.object({
-    email: z.string().email("Please enter a valid email"),
+    email: z.email("Please enter a valid email"),
 })
 
 type FormInputs = z.infer<typeof formSchema>

@@ -3,9 +3,9 @@ import { z } from "zod";
 /** The brand onboarding form (client) and the create-brand request (server) share this. */
 export const RequestBrandCreateFormSchema = z
     .object({
-        profileUrl: z.string().url().optional(),
+        profileUrl: z.url().optional(),
         profileUrlPreview: z.string().optional(),
-        coverUrl: z.string().url().optional().or(z.literal("")),
+        coverUrl: z.url().optional().or(z.literal("")),
         coverImagePreview: z.string().optional(),
         displayName: z
             .string()
@@ -14,7 +14,7 @@ export const RequestBrandCreateFormSchema = z
         bio: z.string().optional(),
         assetType: z.enum(["new", "custom"]),
         assetName: z.string().default(""),
-        assetImage: z.string().url().optional(),
+        assetImage: z.url().optional(),
         assetImagePreview: z.string().optional(),
         assetCode: z.string().default(""),
         issuer: z.string().default(""),

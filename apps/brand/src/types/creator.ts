@@ -5,7 +5,7 @@ export const creatorExtraFiledsSchema = z
     navPermission: z.boolean().optional(),
   })
   // Keep keys other code stores here (e.g. aiUsage) when this is re-saved.
-  .passthrough()
+  .loose()
   .optional()
   .nullable();
 

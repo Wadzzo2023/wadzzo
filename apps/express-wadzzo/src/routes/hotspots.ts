@@ -40,13 +40,13 @@ const CreateHotspotSchema = z.object({
     creatorId: z.string().min(1),
     title: z.string().min(3),
     description: z.string().optional(),
-    image: z.string().url().optional(),
-    url: z.string().url().optional(),
+    image: z.url().optional(),
+    url: z.url().optional(),
     type: z.string().optional(),
     dropEveryDays: z.number().int().min(1),
     pinDurationDays: z.number().int().min(1),
-    hotspotStartDate: z.string().datetime(),
-    hotspotEndDate: z.string().datetime(),
+    hotspotStartDate: z.iso.datetime(),
+    hotspotEndDate: z.iso.datetime(),
     pinNumber: z.number().int().min(1),
     pinCollectionLimit: z.number().int().min(0),
     autoCollect: z.boolean(),
@@ -76,7 +76,7 @@ router.post(
     asyncHandler(async (req, res) => {
         const parse = CreateHotspotSchema.safeParse(req.body);
         if (!parse.success) {
-            res.status(400).json({ error: "Invalid request body", details: parse.error.flatten() });
+            res.status(400).json({ error: "Invalid request body", details: z.flattenError(parse.error) });
             return;
         }
 
@@ -308,8 +308,8 @@ router.post(
 
 const UpdateHotspotSchema = z.object({
     creatorId: z.string().min(1),
-    hotspotStartDate: z.string().datetime().optional(),
-    hotspotEndDate: z.string().datetime().optional(),
+    hotspotStartDate: z.iso.datetime().optional(),
+    hotspotEndDate: z.iso.datetime().optional(),
     dropEveryDays: z.number().int().min(1).optional(),
     pinDurationDays: z.number().int().min(1).optional(),
     autoCollect: z.boolean().optional(),

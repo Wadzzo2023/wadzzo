@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const MediaInfo = z.object({
   url: z.string(),
-  type: z.nativeEnum(MediaType),
+  type: z.enum(MediaType),
 });
 export const PostSchema = z.object({
   heading: z.string().min(1, { message: "Required" }),
