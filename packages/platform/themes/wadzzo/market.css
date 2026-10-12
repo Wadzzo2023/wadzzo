@@ -1,0 +1,5 @@
+/*
+ * Wadzzo marketplace theme (the default look: no overrides). Loaded after the app's own stylesheet, so these declarations win
+ * on equal specificity. Generated from the differences between the platform's
+ * look and the default Wadzzo look; edit values here, never fork the app.
+ */

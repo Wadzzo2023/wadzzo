@@ -1,6 +1,6 @@
 import { notFound, permanentRedirect } from "next/navigation";
 
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 
 /** Vanity URLs (wadzzo.com/brandname) open the brand's page. */
 export default async function VanityPage({ params }: PageProps<"/[vanity]">) {

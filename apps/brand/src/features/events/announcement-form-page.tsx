@@ -19,6 +19,7 @@ import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "~/ui/skeleton";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type EditableAnnouncement = RouterOutputs["events"]["myAnnouncements"][number];
 const MAX_IMAGES = 6;
@@ -139,7 +140,7 @@ function AnnouncementForm({ announcement }: { announcement: EditableAnnouncement
   return (
     <FormPage
       title={announcement ? "Edit announcement" : "New announcement"}
-      description="Shows up in the News feed on Wadzzo web and app right away."
+      description={`Shows up in the News feed on ${platformBranding.name} web and app right away.`}
       back={{ href: back, label: "Announcements" }}
       onSubmit={submit}
       actions={actions}

@@ -9,6 +9,7 @@ import { aiRemaining, IMAGE_MODEL, openai, TEXT_MODEL, withAiQuota } from "~/ser
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { uploadBufferToS3 } from "~/server/s3";
 import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pinataSDK = require("@pinata/sdk") as new (o: { pinataJWTKey: string }) => {
@@ -24,7 +25,7 @@ const RULES = `Rules:
 - Never invent URLs, prices, addresses or facts the brand didn't give; use null when unknown.
 - Respect every detail the brand gave (dates, numbers, names).`;
 
-async function brandLine(db: typeof import("@wadzzo/db").db, userId: string) {
+async function brandLine(db: import("@wadzzo/db").Db, userId: string) {
   const c = await db.creator.findUnique({ where: { id: userId }, select: { name: true, bio: true } });
   return c ? `The brand is "${c.name}"${c.bio ? ` — ${c.bio.slice(0, 300)}` : ""}.` : "";
 }
@@ -59,7 +60,7 @@ export const aiRouter = createTRPCRouter({
           input: [
             {
               role: "system",
-              content: `You fill in the form for ${FORM_BRIEF[input.form]} on Wadzzo, a brand portal. ${await brandLine(ctx.db, ctx.session.user.id)}
+              content: `You fill in the form for ${FORM_BRIEF[input.form]} on {platformBranding.name}, a brand portal. ${await brandLine(ctx.db, ctx.session.user.id)}
 It is now ${input.now} (${input.timeZone}). Choose sensible defaults for anything the brand didn't specify, and dates in the future.
 ${RULES}`,
             },

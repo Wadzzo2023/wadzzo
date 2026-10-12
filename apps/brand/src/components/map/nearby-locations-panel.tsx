@@ -6,6 +6,7 @@ import { memo, useState } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useNearbyPinsStore } from "~/store/map-stores";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * "In view": the pins inside the visible map area (desktop). Click one to fly
@@ -43,10 +44,10 @@ export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={pin.locationGroup?.image ?? pin.locationGroup?.creator.profileUrl ?? "/images/logo.png"}
+                      src={pin.locationGroup?.image ?? pin.locationGroup?.creator.profileUrl ?? platformBranding.assets.logo}
                       alt=""
                       className="size-9 shrink-0 rounded-lg object-cover"
-                      onError={(e) => (e.currentTarget.src = "/images/logo.png")}
+                      onError={(e) => (e.currentTarget.src = platformBranding.assets.logo)}
                     />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">

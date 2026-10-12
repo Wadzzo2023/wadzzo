@@ -6,7 +6,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { Calendar, Crown, MessageSquare, Paperclip, Pencil, Target, Trash2, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { submitSignedTransaction } from "@wadzzo/wallet";
+import { submitSignedTransaction } from "@wadzzo/wallet/stellar";
 import { useState } from "react";
 import toast from "react-hot-toast";
 

@@ -1,4 +1,4 @@
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { addMonths } from 'date-fns'
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";

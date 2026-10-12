@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { env } from "~/env";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform } from "@wadzzo/platform/server";
 import { platformScope } from "@wadzzo/platform/scope";
 

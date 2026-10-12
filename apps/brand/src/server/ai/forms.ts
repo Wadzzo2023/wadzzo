@@ -1,5 +1,6 @@
 import { MediaType, PinType } from "@wadzzo/db";
 import { z } from "zod";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * "Fill with AI" output per form. Structured outputs need every key present,
@@ -92,7 +93,7 @@ export type FillResult<F extends FillForm> = z.infer<(typeof FILL_SCHEMAS)[F]>;
 export const FILL_FORMS = Object.keys(FILL_SCHEMAS) as [FillForm, ...FillForm[]];
 
 export const FORM_BRIEF: Record<FillForm, string> = {
-  pin: "a map pin fans walk to and collect in the Wadzzo location game",
+  pin: `a map pin fans walk to and collect in the ${platformBranding.name} location game`,
   hotspot: "a hotspot: an area on the map that keeps dropping collectible pins on a schedule",
   post: "a post to the brand's followers (news, media, perks)",
   announcement: "a short announcement in the brand's News feed",

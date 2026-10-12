@@ -1,4 +1,5 @@
 import { Frame, QrCode, ScanLine, type LucideIcon } from "lucide-react";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * The camera's three ways in — same list as the mobile app's
@@ -40,7 +41,7 @@ export const CAMERA_MODES: CameraModeDef[] = [
     href: "/scan",
     label: "QR",
     title: "QR Scan",
-    blurb: "Scan a printed Wadzzo code. Works indoors.",
+    blurb: `Scan a printed ${platformBranding.name} code. Works indoors.`,
     icon: QrCode,
     accent: "--rarity-rare",
     accentHot: "--rarity-rare",
@@ -51,7 +52,7 @@ export const CAMERA_MODES: CameraModeDef[] = [
     href: "/murals",
     label: "Murals",
     title: "Murals",
-    blurb: "Scan murals and street art to earn Wadzzo Coins.",
+    blurb: `Scan murals and street art to earn ${platformBranding.coinName}.`,
     icon: Frame,
     accent: "--rarity-epic",
     accentHot: "--rarity-epic",

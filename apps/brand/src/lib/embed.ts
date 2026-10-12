@@ -1,4 +1,5 @@
 import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/db";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * Where the embedded map is served from — wadzzoAR (web.wadzzo.com), not this
@@ -7,7 +8,7 @@ import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/
  */
 export const WADZZO_AR_URL = (
     process.env.NEXT_PUBLIC_WADZZO_AR_URL ??
-    (process.env.NODE_ENV === "production" ? "https://web.wadzzo.com" : "http://localhost:3000")
+    (process.env.NODE_ENV === "production" ? platformBranding.urls.arWeb : "http://localhost:3000")
 ).replace(/\/$/, "")
 
 export interface EmbedDraft {
@@ -72,7 +73,7 @@ export const scriptSnippet = (id: string, height = 520) =>
     `<div data-wadzzo-embed="${id}" style="height:${height}px"></div>\n<script async src="${WADZZO_AR_URL}/embed.js"></script>`
 
 export const iframeSnippet = (id: string, height = 520) =>
-    `<iframe src="${embedPageUrl(id)}" title="Wadzzo map" width="100%" height="${height}" style="border:0;display:block" loading="lazy" allow="geolocation"></iframe>`
+    `<iframe src="${embedPageUrl(id)}" title="${platformBranding.name} map" width="100%" height="${height}" style="border:0;display:block" loading="lazy" allow="geolocation"></iframe>`
 
 /** A hero section with the map behind the page's own heading and buttons. */
 export const heroSnippet = (id: string) => `<section style="position:relative;height:560px;overflow:hidden">

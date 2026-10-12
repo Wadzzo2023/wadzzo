@@ -1,4 +1,5 @@
 import type { ArPinType } from "~/lib/ar/types";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Website embed config ───────────────────────────────────────────────────
@@ -73,14 +74,14 @@ export function normalizeConfig(raw: Record<string, unknown>, id: string): Embed
     : [];
   return {
     id,
-    name: text(raw.name, "Wadzzo map", 80),
+    name: text(raw.name, `${platformBranding.name} map`, 80),
     centerLat: num(raw.centerLat, -85, 85, 39.5),
     centerLng: num(raw.centerLng, -180, 180, -98.35),
     zoom: num(raw.zoom, 2, 18, 12),
     userLocation: raw.userLocation === true,
     gestureMode: raw.gestureMode === "GREEDY" ? "GREEDY" : "COOPERATIVE",
     theme: raw.theme === "LIGHT" || raw.theme === "DARK" ? raw.theme : "AUTO",
-    accentColor: typeof raw.accentColor === "string" && HEX.test(raw.accentColor) ? raw.accentColor : "#39ff88",
+    accentColor: typeof raw.accentColor === "string" && HEX.test(raw.accentColor) ? raw.accentColor : platformBranding.colors.embedAccent,
     pinSource: raw.pinSource === "CREATOR" ? "CREATOR" : "ALL",
     creatorId: typeof raw.creatorId === "string" && raw.creatorId ? raw.creatorId : null,
     pinTypes,
@@ -109,7 +110,7 @@ export function decodePreview(c: string | undefined): Record<string, unknown> | 
 
 /** Origins of brand-wadzzo, which may always frame embeds (editor preview). */
 export function brandOrigins(): string[] {
-  return (process.env.BRAND_APP_ORIGINS ?? "https://brand.wadzzo.com http://localhost:3001")
+  return (process.env.BRAND_APP_ORIGINS ?? `${platformBranding.urls.brandPortal} http://localhost:3001`)
     .split(/[\s,]+/)
     .filter(Boolean);
 }

@@ -6,6 +6,7 @@ import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
 
 import type { Caller } from "./context";
 import { HttpError } from "./http";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const CUSTODIAL = new Set(["emailPass", "google", "facebook", "apple"]);
 
@@ -28,7 +29,7 @@ function assertFollowTx(xdr: string, userId: string) {
   }
   const mother = Keypair.fromSecret(env.MOTHER_SECRET).publicKey();
   if (tx.source !== mother) {
-    throw new HttpError(400, "BAD_REQUEST", "Transaction wasn't prepared by Wadzzo");
+    throw new HttpError(400, "BAD_REQUEST", `Transaction wasn't prepared by ${platformBranding.name}`);
   }
   const ok = tx.operations.every((op) => {
     if (op.type === "changeTrust") return op.source === userId;

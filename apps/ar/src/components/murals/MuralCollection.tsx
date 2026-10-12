@@ -7,6 +7,7 @@ import { CardSkeleton } from "~/components/ui/Skeleton";
 import { useAuth } from "~/lib/ar/store";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Collection › Murals ────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ export function MuralCollection({ signedIn }: { signedIn: boolean }) {
         <Frame size={30} strokeWidth={1.7} className="mx-auto text-rarity-epic" />
         <p className="font-hud mt-3 text-[15px] font-bold text-ar-text">Murals you find live here</p>
         <p className="mx-auto mt-1.5 max-w-[17rem] text-[12px] leading-relaxed text-ar-dim">
-          Scan street art with the camera to collect it and earn Wadzzo Coins.
+          Scan street art with the camera to collect it and earn {platformBranding.coinName}.
         </p>
         <ArButton variant="primary" size="md" className="mt-4" onClick={() => requireAuth("murals")}>
           Sign in
@@ -57,7 +58,7 @@ export function MuralCollection({ signedIn }: { signedIn: boolean }) {
             {balance.isLoading ? "—" : (balance.data?.balance ?? 0).toLocaleString()}
           </span>
           <span className="mt-1 block text-[10.5px] uppercase tracking-[0.12em] text-ar-faint">
-            Wadzzo Coins · redeem coming soon
+            {platformBranding.coinName} · redeem coming soon
           </span>
         </span>
         <ChevronRight size={17} strokeWidth={2.3} className="text-ar-faint" />

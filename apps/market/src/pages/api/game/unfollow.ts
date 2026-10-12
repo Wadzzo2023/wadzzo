@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 
 // import { getSession } from "next-auth/react";
 

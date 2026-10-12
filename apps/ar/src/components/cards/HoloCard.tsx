@@ -25,6 +25,7 @@ import type { ArBrand, ArPin, DetectionMethod } from "~/lib/ar/types";
 import { nonBlank } from "~/lib/utils";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
@@ -89,8 +90,8 @@ export function WadzzoCardBack({
           {/* Official Wadzzo Logo Mark from public folder */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/wadzzo-mark.png"
-            alt="Wadzzo"
+            src={platformBranding.assets.mark}
+            alt={platformBranding.name}
             className={cn(
               "relative z-10 h-14 w-14 object-contain drop-shadow-[0_0_12px_hsl(var(--ar-green)/0.8)]",
               loading && "animate-pulse",
@@ -559,7 +560,7 @@ function PokemonTcgCreatorFront({
   const bio =
     nonBlank(brand?.bio) ??
     nonBlank(brand?.tagline) ??
-    "Official Wadzzo creator placing drops in the real world.";
+    `Official ${platformBranding.name} creator placing drops in the real world.`;
   const followersCount = brand?.followers ?? 0;
   const dropsCount = brand?.pinCount ?? 1;
   const verified = brand?.verified ?? false;
@@ -569,9 +570,11 @@ function PokemonTcgCreatorFront({
     <div
       className={cn(
         "tcg-face relative flex h-full w-full flex-col overflow-hidden",
-        "select-none border-[5px] border-[#134226] shadow-[0_0_18px_rgba(34,197,94,0.35)]",
+        "select-none border-[5px]",
       )}
       style={{
+        borderColor: platformBranding.colors.cardBorder,
+        boxShadow: `0 0 18px ${platformBranding.colors.cardGlow}`,
         background: `radial-gradient(130% 100% at 50% 0%, hsl(${accent}/0.24) 0%, hsl(var(--ar-surface-2)) 60%, hsl(var(--ar-void)) 100%)`,
       }}
     >
@@ -659,7 +662,7 @@ function PokemonTcgCreatorFront({
         }
         right={
           <span className="font-hud font-bold uppercase tracking-[0.14em] text-ar-faint">
-            Wadzzo &bull; AR
+            {platformBranding.name} &bull; AR
           </span>
         }
       />
@@ -859,7 +862,7 @@ function PokemonTcgFront({
             </span>
           ) : (
             <span className="font-hud font-bold uppercase tracking-[0.14em] text-ar-faint">
-              Wadzzo &bull; AR
+              {platformBranding.name} &bull; AR
             </span>
           )
         }

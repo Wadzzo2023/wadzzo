@@ -14,6 +14,7 @@ import { Dropzone } from "~/ui/upload/dropzone";
 import { uploadToIpfsUrl } from "~/ui/upload/ipfs";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type PageAsset = NonNullable<NonNullable<RouterOutputs["fan"]["creator"]["profileOverview"]>["pageAsset"]>;
 
@@ -97,7 +98,7 @@ function SetupAsset() {
       </p>
 
       <div role="radiogroup" aria-label="Page asset type" className="mt-4 grid gap-3 md:grid-cols-2">
-        {option("new", Sparkles, "Create a new token", "Name it and add an image. Wadzzo issues it on Stellar for you.")}
+        {option("new", Sparkles, "Create a new token", `Name it and add an image. ${platformBranding.name} issues it on Stellar for you.`)}
         {option("custom", Link2, "Use a token I already have", "Connect an existing Stellar asset by its code and issuer.")}
       </div>
 
@@ -203,7 +204,7 @@ function AssetDetails({ asset, onMembership }: { asset: PageAsset; onMembership?
           )}
           <div className="min-w-0 flex-1">
             <p className="font-hud text-2xl font-semibold">{asset.code}</p>
-            <p className="text-sm text-muted-foreground">{asset.custom ? "Your own Stellar asset" : "Issued by Wadzzo"}</p>
+            <p className="text-sm text-muted-foreground">{asset.custom ? "Your own Stellar asset" : `Issued by ${platformBranding.name}`}</p>
           </div>
         </div>
 

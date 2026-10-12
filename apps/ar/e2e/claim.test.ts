@@ -8,7 +8,7 @@ const ASSET_ID = 12; // LSTP, open edition, issuer live
 
 describe("claim to wallet (testnet)", () => {
   it("quotes, delivers by minting, and settles", async () => {
-    const { db } = await import("@wadzzo/db");
+    const { db } = await import("@wadzzo/db/server");
     const { quoteClaim, prepareClaim, settleClaim } = await import("~/server/stellar/claim");
     const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 

@@ -22,6 +22,7 @@ import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "~/ui/skeleton";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type EditableEvent = RouterOutputs["events"]["myEvent"];
 
@@ -184,7 +185,7 @@ function EventForm({ event }: { event: EditableEvent | null }) {
   return (
     <FormPage
       title={event ? "Edit event" : "New event"}
-      description="Published straight away to everyone on Wadzzo — web and app."
+      description={`Published straight away to everyone on ${platformBranding.name} — web and app.`}
       back={{ href: "/events", label: "Events" }}
       onSubmit={submit}
       actions={actions}

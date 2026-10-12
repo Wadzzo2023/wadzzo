@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Theme ──────────────────────────────────────────────────────────────────
@@ -24,8 +25,8 @@ export const THEME_STORAGE_KEY = "wadzzo-ar-theme";
 
 /** The two `theme-color` values — see the matching hex in `_document.tsx`. */
 const THEME_COLOR: Record<ResolvedTheme, string> = {
-  dark: "#06100a",
-  light: "#f5f9f7",
+  dark: platformBranding.colors.themeDark,
+  light: platformBranding.colors.themeLight,
 };
 
 /**

@@ -4,11 +4,12 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api"
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const METRICS = [
     { key: "views", label: "Map views", hint: "Times the map loaded on a website" },
     { key: "pinTaps", label: "Pin taps", hint: "Visitors opened a drop's card" },
-    { key: "openClicks", label: "Opened in Wadzzo", hint: "Visitors went on to Wadzzo" },
+    { key: "openClicks", label: `Opened in ${platformBranding.name}`, hint: `Visitors went on to ${platformBranding.name}` },
     { key: "eventsClicks", label: "Events button", hint: "Clicks on the events button" },
     { key: "bountiesClicks", label: "Bounties button", hint: "Clicks on the bounties button" },
 ] as const

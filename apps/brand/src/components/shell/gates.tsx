@@ -15,6 +15,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { PageSkeleton } from "~/ui/skeleton";
 
 import type { usePortalAccess } from "./use-portal-access";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Access = ReturnType<typeof usePortalAccess>;
 
@@ -24,10 +25,10 @@ export function SignInScreen() {
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 text-center">
         <span className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-          <Image src="/images/loading.png" alt="" width={32} height={32} className="object-contain" />
+          <Image src={platformBranding.assets.loading} alt="" width={32} height={32} className="object-contain" />
         </span>
         <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Brand portal</p>
-        <h1 className="mt-1 font-hud text-2xl font-bold">Sign in to Wadzzo</h1>
+        <h1 className="mt-1 font-hud text-2xl font-bold">Sign in to {platformBranding.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Create drops, run bounties and stores, and see how fans engage with your brand.
         </p>
@@ -117,7 +118,7 @@ export function AdminGate({ access, children }: { access: Access; children: Reac
       <div className="max-w-sm text-center">
         <ShieldAlert className="mx-auto mb-3 size-8 text-muted-foreground" />
         <h1 className="font-hud text-xl font-bold">Admins only</h1>
-        <p className="mt-1 text-sm text-muted-foreground">This area is for Wadzzo admins. Your account doesn&apos;t have admin access.</p>
+        <p className="mt-1 text-sm text-muted-foreground">This area is for {platformBranding.name} admins. Your account doesn&apos;t have admin access.</p>
         <Button asChild variant="outline" className="mt-5">
           <Link href="/pins">Back to your portal</Link>
         </Button>

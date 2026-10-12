@@ -22,6 +22,7 @@ import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { CollectionsChart, Delta, PeriodPicker, downloadCsv, periodLabel, periodRange, pinStatus, type Period } from "./report-kit";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Summary = RouterOutputs["maps"]["report"]["summary"];
 type PinRow = Summary["pins"][number];
@@ -67,7 +68,7 @@ export function CollectionReport({ scope }: { scope: "brand" | "admin" }) {
         onSuccess: (rows) => {
           if (!rows.length) return toast("Nothing to export for this period");
           downloadCsv(
-            `wadzzo-collections-${new Date().toISOString().slice(0, 10)}.csv`,
+            `${platformBranding.filePrefix}-collections-${new Date().toISOString().slice(0, 10)}.csv`,
             rows.map((r) => ({
               ...(allBrands ? { Brand: r.brand } : {}),
               Pin: r.pin,

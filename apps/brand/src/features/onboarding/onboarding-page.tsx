@@ -34,6 +34,7 @@ import { Dropzone } from "~/ui/upload/dropzone";
 import { uploadToIpfsUrl } from "~/ui/upload/ipfs";
 import { api } from "~/utils/api";
 import { WADZZO_AR_URL } from "~/lib/embed";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /** The AR site brand vanity URLs live on (this platform's web app). */
 const AR_HOST = WADZZO_AR_URL.replace(/^https?:\/\//, "");
@@ -496,7 +497,7 @@ export default function ArtistOnboarding() {
                           <div>
                             <span className="block text-sm font-semibold text-foreground">Create a new token</span>
                             <span className="mt-0.5 block text-xs text-muted-foreground">
-                              Name your token and add an image. Wadzzo issues it on Stellar for you.
+                              Name your token and add an image. {platformBranding.name} issues it on Stellar for you.
                             </span>
                           </div>
                         </button>
@@ -672,7 +673,7 @@ export default function ArtistOnboarding() {
                       <div>
                         <h2 className="font-hud text-2xl font-bold tracking-tight">Choose Your Vanity URL</h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          Your brand profile address on the Wadzzo fan portal.
+                          Your brand profile address on the {platformBranding.name} fan portal.
                         </p>
                       </div>
 
@@ -825,7 +826,7 @@ export default function ArtistOnboarding() {
                                 {formData.assetType === "new" ? formData.assetName : formData.assetCode}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {formData.assetType === "new" ? "New token issued by Wadzzo" : `Issuer: ${formData.issuer.slice(0, 8)}...`}
+                                {formData.assetType === "new" ? `New token issued by ${platformBranding.name}` : `Issuer: ${formData.issuer.slice(0, 8)}...`}
                               </p>
                             </div>
                           </div>

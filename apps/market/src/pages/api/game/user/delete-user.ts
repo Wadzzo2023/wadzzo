@@ -6,7 +6,7 @@ import { createTransport, Transporter } from "nodemailer";
 import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 

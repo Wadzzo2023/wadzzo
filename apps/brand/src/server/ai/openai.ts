@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import OpenAI from "openai";
 
 import { env } from "~/env";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { canAdminPlatform, getCurrentPlatform } from "@wadzzo/platform/server";
 
 export const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });

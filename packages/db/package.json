@@ -5,7 +5,8 @@
   "type": "module",
   "description": "The shared database: Prisma schema (single source of truth), generated client and the app-wide `db` instance.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
   },
   "scripts": {
     "generate": "prisma generate",
@@ -19,7 +20,8 @@
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
     "@wadzzo/errors": "workspace:*",
-    "dotenv": "catalog:"
+    "dotenv": "catalog:",
+    "server-only": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

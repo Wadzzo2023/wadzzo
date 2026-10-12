@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { Brand } from "~/types/game/brand";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export default async function handler(
   req: NextApiRequest,
@@ -56,4 +57,4 @@ export default async function handler(
 }
 
 export const avaterIconUrl =
-  "https://app.wadzzo.com/images/icons/avatar-icon.png";
+  `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;

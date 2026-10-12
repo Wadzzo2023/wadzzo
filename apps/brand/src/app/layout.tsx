@@ -1,22 +1,19 @@
-// Self-hosted fonts (same families as the fan apps): Sora body, Chakra Petch display.
-import "@fontsource-variable/sora";
-import "@fontsource/chakra-petch/500.css";
-import "@fontsource/chakra-petch/600.css";
-import "@fontsource/chakra-petch/700.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "react-quill-new/dist/quill.snow.css";
 import "~/styles/globals.css";
+import "~/styles/platform-theme.css";
 
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import { Providers } from "./providers";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 
 export const metadata: Metadata = {
-  title: { default: "Wadzzo Brand Portal", template: "%s · Wadzzo Brand Portal" },
-  description: "Create and manage your drops, stores, posts, bounties and events on Wadzzo.",
-  icons: { icon: "/favicon.ico" },
+  title: { default: `${platformBranding.name} Brand Portal`, template: `%s · ${platformBranding.name} Brand Portal` },
+  description: `Create and manage your drops, stores, posts, bounties and events on ${platformBranding.name}.`,
+  icons: { icon: platformBranding.assets.favicon },
 };
 
 export const viewport: Viewport = {
@@ -24,8 +21,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f0f5f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a100d" },
+    { media: "(prefers-color-scheme: light)", color: platformBranding.colors.portalThemeLight },
+    { media: "(prefers-color-scheme: dark)", color: platformBranding.colors.portalThemeDark },
   ],
 };
 

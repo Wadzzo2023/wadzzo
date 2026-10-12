@@ -16,6 +16,7 @@ import { Confetti } from "~/components/fx/Confetti";
 import { ArButton } from "~/components/ui/ArButton";
 import type { RejectCode, ScanResult as Result } from "~/lib/murals/constants";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── ScanResult ─────────────────────────────────────────────────────────────
@@ -178,7 +179,7 @@ export function ScanResult({
             </p>
           )}
           <p className="mt-1 text-[10.5px] uppercase tracking-[0.12em] text-ar-faint">
-            Wadzzo Coins · balance {result.balance.toLocaleString()}
+            {platformBranding.coinName} · balance {result.balance.toLocaleString()}
           </p>
         </div>
 

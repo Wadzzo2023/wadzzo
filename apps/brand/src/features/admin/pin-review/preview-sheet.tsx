@@ -18,6 +18,7 @@ import { api } from "~/utils/api";
 
 import { Locations } from "./locations";
 import { TYPE_LABEL, plural, type View } from "./model";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const PRIVACY: Record<string, string> = {
   PUBLIC: "Everyone",
@@ -237,7 +238,7 @@ function Body({
             locationId: g.locations[0].id,
             locationGroupId: g.id,
             title: g.title,
-            brandName: g.creator.name ?? "Wadzzo",
+            brandName: g.creator.name ?? platformBranding.name,
             brandImageUrl: g.creator.profileUrl,
             pinCount: g.multiPin ? g.locations.length : null,
           }}

@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import { WadzzoMark } from "~/components/brand/WadzzoMark";
+import { BrandMark } from "~/components/brand/BrandMark";
 import { RARITY_META } from "~/lib/ar/rarity";
 import type { Rarity } from "~/lib/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -240,7 +240,7 @@ export function PackOpening({
                   className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-3 focus-visible:outline-hidden"
                   aria-label="Tear open to reveal your collectible"
                 >
-                  <WadzzoMark glow className="h-10 w-auto" />
+                  <BrandMark glow className="h-10 w-auto" />
 
                   <motion.span
                     className="font-hud flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em]"

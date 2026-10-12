@@ -2,17 +2,19 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "~/styles/globals.css";
 // Loaded after globals so the arcade palette wins on equal specificity.
 import "~/styles/arcade.css";
+import "~/styles/platform-theme.css";
 
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import { fontVariables } from "~/lib/fonts";
 import { TRPCReactProvider } from "~/trpc/provider";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
-  title: "Wadzzo AR — Collect the real world",
+  title: `${platformBranding.name} AR — Collect the real world`,
   description: "Find digital collectibles at real places, capture them in AR, and build your collection. No app install required.",
-  icons: { icon: [{ url: "/favicon.ico" }, { url: "/brand/wadzzo-mark.png", type: "image/png" }] },
+  icons: { icon: [{ url: platformBranding.assets.favicon }, { url: platformBranding.assets.mark, type: "image/png" }] },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent" },
 };
 
@@ -26,7 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#06100a",
+  themeColor: platformBranding.colors.themeDark,
 };
 
 /**
@@ -56,7 +58,7 @@ const themeBootScript = `
     if (light) {
       document.documentElement.classList.remove("dark");
       var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute("content", "#f5f9f7");
+      if (meta) meta.setAttribute("content", platformBranding.colors.themeLight);
     }
   } catch (e) {}
 })();

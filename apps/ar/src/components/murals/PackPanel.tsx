@@ -7,6 +7,7 @@ import { formatBytes, packProgress, startMuralPack, useMuralPack, type PackStatu
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PackArt } from "./PackArt";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── PackPanel ──────────────────────────────────────────────────────────────
@@ -191,7 +192,7 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
 
       {!done && (
         <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[10.5px] text-ar-faint">
-          <Download size={11} /> Keep using Wadzzo — this finishes in the background.
+          <Download size={11} /> Keep using {platformBranding.name} — this finishes in the background.
         </p>
       )}
     </div>

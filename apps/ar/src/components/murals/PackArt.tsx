@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── PackArt ────────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ export function PackArt({ size = 96, progress = 0, done = false, spinning = fals
         cy="50"
         r={R}
         fill="none"
-        stroke={done ? "hsl(150 80% 55%)" : `url(#ring-${id})`}
+        stroke={done ? platformBranding.colors.packDone : `url(#ring-${id})`}
         strokeWidth="4"
         strokeLinecap="round"
         strokeDasharray={C}
@@ -70,7 +71,7 @@ export function PackArt({ size = 96, progress = 0, done = false, spinning = fals
       <path d="M28 64 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4z" fill="#fff" opacity="0.9" />
       <path d="M71 28 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1z" fill="#fff" opacity="0.75" />
 
-      {done && <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(150 80% 55% / 0.35)" strokeWidth="6" />}
+      {done && <circle cx="50" cy="50" r="40" fill="none" stroke={platformBranding.colors.packDoneGlow} strokeWidth="6" />}
     </svg>
   );
 }

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@wadzzo/ui/components/button";
 import { Card, CardContent, CardFooter } from "@wadzzo/ui/components/card";
 import { Progress } from "@wadzzo/ui/components/progress";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export default function PendingPage({ createdAt }: { createdAt?: Date | string | null }) {
     const rawDate = createdAt ? new Date(createdAt) : new Date();
@@ -62,7 +63,7 @@ export default function PendingPage({ createdAt }: { createdAt?: Date | string |
             <CardFooter className="border-t bg-muted/10 pt-4">
                 <div className="w-full flex justify-between items-center">
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="https://app.wadzzo.com/support" target="_blank" rel="noopener noreferrer">
+                        <Link href={platformBranding.contact.supportUrl} target="_blank" rel="noopener noreferrer">
                             Contact Support
                         </Link>
                     </Button>

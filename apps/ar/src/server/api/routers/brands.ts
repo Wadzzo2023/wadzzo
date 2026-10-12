@@ -16,6 +16,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Brands ─────────────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ import {
  */
 
 const AVATAR_FALLBACK =
-  "https://app.wadzzo.com/images/icons/avatar-icon.png";
+  `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;
 
 /** `Creator.id` is a 56-char Stellar pubkey; show it the way the app does. */
 const shortHandle = (id: string) => `${id.slice(0, 3)}…${id.slice(-3)}`;

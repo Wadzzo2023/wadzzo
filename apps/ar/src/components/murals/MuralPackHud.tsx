@@ -9,6 +9,7 @@ import { sfx } from "~/lib/murals/sfx";
 
 import { PackArt } from "./PackArt";
 import { PackPanel } from "./PackPanel";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /** Pages that must never pull 23 MB: brand-site embeds and dev tools. */
 const NO_DOWNLOAD = ["/embed", "/dev"];
@@ -66,7 +67,7 @@ export function MuralPackHud() {
             <PackArt size={40} done />
             <div className="min-w-0 flex-1">
               <p className="font-hud text-[12px] font-bold uppercase tracking-[0.12em] text-ar-text">Mural pack ready</p>
-              <p className="truncate text-[11px] text-ar-dim">Find street art and earn Wadzzo Coins.</p>
+              <p className="truncate text-[11px] text-ar-dim">Find street art and earn {platformBranding.coinName}.</p>
             </div>
             <button
               onClick={() => {

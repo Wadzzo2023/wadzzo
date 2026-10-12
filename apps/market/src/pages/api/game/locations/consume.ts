@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { generateRedeemCode } from "~/utils/redeem";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export default async function handler(

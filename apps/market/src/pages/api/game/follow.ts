@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import NextCors from "nextjs-cors";
 import { z } from "zod";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 
 // import { getSession } from "next-auth/react";
 

@@ -7,14 +7,14 @@ import {
 } from "firebase/auth";
 import { WalletType } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
-import { firebaseAuth } from "@wadzzo/wallet";
+import { firebaseAuth } from "@wadzzo/wallet/firebase";
 import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
 import { z } from "zod";
 
 import { env } from "~/env";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform, recordUserPlatform } from "@wadzzo/platform/server";
 import type { AuthCredential } from "@wadzzo/wallet/shared";
 import { truncateString } from "@wadzzo/utils/string";

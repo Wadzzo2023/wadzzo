@@ -4,12 +4,12 @@ import { TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
 import type { Platform } from "@wadzzo/db";
 
 import { networkPassphrase } from "@wadzzo/wallet/config";
-import type { db as Db } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { notifyFan } from "@wadzzo/platform/server";
 
 import { horizon } from "./creator-items";
 
-type DbClient = typeof Db;
+type DbClient = Db;
 
 const hashOf = (tx: Transaction) => {
   const h = tx.hash() as unknown;

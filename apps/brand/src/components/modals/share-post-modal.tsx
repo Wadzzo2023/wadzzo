@@ -8,6 +8,7 @@ import { FaXTwitter } from "react-icons/fa6"
 import { Check, Copy, Link } from "lucide-react"
 import { cn } from "@wadzzo/ui/lib/cn";
 import { env } from "~/env"
+import { platformBranding } from "@wadzzo/platform/branding";
 type ShareModalProps = {
     isOpen: boolean
     setIsOpen: (value: boolean) => void
@@ -22,9 +23,7 @@ const ShareModal = ({ isOpen, setIsOpen, data }: ShareModalProps) => {
         setIsOpen(false)
     }
 
-    const fullUrl = `${env.NEXT_PUBLIC_FAN_APP_URL?.replace(/\/$/, "") ?? (env.NEXT_PUBLIC_ASSET_CODE?.toLocaleLowerCase() === "wadzzo" ? "https://app.wadzzo.com" :
-        env.NEXT_PUBLIC_ASSET_CODE === "bandcoin" ? "https://bandcoin.io" : "https://app.action-tokens.com")
-        }${data}`
+    const fullUrl = `${(env.NEXT_PUBLIC_FAN_APP_URL ?? platformBranding.urls.fanApp).replace(/\/$/, "")}${data}`
 
     const handleCopy = async () => {
         try {
@@ -41,8 +40,8 @@ const ShareModal = ({ isOpen, setIsOpen, data }: ShareModalProps) => {
             Component: FacebookShareButton,
             props: {
                 url: fullUrl,
-                quote: "Checkout my post on Wadzzo",
-                hashtag: `#${env.NEXT_PUBLIC_ASSET_CODE?.toLocaleLowerCase() === "wadzzo" ? "Wadzzo" : env.NEXT_PUBLIC_ASSET_CODE.toLocaleLowerCase() === "bandcoin" ? "Bandcoin" : "ACTIONVERSE"}`,
+                quote: `Checkout my post on ${platformBranding.name}`,
+                hashtag: platformBranding.hashtag,
             },
             icon: (
                 <svg
@@ -63,7 +62,7 @@ const ShareModal = ({ isOpen, setIsOpen, data }: ShareModalProps) => {
             Component: TwitterShareButton,
             props: {
                 url: fullUrl,
-                title: `Checkout my post on ${env.NEXT_PUBLIC_ASSET_CODE?.toLocaleLowerCase() === "wadzzo" ? "Wadzzo" : env.NEXT_PUBLIC_ASSET_CODE.toLocaleLowerCase() === "bandcoin" ? "Bandcoin" : "ACTIONVERSE"}`,
+                title: `Checkout my post on ${platformBranding.name}`,
             },
             icon: <FaXTwitter className="transition-all duration-300" />,
             bgHover: "hover:bg-[#1d9bf0]",
@@ -74,7 +73,7 @@ const ShareModal = ({ isOpen, setIsOpen, data }: ShareModalProps) => {
             Component: WhatsappShareButton,
             props: {
                 url: fullUrl,
-                title: `Checkout my post on ${env.NEXT_PUBLIC_ASSET_CODE?.toLocaleLowerCase() === "wadzzo" ? "Wadzzo" : env.NEXT_PUBLIC_ASSET_CODE.toLocaleLowerCase() === "bandcoin" ? "Bandcoin" : "ACTIONVERSE"}`,
+                title: `Checkout my post on ${platformBranding.name}`,
                 separator: ":: ",
             },
             icon: (
@@ -100,7 +99,7 @@ const ShareModal = ({ isOpen, setIsOpen, data }: ShareModalProps) => {
             Component: TelegramShareButton,
             props: {
                 url: fullUrl,
-                title: `Checkout my post on ${env.NEXT_PUBLIC_ASSET_CODE?.toLocaleLowerCase() === "wadzzo" ? "Wadzzo" : env.NEXT_PUBLIC_ASSET_CODE.toLocaleLowerCase() === "bandcoin" ? "Bandcoin" : "ACTIONVERSE"}`,
+                title: `Checkout my post on ${platformBranding.name}`,
             },
             icon: (
                 <svg

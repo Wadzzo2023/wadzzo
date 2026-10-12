@@ -5,11 +5,12 @@ import { useState } from "react";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Comment = RouterOutputs["bounty"]["comments"][number];
 type Reply = Comment["replies"][number];
 
-const AVATAR_FALLBACK = "/brand/wadzzo-mark.png";
+const AVATAR_FALLBACK = platformBranding.assets.mark;
 
 /**
  * ── DiscussionPanel ────────────────────────────────────────────────────────

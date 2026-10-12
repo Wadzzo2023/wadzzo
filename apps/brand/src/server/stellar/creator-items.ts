@@ -12,7 +12,7 @@ import { WalletType } from "@wadzzo/wallet/shared";
 import { env } from "~/env";
 import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import type { db as Db } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /*
@@ -24,7 +24,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
  * it's just a database row and copies are minted when fans buy or claim.
  */
 
-type DbClient = typeof Db;
+type DbClient = Db;
 type Ctx = { db: DbClient; platform: Pick<Platform, "id">; session: Session };
 
 const BASE_RESERVE = 0.5;

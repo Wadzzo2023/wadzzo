@@ -26,6 +26,7 @@ import {
 import { cn } from "@wadzzo/ui/lib/cn";
 import { motion, AnimatePresence, useDragControls } from "framer-motion"
 import type { MediaType } from "@wadzzo/db";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 interface MediaItem {
     id: number
@@ -570,7 +571,7 @@ function MediaGalleryContent({ media, initialIndex = 0, autoPlay = false, onClos
                                                     className="w-full h-full rounded-full overflow-hidden border-4 border-border"
                                                 >
                                                     <img
-                                                        src={currentMedia.thumbnail ?? "/images/logo.png"}
+                                                        src={currentMedia.thumbnail ?? platformBranding.assets.logo}
                                                         alt={currentMedia.title ?? "Album Art"}
                                                         className="absolute inset-0 size-full object-cover"
                                                         sizes="(max-width: 768px) 96px, 192px"

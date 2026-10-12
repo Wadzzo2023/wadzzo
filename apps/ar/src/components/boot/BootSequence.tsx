@@ -1,8 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { WadzzoMark } from "~/components/brand/WadzzoMark";
+import { BrandMark } from "~/components/brand/BrandMark";
 import { BOOT_LINES } from "~/lib/ar/mock";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── BootSequence ───────────────────────────────────────────────────────────
@@ -28,7 +29,7 @@ import { BOOT_LINES } from "~/lib/ar/mock";
  * a full-screen kinetic logo is exactly what that setting exists to prevent.
  */
 
-const WORDMARK = ["W", "A", "D", "Z", "Z", "O"] as const;
+const WORDMARK = platformBranding.wordmark.letters;
 
 /** Beat boundaries in ms from mount. Tuned so the charge bar never waits. */
 const T = {
@@ -119,7 +120,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
   return (
     <motion.div
       role="status"
-      aria-label="Loading Wadzzo AR"
+      aria-label={`Loading ${platformBranding.name} AR`}
       onClick={finish}
       className="absolute inset-0 z-[100] cursor-pointer select-none overflow-hidden bg-ar-void"
       initial={{ opacity: 1 }}
@@ -286,7 +287,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
  */
 function BootMark({ started }: { started: boolean }) {
   return (
-    <WadzzoMark
+    <BrandMark
       glow
       className="mb-2 h-[70px] w-auto"
       initial={{ opacity: 0, scale: 2.2, rotate: -16, filter: "blur(10px)" }}
@@ -334,7 +335,7 @@ function Wordmark({ phase }: { phase: Phase }) {
           }}
           transition={{ type: "spring", stiffness: 180, damping: 18 }}
         >
-          WADZZO
+          {platformBranding.wordmark.letters.join("")}
         </motion.span>
       ))}
 
@@ -391,7 +392,7 @@ function Wordmark({ phase }: { phase: Phase }) {
           }
           transition={{ type: "spring", stiffness: 420, damping: 17, mass: 0.8 }}
         >
-          AR
+          {platformBranding.wordmark.plate}
         </motion.span>
       </h1>
     </div>

@@ -1,4 +1,5 @@
-import { db, type Platform } from "@wadzzo/db";
+import { type Platform } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { AppError } from "@wadzzo/errors";
 
 import { logAudit } from "./audit";

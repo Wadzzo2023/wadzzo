@@ -10,7 +10,7 @@ import { env } from "~/env";
 import { getplatformAssetNumberForXLM } from "~/lib/stellar/fan/get_token_price";
 import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import type { db as Db } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { notifyFan } from "@wadzzo/platform/server";
 
 import { decryptSecret, horizon, loadAccount, signerFor } from "./creator-items";
@@ -30,7 +30,7 @@ import { decryptSecret, horizon, loadAccount, signerFor } from "./creator-items"
  * gift they accept from their wallet — for which the brand also covers the
  * 0.5 XLM the sending account must lock.
  */
-type DbClient = typeof Db;
+type DbClient = Db;
 type Ctx = { db: DbClient; platform: Pick<Platform, "id">; session: Session };
 
 const TX_TIMEOUT_SECONDS = 180;

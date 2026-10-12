@@ -17,6 +17,7 @@ import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const TYPE_LABEL: Record<string, string> = { OTHER: "General", LANDMARK: "Landmark", EVENT: "Event", BOUNTY: "Bounty", EXPERIENCE: "Experience", LAUNCH: "Launch" };
 
@@ -261,7 +262,7 @@ export default function PinDetailPanel() {
             locationId: pin.id,
             locationGroupId: g.id,
             title: g.title,
-            brandName: g.creator.name ?? "Wadzzo",
+            brandName: g.creator.name ?? platformBranding.name,
             brandImageUrl: g.creator.profileUrl,
           }}
         />

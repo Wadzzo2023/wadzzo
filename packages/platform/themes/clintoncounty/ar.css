@@ -1,0 +1,54 @@
+/*
+ * Clinton County AR theme: county maroon in place of Wadzzo green. Loaded after the app's own stylesheet, so these declarations win
+ * on equal specificity. Generated from the differences between the platform's
+ * look and the default Wadzzo look; edit values here, never fork the app.
+ */
+
+:root {
+  --ar-void: 0 0% 97%;
+  --ar-bg: 0 0% 96%;
+  --ar-surface-2: 0 0% 97%;
+  --ar-surface-3: 0 0% 92%;
+  --ar-line: 0 0% 86%;
+  --ar-line-bright: 0 0% 72%;
+  --ar-text: 188 24% 10%;
+  --ar-text-dim: 188 14% 30%;
+  --ar-text-faint: 188 8% 44%;
+  --ar-green: 346 48% 34%;
+  --ar-green-hot: 346 48% 44%;
+  --ar-green-deep: 346 52% 26%;
+  --ar-green-ink: 0 0% 100%;
+  --rarity-common: 188 12% 38%;
+  --rarity-rare: 205 65% 34%;
+  --rarity-epic: 346 48% 34%;
+  --rarity-legendary: 42 72% 30%;
+  --rarity-mythic: 322 62% 40%;
+}
+.dark {
+  --ar-void: 346 10% 3%;
+  --ar-bg: 346 8% 5%;
+  --ar-surface: 346 6% 9%;
+  --ar-surface-2: 346 5% 12%;
+  --ar-surface-3: 346 4% 17%;
+  --ar-line: 346 4% 22%;
+  --ar-line-bright: 346 4% 33%;
+  --ar-text: 346 12% 96%;
+  --ar-text-dim: 346 8% 70%;
+  --ar-text-faint: 346 6% 50%;
+  --ar-green: 346 52% 56%;
+  --ar-green-hot: 346 62% 66%;
+  --ar-green-deep: 346 52% 34%;
+  --ar-green-ink: 0 0% 100%;
+  --rarity-common: 190 10% 62%;
+  --rarity-rare: 205 80% 64%;
+  --rarity-epic: 346 62% 64%;
+  --rarity-legendary: 46 62% 62%;
+  --rarity-mythic: 322 78% 66%;
+}
+
+:root {
+  --hero-panel-start: hsl(346 48% 34%);
+}
+.dark {
+  --hero-panel-start: hsl(346 52% 56%);
+}

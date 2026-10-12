@@ -30,6 +30,7 @@ import { EngagementDialog } from "~/components/events/engagement-dialog"
 import { cn } from "@wadzzo/ui/lib/cn";
 import { PageBody, PageHeader } from "~/ui/page-header"
 import { api, type RouterOutputs } from "~/utils/api"
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type EditableEvent = RouterOutputs["events"]["myEvents"][number]
 type EditableAnnouncement = RouterOutputs["events"]["myAnnouncements"][number]
@@ -82,7 +83,7 @@ export default function CreatorEventsPage() {
             <PageHeader
                 eyebrow="Drops"
                 title="Events & announcements"
-                description="Both go live straight away for everyone on Wadzzo — web and app."
+                description={`Both go live straight away for everyone on ${platformBranding.name} — web and app.`}
                 actions={
                     <Button onClick={() => router.push(tab === "events" ? "/events/new" : "/events/announcements/new")}>
                         <Plus />
@@ -141,7 +142,7 @@ export default function CreatorEventsPage() {
                     <EmptyState
                         icon={when === "past" ? CalendarX2 : CalendarDays}
                         title={when === "past" ? "No past events" : "No upcoming events"}
-                        body="Events show up for fans on Wadzzo with the date, venue, RSVPs and directions."
+                        body={`Events show up for fans on ${platformBranding.name} with the date, venue, RSVPs and directions.`}
                         action={when === "upcoming" ? () => router.push("/events/new") : undefined}
                         actionLabel="Create your first event"
                     />

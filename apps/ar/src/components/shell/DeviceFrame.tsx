@@ -1,7 +1,8 @@
 import { Camera, MapPin, Smartphone } from "lucide-react";
 import { type ReactNode } from "react";
 
-import { WadzzoMark } from "~/components/brand/WadzzoMark";
+import { BrandMark } from "~/components/brand/BrandMark";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /** Why this exists at all, for anyone reading the caption cold on a laptop. */
 const CAPTION_PERKS = [
@@ -55,12 +56,12 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
             aria-hidden
             className="animate-pulse-ring absolute inset-0 rounded-2xl border border-ar-green-hot/50"
           />
-          <WadzzoMark glow className="relative h-9 w-auto" />
+          <BrandMark glow className="relative h-9 w-auto" />
         </div>
 
         <div className="flex items-center gap-2">
           <p className="font-hud text-4xl font-bold leading-none tracking-tight text-ar-text">
-            WADZZO
+            {platformBranding.wordmark.letters.join("")}
           </p>
           <span
             className="font-hud flex h-6 items-center rounded-[6px] border border-ar-green px-1.5 text-[13px] font-bold tracking-[0.1em] text-ar-green-hot"
@@ -70,7 +71,7 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
                 "0 0 16px -2px hsl(var(--ar-green)/0.7), inset 0 0 10px -3px hsl(var(--ar-green)/0.8)",
             }}
           >
-            AR
+            {platformBranding.wordmark.plate}
           </span>
         </div>
 

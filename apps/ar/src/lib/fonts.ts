@@ -1,40 +1,65 @@
+import { platformBranding } from "@wadzzo/platform/branding";
 import {
   Bungee_Shade,
   Chakra_Petch,
   Cormorant_Upright,
+  Montserrat,
+  Roboto_Slab,
   Sora,
 } from "next/font/google";
 
 /**
- * ── Wadzzo AR type system ──────────────────────────────────────────────────
+ * ── AR type system ─────────────────────────────────────────────────────────
  *
  * Two families do all the work, the way a game HUD does it:
  *
- *  · Chakra Petch — angular, slightly condensed, with tabular-feeling numerals.
- *    Carries every piece of chrome: tab labels, stat counters, distance
- *    readouts, rarity plates, buttons. Its cut edges read as "interface"
- *    rather than "document", which is the whole point.
+ *  · Display — carries every piece of chrome: tab labels, stat counters,
+ *    distance readouts, rarity plates, buttons. (Wadzzo: Chakra Petch,
+ *    angular and slightly condensed, its cut edges read as "interface".)
  *
- *  · Sora — geometric, generous x-height, very legible at 13-15px on a phone
+ *  · Body — geometric, generous x-height, very legible at 13-15px on a phone
  *    in daylight. Carries prose: pin descriptions, brand bios, help text.
+ *    (Wadzzo: Sora.)
  *
  * Both are variable-weight-friendly on Google Fonts and subset to latin only,
  * so the boot sequence isn't waiting on a 300kB font payload.
  */
 
-export const displayFont = Chakra_Petch({
+/**
+ * Each platform picks its own pair; both pairs expose the same CSS variables,
+ * so nothing downstream knows which one is active.
+ *
+ *  · wadzzo         Chakra Petch (display) + Sora (body)
+ *  · clintoncounty  Roboto Slab (display) + Montserrat (body): the county's own faces
+ */
+const wadzzoDisplay = Chakra_Petch({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--nf-display",
 });
-
-export const bodyFont = Sora({
+const wadzzoBody = Sora({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
   variable: "--nf-body",
 });
+const countyDisplay = Roboto_Slab({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--nf-display",
+});
+const countyBody = Montserrat({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--nf-body",
+});
+
+const isCounty = platformBranding.slug === "clintoncounty";
+export const displayFont = isCounty ? countyDisplay : wadzzoDisplay;
+export const bodyFont = isCounty ? countyBody : wadzzoBody;
 
 /**
  * Stylish display font for hero / creator-title rendering.

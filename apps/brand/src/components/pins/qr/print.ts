@@ -1,3 +1,4 @@
+import { platformBranding } from "@wadzzo/platform/branding";
 /**
  * ── Sticker print sheets ─────────────────────────────────────────────────────
  *
@@ -297,7 +298,7 @@ export function slugify(value: string, max = 40): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return slug.slice(0, max) || "wadzzo";
+  return slug.slice(0, max) || platformBranding.fallbackSlug;
 }
 
 /**
@@ -316,5 +317,5 @@ export function qrFilename(
   const slug = slugify(drop.title, 32);
   const tail = item.locationId.slice(-6);
   const pin = item.pinNumber == null ? "" : `-pin-${String(item.pinNumber).padStart(2, "0")}`;
-  return `wadzzo-qr-${slug}${pin}-${tail}.${extension}`;
+  return `${platformBranding.filePrefix}-qr-${slug}${pin}-${tail}.${extension}`;
 }

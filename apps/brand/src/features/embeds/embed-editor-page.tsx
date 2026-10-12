@@ -16,6 +16,7 @@ import { Textarea } from "@wadzzo/ui/components/textarea";
 import { DEFAULT_DRAFT, type EmbedDraft, PIN_TYPE_LABEL, previewUrl, WADZZO_AR_URL } from "~/lib/embed"
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api"
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Tab = "settings" | "install" | "stats"
 const AR_ORIGIN = new URL(WADZZO_AR_URL).origin
@@ -260,7 +261,7 @@ function Settings({ draft, set }: { draft: EmbedDraft; set: <K extends keyof Emb
                     <p className="text-xs text-muted-foreground">
                         {draft.pinSource === "CREATOR"
                             ? "Only your own drops appear — on the map, in the list and in search."
-                            : "Every brand's drops in the area appear, like the Wadzzo app."}
+                            : `Every brand's drops in the area appear, like the ${platformBranding.name} app.`}
                     </p>
                 </div>
                 <Label className="block pt-1">Pin types</Label>
@@ -291,7 +292,7 @@ function Settings({ draft, set }: { draft: EmbedDraft; set: <K extends keyof Emb
             <Section title="Features">
                 <Toggle title="Search box" hint="Search drops and places" checked={draft.showSearch} onChange={(v) => set("showSearch", v)} />
                 <Toggle title="Nearby list" hint="A list of drops beside the map on wide screens, a strip on phones" checked={draft.showNearby} onChange={(v) => set("showNearby", v)} />
-                <Toggle title="Murals" hint="Street art Wadzzo users found and admins verified — shown once visitors zoom in" checked={draft.showMurals} onChange={(v) => set("showMurals", v)} />
+                <Toggle title="Murals" hint={`Street art ${platformBranding.name} users found and admins verified — shown once visitors zoom in`} checked={draft.showMurals} onChange={(v) => set("showMurals", v)} />
                 <div className="space-y-1.5">
                     <Label>Scrolling</Label>
                     <Segmented<EmbedGesture>
@@ -511,7 +512,7 @@ function LinkField({
                 <div className="grid gap-2">
                     <Input value={label} maxLength={40} onChange={(e) => onLabel(e.target.value)} placeholder="Button text" />
                     <Input value={url ?? ""} type="url" onChange={(e) => onUrl(e.target.value)} placeholder="https://" />
-                    <p className="text-[11px] text-muted-foreground">Opens in a new tab. Use your own page, or keep Wadzzo&apos;s.</p>
+                    <p className="text-[11px] text-muted-foreground">Opens in a new tab. Use your own page, or keep {platformBranding.name}&apos;s.</p>
                 </div>
             )}
         </div>

@@ -13,6 +13,7 @@ import { platformScope } from "@wadzzo/platform/server";
 import { Location } from "~/types/game/location";
 import { findNearestLocation } from "~/utils/geo";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
@@ -194,7 +195,7 @@ export const widgetRouter = createTRPCRouter({
         })
         .filter((location) => location !== undefined);
 
-      const WadzzoIconURL = "https://app.wadzzo.com/images/loading.png";
+      const WadzzoIconURL = `${(env.NEXT_PUBLIC_URL ?? platformBranding.urls.brandPortal).replace(/\/$/, "")}${platformBranding.assets.loading}`;
       const locations: Location[] = pins.map((location) => {
         return {
           id: location.id,
@@ -316,7 +317,7 @@ export const widgetRouter = createTRPCRouter({
 
       // Create a system prompt with the context
       const systemPrompt = `
-You are Wadzzo's assistant for a location-based deal discovery platform. 
+You are {platformBranding.name}'s assistant for a location-based deal discovery platform. 
 You have access to information about brands/creators and their locations.
 
 ${

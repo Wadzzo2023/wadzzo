@@ -1,6 +1,7 @@
 import { format, isSameDay, isSameYear } from "date-fns";
 
 import type { ArEventCard, ArEventDetail } from "./types";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Event helpers ──────────────────────────────────────────────────────────
@@ -98,11 +99,11 @@ export function eventIcs(e: IcsEvent, pageUrl: string) {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Wadzzo//Events//EN",
+    `PRODID:-//${platformBranding.calendar.productId}//Events//EN`,
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${e.id}@wadzzo.com`,
+    `UID:${e.id}@${platformBranding.calendar.uidDomain}`,
     `DTSTAMP:${icsDate(new Date().toISOString())}`,
     `DTSTART:${icsDate(e.startDate)}`,
     `DTEND:${icsDate(e.endDate ?? e.startDate)}`,
@@ -111,7 +112,7 @@ export function eventIcs(e: IcsEvent, pageUrl: string) {
     location && `LOCATION:${icsText(location)}`,
     e.latitude != null && e.longitude != null && `GEO:${e.latitude};${e.longitude}`,
     `URL:${pageUrl}`,
-    `ORGANIZER;CN=${icsText(e.brand.name)}:MAILTO:events@wadzzo.com`,
+    `ORGANIZER;CN=${icsText(e.brand.name)}:MAILTO:${platformBranding.contact.supportEmail}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].filter((l): l is string => Boolean(l));

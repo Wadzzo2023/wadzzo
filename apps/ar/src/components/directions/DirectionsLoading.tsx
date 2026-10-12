@@ -2,6 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Skeleton } from "~/components/ui/Skeleton";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const LINES = ["Finding the drop…", "Plotting your route…", "Checking every way there…"];
 
@@ -33,20 +34,20 @@ export function DirectionsLoading({ onBack, mural }: { onBack: () => void; mural
             <path d="M-20 150 L380 190" />
             <path d="M250 -20 L230 560" />
           </g>
-          <path d="M98 296 L114 238 L122 176 L236 164 L244 104" fill="none" stroke="#3fd831" strokeOpacity="0.18" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M98 296 L114 238 L122 176 L236 164 L244 104" fill="none" stroke={platformBranding.colors.mapLoadingRoute} strokeOpacity="0.18" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" />
           <path
             className="dir-load-route"
             d="M98 296 L114 238 L122 176 L236 164 L244 104"
             fill="none"
-            stroke="#3fd831"
+            stroke={platformBranding.colors.mapLoadingRoute}
             strokeWidth="8"
             strokeLinecap="round"
             strokeLinejoin="round"
             pathLength={100}
           />
           {/* You */}
-          <circle cx="98" cy="296" r="18" fill="#3fd831" opacity="0.18" className="dir-load-pulse" />
-          <circle cx="98" cy="296" r="8" fill="#3fd831" stroke="#fff" strokeWidth="3" />
+          <circle cx="98" cy="296" r="18" fill={platformBranding.colors.mapLoadingRoute} opacity="0.18" className="dir-load-pulse" />
+          <circle cx="98" cy="296" r="8" fill={platformBranding.colors.mapLoadingRoute} stroke="#fff" strokeWidth="3" />
           {/* Destination */}
           <g className="dir-load-flag">
             <path d="M244 104 L244 70" stroke="hsl(var(--rarity-epic))" strokeWidth="3" strokeLinecap="round" />

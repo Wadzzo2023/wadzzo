@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Coords, GeoFix } from "./types";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export type GeoStatus =
   | "idle"
@@ -19,7 +20,7 @@ export type GeoReason = "denied" | "unavailable" | "timeout";
 
 export const GEO_REASON_TEXT: Record<GeoReason, string> = {
   denied:
-    "Location is blocked for this site. Allow it and Wadzzo can show the drops around you.",
+    `Location is blocked for this site. Allow it and ${platformBranding.name} can show the drops around you.`,
   unavailable:
     "Your device couldn't get a location fix. Check that Location Services are on.",
   timeout:

@@ -12,6 +12,7 @@ import { nonBlank } from "~/lib/utils";
 import { truncateString } from "@wadzzo/utils/string";
 import { DEFAULT_SETTINGS } from "./mock";
 import type { ArSettings, ArUser } from "./types";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── App state ──────────────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ function deriveArUser(sessionUser: {
     id,
     name: nonBlank(sessionUser.name) ?? truncateString(id, 6, 4),
     handle: truncateString(id, 4, 4).toLowerCase(),
-    avatarUrl: nonBlank(sessionUser.image) ?? "/brand/wadzzo-mark.png",
+    avatarUrl: nonBlank(sessionUser.image) ?? platformBranding.assets.mark,
     pubkey: truncateString(id, 4, 4).toUpperCase(),
     joinedAt: new Date().toISOString(),
     collectedCount: 0,
@@ -115,7 +116,7 @@ export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   },
   murals: {
     title: "Sign in to collect this mural",
-    body: "Finding street art is free for everyone — collecting it and earning Wadzzo Coins needs an account.",
+    body: `Finding street art is free for everyone — collecting it and earning ${platformBranding.coinName} needs an account.`,
   },
   ar: {
     title: "Sign in to capture",

@@ -16,6 +16,7 @@ import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header"
 import { Skeleton } from "~/ui/skeleton"
 import { api } from "~/utils/api"
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── /embeds ────────────────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ export default function EmbedsPage() {
             <PageHeader
                 eyebrow="Drops"
                 title="Website Map"
-                description="Put the Wadzzo map on your own website — a homepage hero, a visitors page, anywhere. Paste one snippet; settings you change here update the live map."
+                description={`Put the ${platformBranding.name} map on your own website — a homepage hero, a visitors page, anywhere. Paste one snippet; settings you change here update the live map.`}
                 actions={
                     <Button asChild>
                         <Link href="/embeds/new">

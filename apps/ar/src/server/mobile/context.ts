@@ -2,7 +2,7 @@ import type { Session } from "next-auth";
 
 import { appRouter } from "~/server/api/root";
 import { createInnerTRPCContext } from "~/server/api/trpc";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform } from "@wadzzo/platform/server";
 
 import { verifyMobileToken } from "./token";

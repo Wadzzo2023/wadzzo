@@ -8,6 +8,7 @@ import {
   type GeoReason,
   type GeoStatus,
 } from "~/lib/ar/useGeolocation";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── LocationGate ───────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export function LocationGate({
       </div>
 
       <h1 className="font-hud text-center text-[19px] font-bold leading-tight text-ar-text">
-        {asking ? "Finding you…" : "Wadzzo needs your location"}
+        {asking ? "Finding you…" : `${platformBranding.name} needs your location`}
       </h1>
 
       <p className="mt-2.5 max-w-[19rem] text-center text-[13px] leading-relaxed text-ar-dim">

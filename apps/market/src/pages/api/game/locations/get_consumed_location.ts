@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { ConsumedLocation } from "~/types/game/location";
 import { avaterIconUrl } from "../brands";
 import { WadzzoCircularIconURL, WadzzoIconURL } from "./index";

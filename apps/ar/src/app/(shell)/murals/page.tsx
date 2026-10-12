@@ -30,6 +30,7 @@ import { captureKeyframe, useMuralDetector } from "~/lib/murals/useMuralDetector
 import { useCoinBalance, useNearbyMurals, useSubmitMuralScan } from "~/lib/murals/useMurals";
 import { useMuralSweep, type SweepSlot } from "~/lib/murals/useMuralSweep";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── /murals ────────────────────────────────────────────────────────────────
@@ -53,15 +54,15 @@ type Phase = "gate" | "searching" | "locked" | "sweeping" | "sending" | "result"
 const GATE: GateCopy = {
   mode: "murals",
   title: "Scan street art",
-  body: "Point at a mural or graffiti, turn a little left and right, earn Wadzzo Coins.",
+  body: `Point at a mural or graffiti, turn a little left and right, earn ${platformBranding.coinName}.`,
   why: {
     camera: "Spots murals and graffiti in the live view.",
     location: "Ties your scan to the wall it's painted on.",
     motion: "Confirms the short left/right turn.",
   },
   unsupported: {
-    camera: "No camera found — open Wadzzo on your phone to scan murals.",
-    location: "No location on this device — open Wadzzo on your phone to scan murals.",
+    camera: `No camera found — open ${platformBranding.name} on your phone to scan murals.`,
+    location: `No location on this device — open ${platformBranding.name} on your phone to scan murals.`,
     motion: "No motion sensor — the left/right check needs a phone.",
   },
   cta: "Allow & start scanning",
@@ -308,7 +309,7 @@ export default function MuralsScreen() {
       return { title: "Point at a mural or street art", sub: "Murals, graffiti, painted walls — fill the frame with it.", Icon: Frame };
     }
     if (phase === "locked") {
-      if (!signedIn) return { title: "Mural found", sub: "Sign in to collect it and earn Wadzzo Coins.", Icon: Frame };
+      if (!signedIn) return { title: "Mural found", sub: `Sign in to collect it and earn ${platformBranding.coinName}.`, Icon: Frame };
       if (atLimit && match) {
         return { title: `${match.title} · ${match.scansToday}/${nearby.dailyLimit} today`, sub: "Come back after midnight to scan it again.", Icon: Frame };
       }
@@ -380,7 +381,7 @@ export default function MuralsScreen() {
             <button
               onClick={() => void router.push("/collection?tab=murals")}
               className="ar-glass flex h-9 items-center gap-1.5 rounded-full px-3 text-gold"
-              aria-label="Wadzzo Coins balance"
+              aria-label={`${platformBranding.coinName} balance`}
             >
               <Coins size={14} strokeWidth={2.5} />
               <span className="font-hud text-[12px] font-bold tabular-nums">{(balance.data?.balance ?? 0).toLocaleString()}</span>

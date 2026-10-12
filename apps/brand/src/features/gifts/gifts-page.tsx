@@ -23,6 +23,7 @@ import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { fetchPubkeyfromEmail } from "~/utils/get-pubkey";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Kind = "PAGEASSET" | "PLATFORMASSET" | "ITEM";
 /** `balance` is what can be given away now; for an item that's its stock plus what can still be minted (Infinity = open edition). */
@@ -84,7 +85,7 @@ export default function GiftsPage() {
       const pk = await fetchPubkeyfromEmail(recipient.trim());
       setResolved({ pubkey: pk, label: recipient.trim() });
     } catch {
-      toast.error("No Wadzzo account uses that email");
+      toast.error(`No ${platformBranding.name} account uses that email`);
     } finally {
       setLooking(false);
     }

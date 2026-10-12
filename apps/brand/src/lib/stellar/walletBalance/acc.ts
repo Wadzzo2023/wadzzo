@@ -18,7 +18,7 @@ import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { api } from "~/utils/api";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type Balances = (

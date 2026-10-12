@@ -8,7 +8,9 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
     "./shared": "./src/shared.ts",
-    "./config": "./src/config/index.ts"
+    "./config": "./src/config/index.ts",
+    "./stellar": "./src/stellar.ts",
+    "./firebase": "./src/firebase.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

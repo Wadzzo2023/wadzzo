@@ -4,10 +4,11 @@ import { ItemPrivacy } from "@wadzzo/db";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { Location } from "~/types/game/location";
 import { avaterIconUrl as abaterIconUrl } from "../brands";
 import { StellarAccount } from "@wadzzo/stellar/account";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export default async function handler(
   req: NextApiRequest,
@@ -229,5 +230,5 @@ export default async function handler(
   res.status(200).json({ locations });
 }
 
-export const WadzzoIconURL = "https://app.wadzzo.com/images/loading.png";
-export const WadzzoCircularIconURL = "https://app.wadzzo.com/images/circular-default.png";
+export const WadzzoIconURL = `${platformBranding.urls.fanApp}${platformBranding.assets.loading}`;
+export const WadzzoCircularIconURL = `${platformBranding.urls.fanApp}/images/circular-default.png`;

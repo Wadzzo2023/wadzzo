@@ -39,6 +39,7 @@ import type { ArSettings } from "~/lib/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useBrands, usePinsQuery } from "~/lib/ar/usePins";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const THEME_OPTIONS: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
   { value: "auto", icon: MonitorSmartphone, label: "System" },
@@ -151,7 +152,7 @@ export default function ProfileScreen() {
                 <span>
                   {platformBalance.data
                     ? `${platformBalance.data.assetCode} balance`
-                    : "Wadzzo balance"}
+                    : `${platformBranding.coinOwner} balance`}
                 </span>
               </span>
               {platformBalance.isLoading ? (
@@ -212,7 +213,7 @@ export default function ProfileScreen() {
         >
           <Coins size={16} strokeWidth={2.4} className="text-gold" />
           <span className="font-hud flex-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-dim">
-            Wadzzo Coins
+            {platformBranding.coinName}
           </span>
           <span className="font-hud text-[16px] font-bold tabular-nums text-gold">
             {(coins.data?.balance ?? 0).toLocaleString()}

@@ -26,3 +26,7 @@ next-env.d.ts
 !.vscode/extensions.json
 .vercel
 npm-debug.log*
+
+# generated per platform by packages/platform/scripts/sync-platform-assets.mjs
+apps/*/src/styles/platform-theme.css
+apps/*/public/platform

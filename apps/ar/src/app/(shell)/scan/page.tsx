@@ -12,6 +12,7 @@ import { useAuth } from "~/lib/ar/store";
 import { useCamera } from "~/lib/ar/useCamera";
 import { pinIdFromScan, useQrScanner } from "~/lib/ar/useQrScanner";
 import { useCollectPinByQr } from "~/lib/ar/usePins";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── /scan ──────────────────────────────────────────────────────────────────
@@ -110,7 +111,7 @@ export default function ScanScreen() {
     onResult: (text) => {
       const id = pinIdFromScan(text);
       if (!id) {
-        setMessage("That isn't a Wadzzo code.");
+        setMessage(`That isn't a ${platformBranding.name} code.`);
         return;
       }
       claim(id);
@@ -284,7 +285,7 @@ export default function ScanScreen() {
 
             <p className="font-hud text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
               {camera.isPlaying
-                ? "Point at a Wadzzo code"
+                ? `Point at a ${platformBranding.name} code`
                 : camera.state === "denied"
                   ? "Camera blocked"
                   : "Starting camera…"}

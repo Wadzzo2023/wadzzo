@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * The stand-in when a brand's own artwork can't be fetched. Local, so it can
- * never be the thing that fails — `public/brand/wadzzo-mark.png` ships with the
+ * never be the thing that fails — the platform's brand mark ships with the
  * app rather than being pulled from a CDN or a gateway.
  */
-const FALLBACK_SRC = "/brand/wadzzo-mark.png";
+const FALLBACK_SRC = platformBranding.assets.mark;
 
 /**
  * ── BrandAvatar ────────────────────────────────────────────────────────────

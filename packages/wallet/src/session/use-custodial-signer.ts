@@ -1,3 +1,5 @@
+"use client";
+
 import { useSession } from "next-auth/react";
 
 import type { CustodialSigner } from "./custodial-signer";

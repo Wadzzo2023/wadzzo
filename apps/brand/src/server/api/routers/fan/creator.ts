@@ -45,8 +45,9 @@ import { TRPCError } from "@trpc/server";
 import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { creatorExtraFiledsSchema } from "~/types/creator";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 /** A vanity URL is free to claim if nobody else has it. */
-async function assertVanityFree(db: typeof import("@wadzzo/db").db, vanityURL: string, creatorId: string) {
+async function assertVanityFree(db: import("@wadzzo/db").Db, vanityURL: string, creatorId: string) {
   const taken = await db.creator.findUnique({ where: { vanityURL }, select: { id: true } });
   if (taken && taken.id !== creatorId) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "That URL is taken. Try another." });
 }
@@ -247,7 +248,7 @@ export const creatorRouter = createTRPCRouter({
           creatorId: creator.id,
           price: Number(asset),
           priceUSD: Number(usd),
-          thumbnail: "https://app.wadzzo.com/images/loading.png",
+          thumbnail: `${(env.NEXT_PUBLIC_URL ?? platformBranding.urls.brandPortal).replace(/\/$/, "")}${platformBranding.assets.loading}`,
         };
       }
     }

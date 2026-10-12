@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import internal from "stream";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { Brand } from "~/types/game/brand";
 import { avaterIconUrl } from "./brands";
 import { EnableCors } from "~/server/api-cors";

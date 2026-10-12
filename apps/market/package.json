@@ -10,7 +10,10 @@
     "start": "next start",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs market",
+    "predev": "pnpm sync:platform",
+    "prebuild": "pnpm sync:platform"
   },
   "dependencies": {
     "@albedo-link/intent": "catalog:",

@@ -1,6 +1,6 @@
 "use client";
 
-import { getTransactionHashHex } from "@wadzzo/wallet";
+import { getTransactionHashHex } from "@wadzzo/wallet/stellar";
 
 import type { VanitySubscription } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";

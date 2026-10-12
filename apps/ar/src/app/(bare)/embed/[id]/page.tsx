@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { cache } from "react";
 
 import { decodePreview, normalizeConfig, brandOrigins, type EmbedConfig } from "~/lib/embed/config";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 
 import { EmbedClient } from "./EmbedClient";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── /embed/[id] ────────────────────────────────────────────────────────────
@@ -32,7 +33,7 @@ const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : u
 
 export async function generateMetadata({ params, searchParams }: PageProps<"/embed/[id]">): Promise<Metadata> {
   const loaded = await load((await params).id, one((await searchParams).c));
-  return { title: `${loaded?.config.name ?? "Map unavailable"} · Wadzzo`, robots: { index: false } };
+  return { title: `${loaded?.config.name ?? "Map unavailable"} · ${platformBranding.name}`, robots: { index: false } };
 }
 
 export default async function EmbedPage({ params, searchParams }: PageProps<"/embed/[id]">) {
@@ -42,7 +43,7 @@ export default async function EmbedPage({ params, searchParams }: PageProps<"/em
       <div className="flex h-screen w-screen items-center justify-center bg-ar-bg p-6 text-center">
         <div>
           <p className="font-hud text-[12px] font-semibold uppercase tracking-[0.16em] text-ar-dim">Map unavailable</p>
-          <p className="mt-1 text-[12px] text-ar-faint">This Wadzzo map has been turned off or removed.</p>
+          <p className="mt-1 text-[12px] text-ar-faint">This {platformBranding.name} map has been turned off or removed.</p>
         </div>
       </div>
     );

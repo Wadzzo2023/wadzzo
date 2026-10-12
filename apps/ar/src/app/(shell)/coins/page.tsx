@@ -10,6 +10,7 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { useAuth } from "~/lib/ar/store";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── /coins ─────────────────────────────────────────────────────────────────
@@ -39,7 +40,7 @@ export default function CoinsScreen() {
   return (
     <AppShell tabs={false}>
       <div className="ar-scroll h-full pb-10">
-        <ScreenHeader back eyebrow="Wallet" title="Wadzzo Coins" />
+        <ScreenHeader back eyebrow="Wallet" title={platformBranding.coinName} />
 
         {!signedIn ? (
           <div className="px-5 pt-8 text-center">

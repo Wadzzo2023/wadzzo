@@ -1,0 +1,50 @@
+import type { PlatformBranding } from "./types";
+
+/** Clinton County, Iowa: partner platform (web.clintoncounty-ia.gov, brand.clintoncounty-ia.gov). */
+export const clintonCountyBranding: PlatformBranding = {
+  slug: "clintoncounty",
+  name: "Clinton City",
+  longName: "Clinton County",
+  coinName: "Clinton Coins",
+  coinOwner: "Clinton",
+  arAppTitle: "Clinton City AR — Collect the real world",
+  portalTitle: "Clinton City Brand Portal",
+  hashtag: "#ClintonCounty",
+  filePrefix: "clinton",
+  fallbackSlug: "clinton",
+  wordmark: { letters: ["C", "L", "I", "N", "T", "O", "N"], plate: "CITY" },
+  assets: {
+    mark: "/platform/brand/brand-mark.png",
+    logo: "/platform/images/logo.png",
+    loading: "/platform/images/loading.png",
+    avatar: "/platform/images/icons/avatar-icon.png",
+    favicon: "/platform/favicon.ico",
+  },
+  colors: {
+    portalThemeDark: "#0a100c",
+    portalThemeLight: "#f5f5f5",
+    themeDark: "#0b0809",
+    themeLight: "#f5f5f5",
+    mapRoute: "#b8415a",
+    mapRouteCasing: "#4a1420",
+    mapNavAccent: "#6e1d2c",
+    mapLoadingRoute: "#35b66b",
+    embedAccent: "#35b66b",
+    cardBorder: "#5c1d2c",
+    cardGlow: "rgba(139,45,64,0.35)",
+    packDone: "hsl(46 62% 52%)",
+    packDoneGlow: "hsl(46 62% 52% / 0.35)",
+  },
+  urls: {
+    arWeb: "https://web.clintoncounty-ia.gov",
+    brandPortal: "https://brand.clintoncounty-ia.gov",
+    fanApp: "https://web.clintoncounty-ia.gov",
+  },
+  contact: { supportEmail: "support@wadzzo.com", supportUrl: "mailto:support@wadzzo.com" },
+  toml: {
+    orgName: "Clinton City",
+    orgUrl: "https://www.clintoncounty-ia.gov/",
+    principals: [],
+  },
+  calendar: { productId: "Clinton County", uidDomain: "clintoncounty-ia.gov" },
+};

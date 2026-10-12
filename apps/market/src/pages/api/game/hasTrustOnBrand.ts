@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 // import { getSession } from "next-auth/react";
 
 export default async function handler(

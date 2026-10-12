@@ -15,6 +15,7 @@ import { CreateMenu } from "./create-menu";
 import { isActive, type NavItem, type BrandEntry } from "./nav";
 import { UserMenu } from "./user-menu";
 import { WalletBalance } from "./wallet-balance";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * Desktop navigation (lg and up). Full width shows group labels and names;
@@ -53,13 +54,13 @@ export function Sidebar({
       >
         {/* Brand and Toggle */}
         <div className={cn("flex items-center border-b", collapsed ? "h-16 justify-center px-0" : "h-16 justify-between px-4")}>
-          <Link href={homeHref} className="flex items-center gap-2.5" aria-label="Wadzzo portal home">
+          <Link href={homeHref} className="flex items-center gap-2.5" aria-label={`${platformBranding.name} portal home`}>
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
-              <Image src="/images/loading.png" alt="" width={22} height={22} className="object-contain" />
+              <Image src={platformBranding.assets.loading} alt="" width={22} height={22} className="object-contain" />
             </span>
             {!collapsed && (
               <span className="leading-tight">
-                <span className="block font-hud text-base font-bold tracking-tight">Wadzzo</span>
+                <span className="block font-hud text-base font-bold tracking-tight">{platformBranding.name}</span>
                 <span className="block font-hud text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {isPureAdmin ? "Admin portal" : "Brand portal"}
                 </span>

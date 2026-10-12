@@ -1,0 +1,68 @@
+/*
+ * Clinton County brand portal theme: county green + maroon, Montserrat / Roboto Slab. Loaded after the app's own stylesheet, so these declarations win
+ * on equal specificity. Generated from the differences between the platform's
+ * look and the default Wadzzo look; edit values here, never fork the app.
+ */
+
+@import "@fontsource-variable/montserrat";
+@import "@fontsource/roboto-slab/500.css";
+@import "@fontsource/roboto-slab/600.css";
+@import "@fontsource/roboto-slab/700.css";
+
+:root {
+  --ar-void: 145 12% 97%;
+  --ar-bg: 0 0% 96%;
+  --ar-surface-2: 0 0% 97%;
+  --ar-surface-3: 0 0% 92%;
+  --ar-line: 0 0% 86%;
+  --ar-line-bright: 0 0% 72%;
+  --ar-text: 188 24% 10%;
+  --ar-text-dim: 188 14% 30%;
+  --ar-text-faint: 188 8% 44%;
+  --ar-green: 145 78% 16%;
+  --ar-green-hot: 145 72% 24%;
+  --ar-green-deep: 145 70% 13%;
+  --ar-green-ink: 0 0% 100%;
+  --ar-maroon: 346 48% 34%;
+  --ar-maroon-hot: 346 48% 44%;
+  --ar-maroon-ink: 0 0% 100%;
+  --ar-gold-tint: 46 42% 90%;
+  --ar-gold-ink: 145 70% 14%;
+  --rarity-common: 188 12% 38%;
+  --rarity-rare: 205 65% 34%;
+  --rarity-epic: 346 48% 34%;
+  --rarity-legendary: 42 72% 30%;
+  --rarity-mythic: 322 62% 40%;
+  --primary: var(--ar-maroon);
+  --primary-foreground: var(--ar-maroon-ink);
+  --accent: var(--ar-gold-tint);
+  --accent-foreground: var(--ar-gold-ink);
+  --font-body: "Montserrat Variable";
+  --font-display: "Roboto Slab";
+}
+.dark {
+  --ar-void: 145 30% 3%;
+  --ar-bg: 145 24% 5%;
+  --ar-surface: 145 18% 9%;
+  --ar-surface-2: 145 16% 12%;
+  --ar-surface-3: 145 14% 17%;
+  --ar-line: 145 12% 22%;
+  --ar-line-bright: 145 12% 33%;
+  --ar-text: 140 12% 96%;
+  --ar-text-dim: 140 8% 70%;
+  --ar-text-faint: 140 6% 50%;
+  --ar-green: 145 55% 46%;
+  --ar-green-hot: 145 65% 58%;
+  --ar-green-deep: 145 70% 24%;
+  --ar-green-ink: 145 70% 6%;
+  --ar-maroon: 346 52% 52%;
+  --ar-maroon-hot: 346 60% 62%;
+  --ar-maroon-ink: 0 0% 100%;
+  --ar-gold-tint: 46 22% 18%;
+  --ar-gold-ink: 46 38% 84%;
+  --rarity-common: 190 10% 62%;
+  --rarity-rare: 205 80% 64%;
+  --rarity-epic: 346 62% 64%;
+  --rarity-legendary: 46 62% 62%;
+  --rarity-mythic: 322 78% 66%;
+}

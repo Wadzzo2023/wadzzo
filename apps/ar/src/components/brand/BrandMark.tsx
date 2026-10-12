@@ -1,7 +1,8 @@
 import { motion, type MotionProps } from "framer-motion";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
- * ── WadzzoMark ─────────────────────────────────────────────────────────────
+ * ── BrandMark ─────────────────────────────────────────────────────────────
  *
  * The brand icon, using the actual source artwork (`public/brand/wadzzo-mark.png`,
  * copied from the main Wadzzo app's `images/loading.png`) rather than a
@@ -9,7 +10,7 @@ import { motion, type MotionProps } from "framer-motion";
  * mark. Wrapped as `motion.img` so it can still be scaled, glowed, and
  * animated in the boot sequence and elsewhere.
  */
-export function WadzzoMark({
+export function BrandMark({
   className,
   glow = false,
   ...motionProps
@@ -21,8 +22,8 @@ export function WadzzoMark({
   return (
      
     <motion.img
-      src="/brand/wadzzo-mark.png"
-      alt="Wadzzo"
+      src={platformBranding.assets.mark}
+      alt={platformBranding.name}
       className={className}
       style={
         glow

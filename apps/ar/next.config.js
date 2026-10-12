@@ -10,6 +10,8 @@ const withBundleAnalyzer = analyzer({
 
 /** @type {import("next").NextConfig} */
 const config = {
+  // Browser bundles read the platform from here (see @wadzzo/platform/branding).
+  env: { NEXT_PUBLIC_PLATFORM_SLUG: process.env.PLATFORM_SLUG ?? "wadzzo" },
   transpilePackages: ["three", "@wadzzo/db", "@wadzzo/errors", "@wadzzo/platform", "@wadzzo/stellar", "@wadzzo/ui", "@wadzzo/utils", "@wadzzo/wallet"],
 
   /**

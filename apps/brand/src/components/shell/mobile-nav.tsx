@@ -13,6 +13,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import { ADMIN_NAV, adminNavFor, BRAND_NAV, CREATE_ACTIONS, isActive, brandEntryGroup, MOBILE_TABS, type BrandEntry, type NavItem } from "./nav";
 import { UserMenu } from "./user-menu";
 import { WalletBalance } from "./wallet-balance";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /** Phone top bar: logo, current section, notifications, account. */
 export function MobileTopBar({ title, homeHref = "/pins", showBell = false }: { title?: string; homeHref?: string; showBell?: boolean }) {
@@ -20,10 +21,10 @@ export function MobileTopBar({ title, homeHref = "/pins", showBell = false }: { 
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur-sm supports-[backdrop-filter]:bg-card/80 lg:hidden">
       <Link href={homeHref} className="flex items-center gap-2" aria-label="Home">
         <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-          <Image src="/images/loading.png" alt="" width={20} height={20} className="object-contain" />
+          <Image src={platformBranding.assets.loading} alt="" width={20} height={20} className="object-contain" />
         </span>
       </Link>
-      <span className="min-w-0 flex-1 truncate font-hud text-base font-semibold">{title ?? "Wadzzo"}</span>
+      <span className="min-w-0 flex-1 truncate font-hud text-base font-semibold">{title ?? platformBranding.name}</span>
       {showBell && <NotificationBell />}
       <UserMenu compact />
     </header>

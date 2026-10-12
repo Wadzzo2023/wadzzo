@@ -1,4 +1,4 @@
-import { submitSignedTransaction } from "@wadzzo/wallet";
+import { submitSignedTransaction } from "@wadzzo/wallet/stellar";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { CreditCard, PaymentForm } from "react-square-web-payments-sdk";

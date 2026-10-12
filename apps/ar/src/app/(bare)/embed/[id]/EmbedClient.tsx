@@ -22,6 +22,7 @@ import {
 } from "~/lib/embed/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 // ── The embed ─────────────────────────────────────────────────────────────
 
@@ -367,7 +368,7 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
               rel="noopener noreferrer"
               className="ar-glass pointer-events-auto shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold text-ar-dim hover:text-ar-text"
             >
-              Powered by <span className="text-ar-green-hot">Wadzzo</span>
+              Powered by <span className="text-ar-green-hot">{platformBranding.name}</span>
             </a>
           </div>
         </div>
@@ -432,7 +433,7 @@ function MuralPreviewCard({
           </p>
           <p className="mt-1.5 text-[11px] text-ar-faint">
             {distance != null ? `${formatDistance(distance)} away · ` : ""}
-            Scan it with the Wadzzo camera to earn coins
+            Scan it with the {platformBranding.name} camera to earn coins
           </p>
         </div>
       </div>
@@ -444,7 +445,7 @@ function MuralPreviewCard({
           onClick={onOpen}
           className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold uppercase tracking-[0.08em]"
         >
-          Open in Wadzzo <ExternalLink size={14} strokeWidth={2.4} />
+          Open in {platformBranding.name} <ExternalLink size={14} strokeWidth={2.4} />
         </a>
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${mural.latitude},${mural.longitude}`}
@@ -516,7 +517,7 @@ function PreviewCard({
           onClick={onOpen}
           className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold uppercase tracking-[0.08em]"
         >
-          Open in Wadzzo <ExternalLink size={14} strokeWidth={2.4} />
+          Open in {platformBranding.name} <ExternalLink size={14} strokeWidth={2.4} />
         </a>
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${pin.lat},${pin.lng}`}

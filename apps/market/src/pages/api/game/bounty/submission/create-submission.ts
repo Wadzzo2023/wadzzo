@@ -8,7 +8,7 @@ import { z } from "zod";
 const SubmissionMediaInfo = z.object({ url: z.string(), name: z.string(), size: z.number(), type: z.string() });
 import { EnableCors } from "~/server/api-cors";
 
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 

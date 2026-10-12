@@ -14,6 +14,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Pins ───────────────────────────────────────────────────────────────────
@@ -39,7 +40,7 @@ import {
  */
 
 /** Fallbacks, matching the main webapp so a brand's art is identical in both. */
-export const WADZZO_ICON = "https://app.wadzzo.com/images/loading.png";
+export const WADZZO_ICON = `${platformBranding.urls.fanApp}${platformBranding.assets.loading}`;
 
 /**
  * `LocationGroup.limit` is an inventory ceiling, not a scarcity choice — the

@@ -7,8 +7,9 @@ import { useAuth } from "~/lib/ar/store";
 import type { ArComment, ArCommentTarget } from "~/lib/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
-const AVATAR_FALLBACK = "/brand/wadzzo-mark.png";
+const AVATAR_FALLBACK = platformBranding.assets.mark;
 
 /**
  * ── Comments ───────────────────────────────────────────────────────────────

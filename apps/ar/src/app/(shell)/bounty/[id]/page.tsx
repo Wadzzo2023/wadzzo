@@ -43,6 +43,7 @@ import {
 } from "~/lib/ar/useBountyAttention";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Section = "brief" | "entries" | "chat" | "discussion";
 const SECTIONS: Section[] = ["brief", "entries", "chat", "discussion"];
@@ -513,7 +514,7 @@ function PrimaryAction({
       <>
         {note("You posted this bounty")}
         <ArButton block size="lg" disabled>
-          Manage it on Wadzzo
+          Manage it on {platformBranding.name}
         </ArButton>
       </>
     );

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Mural pack ─────────────────────────────────────────────────────────────
@@ -173,7 +174,7 @@ async function run() {
       set({ status: "ready", version: flag.version });
       return;
     }
-    fail(navigator.onLine === false ? "offline" : "network", navigator.onLine === false ? "You're offline — the download continues when you're back online." : "Couldn't reach Wadzzo to check the mural pack.");
+    fail(navigator.onLine === false ? "offline" : "network", navigator.onLine === false ? "You're offline — the download continues when you're back online." : `Couldn't reach ${platformBranding.name} to check the mural pack.`);
     return;
   }
   const file = manifest.web;

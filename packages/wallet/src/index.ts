@@ -1,4 +1,10 @@
-/** Client-side wallet API: connect UI, session state and transaction signing. */
+"use client";
+
+/**
+ * The wallet's browser API: connect UI, signing and the hooks that go with it.
+ * Server code and anything without UI imports the narrower entries instead:
+ * `/shared`, `/stellar`, `/firebase`, `/config`, `/server`.
+ */
 
 // UI
 export { ConnectWalletButton } from "./ui/connect-wallet-button";
@@ -14,18 +20,3 @@ export {
   type SignAndSubmitTransactionInput,
 } from "./signing/sign-and-submit-transaction";
 export { useCustodialSigner } from "./session/use-custodial-signer";
-export { firebaseAuth } from "./firebase/client";
-
-// everything that is also safe on the server (WalletType, schemas)
-export * from "./shared";
-
-// stellar helpers shared by every app
-export {
-  StellarTransactionError,
-  describeStellarError,
-  isRecoverableStellarError,
-  summarizeStellarError,
-} from "./errors/stellar-transaction-error";
-export { isStellarAccountActive, submitSignedTransaction } from "./stellar/horizon";
-export { concatAssetWithIssuer, splitAssetKey } from "./stellar/asset-keys";
-export { getTransactionHashHex } from "./stellar/transaction-hash";

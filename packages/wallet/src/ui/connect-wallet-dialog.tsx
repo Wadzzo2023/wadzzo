@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { DocumentDuplicateIcon, SignalSlashIcon } from "@heroicons/react/24/solid";

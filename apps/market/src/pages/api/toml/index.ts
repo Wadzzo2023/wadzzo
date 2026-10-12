@@ -4,7 +4,7 @@ import { Asset } from "@wadzzo/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
 
 export default async function handler(

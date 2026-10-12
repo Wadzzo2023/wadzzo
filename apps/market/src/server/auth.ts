@@ -13,10 +13,10 @@ import {
 } from "firebase/auth";
 import { WalletType, type WadzzoSessionUser as User } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
-import { firebaseAuth } from "@wadzzo/wallet";
+import { firebaseAuth } from "@wadzzo/wallet/firebase";
 import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
 import { z } from "zod";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform, recordUserPlatform } from "@wadzzo/platform/server";
 import { AuthCredential } from "@wadzzo/wallet/shared";
 import { truncateString } from "@wadzzo/utils/string";

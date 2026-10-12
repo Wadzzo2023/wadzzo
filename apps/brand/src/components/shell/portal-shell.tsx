@@ -12,6 +12,7 @@ import { ADMIN_NAV, BRAND_NAV, isActive } from "./nav";
 import { Sidebar } from "./sidebar";
 import { usePortalAccess } from "./use-portal-access";
 import { UserMenu } from "./user-menu";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const COLLAPSE_KEY = "wadzzo.sidebar.collapsed";
 /** The saved choice only changes through our own toggle, so there's nothing to subscribe to. */
@@ -66,10 +67,10 @@ export function PortalShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-card/95 px-4 backdrop-blur-sm supports-[backdrop-filter]:bg-card/80 sm:px-8">
           <div className="flex items-center gap-2.5">
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-              <Image src="/images/loading.png" alt="" width={20} height={20} className="object-contain" />
+              <Image src={platformBranding.assets.loading} alt="" width={20} height={20} className="object-contain" />
             </span>
             <span className="leading-tight">
-              <span className="block font-hud text-base font-bold tracking-tight">Wadzzo</span>
+              <span className="block font-hud text-base font-bold tracking-tight">{platformBranding.name}</span>
               <span className="block font-hud text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Brand Onboarding
               </span>

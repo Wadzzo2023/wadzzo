@@ -11,7 +11,7 @@
 
 import { ItemPrivacy } from "@wadzzo/db";
 import { PinType } from "@wadzzo/db";
-import type { db as PrismaDb } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertCreatorInScope, assertOwnerOrAdmin, isAdmin as checkIsAdmin } from "~/server/api/access";
@@ -109,7 +109,7 @@ const MAX_QR_CODES_PER_DROP = 100;
  * cuid-like so a lexicographic comparison lines up with insertion order well
  * enough for a label. Cheaper than pulling every sibling row.
  */
-async function locationOrdinal(db: typeof PrismaDb, locationId: string): Promise<number | null> {
+async function locationOrdinal(db: Db, locationId: string): Promise<number | null> {
   const self = await db.location.findUnique({
     where: { id: locationId },
     select: { id: true, locationGroupId: true },

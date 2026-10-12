@@ -35,7 +35,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { PaymentMethodEnum } from "../bounty/bounty";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 enum assetType {

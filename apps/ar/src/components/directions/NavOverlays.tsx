@@ -2,6 +2,7 @@ import { LocateFixed, Menu, SlidersHorizontal, type LucideIcon } from "lucide-re
 import { forwardRef, type ReactNode } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── Directions overlays ────────────────────────────────────────────────────
@@ -74,8 +75,8 @@ export const UserArrow = forwardRef<HTMLDivElement, { hud?: boolean }>(function 
         </svg>
       ) : (
         <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden>
-          <circle cx="23" cy="23" r="21" fill="#3fd831" opacity="0.16" />
-          <path d="M23 7 L35 36 L23 29 L11 36 Z" fill="#3fd831" stroke="#fff" strokeWidth="2.8" strokeLinejoin="round" />
+          <circle cx="23" cy="23" r="21" fill={platformBranding.colors.mapLoadingRoute} opacity="0.16" />
+          <path d="M23 7 L35 36 L23 29 L11 36 Z" fill={platformBranding.colors.mapLoadingRoute} stroke="#fff" strokeWidth="2.8" strokeLinejoin="round" />
         </svg>
       )}
     </div>

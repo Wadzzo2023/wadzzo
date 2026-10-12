@@ -4,9 +4,10 @@ import { applyCors } from "~/server/api-cors";
 import { Asset } from "@wadzzo/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform } from "@wadzzo/platform/server";
 import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export default async function handler(
   req: NextApiRequest,
@@ -83,25 +84,26 @@ export function dictionaryToTomlString(dict: {
 }
 
 /**
- * The organisation behind this deployment's assets. Partner platforms set the
- * TOML_ORG_* env vars (and optionally TOML_PRINCIPAL_*); unset, it's Wadzzo.
+ * The organisation behind this deployment's assets. A deployment can override
+ * every field with TOML_ORG_* (and TOML_PRINCIPAL_*); unset, it is the platform's own.
  */
 function documentationToml() {
   const e = process.env;
   const partner = Boolean(e.TOML_ORG_NAME);
   // A partner's unset fields are left out rather than showing Wadzzo's.
-  const field = (key: string, value: string | undefined, wadzzo: string) => {
-    const v = value ?? (partner ? undefined : wadzzo);
+  const { toml } = platformBranding;
+  const field = (key: string, value: string | undefined, platformDefault: string | undefined) => {
+    const v = value ?? (partner ? undefined : platformDefault);
     return v ? [`${key}="${v}"`] : [];
   };
   const lines = [
     "[DOCUMENTATION]",
-    ...field("ORG_NAME", e.TOML_ORG_NAME, "Wadzzo"),
-    ...field("ORG_URL", e.TOML_ORG_URL, "https://wadzzo.com/"),
-    ...field("ORG_LOGO", e.TOML_ORG_LOGO, "https://raw.githubusercontent.com/Bandcoin2023/assets/refs/heads/main/public/wadzzo.webp"),
-    ...field("ORG_DESCRIPTION", e.TOML_ORG_DESCRIPTION, "Wadzzo: Explore, Collect, Win"),
-    ...field("ORG_TWITTER", e.TOML_ORG_TWITTER, "WadzzoApp"),
-    ...field("ORG_OFFICIAL_EMAIL", e.TOML_ORG_OFFICIAL_EMAIL, "support@wadzzo.com"),
+    ...field("ORG_NAME", e.TOML_ORG_NAME, toml.orgName),
+    ...field("ORG_URL", e.TOML_ORG_URL, toml.orgUrl),
+    ...field("ORG_LOGO", e.TOML_ORG_LOGO, toml.orgLogo),
+    ...field("ORG_DESCRIPTION", e.TOML_ORG_DESCRIPTION, toml.orgDescription),
+    ...field("ORG_TWITTER", e.TOML_ORG_TWITTER, toml.orgTwitter),
+    ...field("ORG_OFFICIAL_EMAIL", e.TOML_ORG_OFFICIAL_EMAIL, toml.orgEmail),
     "",
   ];
   // Wadzzo's principal only describes Wadzzo's own toml.
@@ -110,7 +112,12 @@ function documentationToml() {
     if (e.TOML_PRINCIPAL_EMAIL) lines.push(`email="${e.TOML_PRINCIPAL_EMAIL}"`);
     lines.push("");
   } else if (!partner) {
-    lines.push("[[PRINCIPALS]]", `name="Arnob Dey"`, `twitter="ArnobDey_Dev"`, `github="arnob016"`, "");
+    for (const principal of toml.principals) {
+      lines.push("[[PRINCIPALS]]", `name="${principal.name}"`);
+      if (principal.twitter) lines.push(`twitter="${principal.twitter}"`);
+      if (principal.github) lines.push(`github="${principal.github}"`);
+      lines.push("");
+    }
   }
   return lines.join("\n") + "\n";
 }

@@ -1,5 +1,5 @@
 import { eventIcs } from "~/lib/ar/events";
-import { db } from "@wadzzo/db";
+import { db } from "@wadzzo/db/server";
 import { getCurrentPlatform, platformScope } from "@wadzzo/platform/server";
 
 /**

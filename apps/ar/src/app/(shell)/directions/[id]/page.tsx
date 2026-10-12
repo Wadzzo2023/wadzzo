@@ -75,6 +75,7 @@ import { useNavigation } from "~/lib/ar/useNavigation";
 import { usePinsQuery } from "~/lib/ar/usePins";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
 
@@ -113,9 +114,9 @@ const readStyle = (): NavStyle => {
 };
 
 // Route line palette (emissive, so it stays bright under the night light preset).
-const ROUTE = "#3fd831";
-const ROUTE_CASING = "#0b4614";
-const NAV_GREEN = "#0f5c1c";
+const ROUTE = platformBranding.colors.mapRoute;
+const ROUTE_CASING = platformBranding.colors.mapRouteCasing;
+const NAV_GREEN = platformBranding.colors.mapNavAccent;
 const width = (lo: number, mid: number, hi: number) =>
   [
     "interpolate",
@@ -872,7 +873,10 @@ export default function DirectionsScreen() {
                   ]!;
                 return (
                   <Marker longitude={mid[0]} latitude={mid[1]} anchor="bottom">
-                    <span className="font-hud block rounded-[10px] border border-[#0b4614] bg-[#3fd831] px-2 py-1 text-[11.5px] font-bold text-[#04250a] shadow-lg">
+                    <span
+                      className="font-hud block rounded-[10px] border px-2 py-1 text-[11.5px] font-bold text-white shadow-lg"
+                      style={{ borderColor: ROUTE_CASING, backgroundColor: ROUTE }}
+                    >
                       {formatDuration(route.duration)}
                     </span>
                   </Marker>
@@ -886,7 +890,10 @@ export default function DirectionsScreen() {
                 latitude={progress.next.location[1]}
                 anchor="center"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-white bg-[#0f5c1c] text-white shadow-lg">
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-white text-white shadow-lg"
+                  style={{ backgroundColor: NAV_GREEN }}
+                >
                   <NextIcon size={15} strokeWidth={3} />
                 </span>
               </Marker>
@@ -942,12 +949,12 @@ export default function DirectionsScreen() {
                         <radialGradient id="beam" cx="50%" cy="100%" r="100%">
                           <stop
                             offset="0"
-                            stopColor="#3fd831"
+                            stopColor={ROUTE}
                             stopOpacity="0.55"
                           />
                           <stop
                             offset="1"
-                            stopColor="#3fd831"
+                            stopColor={ROUTE}
                             stopOpacity="0"
                           />
                         </radialGradient>
@@ -958,7 +965,10 @@ export default function DirectionsScreen() {
                       />
                     </svg>
                   )}
-                  <span className="relative block h-[18px] w-[18px] rounded-full border-[3px] border-white bg-[#3fd831] shadow-[0_0_0_6px_rgba(63,216,49,0.25)]" />
+                  <span
+                    className="relative block h-[18px] w-[18px] rounded-full border-[3px] border-white"
+                    style={{ backgroundColor: ROUTE, boxShadow: `0 0 0 6px color-mix(in srgb, ${ROUTE} 25%, transparent)` }}
+                  />
                 </span>
               </Marker>
             )}
@@ -1365,9 +1375,10 @@ export default function DirectionsScreen() {
                         className={cn(
                           "flex flex-1 items-center justify-center gap-1 rounded-full border px-2 py-2 transition-colors",
                           active
-                            ? "border-transparent bg-[#0f5c1c] text-white"
+                            ? "border-transparent text-white"
                             : "border-ar-line bg-white/[0.03] text-ar-dim",
                         )}
+                        style={active ? { backgroundColor: NAV_GREEN } : undefined}
                       >
                         <Icon size={16} strokeWidth={2.2} />
                         <span className="font-hud whitespace-nowrap text-[11.5px] font-bold tabular-nums">
@@ -1446,7 +1457,7 @@ export default function DirectionsScreen() {
             )}
             <p className="mt-3 px-1 text-[11px] leading-relaxed text-ar-faint">
               {isMural
-                ? `Get within ${MURAL_SCAN_FROM_M} m and scan it with the Murals camera to earn Wadzzo Coins.`
+                ? `Get within ${MURAL_SCAN_FROM_M} m and scan it with the Murals camera to earn ${platformBranding.coinName}.`
                 : "Get close and this drop becomes collectible in AR."}
             </p>
           </DragSheet>
