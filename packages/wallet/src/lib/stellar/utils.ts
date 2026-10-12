@@ -1,0 +1,187 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  xdr,
+  Transaction,
+  Networks,
+  Horizon,
+  // type Horizon.BaseResponse,
+} from "@stellar/stellar-sdk";
+
+import { WalletType } from "../enums";
+import {
+  albedoSignTrx,
+  albedoSignTrxInTestNet,
+} from "./wallet_clients/albedo_login";
+import { freighterSignTrx } from "./wallet_clients/freighter_login";
+// import { xbullXdrSingXdrAndSubmit } from "./wallet_clients/xbull_login";
+import { rabetXdrSingXdrAndSubmit } from "./wallet_clients/rabe_login";
+import { metamaskSignAndSubmitXdr } from "./wallet_clients/metamask_login";
+import { xbullSignAndSubmitXdr } from "./wallet_clients/xbull_login";
+import { hanaSignAndSubmitXdr } from "./wallet_clients/hana_login";
+import { hotWalletSignAndSubmitXdr } from "./wallet_clients/hot_wallet_login";
+import {
+  walletConnectSignTransaction,
+  walletConnectSignTransactionSubmitterWrapper,
+} from "./wallet_clients/wallet_connect";
+import {
+  submitSignedXDRToServer4User,
+  submitSignedXDRToServer4UserTestnet,
+} from "./trx/payment_fb_g";
+
+import axios from "axios";
+import { STELLAR_URL, networkPassphrase } from "./constant";
+import toast from "react-hot-toast";
+import { formatErrorForLogging, parseStellarError, StellarTransactionError } from "../error-handler";
+
+export const recursiveTransactionSubmitter = async (
+  transaction: Transaction,
+): Promise<Horizon.HorizonApi.SubmitTransactionResponse> => {
+  let result: Horizon.HorizonApi.SubmitTransactionResponse;
+  try {
+    const server = new Horizon.Server(STELLAR_URL);
+
+    return await server.submitTransaction(transaction);
+
+  } catch (error: any) {
+    const parsedError = parseStellarError(error);
+    console.error("Transaction Error:", formatErrorForLogging(error));
+    throw new StellarTransactionError(parsedError);
+  }
+};
+
+export async function submitSignedXDRToServer(signed_xdr: string) {
+  const envelop = xdr.TransactionEnvelope.fromXDR(signed_xdr, "base64");
+  const transaction = new Transaction(envelop, networkPassphrase);
+  const res = await recursiveTransactionSubmitter(transaction);
+  return res;
+}
+
+export async function clientsign(props: {
+  walletType?: WalletType;
+  presignedxdr: string;
+  pubkey?: string;
+  test?: boolean;
+}) {
+  if (!props.walletType || !props.pubkey) {
+    toast.error("problem with wallet type or pubkey, please reconnect wallet");
+    return false;
+  }
+  if (props.test) {
+    if (props.walletType == WalletType.isAdmin) {
+      return await submitSignedXDRToServer4UserTestnet(props.presignedxdr);
+    }
+    else if (props.walletType == WalletType.emailPass) {
+      return await submitSignedXDRToServer4UserTestnet(props.presignedxdr);
+    }
+    else if (props.walletType == WalletType.facebook) {
+      return await submitSignedXDRToServer4UserTestnet(props.presignedxdr);
+    }
+    else if (props.walletType == WalletType.google) {
+      return await submitSignedXDRToServer4UserTestnet(props.presignedxdr);
+    }
+    else if (props.walletType == WalletType.walletConnect) {
+      return await walletConnectSignTransactionSubmitterWrapper(
+        props.presignedxdr,
+      );
+    }
+    // else if(props.walletType == WalletType.xBull){
+    //   return await xbullXdrSingXdrAndSubmit(props.presignedxdr, props.pubkey);
+    // }
+    else if (props.walletType == WalletType.rabet) {
+      return await rabetXdrSingXdrAndSubmit(props.presignedxdr, props.pubkey);
+    }
+    else if (props.walletType == WalletType.metamask) {
+      return await metamaskSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    }
+    else if (props.walletType == WalletType.xBull) {
+      return await xbullSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    }
+    else if (props.walletType == WalletType.hana) {
+      return await hanaSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    }
+    else if (props.walletType == WalletType.hotWallet) {
+      return await hotWalletSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    }
+    else if (props.walletType == WalletType.frieghter) {
+      return await freighterSignTrx(props.presignedxdr, props.pubkey);
+    }
+    else
+      return await albedoSignTrxInTestNet(props.presignedxdr, props.pubkey);
+  }
+
+  switch (props.walletType) {
+    case WalletType.albedo:
+      return await albedoSignTrx(props.presignedxdr, props.pubkey);
+    case WalletType.frieghter:
+      return await freighterSignTrx(props.presignedxdr, props.pubkey);
+    // case WalletType.xBull:
+    //   return await xbullXdrSingXdrAndSubmit(props.presignedxdr, props.pubkey);
+    case WalletType.rabet:
+      return await rabetXdrSingXdrAndSubmit(props.presignedxdr, props.pubkey);
+    case WalletType.metamask:
+      return await metamaskSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    case WalletType.xBull:
+      return await xbullSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    case WalletType.hana:
+      return await hanaSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    case WalletType.hotWallet:
+      return await hotWalletSignAndSubmitXdr(props.presignedxdr, props.pubkey);
+    case WalletType.walletConnect:
+      return await walletConnectSignTransactionSubmitterWrapper(
+        props.presignedxdr,
+      );
+
+    case WalletType.google:
+      return await submitSignedXDRToServer4User(props.presignedxdr);
+    case WalletType.facebook:
+      return await submitSignedXDRToServer4User(props.presignedxdr);
+    case WalletType.emailPass:
+      return await submitSignedXDRToServer4User(props.presignedxdr);
+    case WalletType.isAdmin:
+      return await submitSignedXDRToServer4User(props.presignedxdr);
+    default:
+      return false;
+  }
+}
+
+export function concatAssetWithIssuer(
+  asset_code: string,
+  asset_issuer: string,
+): string {
+  return `${asset_code}-${asset_issuer}`;
+}
+
+export function getAssetIssuerFromConcat(
+  concatenatedStr: string,
+): [string, string] {
+  const parts = concatenatedStr.split("-");
+  if (parts.length === 2) {
+    return [parts[0]!, parts[1]!];
+  } else {
+    throw new Error("Invalid format: The string does not contain a hyphen.");
+  }
+}
+
+export async function checkStellarAccountActivity(
+  publicKey: string,
+): Promise<boolean> {
+  try {
+    const response = await axios.get(`${STELLAR_URL}/accounts/${publicKey}`);
+    const accountData = response.data;
+
+    // Check if the account exists and has a balance
+    if (
+      accountData &&
+      accountData.id &&
+      accountData.balances &&
+      accountData.balances.length > 0
+    ) {
+      return true; // Active account
+    }
+
+    return false; // Inactive account
+  } catch (error) {
+    return false;
+  }
+}
