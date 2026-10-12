@@ -19,7 +19,9 @@ const lum = ([r, g, b]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 function hsv([r, g, b]) {
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  const mx = Math.max(r, g, b),
+    mn = Math.min(r, g, b),
+    d = mx - mn;
   let h = 0;
   if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
   return { h: (h * 60 + 360) % 360, s: mx ? d / mx : 0 };
@@ -39,15 +41,15 @@ const rgb = (...v) => v.map((x) => x / 255);
 const THEMES = {
   // From wadzzoWebAR-public/src/theme/tokens.ts (dark).
   dark: {
-    tint: rgb(28, 44, 36),       // green-tinted neutral (ar-surface-3 → ar-green-deep)
+    tint: rgb(28, 44, 36), // green-tinted neutral (ar-surface-3 → ar-green-deep)
     tintStrength: 0.9,
-    water: rgb(6, 70, 92),       // deep cyan-teal — clearly not ground
-    waterBright: 0.8,            // a touch darker than the land around it
-    park: rgb(30, 116, 27),      // ar-green-deep
+    water: rgb(6, 70, 92), // deep cyan-teal — clearly not ground
+    waterBright: 0.8, // a touch darker than the land around it
+    park: rgb(30, 116, 27), // ar-green-deep
     contrast: 1.12,
   },
   light: {
-    tint: rgb(196, 214, 203),    // ar-line → ar-bg family
+    tint: rgb(196, 214, 203), // ar-line → ar-bg family
     tintStrength: 0.85,
     water: rgb(120, 196, 214),
     waterBright: 0.92,
@@ -61,7 +63,11 @@ function grade(t, c) {
   let y = lum(c);
   y = clamp01(0.5 + (y - 0.5) * t.contrast);
   // Neutral: Wadzzo tint at the same brightness.
-  let o = mix(atLuminance(c, y), atLuminance(t.tint, y), t.tintStrength * (1 - Math.min(1, s * 1.2) * 0.35));
+  let o = mix(
+    atLuminance(c, y),
+    atLuminance(t.tint, y),
+    t.tintStrength * (1 - Math.min(1, s * 1.2) * 0.35),
+  );
   // Water: strongly saturated blues.
   const wW = band(h, 185, 230) * clamp01((s - 0.45) * 4);
   o = mix(o, atLuminance(t.water, y * t.waterBright), wW);
@@ -82,9 +88,13 @@ function grade(t, c) {
         for (let ri = 0; ri < N; ri++) {
           const o = grade(t, [ri / (N - 1), gi / (N - 1), bi / (N - 1)]);
           const i = (gi * N * N + bi * N + ri) * 3;
-          buf[i] = o[0]; buf[i + 1] = o[1]; buf[i + 2] = o[2];
+          buf[i] = o[0];
+          buf[i + 1] = o[1];
+          buf[i + 2] = o[2];
         }
-    await sharp(buf, { raw: { width: N * N, height: N, channels: 3 } }).png().toFile(`${out}/wadzzo-${name}.png`);
+    await sharp(buf, { raw: { width: N * N, height: N, channels: 3 } })
+      .png()
+      .toFile(`${out}/wadzzo-${name}.png`);
     console.log("wrote", `wadzzo-${name}.png`);
   }
 })();

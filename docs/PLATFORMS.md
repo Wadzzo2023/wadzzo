@@ -1,16 +1,16 @@
 # White-label platforms
 
-A platform (Wadzzo, Clinton County, ...) is *configuration*, never a branch.
+A platform (Wadzzo, Clinton County, ...) is _configuration_, never a branch.
 
 ## What a platform consists of
 
-| Piece | Where | Used for |
-| --- | --- | --- |
-| Branding | `packages/platform/src/branding/<slug>.ts` | names, coin name, hashtag, URLs, colours, wordmark, toml defaults |
-| Theme | `packages/platform/themes/<slug>/<app>.css` | CSS variable overrides and fonts, loaded after the app's own CSS |
-| Assets | `packages/platform/assets/<slug>/<app>/**` | favicon, logo, mark, avatar; served from `/platform/...` |
-| Database row | `Platform` table, `id = slug` | scoping, admins, audit, token |
-| Env | `PLATFORM_SLUG=<slug>` per deployment | selects all of the above |
+| Piece        | Where                                       | Used for                                                          |
+| ------------ | ------------------------------------------- | ----------------------------------------------------------------- |
+| Branding     | `packages/platform/src/branding/<slug>.ts`  | names, coin name, hashtag, URLs, colours, wordmark, toml defaults |
+| Theme        | `packages/platform/themes/<slug>/<app>.css` | CSS variable overrides and fonts, loaded after the app's own CSS  |
+| Assets       | `packages/platform/assets/<slug>/<app>/**`  | favicon, logo, mark, avatar; served from `/platform/...`          |
+| Database row | `Platform` table, `id = slug`               | scoping, admins, audit, token                                     |
+| Env          | `PLATFORM_SLUG=<slug>` per deployment       | selects all of the above                                          |
 
 ## Add a platform
 

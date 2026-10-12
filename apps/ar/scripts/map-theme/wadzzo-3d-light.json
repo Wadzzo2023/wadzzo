@@ -10,10 +10,7 @@
     },
     "mapbox:groups": {}
   },
-  "center": [
-    -34,
-    38
-  ],
+  "center": [-34, 38],
   "zoom": 2,
   "terrain": null,
   "imports": [
@@ -53,39 +50,12 @@
       "source-layer": "building",
       "minzoom": 14,
       "slot": "middle",
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "get",
-            "extrude"
-          ],
-          "true"
-        ],
-        [
-          "!=",
-          [
-            "get",
-            "underground"
-          ],
-          "true"
-        ]
-      ],
+      "filter": ["all", ["==", ["get", "extrude"], "true"], ["!=", ["get", "underground"], "true"]],
       "id": "wadzzo-walls",
       "paint": {
         "fill-extrusion-pattern": [
           "match",
-          [
-            "%",
-            [
-              "to-number",
-              [
-                "id"
-              ]
-            ],
-            4
-          ],
+          ["%", ["to-number", ["id"]], 4],
           0,
           "wz-m0",
           1,
@@ -96,39 +66,21 @@
         ],
         "fill-extrusion-height": [
           "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
+          ["linear"],
+          ["zoom"],
           14,
           0,
           15,
-          [
-            "max",
-            [
-              "get",
-              "height"
-            ],
-            7
-          ]
+          ["max", ["get", "height"], 7]
         ],
         "fill-extrusion-base": [
           "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
+          ["linear"],
+          ["zoom"],
           14,
           0,
           15,
-          [
-            "get",
-            "min_height"
-          ]
+          ["get", "min_height"]
         ],
         "fill-extrusion-vertical-gradient": false,
         "fill-extrusion-ambient-occlusion-intensity": 0.35,
@@ -142,39 +94,12 @@
       "source-layer": "building",
       "minzoom": 14,
       "slot": "middle",
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "get",
-            "extrude"
-          ],
-          "true"
-        ],
-        [
-          "!=",
-          [
-            "get",
-            "underground"
-          ],
-          "true"
-        ]
-      ],
+      "filter": ["all", ["==", ["get", "extrude"], "true"], ["!=", ["get", "underground"], "true"]],
       "id": "wadzzo-roofs",
       "paint": {
         "fill-extrusion-color": [
           "match",
-          [
-            "%",
-            [
-              "to-number",
-              [
-                "id"
-              ]
-            ],
-            4
-          ],
+          ["%", ["to-number", ["id"]], 4],
           0,
           "#d5e0d8",
           1,
@@ -185,47 +110,21 @@
         ],
         "fill-extrusion-base": [
           "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
+          ["linear"],
+          ["zoom"],
           14,
           0,
           15,
-          [
-            "max",
-            [
-              "get",
-              "height"
-            ],
-            7
-          ]
+          ["max", ["get", "height"], 7]
         ],
         "fill-extrusion-height": [
           "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
+          ["linear"],
+          ["zoom"],
           14,
           0,
           15,
-          [
-            "+",
-            [
-              "max",
-              [
-                "get",
-                "height"
-              ],
-              7
-            ],
-            0.8
-          ]
+          ["+", ["max", ["get", "height"], 7], 0.8]
         ],
         "fill-extrusion-ambient-occlusion-intensity": 0.3,
         "fill-extrusion-emissive-strength": 0

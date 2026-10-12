@@ -22,10 +22,10 @@ NEXT_PUBLIC_STELLAR_NETWORK = testnet | mainnet      (legacy: NEXT_PUBLIC_STELLA
 
 `@wadzzo/wallet` exposes every sign-in through one `WalletProvider` interface:
 
-| Kind | Providers |
-| --- | --- |
-| Extension / app | Freighter, Albedo, xBull, Rabet, Hana, HOT, MetaMask (Stellar snap), WalletConnect |
-| Custodial (keys held by the accounts service) | Email + password, Google, Apple, Facebook |
+| Kind                                          | Providers                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Extension / app                               | Freighter, Albedo, xBull, Rabet, Hana, HOT, MetaMask (Stellar snap), WalletConnect |
+| Custodial (keys held by the accounts service) | Email + password, Google, Apple, Facebook                                          |
 
 - Browser: `signAndSubmitTransaction({ xdr, publicKey, walletType })`.
 - Server: `signXdrForCustodialUser`, `buildLoginChallengeXdr`, `verifyTransactionSignature`.

@@ -20,7 +20,8 @@ import path from "node:path";
 import { MATERIALS } from "./materials.mjs";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
-if (!TOKEN) throw new Error("NEXT_PUBLIC_MAPBOX_API missing (run with --env-file=.env.development)");
+if (!TOKEN)
+  throw new Error("NEXT_PUBLIC_MAPBOX_API missing (run with --env-file=.env.development)");
 
 const STYLES = {
   dark: "cmuwbonsf00rv01sdcun4fhdu",
@@ -38,7 +39,12 @@ function buildingLayers(theme) {
   // Grow out of the ground as you zoom in, like Standard's do.
   const grow = (v) => ["interpolate", ["linear"], ["zoom"], 14, 0, 15, v];
   const material = ["%", ["to-number", ["id"]], mats.length]; // stable per building
-  const pick = (values) => ["match", material, ...values.slice(0, -1).flatMap((v, i) => [i, v]), values.at(-1)];
+  const pick = (values) => [
+    "match",
+    material,
+    ...values.slice(0, -1).flatMap((v, i) => [i, v]),
+    values.at(-1),
+  ];
   const common = {
     type: "fill-extrusion",
     source: "wadzzo-streets",
@@ -93,10 +99,17 @@ for (const [theme, id] of Object.entries(STYLES)) {
   // Import by URL only, so each SDK resolves a Standard it supports.
   delete basemap.data;
   // Our layers replace Standard's buildings; dark is dusk, not night.
-  basemap.config = { ...basemap.config, show3dBuildings: false, ...(theme === "dark" ? { lightPreset: "dusk" } : {}) };
+  basemap.config = {
+    ...basemap.config,
+    show3dBuildings: false,
+    ...(theme === "dark" ? { lightPreset: "dusk" } : {}),
+  };
   delete basemap.config.show3dFacades;
 
-  style.sources = { ...style.sources, "wadzzo-streets": { type: "vector", url: "mapbox://mapbox.mapbox-streets-v8" } };
+  style.sources = {
+    ...style.sources,
+    "wadzzo-streets": { type: "vector", url: "mapbox://mapbox.mapbox-streets-v8" },
+  };
   const ours = new Set(["wadzzo-buildings", "wadzzo-walls", "wadzzo-roofs"]);
   style.layers = [...(style.layers ?? []).filter((l) => !ours.has(l.id)), ...buildingLayers(theme)];
 

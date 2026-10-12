@@ -8,3 +8,9 @@ apps/mobile
 packages/db/prisma/schema.prisma
 **/public
 **/*.generated.*
+**/.cache
+apps/*/docs
+apps/*/AGENTS.md
+apps/*/CLAUDE.md
+apps/*/changelog.json
+apps/*/README.md
