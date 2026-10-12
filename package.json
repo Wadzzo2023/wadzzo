@@ -1,0 +1,29 @@
+{
+  "name": "wadzzo",
+  "private": true,
+  "description": "Wadzzo monorepo: brand portal, fan marketplace, AR collector, mobile app and the shared packages behind them.",
+  "packageManager": "pnpm@12.9.1",
+  "engines": { "node": ">=20.19.0" },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "dev:brand": "turbo run dev --filter=@wadzzo/brand",
+    "dev:market": "turbo run dev --filter=@wadzzo/market",
+    "dev:ar": "turbo run dev --filter=@wadzzo/ar",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml}\" --ignore-path .prettierignore",
+    "db:generate": "pnpm --filter @wadzzo/db generate",
+    "db:studio": "pnpm --filter @wadzzo/db studio",
+    "clean": "git clean -xdf node_modules .turbo .next"
+  },
+  "devDependencies": {
+    "@wadzzo/prettier-config": "workspace:*",
+    "prettier": "catalog:",
+    "turbo": "^2.5.0",
+    "typescript": "catalog:"
+  },
+  "prettier": "@wadzzo/prettier-config"
+}

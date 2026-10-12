@@ -1,0 +1,23 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": ["pnpm-workspace.yaml", "tsconfig.json"],
+  "globalPassThroughEnv": [
+    "PLATFORM_SLUG",
+    "STELLAR_NETWORK",
+    "NEXT_PUBLIC_STELLAR_NETWORK",
+    "SKIP_ENV_VALIDATION"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": { "cache": false, "persistent": true },
+    "typecheck": { "dependsOn": ["^typecheck"], "outputs": [".cache/tsbuildinfo.json"] },
+    "lint": { "dependsOn": ["^lint"], "outputs": [".cache/.eslintcache"] },
+    "test": { "outputs": [] },
+    "generate": { "cache": false }
+  }
+}

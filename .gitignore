@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# builds and caches
+.next
+.turbo
+dist
+out
+build
+coverage
+*.tsbuildinfo
+.cache
+next-env.d.ts
+
+# env files hold secrets: only *.example files are committed
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+*.pem
+.idea
+.vscode/*
+!.vscode/extensions.json
+.vercel
+npm-debug.log*

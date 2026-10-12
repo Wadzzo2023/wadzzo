@@ -1,0 +1,10 @@
+node_modules
+.next
+.turbo
+dist
+pnpm-lock.yaml
+package-lock.json
+apps/mobile
+packages/db/prisma/schema.prisma
+**/public
+**/*.generated.*

@@ -1,0 +1,9 @@
+{
+  "name": "@wadzzo/prettier-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./index.mjs" },
+  "dependencies": { "prettier-plugin-tailwindcss": "catalog:" },
+  "peerDependencies": { "prettier": "catalog:" }
+}
