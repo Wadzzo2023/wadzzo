@@ -1,11 +1,11 @@
 import "server-only";
 
 import { TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 
-import { networkPassphrase } from "~/lib/stellar/constant";
-import type { db as Db } from "~/server/db";
-import { notifyFan } from "~/server/notify";
+import { networkPassphrase } from "@wadzzo/wallet/config";
+import type { db as Db } from "@wadzzo/db";
+import { notifyFan } from "@wadzzo/platform/server";
 
 import { horizon } from "./creator-items";
 

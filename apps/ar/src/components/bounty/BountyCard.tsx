@@ -11,7 +11,7 @@ import {
   TONE_CLASS,
   viewerBadge,
 } from "~/lib/ar/bounty";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── BountyCard ─────────────────────────────────────────────────────────────

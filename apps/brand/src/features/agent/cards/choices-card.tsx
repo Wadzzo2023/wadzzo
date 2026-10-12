@@ -3,9 +3,9 @@
 import { Check, CornerDownLeft, MessageCircleQuestion } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import type { AgentBlock } from "~/lib/agent/contract";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 type Choices = Extract<AgentBlock, { kind: "choices" }>;
 

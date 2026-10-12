@@ -12,7 +12,7 @@ import { BottomSheet } from "~/components/ui/BottomSheet";
 import { distanceMeters, formatDistance } from "~/lib/ar/geo";
 import type { GeoFix } from "~/lib/ar/types";
 import { api } from "~/utils/api";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import type { MapMural } from "./MuralMarker";
 

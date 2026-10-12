@@ -1,11 +1,11 @@
-import { NotificationType } from "@prisma/client";
+import { NotificationType } from "@wadzzo/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
 import { z } from "zod";
 import { EnableCors } from "~/server/api-cors";
 
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 export default async function handler(
   req: NextApiRequest,

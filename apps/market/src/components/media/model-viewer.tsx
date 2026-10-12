@@ -5,7 +5,7 @@ import { Canvas, useLoader } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
-import { Spinner } from "~/ui/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 
 function Gltf({ url }: { url: string }) {
   const { scene } = useGLTF(url);

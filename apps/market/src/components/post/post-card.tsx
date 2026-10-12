@@ -9,10 +9,10 @@ import toast from "react-hot-toast";
 
 import { creatorHref } from "~/lib/creator";
 import { tierColor } from "~/components/creator/tier-card";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api, type RouterOutputs } from "~/utils/api";
 
 export type PostData = RouterOutputs["post"]["feed"]["items"][number];

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cache } from "react";
 
 import { decodePreview, normalizeConfig, brandOrigins, type EmbedConfig } from "~/lib/embed/config";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 import { EmbedClient } from "./EmbedClient";
 

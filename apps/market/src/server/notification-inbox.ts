@@ -1,7 +1,7 @@
-import type { NotificationType, Prisma } from "@prisma/client";
+import type { NotificationType, Prisma } from "@wadzzo/db";
 
 import { BOUNTY_TYPES, CATEGORIES, GROUPABLE, POST_TYPES, scopeTypes, type InboxScope } from "~/lib/notification-catalog";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 export type InboxActor = { id: string; name: string | null; image: string | null };
 

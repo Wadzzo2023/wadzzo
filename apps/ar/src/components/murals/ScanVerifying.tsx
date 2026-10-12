@@ -3,7 +3,7 @@ import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { RejectCode } from "~/lib/murals/constants";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── ScanVerifying ──────────────────────────────────────────────────────────

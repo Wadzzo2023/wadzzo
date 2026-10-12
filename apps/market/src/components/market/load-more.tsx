@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import type { ListingsInput } from "~/server/api/routers/market";
 import { api } from "~/utils/api";
 

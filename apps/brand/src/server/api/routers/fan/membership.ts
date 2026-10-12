@@ -1,4 +1,4 @@
-import { NotificationType } from "@prisma/client";
+import { NotificationType } from "@wadzzo/db";
 import { z } from "zod";
 import { AccountSchema } from "~/lib/stellar/fan/utils";
 

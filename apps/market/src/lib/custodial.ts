@@ -1,4 +1,4 @@
-import { WalletType } from "package/connect_wallet/src/lib/enums";
+import { WalletType } from "@wadzzo/wallet/shared";
 
 const CUSTODIAL = new Set<WalletType>([WalletType.emailPass, WalletType.google, WalletType.facebook, WalletType.apple]);
 

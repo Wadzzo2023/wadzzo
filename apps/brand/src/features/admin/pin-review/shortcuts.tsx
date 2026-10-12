@@ -3,7 +3,7 @@
 import { Keyboard } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 
 export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["J"], label: "Next pin" },

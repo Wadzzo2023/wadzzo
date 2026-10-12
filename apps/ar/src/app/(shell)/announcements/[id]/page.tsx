@@ -12,7 +12,7 @@ import { AppShell } from "~/components/shell/AppShell";
 import { ArLinkButton } from "~/components/ui/ArButton";
 import { Skeleton, SkeletonText } from "~/components/ui/Skeleton";
 import { shareLink } from "~/lib/ar/events";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 /**

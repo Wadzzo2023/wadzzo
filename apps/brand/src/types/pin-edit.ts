@@ -1,4 +1,4 @@
-import { PinType as PinTypeEnum } from "@prisma/client";
+import { PinType as PinTypeEnum } from "@wadzzo/db";
 import { z } from "zod";
 
 import { BADWORDS } from "~/utils/banned-word";

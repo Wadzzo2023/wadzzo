@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useDialogStore } from "package/connect_wallet/src/state/connect_wallet_dialog";
+import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 import { useCallback } from "react";
 
 /**
@@ -10,7 +10,7 @@ import { useCallback } from "react";
  */
 export function useRequireAuth() {
   const session = useSession();
-  const openSignIn = useDialogStore((s) => s.setIsOpen);
+  const openSignIn = useConnectWalletDialogStore((s) => s.setIsOpen);
   const signedIn = session.status === "authenticated";
 
   const requireAuth = useCallback(

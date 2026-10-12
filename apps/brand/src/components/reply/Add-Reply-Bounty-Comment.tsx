@@ -4,8 +4,8 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { type z } from "zod";
 import { api } from "~/utils/api";
 import { BountyCommentSchema } from "../comment/Add-Bounty-Comment";
-import { Button } from "../shadcn/ui/button";
-import { Textarea } from "../shadcn/ui/textarea";
+import { Button } from "@wadzzo/ui/components/button";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 
 export function AddBountyReplyComment({
   parentId,

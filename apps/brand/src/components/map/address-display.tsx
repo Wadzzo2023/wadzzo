@@ -1,5 +1,5 @@
 import { useGeolocation, useReverseGeolocation } from "~/hooks/use-geolocation";
-import { Badge } from "../shadcn/ui/badge";
+import { Badge } from "@wadzzo/ui/components/badge";
 
 interface LocationAddressDisplayProps {
     latitude: number;

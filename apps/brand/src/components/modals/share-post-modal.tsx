@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton, TelegramShareButton } from "next-share"
 import { FaXTwitter } from "react-icons/fa6"
 import { Check, Copy, Link } from "lucide-react"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import { env } from "~/env"
 type ShareModalProps = {
     isOpen: boolean

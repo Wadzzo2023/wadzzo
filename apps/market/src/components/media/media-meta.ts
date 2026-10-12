@@ -1,4 +1,4 @@
-import type { MediaType } from "@prisma/client";
+import type { MediaType } from "@wadzzo/db";
 import { Box, Image as ImageIcon, Music, Video, type LucideIcon } from "lucide-react";
 
 /** Label and icon for each kind of item content. */

@@ -1,11 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { Camera, Coins, Loader2, Receipt, Trophy, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { clientsign } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -13,12 +13,11 @@ import { z } from "zod";
 
 import { Editor } from "~/components/common/quill-editor";
 import { PaymentChoose, usePaymentMethodStore } from "~/components/common/payment-options";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import useNeedSign from "~/lib/hook";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { useCustodialSigner } from "@wadzzo/wallet";
 import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
-import { PLATFORM_ASSET, PLATFORM_FEE, SIMPLIFIED_FEE_IN_XLM, TrxBaseFeeInPlatformAsset } from "~/lib/stellar/constant";
-import { clientSelect } from "~/lib/stellar/fan/utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, SIMPLIFIED_FEE_IN_XLM, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { AiTextButton } from "~/ui/ai/ai-text";
@@ -52,7 +51,7 @@ const code = PLATFORM_ASSET.code.toUpperCase();
 export default function NewBountyPage() {
   const router = useRouter();
   const session = useSession();
-  const { needSign } = useNeedSign();
+  const { getCustodialSigner } = useCustodialSigner();
   const { platformAssetBalance } = useUserStellarAcc();
   const { paymentMethod, setIsOpen } = usePaymentMethodStore();
 
@@ -95,11 +94,10 @@ export default function NewBountyPage() {
       if (!data) return;
       setSigning(true);
       try {
-        const signed = await clientsign({
-          presignedxdr: data.xdr,
+        const signed = await signAndSubmitTransaction({
+          xdr: data.xdr,
           walletType: session.data?.user?.walletType,
-          pubkey: data.pubKey,
-          test: clientSelect(),
+          publicKey: data.pubKey
         });
         if (!signed) {
           toast.error("The transaction wasn't signed");
@@ -132,7 +130,7 @@ export default function NewBountyPage() {
   const busy = fund.isPending || signing || create.isPending;
 
   const confirmPayment = handleSubmit((data) =>
-    fund.mutate({ signWith: needSign(), prize: data.prize, xlmPrice: data.prizeInUSD * XLM_PER_USD, method: paymentMethod }),
+    fund.mutate({ signWith: getCustodialSigner(), prize: data.prize, xlmPrice: data.prizeInUSD * XLM_PER_USD, method: paymentMethod }),
   );
   // The page's submit validates, then asks how to pay.
   const onSubmit = handleSubmit(() => setIsOpen(true));

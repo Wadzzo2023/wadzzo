@@ -6,11 +6,11 @@ import { useState } from "react";
 
 import { creatorHref } from "~/lib/creator";
 import { FollowButton } from "~/components/creator/creator-actions";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 

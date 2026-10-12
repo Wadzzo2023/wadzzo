@@ -5,7 +5,7 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { WadzzoMark } from "~/components/brand/WadzzoMark";
 import { RARITY_META } from "~/lib/ar/rarity";
 import type { Rarity } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── PackOpening ────────────────────────────────────────────────────────────

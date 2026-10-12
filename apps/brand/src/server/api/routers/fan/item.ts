@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 

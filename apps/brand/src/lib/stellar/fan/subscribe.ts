@@ -6,15 +6,9 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  STROOP,
-  networkPassphrase,
-} from "../constant";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, STROOP, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "../marketplace/test/Account";
-import { type SignUserType, WithSing } from "../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { type MyAssetType } from "./utils";
 
 const log = console;
@@ -33,7 +27,7 @@ export async function getClawbackAsPayment({
   price: string;
   creatorId: string;
   creatorStorageSec: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
 
@@ -95,7 +89,7 @@ export async function getClawbackAsPayment({
   buildTrx.sign(creatorStorageAcc);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
 
   return singedXdr;
 }

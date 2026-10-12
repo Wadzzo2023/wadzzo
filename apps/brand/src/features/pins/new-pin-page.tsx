@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { Calendar, Loader2, MapPin, Settings, Sparkles, Tag } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,11 +19,11 @@ import {
   type AssetType,
   type CreatePinType,
 } from "~/components/pins/pin-form-parts";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { useMapInteractionStore } from "~/store/map-stores";
 import { api } from "~/utils/api";
 import { AiFillCard } from "~/ui/ai/ai-fill";

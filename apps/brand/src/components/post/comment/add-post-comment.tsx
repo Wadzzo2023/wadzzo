@@ -9,9 +9,9 @@ import { z } from "zod"
 import { api } from "~/utils/api"
 
 import { useSession } from "next-auth/react"
-import { Button } from "~/components/shadcn/ui/button"
-import { Textarea } from "~/components/shadcn/ui/textarea"
-import { cn } from "~/lib/utils"
+import { Button } from "@wadzzo/ui/components/button";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { cn } from "@wadzzo/ui/lib/cn";
 import CustomAvatar from "~/components/common/custom-avatar"
 
 export const CommentSchema = z.object({

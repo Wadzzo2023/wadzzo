@@ -1,0 +1,4 @@
+{
+  "extends": "@wadzzo/tsconfig/library.json",
+  "include": ["src"]
+}

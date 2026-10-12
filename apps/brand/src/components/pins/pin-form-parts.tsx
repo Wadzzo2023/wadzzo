@@ -6,21 +6,21 @@ import { Controller, FormProvider, type SubmitHandler, useForm, useFormContext }
 import { z } from "zod"
 import toast from "react-hot-toast"
 import { Loader, MapPin, ImageIcon, Settings, CheckCircle, Coins, Wand2, Calendar, Tag, Plus } from "lucide-react"
-import { Input } from "~/components/shadcn/ui/input"
-import { Label } from "~/components/shadcn/ui/label"
-import { Textarea } from "~/components/shadcn/ui/textarea"
-import { Button } from "~/components/shadcn/ui/button"
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/components/button";
 import { useCreatorStorageAcc } from "~/lib/state/wallete/stellar-balances"
 import { api } from "~/utils/api"
 import { BADWORDS } from "~/utils/banned-word"
-import { PinType } from "@prisma/client"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/shadcn/ui/card"
-import { Badge } from "~/components/shadcn/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs"
+import { PinType } from "@wadzzo/db";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@wadzzo/ui/components/card";
+import { Badge } from "@wadzzo/ui/components/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
 import { Dropzone } from "~/ui/upload/dropzone"
 import { AiImageButton } from "~/ui/ai/ai-image"
-import { Switch } from "~/components/shadcn/ui/switch"
+import { Switch } from "@wadzzo/ui/components/switch";
 import { LocationAddressDisplay } from "~/components/map/address-display"
 
 // Define types for assets and pins

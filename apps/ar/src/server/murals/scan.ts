@@ -1,5 +1,5 @@
-import type { Mural, Prisma } from "@prisma/client";
-import type { Db } from "~/server/db";
+import type { Mural, Prisma } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { distanceMeters } from "~/lib/ar/geo";
@@ -22,7 +22,7 @@ import {
   type ScanPlatform,
   type ScanResult,
 } from "~/lib/murals/constants";
-import { getCurrentPlatform, platformScope } from "~/server/platform";
+import { getCurrentPlatform, platformScope } from "@wadzzo/platform/server";
 import { getObjectBytes, publicS3Url, signMuralFrames } from "~/server/s3";
 
 import { dot, embedImage, muralScore } from "./clip";

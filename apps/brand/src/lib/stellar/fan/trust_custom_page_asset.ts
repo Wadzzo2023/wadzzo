@@ -6,8 +6,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { type SignUserType, WithSing } from "../utils";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 
 export async function trustCustomPageAsset({
   creator,
@@ -22,7 +22,7 @@ export async function trustCustomPageAsset({
   code: string;
   issuer: string;
   storageSecret: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
 
@@ -68,7 +68,7 @@ export async function trustCustomPageAsset({
 
   const xdr = buildTrx.toXDR();
 
-  const signedXDr = await WithSing({
+  const signedXDr = await signXdrForCustodialUser({
     xdr: xdr,
     signWith: signWith,
   });

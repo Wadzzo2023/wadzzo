@@ -5,15 +5,15 @@ import { ArrowDownLeft, ArrowUpRight, Boxes, Check, Copy, ExternalLink, Sparkles
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { env } from "~/env";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 const fmt = (n: number, dp = 2) => n.toLocaleString("en-US", { maximumFractionDigits: dp });
 const explorer = (path: string) => `https://stellar.expert/explorer/${env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet"}/${path}`;
@@ -120,7 +120,7 @@ function Holdings({ tokens }: { tokens: Data["tokens"] }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{t.item?.name ?? t.code}</p>
                 <p className="truncate font-mono text-xs text-muted-foreground">
-                  {t.code} · {addrShort(t.issuer, 5)}
+                  {t.code} · {abbreviateAddress(t.issuer, 5)}
                 </p>
               </div>
               <p className="font-hud text-sm font-semibold tabular-nums">{fmt(t.balance, 4)}</p>
@@ -161,7 +161,7 @@ function History() {
                         {r.kind === "created" ? "Account created" : out ? "Sent" : "Received"} {r.label ?? r.code}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {r.kind === "created" ? "by" : out ? "to" : "from"} <span className="font-mono">{addrShort(r.counterparty, 5)}</span> · {formatDistanceToNow(new Date(r.at), { addSuffix: true })}
+                        {r.kind === "created" ? "by" : out ? "to" : "from"} <span className="font-mono">{abbreviateAddress(r.counterparty, 5)}</span> · {formatDistanceToNow(new Date(r.at), { addSuffix: true })}
                       </span>
                     </span>
                     <span className={cn("font-hud text-sm font-semibold tabular-nums", !out && "text-primary")}>

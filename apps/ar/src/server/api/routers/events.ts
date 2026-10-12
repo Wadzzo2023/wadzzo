@@ -1,5 +1,5 @@
-import { Prisma } from "@prisma/client";
-import type { Db } from "~/server/db";
+import { Prisma } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -15,7 +15,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { platformScope, type PlatformCtx } from "~/server/platform-scope";
+import { platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 
 import { WADZZO_ICON } from "./pins";
 
@@ -116,7 +116,7 @@ function toAnnouncement(
 }
 
 /** Throws NOT_FOUND unless the target exists, is still visible and is on this platform. */
-async function assertTarget(db: Db, target: z.infer<typeof TARGET>, ctx: PlatformCtx) {
+async function assertTarget(db: Db, target: z.infer<typeof TARGET>, ctx: PlatformContext) {
   if (target.kind === "event") {
     const row = await db.creatorEvent.findFirst({
       where: { id: target.id, ...platformScope(ctx) },

@@ -26,7 +26,7 @@ import {
 } from "~/lib/stellar/fan/vanity-url";
 import { getAssetBalance } from "~/lib/stellar/marketplace/test/acc";
 import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { BLANK_KEYWORD } from "~/lib/utils";
 import { createCircularImage } from "~/server/circular-image";
 import {
@@ -36,16 +36,16 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { brandWorksOnPlatform, platformScope } from "~/server/platform";
+import { brandWorksOnPlatform, platformScope } from "@wadzzo/platform/server";
 import { BADWORDS } from "~/utils/banned-word";
-import { truncateString } from "~/utils/string";
+import { truncateString } from "@wadzzo/utils/string";
 import { PaymentMethodEnum } from "../bounty/bounty";
 import axios from "axios";
 import { TRPCError } from "@trpc/server";
 import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { creatorExtraFiledsSchema } from "~/types/creator";
 /** A vanity URL is free to claim if nobody else has it. */
-async function assertVanityFree(db: typeof import("~/server/db").db, vanityURL: string, creatorId: string) {
+async function assertVanityFree(db: typeof import("@wadzzo/db").db, vanityURL: string, creatorId: string) {
   const taken = await db.creator.findUnique({ where: { vanityURL }, select: { id: true } });
   if (taken && taken.id !== creatorId) throw new Error("That URL is taken. Try another.");
 }
@@ -709,7 +709,7 @@ export const creatorRouter = createTRPCRouter({
         assetId: z.number(),
         maxRedeems: z.number(),
         redeemCode: z.string(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         paymentMethod: z.string().optional(),
       }),
     )
@@ -767,7 +767,7 @@ export const creatorRouter = createTRPCRouter({
       z.object({
         vanityURL: z.string().min(2).max(30).optional().nullable(),
         isChanging: z.boolean().optional(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         cost: z.number().optional(), // ignored; kept so older clients still validate
       }),
     )
@@ -978,7 +978,7 @@ export const creatorRouter = createTRPCRouter({
         code: z.string(),
         issuer: z.string(),
         price: z.number(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         creatorId: z.string(),
         method: PaymentMethodEnum,
         priceInXLM: z.number(),

@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
-import { Toaster } from "~/components/shadcn/ui/toaster";
+import { Toaster } from "@wadzzo/ui/components/toaster";
 import { TRPCReactProvider } from "~/trpc/provider";
 
 // connect_wallet's global dialogs (wallet connect, toasts). Browser-only.

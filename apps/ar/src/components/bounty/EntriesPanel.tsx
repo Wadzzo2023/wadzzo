@@ -6,7 +6,7 @@ import { type Entry, formatBytes, mediaIcon } from "~/components/bounty/EntryShe
 import { RichText } from "~/components/bounty/RichText";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { ENTRY_STATUS, TONE_CLASS } from "~/lib/ar/bounty";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 /**

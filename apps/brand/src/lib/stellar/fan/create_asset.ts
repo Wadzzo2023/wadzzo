@@ -5,15 +5,10 @@ import {
   TransactionBuilder,
   Asset,
 } from "@stellar/stellar-sdk";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  networkPassphrase,
-} from "../constant";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { AccountSchema, type AccountType } from "./utils";
-import { type SignUserType, WithSing } from "../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 
 const log = console;
 
@@ -38,7 +33,7 @@ export async function createAsset({
   code: string;
   limit: number;
   actionAmount: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const limit = limitValue.toString();
   const server = new Horizon.Server(STELLAR_URL);
@@ -126,7 +121,7 @@ export async function createAsset({
   // sign
   Tx1.sign(issuerAcc, distributorAcc);
   const xdr = Tx1.toXDR();
-  const signedXDr = await WithSing({
+  const signedXDr = await signXdrForCustodialUser({
     xdr: xdr,
     signWith,
   });

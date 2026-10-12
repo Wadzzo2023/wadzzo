@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { ownsAsset } from "~/server/access";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform-scope";
+import { platformScope } from "@wadzzo/platform/scope";
 
 /** An item's locked file (video / audio / image / 3D): owners only. */
 export const contentRouter = createTRPCRouter({

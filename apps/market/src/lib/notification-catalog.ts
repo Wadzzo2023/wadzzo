@@ -1,4 +1,4 @@
-import type { NotificationType } from "@prisma/client";
+import type { NotificationType } from "@wadzzo/db";
 
 /**
  * What kinds of notification there are and how an inbox groups them. Shared by

@@ -21,7 +21,7 @@ import {
 } from "~/lib/ar/geo";
 import { pinStatus, timeRemaining } from "~/lib/ar/rarity";
 import type { ArPin, GeoFix, TravelMode } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import {
   DETECTION_META,

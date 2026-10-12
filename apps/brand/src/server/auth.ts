@@ -15,21 +15,18 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { WalletType } from "package/connect_wallet";
-import {
-  appleTokenToUser,
-  verifyIdToken,
-} from "package/connect_wallet/src/lib/firebase/admin/auth";
-import { auth } from "package/connect_wallet/src/lib/firebase/firebase-auth";
-import { getPublicKeyAPISchema } from "package/connect_wallet/src/lib/stellar/wallet_clients/type";
+import { WalletType } from "@wadzzo/wallet/shared";
+import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
+import { firebaseAuth } from "@wadzzo/wallet";
+import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
 import { z } from "zod";
-import { db } from "~/server/db";
-import { getCurrentPlatform, recordUserPlatform } from "~/server/platform";
-import { AuthCredentialType } from "~/types/auth";
-import { truncateString } from "~/utils/string";
+import { db } from "@wadzzo/db";
+import { getCurrentPlatform, recordUserPlatform } from "@wadzzo/platform/server";
+import { AuthCredential } from "@wadzzo/wallet/shared";
+import { truncateString } from "@wadzzo/utils/string";
 
-import { USER_ACCOUNT_URL } from "package/connect_wallet/src/lib/stellar/constant";
-import { verifyXDRSignature } from "package/connect_wallet/src/lib/stellar/trx/deummy";
+import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
+import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
 
 /**
@@ -89,7 +86,7 @@ export const authOptions: NextAuthOptions = {
       type: "credentials",
       credentials: {},
       async authorize(credentials): Promise<User | null> {
-        const cred = credentials as AuthCredentialType;
+        const cred = credentials as AuthCredential;
 
         // email pass login
         if (cred.walletType == WalletType.emailPass) {
@@ -144,7 +141,7 @@ export const authOptions: NextAuthOptions = {
         // wallet rabet and frieghter
         if (
           cred.walletType == WalletType.rabet ||
-          cred.walletType == WalletType.frieghter ||
+          cred.walletType == WalletType.freighter ||
           cred.walletType == WalletType.walletConnect ||
           cred.walletType == WalletType.metamask ||
           cred.walletType == WalletType.xBull ||
@@ -152,7 +149,7 @@ export const authOptions: NextAuthOptions = {
           cred.walletType == WalletType.hotWallet
         ) {
           const { pubkey, signedXDR, fromAppSign } = cred;
-          const isValid = await verifyXDRSignature({
+          const isValid = await verifyTransactionSignature({
             publicKey: pubkey,
             xdr: signedXDR,
           });
@@ -179,7 +176,7 @@ export const authOptions: NextAuthOptions = {
         ) {
           const { token, email, fromAppSign } = cred;
 
-          const { uid } = await verifyIdToken(token);
+          const { uid } = await verifyFirebaseIdToken(token);
           const data = await getUserPublicKey({ uid, email, fromAppSign });
           const sessionUser = await dbUser(
             data.publicKey,
@@ -199,7 +196,7 @@ export const authOptions: NextAuthOptions = {
           const { appleToken, token, email, fromAppSign } = cred;
 
           if (token) {
-            const { uid } = await verifyIdToken(token);
+            const { uid } = await verifyFirebaseIdToken(token);
             const data = await getUserPublicKey({ uid, email, fromAppSign });
             const sessionUser = await dbUser(
               data.publicKey,
@@ -215,7 +212,7 @@ export const authOptions: NextAuthOptions = {
             };
           } else {
             if (appleToken) {
-              const { uid } = await appleTokenToUser(appleToken, email);
+              const { uid } = await getOrCreateFirebaseUserFromApple(appleToken, email);
 
               const data = await getUserPublicKey({ uid, email, fromAppSign });
               const sessionUser = await dbUser(
@@ -308,7 +305,7 @@ async function getUserPublicKey({
   email: string;
   fromAppSign: string | undefined;
 }) {
-  const res = await axios.get<z.infer<typeof getPublicKeyAPISchema>>(
+  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(
     USER_ACCOUNT_URL,
     {
       params: {

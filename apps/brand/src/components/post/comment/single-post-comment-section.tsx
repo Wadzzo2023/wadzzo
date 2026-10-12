@@ -3,11 +3,11 @@
 import { useState, type ReactElement } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { formatPostCreatedAt } from "~/utils/format-date"
-import { type Comment } from "@prisma/client"
-import { Button } from "~/components/shadcn/ui/button"
+import { type Comment } from "@wadzzo/db";
+import { Button } from "@wadzzo/ui/components/button";
 import { useSession } from "next-auth/react"
 import { api } from "~/utils/api"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import Link from "next/link"
 import { MessageCircle, Send } from 'lucide-react'
 import CustomAvatar from "~/components/common/custom-avatar"

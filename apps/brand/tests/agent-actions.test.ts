@@ -4,7 +4,7 @@ import type * as Actions from "~/server/agent/actions";
 
 // Carrying out confirmed proposals (src/server/agent/actions.ts) against a stand-in database.
 vi.mock("~/server/auth", () => ({ getServerAuthSession: vi.fn() }));
-vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("@wadzzo/db", () => ({ db: {} }));
 vi.mock("~/env", () => ({ env: { PLATFORM_SLUG: "wadzzo" } }));
 vi.mock("~/server/image-optimizer", () => ({ createOptimizedImage: vi.fn(async () => "optimized") }));
 const taskClient = { enqueue: vi.fn(async () => ({ jobId: "task-1" })) };

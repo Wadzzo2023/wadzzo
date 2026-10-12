@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Page from "~/features/admin/user-details-page";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 export const metadata = { title: "User Details" };
 

@@ -11,7 +11,7 @@ import {
   useResolvedTheme,
   useThemeRead,
 } from "~/lib/ar/theme";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { ClusterBillboard } from "./ClusterBillboard";
 import { MuralMarker, type MapMural } from "./MuralMarker";
 import { PinMarker } from "./PinMarker";

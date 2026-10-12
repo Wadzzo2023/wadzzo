@@ -1,4 +1,4 @@
-import { WalletType } from "package/connect_wallet";
+import { WalletType } from "@wadzzo/wallet/shared";
 
 export function isRechargeAbleClient(walletType: WalletType): boolean {
     return (

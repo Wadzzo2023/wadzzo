@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import type { Location, LocationGroup, PinType } from "@prisma/client"
+import type { Location, LocationGroup, PinType } from "@wadzzo/db";
 
 /** Visible map area (same fields Google used, so the store logic is unchanged). */
 export type MapBounds = { north: number; south: number; east: number; west: number };

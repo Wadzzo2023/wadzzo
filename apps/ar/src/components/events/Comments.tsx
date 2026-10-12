@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { useAuth } from "~/lib/ar/store";
 import type { ArComment, ArCommentTarget } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 const AVATAR_FALLBACK = "/brand/wadzzo-mark.png";

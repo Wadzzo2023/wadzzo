@@ -41,7 +41,7 @@ import {
   useBountyAttention,
   useBountySeen,
 } from "~/lib/ar/useBountyAttention";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 type Section = "brief" | "entries" | "chat" | "discussion";

@@ -23,9 +23,9 @@ import {
     FastForward,
     Minimize2,
 } from "lucide-react"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import { motion, AnimatePresence, useDragControls } from "framer-motion"
-import type { MediaType } from "@prisma/client"
+import type { MediaType } from "@wadzzo/db";
 
 interface MediaItem {
     id: number

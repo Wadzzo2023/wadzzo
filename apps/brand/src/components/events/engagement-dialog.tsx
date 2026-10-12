@@ -4,9 +4,9 @@ import { formatDistanceToNowStrict } from "date-fns"
 import { Loader2, MessageCircle, Trash2, Users } from "lucide-react"
 import { useState } from "react"
 import toast from "react-hot-toast"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/shadcn/ui/avatar"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
 import { api } from "~/utils/api"
 
 type Target = { kind: "event" | "announcement"; id: string; title: string }

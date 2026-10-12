@@ -1,12 +1,12 @@
 import { applyCors } from "~/server/api-cors";
 // nextjs 14 api routes
 
-import { Asset } from "@prisma/client";
+import { Asset } from "@wadzzo/db";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { db } from "~/server/db";
-import { getCurrentPlatform } from "~/server/platform";
-import { ipfsHashToUrl } from "~/utils/ipfs";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { db } from "@wadzzo/db";
+import { getCurrentPlatform } from "@wadzzo/platform/server";
+import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
 
 export default async function handler(
   req: NextApiRequest,

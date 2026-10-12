@@ -4,7 +4,7 @@ import { Image as ImageIcon, Lock, PenSquare, Video } from "lucide-react";
 
 import { env } from "~/env";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
 
 /**

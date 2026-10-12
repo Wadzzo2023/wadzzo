@@ -1,7 +1,7 @@
 import "server-only";
 
 import { StellarAccount, type AssetRef } from "~/lib/stellar/account";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 /**
  * Who may see what. Item files are for owners only; gated posts for members

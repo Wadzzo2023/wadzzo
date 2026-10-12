@@ -7,19 +7,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatCard } from "~/ui/stat-card";
-import { StatusPill } from "~/ui/status-pill";
+import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type User = RouterOutputs["admin"]["user"]["getUser"];
 const back = { href: "/admin/users", label: "Users" };
@@ -48,7 +48,7 @@ function Details({ u }: { u: User }) {
   const router = useRouter();
   const utils = api.useUtils();
   const [deleting, setDeleting] = useState(false);
-  const title = u.name?.trim() ? u.name : addrShort(u.id, 6);
+  const title = u.name?.trim() ? u.name : abbreviateAddress(u.id, 6);
 
   const remove = api.admin.user.deleteUser.useMutation({
     onSuccess: () => {
@@ -93,7 +93,7 @@ function Details({ u }: { u: User }) {
               onClick={() => void navigator.clipboard.writeText(u.id).then(() => toast.success("Wallet copied"))}
               className="inline-flex items-center gap-1 font-mono text-xs hover:text-foreground"
             >
-              {addrShort(u.id, 6)} <Copy className="size-3" />
+              {abbreviateAddress(u.id, 6)} <Copy className="size-3" />
             </button>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">

@@ -6,16 +6,16 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type Listing = RouterOutputs["fan"]["asset"]["getMyAssets"][number];
 const platform = PLATFORM_ASSET.code.toUpperCase();
@@ -99,7 +99,7 @@ export function PageAssetTab() {
                   onClick={() => void navigator.clipboard.writeText(pa.issuer).then(() => toast.success("Issuer copied"))}
                   className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 font-mono hover:bg-white/25"
                 >
-                  {addrShort(pa.issuer, 5)} <Copy className="size-3" />
+                  {abbreviateAddress(pa.issuer, 5)} <Copy className="size-3" />
                 </button>
               )}
               {pa.custom && <span className="rounded-full bg-white/15 px-2 py-0.5">Your own Stellar asset</span>}

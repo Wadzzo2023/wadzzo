@@ -1,4 +1,4 @@
-import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@prisma/client"
+import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/db";
 
 /**
  * Where the embedded map is served from — wadzzoAR (web.wadzzo.com), not this

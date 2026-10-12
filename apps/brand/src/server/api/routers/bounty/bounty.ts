@@ -1,17 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import {
-  BountyStatus,
-  MediaType,
-  NotificationType,
-  type Prisma,
-  SubmissionViewType,
-  UserRole,
-} from "@prisma/client"; // Assuming you are using Prisma
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { BountyStatus, MediaType, NotificationType, type Prisma, SubmissionViewType, UserRole } from "@wadzzo/db"; // Assuming you are using Prisma
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertOwnerOrAdmin } from "~/server/api/access";
-import { notify, notifyFan } from "~/server/notify";
+import { notify, notifyFan } from "@wadzzo/platform/server";
 import { sortOptionEnum } from "~/types/bounty/bounty-type";
 import {
   checkXDRSubmitted,
@@ -32,13 +25,13 @@ import {
   getPlatformAssetPrice,
   getXLMPriceByPlatformAsset,
 } from "~/lib/stellar/fan/get_token_price";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform";
+import { platformScope } from "@wadzzo/platform/server";
 export const BountyCommentSchema = z.object({
   bountyId: z.number(),
   parentId: z.number().optional(),
@@ -80,7 +73,7 @@ export const BountyRoute = createTRPCRouter({
   sendBountyBalanceToMotherAcc: protectedProcedure
     .input(
       z.object({
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         prize: z.number().min(0.00001, { message: "Prize can't less than 0" }),
         xlmPrice: z
           .number()
@@ -93,7 +86,7 @@ export const BountyRoute = createTRPCRouter({
 
       let secretKey;
       if (ctx.session.user.email && ctx.session.user.email.length > 0) {
-        secretKey = await getAccSecretFromRubyApi(ctx.session.user.email);
+        secretKey = await fetchCustodialAccountSecret(ctx.session.user.email);
       }
 
       if (input.method === PaymentMethodEnum.enum.xlm) {
@@ -1255,13 +1248,13 @@ export const BountyRoute = createTRPCRouter({
         bountyId: z.number(),
         priceInBand: z.number(),
         priceInUSD: z.number(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
       let secretKey;
       if (ctx.session.user.email && ctx.session.user.email.length > 0) {
-        secretKey = await getAccSecretFromRubyApi(ctx.session.user.email);
+        secretKey = await fetchCustodialAccountSecret(ctx.session.user.email);
       }
       const findXDR = await ctx.db.bountyWinner.findFirst({
         where: {

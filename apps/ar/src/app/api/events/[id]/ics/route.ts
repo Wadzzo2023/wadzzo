@@ -1,6 +1,6 @@
 import { eventIcs } from "~/lib/ar/events";
-import { db } from "~/server/db";
-import { getCurrentPlatform, platformScope } from "~/server/platform";
+import { db } from "@wadzzo/db";
+import { getCurrentPlatform, platformScope } from "@wadzzo/platform/server";
 
 /**
  * GET /api/events/:id/ics — the event as an iCalendar file, for "Add to

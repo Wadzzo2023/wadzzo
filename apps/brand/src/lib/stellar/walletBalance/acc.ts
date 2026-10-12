@@ -13,16 +13,11 @@ import {
 
 import { Horizon } from "@stellar/stellar-sdk";
 import { StellarAccount } from "../marketplace/test/Account";
-import { SignUserType, WithSing } from "../utils";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
-import {
-  networkPassphrase,
-  PLATFORM_ASSET,
-  STELLAR_URL,
-  TrxBaseFee,
-} from "../constant";
+import { CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
+import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { api } from "~/utils/api";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 export type Balances = (
   | Horizon.HorizonApi.BalanceLineNative
@@ -144,7 +139,7 @@ export async function SendAssets({
   asset_code: string;
   asset_type: string;
   asset_issuer: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -218,7 +213,7 @@ export async function SendAssets({
 
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });
@@ -237,7 +232,7 @@ export async function AddAssetTrustLine({
   userPubKey: string;
   asset_code: string;
   asset_issuer: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -277,7 +272,7 @@ export async function AddAssetTrustLine({
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
 
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });
@@ -449,7 +444,7 @@ export async function AcceptClaimableBalance({
 }: {
   userPubKey: string;
   balanceId: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 
 }) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -498,7 +493,7 @@ export async function AcceptClaimableBalance({
     const buildTrx = Tx1.build();
     buildTrx.sign()
     const xdr = buildTrx.toXDR();
-    const singedXdr = WithSing({ xdr, signWith });
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
     console.log(singedXdr);
     return singedXdr;
 
@@ -515,7 +510,7 @@ export async function DeclineClaimableBalance({
 }: {
   pubKey: string;
   balanceId: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -535,7 +530,7 @@ export async function DeclineClaimableBalance({
 
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });

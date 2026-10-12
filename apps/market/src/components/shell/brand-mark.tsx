@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** Logo + wordmark (the same mark the brand portal and fan apps use). */
 export function BrandMark({ compact = false, className }: { compact?: boolean; className?: string }) {

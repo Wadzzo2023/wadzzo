@@ -8,12 +8,12 @@ import { Marker } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
 import { PinQRDialog } from "~/components/pins/qr";
-import { Button } from "~/components/shadcn/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from "~/components/shadcn/ui/sheet";
-import { ErrorState } from "~/ui/error-state";
-import { Person } from "~/ui/person";
+import { Button } from "@wadzzo/ui/components/button";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@wadzzo/ui/components/sheet";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
 
 import { Locations } from "./locations";

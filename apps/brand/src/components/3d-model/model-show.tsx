@@ -8,7 +8,7 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js"
 import { Stage, OrbitControls } from "@react-three/drei"
 import type { Group } from "three"
 import * as THREE from "three"
-import { Button } from "~/components/shadcn/ui/button"
+import { Button } from "@wadzzo/ui/components/button";
 import clsx from "clsx"
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib"
 const Model = ({

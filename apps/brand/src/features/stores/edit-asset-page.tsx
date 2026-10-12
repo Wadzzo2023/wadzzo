@@ -8,17 +8,17 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { EmptyState } from "~/ui/empty-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 const ThreeD = dynamic(() => import("~/components/3d-model/model-show"), { ssr: false });
 
@@ -175,7 +175,7 @@ function EditForm({ item }: { item: Item }) {
                     onClick={() => void navigator.clipboard.writeText(a.issuer).then(() => toast.success("Issuer copied"))}
                     className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
                   >
-                    {addrShort(a.issuer, 4)} <Copy className="size-3" />
+                    {abbreviateAddress(a.issuer, 4)} <Copy className="size-3" />
                   </button>
                 </dd>
               </div>

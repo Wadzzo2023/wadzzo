@@ -1,9 +1,9 @@
 import { Horizon, NotFoundError } from "@stellar/stellar-sdk";
 import { z } from "zod";
 
-import { PLATFORM_ASSET, STELLAR_URL } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 const horizon = () => new Horizon.Server(STELLAR_URL);
 export type HistoryRow = {

@@ -1,26 +1,26 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Card, CardHeader, CardContent, CardFooter } from '~/components/shadcn//ui/card'
+import { Card, CardHeader, CardContent, CardFooter } from "@wadzzo/ui/components/card";
 import { Loader2, Paperclip, Plus, Search, Send, Trash } from "lucide-react"
-import { UserRole } from "@prisma/client"
-import { cn } from "~/lib/utils"
+import { UserRole } from "@wadzzo/db";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { z } from "zod"
 import Link from "next/link"
 import { MultiUploadS3Button } from "../common/upload-button"
 import { api } from "~/utils/api"
-import { addrShort } from "~/utils/utils"
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import type { MutableRefObject } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/ui/avatar"
-import { ScrollArea } from "../shadcn/ui/scroll-area"
-import { Input } from "../shadcn/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs"
-import { Button } from "~/components/shadcn/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/shadcn/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
+import { ScrollArea } from "@wadzzo/ui/components/scroll-area";
+import { Input } from "@wadzzo/ui/components/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@wadzzo/ui/components/dialog";
 import CustomAvatar from "../common/custom-avatar"
 import { motion } from "framer-motion"
-import { toast } from "../shadcn/ui/use-toast"
+import { toast } from "@wadzzo/ui/components/use-toast";
 type BountyDoubtListItem = {
     id: number
     bountyId: number
@@ -105,7 +105,7 @@ const Chat = ({ bountyId }: { bountyId: number }) => {
                                             >
                                                 <CustomAvatar url={item.user.image} className="h-10 w-10" winnerCount={item.winnerCount} />
                                                 <div>
-                                                    <p className="font-medium">{addrShort(item.user.id, 5)}</p>
+                                                    <p className="font-medium">{abbreviateAddress(item.user.id, 5)}</p>
                                                     <p className="text-sm text-muted-foreground">{item.user.email ?? "No email"}</p>
                                                 </div>
                                             </div>
@@ -141,7 +141,7 @@ const Chat = ({ bountyId }: { bountyId: number }) => {
                                 >
                                     <CustomAvatar url={item.user.image} className="h-10 w-10" winnerCount={item.winnerCount} />
                                     <div className="flex flex-col items-start overflow-hidden">
-                                        <p className="font-medium">{addrShort(item.user.id, 5)}</p>
+                                        <p className="font-medium">{abbreviateAddress(item.user.id, 5)}</p>
                                         <p className="w-full truncate text-sm text-muted-foreground">{item.user.email ?? "No email"}</p>
                                     </div>
                                 </TabsTrigger>
@@ -255,7 +255,7 @@ const ChatItem = ({ item }: { item: BountyDoubtListItem }) => {
                     <AvatarFallback>{item.user.id.slice(0, 2)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <h2 className="text-lg font-semibold">{addrShort(item.user.id, 5)}</h2>
+                    <h2 className="text-lg font-semibold">{abbreviateAddress(item.user.id, 5)}</h2>
                     <p className="text-sm text-muted-foreground">{item.user.email ?? "No email"}</p>
                 </div>
             </CardHeader>

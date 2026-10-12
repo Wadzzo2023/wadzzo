@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { SearchInput } from "~/ui/toolbar";
+import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 
 /** The search page's own box: keeps the query in the URL so results are shareable and indexable. */
 export function SearchField({ value }: { value?: string }) {

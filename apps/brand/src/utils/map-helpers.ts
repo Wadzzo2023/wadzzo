@@ -1,5 +1,5 @@
 import { Target, Calendar, Star, MapPin } from "lucide-react"
-import { PinType } from "@prisma/client" // Import PinType enum
+import { PinType } from "@wadzzo/db"; // Import PinType enum
 
 // Helper to get the appropriate icon for a pin type
 export const getPinIcon = (type: PinType) => {

@@ -1,4 +1,4 @@
-import type { BountyStatus } from "@prisma/client";
+import type { BountyStatus } from "@wadzzo/db";
 
 /** A bounty's state for brands: review status first, then whether all winners are picked. */
 export function bountyStatus(b: { status: BountyStatus; currentWinnerCount: number; totalWinner: number }) {

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import Page from "~/features/embeds/embed-editor-page";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 export const metadata = { title: "Website Map editor" };
 

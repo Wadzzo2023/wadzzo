@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import type { Metadata } from "next";
 
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
@@ -7,7 +7,7 @@ import { MarketFilters } from "~/components/market/market-filters";
 import { Store } from "lucide-react";
 import type { ListingsInput } from "~/server/api/routers/market";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "~/ui/empty-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 
 export const metadata: Metadata = {

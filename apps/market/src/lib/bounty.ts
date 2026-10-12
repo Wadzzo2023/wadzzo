@@ -1,5 +1,5 @@
 
-import type { Tone } from "~/ui/status-pill";
+import type { Tone } from "@wadzzo/ui/patterns/status-pill";
 import type { RouterOutputs } from "~/utils/api";
 
 /**

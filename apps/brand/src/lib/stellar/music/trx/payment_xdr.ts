@@ -7,14 +7,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { networkPassphrase } from "./create_song_token";
-import { type SignUserType, WithSing } from "../../utils";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-} from "../../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../../utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { StellarAccount } from "../../marketplace/test/Account";
 import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
@@ -34,7 +28,7 @@ export async function XDR4BuyAsset({
   code: string;
   issuerPub: string;
   price: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   storageSecret: string;
   seller: string;
 }) {
@@ -125,7 +119,7 @@ export async function XDR4BuyAsset({
   buildTrx.sign(motherAcc, storageAcc);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
   return singedXdr;
 }
 
@@ -142,7 +136,7 @@ export async function XDR4BuyAssetWithXLM({
   code: string;
   issuerPub: string;
   priceInNative: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   storageSecret: string;
   seller: string;
 }) {
@@ -216,7 +210,7 @@ export async function XDR4BuyAssetWithXLM({
   buildTrx.sign(storageAcc);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
   // console.log(singedXdr, "singedXdr");
   return singedXdr;
 }
@@ -234,7 +228,7 @@ export async function XDR4BuyAssetWithSquire({
   code: string;
   issuerPub: string;
   price: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   storageSecret: string;
   seller: string;
 }) {
@@ -300,7 +294,7 @@ export async function XDR4BuyAssetWithSquire({
   buildTrx.sign(storageAcc, mother);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
   // console.log(singedXdr, "singedXdr");
   return singedXdr;
 }

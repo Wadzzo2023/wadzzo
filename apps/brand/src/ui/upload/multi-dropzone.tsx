@@ -5,7 +5,7 @@ import { useId, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import type { EndPointType } from "~/server/s3";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { ENDPOINT_ACCEPT, fileMatchesAccept, formatBytes } from "./accept";
 import { useS3Upload, type UploadedFile } from "./use-s3-upload";

@@ -6,17 +6,17 @@ import {
   sendNft2StorageXDR,
   sendNftback,
 } from "~/lib/stellar/marketplace/trx/nft_2_storage";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
-import { ItemPrivacy, MarketAsset } from "@prisma/client";
+import { ItemPrivacy, MarketAsset } from "@wadzzo/db";
 import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
 import { type MarketAssetType } from "~/lib/state/play/use-modal-store";
-import { logAudit } from "~/server/audit";
-import { platformScope } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import { platformScope } from "@wadzzo/platform/server";
 export const BackMarketFormSchema = z.object({
   placingCopies: z
     .number({
@@ -67,7 +67,7 @@ export const PlaceMarketFormSchema = z.object({
 
 export const marketRouter = createTRPCRouter({
   placeNft2StorageXdr: protectedProcedure
-    .input(PlaceMarketFormSchema.extend({ signWith: SignUser }))
+    .input(PlaceMarketFormSchema.extend({ signWith: custodialSignerSchema }))
     .mutation(async ({ input, ctx }) => {
       // validate and transfer input
       const { code, issuer, placingCopies, signWith } = input;
@@ -95,7 +95,7 @@ export const marketRouter = createTRPCRouter({
     }),
 
   placeBackNftXdr: protectedProcedure
-    .input(BackMarketFormSchema.extend({ signWith: SignUser }))
+    .input(BackMarketFormSchema.extend({ signWith: custodialSignerSchema }))
     .mutation(async ({ ctx, input }) => {
       // validate and transfor input
       const { code, issuer, placingCopies, signWith } = input;

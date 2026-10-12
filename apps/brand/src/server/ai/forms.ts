@@ -1,4 +1,4 @@
-import { MediaType, PinType } from "@prisma/client";
+import { MediaType, PinType } from "@wadzzo/db";
 import { z } from "zod";
 
 /**

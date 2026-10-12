@@ -4,8 +4,8 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { Input } from "~/components/shadcn/ui/input";
-import { cn } from "~/lib/utils";
+import { Input } from "@wadzzo/ui/components/input";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** Global search: Enter opens /search?q=… */
 export function SearchBox({ className, autoFocus }: { className?: string; autoFocus?: boolean }) {

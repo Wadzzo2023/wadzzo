@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import PinManagementPage from "~/features/pins/list-view";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 export const metadata = { title: "Pin management" };
 

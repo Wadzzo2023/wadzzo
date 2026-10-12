@@ -1,10 +1,10 @@
 import { Horizon } from "@stellar/stellar-sdk";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { z } from "zod";
-import { STELLAR_URL } from "~/lib/stellar/constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { claimRedeemXDR } from "~/lib/stellar/fan/redeem";
 import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import {
   createTRPCRouter,
@@ -77,7 +77,7 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         code: z.string(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {

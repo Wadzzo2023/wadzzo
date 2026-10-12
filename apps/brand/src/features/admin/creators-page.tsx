@@ -5,21 +5,21 @@ import { Ban, Check, Clock, Coins, ExternalLink, RefreshCw, Trash2, UserCheck, U
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Switch } from "~/components/shadcn/ui/switch";
+import { Button } from "@wadzzo/ui/components/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Switch } from "@wadzzo/ui/components/switch";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { BLANK_KEYWORD } from "~/lib/utils";
 import type { CreatorExtraFields } from "~/types/creator";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column, type RowAction } from "~/ui/data-table";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Person } from "~/ui/person";
-import { StatusPill } from "~/ui/status-pill";
-import { FilterChips, SearchInput, Toolbar } from "~/ui/toolbar";
+import { Person } from "@wadzzo/ui/patterns/person";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { FilterChips, SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { useCreatorActions } from "./use-creator-actions";
 
@@ -68,7 +68,7 @@ export default function CreatorsPage() {
       id: "brand",
       header: "Brand",
       skeleton: "person",
-      cell: (c) => <Person name={c.name} image={c.profileUrl} sub={<span className="font-mono">{addrShort(c.id, 6)}</span>} />,
+      cell: (c) => <Person name={c.name} image={c.profileUrl} sub={<span className="font-mono">{abbreviateAddress(c.id, 6)}</span>} />,
     },
     ...(isSuperAdmin
       ? [{ id: "platform", header: "Platform", skeleton: "short", cell: (c) => <StatusPill tone="info">{c.platform.name}</StatusPill> } satisfies Column<Creator>]

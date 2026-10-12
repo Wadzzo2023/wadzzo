@@ -8,16 +8,16 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { PinQRButton, PinQRDownloadAllButton, pinQRBulkActions, useDropQRs } from "~/components/pins/qr";
-import { Button } from "~/components/shadcn/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/shadcn/ui/dropdown-menu";
-import { Input } from "~/components/shadcn/ui/input";
-import { cn } from "~/lib/utils";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
+import { Input } from "@wadzzo/ui/components/input";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
-import { Spinner } from "~/ui/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Kind = "general" | "landmark" | "event" | "hotspot";

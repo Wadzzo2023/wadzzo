@@ -21,15 +21,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast, { type Toast } from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
-import { FilterChips, SearchInput } from "~/ui/toolbar";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { FilterChips, SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api } from "~/utils/api";
 
 import { plural, REJECT_LABEL, VIEW_STATUS, type MuralRow, type View } from "./mural-review/model";

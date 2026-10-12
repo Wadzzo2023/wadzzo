@@ -1,10 +1,9 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
-import { clientsign } from "package/connect_wallet/src/lib/stellar/utils";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 
 import { api } from "~/utils/api";
-import { clientSelect } from "~/lib/stellar/client-select";
 import { distanceMeters } from "./geo";
 import { pinStatus } from "./rarity";
 import { useSettings } from "./store";
@@ -45,7 +44,7 @@ export function useBrands(): ArBrand[] {
  *   1. `followXdr`  — server builds the changeTrust transaction (mother pays
  *                     the 0.5 XLM reserve the trustline costs), or says the
  *                     wallet already trusts the asset.
- *   2. `clientsign` — the user signs and submits it. Custodial wallets were
+ *   2. `signAndSubmitTransaction` — the user signs and submits it. Custodial wallets were
  *                     already co-signed server-side; self-custody wallets
  *                     prompt here.
  *   3. `follow`     — only now is the `Follow` row written.
@@ -106,11 +105,10 @@ export function useToggleFollow() {
       // fee to change nothing.
       if (!step.alreadyTrusted) {
         setPending({ id: brandId, phase: "signing" });
-        const signed = await clientsign({
-          presignedxdr: step.xdr,
-          pubkey: session?.user?.id,
-          walletType: session?.user?.walletType,
-          test: clientSelect(),
+        const signed = await signAndSubmitTransaction({
+          xdr: step.xdr,
+          publicKey: session?.user?.id,
+          walletType: session?.user?.walletType
         });
         if (!signed) {
           setError("Transaction failed while signing.");

@@ -6,10 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import { MEDIA_META } from "~/components/media/media-meta";
 import { usePriceText } from "~/components/price/price";
-import { Button } from "~/components/shadcn/ui/button";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard } from "~/server/api/routers/market";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 
 const INTERVAL_MS = 6000;
 

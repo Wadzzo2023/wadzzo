@@ -12,13 +12,13 @@ import { ItemActions } from "~/components/market/item-actions";
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { MintProgress } from "~/components/market/mint-progress";
 import { ItemMedia } from "~/components/media/item-media";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
 import { MEDIA_META } from "~/components/media/media-meta";
 import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
 import { PageBody } from "~/ui/page-header";
 import { Section } from "~/ui/section";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 
 const getItem = cache(async (id: number) => {
   try {

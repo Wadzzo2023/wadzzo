@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { z } from "zod";
 
 import { AccountSchema } from "~/lib/stellar/fan/utils";

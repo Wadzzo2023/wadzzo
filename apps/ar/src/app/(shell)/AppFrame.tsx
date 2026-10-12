@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 // The submodule's own wallet-chooser dialog. Its visibility is driven by its
-// own zustand store (`useDialogStore`), which `useAuth().signIn()` opens —
+// own zustand store (`useConnectWalletDialogStore`), which `useAuth().signIn()` opens —
 // see the note in lib/ar/store.ts. Mounted once here so it exists regardless
 // of which screen triggered the sign-in.
-import ConnectDialog from "package/connect_wallet/src/components/connect_dialog";
+import { ConnectWalletDialog as ConnectDialog } from "@wadzzo/wallet";
 
 import { AuthGate } from "~/components/auth/AuthGate";
 import { SessionSync } from "~/components/auth/SessionSync";
@@ -83,7 +83,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
       </DeviceFrame>
 
       {/* The real wallet/email chooser, from the connect_wallet submodule.
-          Its own visibility is a separate zustand store (`useDialogStore`)
+          Its own visibility is a separate zustand store (`useConnectWalletDialogStore`)
           that `useAuth().signIn()` opens; mounted once here, outside
           `DeviceFrame`, because its dialog is not constrained to the phone
           frame and renders as a normal centred desktop modal. */}

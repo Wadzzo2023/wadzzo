@@ -8,7 +8,7 @@
 import { z } from "zod";
 
 import type { AreaFeature } from "~/components/map-kit/geo";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 export type HomeArea = { name: string; source: "brand" | "platform"; feature: AreaFeature };
 

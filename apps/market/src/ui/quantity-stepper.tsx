@@ -2,7 +2,7 @@
 
 import { Minus, Plus } from "lucide-react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** − [ n ] + : pick a whole number between `min` and `max`. */
 export function QuantityStepper({

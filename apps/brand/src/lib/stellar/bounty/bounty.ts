@@ -7,16 +7,9 @@ import {
   Transaction,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import {
-  networkPassphrase,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-} from "../constant";
+import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";
-import { type SignUserType, WithSing } from "../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 
 const assetIssuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 const assetCode = "USDC";
@@ -29,7 +22,7 @@ export async function SendBountyBalanceToMotherAccount({
 }: {
   prize: number;
 
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   userPubKey: string;
   secretKey?: string | undefined;
 }) {
@@ -60,7 +53,7 @@ export async function SendBountyBalanceToMotherAccount({
 
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });
@@ -77,7 +70,7 @@ export async function SendBountyBalanceToMotherAccountViaXLM({
 
 }: {
   prizeInXLM: number;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   userPubKey: string;
   secretKey?: string | undefined;
 
@@ -109,7 +102,7 @@ export async function SendBountyBalanceToMotherAccountViaXLM({
 
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });
@@ -343,7 +336,7 @@ export async function SwapUserAssetToMotherUSDC({
   priceInUSD: number;
   userPubKey: string;
   secretKey?: string | undefined;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
@@ -439,7 +432,7 @@ export async function SwapUserAssetToMotherUSDC({
 
   if (signWith && "email" in signWith && secretKey) {
     const xdr = buildTrx.toXDR();
-    const signedXDr = await WithSing({
+    const signedXDr = await signXdrForCustodialUser({
       xdr: xdr,
       signWith: signWith,
     });

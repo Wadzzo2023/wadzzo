@@ -8,7 +8,7 @@ import { FILL_FORMS, FILL_SCHEMAS, FORM_BRIEF } from "~/server/ai/forms";
 import { aiRemaining, IMAGE_MODEL, openai, TEXT_MODEL, withAiQuota } from "~/server/ai/openai";
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { uploadBufferToS3 } from "~/server/s3";
-import { ipfsHashToPinataGatewayUrl } from "~/utils/ipfs";
+import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pinataSDK = require("@pinata/sdk") as new (o: { pinataJWTKey: string }) => {
@@ -24,7 +24,7 @@ const RULES = `Rules:
 - Never invent URLs, prices, addresses or facts the brand didn't give; use null when unknown.
 - Respect every detail the brand gave (dates, numbers, names).`;
 
-async function brandLine(db: typeof import("~/server/db").db, userId: string) {
+async function brandLine(db: typeof import("@wadzzo/db").db, userId: string) {
   const c = await db.creator.findUnique({ where: { id: userId }, select: { name: true, bio: true } });
   return c ? `The brand is "${c.name}"${c.bio ? ` — ${c.bio.slice(0, 300)}` : ""}.` : "";
 }

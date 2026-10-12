@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 
 // The real access rules, run against a stand-in database.
 vi.mock("~/server/auth", () => ({ getServerAuthSession: vi.fn() }));
-vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("@wadzzo/db", () => ({ db: {} }));
 vi.mock("~/env", () => ({ env: { PLATFORM_SLUG: "wadzzo" } }));
 
 const WADZZO = { id: "wadzzo", name: "Wadzzo", isRoot: true };

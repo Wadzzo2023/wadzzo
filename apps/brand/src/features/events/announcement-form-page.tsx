@@ -7,11 +7,11 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { firstError, fromLocalInput, toLocalInput } from "~/components/events/form-utils";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { EmptyState } from "~/ui/empty-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { AiTextButton } from "~/ui/ai/ai-text";

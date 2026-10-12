@@ -4,14 +4,14 @@ import { Building2, Loader2, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
-import { Switch } from "~/components/shadcn/ui/switch";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
+import { Switch } from "@wadzzo/ui/components/switch";
 import { DataTable, type Column } from "~/ui/data-table";
 import { Field } from "~/ui/form-page";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Platform = RouterOutputs["admin"]["platforms"]["list"][number];

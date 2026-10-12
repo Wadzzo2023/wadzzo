@@ -5,11 +5,11 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { CardForm } from "~/components/payment/card-form";
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

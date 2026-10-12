@@ -3,17 +3,9 @@
 import { Coins, ShieldAlert, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/shadcn/ui/alert-dialog";
-import { Button } from "~/components/shadcn/ui/button";
-import { cn } from "~/lib/utils";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@wadzzo/ui/components/alert-dialog";
+import { Button } from "@wadzzo/ui/components/button";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 import { plural } from "./model";

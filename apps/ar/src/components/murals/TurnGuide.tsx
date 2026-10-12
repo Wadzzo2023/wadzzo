@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { SweepStep } from "~/lib/murals/useMuralSweep";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── Turn guide (2026-10-05 round) ─────────────────────────────────────────

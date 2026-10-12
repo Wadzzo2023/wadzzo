@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import type { RouterOutputs } from "~/utils/api";
 
 import { creatorHref } from "~/lib/creator";

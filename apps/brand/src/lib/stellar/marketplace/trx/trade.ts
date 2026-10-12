@@ -7,8 +7,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../SECRET";
-import { type SignUserType, WithSing } from "../../utils";
-import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "../../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../../utils";
+import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 
 export async function tradeAssetXDR(props: {
   sellingAsset: Asset;
@@ -17,7 +17,7 @@ export async function tradeAssetXDR(props: {
   price: string;
   creatorStorageSecret: string;
   pubkey: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   // take siteAsset and send xlm from storage
   const {
@@ -63,7 +63,7 @@ export async function tradeAssetXDR(props: {
 
   const xdr = Tx.toXDR();
 
-  const signedXDR = await WithSing({
+  const signedXDR = await signXdrForCustodialUser({
     xdr: xdr,
     signWith: signWith,
   });
@@ -78,7 +78,7 @@ export async function buyOfferXDR(props: {
   price: string;
   creatorStorageSecret?: string;
   pubkey: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   // take siteAsset and send xlm from storage
   const {
@@ -124,7 +124,7 @@ export async function buyOfferXDR(props: {
 
   const xdr = Tx.toXDR();
 
-  const signedXDR = await WithSing({
+  const signedXDR = await signXdrForCustodialUser({
     xdr: xdr,
     signWith: signWith,
   });

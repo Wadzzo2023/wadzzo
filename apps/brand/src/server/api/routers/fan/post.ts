@@ -1,4 +1,4 @@
-import { MediaType, NotificationType } from "@prisma/client";
+import { MediaType, NotificationType } from "@wadzzo/db";
 import { z } from "zod";
 
 import { MediaInfo, PostSchema } from "~/types/post";
@@ -10,7 +10,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform";
+import { platformScope } from "@wadzzo/platform/server";
 export const CommentSchema = z.object({
   postId: z.number(),
   parentId: z.number().optional(),

@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Button } from "~/components/shadcn/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "~/components/shadcn/ui/card"
-import { Badge } from "~/components/shadcn/ui/badge"
+import { Button } from "@wadzzo/ui/components/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@wadzzo/ui/components/card";
+import { Badge } from "@wadzzo/ui/components/badge";
 import { Heart, MessageCircle, Share2, Lock, Globe, Bookmark, Flag, ChevronDown, ChevronUp, CreditCard, Loader2, LockOpen } from 'lucide-react'
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import MediaGallery from "./media-gallary"
-import type { Media, Post } from "@prisma/client"
+import type { Media, Post } from "@wadzzo/db";
 import { api } from "~/utils/api"
 import CustomAvatar from "../common/custom-avatar"
 import { CommentSection } from "./comment/post-comment-section"

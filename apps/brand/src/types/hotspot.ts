@@ -1,4 +1,4 @@
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import type { Feature } from "geojson";
 import { z } from "zod";
 

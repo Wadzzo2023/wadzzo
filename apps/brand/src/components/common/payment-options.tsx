@@ -1,18 +1,11 @@
 import { useState } from "react";
-import { Button } from "~/components/shadcn/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/shadcn/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "~/components/shadcn/ui/radio-group";
-import { Label } from "~/components/shadcn/ui/label";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@wadzzo/ui/components/dialog";
+import { RadioGroup, RadioGroupItem } from "@wadzzo/ui/components/radio-group";
+import { Label } from "@wadzzo/ui/components/label";
 import { Coins, DollarSign, Loader2 } from "lucide-react";
 import { CREATOR_TERM } from "~/utils/term";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 
 import { create } from "zustand";
 import { env } from "~/env";

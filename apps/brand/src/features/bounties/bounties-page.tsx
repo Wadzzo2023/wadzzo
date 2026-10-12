@@ -4,19 +4,19 @@ import { Plus, Search, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { Badge } from "~/components/shadcn/ui/badge";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
+import { Badge } from "@wadzzo/ui/components/badge";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { sortOptionEnum } from "~/types/bounty/bounty-type";
 import { htmlToText } from "~/ui/ai/shared";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
-import { Spinner } from "~/ui/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { bountyStatus } from "./bounty-status";

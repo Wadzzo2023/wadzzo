@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { CreatorCard } from "~/components/creator/creator-card";
 import { CreatorSearch, LoadMoreCreators } from "~/components/creator/creator-list";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "~/ui/empty-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 
 export const metadata: Metadata = {

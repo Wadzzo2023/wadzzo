@@ -23,12 +23,12 @@ import {
 import toast from "react-hot-toast";
 import type { z } from "zod";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Label } from "~/components/shadcn/ui/label";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { uploadToIpfsUrl } from "~/ui/upload/ipfs";

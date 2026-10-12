@@ -9,7 +9,7 @@
 //    (read-only on brand data) and saves its answer and proposals;
 //  • proposals change nothing until the person confirms, and are carried out
 //    here (executeAction) after checking everything again.
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 

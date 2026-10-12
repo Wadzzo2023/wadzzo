@@ -1,11 +1,11 @@
 import { Asset, Horizon } from "@stellar/stellar-sdk";
 import { z } from "zod";
-import { STELLAR_URL } from "~/lib/stellar/constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 import {
   buyOfferXDR,
   tradeAssetXDR,
 } from "~/lib/stellar/marketplace/trx/trade";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import {
   createTRPCRouter,
@@ -30,7 +30,7 @@ export const tradeRouter = createTRPCRouter({
   }),
 
   getTradeXDR: protectedProcedure
-    .input(tradeFormSchema.extend({ signWith: SignUser }))
+    .input(tradeFormSchema.extend({ signWith: custodialSignerSchema }))
     .mutation(async ({ ctx, input }) => {
       // validate
       const { selling, buying, amount, price } = input;
@@ -53,7 +53,7 @@ export const tradeRouter = createTRPCRouter({
     }),
 
   offerBuyXDR: protectedProcedure
-    .input(z.object({ offerId: z.string() }).extend({ signWith: SignUser }))
+    .input(z.object({ offerId: z.string() }).extend({ signWith: custodialSignerSchema }))
     .mutation(async ({ ctx, input }) => {
       const uid = ctx.session.user.id;
       const { offerId, signWith } = input;

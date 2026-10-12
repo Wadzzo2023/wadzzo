@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import { localDay, timeZoneAt } from "~/server/murals/geo";
 import { nameMural, startScan, submitScan } from "~/server/murals/scan";
 import { boxAround, getMuralSettings, LIVE_MURAL, toMuralCard } from "~/server/murals/service";
-import { platformScope } from "~/server/platform-scope";
+import { platformScope } from "@wadzzo/platform/scope";
 
 /**
  * ── murals ─────────────────────────────────────────────────────────────────

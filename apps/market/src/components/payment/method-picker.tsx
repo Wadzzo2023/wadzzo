@@ -2,8 +2,8 @@
 
 import { Coins, CreditCard, Sparkles } from "lucide-react";
 
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 export type PayMethod = "PLATFORM_ASSET" | "XLM" | "CARD";
 

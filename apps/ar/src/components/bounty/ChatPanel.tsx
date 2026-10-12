@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { type RouterOutputs } from "~/utils/api";
 
 type Message = RouterOutputs["bounty"]["thread"][number];

@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { pageAssetRef, tierBalances } from "~/server/access";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { notify } from "~/server/notify";
-import { platformScope } from "~/server/platform-scope";
+import { notify } from "@wadzzo/platform/server";
+import { platformScope } from "@wadzzo/platform/scope";
 import { followTrustlineXdr } from "~/server/stellar/follow";
 import { preparePageTokens, quotePageTokens } from "~/server/stellar/page-tokens";
 import { signerFor } from "~/server/stellar/session-signer";

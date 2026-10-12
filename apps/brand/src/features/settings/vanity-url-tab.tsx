@@ -1,20 +1,19 @@
 "use client";
 
-import type { VanitySubscription } from "@prisma/client";
+import type { VanitySubscription } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 import { format, formatDistanceToNow } from "date-fns";
 import { Check, Copy, Loader2, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { clientsign } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { env } from "~/env";
-import useNeedSign from "~/lib/hook";
-import { networkPassphrase, PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { clientSelect } from "~/lib/stellar/fan/utils";
-import { cn } from "~/lib/utils";
+import { useCustodialSigner } from "@wadzzo/wallet";
+import { networkPassphrase, PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Field } from "~/ui/form-page";
 import { api } from "~/utils/api";
 
@@ -33,7 +32,7 @@ const money = (n: number) => `${n.toLocaleString()} ${PLATFORM_ASSET.code}`;
  */
 export function VanityUrlTab({ vanityURL, subscription }: { vanityURL: string | null; subscription: VanitySubscription | null }) {
   const session = useSession();
-  const { needSign } = useNeedSign();
+  const { getCustodialSigner } = useCustodialSigner();
   const utils = api.useUtils();
 
   const state = !subscription ? "none" : new Date(subscription.endDate) >= new Date() ? "active" : "expired";
@@ -67,14 +66,13 @@ export function VanityUrlTab({ vanityURL, subscription }: { vanityURL: string | 
     const url = state === "expired" ? current : value;
     setPaying(true);
     try {
-      const xdr = await getXdr.mutateAsync({ vanityURL: url, signWith: needSign() });
+      const xdr = await getXdr.mutateAsync({ vanityURL: url, signWith: getCustodialSigner() });
       // Signing doesn't change the hash, so we know which payment to verify.
       const txHash = TransactionBuilder.fromXDR(xdr, networkPassphrase).hash().toString("hex");
-      const paid = await clientsign({
-        presignedxdr: xdr,
+      const paid = await signAndSubmitTransaction({
+        xdr: xdr,
         walletType: session.data?.user?.walletType,
-        pubkey: session.data?.user?.id,
-        test: clientSelect(),
+        publicKey: session.data?.user?.id
       });
       if (!paid) {
         toast.error("The payment wasn't signed");

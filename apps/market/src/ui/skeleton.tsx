@@ -1,4 +1,4 @@
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * Loading placeholders with the shared sweep (`.skeleton` in globals.css).

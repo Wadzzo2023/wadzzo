@@ -1,6 +1,6 @@
 // nextjs 14 api routes
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GetDummyXDR } from "package/connect_wallet/src/lib/stellar/trx/deummy";
+import { buildLoginChallengeXdr } from "@wadzzo/wallet/server";
 import { z } from "zod";
 
 export default async function handler(
@@ -9,7 +9,7 @@ export default async function handler(
 ) {
   try {
     const pubkey = z.string().length(56).parse(req.query.pubkey);
-    const xdr = await GetDummyXDR({ pubkey });
+    const xdr = await buildLoginChallengeXdr({ pubkey });
 
     res.status(200).json({ xdr });
   } catch (e) {

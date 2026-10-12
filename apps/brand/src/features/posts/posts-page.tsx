@@ -6,12 +6,12 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 import PostCard from "~/components/post/post-card";
-import { Button } from "~/components/shadcn/ui/button";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
-import { Spinner } from "~/ui/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
 
 /** Posts: everything the brand has published to followers. */

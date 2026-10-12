@@ -7,13 +7,7 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../SECRET";
-import {
-  STROOP,
-  STELLAR_URL,
-  PLATFORM_ASSET,
-  networkPassphrase,
-  TrxBaseFee,
-} from "../../constant";
+import { STROOP, STELLAR_URL, PLATFORM_ASSET, networkPassphrase, TrxBaseFee } from "@wadzzo/wallet/config";
 
 export async function covertSiteAsset2XLM(props: {
   siteAssetAmount: number;

@@ -7,15 +7,15 @@ import { useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
 import { SignedIn } from "~/components/shell/sign-in-prompt";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { isCustodial } from "~/lib/custodial";
 import { describeFile, putFile } from "~/lib/upload";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { PageBody } from "~/ui/page-header";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 

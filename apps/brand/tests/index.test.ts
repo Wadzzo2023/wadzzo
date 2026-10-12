@@ -1,6 +1,6 @@
 import { Horizon } from "@stellar/stellar-sdk";
 import { describe, expect, test } from "vitest";
-import { STELLAR_URL } from "~/lib/stellar/constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 
 const add = (a: number, b: number) => {
   return a + b;

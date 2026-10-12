@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";
 import { formatBytes, packProgress, startMuralPack, useMuralPack, type PackStatus } from "~/lib/murals/pack";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PackArt } from "./PackArt";
 

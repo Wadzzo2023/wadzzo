@@ -2,9 +2,9 @@
 
 import { ShieldAlert, Mail } from "lucide-react"
 import Link from "next/link"
-import { Button } from "~/components/shadcn/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/components/shadcn/ui/card"
-import { Separator } from "~/components/shadcn/ui/separator"
+import { Button } from "@wadzzo/ui/components/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@wadzzo/ui/components/card";
+import { Separator } from "@wadzzo/ui/components/separator";
 
 interface BannedCreatorCardProps {
     creatorName: string

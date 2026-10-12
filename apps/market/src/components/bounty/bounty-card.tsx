@@ -8,8 +8,8 @@ import toast from "react-hot-toast";
 import { env } from "~/env";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { type BountyCardData, formatTokens } from "~/lib/bounty";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

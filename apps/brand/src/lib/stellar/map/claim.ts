@@ -6,8 +6,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { type MyAssetType } from "../fan/utils";
-import { type SignUserType, WithSing } from "../utils";
-import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 
 export async function ClaimXDR({
@@ -22,7 +22,7 @@ export async function ClaimXDR({
   amount: string;
   storageSecret: string;
   receiver: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 
 }) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -90,7 +90,7 @@ export async function ClaimXDR({
   Tx1.sign(storageAcc, motherAccount);
 
   const xdr = Tx1.toXDR();
-  const signedXDr = await WithSing({
+  const signedXDr = await signXdrForCustodialUser({
     xdr: xdr,
     signWith,
   });

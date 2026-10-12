@@ -5,8 +5,8 @@ import { Circle, CircleDot, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/shadcn/ui/avatar";
-import { cn } from "~/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { InboxItem } from "~/server/notification-inbox";
 
 import { describeBrand, TONE } from "./describe";

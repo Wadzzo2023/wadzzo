@@ -3,7 +3,7 @@ import "server-only";
 import { Asset, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { StellarAccount, toAsset, type AssetRef } from "~/lib/stellar/account";
-import { BASE_RESERVE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "~/lib/stellar/constant";
+import { BASE_RESERVE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 

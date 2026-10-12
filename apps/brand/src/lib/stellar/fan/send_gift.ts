@@ -7,9 +7,9 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "../constant";
+import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { type MyAssetType } from "./utils";
-import { type SignUserType, WithSing } from "../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { StellarAccount } from "../marketplace/test/Account";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 
@@ -28,7 +28,7 @@ export async function sendGift({
   price: number;
   creatorPub: string;
   creatorStorageSec: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
   const asset = new Asset(creatorPageAsset.code, creatorPageAsset.issuer);
@@ -95,7 +95,7 @@ export async function sendGift({
       const buildTrx = Tx1.build();
       buildTrx.sign(assetStorage, motherAccount);
       const xdr = buildTrx.toXDR();
-      const singedXdr = WithSing({ xdr, signWith });
+      const singedXdr = signXdrForCustodialUser({ xdr, signWith });
       return singedXdr;
     }
     else {
@@ -112,7 +112,7 @@ export async function sendGift({
     const buildTrx = Tx1.build();
     buildTrx.sign(motherAccount, assetStorage);
     const xdr = buildTrx.toXDR();
-    const singedXdr = WithSing({ xdr, signWith });
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
     return singedXdr;
   }
 
@@ -134,7 +134,7 @@ export const sendGitfAsPlatformAsset = async ({
   amount: number,
   assetCode: string,
   assetIssuer: string,
-  signWith: SignUserType,
+  signWith: CustodialSigner,
 }) => {
   const server = new Horizon.Server(STELLAR_URL);
   const asset = new Asset(assetCode, assetIssuer);
@@ -168,7 +168,7 @@ export const sendGitfAsPlatformAsset = async ({
   const buildTrx = Tx1.build();
   buildTrx.sign();
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
   return singedXdr;
 
 }

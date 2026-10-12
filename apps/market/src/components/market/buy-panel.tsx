@@ -8,14 +8,14 @@ import { CardForm } from "~/components/payment/card-form";
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { Price } from "~/components/price/price";
 import { MethodPicker, type PayMethod } from "~/components/payment/method-picker";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { isCustodial } from "~/lib/custodial";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { MAX_PER_PURCHASE, formatAmount } from "~/lib/stellar/quote";
 import { QuantityStepper } from "~/ui/quantity-stepper";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Item = RouterOutputs["market"]["item"];

@@ -1,5 +1,5 @@
-import { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@prisma/client";
-import type { Db } from "~/server/db";
+import { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 

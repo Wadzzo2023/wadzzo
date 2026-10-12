@@ -4,12 +4,12 @@ import { addDays, differenceInCalendarDays, format, startOfDay, startOfWeek, sub
 import { CalendarRange } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/shadcn/ui/popover";
-import { cn } from "~/lib/utils";
-import { FilterChips } from "~/ui/toolbar";
-import type { StatusPill } from "~/ui/status-pill";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { FilterChips } from "@wadzzo/ui/patterns/toolbar";
+import type { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 
 // ── Period ──────────────────────────────────────────────────────────────────
 

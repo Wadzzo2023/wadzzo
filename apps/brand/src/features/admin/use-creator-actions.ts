@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { clientsign, WalletType } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
+import { WalletType } from "@wadzzo/wallet/shared";
 
 import { api } from "~/utils/api";
 
@@ -32,7 +33,7 @@ export function useCreatorActions() {
     try {
       const data = await xdr.mutateAsync({ creatorId: c.id });
       if (!data) throw new Error("This brand has no page asset to issue yet");
-      const ok = await clientsign({ presignedxdr: data.xdr, pubkey: "admin", walletType: WalletType.isAdmin });
+      const ok = await signAndSubmitTransaction({ xdr: data.xdr, publicKey: "admin", walletType: WalletType.isAdmin });
       if (!ok) throw new Error("The Stellar transaction didn't go through");
       await action.mutateAsync({ creatorId: c.id, action: "approve", escrow: data.escrow, storage: data.storage });
       toast.success(c.approved === true ? `Page asset issued for ${c.name}` : `${c.name} approved`, { id });

@@ -1,5 +1,5 @@
 import type { EmbedEvent } from "~/lib/embed/config";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 import { HttpError, clientIp, rateLimit } from "~/server/mobile/http";
 
 /**

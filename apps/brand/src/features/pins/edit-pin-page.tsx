@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { Calendar, Loader2, MapPin, Settings, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,12 +12,12 @@ import type { z } from "zod";
 import { MapPicker } from "~/components/map-kit/map-picker";
 import { updateMapFormSchema } from "~/types/pin-edit";
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { EmptyState } from "~/ui/empty-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "~/ui/skeleton";

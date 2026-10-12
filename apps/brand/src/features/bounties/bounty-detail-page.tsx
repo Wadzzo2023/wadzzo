@@ -1,12 +1,12 @@
 "use client";
 
-import type { SubmissionAttachment, SubmissionViewType } from "@prisma/client";
+import type { SubmissionAttachment, SubmissionViewType } from "@wadzzo/db";
 import { format } from "date-fns";
 import DOMPurify from "isomorphic-dompurify";
 import { Calendar, Crown, MessageSquare, Paperclip, Pencil, Target, Trash2, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { submitSignedXDRToServer4User } from "package/connect_wallet/src/lib/stellar/trx/payment_fb_g";
+import { submitSignedTransaction } from "@wadzzo/wallet";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -15,19 +15,19 @@ import { AddBountyComment } from "~/components/comment/Add-Bounty-Comment";
 import ViewBountyComment from "~/components/comment/View-Bounty-Comment";
 import CustomAvatar from "~/components/common/custom-avatar";
 import ViewBountyAttachmentModal from "~/components/modals/view-bounty-attachment-modal";
-import { Button } from "~/components/shadcn/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
-import { Spinner } from "~/ui/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { bountyStatus } from "./bounty-status";
 
@@ -102,7 +102,7 @@ function BountyView({ bounty: b }: { bounty: Bounty }) {
   const refund = api.bounty.Bounty.getDeleteXdr.useMutation({
     onSuccess: async (xdr) => {
       try {
-        if (xdr) await submitSignedXDRToServer4User(xdr);
+        if (xdr) await submitSignedTransaction(xdr);
         remove.mutate({ BountyId: b.id });
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "The refund didn't go through");
@@ -240,7 +240,7 @@ function Submissions({ bounty: b, onChanged }: { bounty: Bounty; onChanged: () =
   const pay = api.bounty.Bounty.getSendBalanceToWinnerXdr.useMutation({
     onSuccess: async (xdr, v) => {
       try {
-        if (xdr) await submitSignedXDRToServer4User(xdr);
+        if (xdr) await submitSignedTransaction(xdr);
         mark.mutate({ BountyId: v.BountyId, userId: v.userId });
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "The prize payment didn't go through");
@@ -276,7 +276,7 @@ function Submissions({ bounty: b, onChanged }: { bounty: Bounty; onChanged: () =
               <div className="flex flex-wrap items-center gap-3">
                 <CustomAvatar url={s.user.image} winnerCount={s.userWinCount} className="size-10" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{s.user.name ?? addrShort(s.userId, 6)}</p>
+                  <p className="truncate font-medium">{s.user.name ?? abbreviateAddress(s.userId, 6)}</p>
                   <p className="text-xs text-muted-foreground">{format(new Date(s.createdAt), "MMM d, yyyy · HH:mm")}</p>
                 </div>
                 {won ? (

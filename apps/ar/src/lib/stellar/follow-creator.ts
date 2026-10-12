@@ -7,8 +7,9 @@ import {
 } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import { STELLAR_URL, networkPassphrase } from "./constant";
-import { WithSing, type SignUserType } from "./custodial-sign";
+import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
 
 /**
  * ── Follow, on-chain ───────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ import { WithSing, type SignUserType } from "./custodial-sign";
  *  2. `changeTrust`, sourced from the user — which is why the transaction
  *     still needs the user's signature even though mother built and paid.
  *
- * `WithSing` co-signs for custodial wallets (email/social logins, where the
+ * `signXdrForCustodialUser` co-signs for custodial wallets (email/social logins, where the
  * platform holds the key); self-custody wallets get the XDR back to sign in
  * their own wallet.
  */
@@ -41,7 +42,7 @@ export async function buildFollowTrustlineXdr({
 }: {
   userPubkey: string;
   creatorPageAsset: { code: string; issuer: string };
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
   const asset = new Asset(creatorPageAsset.code, creatorPageAsset.issuer);
@@ -75,13 +76,13 @@ export async function buildFollowTrustlineXdr({
 
   tx.sign(motherAccount);
 
-  return WithSing({ xdr: tx.toXDR(), signWith });
+  return signXdrForCustodialUser({ xdr: tx.toXDR(), signWith });
 }
 
 /**
  * Custodial wallets have no on-device key — the platform fetches their secret
  * by email and co-signs server-side. Self-custody wallets sign in the wallet
- * itself, so they get the XDR back untouched (`WithSing` no-ops on
+ * itself, so they get the XDR back untouched (`signXdrForCustodialUser` no-ops on
  * `undefined`).
  *
  * Deriving this from the session rather than taking it from the client, which
@@ -90,7 +91,7 @@ export async function buildFollowTrustlineXdr({
  */
 export function signWithFor(session: {
   user: { walletType?: string | null; email?: string | null };
-}): SignUserType {
+}): CustodialSigner {
   const custodial = ["emailPass", "google", "facebook", "apple"];
   const { walletType, email } = session.user;
   if (walletType && custodial.includes(walletType) && email) {

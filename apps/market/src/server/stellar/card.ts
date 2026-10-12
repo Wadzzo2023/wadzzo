@@ -1,9 +1,9 @@
 import "server-only";
 
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 import { chargeCard, refundCard } from "~/server/square";
 
 import type { Signer } from "./keys";

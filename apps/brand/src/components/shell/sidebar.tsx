@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/shadcn/ui/tooltip";
-import { cn } from "~/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@wadzzo/ui/components/tooltip";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { getPortalLandingRoute, getVisibleNavGroups } from "./access-rules";
 import { NotificationBell } from "~/components/notification/notification-bell";

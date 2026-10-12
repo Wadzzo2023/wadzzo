@@ -1,5 +1,5 @@
 import type { MapMode } from "~/lib/ar/theme";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * Round glass button that flips the map between the flat 2D map and the tilted

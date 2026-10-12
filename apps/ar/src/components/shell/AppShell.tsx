@@ -2,7 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "~/lib/navigation";
 import { type ReactNode } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { BottomTabBar } from "./BottomTabBar";
 import { ProfileButton } from "./ProfileButton";
 import { StatusBar } from "./StatusBar";

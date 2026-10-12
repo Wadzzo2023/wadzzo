@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { CalendarClock, Hexagon, Loader2, Repeat, Tag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,18 +11,18 @@ import type { z } from "zod";
 
 import type { StoredFeature } from "~/components/map-kit/geo";
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Label } from "~/components/shadcn/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { updateHotspotFormSchema } from "~/types/hotspot";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";

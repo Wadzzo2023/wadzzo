@@ -1,25 +1,17 @@
 import "server-only";
 
 import { Asset, Operation, TransactionBuilder, type Keypair, type Transaction } from "@stellar/stellar-sdk";
-import type { AssetTransaction, Platform } from "@prisma/client";
+import type { AssetTransaction, Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { StellarAccount, toAsset, transactionSucceeded } from "~/lib/stellar/account";
-import {
-  BASE_RESERVE_XLM,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  PLATFORM_FEE_XLM,
-  TX_TIMEOUT_SECONDS,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "~/lib/stellar/constant";
-import { WithSing, type SignUserType } from "~/lib/stellar/custodial-sign";
+import { BASE_RESERVE_XLM, PLATFORM_ASSET, PLATFORM_FEE, PLATFORM_FEE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { creatorAsset } from "~/lib/stellar/follow-creator";
 import type { CostLine, Problem } from "~/lib/stellar/quote";
-import type { Db } from "~/server/db";
-import { inPlatformScope } from "~/server/platform-scope";
+import type { Db } from "@wadzzo/db";
+import { isInPlatformScope } from "@wadzzo/platform/scope";
 
 import { issuerKeypairFor, motherKeypair, platformStorageKeypair, storageKeypairFor } from "./keys";
 import { xlmToPlatform } from "./prices";
@@ -91,7 +83,7 @@ async function load(ctx: Ctx, userId: string, consumerId: string) {
     },
   });
   const group = consumer?.location.locationGroup;
-  if (consumer?.userId !== userId || !group || !inPlatformScope(ctx, group.platformId)) {
+  if (consumer?.userId !== userId || !group || !isInPlatformScope(ctx, group.platformId)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Collected pin not found" });
   }
 
@@ -315,7 +307,7 @@ const txExpiry = (tx: Transaction) => new Date((Number(tx.timeBounds?.maxTime ??
  * check runs under a row lock on the asset, so two collectors can't both get
  * the last mintable copy.
  */
-export async function prepareClaim(ctx: Ctx, { userId, consumerId, method, signWith }: { userId: string; consumerId: string; method: ClaimMethod; signWith: SignUserType }) {
+export async function prepareClaim(ctx: Ctx, { userId, consumerId, method, signWith }: { userId: string; consumerId: string; method: ClaimMethod; signWith: CustodialSigner }) {
   const result = await ctx.db.$transaction(
     async (tx) => {
       const inner = { ...ctx, db: tx as unknown as Db };
@@ -384,7 +376,7 @@ export async function prepareClaim(ctx: Ctx, { userId, consumerId, method, signW
       });
       if (linked.count === 0) throw new TRPCError({ code: "CONFLICT", message: "This claim is already in progress." });
 
-      return { ok: true as const, quote: p.quote, txId: row.id, xdr: await WithSing({ xdr: envelope.toXDR(), signWith }) };
+      return { ok: true as const, quote: p.quote, txId: row.id, xdr: await signXdrForCustodialUser({ xdr: envelope.toXDR(), signWith }) };
     },
     { timeout: 30_000 },
   );

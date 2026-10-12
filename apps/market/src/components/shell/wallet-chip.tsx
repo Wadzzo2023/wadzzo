@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useCurrency } from "~/hooks/use-currency";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 const full = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });

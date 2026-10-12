@@ -1,15 +1,11 @@
-import {
-  NotificationType,
-  Prisma,
-  UserRole,
-} from "@prisma/client";
-import type { Db } from "~/server/db";
+import { NotificationType, Prisma, UserRole } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { StellarAccount } from "~/lib/stellar/account";
-import { inPlatformScope, platformScope, type PlatformCtx } from "~/server/platform-scope";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -183,7 +179,7 @@ async function loadForViewer(
   db: Db,
   bountyId: number,
   userId: string,
-  ctx: PlatformCtx,
+  ctx: PlatformContext,
 ) {
   const bounty = await db.bounty.findUnique({
     where: { id: bountyId },
@@ -191,7 +187,7 @@ async function loadForViewer(
   });
   const joined = Boolean(bounty?.participants.length);
   // Another platform's bounty doesn't exist here (web.wadzzo.com sees all).
-  if (!bounty || !inPlatformScope(ctx, bounty.platformId) || (bounty.status !== "APPROVED" && !joined)) {
+  if (!bounty || !isInPlatformScope(ctx, bounty.platformId) || (bounty.status !== "APPROVED" && !joined)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
   }
   return { bounty, joined };
@@ -201,7 +197,7 @@ async function requireOpenMembership(
   db: Db,
   bountyId: number,
   userId: string,
-  ctx: PlatformCtx,
+  ctx: PlatformContext,
 ) {
   const { bounty, joined } = await loadForViewer(db, bountyId, userId, ctx);
   if (!joined) {
@@ -334,7 +330,7 @@ export const bountyRouter = createTRPCRouter({
           },
         },
       });
-      if (!row || !inPlatformScope(ctx, row.platformId)) {
+      if (!row || !isInPlatformScope(ctx, row.platformId)) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
       }
       const card = toCard(row);

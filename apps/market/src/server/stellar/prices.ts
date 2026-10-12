@@ -3,7 +3,7 @@ import "server-only";
 import axios from "axios";
 
 import { env } from "~/env";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 
 /**
  * Exchange rates for quotes. Cached for a minute so a quote and the

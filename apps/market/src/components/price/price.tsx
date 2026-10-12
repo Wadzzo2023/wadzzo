@@ -1,8 +1,8 @@
 "use client";
 
 import { formatTokenNumber, formatUsdAmount, useCurrency } from "~/hooks/use-currency";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 const SIZES = {
   xs: { main: "text-xs", unit: "text-[10px]", sub: "text-[10px]" },

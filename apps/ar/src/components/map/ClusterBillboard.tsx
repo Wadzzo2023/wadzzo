@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 const W = 66;
 const H = 58;

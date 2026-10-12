@@ -26,19 +26,19 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { RichText } from "~/components/post/post-card";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { Price } from "~/components/price/price";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { env } from "~/env";
 import { useBountySeen } from "~/hooks/use-bounty-attention";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { ENTRY_STATUS, type BountyDetail, formatTokens, spotsFilled, viewerBadge } from "~/lib/bounty";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody } from "~/ui/page-header";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
 
 import { EntryDialog, type Entry, formatBytes, MediaTypeIcon } from "./entry-dialog";

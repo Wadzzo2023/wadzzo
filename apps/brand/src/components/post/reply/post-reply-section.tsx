@@ -2,7 +2,7 @@
 
 import { formatPostCreatedAt } from "~/utils/format-date"
 
-import type { Comment } from "@prisma/client"
+import type { Comment } from "@wadzzo/db";
 import { useSession } from "next-auth/react"
 
 import { api } from "~/utils/api"

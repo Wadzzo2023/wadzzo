@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { isCustodial } from "~/lib/custodial";
 import { StellarAccount } from "~/lib/stellar/account";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformToUsd, platformToXlm } from "~/server/stellar/prices";
 import { signerFor } from "~/server/stellar/session-signer";

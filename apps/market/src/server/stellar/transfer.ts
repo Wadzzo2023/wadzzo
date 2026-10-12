@@ -1,13 +1,13 @@
 import "server-only";
 
 import { Asset, Claimant, Operation, StrKey, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { StellarAccount } from "~/lib/stellar/account";
-import { BASE_RESERVE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "~/lib/stellar/constant";
+import { BASE_RESERVE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import type { CostLine } from "~/lib/stellar/quote";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 import { signForUser, type Signer } from "./keys";
 

@@ -5,13 +5,13 @@ import { ArrowRight, Bell, Target, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { useBountyAttention } from "~/hooks/use-bounty-attention";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import type { BountyCardData } from "~/lib/bounty";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { SearchInput } from "~/ui/toolbar";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api } from "~/utils/api";
 
 import { BountyCard, BountyCardSkeleton } from "./bounty-card";

@@ -38,7 +38,7 @@ import { type ThemePreference, useTheme } from "~/lib/ar/theme";
 import type { ArSettings } from "~/lib/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useBrands, usePinsQuery } from "~/lib/ar/usePins";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 const THEME_OPTIONS: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
   { value: "auto", icon: MonitorSmartphone, label: "System" },

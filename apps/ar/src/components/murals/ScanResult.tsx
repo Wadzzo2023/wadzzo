@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { Confetti } from "~/components/fx/Confetti";
 import { ArButton } from "~/components/ui/ArButton";
 import type { RejectCode, ScanResult as Result } from "~/lib/murals/constants";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── ScanResult ─────────────────────────────────────────────────────────────

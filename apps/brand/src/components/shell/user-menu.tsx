@@ -5,16 +5,9 @@ import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/shadcn/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/shadcn/ui/dropdown-menu";
-import { cn } from "~/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 const THEMES = [

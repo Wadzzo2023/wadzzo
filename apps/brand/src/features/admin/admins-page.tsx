@@ -6,19 +6,19 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
 import { Field } from "~/ui/form-page";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Person } from "~/ui/person";
-import { StatusPill } from "~/ui/status-pill";
+import { Person } from "@wadzzo/ui/patterns/person";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type Admin = RouterOutputs["wallate"]["admin"]["admins"][number];
 const PUBKEY = /^G[A-Z2-7]{55}$/;
@@ -52,7 +52,7 @@ export default function AdminsPage() {
       skeleton: "person",
       cell: (a) => (
         <div className="flex items-center gap-2">
-          <Person name={a.user.name} image={a.user.image} id={a.id} sub={a.user.email ?? <span className="font-mono">{addrShort(a.id, 6)}</span>} />
+          <Person name={a.user.name} image={a.user.image} id={a.id} sub={a.user.email ?? <span className="font-mono">{abbreviateAddress(a.id, 6)}</span>} />
           {a.id === me && <StatusPill tone="info">You</StatusPill>}
         </div>
       ),
@@ -63,7 +63,7 @@ export default function AdminsPage() {
       skeleton: "mono",
       cell: (a) => (
         <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <span className="font-mono text-xs text-muted-foreground">{addrShort(a.id, 8)}</span>
+          <span className="font-mono text-xs text-muted-foreground">{abbreviateAddress(a.id, 8)}</span>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -132,7 +132,7 @@ export default function AdminsPage() {
       <ConfirmDialog
         open={Boolean(removing)}
         onOpenChange={(o) => !o && !remove.isPending && setRemoving(null)}
-        title={`Remove ${removing?.user.name ?? addrShort(removing?.id, 5)} as admin?`}
+        title={`Remove ${removing?.user.name ?? abbreviateAddress(removing?.id, 5)} as admin?`}
         description="They keep their account but lose access to the Admin section right away."
         confirmLabel="Remove access"
         busy={remove.isPending}

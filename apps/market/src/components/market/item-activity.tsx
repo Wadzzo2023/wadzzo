@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 
 import { formatAmount } from "~/lib/stellar/quote";
-import { Person } from "~/ui/person";
+import { Person } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
 
 const LABEL = { PURCHASE: "Bought", RESALE_PURCHASE: "Bought (resale)", CLAIM: "Claimed", GIFT: "Gifted" } as const;

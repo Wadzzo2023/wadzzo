@@ -1,8 +1,8 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { formatAmount, type CostLine, type Problem } from "~/lib/stellar/quote";
 
 /**

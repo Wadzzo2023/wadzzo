@@ -1,11 +1,11 @@
-import type { MuralStatus, Prisma } from "@prisma/client";
+import type { MuralStatus, Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
-import { logAudit } from "~/server/audit";
-import type { Db } from "~/server/db";
-import { platformScope, type PlatformCtx } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import type { Db } from "@wadzzo/db";
+import { platformScope, type PlatformContext } from "@wadzzo/platform/server";
 
 /**
  * Admin › Mural review (wadzzoAR/docs/murals/plan.md §9).
@@ -125,7 +125,7 @@ async function restore(tx: Tx, muralId: string) {
 const statusInput = z.enum(["DISCOVERED", "PENDING", "APPROVED", "REJECTED"]);
 
 /** Every id must be a mural this deployment's platform may manage (NOT_FOUND otherwise). */
-async function assertMuralsInScope(ctx: PlatformCtx & { db: Db }, ids: string[]) {
+async function assertMuralsInScope(ctx: PlatformContext & { db: Db }, ids: string[]) {
   const found = await ctx.db.mural.count({ where: { id: { in: ids }, ...platformScope(ctx) } });
   if (found !== new Set(ids).size) throw new TRPCError({ code: "NOT_FOUND", message: "Mural not found" });
 }

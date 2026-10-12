@@ -1,11 +1,11 @@
-import { NotificationType } from "@prisma/client";
-import type { Db } from "~/server/db";
+import { NotificationType } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { ArBrand } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
-import { platformScope } from "~/server/platform-scope";
+import { platformScope } from "@wadzzo/platform/scope";
 import {
   buildFollowTrustlineXdr,
   creatorAsset,

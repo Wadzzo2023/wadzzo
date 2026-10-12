@@ -11,7 +11,7 @@ import { useRef, type Ref } from "react";
 import toast from "react-hot-toast";
 
 import type { EndPointType } from "~/server/s3";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { ENDPOINT_ACCEPT } from "~/ui/upload/accept";
 import { Dropzone, type DropzoneShape } from "~/ui/upload/dropzone";
 import { MultiDropzone } from "~/ui/upload/multi-dropzone";

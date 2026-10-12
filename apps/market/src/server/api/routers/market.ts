@@ -1,9 +1,9 @@
-import { ItemPrivacy, MediaType, type Prisma } from "@prisma/client";
+import { ItemPrivacy, MediaType, type Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform-scope";
+import { platformScope } from "@wadzzo/platform/scope";
 
 /** Listings anyone may see (drafts and not-for-sale items stay hidden). */
 const VISIBLE: ItemPrivacy[] = [ItemPrivacy.PUBLIC, ItemPrivacy.FOR_SALE, ItemPrivacy.PRIVATE, ItemPrivacy.TIER];

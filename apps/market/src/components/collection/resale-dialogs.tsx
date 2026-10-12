@@ -5,12 +5,12 @@ import { useState } from "react";
 
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { MethodPicker } from "~/components/payment/method-picker";
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
-import { Label } from "~/components/shadcn/ui/label";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

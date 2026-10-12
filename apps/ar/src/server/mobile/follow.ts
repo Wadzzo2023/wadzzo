@@ -2,7 +2,7 @@ import { Horizon, Keypair, Transaction, TransactionBuilder } from "@stellar/stel
 import type { Session } from "next-auth";
 
 import { env } from "~/env";
-import { STELLAR_URL, networkPassphrase } from "~/lib/stellar/constant";
+import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
 
 import type { Caller } from "./context";
 import { HttpError } from "./http";
@@ -60,7 +60,7 @@ async function submit(xdr: string, userId: string) {
  *
  *  - already trusts the asset          → record the follow
  *  - custodial wallet (email/social)   → XDR is co-signed server-side
- *                                        (`WithSing`); submit it here, then record
+ *                                        (`signXdrForCustodialUser`); submit it here, then record
  *  - self-custody (Albedo)             → `{ needsSignature, xdr }`; the app has
  *                                        Albedo sign it and calls back with
  *                                        `signedXdr`, which is submitted here

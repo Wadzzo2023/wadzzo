@@ -1,4 +1,4 @@
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { z } from "zod";
 
 export const MediaInfo = z.object({

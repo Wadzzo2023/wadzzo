@@ -29,7 +29,7 @@ import { sfx } from "~/lib/murals/sfx";
 import { captureKeyframe, useMuralDetector } from "~/lib/murals/useMuralDetector";
 import { useCoinBalance, useNearbyMurals, useSubmitMuralScan } from "~/lib/murals/useMurals";
 import { useMuralSweep, type SweepSlot } from "~/lib/murals/useMuralSweep";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── /murals ────────────────────────────────────────────────────────────────

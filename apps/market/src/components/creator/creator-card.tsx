@@ -7,8 +7,8 @@ import toast from "react-hot-toast";
 import { env } from "~/env";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { creatorHref } from "~/lib/creator";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 

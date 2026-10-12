@@ -11,16 +11,13 @@ import {
 } from "~/lib/stellar/fan/get_token_price";
 import { getClawbackAsPayment } from "~/lib/stellar/fan/subscribe";
 import { AssetSchema } from "~/lib/stellar/fan/utils";
-import { SignUser, WithSing } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 
 import { Keypair } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  TrxBaseFeeInPlatformAsset,
-} from "~/lib/stellar/constant";
+import { PLATFORM_ASSET, PLATFORM_FEE, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import {
   createStorageTrx,
   createStorageTrxWithXLM,
@@ -38,7 +35,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 import { PaymentMethodEnum } from "../bounty/bounty";
 enum assetType {
   PAGEASSET = "PAGEASSET",
@@ -50,7 +47,7 @@ export const trxRouter = createTRPCRouter({
     .input(
       z.object({
         code: z.string(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         limit: z.number().nonnegative().min(1),
         ipfs: z.string(),
         method: PaymentMethodEnum.optional(),
@@ -94,7 +91,7 @@ export const trxRouter = createTRPCRouter({
       AssetSchema.extend({
         creatorId: z.string(),
         price: z.number(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -116,12 +113,12 @@ export const trxRouter = createTRPCRouter({
         userPubkey: ctx.session.user.id,
       });
 
-      return await WithSing({ xdr, signWith: input.signWith });
+      return await signXdrForCustodialUser({ xdr, signWith: input.signWith });
     }),
 
   createAssetTrx: protectedProcedure
     .input(
-      z.object({ code: z.string(), limit: z.number(), signWith: SignUser }),
+      z.object({ code: z.string(), limit: z.number(), signWith: custodialSignerSchema }),
     )
     .mutation(async ({ ctx, input }) => {
       const assetAmout = await getplatformAssetNumberForXLM();
@@ -140,7 +137,7 @@ export const trxRouter = createTRPCRouter({
       z.object({
         code: z.string(),
         limit: z.number(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         ipfsHash: z.string(),
         native: z.boolean().optional(),
       }),
@@ -197,7 +194,7 @@ export const trxRouter = createTRPCRouter({
   buyAssetTrx: protectedProcedure
     .input(
       AssetSchema.extend({
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         price: z.number(),
         creatorId: z.string(),
       }),
@@ -219,7 +216,7 @@ export const trxRouter = createTRPCRouter({
         storageSecret: creator.storageSecret,
       });
 
-      return await WithSing({ xdr, signWith: input.signWith });
+      return await signXdrForCustodialUser({ xdr, signWith: input.signWith });
     }),
 
   getSecretMessage: protectedProcedure.query(() => {
@@ -237,7 +234,7 @@ export const trxRouter = createTRPCRouter({
     }),
 
   createStorageAccount: protectedProcedure
-    .input(z.object({ signWith: SignUser, native: z.boolean().optional() }))
+    .input(z.object({ signWith: custodialSignerSchema, native: z.boolean().optional() }))
     .mutation(async ({ ctx, input }) => {
       if (input.native) {
         return await createStorageTrxWithXLM({
@@ -253,7 +250,7 @@ export const trxRouter = createTRPCRouter({
     }),
 
   followCreatorTRX: protectedProcedure
-    .input(z.object({ creatorId: z.string().min(56), signWith: SignUser }))
+    .input(z.object({ creatorId: z.string().min(56), signWith: custodialSignerSchema }))
     .mutation(async ({ input, ctx }) => {
       const { creatorId, signWith } = input;
       const userId = ctx.session.user.id;
@@ -316,7 +313,7 @@ export const trxRouter = createTRPCRouter({
       assetCode: z.string().nonempty(),
       assetIssuer: z.string().nonempty(),
       assetType: z.nativeEnum(assetType),
-      signWith: SignUser,
+      signWith: custodialSignerSchema,
     }))
     .mutation(async ({ input, ctx }) => {
       const creatorId = ctx.session.user.id;
@@ -418,7 +415,7 @@ export const trxRouter = createTRPCRouter({
       z.object({
         code: z.string(),
         issuer: z.string(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {

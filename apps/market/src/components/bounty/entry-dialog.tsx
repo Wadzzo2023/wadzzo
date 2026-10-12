@@ -3,9 +3,9 @@
 import { FileText, Film, Image as ImageIcon, Music, Paperclip, X } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useEntryUpload, type UploadedMedia } from "~/hooks/use-entry-upload";
 import { MAX_ENTRY_FILES, entryFileProblem } from "~/lib/upload-files";
 import { api, type RouterOutputs } from "~/utils/api";

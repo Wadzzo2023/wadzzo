@@ -3,7 +3,7 @@ import { Loader2, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { forwardRef, type ReactNode } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 type Variant = "primary" | "ghost" | "outline" | "danger" | "gold";
 type Size = "sm" | "md" | "lg";

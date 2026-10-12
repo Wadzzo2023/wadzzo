@@ -4,13 +4,13 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { CheckCircle2, Gift } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { formatAmount } from "~/lib/stellar/quote";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
 
 /** Anything in the wallet that can be sent. `issuer` is null for XLM. */

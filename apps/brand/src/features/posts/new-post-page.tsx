@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { Eye, FileAudio, ImageIcon, Loader2, Lock, Music, Paperclip, Sparkles, Users2, Video, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,10 +17,10 @@ import { htmlToText } from "~/ui/ai/shared";
 import CustomAvatar from "~/components/common/custom-avatar";
 import { Editor } from "~/components/common/quill-editor";
 import { PostSchema } from "~/types/post";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { EndPointType } from "~/server/s3";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";

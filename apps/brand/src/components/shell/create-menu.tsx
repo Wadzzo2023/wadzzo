@@ -3,15 +3,9 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "~/components/shadcn/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "~/components/shadcn/ui/dropdown-menu";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { CREATE_ACTIONS } from "./nav";
 

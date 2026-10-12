@@ -2,7 +2,7 @@
 
 import { Loader2, ShieldCheck } from "lucide-react"
 import toast from "react-hot-toast"
-import { Button } from "~/components/shadcn/ui/button"
+import { Button } from "@wadzzo/ui/components/button";
 import { api } from "~/utils/api"
 
 /**

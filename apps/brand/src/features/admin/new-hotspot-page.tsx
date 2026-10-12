@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { CalendarClock, Hexagon, Loader2, Settings, Sparkles, Tag, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,16 +21,16 @@ import {
   type AssetType,
   type CreatePinType,
 } from "~/components/pins/pin-form-parts";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { useHotspotDraft } from "~/store/hotspot-draft";
 import { useSelectCreatorStore } from "~/components/store/creator-selection-store";
 import { createHotspotFormSchema } from "~/types/hotspot";
-import { EmptyState } from "~/ui/empty-state";
-import { CenteredSpinner } from "~/ui/spinner";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { fromLocal } from "~/ui/ai/shared";

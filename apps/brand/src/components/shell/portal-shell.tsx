@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 import { AdminGate, CreatorGate, OnboardingGate, SignInScreen } from "./gates";
 import { MobileTabBar, MobileTopBar } from "./mobile-nav";

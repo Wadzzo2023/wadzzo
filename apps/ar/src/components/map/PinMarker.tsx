@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArPin } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── PinMarker ──────────────────────────────────────────────────────────────

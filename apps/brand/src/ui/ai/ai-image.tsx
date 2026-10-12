@@ -4,10 +4,10 @@ import { Check, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { FillForm } from "~/server/ai/forms";
 import { api } from "~/utils/api";
 

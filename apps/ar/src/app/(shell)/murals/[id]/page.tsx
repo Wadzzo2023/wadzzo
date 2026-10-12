@@ -12,7 +12,7 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { venueMapImage } from "~/lib/ar/events";
 import { useResolvedTheme } from "~/lib/ar/theme";
 import type { MuralStatus } from "~/lib/murals/constants";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 /**

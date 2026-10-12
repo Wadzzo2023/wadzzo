@@ -1,7 +1,7 @@
 
 import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import { type SignUserType, WithSing } from "../utils";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 
 export const sendAssetXDRForAsset = async ({ creatorId, priceWithCost, code, issuer, signWith,
@@ -12,7 +12,7 @@ export const sendAssetXDRForAsset = async ({ creatorId, priceWithCost, code, iss
     priceWithCost: number,
     code: string,
     issuer: string,
-    signWith: SignUserType,
+    signWith: CustodialSigner,
     storageSecret: string,
     userPublicKey: string,
     totoalTokenToSend: number
@@ -62,7 +62,7 @@ export const sendAssetXDRForAsset = async ({ creatorId, priceWithCost, code, iss
     buildTrx.sign(motherAccount, assetStorage);
 
     const xdr = buildTrx.toXDR();
-    const singedXdr = WithSing({ xdr, signWith });
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
     return singedXdr;
 }
 
@@ -74,7 +74,7 @@ export const sendAssetXDRForNative = async ({ creatorId, priceInXLMWithCost, cod
     priceInXLMWithCost: number,
     code: string,
     issuer: string,
-    signWith: SignUserType,
+    signWith: CustodialSigner,
     storageSecret: string,
     userPublicKey: string,
     totoalTokenToSend: number
@@ -124,7 +124,7 @@ export const sendAssetXDRForNative = async ({ creatorId, priceInXLMWithCost, cod
     buildTrx.sign(motherAccount, assetStorage);
 
     const xdr = buildTrx.toXDR();
-    const singedXdr = WithSing({ xdr, signWith });
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
     return singedXdr;
 }
 

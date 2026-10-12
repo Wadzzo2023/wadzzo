@@ -5,7 +5,7 @@
  * the brand it acts for (ids must be the brand's own), the person's card edits
  * are validated, and the same input rules as the normal forms apply.
  */
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -14,7 +14,7 @@ import { hotspotClient } from "~/lib/express/hotspotClient-sdk";
 import { taskClient } from "~/lib/express/taskClient-sdk";
 import { UNLIMITED_COLLECTIONS, type ActionEdits, type PinDefaults, type ProposedAction } from "~/lib/agent/contract";
 import { AnnouncementInput, EventInput, announcementData, eventData } from "~/server/api/routers/events";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 import { createOptimizedImage } from "~/server/image-optimizer";
 import { BADWORDS } from "~/utils/banned-word";
 

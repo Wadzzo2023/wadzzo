@@ -4,16 +4,16 @@ import { format } from "date-fns";
 import { ScrollText } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { DataTable, type Column } from "~/ui/data-table";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Person } from "~/ui/person";
-import { Spinner } from "~/ui/spinner";
-import { StatusPill } from "~/ui/status-pill";
-import { SearchInput, Toolbar } from "~/ui/toolbar";
+import { Person } from "@wadzzo/ui/patterns/person";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type Entry = RouterOutputs["admin"]["audit"]["list"]["items"][number];
 
@@ -41,7 +41,7 @@ export default function AuditPage() {
       header: "Who",
       skeleton: "person",
       cell: (e) =>
-        e.actorId ? <Person name={e.actor?.name ?? null} image={e.actor?.image ?? null} id={e.actorId} sub={<span className="font-mono">{addrShort(e.actorId, 6)}</span>} /> : <span className="text-muted-foreground">System</span>,
+        e.actorId ? <Person name={e.actor?.name ?? null} image={e.actor?.image ?? null} id={e.actorId} sub={<span className="font-mono">{abbreviateAddress(e.actorId, 6)}</span>} /> : <span className="text-muted-foreground">System</span>,
     },
     {
       id: "action",

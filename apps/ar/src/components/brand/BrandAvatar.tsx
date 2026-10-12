@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * The stand-in when a brand's own artwork can't be fetched. Local, so it can

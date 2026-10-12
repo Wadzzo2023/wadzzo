@@ -1,4 +1,4 @@
-import { ipfsHashToPinataGatewayUrl } from "~/utils/ipfs";
+import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 
 /** Pin a file to IPFS (token images live there); resolves to its hash. */
 export async function uploadToIpfs(file: File) {

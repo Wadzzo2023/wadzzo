@@ -8,9 +8,9 @@ import type { MapRef } from "react-map-gl/mapbox";
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
 import { areaBounds, toMapboxArea, type AreaFeature } from "~/components/map-kit/geo";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { AreaSearch } from "./area-search";
 

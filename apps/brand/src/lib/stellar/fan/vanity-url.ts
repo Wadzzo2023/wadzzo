@@ -1,8 +1,8 @@
-import { db } from "~/server/db"
+import { db } from "@wadzzo/db";
 import { addMonths } from 'date-fns'
-import { type SignUserType, WithSing } from "../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { Horizon, Keypair, Operation, TransactionBuilder, } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "../constant";
+import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";
 
 
@@ -12,7 +12,7 @@ export async function getVanitySubscriptionXDR({
     userPubKey,
 }: {
     amount: number;
-    signWith: SignUserType;
+    signWith: CustodialSigner;
     userPubKey: string;
 }) {
     const server = new Horizon.Server(STELLAR_URL);
@@ -39,7 +39,7 @@ export async function getVanitySubscriptionXDR({
     const xdr = buildTrx.toXDR();
 
 
-    const singedXdr = WithSing({ xdr, signWith });
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
 
     return singedXdr;
 }

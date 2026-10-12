@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ClaimXDR } from "~/lib/stellar/map/claim";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const trxRouter = createTRPCRouter({
@@ -10,7 +10,7 @@ export const trxRouter = createTRPCRouter({
   getClaimXDR: protectedProcedure
     .input(
       z.object({
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         locationId: z.string(),
       }),
     )

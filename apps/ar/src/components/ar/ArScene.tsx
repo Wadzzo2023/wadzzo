@@ -12,7 +12,7 @@ import {
 import { angleDelta } from "~/lib/ar/heading";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArPin, GeoFix } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { ArButton } from "~/components/ui/ArButton";
 import { RarityPlate, StatusBadge } from "~/components/ui/Badges";
 

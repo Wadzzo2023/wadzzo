@@ -1,4 +1,4 @@
-import { ItemPrivacy, MediaType } from "@prisma/client";
+import { ItemPrivacy, MediaType } from "@wadzzo/db";
 import { Horizon } from "@stellar/stellar-sdk";
 import { TRPCError } from "@trpc/server";
 import { storage } from "firebase-admin";
@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { ExtraSongInfo, NftFormSchema } from "~/types/asset";
 export { ExtraSongInfo, NftFormSchema };
-import { STELLAR_URL } from "~/lib/stellar/constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { AccountSchema } from "~/lib/stellar/fan/utils";
 import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
 import { GetPageAssetBuyXDRInPlatform, GetPageAssetBuyXDRInXLM } from "~/lib/stellar/marketplace/trx/page-asset-sell";

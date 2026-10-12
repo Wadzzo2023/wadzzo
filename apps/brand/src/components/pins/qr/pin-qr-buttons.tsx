@@ -3,7 +3,7 @@
 import { Download, Loader2, Printer, QrCode, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 
 import { PinQRDialog, type PinQRTarget } from "./pin-qr-dialog";
 import { useDropQRs } from "./use-drop-qrs";

@@ -6,7 +6,7 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { MOTHER_SECRET, STORAGE_SECRET } from "../SECRET";
-import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "../../constant";
+import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "../test/Account";
 
 async function checkSiteAssetTrustLine(accPub: string) {

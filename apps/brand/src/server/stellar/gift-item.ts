@@ -1,16 +1,16 @@
 import "server-only";
 
 import { Asset, Claimant, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 
 import { env } from "~/env";
 import { getplatformAssetNumberForXLM } from "~/lib/stellar/fan/get_token_price";
-import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "~/lib/stellar/constant";
-import { WithSing } from "~/lib/stellar/utils";
-import type { db as Db } from "~/server/db";
-import { notifyFan } from "~/server/notify";
+import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import type { db as Db } from "@wadzzo/db";
+import { notifyFan } from "@wadzzo/platform/server";
 
 import { decryptSecret, horizon, loadAccount, signerFor } from "./creator-items";
 
@@ -247,7 +247,7 @@ export async function prepareGiftItem(ctx: Ctx, input: { assetId: number; pubkey
           platformId: ctx.platform.id,
         },
       });
-      return { txId: row.id, xdr: await WithSing({ xdr: built.toXDR(), signWith: signerFor(ctx.session) }), quote: q };
+      return { txId: row.id, xdr: await signXdrForCustodialUser({ xdr: built.toXDR(), signWith: signerFor(ctx.session) }), quote: q };
     },
     { timeout: 30_000 },
   );

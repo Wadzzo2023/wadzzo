@@ -73,7 +73,7 @@ import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useGeolocation } from "~/lib/ar/useGeolocation";
 import { useNavigation } from "~/lib/ar/useNavigation";
 import { usePinsQuery } from "~/lib/ar/usePins";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;

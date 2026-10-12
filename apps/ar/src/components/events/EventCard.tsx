@@ -5,7 +5,7 @@ import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { dateTile, eventWhen, liveState, spotsLabel } from "~/lib/ar/events";
 import type { ArEventCard } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── EventCard ──────────────────────────────────────────────────────────────

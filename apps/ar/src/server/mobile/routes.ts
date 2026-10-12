@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { authorizeCredentials } from "~/server/auth/credentials";
 import { signEntryUpload } from "~/server/s3";
-import { authCredentialSchema } from "~/types/auth";
+import { authCredentialSchema } from "@wadzzo/wallet/shared";
 
 import type { Caller } from "./context";
 import { followBrand } from "./follow";

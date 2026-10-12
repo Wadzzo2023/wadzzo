@@ -1,6 +1,6 @@
 import { Trophy } from "lucide-react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 interface CustomAvatarProps {
   url?: string | null;

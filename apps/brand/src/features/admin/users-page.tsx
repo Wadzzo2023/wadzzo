@@ -5,18 +5,18 @@ import { ExternalLink, Shield, Store, Trash2, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Person } from "~/ui/person";
-import { Spinner } from "~/ui/spinner";
-import { StatusPill } from "~/ui/status-pill";
-import { SearchInput, Toolbar } from "~/ui/toolbar";
+import { Person } from "@wadzzo/ui/patterns/person";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type User = RouterOutputs["admin"]["user"]["getUsers"]["users"][number];
 
@@ -67,7 +67,7 @@ export default function UsersPage() {
       id: "user",
       header: "User",
       skeleton: "person",
-      cell: (u) => <Person name={u.name} image={u.image} id={u.id} sub={u.email ?? (u.name ? <span className="font-mono">{addrShort(u.id, 6)}</span> : "Wallet account")} />,
+      cell: (u) => <Person name={u.name} image={u.image} id={u.id} sub={u.email ?? (u.name ? <span className="font-mono">{abbreviateAddress(u.id, 6)}</span> : "Wallet account")} />,
     },
     {
       id: "role",

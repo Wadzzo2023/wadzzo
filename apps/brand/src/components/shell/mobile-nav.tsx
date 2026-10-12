@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { NotificationBell } from "~/components/notification/notification-bell";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "~/components/shadcn/ui/drawer";
-import { cn } from "~/lib/utils";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@wadzzo/ui/components/drawer";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { ADMIN_NAV, adminNavFor, BRAND_NAV, CREATE_ACTIONS, isActive, brandEntryGroup, MOBILE_TABS, type BrandEntry, type NavItem } from "./nav";
 import { UserMenu } from "./user-menu";

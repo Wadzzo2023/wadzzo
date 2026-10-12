@@ -1,4 +1,4 @@
-import type { MuralStatus } from "@prisma/client";
+import type { MuralStatus } from "@wadzzo/db";
 
 import type { RouterOutputs } from "~/utils/api";
 

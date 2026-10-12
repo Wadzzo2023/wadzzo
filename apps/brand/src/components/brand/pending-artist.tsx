@@ -4,9 +4,9 @@ import Link from "next/link";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Card, CardContent, CardFooter } from "~/components/shadcn/ui/card";
-import { Progress } from "~/components/shadcn/ui/progress";
+import { Button } from "@wadzzo/ui/components/button";
+import { Card, CardContent, CardFooter } from "@wadzzo/ui/components/card";
+import { Progress } from "@wadzzo/ui/components/progress";
 
 export default function PendingPage({ createdAt }: { createdAt?: Date | string | null }) {
     const rawDate = createdAt ? new Date(createdAt) : new Date();

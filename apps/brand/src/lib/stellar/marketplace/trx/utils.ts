@@ -1,5 +1,5 @@
 import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "../../constant";
+import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "@wadzzo/wallet/config";
 
 export function checkSiteAssetBalance(accRes: Horizon.AccountResponse) {
   for (const balance of accRes.balances) {

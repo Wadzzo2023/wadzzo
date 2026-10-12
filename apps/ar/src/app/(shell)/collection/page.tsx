@@ -16,7 +16,7 @@ import { useAuth } from "~/lib/ar/store";
 import type { Rarity } from "~/lib/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useCollectedPinsQuery } from "~/lib/ar/usePins";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** Cards mounted per page — same budget as the brand grid. */
 const PAGE_SIZE = 24;

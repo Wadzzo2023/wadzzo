@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { EmptyState } from "~/ui/empty-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";

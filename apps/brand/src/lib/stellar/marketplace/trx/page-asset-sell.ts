@@ -8,12 +8,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
-import {
-    PLATFORM_ASSET,
-    STELLAR_URL,
-    TrxBaseFee,
-    networkPassphrase,
-} from "../../constant";
+import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 
 // Shared helper for building and signing transaction
 async function buildAssetBuyTransaction({

@@ -4,7 +4,7 @@ import { Check, ChevronDown, Loader2, Search, X } from "lucide-react";
 import { useState } from "react";
 
 import type { AreaFeature } from "~/components/map-kit/geo";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Match = RouterOutputs["homeArea"]["findPlaces"][number];

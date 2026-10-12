@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useSyncExternalStore } from "react";
 
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "~/components/shadcn/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@wadzzo/ui/components/sheet";
 import { env } from "~/env";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSidebarCollapsed } from "~/hooks/use-sidebar-collapsed";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 import { BrandMark } from "./brand-mark";

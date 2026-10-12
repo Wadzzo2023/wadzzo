@@ -1,11 +1,11 @@
 import "server-only";
 
-import type { AssetTransaction } from "@prisma/client";
+import type { AssetTransaction } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { StellarAccount, horizon, transactionSucceeded } from "~/lib/stellar/account";
-import { networkPassphrase } from "~/lib/stellar/constant";
-import type { Db } from "~/server/db";
+import { networkPassphrase } from "@wadzzo/wallet/config";
+import type { Db } from "@wadzzo/db";
 
 import { announceSettled } from "~/server/notify-events";
 

@@ -3,11 +3,11 @@
 import { CheckCircle2, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 const TOPICS = ["Account & sign-in", "Payments & wallet", "Items & collection", "Bounties", "Brands & memberships", "Something else"] as const;

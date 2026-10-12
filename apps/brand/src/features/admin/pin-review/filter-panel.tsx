@@ -3,11 +3,11 @@
 import { MapIcon, SlidersHorizontal, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/shadcn/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { LOCS, NO_FILTERS, SUBMITTED, TYPE_LABEL, activeChips, type Filters, type LocCount, type SubmittedPreset } from "./model";
 

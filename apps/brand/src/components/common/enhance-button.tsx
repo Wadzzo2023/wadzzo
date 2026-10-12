@@ -3,7 +3,7 @@
 import { Loader2, Wand2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { api } from "~/utils/api";
 
 export const plainText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();

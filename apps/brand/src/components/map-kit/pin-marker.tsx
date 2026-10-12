@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { memo } from "react";
 import { Marker } from "react-map-gl/mapbox";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 export type PinMarkerState = {
   expired: boolean;

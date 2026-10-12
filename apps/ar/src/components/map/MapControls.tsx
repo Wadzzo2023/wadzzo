@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Compass, Crosshair, Frame, RotateCw, Zap } from "lucide-react";
 
 import type { MapMode } from "~/lib/ar/theme";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { MapModeButton } from "./MapModeButton";
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { env } from "~/env";
-import { networkPassphrase, PLATFORM_ASSET } from "../constant";
+import { networkPassphrase, PLATFORM_ASSET } from "@wadzzo/wallet/config";
 
 interface PlatformAssetInfo {
   price: number;

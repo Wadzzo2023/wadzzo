@@ -6,15 +6,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "../constant";
-import { type SignUserType, WithSing } from "../utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 
 export async function createRedeemXDRAsset({
@@ -24,7 +17,7 @@ export async function createRedeemXDRAsset({
 }: {
   creatorId: string;
   maxRedeems: number;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
 
@@ -58,7 +51,7 @@ export async function createRedeemXDRAsset({
   buildTrx.sign(motherAccount);
   const xdr = buildTrx.toXDR();
 
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
 
   return singedXdr;
 }
@@ -70,7 +63,7 @@ export async function createRedeemXDRNative({
 }: {
   creatorId: string;
   maxRedeems: number;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
 
@@ -103,7 +96,7 @@ export async function createRedeemXDRNative({
   buildTrx.sign(motherAccount);
   const xdr = buildTrx.toXDR();
 
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
 
   return singedXdr;
 }
@@ -119,7 +112,7 @@ export async function claimRedeemXDR({
   creatorId: string;
   assetIssuer: string;
   assetCode: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   userPub: string;
   storageSecret: string;
 }) {
@@ -170,7 +163,7 @@ export async function claimRedeemXDR({
   buildTrx.sign(motherAccount, assetStorage);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
 
   return singedXdr;
 }

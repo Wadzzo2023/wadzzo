@@ -1,4 +1,4 @@
-import { submitSignedXDRToServer4User } from "package/connect_wallet/src/lib/stellar/trx/payment_fb_g";
+import { submitSignedTransaction } from "@wadzzo/wallet";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { CreditCard, PaymentForm } from "react-square-web-payments-sdk";
@@ -24,7 +24,7 @@ export default function BuyWithSquire({
                 if (data) {
                     const id = data;
                     const tostId = toast.loading("Submitting transaction");
-                    submitSignedXDRToServer4User(xdr)
+                    submitSignedTransaction(xdr)
                         .then((data) => {
                             if (data) {
                                 toast.success("Payment Successful");

@@ -7,21 +7,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Switch } from "~/components/shadcn/ui/switch";
+import { Button } from "@wadzzo/ui/components/button";
+import { Switch } from "@wadzzo/ui/components/switch";
 import { WADZZO_AR_URL } from "~/lib/embed";
 import { BLANK_KEYWORD } from "~/lib/utils";
 import type { CreatorExtraFields } from "~/types/creator";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatCard } from "~/ui/stat-card";
-import { StatusPill } from "~/ui/status-pill";
+import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { useCreatorActions } from "./use-creator-actions";
 
@@ -111,7 +111,7 @@ function Details({ c }: { c: Creator }) {
             <span>Joined {format(new Date(c.joinedAt), "MMM d, yyyy")}</span>
             <span aria-hidden>·</span>
             <button type="button" onClick={() => copy(c.id, "Wallet")} className="inline-flex items-center gap-1 font-mono hover:text-foreground">
-              {addrShort(c.id, 6)} <Copy className="size-3" />
+              {abbreviateAddress(c.id, 6)} <Copy className="size-3" />
             </button>
             {c.user.email && (
               <>
@@ -250,7 +250,7 @@ function Details({ c }: { c: Creator }) {
                   </p>
                   {asset.issuer && asset.issuer !== BLANK_KEYWORD && (
                     <button type="button" onClick={() => copy(asset.issuer, "Issuer")} className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground">
-                      {addrShort(asset.issuer, 6)} <Copy className="size-3" />
+                      {abbreviateAddress(asset.issuer, 6)} <Copy className="size-3" />
                     </button>
                   )}
                 </div>

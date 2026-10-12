@@ -46,7 +46,7 @@ import {
   useToggleFollow,
 } from "~/lib/ar/usePins";
 import type { ArBrand, ArPin } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;

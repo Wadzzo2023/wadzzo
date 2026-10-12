@@ -5,7 +5,7 @@ import { createDecipheriv } from "crypto";
 import { Keypair } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 /**
  * Secrets the server signs with. Issuer secrets are stored encrypted

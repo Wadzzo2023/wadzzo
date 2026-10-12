@@ -8,14 +8,14 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { PinQRDialog } from "~/components/pins/qr";
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { useMapInteractionStore } from "~/store/map-stores";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { Avatar } from "~/ui/person";
-import { StatusPill } from "~/ui/status-pill";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { Avatar } from "@wadzzo/ui/patterns/person";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
 
 const TYPE_LABEL: Record<string, string> = { OTHER: "General", LANDMARK: "Landmark", EVENT: "Event", BOUNTY: "Bounty", EXPERIENCE: "Experience", LAUNCH: "Launch" };

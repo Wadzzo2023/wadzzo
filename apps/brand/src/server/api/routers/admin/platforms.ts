@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
-import { logAudit } from "~/server/audit";
+import { logAudit } from "@wadzzo/platform/server";
 
 const PlatformInput = z.object({
   /** slug; must equal the deployment's PLATFORM_SLUG */

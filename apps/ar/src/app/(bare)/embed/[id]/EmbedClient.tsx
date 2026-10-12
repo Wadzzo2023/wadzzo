@@ -20,7 +20,7 @@ import {
   normalizeConfig,
   PIN_TYPE_LABEL,
 } from "~/lib/embed/config";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 // ── The embed ─────────────────────────────────────────────────────────────

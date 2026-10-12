@@ -22,7 +22,8 @@ import {
 import { AR_CAPTURE_RADIUS } from "~/lib/ar/geo";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArBrand, ArPin, DetectionMethod } from "~/lib/ar/types";
-import { cn, nonBlank } from "~/lib/utils";
+import { nonBlank } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 
 const compact = (n: number) =>

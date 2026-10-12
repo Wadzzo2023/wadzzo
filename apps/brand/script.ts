@@ -1,4 +1,4 @@
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 import { s3Client } from "~/server/s3";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 

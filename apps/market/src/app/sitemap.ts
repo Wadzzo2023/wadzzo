@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 
 import { env } from "~/env";
-import { db } from "~/server/db";
-import { getCurrentPlatform } from "~/server/platform";
-import { platformScope } from "~/server/platform-scope";
+import { db } from "@wadzzo/db";
+import { getCurrentPlatform } from "@wadzzo/platform/server";
+import { platformScope } from "@wadzzo/platform/scope";
 
 // Rebuilt at most hourly.
 export const revalidate = 3600;

@@ -8,7 +8,7 @@ import { CameraLauncher } from "~/components/camera/CameraLauncher";
 import { PackRing } from "~/components/murals/PackRing";
 
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 type Tab = {
   href: string;

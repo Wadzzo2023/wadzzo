@@ -1,5 +1,5 @@
 /* eslint-disable  */
-import { ItemPrivacy } from "@prisma/client";
+import { ItemPrivacy } from "@wadzzo/db";
 import OpenAI from "openai";
 import { z } from "zod";
 import { env } from "~/env";
@@ -9,7 +9,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform";
+import { platformScope } from "@wadzzo/platform/server";
 import { Location } from "~/types/game/location";
 import { findNearestLocation } from "~/utils/geo";
 

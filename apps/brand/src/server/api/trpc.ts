@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -15,8 +15,8 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
-import { brandWorksOnPlatform, canAdminPlatform, getCurrentPlatform } from "~/server/platform";
+import { db } from "@wadzzo/db";
+import { brandWorksOnPlatform, canAdminPlatform, getCurrentPlatform } from "@wadzzo/platform/server";
 
 /**
  * 1. CONTEXT

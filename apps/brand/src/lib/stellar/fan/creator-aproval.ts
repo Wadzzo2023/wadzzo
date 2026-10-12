@@ -7,8 +7,8 @@ import {
 } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "../constant";
-import { SignUserType } from "../utils";
+import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
+import { CustodialSigner } from "../utils";
 import { type AccountType } from "./utils";
 import { Key } from "lucide-react";
 

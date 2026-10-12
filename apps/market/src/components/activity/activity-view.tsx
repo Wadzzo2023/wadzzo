@@ -1,20 +1,20 @@
 "use client";
 
-import type { AssetTxType } from "@prisma/client";
+import type { AssetTxType } from "@wadzzo/db";
 import { format } from "date-fns";
 import { Activity, ArrowDownLeft, ArrowRight, ArrowUpRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import { env } from "~/env";
 import { formatAmount } from "~/lib/stellar/quote";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill, type Tone } from "~/ui/status-pill";
+import { StatusPill, type Tone } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Row = RouterOutputs["activity"]["list"]["items"][number];

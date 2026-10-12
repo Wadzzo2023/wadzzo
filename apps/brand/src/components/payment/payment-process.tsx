@@ -1,33 +1,24 @@
 import { useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
-import { clientsign, WalletType } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
+import { WalletType } from "@wadzzo/wallet/shared";
 import toast from "react-hot-toast";
-import { Button } from "~/components/shadcn/ui/button";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-} from "~/components/shadcn/ui/dialog";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogClose, DialogContent, DialogFooter } from "@wadzzo/ui/components/dialog";
 import { Loader } from "lucide-react";
-import { Alert } from "~/components/shadcn/ui/alert";
-import useNeedSign from "~/lib/hook";
+import { Alert } from "@wadzzo/ui/components/alert";
+import { useCustodialSigner } from "@wadzzo/wallet";
 import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
-import {
-    PLATFORM_ASSET,
-    PLATFORM_FEE,
-    TrxBaseFeeInPlatformAsset,
-} from "~/lib/stellar/constant";
-import { clientSelect } from "~/lib/stellar/fan/utils";
-import { addrShort } from "~/utils/utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 import { z } from "zod";
 import clsx from "clsx";
 import { type AssetType } from "~/lib/state/play/use-modal-store";
-import { Card, CardContent } from "~/components/shadcn/ui/card";
+import { Card, CardContent } from "@wadzzo/ui/components/card";
 import BuyWithSquire from "./buy-with-squire";
 import RechargeLink from "./recharge-link";
-import { Badge } from "../shadcn/ui/badge";
+import { Badge } from "@wadzzo/ui/components/badge";
 
 type PaymentProcessProps = {
     item: AssetType;
@@ -49,7 +40,7 @@ export default function PaymentProcessItem({
     setClose,
 }: PaymentProcessProps) {
     const session = useSession();
-    const { needSign } = useNeedSign();
+    const { getCustodialSigner } = useCustodialSigner();
     const { code, issuer } = item;
     const { platformAssetBalance, active, getXLMBalance, balances, hasTrust } =
         useUserStellarAcc();
@@ -92,7 +83,7 @@ export default function PaymentProcessItem({
             assetCode: code,
             issuerPub: issuer,
             limit: 1,
-            signWith: needSign(),
+            signWith: getCustodialSigner(),
             method,
         });
     }
@@ -108,11 +99,10 @@ export default function PaymentProcessItem({
             toast.error("XDR data is missing.");
             return;
         }
-        clientsign({
-            presignedxdr: xdrMutation.data,
-            pubkey: session.data?.user.id,
-            walletType: session.data?.user.walletType,
-            test: clientSelect(),
+        signAndSubmitTransaction({
+            xdr: xdrMutation.data,
+            publicKey: session.data?.user.id,
+            walletType: session.data?.user.walletType
         })
             .then((res) => {
                 if (res) {
@@ -161,7 +151,7 @@ export default function PaymentProcessItem({
                         </div>
                         <div className="flex justify-between text-sm">
                             <span>Issuer</span>
-                            <span className="font-mono text-xs">{addrShort(issuer, 7)}</span>
+                            <span className="font-mono text-xs">{abbreviateAddress(issuer, 7)}</span>
                         </div>
                     </div>
 

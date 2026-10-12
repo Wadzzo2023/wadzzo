@@ -1,23 +1,14 @@
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { StellarAccount, toAsset } from "~/lib/stellar/account";
-import {
-  BASE_RESERVE_XLM,
-  NEW_ACCOUNT_XLM,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  TX_TIMEOUT_SECONDS,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "~/lib/stellar/constant";
+import { BASE_RESERVE_XLM, NEW_ACCOUNT_XLM, PLATFORM_ASSET, PLATFORM_FEE, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import type { CostLine, Problem } from "~/lib/stellar/quote";
-import type { Db } from "~/server/db";
-import { truncateString } from "~/utils/string";
+import type { Db } from "@wadzzo/db";
+import { truncateString } from "@wadzzo/utils/string";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 import { xlmToPlatform } from "./prices";

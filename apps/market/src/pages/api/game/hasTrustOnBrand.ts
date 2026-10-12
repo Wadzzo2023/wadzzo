@@ -2,9 +2,9 @@ import { Horizon } from "@stellar/stellar-sdk";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
-import { STELLAR_URL } from "~/lib/stellar/constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 // import { getSession } from "next-auth/react";
 
 export default async function handler(

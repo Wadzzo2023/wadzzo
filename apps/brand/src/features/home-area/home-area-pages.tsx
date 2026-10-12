@@ -3,11 +3,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { ErrorState } from "~/ui/error-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
 
 import { HomeAreaEditor, type Area } from "./home-area-editor";

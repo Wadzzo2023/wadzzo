@@ -4,9 +4,9 @@ import { LocateFixed, MapPin } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Marker, Source, type MapRef } from "react-map-gl/mapbox";
 
-import { Input } from "~/components/shadcn/ui/input";
-import { Label } from "~/components/shadcn/ui/label";
-import { cn } from "~/lib/utils";
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { BaseMap, WORLD_VIEW } from "./base-map";
 import { circleFeature, toMapboxFeature, type LatLng } from "./geo";

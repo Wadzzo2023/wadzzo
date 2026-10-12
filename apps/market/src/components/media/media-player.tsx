@@ -1,12 +1,12 @@
 "use client";
 
-import type { MediaType } from "@prisma/client";
+import type { MediaType } from "@wadzzo/db";
 import { Box, Download, Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { cn } from "~/lib/utils";
-import { Spinner } from "~/ui/spinner";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 
 const ModelViewer = dynamic(() => import("./model-viewer"), {
   ssr: false,

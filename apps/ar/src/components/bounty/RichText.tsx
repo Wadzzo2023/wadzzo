@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import { useMemo } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * Renders HTML written in wadzz0's rich-text editor — bounty briefs, and

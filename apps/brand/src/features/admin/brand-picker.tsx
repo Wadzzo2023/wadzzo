@@ -3,10 +3,10 @@
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/shadcn/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
 import type { SelectedCreator } from "~/components/store/creator-selection-store";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 
 /** Searchable brand picker for admin tools (All maps, admin new pin / hotspot). */

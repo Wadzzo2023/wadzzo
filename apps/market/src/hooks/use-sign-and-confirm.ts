@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { clientsign } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useState } from "react";
 
 import { env } from "~/env";
@@ -21,11 +21,10 @@ export function useSignAndConfirm() {
   const [error, setError] = useState<string | null>(null);
 
   async function submit(xdr: string) {
-    const submitted = await clientsign({
-      presignedxdr: xdr,
+    const submitted = await signAndSubmitTransaction({
+      xdr: xdr,
       walletType: session.data?.user.walletType,
-      pubkey: session.data?.user.id,
-      test: !env.NEXT_PUBLIC_STELLAR_PUBNET,
+      publicKey: session.data?.user.id
     });
     if (!submitted) throw new Error("The transaction wasn't signed.");
   }

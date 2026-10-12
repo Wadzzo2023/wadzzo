@@ -8,10 +8,10 @@ import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
 import { featureCenter, toMapboxFeature, type StoredFeature } from "~/components/map-kit/geo";
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { cn } from "~/lib/utils";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { api } from "~/utils/api";
 
 type Props = {

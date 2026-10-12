@@ -3,11 +3,11 @@ import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 
 import { env } from "~/env";
-import { networkPassphrase } from "~/lib/stellar/constant";
-import type { Db } from "~/server/db";
+import { networkPassphrase } from "@wadzzo/wallet/config";
+import type { Db } from "@wadzzo/db";
 
 /**
  * Secrets the server signs with. Issuer secrets are stored encrypted
@@ -71,7 +71,7 @@ export type Signer = { email: string } | undefined;
 /** Adds the custodial user's signature when they don't use a browser wallet. */
 export async function signForUser(xdr: string, signer: Signer) {
   if (!signer?.email) return xdr;
-  const secret = await getAccSecretFromRubyApi(signer.email);
+  const secret = await fetchCustodialAccountSecret(signer.email);
   const tx = TransactionBuilder.fromXDR(xdr, networkPassphrase);
   tx.sign(Keypair.fromSecret(secret));
   return tx.toXDR();

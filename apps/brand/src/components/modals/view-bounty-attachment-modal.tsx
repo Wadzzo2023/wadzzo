@@ -1,15 +1,9 @@
 import React from "react";
 import { useModal } from "../../lib/state/play/use-modal-store";
-import { Button } from "../shadcn/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "~/components/shadcn/ui/dialog";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import AttachmentSection from "../bounty/attahment-section";
-import { type SubmissionAttachment } from "@prisma/client";
+import { type SubmissionAttachment } from "@wadzzo/db";
 
 type ViewBountyAttachmentModalProps = {
     data: SubmissionAttachment[];

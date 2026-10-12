@@ -21,28 +21,13 @@ import {
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import toast from "react-hot-toast"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "~/components/shadcn/ui/alert-dialog"
-import { Badge } from "~/components/shadcn/ui/badge"
-import { Button } from "~/components/shadcn/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "~/components/shadcn/ui/dropdown-menu"
-import { Skeleton } from "~/components/shadcn/ui/skeleton"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@wadzzo/ui/components/alert-dialog";
+import { Badge } from "@wadzzo/ui/components/badge";
+import { Button } from "@wadzzo/ui/components/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
+import { Skeleton } from "@wadzzo/ui/components/skeleton";
 import { EngagementDialog } from "~/components/events/engagement-dialog"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import { PageBody, PageHeader } from "~/ui/page-header"
 import { api, type RouterOutputs } from "~/utils/api"
 

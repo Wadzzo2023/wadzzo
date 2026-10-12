@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { ChevronDown, Clock, Hexagon, MapPin, Users } from "lucide-react";
 import { memo, useState } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { useNearbyPinsStore } from "~/store/map-stores";
 
 /**

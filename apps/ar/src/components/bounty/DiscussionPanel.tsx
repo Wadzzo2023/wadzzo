@@ -3,7 +3,7 @@ import { CornerDownRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Skeleton } from "~/components/ui/Skeleton";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Comment = RouterOutputs["bounty"]["comments"][number];

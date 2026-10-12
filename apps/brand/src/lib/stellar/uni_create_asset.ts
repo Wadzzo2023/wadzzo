@@ -6,17 +6,11 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "./constant";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "./fan/get_token_price";
 import { type AccountType } from "./fan/utils";
-import { type SignUserType, WithSing } from "./utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 
 const log = console;
 
@@ -36,7 +30,7 @@ export async function createUniAsset({
   limit: string;
   actionAmount: string;
   storageSecret: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   homeDomain: string;
   ipfsHash: string;
 }) {
@@ -139,7 +133,7 @@ export async function createUniAsset({
   buildTrx.sign(PLATFORM_MOTHER_ACC, issuerAcc, assetStorage);
   const xdr = buildTrx.toXDR();
 
-  const signedXDr = await WithSing({
+  const signedXDr = await signXdrForCustodialUser({
     xdr: xdr,
     signWith: signWith && "isAdmin" in signWith ? undefined : signWith,
   });
@@ -166,7 +160,7 @@ export async function createUniAssetWithXLM({
   limit: string;
   actionAmount: string;
   storageSecret: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   homeDomain: string;
   ipfsHash: string;
 }) {
@@ -257,7 +251,7 @@ export async function createUniAssetWithXLM({
   buildTrx.sign(issuerAcc, asesetStorage);
   const xdr = buildTrx.toXDR();
 
-  const signedXDr = await WithSing({
+  const signedXDr = await signXdrForCustodialUser({
     xdr: xdr,
     signWith: signWith && "isAdmin" in signWith ? undefined : signWith,
   });

@@ -8,7 +8,7 @@ import { forwardRef, useEffect, useRef, type ReactNode } from "react";
 import MapGL, { NavigationControl, useControl, useMap, type MapProps, type MapRef } from "react-map-gl/mapbox";
 
 import { env } from "~/env";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { mapStyleFor, readMapMode, setMapMode, useIsClient, useMapMode, type MapMode } from "./map-mode";
 

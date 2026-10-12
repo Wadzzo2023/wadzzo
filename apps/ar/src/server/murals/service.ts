@@ -1,5 +1,5 @@
-import type { CoinReason, Mural, MuralSettings, Prisma } from "@prisma/client";
-import type { Db as AppDb } from "~/server/db";
+import type { CoinReason, Mural, MuralSettings, Prisma } from "@wadzzo/db";
+import type { Db as AppDb } from "@wadzzo/db";
 
 import type { MuralCard } from "~/lib/murals/constants";
 

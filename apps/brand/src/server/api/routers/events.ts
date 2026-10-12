@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 /**
  * Creator side of Events & Announcements. Fans see them in wadzzoAR and the

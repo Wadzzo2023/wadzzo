@@ -5,8 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PlaceSearch } from "./place-search";
 import { circleFeature, haversineMetres, polygonFeature, rectangleFeature, toMapboxFeature, type DrawShape, type LatLng, type StoredFeature } from "./geo";

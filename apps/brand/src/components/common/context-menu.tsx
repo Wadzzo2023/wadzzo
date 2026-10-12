@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MoreHorizontal, Trash2, Edit, Share2 } from "lucide-react"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 
 interface ContextMenuProps {
     handleDelete?: () => void

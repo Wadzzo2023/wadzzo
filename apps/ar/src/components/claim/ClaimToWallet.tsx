@@ -2,14 +2,14 @@
 
 import { CheckCircle2, Loader2, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { clientsign } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useState } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { env } from "~/env";
 import { formatAmount } from "~/lib/stellar/quote";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 type Method = "PLATFORM_ASSET" | "XLM";
@@ -85,11 +85,10 @@ function ClaimSheet({ open, onClose, consumerId, itemName, pending, onDone }: { 
         return;
       }
       setStep("signing");
-      const submitted = await clientsign({
-        presignedxdr: res.xdr,
+      const submitted = await signAndSubmitTransaction({
+        xdr: res.xdr,
         walletType: session.data?.user.walletType,
-        pubkey: session.data?.user.id,
-        test: !env.NEXT_PUBLIC_STELLAR_PUBNET,
+        publicKey: session.data?.user.id
       });
       if (!submitted) throw new Error("The transaction wasn't signed.");
       setStep("confirming");

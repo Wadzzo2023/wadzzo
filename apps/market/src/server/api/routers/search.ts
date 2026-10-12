@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform-scope";
+import { platformScope } from "@wadzzo/platform/scope";
 
 /** One search box across items, creators, posts and bounties. */
 export const searchRouter = createTRPCRouter({

@@ -4,7 +4,7 @@ import { ExternalLink, Lock, Share2, Unlock } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 /** Under the art: whether the viewer owns it (content unlocked or not), share, and the token on Stellar. */

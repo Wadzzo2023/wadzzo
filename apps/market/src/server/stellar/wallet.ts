@@ -1,13 +1,13 @@
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 
 import { StellarAccount, horizon } from "~/lib/stellar/account";
-import { BASE_RESERVE_XLM, PLATFORM_ASSET, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "~/lib/stellar/constant";
-import type { Db } from "~/server/db";
+import { BASE_RESERVE_XLM, PLATFORM_ASSET, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import type { Db } from "@wadzzo/db";
 import { chargeCard, refundCard } from "~/server/square";
 
 import { motherKeypair, platformStorageKeypair, signForUser, type Signer } from "./keys";
@@ -36,7 +36,7 @@ async function ensureCanReceiveTokens(userId: string, email: string | null | und
   const acc = await StellarAccount.load(userId);
   if (acc?.trustsPlatformAsset()) return;
   if (!email) throw new TRPCError({ code: "PRECONDITION_FAILED", message: `Add ${PLATFORM_ASSET.code} to your wallet first.` });
-  const userKp = Keypair.fromSecret(await getAccSecretFromRubyApi(email));
+  const userKp = Keypair.fromSecret(await fetchCustodialAccountSecret(email));
   const mother = motherKeypair();
   const source = await StellarAccount.loadOrThrow(mother.publicKey(), "Platform account");
   const tx = new TransactionBuilder(source.raw, { fee: TrxBaseFee, networkPassphrase }).setTimeout(TX_TIMEOUT_SECONDS);

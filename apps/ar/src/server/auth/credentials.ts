@@ -5,22 +5,19 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { WalletType } from "package/connect_wallet/src/lib/enums";
-import {
-  appleTokenToUser,
-  verifyIdToken,
-} from "package/connect_wallet/src/lib/firebase/admin/auth";
-import { auth } from "package/connect_wallet/src/lib/firebase/firebase-auth";
-import { USER_ACCOUNT_URL } from "package/connect_wallet/src/lib/stellar/constant";
-import { verifyXDRSignature } from "package/connect_wallet/src/lib/stellar/trx/deummy";
-import { getPublicKeyAPISchema } from "package/connect_wallet/src/lib/stellar/wallet_clients/type";
+import { WalletType } from "@wadzzo/wallet/shared";
+import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
+import { firebaseAuth } from "@wadzzo/wallet";
+import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
+import { verifyTransactionSignature } from "@wadzzo/wallet/server";
+import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
 import { z } from "zod";
 
 import { env } from "~/env";
-import { db } from "~/server/db";
-import { getCurrentPlatform, recordUserPlatform } from "~/server/platform";
-import type { AuthCredentialType } from "~/types/auth";
-import { truncateString } from "~/utils/string";
+import { db } from "@wadzzo/db";
+import { getCurrentPlatform, recordUserPlatform } from "@wadzzo/platform/server";
+import type { AuthCredential } from "@wadzzo/wallet/shared";
+import { truncateString } from "@wadzzo/utils/string";
 
 /**
  * ── Credential sign-in ─────────────────────────────────────────────────────
@@ -43,7 +40,7 @@ export type AuthUser = {
 };
 
 export async function authorizeCredentials(
-  cred: AuthCredentialType,
+  cred: AuthCredential,
 ): Promise<AuthUser | null> {
 
     // email pass login
@@ -99,7 +96,7 @@ export async function authorizeCredentials(
     // wallet rabet and frieghter
     if (
       cred.walletType == WalletType.rabet ||
-      cred.walletType == WalletType.frieghter ||
+      cred.walletType == WalletType.freighter ||
       cred.walletType == WalletType.walletConnect ||
       cred.walletType == WalletType.metamask ||
       cred.walletType == WalletType.xBull ||
@@ -107,7 +104,7 @@ export async function authorizeCredentials(
       cred.walletType == WalletType.hotWallet
     ) {
       const { pubkey, signedXDR, fromAppSign } = cred;
-      const isValid = await verifyXDRSignature({
+      const isValid = await verifyTransactionSignature({
         publicKey: pubkey,
         xdr: signedXDR,
       });
@@ -134,7 +131,7 @@ export async function authorizeCredentials(
     ) {
       const { token, email, fromAppSign } = cred;
 
-      const { uid } = await verifyIdToken(token);
+      const { uid } = await verifyFirebaseIdToken(token);
       const data = await getUserPublicKey({ uid, email, fromAppSign });
       const sessionUser = await dbUser(
         data.publicKey,
@@ -154,7 +151,7 @@ export async function authorizeCredentials(
       const { appleToken, token, email, fromAppSign } = cred;
 
       if (token) {
-        const { uid } = await verifyIdToken(token);
+        const { uid } = await verifyFirebaseIdToken(token);
         const data = await getUserPublicKey({ uid, email, fromAppSign });
         const sessionUser = await dbUser(
           data.publicKey,
@@ -170,7 +167,7 @@ export async function authorizeCredentials(
         };
       } else {
         if (appleToken) {
-          const { uid } = await appleTokenToUser(appleToken, email);
+          const { uid } = await getOrCreateFirebaseUserFromApple(appleToken, email);
 
           const data = await getUserPublicKey({ uid, email, fromAppSign });
           const sessionUser = await dbUser(
@@ -246,7 +243,7 @@ async function getUserPublicKey({
   email: string;
   fromAppSign: string | undefined;
 }) {
-  const res = await axios.get<z.infer<typeof getPublicKeyAPISchema>>(
+  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(
     USER_ACCOUNT_URL,
     {
       params: {

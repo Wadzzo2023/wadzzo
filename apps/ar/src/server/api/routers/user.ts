@@ -1,9 +1,9 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
-import { initAdmin } from "package/connect_wallet/src/lib/firebase/admin/config";
+import { initFirebaseAdmin } from "@wadzzo/wallet/server";
 import { z } from "zod";
 
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { StellarAccount } from "~/lib/stellar/account";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isOwnS3Url } from "~/server/s3";
@@ -156,7 +156,7 @@ export const userRouter = createTRPCRouter({
 
     if (user.email) {
       try {
-        const admin = initAdmin();
+        const admin = initFirebaseAdmin();
         const record = await admin.auth().getUserByEmail(user.email);
         await admin.auth().deleteUser(record.uid);
       } catch (e) {

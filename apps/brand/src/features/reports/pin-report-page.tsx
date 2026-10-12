@@ -9,18 +9,18 @@ import toast from "react-hot-toast";
 import { Marker } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { DataTable, type Column } from "~/ui/data-table";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody } from "~/ui/page-header";
-import { Person } from "~/ui/person";
+import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatCard } from "~/ui/stat-card";
-import { StatusPill } from "~/ui/status-pill";
-import { SearchInput } from "~/ui/toolbar";
+import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { CollectionsChart, downloadCsv, pinStatus } from "./report-kit";
 
@@ -99,7 +99,7 @@ function Body({ r, admin }: { r: Report; admin: boolean }) {
       id: "who",
       header: "Collector",
       skeleton: "person",
-      cell: (c) => <Person name={c.user.name} image={c.user.image} id={c.user.id} sub={c.email ?? <span className="font-mono">{addrShort(c.user.id, 5)}</span>} />,
+      cell: (c) => <Person name={c.user.name} image={c.user.image} id={c.user.id} sub={c.email ?? <span className="font-mono">{abbreviateAddress(c.user.id, 5)}</span>} />,
     },
     {
       id: "where",
@@ -147,7 +147,7 @@ function Body({ r, admin }: { r: Report; admin: boolean }) {
           }}
           className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
         >
-          {addrShort(c.user.id, 5)} <Copy className="size-3" />
+          {abbreviateAddress(c.user.id, 5)} <Copy className="size-3" />
         </button>
       ),
     },

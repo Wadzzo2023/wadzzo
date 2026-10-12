@@ -4,9 +4,9 @@ import { Coins, Info, Save, Sparkles, Users, Repeat } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { ErrorState } from "~/ui/error-state";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

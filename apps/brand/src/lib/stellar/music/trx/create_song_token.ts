@@ -7,7 +7,7 @@ import {
   Asset,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { STELLAR_URL } from "../../constant";
+import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { type AccountType } from "../../fan/utils";
 
 const log = console;
@@ -116,7 +116,7 @@ export async function firstTransection({
 
   Tx1.sign(motherAcc, issuerAcc, storageAcc);
   const xdr = Tx1.toXDR();
-  // const signedXDr = await WithSing({ xdr, signWith }); // bcz admin only create song
+  // const signedXDr = await signXdrForCustodialUser({ xdr, signWith }); // bcz admin only create song
 
   const issuer: AccountType = {
     publicKey: issuerAcc.publicKey(),

@@ -4,7 +4,7 @@ import { Check, ChevronDown, Loader2, X } from "lucide-react";
 import { useState } from "react";
 
 import type { AgentStep } from "~/lib/agent/contract";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 function StepLine({ step }: { step: AgentStep }) {
   return (

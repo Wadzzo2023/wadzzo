@@ -14,21 +14,18 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { WalletType } from "package/connect_wallet/src/lib/enums";
-import {
-  appleTokenToUser,
-  verifyIdToken,
-} from "package/connect_wallet/src/lib/firebase/admin/auth";
-import { auth } from "package/connect_wallet/src/lib/firebase/firebase-auth";
-import { getPublicKeyAPISchema } from "package/connect_wallet/src/lib/stellar/wallet_clients/type";
+import { WalletType } from "@wadzzo/wallet/shared";
+import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
+import { firebaseAuth } from "@wadzzo/wallet";
+import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
 import { z } from "zod";
-import { db } from "~/server/db";
-import { AuthCredentialType } from "~/types/auth";
+import { db } from "@wadzzo/db";
+import { AuthCredential } from "@wadzzo/wallet/shared";
 import { authorizeCredentials } from "~/server/auth/credentials";
-import { truncateString } from "~/utils/string";
+import { truncateString } from "@wadzzo/utils/string";
 
-import { USER_ACCOUNT_URL } from "package/connect_wallet/src/lib/stellar/constant";
-import { verifyXDRSignature } from "package/connect_wallet/src/lib/stellar/trx/deummy";
+import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
+import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
 
 /**
@@ -88,7 +85,7 @@ export const authOptions: NextAuthOptions = {
       type: "credentials",
       credentials: {},
       async authorize(credentials): Promise<User | null> {
-        return authorizeCredentials(credentials as AuthCredentialType);
+        return authorizeCredentials(credentials as AuthCredential);
       },
     }),
   ],

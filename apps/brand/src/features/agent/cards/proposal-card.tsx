@@ -3,10 +3,10 @@
 import { AlertTriangle, Check, CircleSlash, ClipboardCheck, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Progress } from "~/components/shadcn/ui/progress";
+import { Button } from "@wadzzo/ui/components/button";
+import { Progress } from "@wadzzo/ui/components/progress";
 import type { ActionEdits, AgentBlock, NamedRef, PinDefaults, ProposedAction } from "~/lib/agent/contract";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 import type { ActionState } from "../use-agent-chat";

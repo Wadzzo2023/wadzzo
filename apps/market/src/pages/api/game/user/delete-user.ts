@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
 import { createTransport, Transporter } from "nodemailer";
-import { initAdmin } from "package/connect_wallet/src/lib/firebase/admin/config";
+import { initFirebaseAdmin } from "@wadzzo/wallet/server";
 
 import { EnableCors } from "~/server/api-cors";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 
 // const transporter: Transporter = createTransport({
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest,
         });
     }
     if (token.email) {
-        const admin = initAdmin();
+        const admin = initFirebaseAdmin();
         const userRecord = await admin.auth().getUserByEmail(token.email);
         const deleteUser = await admin.auth().deleteUser(userRecord.uid);
     }

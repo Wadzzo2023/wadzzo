@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { type ReactNode, useEffect } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * The app's one overlay primitive. Everything that isn't a full screen — pin

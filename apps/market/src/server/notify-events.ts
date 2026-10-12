@@ -1,10 +1,10 @@
 import "server-only";
 
-import type { AssetTransaction } from "@prisma/client";
+import type { AssetTransaction } from "@wadzzo/db";
 
 import { StellarAccount } from "~/lib/stellar/account";
-import type { Db } from "~/server/db";
-import { notify, notifyBrand, notifyFan } from "~/server/notify";
+import type { Db } from "@wadzzo/db";
+import { notify, notifyBrand, notifyFan } from "@wadzzo/platform/server";
 
 const num = (n: number) => Math.round(n * 1e4) / 1e4;
 

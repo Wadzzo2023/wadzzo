@@ -1,23 +1,14 @@
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
-import { ItemPrivacy, type Platform } from "@prisma/client";
+import { ItemPrivacy, type Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { StellarAccount, toAsset, type AssetRef } from "~/lib/stellar/account";
-import {
-  BASE_RESERVE_XLM,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  PLATFORM_FEE_XLM,
-  TX_TIMEOUT_SECONDS,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "~/lib/stellar/constant";
+import { BASE_RESERVE_XLM, PLATFORM_ASSET, PLATFORM_FEE, PLATFORM_FEE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import type { BuyMethod, CostLine, Problem, Quote } from "~/lib/stellar/quote";
-import type { Db } from "~/server/db";
-import { inPlatformScope } from "~/server/platform-scope";
+import type { Db } from "@wadzzo/db";
+import { isInPlatformScope } from "@wadzzo/platform/scope";
 
 import { issuerKeypairFor, motherKeypair, platformStorageKeypair, signForUser, type Signer } from "./keys";
 import { platformToUsd, platformToXlm, xlmToPlatform } from "./prices";
@@ -43,7 +34,7 @@ async function loadListing(ctx: Ctx, listingId: number) {
       placer: { select: { id: true, storagePub: true } },
     },
   });
-  if (!listing || !inPlatformScope(ctx, listing.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Listing not found" });
+  if (!listing || !isInPlatformScope(ctx, listing.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Listing not found" });
 
   const { asset } = listing;
   // No placer = a platform (admin) listing sold from the platform's storage.

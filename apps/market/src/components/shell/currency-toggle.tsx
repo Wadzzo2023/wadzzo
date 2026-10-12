@@ -3,7 +3,7 @@
 import { DollarSign } from "lucide-react";
 
 import { useCurrency, type DisplayCurrency } from "~/hooks/use-currency";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** Header switch between showing prices in Wadzzo or USD first. */
 export function CurrencyToggle({ className }: { className?: string }) {

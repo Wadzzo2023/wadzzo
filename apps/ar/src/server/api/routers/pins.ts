@@ -1,5 +1,5 @@
-import { ItemPrivacy, PinType, Prisma } from "@prisma/client";
-import type { Db } from "~/server/db";
+import { ItemPrivacy, PinType, Prisma } from "@wadzzo/db";
+import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -7,8 +7,8 @@ import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArPin, Rarity } from "~/lib/ar/types";
 import { StellarAccount } from "~/lib/stellar/account";
-import { inPlatformScope, platformScope, type PlatformCtx } from "~/server/platform-scope";
-import { notifyBrand } from "~/server/notify";
+import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
+import { notifyBrand } from "@wadzzo/platform/server";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -213,7 +213,7 @@ function boundingBox({ lat, lng, radiusKm }: { lat: number; lng: number; radiusK
  * module-level object would freeze "now" at process start and slowly begin
  * serving drops that have already ended.
  */
-const liveGroupWhere = (ctx: PlatformCtx) =>
+const liveGroupWhere = (ctx: PlatformContext) =>
   ({
     // This platform's drops; the root platform (web.wadzzo.com) shows every platform's.
     ...platformScope(ctx),
@@ -344,7 +344,7 @@ function pinsOfGroup(
  * physical place the creator put it. Eligibility (`lockReason`) is a different
  * question — who may hold this drop — and applies to both.
  */
-async function assertClaimable(db: Db, userId: string, locationId: string, ctx: PlatformCtx) {
+async function assertClaimable(db: Db, userId: string, locationId: string, ctx: PlatformContext) {
   const location = await db.location.findUnique({
     where: { id: locationId },
     include: { locationGroup: { include: groupInclude } },
@@ -352,7 +352,7 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
 
   const group = location?.locationGroup;
   // Another platform's drop can't be claimed here (web.wadzzo.com may claim any).
-  if (!location || !group || location.hidden || !inPlatformScope(ctx, group.platformId)) {
+  if (!location || !group || location.hidden || !isInPlatformScope(ctx, group.platformId)) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
   }
 
@@ -694,7 +694,7 @@ export const pinsRouter = createTRPCRouter({
             include: groupWithLocationsInclude,
           })
         : null;
-      if (!group || group.approved !== true || !inPlatformScope(ctx, group.platformId)) {
+      if (!group || group.approved !== true || !isInPlatformScope(ctx, group.platformId)) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
       }
 

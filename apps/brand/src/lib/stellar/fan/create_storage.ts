@@ -7,15 +7,8 @@ import {
 } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import {
-  networkPassphrase,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-} from "../constant";
-import { type SignUserType, WithSing } from "../utils";
+import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { getplatformAssetNumberForXLM as getPlatformAssetNumberForXLM } from "./get_token_price";
 import { type AccountType } from "./utils";
 
@@ -26,7 +19,7 @@ export async function createStorageTrx({
   signWith,
 }: {
   pubkey: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   /*
   |---------------------------------------------------
@@ -91,7 +84,7 @@ export async function createStorageTrx({
     secretKey: storageAcc.secret(),
   };
 
-  const xdr = await WithSing({ xdr: Tx1.toXDR(), signWith });
+  const xdr = await signXdrForCustodialUser({ xdr: Tx1.toXDR(), signWith });
 
   return { xdr, storage };
 }
@@ -101,7 +94,7 @@ export async function createStorageTrxWithXLM({
   signWith,
 }: {
   pubkey: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
   const storageAcc = Keypair.random();
@@ -140,7 +133,7 @@ export async function createStorageTrxWithXLM({
     secretKey: storageAcc.secret(),
   };
 
-  const xdr = await WithSing({ xdr: Tx1.toXDR(), signWith });
+  const xdr = await signXdrForCustodialUser({ xdr: Tx1.toXDR(), signWith });
 
   return { xdr, storage };
 }

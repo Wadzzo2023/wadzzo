@@ -4,7 +4,7 @@ import { CalendarDays, Download, Hexagon, Megaphone, MapPinned, Pin as PinIcon, 
 import Link from "next/link";
 
 import type { AgentBlock, PinStatus } from "~/lib/agent/contract";
-import { StatusPill, type Tone } from "~/ui/status-pill";
+import { StatusPill, type Tone } from "@wadzzo/ui/patterns/status-pill";
 
 import { Card, MapRow, ShortList, day, dayTime, n, range } from "./card-kit";
 

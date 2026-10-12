@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import NewPinPage from "~/features/pins/new-pin-page";
-import { CenteredSpinner } from "~/ui/spinner";
+import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 export const metadata = { title: "New pin" };
 

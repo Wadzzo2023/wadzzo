@@ -4,13 +4,13 @@
 // Collection reports (any brand, or all of them), a per-pin report, and a CSV
 // export. Counting happens in SQL so long histories stay fast.
 
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { assertOwnerOrAdmin, isAdmin } from "~/server/api/access";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { platformScope } from "~/server/platform";
+import { platformScope } from "@wadzzo/platform/server";
 import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
 
 type Ctx = Parameters<typeof assertOwnerOrAdmin>[0];

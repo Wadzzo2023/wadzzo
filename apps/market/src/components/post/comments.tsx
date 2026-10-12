@@ -6,8 +6,8 @@ import { useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { EmptyState } from "~/ui/empty-state";
-import { Avatar } from "~/ui/person";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

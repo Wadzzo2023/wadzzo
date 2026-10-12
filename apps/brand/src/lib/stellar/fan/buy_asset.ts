@@ -6,12 +6,7 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  networkPassphrase,
-} from "../constant";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
 import { type MyAssetType } from "./utils";
 
 const log = console;

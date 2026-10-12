@@ -4,7 +4,7 @@ import { ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PageSkeleton } from "~/ui/skeleton";
 

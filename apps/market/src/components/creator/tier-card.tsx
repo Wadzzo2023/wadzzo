@@ -1,7 +1,7 @@
 import { Check, Crown } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /** Tier colors are palette names stored on the tier; each maps to theme-safe classes. */
 export const TIER_COLORS = {

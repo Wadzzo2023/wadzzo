@@ -6,15 +6,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { type SignUserType, WithSing } from "../utils";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-  networkPassphrase,
-} from "../constant";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 import { type AccountType } from "./utils";
 
@@ -31,7 +24,7 @@ export async function creatorPageAccCreate({
   limit: string;
   pubkey: string;
   assetCode: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   ipfs: string;
   storageSecret: string;
 }) {
@@ -125,7 +118,7 @@ export async function creatorPageAccCreate({
 
   // fab and google user sing
   const trx = Tx1.toXDR();
-  const signedXDr = await WithSing({ xdr: trx, signWith });
+  const signedXDr = await signXdrForCustodialUser({ xdr: trx, signWith });
 
   const escrow: AccountType = {
     publicKey: issuerAcc.publicKey(),
@@ -146,7 +139,7 @@ export async function creatorPageAccCreateWithXLM({
   limit: string;
   pubkey: string;
   assetCode: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
   ipfs: string;
   storageSecret: string;
 }) {
@@ -228,7 +221,7 @@ export async function creatorPageAccCreateWithXLM({
 
   // fab and google user sing
   const trx = Tx1.toXDR();
-  const signedXDr = await WithSing({ xdr: trx, signWith });
+  const signedXDr = await signXdrForCustodialUser({ xdr: trx, signWith });
 
   const escrow: AccountType = {
     publicKey: issuerAcc.publicKey(),

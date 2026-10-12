@@ -1,7 +1,7 @@
 import { sign } from "crypto";
 import { add } from "date-fns";
 import { z } from "zod";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import {
   AddAssetTrustLine,
   BalanceWithHomeDomain,
@@ -20,9 +20,9 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL } from "~/lib/stellar/constant";
+import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 
 export const WBalanceRouter = createTRPCRouter({
@@ -113,7 +113,7 @@ export const WBalanceRouter = createTRPCRouter({
         asset_issuer: z.string().min(1, {
           message: "Asset Issuer is required.",
         }),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -121,7 +121,7 @@ export const WBalanceRouter = createTRPCRouter({
 
       let secretKey;
       if (ctx.session.user.email && ctx.session.user.email.length > 0) {
-        secretKey = await getAccSecretFromRubyApi(ctx.session.user.email);
+        secretKey = await fetchCustodialAccountSecret(ctx.session.user.email);
       }
       return await SendAssets({
         userPubKey: userPubKey,
@@ -148,14 +148,14 @@ export const WBalanceRouter = createTRPCRouter({
         asset_issuer: z.string().min(1, {
           message: "Asset Issuer is required.",
         }),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const userPubKey = ctx.session.user.id;
       let secretKey;
       if (ctx.session.user.email && ctx.session.user.email.length > 0) {
-        secretKey = await getAccSecretFromRubyApi(ctx.session.user.email);
+        secretKey = await fetchCustodialAccountSecret(ctx.session.user.email);
       }
       return await AddAssetTrustLine({
         userPubKey: userPubKey,
@@ -196,7 +196,7 @@ export const WBalanceRouter = createTRPCRouter({
         balanceId: z.string().min(1, {
           message: "BalanceId is required.",
         }),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -219,14 +219,14 @@ export const WBalanceRouter = createTRPCRouter({
         balanceId: z.string().min(1, {
           message: "BalanceId is required.",
         }),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const userPubKey = ctx.session.user.id;
       let secretKey;
       if (ctx.session.user.email && ctx.session.user.email.length > 0) {
-        secretKey = await getAccSecretFromRubyApi(ctx.session.user.email);
+        secretKey = await fetchCustodialAccountSecret(ctx.session.user.email);
       }
       return await DeclineClaimableBalance({
         pubKey: userPubKey,

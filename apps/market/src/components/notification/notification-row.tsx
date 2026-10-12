@@ -4,8 +4,8 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { Circle, CircleDot, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import type { InboxItem } from "~/server/notification-inbox";
 
 import { describeFan } from "./describe";

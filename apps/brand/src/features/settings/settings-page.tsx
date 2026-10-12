@@ -8,12 +8,12 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import PostCard from "~/components/post/post-card";
-import { Badge } from "~/components/shadcn/ui/badge";
-import { Button } from "~/components/shadcn/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/shadcn/ui/dialog";
-import { Input } from "~/components/shadcn/ui/input";
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/shadcn/ui/tabs";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Badge } from "@wadzzo/ui/components/badge";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Input } from "@wadzzo/ui/components/input";
+import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { BountyCard } from "~/features/bounties/bounties-page";
@@ -22,16 +22,16 @@ import { MembershipTiers } from "~/features/membership/membership-page";
 import { AssetCard } from "~/features/stores/stores-page";
 import { WADZZO_AR_URL } from "~/lib/embed";
 import { sortOptionEnum } from "~/types/bounty/bounty-type";
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Field } from "~/ui/form-page";
 import { PageBody } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
 import { ENDPOINT_ACCEPT } from "~/ui/upload/accept";
 import { useS3Upload } from "~/ui/upload/use-s3-upload";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { PageAssetTab } from "./page-asset-tab";
 import { VANITY_HOST, VanityUrlTab } from "./vanity-url-tab";
@@ -151,7 +151,7 @@ function Profile({ data }: { data: Overview }) {
               <p className="truncate text-sm">
                 <b className="font-mono">{data.pageAsset.code}</b>{" "}
                 <span className="font-mono text-xs text-muted-foreground" title={data.pageAsset.issuer}>
-                  {addrShort(data.pageAsset.issuer, 5)}
+                  {abbreviateAddress(data.pageAsset.issuer, 5)}
                 </span>
                 {data.pageAsset.custom && <span className="ml-1 text-xs text-muted-foreground">(custom)</span>}
               </p>
@@ -547,7 +547,7 @@ function StorageCard() {
         ) : (
           <p className="truncate text-sm">
             <span className="font-mono text-xs" title={a.publicKey}>
-              {addrShort(a.publicKey, 5)}
+              {abbreviateAddress(a.publicKey, 5)}
             </span>{" "}
             <span className="text-xs text-muted-foreground">
               {a.active ? `${a.xlm.toLocaleString("en-US", { maximumFractionDigits: 2 })} XLM · ${a.tokens.length} asset${a.tokens.length === 1 ? "" : "s"}` : "not active yet"}

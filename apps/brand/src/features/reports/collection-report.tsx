@@ -6,20 +6,20 @@ import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { DataTable, type Column } from "~/ui/data-table";
-import { ErrorState } from "~/ui/error-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
-import { Person } from "~/ui/person";
+import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatCard } from "~/ui/stat-card";
-import { StatusPill } from "~/ui/status-pill";
-import { SearchInput } from "~/ui/toolbar";
+import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 import { CollectionsChart, Delta, PeriodPicker, downloadCsv, periodLabel, periodRange, pinStatus, type Period } from "./report-kit";
 
@@ -208,7 +208,7 @@ export function CollectionReport({ scope }: { scope: "brand" | "admin" }) {
               {data?.collectors.map((c, i) => (
                 <li key={c.id} className="flex items-center gap-3 py-2">
                   <span className="w-4 text-xs text-muted-foreground tabular-nums">{i + 1}</span>
-                  <Person name={c.name} image={c.image} id={c.id} size="sm" sub={<span className="font-mono">{addrShort(c.id, 4)}</span>} />
+                  <Person name={c.name} image={c.image} id={c.id} size="sm" sub={<span className="font-mono">{abbreviateAddress(c.id, 4)}</span>} />
                   <span className="ml-auto text-sm font-semibold tabular-nums">{c.n.toLocaleString()}</span>
                 </li>
               ))}

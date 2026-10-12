@@ -1,6 +1,6 @@
 "use client"
 
-import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@prisma/client"
+import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/db";
 import { ArrowLeft, Crosshair, Laptop, Loader2, Monitor, PanelLeft, Smartphone } from "lucide-react"
 import Link from "next/link"
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -8,13 +8,13 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import toast from "react-hot-toast"
 import { EmbedInstall } from "~/components/embeds/embed-install"
 import { EmbedStats } from "~/components/embeds/embed-stats"
-import { Button } from "~/components/shadcn/ui/button"
-import { Input } from "~/components/shadcn/ui/input"
-import { Label } from "~/components/shadcn/ui/label"
-import { Switch } from "~/components/shadcn/ui/switch"
-import { Textarea } from "~/components/shadcn/ui/textarea"
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Label } from "@wadzzo/ui/components/label";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { DEFAULT_DRAFT, type EmbedDraft, PIN_TYPE_LABEL, previewUrl, WADZZO_AR_URL } from "~/lib/embed"
-import { cn } from "~/lib/utils"
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api"
 
 type Tab = "settings" | "install" | "stats"

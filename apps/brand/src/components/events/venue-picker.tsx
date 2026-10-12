@@ -4,8 +4,8 @@ import { X } from "lucide-react"
 import { useEffect, useRef } from "react"
 
 import { MapPicker } from "~/components/map-kit/map-picker"
-import { Button } from "~/components/shadcn/ui/button"
-import { Input } from "~/components/shadcn/ui/input"
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
 import { env } from "~/env"
 import { Field } from "~/ui/form-page"
 

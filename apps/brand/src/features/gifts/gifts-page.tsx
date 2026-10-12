@@ -2,27 +2,26 @@
 
 import { Check, Coins, Gift, Loader2, Search, Send, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { clientsign } from "package/connect_wallet";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
 import CustomAvatar from "~/components/common/custom-avatar";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import useNeedSign from "~/lib/hook";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { useCustodialSigner } from "@wadzzo/wallet";
 import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
-import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "~/lib/stellar/constant";
-import { clientSelect } from "~/lib/stellar/fan/utils";
-import { cn } from "~/lib/utils";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
-import { EmptyState } from "~/ui/empty-state";
+import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Field, FormSection } from "~/ui/form-page";
 import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { fetchPubkeyfromEmail } from "~/utils/get-pubkey";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type Kind = "PAGEASSET" | "PLATFORMASSET" | "ITEM";
 /** `balance` is what can be given away now; for an item that's its stock plus what can still be minted (Infinity = open edition). */
@@ -35,7 +34,7 @@ const isEmail = (s: string) => z.string().email().safeParse(s.trim()).success;
 /** Gifts: send tokens to a fan — pick them from your followers or type their email / wallet. */
 export default function GiftsPage() {
   const session = useSession();
-  const { needSign } = useNeedSign();
+  const { getCustodialSigner } = useCustodialSigner();
   const { platformAssetBalance } = useUserStellarAcc();
 
   const pageAsset = api.fan.creator.getCreatorPageAssetBalance.useQuery(undefined, { retry: false });
@@ -96,7 +95,7 @@ export default function GiftsPage() {
       if (!xdr) return;
       setSigning(true);
       try {
-        const ok = await clientsign({ presignedxdr: xdr, walletType: session.data?.user?.walletType, pubkey: session.data?.user.id, test: clientSelect() });
+        const ok = await signAndSubmitTransaction({ xdr: xdr, walletType: session.data?.user?.walletType, publicKey: session.data?.user.id});
         if (ok) {
           // tell the server it landed, so the fan is notified
           confirmToken.mutate({ xdr });
@@ -125,7 +124,7 @@ export default function GiftsPage() {
       console.info("[gift] prepared; signing and submitting", { txId: res.txId, delivery: res.quote.delivery });
       // A wallet popup that never answers would otherwise leave this spinning forever.
       const ok = await Promise.race([
-        clientsign({ presignedxdr: res.xdr, walletType, pubkey: session.data?.user.id, test: clientSelect() }),
+        signAndSubmitTransaction({ xdr: res.xdr, walletType, publicKey: session.data?.user.id}),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Signing took too long. Check your wallet window or network and try again.")), 90_000)),
       ]);
       console.info("[gift] signed and submitted", { ok });
@@ -148,7 +147,7 @@ export default function GiftsPage() {
 
   const pickFan = (pk: string, name: string | null) => {
     setRecipient(pk);
-    setResolved({ pubkey: pk, label: name ?? addrShort(pk, 5) });
+    setResolved({ pubkey: pk, label: name ?? abbreviateAddress(pk, 5) });
   };
 
   return (
@@ -161,7 +160,7 @@ export default function GiftsPage() {
             <Field
               label="Recipient"
               htmlFor="recipient"
-              hint={resolved ? <span className="text-primary">Sending to {resolved.label} · {addrShort(resolved.pubkey, 5)}</span> : undefined}
+              hint={resolved ? <span className="text-primary">Sending to {resolved.label} · {abbreviateAddress(resolved.pubkey, 5)}</span> : undefined}
               error={recipient && !pubkey && !isEmail(recipient) ? "Enter an email or a Stellar address (G…)" : undefined}
             >
               <div className="flex gap-2">
@@ -271,7 +270,7 @@ export default function GiftsPage() {
         title="Send this gift?"
         description={
           <>
-            {qty} {asset?.name ?? asset?.code} to {resolved?.label ?? (pubkey ? addrShort(pubkey, 5) : "")}.
+            {qty} {asset?.name ?? asset?.code} to {resolved?.label ?? (pubkey ? abbreviateAddress(pubkey, 5) : "")}.
             {isItem && quote.data ? (
               <span className="mt-2 block space-y-0.5 text-foreground">
                 {quote.data.lines.map((l) => (
@@ -302,7 +301,7 @@ export default function GiftsPage() {
             ? void sendItem()
             : pubkey &&
               asset &&
-              send.mutate({ pubkey, amount: qty, assetCode: asset.code, assetIssuer: asset.issuer, assetType: asset.kind as RouterInputs["fan"]["trx"]["giftFollowerXDR"]["assetType"], signWith: needSign() })
+              send.mutate({ pubkey, amount: qty, assetCode: asset.code, assetIssuer: asset.issuer, assetType: asset.kind as RouterInputs["fan"]["trx"]["giftFollowerXDR"]["assetType"], signWith: getCustodialSigner() })
         }
       />
     </PageBody>
@@ -386,7 +385,7 @@ function FansPanel({ onPick, selected }: { onPick: (pubkey: string, name: string
                   <CustomAvatar url={f.user.image} className="size-9" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">{f.user.name ?? "Fan"}</span>
-                    <span className="block truncate font-mono text-xs text-muted-foreground">{addrShort(f.user.id, 6)}</span>
+                    <span className="block truncate font-mono text-xs text-muted-foreground">{abbreviateAddress(f.user.id, 6)}</span>
                   </span>
                   {selected === f.user.id && <Check className="size-4 text-primary" />}
                 </button>

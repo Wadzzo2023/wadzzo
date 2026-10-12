@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Chip } from "~/components/ui/Badges";
 import type { PinFilterId } from "~/lib/ar/usePins";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * The map's filter rail, collapsed: only the active filter shows as a chip.

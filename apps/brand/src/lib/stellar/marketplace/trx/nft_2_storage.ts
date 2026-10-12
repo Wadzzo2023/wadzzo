@@ -7,16 +7,9 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  networkPassphrase,
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  TrxBaseFee,
-  TrxBaseFeeInPlatformAsset,
-} from "../../constant";
+import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
-import { type SignUserType, WithSing } from "../../utils";
+import { type CustodialSigner, signXdrForCustodialUser } from "../../utils";
 import { StellarAccount } from "../test/Account";
 
 export async function sendNft2StorageXDR({
@@ -32,7 +25,7 @@ export async function sendNft2StorageXDR({
   assetCode: string;
   issuerPub: string;
   assetAmount: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   // const assetAmount = DEFAULT_ASSET_LIMIT
   const asset = new Asset(assetCode, issuerPub);
@@ -94,7 +87,7 @@ export async function sendNft2StorageXDR({
 
   buildTrx.sign(motherAcc, storageAcc);
 
-  return await WithSing({ xdr: buildTrx.toXDR(), signWith });
+  return await signXdrForCustodialUser({ xdr: buildTrx.toXDR(), signWith });
 }
 
 export async function sendNftback({
@@ -110,7 +103,7 @@ export async function sendNftback({
   assetCode: string;
   issuerPub: string;
   assetAmount: string;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   // const assetAmount = DEFAULT_ASSET_LIMIT
   const asset = new Asset(assetCode, issuerPub);
@@ -171,5 +164,5 @@ export async function sendNftback({
 
   Tx2.sign(storageAcc, motherAcc);
 
-  return await WithSing({ xdr: Tx2.toXDR(), signWith });
+  return await signXdrForCustodialUser({ xdr: Tx2.toXDR(), signWith });
 }

@@ -9,14 +9,14 @@
 //
 // QStash has been removed entirely.
 
-import { ItemPrivacy } from "@prisma/client";
-import { PinType } from "@prisma/client";
-import type { db as PrismaDb } from "~/server/db";
+import { ItemPrivacy } from "@wadzzo/db";
+import { PinType } from "@wadzzo/db";
+import type { db as PrismaDb } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertCreatorInScope, assertOwnerOrAdmin, isAdmin as checkIsAdmin } from "~/server/api/access";
-import { logAudit } from "~/server/audit";
-import { assertInPlatformScope, platformScope, relationScope } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import { assertInPlatformScope, platformScope, relationScope } from "@wadzzo/platform/server";
 import { createOptimizedImage } from "~/server/image-optimizer";
 import { createHotspotFormSchema } from "~/types/hotspot";
 import { updateMapFormSchema } from "~/types/pin-edit";

@@ -5,20 +5,14 @@ import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { useState } from "react"
 import toast from "react-hot-toast"
-import { Badge } from "~/components/shadcn/ui/badge"
-import { Button } from "~/components/shadcn/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "~/components/shadcn/ui/dropdown-menu"
+import { Badge } from "@wadzzo/ui/components/badge";
+import { Button } from "@wadzzo/ui/components/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
 import { scriptSnippet } from "~/lib/embed"
-import { cn } from "~/lib/utils"
-import { ConfirmDialog } from "~/ui/confirm-dialog"
-import { EmptyState } from "~/ui/empty-state"
-import { ErrorState } from "~/ui/error-state"
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header"
 import { Skeleton } from "~/ui/skeleton"
 import { api } from "~/utils/api"

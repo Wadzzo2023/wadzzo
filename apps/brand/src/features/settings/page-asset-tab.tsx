@@ -4,16 +4,16 @@ import { Clock, Coins, Copy, ExternalLink, Link2, Loader2, Sparkles } from "luci
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
 import { env } from "~/env";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { cn } from "~/lib/utils";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Field } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { uploadToIpfsUrl } from "~/ui/upload/ipfs";
 import { api, type RouterOutputs } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 type PageAsset = NonNullable<NonNullable<RouterOutputs["fan"]["creator"]["profileOverview"]>["pageAsset"]>;
 
@@ -219,7 +219,7 @@ function AssetDetails({ asset, onMembership }: { asset: PageAsset; onMembership?
             <dt className="text-xs text-muted-foreground">Issuer</dt>
             <dd className="flex items-center gap-1">
               <span className="truncate font-mono text-xs" title={asset.issuer}>
-                {addrShort(asset.issuer, 10)}
+                {abbreviateAddress(asset.issuer, 10)}
               </span>
               <Button variant="ghost" size="icon-sm" aria-label="Copy issuer" onClick={copy}>
                 <Copy />

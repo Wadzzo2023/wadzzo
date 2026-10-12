@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { frameAncestors } from "~/lib/embed/config";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 /** The CSP `frame-ancestors` value for one saved embed (used by `src/proxy.ts`). */
 export async function GET(_req: Request, ctx: RouteContext<"/api/embed/frame-policy/[id]">) {

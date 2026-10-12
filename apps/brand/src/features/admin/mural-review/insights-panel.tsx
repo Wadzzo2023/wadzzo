@@ -5,14 +5,14 @@ import { Activity, AlertTriangle, CheckCircle2, Coins, DollarSign, UserPlus } fr
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { cn } from "~/lib/utils";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
-import { StatCard } from "~/ui/stat-card";
-import { StatusPill } from "~/ui/status-pill";
-import { FilterChips } from "~/ui/toolbar";
+import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
+import { FilterChips } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Insights = RouterOutputs["admin"]["murals"]["insights"];

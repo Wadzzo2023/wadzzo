@@ -6,11 +6,11 @@ import Link from "next/link";
 
 import { FollowButton } from "~/components/creator/creator-actions";
 import { tierColor } from "~/components/creator/tier-card";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { env } from "~/env";
 import { creatorHref } from "~/lib/creator";
-import { cn } from "~/lib/utils";
-import { Avatar } from "~/ui/person";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import type { RouterOutputs } from "~/utils/api";
 
 import type { PostData } from "./post-card";

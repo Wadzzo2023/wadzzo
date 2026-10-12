@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { followTrustlineXdr } from "~/server/stellar/follow";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 // import { getSession } from "next-auth/react";
 

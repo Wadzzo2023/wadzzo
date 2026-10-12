@@ -18,7 +18,7 @@ import {
   MAX_ENTRY_FILES,
 } from "~/lib/ar/entryFiles";
 import { type UploadedMedia, useEntryUpload } from "~/lib/ar/useEntryUpload";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";
 
 export type Entry = RouterOutputs["bounty"]["entries"][number];

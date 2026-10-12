@@ -1,6 +1,6 @@
 import { Asset, Horizon, NotFoundError } from "@stellar/stellar-sdk";
 
-import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET, STELLAR_URL } from "./constant";
+import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
 
 export type Balances = Horizon.HorizonApi.AccountResponse["balances"];
 export type AssetRef = { code: string; issuer: string };

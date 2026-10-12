@@ -4,8 +4,8 @@ import { Bell, CheckCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/shadcn/ui/popover";
-import { cn } from "~/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Skeleton } from "~/ui/skeleton";
 import { api } from "~/utils/api";
 

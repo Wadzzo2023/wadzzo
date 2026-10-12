@@ -7,14 +7,14 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { PinQRButton } from "~/components/pins/qr";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { env } from "~/env";
-import { cn } from "~/lib/utils";
-import { ConfirmDialog } from "~/ui/confirm-dialog";
+import { cn } from "@wadzzo/ui/lib/cn";
+import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { Check } from "~/ui/data-table";
-import { ErrorState } from "~/ui/error-state";
+import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Skeleton } from "~/ui/skeleton";
-import { StatusPill } from "~/ui/status-pill";
+import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { plural } from "./model";

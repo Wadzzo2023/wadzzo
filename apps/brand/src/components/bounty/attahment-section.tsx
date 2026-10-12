@@ -4,8 +4,8 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
 import { Download } from "lucide-react";
-import { downloadAttachment } from "~/utils/utils";
-import { Button } from "../shadcn/ui/button";
+import { downloadAttachment } from "@wadzzo/utils/utils";
+import { Button } from "@wadzzo/ui/components/button";
 import CustomPlayer from "../common/custom-bounty-player";
 
 interface Attachment {

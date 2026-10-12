@@ -1,7 +1,7 @@
 import { formatPostCreatedAt } from "~/utils/format-date"
 import { useSession } from "next-auth/react"
 import React, { useState } from "react"
-import type { BountyComment } from "@prisma/client"
+import type { BountyComment } from "@wadzzo/db";
 import { api } from "~/utils/api"
 import CustomAvatar from "../common/custom-avatar"
 import ContextMenu from "../common/context-menu"

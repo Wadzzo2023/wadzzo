@@ -4,18 +4,11 @@ import { LogIn, LogOut, Settings, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/shadcn/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/shadcn/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { api } from "~/utils/api";
-import { addrShort } from "~/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 /** The avatar menu in the header: settings and sign in/out. Navigation lives in the sidebar. */
 export function UserMenu() {
@@ -43,7 +36,7 @@ export function UserMenu() {
           <>
             <DropdownMenuLabel className="font-normal">
               <span className="block truncate text-sm font-semibold">{name}</span>
-              {id && <span className="block truncate font-mono text-[11px] text-muted-foreground">{addrShort(id, 6)}</span>}
+              {id && <span className="block truncate font-mono text-[11px] text-muted-foreground">{abbreviateAddress(id, 6)}</span>}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="gap-2">

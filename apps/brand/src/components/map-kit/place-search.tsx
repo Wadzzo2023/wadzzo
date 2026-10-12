@@ -4,7 +4,7 @@ import { Crosshair, Loader2, MapPin, Search, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { env } from "~/env";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { parseCoordinates, type LatLng } from "./geo";
 

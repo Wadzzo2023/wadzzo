@@ -1,12 +1,12 @@
-import { type Prisma } from "@prisma/client";
+import { type Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { pageAssetRef, tierBalances } from "~/server/access";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import type { Db } from "~/server/db";
-import { notify } from "~/server/notify";
-import { platformScope } from "~/server/platform-scope";
+import type { Db } from "@wadzzo/db";
+import { notify } from "@wadzzo/platform/server";
+import { platformScope } from "@wadzzo/platform/scope";
 
 const postSelect = {
   id: true,

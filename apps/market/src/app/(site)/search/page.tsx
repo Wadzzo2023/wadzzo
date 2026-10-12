@@ -8,7 +8,7 @@ import { BountyCard } from "~/components/bounty/bounty-card";
 import { CreatorCard } from "~/components/creator/creator-card";
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "~/ui/empty-state";
+import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 
 const queryOf = (sp: Record<string, string | string[] | undefined>) => (typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "");

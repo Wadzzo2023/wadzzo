@@ -1,31 +1,30 @@
 "use client";
 
-import { MediaType } from "@prisma/client";
+import { MediaType } from "@wadzzo/db";
 import { Box, Coins, ImageIcon, Loader2, Lock, Music, Package, Receipt, Sparkles, Video } from "lucide-react";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { clientsign } from "package/connect_wallet";
-import { WalletType } from "package/connect_wallet/src/lib/enums";
+import { signAndSubmitTransaction } from "@wadzzo/wallet";
+import { WalletType } from "@wadzzo/wallet/shared";
 import { useDeferredValue, useState } from "react";
 import toast from "react-hot-toast";
 
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { AiTextButton } from "~/ui/ai/ai-text";
-import { Button } from "~/components/shadcn/ui/button";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Textarea } from "~/components/shadcn/ui/textarea";
-import { PLATFORM_ASSET } from "~/lib/stellar/constant";
-import { clientSelect } from "~/lib/stellar/fan/utils";
-import { cn } from "~/lib/utils";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Textarea } from "@wadzzo/ui/components/textarea";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { EndPointType } from "~/server/s3";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api } from "~/utils/api";
 import { uploadToIpfs } from "~/ui/upload/ipfs";
-import { ipfsHashToPinataGatewayUrl } from "~/utils/ipfs";
+import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 
 const KINDS: { type: MediaType; label: string; icon: typeof ImageIcon; endpoint: EndPointType; hint?: string }[] = [
   { type: MediaType.IMAGE, label: "Image", icon: ImageIcon, endpoint: "imageUploader" },
@@ -144,7 +143,7 @@ export default function NewAssetPage() {
       });
       if (res.txId && res.xdr) {
         setStep("signing");
-        const signed = await clientsign({ presignedxdr: res.xdr, pubkey: session.data?.user.id, walletType, test: clientSelect() }).catch(() => false);
+        const signed = await signAndSubmitTransaction({ xdr: res.xdr, publicKey: session.data?.user.id, walletType}).catch(() => false);
         if (!signed) {
           await cancel.mutateAsync({ txId: res.txId }).catch(() => undefined);
           toast.error("The transaction wasn't signed, so the item wasn't created.");

@@ -7,8 +7,8 @@ import {
   protectedProcedure,
   adminProcedure,
 } from "~/server/api/trpc";
-import { logAudit } from "~/server/audit";
-import { inPlatformScope, platformScope } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import { isInPlatformScope, platformScope } from "@wadzzo/platform/server";
 
 export const adminRouter = createTRPCRouter({
   /** The caller's admin access on this deployment (undefined when not an admin here). */
@@ -34,7 +34,7 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const platformId = input.platformId ?? ctx.platform.id;
       // A platform's admins add admins to their own platform; a Wadzzo admin can add to any.
-      if (!ctx.isSuperAdmin && !inPlatformScope(ctx, platformId)) throw new TRPCError({ code: "FORBIDDEN", message: "You can only add admins to your own platform." });
+      if (!ctx.isSuperAdmin && !isInPlatformScope(ctx, platformId)) throw new TRPCError({ code: "FORBIDDEN", message: "You can only add admins to your own platform." });
       if (!(await ctx.db.platform.findUnique({ where: { id: platformId }, select: { id: true } }))) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Unknown platform." });
       }
@@ -77,7 +77,7 @@ export const adminRouter = createTRPCRouter({
       // Never lock a platform out: not yourself, and never its last admin.
       if (input === ctx.session.user.id) throw new TRPCError({ code: "BAD_REQUEST", message: "You can't remove your own admin access." });
       const target = await ctx.db.admin.findUnique({ where: { id: input }, select: { platformId: true } });
-      if (!target || (!ctx.isSuperAdmin && !inPlatformScope(ctx, target.platformId))) throw new TRPCError({ code: "NOT_FOUND", message: "Admin not found." });
+      if (!target || (!ctx.isSuperAdmin && !isInPlatformScope(ctx, target.platformId))) throw new TRPCError({ code: "NOT_FOUND", message: "Admin not found." });
       if ((await ctx.db.admin.count({ where: { platformId: target.platformId } })) <= 1) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "There must always be at least one admin." });
       }

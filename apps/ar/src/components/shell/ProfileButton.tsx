@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { useAuth } from "~/lib/ar/store";
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * ── ProfileButton ──────────────────────────────────────────────────────────

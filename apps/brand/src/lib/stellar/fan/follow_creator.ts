@@ -6,8 +6,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "../constant";
-import { type SignUserType, WithSing } from "../utils";
+import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
 import { type MyAssetType } from "./utils";
 
 /**
@@ -22,7 +22,7 @@ export async function follow_creator({
 }: {
   userPubkey: string;
   creatorPageAsset: MyAssetType;
-  signWith: SignUserType;
+  signWith: CustodialSigner;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
 
@@ -59,7 +59,7 @@ export async function follow_creator({
   buildTrx.sign(motherAccount);
 
   const xdr = buildTrx.toXDR();
-  const singedXdr = WithSing({ xdr, signWith: signWith });
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith: signWith });
 
   return singedXdr;
 }

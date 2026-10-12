@@ -1,6 +1,6 @@
 "use client";
 
-import { PinType } from "@prisma/client";
+import { PinType } from "@wadzzo/db";
 import { Hexagon, Loader2, MapPinOff, Plus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,8 +16,8 @@ import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
 import HotspotDetailModal from "~/components/modals/hotspot-details-modal";
 import PinDetailAndActionsModal from "~/components/modals/pin-detail-modal";
-import { Button } from "~/components/shadcn/ui/button";
-import { Switch } from "~/components/shadcn/ui/switch";
+import { Button } from "@wadzzo/ui/components/button";
+import { Switch } from "@wadzzo/ui/components/switch";
 import { useSelectCreatorStore, type SelectedCreator } from "~/components/store/creator-selection-store";
 import { AgentChat } from "~/features/agent/agent-chat";
 import { AgentMapLayer } from "~/features/agent/agent-map";

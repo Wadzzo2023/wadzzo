@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import type { Db } from "~/server/db";
-import { brandWorksOnPlatform, canAdminPlatform, inPlatformScope, type ScopePlatform } from "~/server/platform-scope";
+import type { Db } from "@wadzzo/db";
+import { brandWorksOnPlatform, canAdminPlatform, isInPlatformScope, type ScopePlatform } from "@wadzzo/platform/scope";
 
 type AuthCtx = {
   db: Db;
@@ -54,7 +54,7 @@ export async function assertOwnerOrAdmin(ctx: AuthCtx, ...allowed: (string | nul
 /** The brand's platform, after checking this deployment may manage it (NOT_FOUND otherwise). */
 export async function assertCreatorInScope(ctx: AuthCtx, creatorId: string) {
   const creator = await ctx.db.creator.findUnique({ where: { id: creatorId }, select: { platformId: true } });
-  if (!creator || !inPlatformScope(ctx, creator.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+  if (!creator || !isInPlatformScope(ctx, creator.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
   return creator.platformId;
 }
 
@@ -78,7 +78,7 @@ export async function resolveActingBrand(ctx: AuthCtx, requestedId?: string | nu
     }
   } else {
     if (!(await isAdmin(ctx))) throw new TRPCError({ code: "FORBIDDEN", message: "Only an admin can act for another brand" });
-    if (!creator || !inPlatformScope(ctx, creator.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+    if (!creator || !isInPlatformScope(ctx, creator.platformId)) throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
   }
 
   return { creatorId, platformId: creator.platformId };

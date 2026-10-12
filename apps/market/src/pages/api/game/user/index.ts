@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getSession } from "next-auth/react";
 import { EnableCors } from "~/server/api-cors";
-import { db } from "~/server/db";
+import { db } from "@wadzzo/db";
 
 export default async function handler(
   req: NextApiRequest,

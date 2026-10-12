@@ -1,14 +1,14 @@
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
 import { StellarAccount } from "~/lib/stellar/account";
-import { BASE_RESERVE_XLM, PLATFORM_ASSET, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "~/lib/stellar/constant";
+import { BASE_RESERVE_XLM, PLATFORM_ASSET, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import type { CostLine, Problem } from "~/lib/stellar/quote";
 import { pageAssetRef } from "~/server/access";
-import type { Db } from "~/server/db";
+import type { Db } from "@wadzzo/db";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 import { xlmToPlatform } from "./prices";

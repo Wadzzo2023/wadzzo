@@ -47,7 +47,7 @@ const bal = async (id: string, asset: Asset | "XLM") => {
 
 describe("fan app money flows (testnet)", () => {
   it("buy, bulk buy, resale, send, and accepting a gift", async () => {
-    const { db } = await import("~/server/db");
+    const { db } = await import("@wadzzo/db");
     const { PLATFORM_ASSET } = await import("~/lib/stellar/constant");
     const { preparePurchase } = await import("~/server/stellar/purchase");
     const { prepareStorageSetup, prepareListing } = await import("~/server/stellar/resale");

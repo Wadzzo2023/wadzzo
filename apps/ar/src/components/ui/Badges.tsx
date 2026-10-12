@@ -3,7 +3,7 @@ import { type ReactNode } from "react";
 
 import { RARITY_META, STATUS_META } from "~/lib/ar/rarity";
 import type { DetectionMethod, PinStatus, Rarity } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
  * Rarity plate — the small hard-edged tag in the corner of every card.

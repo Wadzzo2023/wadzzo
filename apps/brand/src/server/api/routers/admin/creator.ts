@@ -8,10 +8,10 @@ import {
   creatorProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-import { logAudit } from "~/server/audit";
-import { platformScope } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import { platformScope } from "@wadzzo/platform/server";
 import { creatorExtraFiledsSchema } from "~/types/creator";
-import { urlToIpfsHash } from "~/utils/ipfs";
+import { urlToIpfsHash } from "@wadzzo/utils/ipfs";
 export const MAX_ASSET_LIMIT = Number("922337203685");
 
 export const creatorRouter = createTRPCRouter({

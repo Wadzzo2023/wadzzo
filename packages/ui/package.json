@@ -1,0 +1,50 @@
+{
+  "name": "@wadzzo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared shadcn/Radix components and page patterns for the Wadzzo web apps.",
+  "exports": {
+    "./components/*": "./src/components/*.tsx",
+    "./patterns/*": "./src/patterns/*.tsx",
+    "./lib/*": "./src/lib/*.ts",
+    "./hooks/*": "./src/components/*.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "dependencies": {
+    "@radix-ui/react-alert-dialog": "catalog:",
+    "@radix-ui/react-avatar": "catalog:",
+    "@radix-ui/react-checkbox": "catalog:",
+    "@radix-ui/react-dialog": "catalog:",
+    "@radix-ui/react-dropdown-menu": "catalog:",
+    "@radix-ui/react-label": "catalog:",
+    "@radix-ui/react-popover": "catalog:",
+    "@radix-ui/react-progress": "catalog:",
+    "@radix-ui/react-radio-group": "catalog:",
+    "@radix-ui/react-scroll-area": "catalog:",
+    "@radix-ui/react-select": "catalog:",
+    "@radix-ui/react-separator": "catalog:",
+    "@radix-ui/react-slot": "catalog:",
+    "@radix-ui/react-switch": "catalog:",
+    "@radix-ui/react-tabs": "catalog:",
+    "@radix-ui/react-toast": "catalog:",
+    "@radix-ui/react-tooltip": "catalog:",
+    "@wadzzo/utils": "workspace:*",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "date-fns": "catalog:",
+    "lucide-react": "catalog:",
+    "react-day-picker": "catalog:",
+    "tailwind-merge": "catalog:",
+    "vaul": "catalog:"
+  },
+  "peerDependencies": { "react": "catalog:", "react-dom": "catalog:" },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@wadzzo/tsconfig": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

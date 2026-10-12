@@ -3,15 +3,15 @@ import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import type { Platform } from "@prisma/client";
+import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
-import { WalletType } from "package/connect_wallet/src/lib/enums";
+import { WalletType } from "@wadzzo/wallet/shared";
 
 import { env } from "~/env";
-import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "~/lib/stellar/constant";
-import { WithSing } from "~/lib/stellar/utils";
-import type { db as Db } from "~/server/db";
+import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import type { db as Db } from "@wadzzo/db";
 
 /*
  * Creator items under the lazy-mint model. Every creator has ONE issuer
@@ -228,7 +228,7 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
       platformId: ctx.platform.id,
     },
   });
-  const xdr = await WithSing({ xdr: built.toXDR(), signWith: signerFor(ctx.session) });
+  const xdr = await signXdrForCustodialUser({ xdr: built.toXDR(), signWith: signerFor(ctx.session) });
   return { assetId: asset.id, txId: row.id, xdr };
 }
 

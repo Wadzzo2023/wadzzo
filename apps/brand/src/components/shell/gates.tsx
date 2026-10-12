@@ -4,14 +4,14 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ConnectWalletButton } from "package/connect_wallet";
+import { ConnectWalletButton } from "@wadzzo/wallet";
 import { useEffect, type ReactNode } from "react";
 
 import { BannedCreatorCard } from "~/components/brand/ban-artist";
 import JoinArtistPage from "~/components/brand/join-artist";
 import PendingArtistPage from "~/components/brand/pending-artist";
 import RequestApprovalCard from "~/components/brand/request-approval";
-import { Button } from "~/components/shadcn/ui/button";
+import { Button } from "@wadzzo/ui/components/button";
 import { PageSkeleton } from "~/ui/skeleton";
 
 import type { usePortalAccess } from "./use-portal-access";

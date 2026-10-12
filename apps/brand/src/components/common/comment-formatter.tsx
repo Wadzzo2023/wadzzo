@@ -1,5 +1,5 @@
-import { cn } from "~/lib/utils"
-import { Button } from "../shadcn/ui/button"
+import { cn } from "@wadzzo/ui/lib/cn";
+import { Button } from "@wadzzo/ui/components/button";
 import { useState, type ReactElement } from "react"
 
 interface CommentFormatterProps {

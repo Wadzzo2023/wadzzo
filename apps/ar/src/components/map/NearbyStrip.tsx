@@ -7,7 +7,7 @@ import { AR_CAPTURE_RADIUS, formatDistance } from "~/lib/ar/geo";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArPin } from "~/lib/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 export interface NearbyPin {
   pin: ArPin;

@@ -1,10 +1,10 @@
 "use client";
 
-import type { MediaType } from "@prisma/client";
+import type { MediaType } from "@wadzzo/db";
 import { Lock } from "lucide-react";
 
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 import { MEDIA_META } from "./media-meta";

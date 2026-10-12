@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Price } from "~/components/price/price";
 
 import { MEDIA_META } from "~/components/media/media-meta";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard as ListingCardData } from "~/server/api/routers/market";
-import { Avatar } from "~/ui/person";
+import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "~/ui/skeleton";
 
 const num = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });

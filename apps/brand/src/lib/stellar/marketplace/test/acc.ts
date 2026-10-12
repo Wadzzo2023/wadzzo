@@ -1,5 +1,5 @@
 import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "../../constant";
+import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "@wadzzo/wallet/config";
 
 type Balances = (
   | Horizon.HorizonApi.BalanceLineNative

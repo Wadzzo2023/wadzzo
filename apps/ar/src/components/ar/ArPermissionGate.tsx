@@ -7,7 +7,7 @@ import { useMemo } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";
 import { detectPlatform, LOCATION_STEPS } from "~/lib/ar/locationHelp";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 export type PermState =
   | "pending"

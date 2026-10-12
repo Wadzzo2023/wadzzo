@@ -2,14 +2,14 @@ import { signOut as nextAuthSignOut } from "next-auth/react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Deep import, not the package barrel — `useDialogStore` is the wallet
+// Deep import, not the package barrel — `useConnectWalletDialogStore` is the wallet
 // dialog's own visibility switch and isn't re-exported from
 // `package/connect_wallet`'s public index, same as the deep imports
 // src/server/auth.ts already makes into this submodule.
-import { useDialogStore } from "package/connect_wallet/src/state/connect_wallet_dialog";
+import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 
 import { nonBlank } from "~/lib/utils";
-import { truncateString } from "~/utils/string";
+import { truncateString } from "@wadzzo/utils/string";
 import { DEFAULT_SETTINGS } from "./mock";
 import type { ArSettings, ArUser } from "./types";
 
@@ -130,7 +130,7 @@ export const useAuth = create<AuthState>()(
       gate: null,
       signIn: () => {
         set({ gate: null });
-        useDialogStore.getState().setIsOpen(true);
+        useConnectWalletDialogStore.getState().setIsOpen(true);
       },
       signOut: () => {
         void nextAuthSignOut({ redirect: false });

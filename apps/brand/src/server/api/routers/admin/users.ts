@@ -7,8 +7,8 @@ import {
   protectedProcedure,
   superAdminProcedure,
 } from "~/server/api/trpc";
-import { logAudit } from "~/server/audit";
-import { inPlatformScope, platformScope, relationScope } from "~/server/platform";
+import { logAudit } from "@wadzzo/platform/server";
+import { isInPlatformScope, platformScope, relationScope } from "@wadzzo/platform/server";
 
 import { createTransport, type Transporter } from "nodemailer";
 
@@ -144,7 +144,7 @@ export const userRouter = createTRPCRouter({
 
   deleteAPost: adminProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
     const post = await ctx.db.post.findUnique({ where: { id: input }, select: { platformId: true } });
-    if (!post || !inPlatformScope(ctx, post.platformId)) throw new TRPCError({ code: "NOT_FOUND" });
+    if (!post || !isInPlatformScope(ctx, post.platformId)) throw new TRPCError({ code: "NOT_FOUND" });
     const deleted = await ctx.db.post.delete({ where: { id: input } });
     await logAudit(ctx, { action: "post.delete", entityType: "Post", entityId: input, targetPlatformId: post.platformId });
     return deleted;

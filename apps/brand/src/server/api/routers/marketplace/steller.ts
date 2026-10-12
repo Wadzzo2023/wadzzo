@@ -1,6 +1,6 @@
 import { Keypair } from "@stellar/stellar-sdk";
 import { AwardIcon } from "lucide-react";
-import { getAccSecretFromRubyApi } from "package/connect_wallet/src/lib/stellar/get-acc-secret";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { z } from "zod";
 import { env } from "~/env";
 import { getXLMPriceByPlatformAsset } from "~/lib/stellar/fan/get_token_price";
@@ -13,7 +13,7 @@ import {
   XDR4BuyAssetWithSquire,
   XDR4BuyAssetWithXLM,
 } from "~/lib/stellar/music/trx/payment_xdr";
-import { SignUser } from "~/lib/stellar/utils";
+import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -34,7 +34,7 @@ export const stellarRouter = createTRPCRouter({
         issuerPub: z.string(),
         limit: z.number(),
         placerId: z.string().optional().nullable(),
-        signWith: SignUser,
+        signWith: custodialSignerSchema,
         method: z.enum(["xlm", "asset", "card"]),
       }),
     )
@@ -130,7 +130,7 @@ export const stellarRouter = createTRPCRouter({
       const user = ctx.session.user;
 
       if (user.email) {
-        const secret = await getAccSecretFromRubyApi(user.email);
+        const secret = await fetchCustodialAccountSecret(user.email);
 
         const xdr = await covertSiteAsset2XLM({
           pubkey: user.id,

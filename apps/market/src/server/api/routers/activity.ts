@@ -1,4 +1,4 @@
-import { AssetTxType, type Prisma } from "@prisma/client";
+import { AssetTxType, type Prisma } from "@wadzzo/db";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";

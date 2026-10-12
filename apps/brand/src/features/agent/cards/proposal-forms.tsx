@@ -3,13 +3,13 @@
 import { format } from "date-fns";
 import { useState } from "react";
 
-import { Checkbox } from "~/components/shadcn/ui/checkbox";
-import { Input } from "~/components/shadcn/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/shadcn/ui/select";
-import { Switch } from "~/components/shadcn/ui/switch";
-import { Textarea } from "~/components/shadcn/ui/textarea";
+import { Checkbox } from "@wadzzo/ui/components/checkbox";
+import { Input } from "@wadzzo/ui/components/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import { Switch } from "@wadzzo/ui/components/switch";
+import { Textarea } from "@wadzzo/ui/components/textarea";
 import { UNLIMITED_COLLECTIONS, type PinDefaults, type PlaceItem } from "~/lib/agent/contract";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/ui/lib/cn";
 
 import { MapRow, day } from "./card-kit";
 
