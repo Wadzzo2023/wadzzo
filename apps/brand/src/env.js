@@ -11,7 +11,7 @@ export const env = createEnv({
       .string()
       .regex(/^[a-z0-9-]+$/)
       .default("wadzzo"),
-    /** The Express task server (package/express-wadzzo). Required outside production. */
+    /** The Express task server (apps/express-wadzzo). Required outside production. */
     EXPRESS_SERVER_URL: z.string().url().optional(),
     DATABASE_URL: z
       .string()

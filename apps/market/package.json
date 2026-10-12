@@ -8,12 +8,13 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
     "typecheck": "next typegen && tsc --noEmit",
     "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs market",
     "predev": "pnpm sync:platform",
-    "prebuild": "pnpm sync:platform"
+    "prebuild": "pnpm sync:platform",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@albedo-link/intent": "catalog:",
@@ -90,6 +91,8 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/three": "catalog:",
+    "@wadzzo/tsconfig": "workspace:*",
+    "@wadzzo/vitest-config": "workspace:*",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "postcss": "catalog:",
@@ -100,8 +103,7 @@
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:",
-    "@wadzzo/tsconfig": "workspace:*"
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // The task server's place lookup (package/express-wadzzo/src/agent/google.ts):
 // Google first, OpenStreetMap when Google can't place a name.
 const store = new Map<string, string>();
-vi.mock("../package/express-wadzzo/src/lib/db", () => ({
+vi.mock("../../express-wadzzo/src/lib/db", () => ({
   db: {
     geoCache: {
       findUnique: vi.fn(async ({ where }: { where: { key: string } }) => (store.has(where.key) ? { value: store.get(where.key) } : null)),
@@ -11,10 +11,10 @@ vi.mock("../package/express-wadzzo/src/lib/db", () => ({
     },
   },
 }));
-vi.mock("../package/express-wadzzo/src/lib/logger", () => ({ logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() } }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() } }));
 
-const { geocode, searchPlaces } = await import("../package/express-wadzzo/src/agent/google");
-const { cacheKey } = await import("../package/express-wadzzo/src/agent/geo-cache");
+const { geocode, searchPlaces } = await import("../../express-wadzzo/src/agent/google");
+const { cacheKey } = await import("../../express-wadzzo/src/agent/geo-cache");
 
 afterEach(() => {
   vi.unstubAllGlobals();

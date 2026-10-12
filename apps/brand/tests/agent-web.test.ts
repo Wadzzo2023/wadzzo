@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 // Web list lookups (package/express-wadzzo/src/agent/web.ts) with the model and Google stubbed.
-vi.mock("../package/express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 const findPlace = vi.fn(async (name: string) => ({ id: `g_${name}`, title: name, lat: 1, lng: 2 }));
-vi.mock("../package/express-wadzzo/src/agent/google", () => ({ findPlace, geocode: vi.fn(async () => null) }));
+vi.mock("../../express-wadzzo/src/agent/google", () => ({ findPlace, geocode: vi.fn(async () => null) }));
 const prompts: string[] = [];
-vi.mock("../package/express-wadzzo/node_modules/@langchain/openai", () => ({
+vi.mock("@langchain/openai", () => ({
   ChatOpenAI: class {
     bindTools() {
       return this;
@@ -20,7 +20,7 @@ vi.mock("../package/express-wadzzo/node_modules/@langchain/openai", () => ({
   },
 }));
 
-const { searchWebList } = await import("../package/express-wadzzo/src/agent/web");
+const { searchWebList } = await import("../../express-wadzzo/src/agent/web");
 
 describe("web lists", () => {
   it("look a worldwide list up region by region, then merge duplicates", async () => {

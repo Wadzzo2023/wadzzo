@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 // The real agent router and access rules, run against a stand-in database and task server.
 vi.mock("~/server/auth", () => ({ getServerAuthSession: vi.fn() }));
-vi.mock("@wadzzo/db", () => ({ db: {} }));
+vi.mock("@wadzzo/db/server", () => ({ db: {} }));
 vi.mock("~/env", () => ({ env: { PLATFORM_SLUG: "wadzzo" } }));
 
 const taskClient = { enqueue: vi.fn(), poll: vi.fn() };

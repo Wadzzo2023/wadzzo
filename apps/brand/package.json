@@ -9,12 +9,13 @@
     "lint": "eslint .",
     "start": "next start",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck:tests": "tsc -p tests",
     "typecheck": "next typegen && tsc --noEmit",
     "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs brand",
     "predev": "pnpm sync:platform",
-    "prebuild": "pnpm sync:platform"
+    "prebuild": "pnpm sync:platform",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@albedo-link/intent": "catalog:",
@@ -98,6 +99,8 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@langchain/core": "catalog:",
+    "@langchain/openai": "catalog:",
     "@next/bundle-analyzer": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@tailwindcss/typography": "catalog:",
@@ -109,6 +112,8 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@wadzzo/tsconfig": "workspace:*",
+    "@wadzzo/vitest-config": "workspace:*",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "postcss": "catalog:",
@@ -120,8 +125,7 @@
     "tw-animate-css": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vitest": "catalog:",
-    "@wadzzo/tsconfig": "workspace:*"
+    "vitest": "catalog:"
   },
   "ct3aMetadata": {
     "initVersion": "7.25.2"

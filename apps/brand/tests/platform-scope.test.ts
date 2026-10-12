@@ -5,10 +5,10 @@ import {
   assertInPlatformScope,
   brandWorksOnPlatform,
   canAdminPlatform,
-  inPlatformScope,
+  isInPlatformScope,
   platformScope,
   relationScope,
-} from "../src/server/platform-scope";
+} from "@wadzzo/platform/scope";
 
 const wadzzo = { platform: { id: "wadzzo", isRoot: true } };
 const clinton = { platform: { id: "clintoncounty", isRoot: false } };
@@ -35,12 +35,12 @@ describe("platformScope", () => {
 
 describe("inPlatformScope", () => {
   it("lets the root platform reach any row", () => {
-    expect(inPlatformScope(wadzzo, "clintoncounty")).toBe(true);
+    expect(isInPlatformScope(wadzzo, "clintoncounty")).toBe(true);
   });
 
   it("keeps a sub-platform out of other platforms' rows", () => {
-    expect(inPlatformScope(clinton, "clintoncounty")).toBe(true);
-    expect(inPlatformScope(clinton, "wadzzo")).toBe(false);
+    expect(isInPlatformScope(clinton, "clintoncounty")).toBe(true);
+    expect(isInPlatformScope(clinton, "wadzzo")).toBe(false);
     expect(() => assertInPlatformScope(clinton, "wadzzo")).toThrow();
   });
 });

@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 describe("map agent contract", () => {
   it("is the same in the brand app and the task server", () => {
     const app = readFileSync(resolve(__dirname, "../src/lib/agent/contract.ts"), "utf8");
-    const worker = readFileSync(resolve(__dirname, "../package/express-wadzzo/src/agent/contract.ts"), "utf8");
+    const worker = readFileSync(resolve(__dirname, "../../express-wadzzo/src/agent/contract.ts"), "utf8");
     expect(worker).toBe(app);
   });
 });

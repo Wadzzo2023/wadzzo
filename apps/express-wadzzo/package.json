@@ -14,8 +14,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "catalog:",
     "@aws-sdk/s3-request-presigner": "catalog:",
-    "@langchain/core": "^1.2.17",
-    "@langchain/openai": "^1.6.2",
+    "@langchain/core": "catalog:",
+    "@langchain/openai": "catalog:",
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
     "cors": "^2.8.6",

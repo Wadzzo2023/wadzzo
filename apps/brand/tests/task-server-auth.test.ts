@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 // The task server's gate (package/express-wadzzo), with a quiet logger.
-vi.mock("../package/express-wadzzo/src/lib/logger", () => ({ logger: { warn: vi.fn() } }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { warn: vi.fn() } }));
 vi.mock("~/env", () => ({ env: {} }));
 
 const SECRET = "s".repeat(40);
@@ -15,7 +15,7 @@ async function gate(env: { secret?: string; prod?: boolean }, header?: string) {
   vi.stubEnv("NEXTAUTH_SECRET", env.secret ?? "");
   vi.stubEnv("NODE_ENV", env.prod ? "production" : "development");
   if (!env.secret) delete process.env.NEXTAUTH_SECRET;
-  const { requireTaskSecret } = await import("../package/express-wadzzo/src/middleware/auth");
+  const { requireTaskSecret } = await import("../../express-wadzzo/src/middleware/auth");
 
   const req = { headers: header === undefined ? {} : { "x-task-secret": header }, method: "POST", originalUrl: "/jobs/enqueue", ip: "1.2.3.4" };
   const res: { status: (code: number) => unknown; json: () => unknown } = { status: vi.fn(() => res), json: vi.fn(() => res) };

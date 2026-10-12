@@ -7,12 +7,12 @@ const db = {
   locationTag: { upsert: vi.fn(async () => ({ id: "t1", name: "park" })) },
   creator: { findUniqueOrThrow: vi.fn(async (): Promise<{ platformId: string }> => Promise.reject(new Error("database went away"))) },
 };
-vi.mock("../package/express-wadzzo/src/lib/db", () => ({ db }));
-vi.mock("../package/express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
-vi.mock("../package/express-wadzzo/src/lib/google-place-enrichment", () => ({ enrichPinFromGooglePlace: vi.fn() }));
-vi.mock("../package/express-wadzzo/src/lib/image-optimizer", () => ({ createOptimizedImage: vi.fn() }));
+vi.mock("../../express-wadzzo/src/lib/db", () => ({ db }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock("../../express-wadzzo/src/lib/google-place-enrichment", () => ({ enrichPinFromGooglePlace: vi.fn() }));
+vi.mock("../../express-wadzzo/src/lib/image-optimizer", () => ({ createOptimizedImage: vi.fn() }));
 
-const { runCreatePinsJob } = await import("../package/express-wadzzo/src/workers/create-pins-worker");
+const { runCreatePinsJob } = await import("../../express-wadzzo/src/workers/create-pins-worker");
 
 const pin = { id: "a", type: "LANDMARK", title: "Park", description: "", latitude: 41.8, longitude: -90.2, startDate: "2026-10-10", endDate: "2026-11-10", pinCollectionLimit: 1, radius: 2 };
 const job = {

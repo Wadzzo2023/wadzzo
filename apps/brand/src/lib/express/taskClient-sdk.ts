@@ -1,4 +1,4 @@
-// Client for the Express task server's job queue (package/express-wadzzo).
+// Client for the Express task server's job queue (apps/express-wadzzo).
 // Long work (the map agent, bulk pin creation) runs there; this app enqueues it
 // and polls. Callers must check the user may act for `creatorId` first.
 

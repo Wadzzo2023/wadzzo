@@ -11,16 +11,16 @@ const db = {
   creatorAnnouncement: { findFirst: vi.fn(async () => null), findMany: vi.fn(async () => []) },
   $queryRaw: vi.fn(),
 };
-vi.mock("../package/express-wadzzo/src/lib/db", () => ({ db }));
-vi.mock("../package/express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
+vi.mock("../../express-wadzzo/src/lib/db", () => ({ db }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 const geocode = vi.fn(async (_place: string): Promise<unknown> => null);
 const searchPlaces = vi.fn(async (_query: string, _box: unknown, _limit: number): Promise<unknown[]> => []);
-vi.mock("../package/express-wadzzo/src/agent/google", () => ({ geocode, searchPlaces, findPlace: vi.fn() }));
+vi.mock("../../express-wadzzo/src/agent/google", () => ({ geocode, searchPlaces, findPlace: vi.fn() }));
 
-const { Run } = await import("../package/express-wadzzo/src/agent/run");
-const { inArea, inRing, tiles, areaFromFeature, searchBoxes } = await import("../package/express-wadzzo/src/agent/area");
-const { AGENT_TOOLS } = await import("../package/express-wadzzo/src/agent/tools");
-const { createJob } = await import("../package/express-wadzzo/src/lib/job-store");
+const { Run } = await import("../../express-wadzzo/src/agent/run");
+const { inArea, inRing, tiles, areaFromFeature, searchBoxes } = await import("../../express-wadzzo/src/agent/area");
+const { AGENT_TOOLS } = await import("../../express-wadzzo/src/agent/tools");
+const { createJob } = await import("../../express-wadzzo/src/lib/job-store");
 
 type RunT = InstanceType<typeof Run>;
 const tool = (name: string) => AGENT_TOOLS.find((t: { name: string }) => t.name === name)!;
@@ -165,8 +165,8 @@ describe("the agent loop", () => {
       { content: "I found 1 park in Clinton County.", tool_calls: [] },
     ];
     const seenSteps: unknown[] = [];
-    // The worker resolves @langchain/openai from its own node_modules.
-    vi.doMock("../package/express-wadzzo/node_modules/@langchain/openai", () => ({
+    // The task server and this test resolve the same @langchain/openai instance (both depend on it).
+    vi.doMock("@langchain/openai", () => ({
       ChatOpenAI: class {
         bindTools() {
           return this;
@@ -183,16 +183,16 @@ describe("the agent loop", () => {
         }
       },
     }));
-    vi.doMock("../package/express-wadzzo/src/agent/context", () => ({ loadBrandContext: vi.fn(async () => brand()) }));
+    vi.doMock("../../express-wadzzo/src/agent/context", () => ({ loadBrandContext: vi.fn(async () => brand()) }));
     const saveAnswer = vi.fn(async (run: RunT, _text: string) => {
       seenSteps.push(...run.steps);
       return "msg_1";
     });
-    vi.doMock("../package/express-wadzzo/src/agent/store", () => ({ loadHistory: vi.fn(async () => ({ turns: [{ role: "user", text: "find parks" }], earlierBlocks: [] })), saveAnswer }));
+    vi.doMock("../../express-wadzzo/src/agent/store", () => ({ loadHistory: vi.fn(async () => ({ turns: [{ role: "user", text: "find parks" }], earlierBlocks: [] })), saveAnswer }));
     searchPlaces.mockResolvedValue([{ key: "in", title: "Eagle Point Park", lat: 41.86, lng: -90.18, kind: "place" }]);
 
-    const { runAgent } = await import("../package/express-wadzzo/src/agent/agent");
-    const { createJob: create, getJob: get } = await import("../package/express-wadzzo/src/lib/job-store");
+    const { runAgent } = await import("../../express-wadzzo/src/agent/agent");
+    const { createJob: create, getJob: get } = await import("../../express-wadzzo/src/lib/job-store");
     const job = create({ type: "agent_run", creatorId: "BRAND_A", payload: {} });
     const result = await runAgent(job.id, { conversationId: "conv_1", creatorId: "BRAND_A", platformId: "clintoncounty" });
 

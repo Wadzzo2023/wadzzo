@@ -3,7 +3,7 @@
  * the brand app (which shows it and carries out confirmed actions).
  *
  * KEEP IN SYNC: this file is copied verbatim to
- * package/express-wadzzo/src/agent/contract.ts (a separate repo).
+ * apps/express-wadzzo/src/agent/contract.ts (the task server in this monorepo).
  * tests/agent-contract.test.ts fails if the two copies differ.
  */
 
