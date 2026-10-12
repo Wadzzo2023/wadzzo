@@ -9,15 +9,16 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { logger } from "../lib/logger";
+import { env } from "../lib/env";
 
 /** Must match taskServerKey in the brand app's src/lib/express/server-url.ts. */
 export function taskServerKey(secret: string): string {
   return createHmac("sha256", secret).update("wadzzo-task-server").digest("hex");
 }
 
-const SECRET = process.env.NEXTAUTH_SECRET;
+const SECRET = env.NEXTAUTH_SECRET;
 const KEY = SECRET ? taskServerKey(SECRET) : undefined;
-const IS_PROD = process.env.NODE_ENV === "production";
+const IS_PROD = env.NODE_ENV === "production";
 
 if (!KEY) {
   logger.warn(

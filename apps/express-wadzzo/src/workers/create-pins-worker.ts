@@ -6,9 +6,10 @@ import { logger } from "../lib/logger";
 import { enrichPinFromGooglePlace } from "../lib/google-place-enrichment";
 import { createOptimizedImage } from "@wadzzo/storage";
 import pLimit from "../lib/limit";
+import { env } from "../lib/env";
 
 const ENRICHMENT_CONCURRENCY = 5;
-const DB_WRITE_CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? "5", 10);
+const DB_WRITE_CONCURRENCY = env.WORKER_CONCURRENCY;
 /** Tagging is a nice-to-have: past this, pins are created without tags. */
 const TAGS_TIMEOUT_MS = 30_000;
 
@@ -359,7 +360,7 @@ async function callOpenAI(pin: {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
     },
     signal: AbortSignal.timeout(TAGS_TIMEOUT_MS),
     body: JSON.stringify({

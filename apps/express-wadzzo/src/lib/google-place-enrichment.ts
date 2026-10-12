@@ -1,5 +1,6 @@
 // src/lib/google-place-enrichment.ts
 import { copyImageToBucket } from "@wadzzo/storage";
+import { env } from "./env";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ export interface PlaceEnrichment {
 async function fetchGooglePlaceDetails(gPlaceId: string): Promise<{
   photoName: string | null;
 }> {
-  const apiKey = process.env.GOOGLE_MAP_API_KEY; // add this to your env
+  const apiKey = env.GOOGLE_MAP_API_KEY; // add this to your env
 
   const url =
     `https://places.googleapis.com/v1/places/${encodeURIComponent(gPlaceId)}` +
@@ -45,7 +46,7 @@ async function fetchGooglePlaceDetails(gPlaceId: string): Promise<{
  * Returns a fetchable HTTPS URL for the full-resolution image.
  */
 function buildPlacePhotoUrl(photoName: string, maxWidth = 1200): string {
-  const apiKey = process.env.GOOGLE_MAP_API_KEY;
+  const apiKey = env.GOOGLE_MAP_API_KEY;
   return (
     `https://places.googleapis.com/v1/${photoName}/media` +
     `?maxWidthPx=${maxWidth}&key=${apiKey}&skipHttpRedirect=true`

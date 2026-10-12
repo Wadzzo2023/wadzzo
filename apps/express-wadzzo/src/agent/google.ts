@@ -10,9 +10,10 @@ import type { PlaceItem } from "@wadzzo/agent-contract";
 import { boxSpanKm, tiles, type Box } from "./area";
 import { cached, cacheKey } from "./geo-cache";
 import { geocodeOsm } from "./osm";
+import { env } from "../lib/env";
 
 const API_KEY = () => {
-  const key = process.env.GOOGLE_MAP_API_KEY;
+  const key = env.GOOGLE_MAP_API_KEY;
   if (!key) throw new Error("GOOGLE_MAP_API_KEY is not set on the task server");
   return key;
 };
@@ -54,7 +55,7 @@ export function geocode(address: string): Promise<Geocoded | null> {
 }
 
 async function geocodeGoogle(text: string): Promise<Geocoded | null> {
-  const key = process.env.GOOGLE_MAP_API_KEY;
+  const key = env.GOOGLE_MAP_API_KEY;
   if (!key) return null;
   const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
   url.searchParams.set("address", text);

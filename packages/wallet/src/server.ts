@@ -1,5 +1,4 @@
 /** Server-side wallet API: sign-in verification and signing for custodial accounts. */
-import "server-only";
 
 export { buildLoginChallengeXdr, verifyTransactionSignature } from "./server/login-challenge";
 export { fetchCustodialAccountSecret } from "./server/custodial-account-secret";

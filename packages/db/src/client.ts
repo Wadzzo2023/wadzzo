@@ -11,6 +11,7 @@ const CONNECTION_TIMEOUT_MS = 30_000;
  * survives hot reloads on globalThis.
  */
 function createDbClient() {
+  const poolMax = Number(process.env.DATABASE_POOL_MAX) || undefined;
   const isBuildWithoutEnv =
     process.env.SKIP_ENV_VALIDATION === "1" || process.env.SKIP_ENV_VALIDATION === "true";
   const connectionString = isBuildWithoutEnv
@@ -18,7 +19,12 @@ function createDbClient() {
     : requireEnv("DATABASE_URL", process.env.DATABASE_URL);
 
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString, connectionTimeoutMillis: CONNECTION_TIMEOUT_MS }),
+    adapter: new PrismaPg({
+      connectionString,
+      connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
+      // Poolers and embedded databases may allow only a few connections.
+      ...(poolMax ? { max: poolMax } : {}),
+    }),
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
     // Secret keys are never loaded unless a query asks for them by name
     // (`select: { storageSecret: true }`), so a stray `include: { creator: true }`

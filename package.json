@@ -19,7 +19,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml}\" --ignore-path .prettierignore",
     "db:generate": "pnpm --filter @wadzzo/db generate",
     "db:studio": "pnpm --filter @wadzzo/db studio",
-    "clean": "git clean -xdf node_modules .turbo .next"
+    "clean": "git clean -xdf node_modules .turbo .next",
+    "db:local": "pnpm --filter @wadzzo/local-db start"
   },
   "devDependencies": {
     "@wadzzo/prettier-config": "workspace:*",

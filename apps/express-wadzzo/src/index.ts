@@ -12,16 +12,16 @@ import { hotspotScheduler } from "./lib/hotspot-scheduler";
 import jobsRouter from "./routes/jobs";
 import healthRouter from "./routes/health";
 import hotspotsRouter from "./routes/hotspots";
+import { env } from "./lib/env";
 
 const app: Express = express();
-const PORT = parseInt(process.env.PORT ?? "4000", 10);
+const PORT = env.PORT;
 app.set("trust proxy", 1);
 
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
 const helmetMw = helmet() as RequestHandler;
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
-  .split(",")
+const allowedOrigins = env.ALLOWED_ORIGINS.split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
@@ -40,8 +40,8 @@ const morganMw = morgan("combined", {
 }) as RequestHandler;
 
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "60000", 10),
-  limit: parseInt(process.env.RATE_LIMIT_MAX ?? "200", 10),
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  limit: env.RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests, please slow down" },
@@ -102,7 +102,7 @@ setInterval(() => pruneOldJobs(), 30 * 60 * 1000);
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const server = app.listen(PORT, () => {
-  logger.info(`✓ Task server running on port ${PORT} (${process.env.NODE_ENV ?? "development"})`);
+  logger.info(`✓ Task server running on port ${PORT} (${env.NODE_ENV})`);
   logger.info(`  Health:     http://localhost:${PORT}/health`);
   logger.info(`  Jobs API:   http://localhost:${PORT}/jobs`);
   logger.info(`  SSE:        http://localhost:${PORT}/jobs/:id/stream`);

@@ -1,10 +1,11 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { env } from "./env";
 
 /** Neon databases sleep when idle; give a cold start time to wake. */
 const CONNECTION_TIMEOUT_MS = 30_000;
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is not set");
 
 const globalForPrisma = globalThis as unknown as {
@@ -18,7 +19,7 @@ export const db =
       connectionString,
       connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
     }),
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;

@@ -1,0 +1,14 @@
+{
+  "name": "@wadzzo/local-db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An embedded Postgres (PGlite) with the shared schema, for running the apps locally without Docker or a hosted database.",
+  "scripts": {
+    "start": "node start.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "catalog:",
+    "@electric-sql/pglite-socket": "catalog:"
+  }
+}
