@@ -17,7 +17,7 @@ import { AssetSelectAllProperty } from "../marketplace/marketplace";
 import { get } from "http";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-export const accRouter = createTRPCRouter({
+export const accountRouter = createTRPCRouter({
   getAccountInfo: protectedProcedure.query(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
     const { tokens: assets } = await accountDetailsWithHomeDomain({
@@ -48,12 +48,12 @@ export const accRouter = createTRPCRouter({
     return await getAccountInfos(userId);
   }),
 
-  getUserPubAssetBallances: protectedProcedure.query(async ({ ctx, input }) => {
+  getUserPubAssetBalances: protectedProcedure.query(async ({ ctx, input }) => {
     const pubkey = ctx.session.user.id;
 
     return await accountBalances({ userPub: pubkey });
   }),
-  getCreatorStorageBallances: creatorProcedure.query(async ({ ctx, input }) => {
+  getCreatorStorageBalances: creatorProcedure.query(async ({ ctx, input }) => {
     const creator = ctx.session.user.id;
 
     const storage = await ctx.db.creator.findUniqueOrThrow({
@@ -63,7 +63,7 @@ export const accRouter = createTRPCRouter({
 
     return await accountBalances({ userPub: storage.storagePub });
   }),
-  getCreatorPageAssetBallances: creatorProcedure.query(async ({ ctx, input }) => {
+  getCreatorPageAssetBalances: creatorProcedure.query(async ({ ctx, input }) => {
     const creatorId = ctx.session.user.id;
     const storage = await ctx.db.creator.findUniqueOrThrow({
       where: { id: creatorId },
@@ -89,7 +89,7 @@ export const accRouter = createTRPCRouter({
       issuer: assetIssuer,
     });
   }),
-  getCreatorStorageBallancesByID: creatorProcedure
+  getCreatorStorageBalancesByID: creatorProcedure
     .input(
       z.object({
         creatorId: z.string(),

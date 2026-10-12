@@ -88,17 +88,17 @@ export function getAssetBalanceFromBalance({
 }
 
 export async function getAccountInfos(pubkey: string) {
-  const allBallances = await accountBalances({ userPub: pubkey });
+  const allBalances = await accountBalances({ userPub: pubkey });
   const platformAssetBal = getAssetBalanceFromBalance({
-    balances: allBallances,
+    balances: allBalances,
     code: PLATFORM_ASSET.code,
     issuer: PLATFORM_ASSET.issuer,
   });
   const xlm = getAssetBalanceFromBalance({
-    balances: allBallances,
+    balances: allBalances,
     native: true,
   });
-  return { balances: allBallances, xlm, platformAssetBal };
+  return { balances: allBalances, xlm, platformAssetBal };
 }
 
 export async function accountDetailsWithHomeDomain({ userPub }: { userPub: string }) {

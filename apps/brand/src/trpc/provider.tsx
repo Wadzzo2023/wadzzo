@@ -35,11 +35,11 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
             op.direction === "down" &&
             op.result instanceof Error,
         }),
-        // Stellar balance lookups (wallate.acc.*) call Horizon and can take
+        // Stellar balance lookups (wallet.account.*) call Horizon and can take
         // seconds; they go on their own so access checks and page data never
         // wait for them. Everything else is batched.
         splitLink({
-          condition: (op) => op.path.startsWith("wallate.acc."),
+          condition: (op) => op.path.startsWith("wallet.account."),
           true: httpLink({ url: "/api/trpc", transformer: superjson }),
           false: httpBatchStreamLink({
             url: "/api/trpc",

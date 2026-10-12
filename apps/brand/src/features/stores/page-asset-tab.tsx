@@ -37,7 +37,7 @@ export function PageAssetTab() {
   const overview = api.fan.creator.profileOverview.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const balance = api.wallate.acc.getCreatorPageAssetBallances.useQuery(undefined, {
+  const balance = api.wallet.account.getCreatorPageAssetBalances.useQuery(undefined, {
     refetchOnWindowFocus: false,
     retry: false,
   });

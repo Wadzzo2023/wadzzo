@@ -29,7 +29,7 @@ export default function PageAssetSalePage({ id }: { id?: number }) {
   const overview = api.fan.creator.profileOverview.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
-  const balance = api.wallate.acc.getCreatorPageAssetBallances.useQuery(undefined, {
+  const balance = api.wallet.account.getCreatorPageAssetBalances.useQuery(undefined, {
     refetchOnWindowFocus: false,
     retry: false,
   });

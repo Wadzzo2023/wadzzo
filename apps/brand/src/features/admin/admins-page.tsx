@@ -33,23 +33,23 @@ import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 
-type Admin = RouterOutputs["wallate"]["admin"]["admins"][number];
+type Admin = RouterOutputs["wallet"]["admin"]["admins"][number];
 const PUBKEY = /^G[A-Z2-7]{55}$/;
 
 /** Admin › Admins: who can approve brands and manage the platform. */
 export default function AdminsPage() {
   const session = useSession();
   const me = session.data?.user.id;
-  const admins = api.wallate.admin.admins.useQuery();
+  const admins = api.wallet.admin.admins.useQuery();
   const utils = api.useUtils();
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<Admin | null>(null);
 
-  const remove = api.wallate.admin.deleteAdmin.useMutation({
+  const remove = api.wallet.admin.deleteAdmin.useMutation({
     onSuccess: () => {
       toast.success("Admin access removed");
       setRemoving(null);
-      void utils.wallate.admin.admins.invalidate();
+      void utils.wallet.admin.admins.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -190,10 +190,10 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
   const [key, setKey] = useState("");
   const [target, setTarget] = useState<string>();
   const [error, setError] = useState<string>();
-  const add = api.wallate.admin.makeAdmin.useMutation({
+  const add = api.wallet.admin.makeAdmin.useMutation({
     onSuccess: (r) => {
       toast.success(r.moved ? `Moved from ${r.from} — they're now an admin here` : "Admin added");
-      void utils.wallate.admin.admins.invalidate();
+      void utils.wallet.admin.admins.invalidate();
       onClose();
     },
     onError: (e) => setError(e.message),

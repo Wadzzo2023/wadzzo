@@ -47,7 +47,7 @@ export function usePortalAccess() {
   const signedIn = session.status === "authenticated";
   const userId = session.data?.user?.id;
 
-  const admin = api.wallate.admin.checkAdmin.useQuery(undefined, {
+  const admin = api.wallet.admin.checkAdmin.useQuery(undefined, {
     enabled: signedIn,
     retry: false,
   });
@@ -63,11 +63,11 @@ export function usePortalAccess() {
     retry: false,
   });
 
-  const account = api.wallate.acc.getAccountBalance.useQuery(undefined, {
+  const account = api.wallet.account.getAccountBalance.useQuery(undefined, {
     enabled: signedIn,
     retry: false,
   });
-  const storage = api.wallate.acc.getCreatorStorageBallances.useQuery(undefined, {
+  const storage = api.wallet.account.getCreatorStorageBalances.useQuery(undefined, {
     enabled: signedIn && approved,
     retry: false,
   });

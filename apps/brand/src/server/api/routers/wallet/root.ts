@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { assetRouter } from "./asset";
-import { accRouter } from "./account";
+import { accountRouter } from "./account";
 import { adminRouter } from "./admin";
 import { tagRouter } from "./tag";
 import { pinataUploadRouter } from "./upload";
@@ -9,9 +9,9 @@ import { pinataUploadRouter } from "./upload";
  *
  * All routers added in /api/routers should be manually added here.
  */
-export const wallateRouter = createTRPCRouter({
+export const walletRouter = createTRPCRouter({
   asset: assetRouter,
-  acc: accRouter,
+  account: accountRouter,
   admin: adminRouter,
   tag: tagRouter,
   pinata: pinataUploadRouter,

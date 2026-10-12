@@ -6,7 +6,7 @@ import { WBalanceRouter } from "./account";
  *
  * All routers added in /api/routers should be manually added here.
  */
-export const wallateBalanceRouter = createTRPCRouter({
+export const walletBalanceRouter = createTRPCRouter({
   wallBalance: WBalanceRouter,
 });
 
