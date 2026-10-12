@@ -4,7 +4,7 @@ import { Price } from "~/components/price/price";
 
 import { MEDIA_META } from "~/components/media/media-meta";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { ListingCard as ListingCardData } from "~/server/api/routers/market";
+import type { ListingCard as ListingCardData } from "@wadzzo/api/market/routers/market";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { platformBranding } from "@wadzzo/platform/branding";

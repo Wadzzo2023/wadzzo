@@ -17,15 +17,15 @@ import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { ArIconButton } from "~/components/ui/ArButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
-import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
+import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { FALLBACK_CENTER } from "~/lib/ar/mock";
-import { pinStatus } from "~/lib/ar/rarity";
+import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { useFeedback } from "~/lib/ar/feedback";
 import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useSettings } from "~/lib/ar/store";
-import type { ArPin, TravelMode } from "~/lib/ar/types";
+import type { ArPin, TravelMode } from "@wadzzo/ar-core/ar/types";
 import { GEO_REASON_TEXT, useGeolocation, type GeoReason } from "~/lib/ar/useGeolocation";
 import {
   filterPins,

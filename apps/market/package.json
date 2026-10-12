@@ -75,7 +75,7 @@
     "react-hot-toast": "catalog:",
     "react-square-web-payments-sdk": "catalog:",
     "server-only": "catalog:",
-    "square": "^46.0.0",
+    "square": "catalog:",
     "superjson": "catalog:",
     "tailwind-merge": "catalog:",
     "three": "catalog:",

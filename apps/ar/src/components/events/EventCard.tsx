@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { dateTile, eventWhen, liveState, spotsLabel } from "~/lib/ar/events";
-import type { ArEventCard } from "~/lib/ar/types";
+import type { ArEventCard } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**

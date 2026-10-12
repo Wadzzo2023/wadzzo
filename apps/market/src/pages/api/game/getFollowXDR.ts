@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
-import { followTrustlineXdr } from "~/server/stellar/follow";
+import { followTrustlineXdr } from "@wadzzo/api/market/server/stellar/follow";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 

@@ -1,4 +1,4 @@
-import type { Rarity } from "~/lib/ar/types";
+import type { Rarity } from "@wadzzo/ar-core/ar/types";
 
 /**
  * The rarity palette as literal `[h, s, l]` triplets, for `THREE.Color`.

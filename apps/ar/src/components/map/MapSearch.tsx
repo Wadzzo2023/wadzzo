@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MapPin, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { distanceMeters, formatDistance } from "~/lib/ar/geo";
-import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
+import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
+import type { ArPin, Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import { api } from "~/utils/api";
 
 const MAX_PINS = 8;

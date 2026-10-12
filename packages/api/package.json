@@ -6,7 +6,8 @@
   "description": "tRPC foundation shared by the web apps: one context, one set of base procedures, and the routers every app serves.",
   "exports": {
     ".": "./src/index.ts",
-    "./routers/*": "./src/routers/*.ts"
+    "./env": "./src/env.ts",
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -14,14 +15,24 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@huggingface/transformers": "catalog:",
+    "@photostructure/tz-lookup": "catalog:",
+    "@stellar/stellar-sdk": "catalog:",
     "@trpc/server": "catalog:",
+    "@wadzzo/ar-core": "workspace:*",
     "@wadzzo/auth": "workspace:*",
     "@wadzzo/db": "workspace:*",
     "@wadzzo/errors": "workspace:*",
     "@wadzzo/platform": "workspace:*",
     "@wadzzo/stellar": "workspace:*",
     "@wadzzo/storage": "workspace:*",
+    "@wadzzo/utils": "workspace:*",
     "@wadzzo/wallet": "workspace:*",
+    "google-auth-library": "catalog:",
+    "jsonwebtoken": "catalog:",
+    "nodemailer": "catalog:",
+    "server-only": "catalog:",
+    "square": "catalog:",
     "superjson": "catalog:",
     "zod": "catalog:"
   },
@@ -30,7 +41,9 @@
     "next-auth": "catalog:"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "catalog:",
     "@types/node": "catalog:",
+    "@types/nodemailer": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
     "@wadzzo/vitest-config": "workspace:*",

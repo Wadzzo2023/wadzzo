@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCamera } from "~/lib/ar/useCamera";
-import PROMPTS from "~/lib/murals/prompts.s0.json";
+import PROMPTS from "@wadzzo/ar-core/murals/prompts.s0.json";
 
 /**
  * ── /dev/mural-spike ───────────────────────────────────────────────────────

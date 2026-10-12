@@ -1,4 +1,4 @@
-import type { ArPinType } from "~/lib/ar/types";
+import type { ArPinType } from "@wadzzo/ar-core/ar/types";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**

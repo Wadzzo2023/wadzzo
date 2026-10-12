@@ -3,8 +3,8 @@ import { Sparkles } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { BrandMark } from "~/components/brand/BrandMark";
-import { RARITY_META } from "~/lib/ar/rarity";
-import type { Rarity } from "~/lib/ar/types";
+import { RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { Rarity } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**

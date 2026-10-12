@@ -1,8 +1,8 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import { RARITY_META } from "~/lib/ar/rarity";
-import type { ArPin } from "~/lib/ar/types";
+import { RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { Confetti } from "./Confetti";
 

@@ -5,7 +5,7 @@ import QRCode from "react-qr-code";
 
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
 import { Chip } from "~/components/ui/Badges";
-import { pinStatus } from "~/lib/ar/rarity";
+import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { usePinsQuery } from "~/lib/ar/usePins";
 
 /**

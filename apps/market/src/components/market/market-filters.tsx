@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@wadzzo/ui/components/select";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { ListingsInput } from "~/server/api/routers/market";
+import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 
 const KINDS = [

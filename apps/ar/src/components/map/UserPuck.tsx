@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-import type { GeoFix } from "~/lib/ar/types";
+import type { GeoFix } from "@wadzzo/ar-core/ar/types";
 
 /**
  * ── UserPuck ───────────────────────────────────────────────────────────────

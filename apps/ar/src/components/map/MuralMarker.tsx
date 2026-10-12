@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import { useState } from "react";
 
-import type { MuralCard } from "~/lib/murals/constants";
+import type { MuralCard } from "@wadzzo/ar-core/murals/constants";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 export type MapMural = MuralCard & { scansToday: number };

@@ -36,12 +36,12 @@ import {
 } from "~/components/ui/Badges";
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { Skeleton, SkeletonText } from "~/components/ui/Skeleton";
-import { pinStatus, RARITY_META, timeRemaining } from "~/lib/ar/rarity";
+import { pinStatus, RARITY_META, timeRemaining } from "@wadzzo/ar-core/ar/rarity";
 import { mapStyleFor, useMapMode, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import { useAuth } from "~/lib/ar/store";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useBrandsQuery, usePinsQuery, useToggleFollow } from "~/lib/ar/usePins";
-import type { ArBrand, ArPin } from "~/lib/ar/types";
+import type { ArBrand, ArPin } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 

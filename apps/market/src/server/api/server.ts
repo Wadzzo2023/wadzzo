@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import { createCaller } from "~/server/api/root";
+import { createCaller } from "@wadzzo/api/market/router";
 import { createTRPCContext } from "~/server/api/trpc";
 
 /**

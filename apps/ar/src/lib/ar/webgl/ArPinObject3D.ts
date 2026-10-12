@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-import { pinStatus } from "~/lib/ar/rarity";
-import type { ArPin } from "~/lib/ar/types";
+import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
+import type { ArPin } from "@wadzzo/ar-core/ar/types";
 
 import { RARITY_HSL } from "./rarityColor";
 

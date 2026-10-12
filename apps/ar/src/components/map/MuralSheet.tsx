@@ -2,8 +2,8 @@ import { Coins, Frame, HelpCircle, Navigation, ScanLine, Sparkles } from "lucide
 
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
-import { distanceMeters, formatDistance } from "~/lib/ar/geo";
-import type { GeoFix } from "~/lib/ar/types";
+import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
+import type { GeoFix } from "@wadzzo/ar-core/ar/types";
 import { api } from "~/utils/api";
 import { cn } from "@wadzzo/ui/lib/cn";
 

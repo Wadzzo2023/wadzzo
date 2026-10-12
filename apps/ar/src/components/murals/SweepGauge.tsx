@@ -1,6 +1,6 @@
 import { Smartphone } from "lucide-react";
 
-import { SWEEP_SIDE_DEG } from "~/lib/murals/constants";
+import { SWEEP_SIDE_DEG } from "@wadzzo/ar-core/murals/constants";
 import type { SweepStep } from "~/lib/murals/useMuralSweep";
 import { cn } from "@wadzzo/ui/lib/cn";
 

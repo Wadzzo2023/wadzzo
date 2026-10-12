@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import type { RejectCode } from "~/lib/murals/constants";
+import type { RejectCode } from "@wadzzo/ar-core/murals/constants";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**

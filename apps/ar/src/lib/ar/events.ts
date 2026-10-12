@@ -1,6 +1,6 @@
 import { format, isSameDay, isSameYear } from "date-fns";
 
-import type { ArEventCard, ArEventDetail } from "./types";
+import type { ArEventCard, ArEventDetail } from "@wadzzo/ar-core/ar/types";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**

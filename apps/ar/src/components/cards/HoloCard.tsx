@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { AR_CAPTURE_RADIUS } from "~/lib/ar/geo";
-import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
-import type { ArBrand, ArPin, DetectionMethod } from "~/lib/ar/types";
+import { AR_CAPTURE_RADIUS } from "@wadzzo/ar-core/ar/geo";
+import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { ArBrand, ArPin, DetectionMethod } from "@wadzzo/ar-core/ar/types";
 import { nonBlank } from "@wadzzo/utils/blank";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";

@@ -1,6 +1,6 @@
 import type { EmbedEvent } from "~/lib/embed/config";
 import { db } from "@wadzzo/db/server";
-import { HttpError, clientIp, rateLimit } from "~/server/mobile/http";
+import { HttpError, clientIp, rateLimit } from "@wadzzo/api/ar/mobile/http";
 
 /**
  * POST /api/embed/track `{ id, e }` — one counter bump for a website embed.

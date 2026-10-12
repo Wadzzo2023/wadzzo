@@ -1,7 +1,7 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { env } from "~/env";
-import { appRouter } from "~/server/api/root";
+import { appRouter } from "@wadzzo/api/ar/router";
 import { createTRPCContext } from "~/server/api/trpc";
 
 const handler = (req: Request) =>

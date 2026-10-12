@@ -21,7 +21,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { useCurrency } from "~/hooks/use-currency";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { isCustodial } from "~/lib/custodial";
+import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { creatorHref } from "~/lib/creator";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -181,7 +181,7 @@ function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) =
   const { session } = useRequireAuth();
   const { currency } = useCurrency();
   // card top-ups are only for custodial (email/social) accounts
-  const custodial = isCustodial(session?.user.walletType);
+  const custodial = isCustodialWallet(session?.user.walletType);
   const actions = [
     ...(custodial ? [{ id: "get" as const, label: "Get tokens", icon: Plus, primary: true }] : []),
     ...(b.active

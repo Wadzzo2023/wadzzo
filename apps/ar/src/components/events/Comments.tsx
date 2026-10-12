@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Skeleton } from "~/components/ui/Skeleton";
 import { useAuth } from "~/lib/ar/store";
-import type { ArComment, ArCommentTarget } from "~/lib/ar/types";
+import type { ArComment, ArCommentTarget } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";

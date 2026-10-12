@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { angleDelta } from "~/lib/ar/heading";
 
-import { SWEEP_SIDE_DEG } from "./constants";
+import { SWEEP_SIDE_DEG } from "@wadzzo/ar-core/murals/constants";
 
 /**
  * ── useMuralSweep ──────────────────────────────────────────────────────────

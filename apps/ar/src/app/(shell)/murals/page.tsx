@@ -26,7 +26,7 @@ import {
   MAX_GPS_ACCURACY_M,
   SWEEP_SIDE_DEG,
   type ScanResult as Result,
-} from "~/lib/murals/constants";
+} from "@wadzzo/ar-core/murals/constants";
 import type { Outline } from "~/lib/murals/localize";
 import { startMuralPack, useMuralPack, verifyMuralPack } from "~/lib/murals/pack";
 import { sfx } from "~/lib/murals/sfx";

@@ -32,7 +32,7 @@ import {
 } from "~/lib/ar/events";
 import { useAuth } from "~/lib/ar/store";
 import { useResolvedTheme } from "~/lib/ar/theme";
-import type { ArEventDetail } from "~/lib/ar/types";
+import type { ArEventDetail } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 

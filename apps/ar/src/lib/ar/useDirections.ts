@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Coords, TravelMode } from "./types";
+import type { Coords, TravelMode } from "@wadzzo/ar-core/ar/types";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**

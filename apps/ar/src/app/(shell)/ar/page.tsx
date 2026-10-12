@@ -9,7 +9,7 @@ import { ArSceneWebGL } from "~/components/ar/ArSceneWebGL";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { AppShell } from "~/components/shell/AppShell";
 import { useAuth } from "~/lib/ar/store";
-import type { ArPin } from "~/lib/ar/types";
+import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { useFeedback } from "~/lib/ar/feedback";
 import { useCamera } from "~/lib/ar/useCamera";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";

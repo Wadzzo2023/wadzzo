@@ -20,9 +20,9 @@ import { EmbedMap, type EmbedMapHandle, type Viewport } from "~/components/embed
 import type { MapMural } from "~/components/map/MuralMarker";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { RarityPlate } from "~/components/ui/Badges";
-import { distanceMeters, formatDistance } from "~/lib/ar/geo";
+import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
 import { applyTheme, setMapMode, useMapMode } from "~/lib/ar/theme";
-import type { ArPin, ArPinType, Coords, GeoFix } from "~/lib/ar/types";
+import type { ArPin, ArPinType, Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import {
   accentVars,
   brandFilter,

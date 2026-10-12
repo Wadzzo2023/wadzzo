@@ -8,7 +8,7 @@ import { MEDIA_META } from "~/components/media/media-meta";
 import { usePriceText } from "~/components/price/price";
 import { Button } from "@wadzzo/ui/components/button";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { ListingCard } from "~/server/api/routers/market";
+import type { ListingCard } from "@wadzzo/api/market/routers/market";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 
 const INTERVAL_MS = 6000;

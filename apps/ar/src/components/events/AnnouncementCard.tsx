@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { Skeleton } from "~/components/ui/Skeleton";
-import type { ArAnnouncement } from "~/lib/ar/types";
+import type { ArAnnouncement } from "@wadzzo/ar-core/ar/types";
 
 /**
  * ── AnnouncementCard ───────────────────────────────────────────────────────

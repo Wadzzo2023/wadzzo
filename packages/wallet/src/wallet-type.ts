@@ -34,9 +34,9 @@ export const CUSTODIAL_WALLET_TYPES: readonly WalletType[] = [
   WalletType.apple,
 ];
 
-export const isCustodialWallet = (walletType: WalletType | string | undefined): boolean =>
+export const isCustodialWallet = (walletType: WalletType | string | null | undefined): boolean =>
   CUSTODIAL_WALLET_TYPES.includes(walletType as WalletType);
 
 /** A transaction for these is already signed by the server and only needs submitting. */
-export const isServerSignedWallet = (walletType: WalletType | string | undefined): boolean =>
+export const isServerSignedWallet = (walletType: WalletType | string | null | undefined): boolean =>
   walletType === WalletType.isAdmin || isCustodialWallet(walletType);

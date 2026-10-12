@@ -11,7 +11,7 @@ import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 import { nonBlank } from "@wadzzo/utils/blank";
 import { truncateMiddle } from "@wadzzo/utils/string";
 import { DEFAULT_SETTINGS } from "./mock";
-import type { ArSettings, ArUser } from "./types";
+import type { ArSettings, ArUser } from "@wadzzo/ar-core/ar/types";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**

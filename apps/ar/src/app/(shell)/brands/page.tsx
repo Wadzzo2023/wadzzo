@@ -8,7 +8,7 @@ import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
 import { ArButton } from "~/components/ui/ArButton";
 import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { useAuth } from "~/lib/ar/store";
-import type { ArBrand } from "~/lib/ar/types";
+import type { ArBrand } from "@wadzzo/ar-core/ar/types";
 import { BrandRowSkeleton } from "~/components/ui/Skeleton";
 import { useBrandsQuery, useToggleFollow } from "~/lib/ar/usePins";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";

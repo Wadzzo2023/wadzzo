@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { Check, Lock, Zap } from "lucide-react";
 import { useState } from "react";
 
-import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
-import type { ArPin } from "~/lib/ar/types";
+import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**

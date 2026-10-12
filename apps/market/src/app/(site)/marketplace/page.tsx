@@ -5,7 +5,7 @@ import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { LoadMoreListings } from "~/components/market/load-more";
 import { MarketFilters } from "~/components/market/market-filters";
 import { Store } from "lucide-react";
-import type { ListingsInput } from "~/server/api/routers/market";
+import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { serverApi } from "~/server/api/server";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";

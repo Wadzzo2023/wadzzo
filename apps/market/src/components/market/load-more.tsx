@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@wadzzo/ui/components/button";
-import type { ListingsInput } from "~/server/api/routers/market";
+import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { api } from "~/utils/api";
 
 import { ListingCard, ListingCardSkeleton, ListingGrid } from "./listing-card";

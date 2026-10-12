@@ -3,10 +3,10 @@ import { ChevronLeft, Navigation, ScanLine, Zap } from "lucide-react";
 import { useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { AR_CAPTURE_RADIUS, bearingDegrees, distanceMeters, formatDistance } from "~/lib/ar/geo";
+import { AR_CAPTURE_RADIUS, bearingDegrees, distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
 import { angleDelta } from "~/lib/ar/heading";
-import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
-import type { ArPin, GeoFix } from "~/lib/ar/types";
+import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { ArPin, GeoFix } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { ArButton } from "~/components/ui/ArButton";
 import { RarityPlate, StatusBadge } from "~/components/ui/Badges";

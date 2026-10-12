@@ -1,0 +1,21 @@
+{
+  "name": "@wadzzo/ar-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The AR collector's pure domain code, shared by its screens and its API: pin and card types, distance maths, rarity, mural constants and scoring. No React, no server imports.",
+  "exports": {
+    "./*.json": "./src/*.json",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

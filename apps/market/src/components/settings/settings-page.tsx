@@ -21,7 +21,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { isCustodial } from "~/lib/custodial";
+import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { describeFile, putFile } from "~/lib/upload";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
@@ -355,7 +355,7 @@ function AccountCard({ me }: { me: Me }) {
           <dd className="font-semibold">
             {(walletType && SIGN_IN_LABEL[walletType]) ?? "Wallet"}
             <span className="bg-foreground/10 text-muted-foreground ml-2 rounded-full px-2 py-0.5 text-[11px] font-medium">
-              {isCustodial(walletType) ? `Managed by ${platformBranding.name}` : "Your own wallet"}
+              {isCustodialWallet(walletType) ? `Managed by ${platformBranding.name}` : "Your own wallet"}
             </span>
           </dd>
         </div>

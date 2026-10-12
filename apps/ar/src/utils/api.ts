@@ -8,7 +8,7 @@
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { createTRPCReact } from "@trpc/react-query";
 
-import { type AppRouter } from "~/server/api/root";
+import { type AppRouter } from "@wadzzo/api/ar/router";
 
 export const api = createTRPCReact<AppRouter>({
   overrides: {

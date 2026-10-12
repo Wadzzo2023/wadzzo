@@ -1,6 +1,6 @@
-import { callerFor, mobileSession } from "~/server/mobile/context";
-import { HttpError, errorResponse } from "~/server/mobile/http";
-import { matchRoute } from "~/server/mobile/routes";
+import { callerFor, mobileSession } from "@wadzzo/api/ar/mobile/context";
+import { HttpError, errorResponse } from "@wadzzo/api/ar/mobile/http";
+import { matchRoute } from "@wadzzo/api/ar/mobile/routes";
 
 /**
  * ── /api/mobile/v1/* ───────────────────────────────────────────────────────

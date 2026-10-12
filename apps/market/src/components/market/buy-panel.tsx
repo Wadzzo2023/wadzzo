@@ -9,7 +9,7 @@ import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown"
 import { Price } from "~/components/price/price";
 import { MethodPicker, type PayMethod } from "~/components/payment/method-picker";
 import { Button } from "@wadzzo/ui/components/button";
-import { isCustodial } from "~/lib/custodial";
+import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { MAX_PER_PURCHASE, formatAmount } from "@wadzzo/stellar/quote";
@@ -47,7 +47,7 @@ export function BuyPanel({ item, listing }: { item: Item; listing: Listing | nul
 function Checkout({ item, listing }: { item: Item; listing: Listing }) {
   const { signedIn, requireAuth, openSignIn, session } = useRequireAuth();
   // card payment is for custodial (email/social) accounts only
-  const methods: PayMethod[] = isCustodial(session?.user.walletType)
+  const methods: PayMethod[] = isCustodialWallet(session?.user.walletType)
     ? ["PLATFORM_ASSET", "XLM", "CARD"]
     : ["PLATFORM_ASSET", "XLM"];
   const [method, setMethod] = useState<PayMethod>("PLATFORM_ASSET");

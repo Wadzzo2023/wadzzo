@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { Coords, GeoFix } from "./types";
+import type { Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export type GeoStatus = "idle" | "prompting" | "tracking" | "denied" | "unavailable";

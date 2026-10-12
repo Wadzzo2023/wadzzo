@@ -16,7 +16,11 @@ export {
   type SignedChallengeCredential,
   type SocialProviderCredential,
 } from "./session/auth-credentials";
-export { custodialSignerSchema, type CustodialSigner } from "./session/custodial-signer";
+export {
+  custodialSignerFor,
+  custodialSignerSchema,
+  type CustodialSigner,
+} from "./session/custodial-signer";
 export {
   assertSignerBelongsToSession,
   type SigningSessionUser,

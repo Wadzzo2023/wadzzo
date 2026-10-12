@@ -53,12 +53,12 @@ import { AppShell } from "~/components/shell/AppShell";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { distanceMeters, formatDistance } from "~/lib/ar/geo";
+import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
 import { formatDuration, formatNavDistance } from "~/lib/ar/navigation";
-import { RARITY_META } from "~/lib/ar/rarity";
+import { RARITY_META } from "@wadzzo/ar-core/ar/rarity";
 import { MapModeButton } from "~/components/map/MapModeButton";
 import { mapStyleFor, setMapMode, useMapMode, useResolvedTheme } from "~/lib/ar/theme";
-import type { TravelMode } from "~/lib/ar/types";
+import type { TravelMode } from "@wadzzo/ar-core/ar/types";
 import {
   firstText,
   PROFILE_LABEL,

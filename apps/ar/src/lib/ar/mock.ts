@@ -1,6 +1,6 @@
-import { offsetBy } from "./geo";
-import { deriveRarity, type PinAccess } from "./rarity";
-import type { ArBrand, ArPin, ArSettings, Coords } from "./types";
+import { offsetBy } from "@wadzzo/ar-core/ar/geo";
+import { deriveRarity, type PinAccess } from "@wadzzo/ar-core/ar/rarity";
+import type { ArBrand, ArPin, ArSettings, Coords } from "@wadzzo/ar-core/ar/types";
 
 /**
  * ── Mock drop ──────────────────────────────────────────────────────────────

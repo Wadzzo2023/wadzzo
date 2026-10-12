@@ -2,8 +2,7 @@
 
 import { useSession } from "next-auth/react";
 
-import type { CustodialSigner } from "./custodial-signer";
-import { isCustodialWallet } from "../wallet-type";
+import { custodialSignerFor, type CustodialSigner } from "./custodial-signer";
 
 /**
  * `getCustodialSigner()` says whom the server must sign for: pass its result
@@ -16,8 +15,7 @@ export function useCustodialSigner() {
   const getCustodialSigner = (asAdmin?: true): CustodialSigner => {
     if (asAdmin) return { isAdmin: true };
     const user = session.data?.user;
-    if (user?.email && isCustodialWallet(user.walletType)) return { email: user.email };
-    return undefined;
+    return user ? custodialSignerFor(user) : undefined;
   };
 
   return { getCustodialSigner };

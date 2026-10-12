@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { signAndSubmitTransaction } from "@wadzzo/wallet";
 
 import { api } from "~/utils/api";
-import { distanceMeters } from "./geo";
-import { pinStatus } from "./rarity";
+import { distanceMeters } from "@wadzzo/ar-core/ar/geo";
+import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { useSettings } from "./store";
-import type { ArBrand, ArPin, GeoFix, Rarity } from "./types";
+import type { ArBrand, ArPin, GeoFix, Rarity } from "@wadzzo/ar-core/ar/types";
 
 /**
  * ── Pin state ──────────────────────────────────────────────────────────────

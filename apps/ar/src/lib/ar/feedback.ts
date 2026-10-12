@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { useSettings } from "./store";
-import type { Rarity } from "./types";
+import type { Rarity } from "@wadzzo/ar-core/ar/types";
 
 /**
  * ── Haptics & sound ────────────────────────────────────────────────────────

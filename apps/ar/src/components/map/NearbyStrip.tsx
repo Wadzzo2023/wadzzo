@@ -3,9 +3,9 @@ import { Zap } from "lucide-react";
 import { useEffect } from "react";
 
 import { NearbyCardSkeleton } from "~/components/ui/Skeleton";
-import { AR_CAPTURE_RADIUS, formatDistance } from "~/lib/ar/geo";
-import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
-import type { ArPin } from "~/lib/ar/types";
+import { AR_CAPTURE_RADIUS, formatDistance } from "@wadzzo/ar-core/ar/geo";
+import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
+import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { cn } from "@wadzzo/ui/lib/cn";
 

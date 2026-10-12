@@ -2,8 +2,8 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "r
 import MapGL, { Marker, type MapRef, type ViewStateChangeEvent } from "react-map-gl/mapbox";
 import Supercluster, { type ClusterProperties } from "supercluster";
 
-import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
-import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
+import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
+import type { ArPin, Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import {
   mapStyleFor,
   type ResolvedTheme,

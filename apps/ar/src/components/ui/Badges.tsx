@@ -1,8 +1,8 @@
 import { Image as ImageIcon, Lock, QrCode, Satellite } from "lucide-react";
 import { type ReactNode } from "react";
 
-import { RARITY_META, STATUS_META } from "~/lib/ar/rarity";
-import type { DetectionMethod, PinStatus, Rarity } from "~/lib/ar/types";
+import { RARITY_META, STATUS_META } from "@wadzzo/ar-core/ar/rarity";
+import type { DetectionMethod, PinStatus, Rarity } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**

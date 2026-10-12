@@ -1,9 +1,9 @@
 import type * as Tjs from "@huggingface/transformers";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { HOLD_SCORE, LOCK_SCORE } from "./constants";
+import { HOLD_SCORE, LOCK_SCORE } from "@wadzzo/ar-core/murals/constants";
 import { boxFromScores, cropGrid, outlineFor, type Outline } from "./localize";
-import { muralScore } from "./score";
+import { muralScore } from "@wadzzo/ar-core/murals/score";
 
 /**
  * ── useMuralDetector ───────────────────────────────────────────────────────

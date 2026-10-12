@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isCustodialWallet } from "../wallet-type";
+
 /**
  * Who the server signs for when the user has no key in their browser:
  * - `{ email }`: a custodial account (email, Google, Facebook, Apple); the
@@ -13,3 +15,14 @@ export const custodialSignerSchema = z
   .or(z.object({ isAdmin: z.boolean() }));
 
 export type CustodialSigner = z.infer<typeof custodialSignerSchema>;
+
+/**
+ * Whom the server signs for, given the signed-in user: their own custodial
+ * account, or nobody (real wallets sign in the browser).
+ */
+export function custodialSignerFor(user: {
+  walletType?: string | null;
+  email?: string | null;
+}): { email: string } | undefined {
+  return user.email && isCustodialWallet(user.walletType) ? { email: user.email } : undefined;
+}

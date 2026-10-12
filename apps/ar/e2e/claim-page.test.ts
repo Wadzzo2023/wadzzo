@@ -8,8 +8,8 @@ const BRAND = "GCMTJCWDCE6AVBJMFCYIIPSLISCOTG3W62MMYKQOWBC2M4SJ65DEMUYK"; // Act
 describe("claim a page-token pin (testnet)", () => {
   it("offers the brand's page token, and says plainly when none is in stock", async () => {
     const { db } = await import("@wadzzo/db/server");
-    const { quoteClaim } = await import("~/server/stellar/claim");
-    const { claimOverview } = await import("~/server/stellar/claim");
+    const { quoteClaim } = await import("@wadzzo/api/ar/server/stellar/claim");
+    const { claimOverview } = await import("@wadzzo/api/ar/server/stellar/claim");
     const kp = Keypair.random();
     const suffix = Math.random().toString(36).slice(2, 8);
     await db.user.create({

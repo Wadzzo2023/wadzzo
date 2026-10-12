@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 
 import { Confetti } from "~/components/fx/Confetti";
 import { ArButton } from "~/components/ui/ArButton";
-import type { RejectCode, ScanResult as Result } from "~/lib/murals/constants";
+import type { RejectCode, ScanResult as Result } from "@wadzzo/ar-core/murals/constants";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { platformBranding } from "@wadzzo/platform/branding";
 
