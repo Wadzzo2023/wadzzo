@@ -214,9 +214,10 @@ export default function BrandDetail() {
             @{brand.handle}
             {brand.region && <> &middot; {brand.region}</>}
           </p>
-          {(brand.tagline ?? brand.bio) && (
+          {/* The tagline only: the bio is shown once, under About. */}
+          {brand.tagline && (
             <p className="mt-2.5 text-[13px] leading-relaxed text-ar-dim">
-              {brand.tagline ?? brand.bio}
+              {brand.tagline}
             </p>
           )}
         </div>
@@ -270,12 +271,14 @@ export default function BrandDetail() {
         )}
 
         {/* ── Bio ──────────────────────────────────────────────────── */}
-        <section className="mt-6 px-5">
-          <h2 className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
-            About
-          </h2>
-          <p className="text-[13px] leading-relaxed text-ar-dim">{brand.bio}</p>
-        </section>
+        {brand.bio && (
+          <section className="mt-6 px-5">
+            <h2 className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+              About
+            </h2>
+            <p className="text-[13px] leading-relaxed text-ar-dim">{brand.bio}</p>
+          </section>
+        )}
 
         {/* ── Drops ────────────────────────────────────────────────── */}
         <section className="mt-6">
