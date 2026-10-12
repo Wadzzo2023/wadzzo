@@ -18,7 +18,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type MobileTokenClaims = {
   sub: string;
-  walletType: AuthUser["walletType"];
+  walletType: AuthenticatedUser["walletType"];
   emailVerified: boolean;
   email?: string | null;
   /** Token format version, so a future format can reject old ones. */
@@ -34,7 +34,7 @@ function secret() {
   return s;
 }
 
-export function signMobileToken(user: AuthUser): string {
+export function signMobileToken(user: AuthenticatedUser): string {
   const claims: MobileTokenClaims = {
     sub: user.id,
     walletType: user.walletType,
