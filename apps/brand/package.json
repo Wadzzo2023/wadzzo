@@ -42,6 +42,7 @@
     "@types/nodemailer": "catalog:",
     "@types/three": "catalog:",
     "@wadzzo/agent-contract": "workspace:*",
+    "@wadzzo/api": "workspace:*",
     "@wadzzo/auth": "workspace:*",
     "@wadzzo/db": "workspace:*",
     "@wadzzo/errors": "workspace:*",

@@ -37,6 +37,15 @@ type Route = {
   handler: (ctx: Ctx) => Promise<unknown>;
 };
 
+/**
+ * The web cards gained `summary` and `isOwner`; the mobile contract predates
+ * them, so they stay off the wire (it only ever adds routes, never reshapes one).
+ */
+const withoutWebOnlyCardFields = <T extends { summary?: unknown; isOwner?: unknown }>(card: T) => {
+  const { summary: _summary, isOwner: _isOwner, ...rest } = card;
+  return rest;
+};
+
 const num = (v: string | undefined) => (v == null || v === "" ? undefined : Number(v));
 const idParam = (ctx: Ctx, key: string) => {
   const n = Number(ctx.params[key]);
@@ -155,7 +164,7 @@ export const ROUTES: Route[] = [
     method: "GET",
     path: "/me/bounties",
     auth: "required",
-    handler: ({ caller }) => caller.bounty.mine(),
+    handler: async ({ caller }) => (await caller.bounty.mine()).map(withoutWebOnlyCardFields),
   },
   {
     method: "GET",
@@ -262,20 +271,25 @@ export const ROUTES: Route[] = [
     method: "GET",
     path: "/bounties",
     auth: "optional",
-    handler: ({ caller, query }) =>
-      caller.bounty.list({
+    handler: async ({ caller, query }) => {
+      const page = await caller.bounty.list({
         filter: (query.filter as "open" | "ending" | "top" | undefined) ?? "open",
         // An empty ?search= means no search, not a search for "".
         search: query.search ? query.search : undefined,
         limit: num(query.limit) ?? 20,
         cursor: num(query.cursor) ?? null,
-      }),
+      });
+      return { ...page, items: page.items.map(withoutWebOnlyCardFields) };
+    },
   },
   {
     method: "GET",
     path: "/bounties/:id",
     auth: "optional",
-    handler: (c) => c.caller.bounty.byId({ id: idParam(c, "id") }),
+    handler: async (c) => {
+      const { summary: _summary, ...bounty } = await c.caller.bounty.byId({ id: idParam(c, "id") });
+      return bounty;
+    },
   },
   {
     method: "POST",

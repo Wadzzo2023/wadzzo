@@ -36,6 +36,7 @@
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
+    "@wadzzo/api": "workspace:*",
     "@wadzzo/auth": "workspace:*",
     "@wadzzo/db": "workspace:*",
     "@wadzzo/errors": "workspace:*",

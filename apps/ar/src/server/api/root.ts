@@ -1,4 +1,4 @@
-import { bountyRouter } from "./routers/bounty";
+import { fanBountyRouter } from "@wadzzo/api/routers/fan-bounty";
 import { brandsRouter } from "./routers/brands";
 import { coinsRouter } from "./routers/coins";
 import { eventsRouter } from "./routers/events";
@@ -13,7 +13,7 @@ export const appRouter = createTRPCRouter({
   claim: claimRouter,
   brands: brandsRouter,
   user: userRouter,
-  bounty: bountyRouter,
+  bounty: fanBountyRouter,
   events: eventsRouter,
   murals: muralsRouter,
   coins: coinsRouter,

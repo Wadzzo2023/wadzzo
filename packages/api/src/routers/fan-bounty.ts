@@ -5,7 +5,7 @@ import { z } from "zod";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import {
   isOwnS3Url,
   MAX_ENTRY_FILE_BYTES,
@@ -17,17 +17,17 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 /**
  * ── Bounty ─────────────────────────────────────────────────────────────────
  *
- * The fan's half of wadzz0's bounty system (`routers/bounty/bounty.ts` and
+ * The fan's half of the brand portal's bounty system (`routers/bounty/bounty.ts` and
  * `pages/bounty/[id].tsx`): browse, join, submit entries, talk to the brand,
  * and see whether you won. Creating, reviewing and paying out stay in wadzz0 —
  * nothing here can create a bounty or change another user's entry.
  *
- * Rewards need no claim step. In the reference the brand pays the winner
+ * Rewards need no claim step. In the original app the brand pays the winner
  * directly when marking them (`makeBountyWinner` → `SendBountyBalanceToWinner`),
  * so by the time a `BountyWinner` row exists the asset is already in the
  * winner's wallet. The optional USDC swap is deferred.
  *
- * Deliberate divergences from the reference, each a bug there:
+ * Deliberate divergences from the original app, each a bug there:
  *
  *  1. Lists only `APPROVED` bounties. `getAllBounties` has no status filter,
  *     so pending and admin-rejected bounties show up to fans.
@@ -39,7 +39,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
  *  4. Chat messages are written with the fan as `senderId`. The reference's
  *     `createUpdateBountyDoubtForUserCreator` writes every message as sent by
  *     the *creator*, and drops attached media on a thread's first message.
- *     Sides are read from `role`, which the reference does record correctly,
+ *     Sides are read from `role`, which the original app does record correctly,
  *     so older threads still render the right way round.
  *  5. Attachment URLs must point at our own bucket — otherwise any link could
  *     be passed off as an uploaded file.
@@ -95,7 +95,7 @@ type CardRow = Prisma.BountyGetPayload<{
  * with at least one winner slot left. `currentWinnerCount` is what the
  * reference itself compares against (`currentWinnerCount === totalWinner`
  * disables "Submit"), and unlike counting `BountyWinner` rows it isn't
- * inflated by the reference's swap flow, which inserts extra winner rows.
+ * inflated by the original app's swap flow, which inserts extra winner rows.
  */
 function isOpen(b: {
   status: string;
@@ -110,7 +110,22 @@ function isOpen(b: {
   );
 }
 
-function toCard(row: CardRow) {
+/** Bounty descriptions are rich-text HTML; a card only needs a short plain-text teaser. */
+function toSummary(html: string | null) {
+  const text = (html ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 220 ? `${text.slice(0, 217).trimEnd()}…` : text;
+}
+
+function toCard(row: CardRow, userId: string | undefined) {
   const perWinner = row.totalWinner > 0 ? row.totalWinner : 1;
   const latest = row.submissions[0];
   return {
@@ -129,7 +144,9 @@ function toCard(row: CardRow) {
     spotsLeft: Math.max(0, row.totalWinner - row.currentWinnerCount),
     participants: row._count.participants,
     requiredBalance: row.requiredBalance,
+    summary: toSummary(row.description),
     endDate: row.endDate,
+    isOwner: !!userId && userId === row.creatorId,
     createdAt: row.createdAt,
     open: isOpen(row),
     viewer: {
@@ -143,7 +160,7 @@ function toCard(row: CardRow) {
 
 export type BountyCard = ReturnType<typeof toCard>;
 
-/** Plain text from the entry box → the HTML wadzz0's review screen renders. */
+/** Plain text from the entry box → the HTML the brand portal's review screen renders. */
 function textToHtml(text: string) {
   const escape = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -222,13 +239,29 @@ async function notifyCreator(
   });
 }
 
-export const bountyRouter = createTRPCRouter({
+export const fanBountyRouter = createTRPCRouter({
+  /** Header numbers for the bounty page: open bounties and their total reward pool. */
+  stats: publicProcedure.query(async ({ ctx }) => {
+    const open = await ctx.db.bounty.aggregate({
+      where: {
+        ...platformScope(ctx),
+        status: "APPROVED",
+        currentWinnerCount: { lt: ctx.db.bounty.fields.totalWinner },
+      },
+      _count: { _all: true },
+      _sum: { priceInUSD: true },
+    });
+    return { open: open._count._all, poolUsd: open._sum.priceInUSD ?? 0 };
+  }),
+
   /** Explore. Public — signed-out viewers browse, only joining is gated. */
   list: publicProcedure
     .input(
       z.object({
         filter: z.enum(LIST_FILTERS).default("open"),
         search: z.string().trim().max(80).optional(),
+        /** one brand's bounties (the creator page) */
+        creatorId: z.string().optional(),
         limit: z.number().int().min(1).max(40).default(20),
         cursor: z.number().int().nullish(),
       }),
@@ -239,6 +272,7 @@ export const bountyRouter = createTRPCRouter({
 
       const where: Prisma.BountyWhereInput = {
         ...platformScope(ctx),
+        ...(input.creatorId && { creatorId: input.creatorId }),
         status: "APPROVED",
         currentWinnerCount: { lt: ctx.db.bounty.fields.totalWinner },
         AND: [
@@ -286,7 +320,7 @@ export const bountyRouter = createTRPCRouter({
       });
 
       const nextCursor = rows.length > input.limit ? rows.pop()!.id : null;
-      return { items: rows.map(toCard), nextCursor };
+      return { items: rows.map((row) => toCard(row, userId)), nextCursor };
     }),
 
   /** Everything the viewer has joined, open or closed, newest join first. */
@@ -297,7 +331,7 @@ export const bountyRouter = createTRPCRouter({
       orderBy: { joinedAt: "desc" },
       select: { bounty: { include: cardInclude(userId) } },
     });
-    return joins.map((j) => toCard(j.bounty));
+    return joins.map((j) => toCard(j.bounty, userId));
   }),
 
   byId: publicProcedure.input(z.object({ id: z.number().int() })).query(async ({ ctx, input }) => {
@@ -314,7 +348,7 @@ export const bountyRouter = createTRPCRouter({
     if (!row || !isInPlatformScope(ctx, row.platformId)) {
       throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
     }
-    const card = toCard(row);
+    const card = toCard(row, userId);
     if (row.status !== "APPROVED" && !card.viewer.joined) {
       throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
     }
@@ -325,7 +359,6 @@ export const bountyRouter = createTRPCRouter({
       status: row.status,
       totalEntries: row._count.submissions,
       commentCount: row._count.comments,
-      isOwner: userId === row.creatorId,
     };
   }),
 
@@ -562,7 +595,7 @@ export const bountyRouter = createTRPCRouter({
         select: { id: true },
       });
 
-      // Same audience as the reference: the brand plus everyone who has
+      // Same audience as the original app: the brand plus everyone who has
       // already commented, minus the author.
       const earlier = await ctx.db.bountyComment.findMany({
         where: { bountyId: bounty.id, userId: { not: userId } },

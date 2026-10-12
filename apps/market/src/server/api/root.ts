@@ -1,7 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 import { activityRouter } from "./routers/activity";
-import { bountyRouter } from "./routers/bounty";
+import { fanBountyRouter } from "@wadzzo/api/routers/fan-bounty";
 import { collectionRouter } from "./routers/collection";
 import { contentRouter } from "./routers/content";
 import { creatorRouter } from "./routers/creator";
@@ -24,7 +24,7 @@ export const appRouter = createTRPCRouter({
   tx: txRouter,
   creator: creatorRouter,
   post: postRouter,
-  bounty: bountyRouter,
+  bounty: fanBountyRouter,
   notification: notificationRouter,
   user: userRouter,
   wallet: walletRouter,
