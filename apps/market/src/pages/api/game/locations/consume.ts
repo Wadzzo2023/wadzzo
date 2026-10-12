@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
-import { generateRedeemCode } from "~/utils/redeem";
+import { generateRedeemCode } from "@wadzzo/utils/redeem-code";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

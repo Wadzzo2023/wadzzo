@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native";
 
 import { useBountyAttention } from "~/lib/api/queries";
 import { useSession } from "~/lib/auth/session";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/utils/blank";
 import { useColors } from "~/theme/theme";
 
 const AVATAR_FALLBACK = require("../../../assets/brand/wadzzo-mark.png");

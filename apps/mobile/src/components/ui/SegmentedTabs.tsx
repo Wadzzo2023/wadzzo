@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pressable, View, type LayoutChangeEvent } from "react-native";
 import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/utils/blank";
 import { useColors } from "~/theme/theme";
 
 import { Bevel } from "./surfaces";

@@ -12,7 +12,7 @@ import { Text } from "~/components/ui/Text";
 import { AR_CAPTURE_RADIUS, bearingDegrees, compassPoint, distanceMeters, formatDistance, travelMinutes } from "~/lib/ar/geo";
 import { pinStatus, timeRemaining } from "~/lib/ar/rarity";
 import type { ArPin, GeoFix, TravelMode } from "~/lib/ar/types";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/utils/blank";
 import { useColors } from "~/theme/theme";
 
 const MODES: { id: TravelMode; icon: LucideIcon; label: string }[] = [

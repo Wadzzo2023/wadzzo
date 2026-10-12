@@ -16,7 +16,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { AR_CAPTURE_RADIUS } from "~/lib/ar/geo";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArBrand, ArPin, DetectionMethod } from "~/lib/ar/types";
-import { nonBlank } from "~/lib/utils";
+import { nonBlank } from "@wadzzo/utils/blank";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { platformBranding } from "@wadzzo/platform/branding";

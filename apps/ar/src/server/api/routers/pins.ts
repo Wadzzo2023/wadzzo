@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArPin, Rarity } from "~/lib/ar/types";
+import { generateRedeemCode } from "@wadzzo/utils/redeem-code";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { notifyBrand } from "@wadzzo/platform/server";
@@ -59,15 +60,6 @@ const supplyOf = (limit: number): number | null =>
  */
 const GEOFENCE_SLACK_M = 40;
 
-/** 32 unambiguous characters — no O/0 or I/1, since these get read aloud. */
-const REDEEM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-function generateRedeemCode(): string {
-  return Array.from(
-    { length: 6 },
-    () => REDEEM_ALPHABET[Math.floor(Math.random() * REDEEM_ALPHABET.length)],
-  ).join("");
-}
 
 /** One query shape, so `list` and `getById` can't drift apart on includes. */
 const groupInclude = {

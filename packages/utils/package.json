@@ -8,7 +8,9 @@
     "./utils": "./src/utils.ts",
     "./string": "./src/string.ts",
     "./hash": "./src/hash.ts",
-    "./ipfs": "./src/ipfs.ts"
+    "./ipfs": "./src/ipfs.ts",
+    "./blank": "./src/blank.ts",
+    "./redeem-code": "./src/redeem-code.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

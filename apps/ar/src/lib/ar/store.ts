@@ -8,7 +8,7 @@ import { persist } from "zustand/middleware";
 // src/server/auth.ts already makes into this submodule.
 import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 
-import { nonBlank } from "~/lib/utils";
+import { nonBlank } from "@wadzzo/utils/blank";
 import { truncateString } from "@wadzzo/utils/string";
 import { DEFAULT_SETTINGS } from "./mock";
 import type { ArSettings, ArUser } from "./types";

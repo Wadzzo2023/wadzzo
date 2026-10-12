@@ -24,7 +24,7 @@ import {
 import { getAssetBalance } from "~/lib/stellar/account-balances";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
-import { BLANK_KEYWORD } from "~/lib/utils";
+import { BLANK_KEYWORD } from "@wadzzo/utils/blank";
 import { createCircularImage } from "@wadzzo/storage";
 import {
   adminProcedure,

@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { useDecorativeMotion } from "~/lib/motion";
-import { cn } from "~/lib/utils";
+import { cn } from "@wadzzo/utils/blank";
 import { useColors } from "~/theme/theme";
 
 /**
