@@ -15,6 +15,7 @@ import {
 } from "~/server/api/trpc";
 import { AssetSelectAllProperty } from "../marketplace/marketplace";
 import { get } from "http";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const accRouter = createTRPCRouter({
   getAccountInfo: protectedProcedure.query(async ({ ctx, input }) => {
@@ -111,7 +112,7 @@ export const accRouter = createTRPCRouter({
       select: { storagePub: true, storageSecret: true },
     });
     if (!storage?.storagePub) {
-      throw new Error("storage does not exist");
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
     }
 
     const { tokens: assets } = await accountDetailsWithHomeDomain({

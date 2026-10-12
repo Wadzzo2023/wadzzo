@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { SquareClient, SquareEnvironment, SquareError } from "square";
 
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const square = new SquareClient({
   token: env.SQUARE_ACCESS_TOKEN,
@@ -27,11 +28,11 @@ export async function chargeCard({ sourceId, verificationToken, usd, note }: { s
       amountMoney: { currency: "USD", amount: BigInt(Math.round(usd * 100)) },
     });
     if (res.payment?.status !== "COMPLETED" || !res.payment.id) {
-      throw new Error(res.errors?.map((x) => x.detail ?? x.code).join("; ") ?? "Payment was not completed");
+      throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: res.errors?.map((x) => x.detail ?? x.code).join("; ") ?? "Payment was not completed" });
     }
     return res.payment.id;
   } catch (e) {
-    throw new Error(`Card payment failed: ${describe(e)}`);
+    throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: `Card payment failed: ${describe(e)}` });
   }
 }
 

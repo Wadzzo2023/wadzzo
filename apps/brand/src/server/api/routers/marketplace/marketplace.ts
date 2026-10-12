@@ -17,6 +17,7 @@ import {
 import { type MarketAssetType } from "~/lib/state/play/use-modal-store";
 import { logAudit } from "@wadzzo/platform/server";
 import { platformScope } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const BackMarketFormSchema = z.object({
   placingCopies: z
     .number({ error: (issue) => (issue.input === undefined ? "Placing Copies  must be a number" : "Placing Copies must be a number") })
@@ -72,7 +73,7 @@ export const marketRouter = createTRPCRouter({
         select: { storagePub: true, storageSecret: true },
       });
       if (!storage?.storagePub) {
-        throw new Error("storage does not exist");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
       }
 
       const assetAmount = placingCopies.toString();
@@ -100,7 +101,7 @@ export const marketRouter = createTRPCRouter({
         select: { storageSecret: true },
       });
       if (!storage?.storageSecret) {
-        throw new Error("storage does not exist");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
       }
 
       const assetAmount = placingCopies.toString();
@@ -135,7 +136,7 @@ export const marketRouter = createTRPCRouter({
         where: { code_issuer: { code, issuer } },
       });
 
-      if (!asset) throw new Error("asset not found");
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
 
       const placerId = userId;
 
@@ -163,7 +164,7 @@ export const marketRouter = createTRPCRouter({
         select: { id: true, creatorId: true },
       });
 
-      if (!asset) throw new Error("asset not found");
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
 
       console.log("asset", asset, code, issuer);
 
@@ -593,7 +594,7 @@ export const marketRouter = createTRPCRouter({
       const { id } = input;
 
       if (!id) {
-        //  throw new Error("id is required");
+        //  throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "id is required" });
 
         return 0;
       }
@@ -603,7 +604,7 @@ export const marketRouter = createTRPCRouter({
         include: { asset: { select: { code: true, issuer: true } } },
       });
 
-      if (!marketItem) throw new Error("market item not found");
+      if (!marketItem) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "market item not found" });
 
       const placerId = marketItem.placerId;
 
@@ -613,7 +614,7 @@ export const marketRouter = createTRPCRouter({
           where: { id: placerId },
         });
 
-        if (!placer) throw new Error("seller not found");
+        if (!placer) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "seller not found" });
 
         const placerStorage = placer.storagePub;
 

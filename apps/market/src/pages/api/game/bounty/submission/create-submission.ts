@@ -9,6 +9,7 @@ const SubmissionMediaInfo = z.object({ url: z.string(), name: z.string(), size: 
 import { EnableCors } from "~/server/api-cors";
 
 import { db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 
@@ -60,7 +61,7 @@ export default async function handler(
         },
     });
     if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
     }
     await db.bountySubmission.create({
         data: {

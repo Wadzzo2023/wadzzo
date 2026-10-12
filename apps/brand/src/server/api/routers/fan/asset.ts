@@ -18,6 +18,7 @@ import {
 } from "~/server/api/trpc";
 import { BADWORDS } from "~/utils/banned-word";
 import { assertOwnerOrAdmin } from "~/server/api/access";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const updateAssetFormShema = z.object({
   assetId: z.number(),
   price: z.number().nonnegative(),
@@ -465,7 +466,7 @@ export const shopRouter = createTRPCRouter({
       }
     })
     if (!findSoldPageAsset) {
-      throw new Error("Sell Pageasset not found");
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Sell Pageasset not found" });
     }
     return await ctx.db.sellPageAsset.delete({
       where: {

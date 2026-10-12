@@ -3,6 +3,7 @@
 // and polls. Callers must check the user may act for `creatorId` first.
 
 import { taskServerHeaders, taskServerUrl } from "./server-url";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 export type JobType = "agent_run" | "create_pins" | "generic";
@@ -35,7 +36,7 @@ export const taskClient = {
         });
         if (!res.ok) {
             const text = await res.text();
-            throw new Error(`Task server error (${res.status}): ${text.slice(0, 200)}`);
+            throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Task server error (${res.status}): ${text.slice(0, 200)}` });
         }
         return res.json() as Promise<{ jobId: string }>;
     },
@@ -45,8 +46,8 @@ export const taskClient = {
         const res = await fetch(`${taskServerUrl()}/jobs/${jobId}`, {
             headers: taskServerHeaders(),
         });
-        if (res.status === 404) throw new Error("Job not found");
-        if (!res.ok) throw new Error(`Poll error: ${res.status}`);
+        if (res.status === 404) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Job not found" });
+        if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Poll error: ${res.status}` });
         return res.json() as Promise<PollResult>;
     },
 

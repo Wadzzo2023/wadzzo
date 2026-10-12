@@ -10,6 +10,7 @@ import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export async function ClaimXDR({
   asset,
@@ -42,10 +43,10 @@ export async function ClaimXDR({
     }
   );
   if (!balance) {
-    throw new Error(`You need at least 30 ${PLATFORM_ASSET.code} to claim a pin`);
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You need at least 30 ${PLATFORM_ASSET.code} to claim a pin` });
   }
   if (balance && Number(balance.balance) < 30) {
-    throw new Error(`You need at least 30 ${PLATFORM_ASSET.code} to claim a pin`);
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You need at least 30 ${PLATFORM_ASSET.code} to claim a pin` });
   }
 
 

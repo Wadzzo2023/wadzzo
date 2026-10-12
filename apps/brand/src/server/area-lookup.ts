@@ -7,6 +7,7 @@
  * quick to draw and check.
  */
 import { TRPCError } from "@trpc/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org";
 const HEADERS = { "User-Agent": "Wadzzo brand portal (home area lookup)", "Accept-Language": "en" };
@@ -34,7 +35,7 @@ async function nominatim<T>(path: string): Promise<T> {
   try {
     await turn;
     const res = await fetch(`${NOMINATIM}${path}`, { headers: HEADERS, signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) throw new Error(`Nominatim ${res.status}`);
+    if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Nominatim ${res.status}` });
     const data = (await res.json()) as T;
     if (cache.size > 300) cache.delete(cache.keys().next().value!);
     cache.set(path, data);

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Coords, TravelMode } from "./types";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Mapbox Directions ──────────────────────────────────────────────────────
@@ -118,7 +119,7 @@ async function fetchProfile(
     // 422 is Mapbox's "no route" (an island, a pedestrian-only lane for a
     // car). That's an answer, not a failure — the caller falls back.
     if (res.status === 422) return [];
-    throw new Error(`Mapbox Directions failed (${res.status})`);
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Mapbox Directions failed (${res.status})` });
   }
 
   const json = (await res.json()) as { routes?: MapboxRoute[] };

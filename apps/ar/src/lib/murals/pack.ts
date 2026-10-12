@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Mural pack ─────────────────────────────────────────────────────────────
@@ -120,7 +121,7 @@ function writeReadyFlag(v: { version: number; sha256: string } | null) {
 
 async function fetchManifest(): Promise<Manifest> {
   const res = await fetch(MANIFEST_URL, { cache: "no-store" });
-  if (!res.ok) throw new Error(`manifest ${res.status}`);
+  if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `manifest ${res.status}` });
   return (await res.json()) as Manifest;
 }
 
@@ -207,7 +208,7 @@ async function run() {
     let buf: ArrayBuffer;
     try {
       const res = await fetch(file.url, { headers: { Range: `bytes=${from}-${to}` }, cache: "no-store" });
-      if (res.status !== 206 && res.status !== 200) throw new Error(`HTTP ${res.status}`);
+      if (res.status !== 206 && res.status !== 200) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `HTTP ${res.status}` });
       if (res.status === 200 || !res.body) {
         // A server that ignored Range sent the whole file — take our slice.
         buf = await res.arrayBuffer();
@@ -242,7 +243,7 @@ async function run() {
         }
         buf = joined.buffer;
       }
-      if (buf.byteLength !== to - from + 1) throw new Error("short read");
+      if (buf.byteLength !== to - from + 1) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "short read" });
     } catch {
       fail(navigator.onLine === false ? "offline" : "network", navigator.onLine === false ? "You're offline — the download continues when you're back online." : "The connection dropped. Retrying…");
       return;

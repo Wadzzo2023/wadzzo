@@ -44,10 +44,11 @@ import axios from "axios";
 import { TRPCError } from "@trpc/server";
 import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { creatorExtraFiledsSchema } from "~/types/creator";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 /** A vanity URL is free to claim if nobody else has it. */
 async function assertVanityFree(db: typeof import("@wadzzo/db").db, vanityURL: string, creatorId: string) {
   const taken = await db.creator.findUnique({ where: { vanityURL }, select: { id: true } });
-  if (taken && taken.id !== creatorId) throw new Error("That URL is taken. Try another.");
+  if (taken && taken.id !== creatorId) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "That URL is taken. Try another." });
 }
 
 export const brandCreateRequestSchema = z.object({
@@ -115,7 +116,7 @@ export const creatorRouter = createTRPCRouter({
         where: { id: id },
       });
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const packages = await ctx.db.subscription.findMany({
         where: { creatorId: creator.id },
@@ -133,7 +134,7 @@ export const creatorRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
       });
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const feature = await ctx.db.subscription.delete({
         where: { id: input.id, creatorId: creator.id },
@@ -149,7 +150,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (creator) {
-        throw new Error("Creator already exists");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Creator already exists" });
       }
       const circularProfileUrl = input.profileUrl
         ? await createCircularImage(input.profileUrl)
@@ -554,7 +555,7 @@ export const creatorRouter = createTRPCRouter({
           const assetCode = z.string().max(12).min(1).parse(code);
           const assetIssuer = z.string().length(56).safeParse(issuer);
 
-          if (assetIssuer.success === false) throw new Error("invalid issuer");
+          if (assetIssuer.success === false) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "invalid issuer" });
 
           console.log("storage Acc", storageAcc);
 
@@ -567,7 +568,7 @@ export const creatorRouter = createTRPCRouter({
               assetIssuer: assetIssuer.data,
             };
           } else {
-            throw new Error("Invalid asset code or issuer");
+            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset code or issuer" });
           }
         } else return null; // no page asset yet — a normal state, not an error
       }
@@ -579,7 +580,7 @@ export const creatorRouter = createTRPCRouter({
     });
 
     if (!creator) {
-      throw new Error("Creator not found");
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
     }
 
     const creatorStoragePub = creator.storagePub;
@@ -604,7 +605,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const storagePubKey = creator.storagePub;
 
@@ -658,19 +659,19 @@ export const creatorRouter = createTRPCRouter({
         include: { pageAsset: true },
       });
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const asset = await ctx.db.asset.findUnique({
         where: { id: assetId },
       });
       if (!asset) {
-        throw new Error("Asset not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
       }
       const findRedeem = await ctx.db.redeem.findUnique({
         where: { code: redeemCode },
       });
       if (findRedeem) {
-        throw new Error("Redeem code already exists");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code already exists" });
       }
       const code = await ctx.db.redeem.create({
         data: {
@@ -725,7 +726,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
 
       const asset = await ctx.db.asset.findUnique({
@@ -733,7 +734,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!asset) {
-        throw new Error("Asset not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
       }
 
       const findRedeem = await ctx.db.redeem.findUnique({
@@ -741,7 +742,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (findRedeem) {
-        throw new Error("Redeem code founded!");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code founded!" });
       }
 
       if (paymentMethod === "xlm") {
@@ -779,7 +780,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const state = vanityState(creator.vanitySubscription);
       if (state !== "expired" && input.vanityURL) await assertVanityFree(ctx.db, input.vanityURL, userId);
@@ -806,7 +807,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
       const state = vanityState(creator.vanitySubscription);
       const amount = vanityPrice(state);
@@ -863,7 +864,7 @@ export const creatorRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { code, issuer } = input;
       if (!code || !issuer) {
-        throw new Error("Code and issuer are required");
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Code and issuer are required" });
       }
 
       const priceUSDAsset = await getAssetPriceByCoddenIssuer({
@@ -948,7 +949,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
 
       const { price, priceUSD } = input;
@@ -1000,7 +1001,7 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new Error("Creator not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       }
 
       const acc = await StellarAccount.loadOrThrow(creator.storagePub);

@@ -4,6 +4,7 @@ import crypto from "crypto";
 
 import { env } from "~/env";
 import { ENTRY_FILE_TYPES, MAX_ENTRY_FILE_BYTES } from "~/lib/ar/entryFiles";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export { MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES } from "~/lib/ar/entryFiles";
 
@@ -50,9 +51,9 @@ export async function signEntryUpload({
   checksum: string;
   fileName: string;
 }) {
-  if (fileSize > MAX_ENTRY_FILE_BYTES) throw new Error("File is too large");
+  if (fileSize > MAX_ENTRY_FILE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
   if (!(ENTRY_FILE_TYPES as readonly string[]).includes(fileType)) {
-    throw new Error("That file type can't be attached");
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "That file type can't be attached" });
   }
 
   const key = crypto.randomBytes(32).toString("hex");
@@ -94,6 +95,6 @@ export async function signMuralFrames(sessionId: string, count: number) {
 /** Bytes of an object this app wrote (mural keyframes). */
 export async function getObjectBytes(key: string) {
   const res = await s3Client.send(new GetObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key }));
-  if (!res.Body) throw new Error(`Empty S3 object ${key}`);
+  if (!res.Body) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Empty S3 object ${key}` });
   return Buffer.from(await res.Body.transformToByteArray());
 }

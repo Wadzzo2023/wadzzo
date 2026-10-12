@@ -7,6 +7,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "~/env";
 import { ENTRY_FILE_TYPES, IMAGE_FILE_TYPES, MAX_ENTRY_FILE_BYTES, MAX_IMAGE_BYTES } from "~/lib/upload-files";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export { MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES } from "~/lib/upload-files";
 
@@ -43,14 +44,14 @@ async function sign({ fileType, fileSize, checksum, fileName }: { fileType: stri
 
 /** A bounty entry attachment. */
 export async function signEntryUpload(file: { fileType: string; fileSize: number; checksum: string; fileName: string }) {
-  if (file.fileSize > MAX_ENTRY_FILE_BYTES) throw new Error("File is too large");
-  if (!(ENTRY_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new Error("That file type can't be attached");
+  if (file.fileSize > MAX_ENTRY_FILE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
+  if (!(ENTRY_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "That file type can't be attached" });
   return sign(file);
 }
 
 /** A profile picture or cover image. */
 export async function signImageUpload(file: { fileType: string; fileSize: number; checksum: string; fileName: string }) {
-  if (file.fileSize > MAX_IMAGE_BYTES) throw new Error("Image is too large (max 10 MB)");
-  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new Error("Use a JPG, PNG, WebP or GIF image");
+  if (file.fileSize > MAX_IMAGE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Image is too large (max 10 MB)" });
+  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Use a JPG, PNG, WebP or GIF image" });
   return sign(file);
 }

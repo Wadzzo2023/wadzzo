@@ -6,6 +6,7 @@ import {
 import { sendSiteAsset2pub } from "~/lib/stellar/marketplace/trx/site_asset_recharge";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 // calling the squire backedapi
 const url = "https://next-actionverse.vercel.app/api/square";
@@ -18,7 +19,7 @@ export const payRouter = createTRPCRouter({
       if (user.email) {
         return await sendSiteAsset2pub(user.id, input.tokenNum);
       } else {
-        throw new Error("Account does not have an associated email");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Account does not have an associated email" });
       }
     }),
   payment: protectedProcedure
@@ -47,12 +48,12 @@ export const payRouter = createTRPCRouter({
         if (data.status === "COMPLETED") {
           return true;
         } else {
-          throw new Error("Payment was not successful");
+          throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Payment was not successful" });
         }
       }
 
       if (result.status === 400) {
-        throw new Error("Something went wrong with the payment");
+        throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Something went wrong with the payment" });
       }
 
       return false;
@@ -108,12 +109,12 @@ export const payRouter = createTRPCRouter({
         if (data.status === "COMPLETED") {
           return true;
         } else {
-          throw new Error("Payment was not successful");
+          throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Payment was not successful" });
         }
       }
 
       if (result.status === 400) {
-        throw new Error("Something went wrong with the payment");
+        throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Something went wrong with the payment" });
       }
     }),
 

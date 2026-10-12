@@ -12,6 +12,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const tradeFormSchema = z.object({
   selling: z.string(),
   buying: z.string(),
@@ -61,7 +62,7 @@ export const tradeRouter = createTRPCRouter({
         !offer.selling.asset_code ||
         !offer.selling.asset_issuer
       )
-        throw new Error("Invalid asset");
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset" });
 
       const buyingAsset = new Asset(
         offer.buying.asset_code,
@@ -108,7 +109,7 @@ export const tradeRouter = createTRPCRouter({
 function assetFromInput(input: string) {
   const [code, issuer] = input.split("-");
   if (!code || !issuer) {
-    throw new Error("Invalid asset input");
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset input" });
   }
   return new Asset(code, issuer);
 }

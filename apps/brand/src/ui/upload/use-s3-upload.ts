@@ -7,6 +7,7 @@ import type { EndPointType } from "~/server/s3";
 import { api } from "~/utils/api";
 
 import { uploadFileType } from "./accept";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type UploadStatus = "idle" | "uploading" | "success" | "error";
 export type UploadedFile = { url: string; name: string; size: number; type: string };
@@ -42,7 +43,7 @@ export function useS3Upload(endpoint: EndPointType) {
       signal: abort.current?.signal,
       onUploadProgress: (e) => onProgress(e.loaded),
     });
-    if (res.status !== 200) throw new Error(`Upload failed (${res.status})`);
+    if (res.status !== 200) throw new AppError(ErrorCodes.UPLOAD_FAILED, { message: `Upload failed (${res.status})` });
   };
 
   /** Upload one file; resolves to its public URL. */

@@ -6,6 +6,7 @@ import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { WalletType } from "@wadzzo/wallet/shared";
 
 import { api } from "~/utils/api";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /** The bits of a brand the actions need (list rows and the detail page both have them). */
 type CreatorRef = { id: string; name: string; approved: boolean | null };
@@ -32,9 +33,9 @@ export function useCreatorActions() {
     setSigning(true);
     try {
       const data = await xdr.mutateAsync({ creatorId: c.id });
-      if (!data) throw new Error("This brand has no page asset to issue yet");
+      if (!data) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "This brand has no page asset to issue yet" });
       const ok = await signAndSubmitTransaction({ xdr: data.xdr, publicKey: "admin", walletType: WalletType.isAdmin });
-      if (!ok) throw new Error("The Stellar transaction didn't go through");
+      if (!ok) throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: "The Stellar transaction didn't go through" });
       await action.mutateAsync({ creatorId: c.id, action: "approve", escrow: data.escrow, storage: data.storage });
       toast.success(c.approved === true ? `Page asset issued for ${c.name}` : `${c.name} approved`, { id });
     } catch (e) {

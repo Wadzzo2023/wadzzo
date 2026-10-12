@@ -18,6 +18,7 @@ import { db } from "@wadzzo/db";
 import { getCurrentPlatform, recordUserPlatform } from "@wadzzo/platform/server";
 import type { AuthCredential } from "@wadzzo/wallet/shared";
 import { truncateString } from "@wadzzo/utils/string";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Credential sign-in ─────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ export async function authorizeCredentials(
       if (!user.emailVerified) {
         await sendEmailVerification(user);
         const errorCode = "auth/unverified-email";
-        throw new Error(`Firebase: Error (${errorCode}).`);
+        throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: `Firebase: Error (${errorCode}).` });
       }
       const data = await getUserPublicKey({ email: email, uid: user.uid, fromAppSign });
       const sessionUser = await dbUser(
@@ -91,7 +92,7 @@ export async function authorizeCredentials(
           emailVerified: true,
         };
       }
-      throw new Error("Invalid signature");
+      throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
     }
     // wallet rabet and frieghter
     if (
@@ -121,7 +122,7 @@ export async function authorizeCredentials(
           emailVerified: true,
         };
       }
-      throw new Error("Invalid signature");
+      throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
     }
 
     // provider logins

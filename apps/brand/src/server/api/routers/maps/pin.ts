@@ -36,6 +36,7 @@ import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
 import {
   randomLocation as getLocationInLatLngRad,
 } from "~/utils/map";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type LocationWithConsumers = {
   title: string;
@@ -555,7 +556,7 @@ export const pinRouter = createTRPCRouter({
       const { pinNumber, pinCollectionLimit, token, tier, multiPin, creatorId } = input;
 
       const creator = await ctx.db.creator.findUnique({ where: { id: creatorId } });
-      if (!creator) throw new Error("Creator not found");
+      if (!creator) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
       assertInPlatformScope(ctx, creator.platformId);
 
       let tierId: number | undefined;
@@ -671,7 +672,7 @@ export const pinRouter = createTRPCRouter({
           },
         },
       });
-      if (!pin) throw new Error("Pin not found");
+      if (!pin) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
 
       return {
         id: pin.id,
@@ -754,7 +755,7 @@ export const pinRouter = createTRPCRouter({
           include: { locationGroup: true },
         });
         if (!findLocation?.locationGroup) {
-          throw new Error("Location or associated LocationGroup not found");
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location or associated LocationGroup not found" });
         }
         await assertOwnerOrAdmin(ctx, findLocation.locationGroup.creatorId);
 
@@ -788,7 +789,7 @@ export const pinRouter = createTRPCRouter({
       } catch (e) {
         if (e instanceof TRPCError) throw e;
         console.error("Error updating location group:", e);
-        throw new Error("Failed to update location group");
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to update location group" });
       }
     }),
 
@@ -1290,7 +1291,7 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.id },
       });
       if (locationConsumer.userId !== ctx.session.user.id) {
-        throw new Error("You are not authorized");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not authorized" });
       }
       return ctx.db.locationConsumer.update({
         data: { claimedAt: new Date() },
@@ -1317,7 +1318,7 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.id },
         include: { locationGroup: true },
       });
-      if (!location) throw new Error("Location not found");
+      if (!location) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location not found" });
 
       await assertOwnerOrAdmin(ctx, location.locationGroup?.creatorId);
 
@@ -1327,7 +1328,7 @@ export const pinRouter = createTRPCRouter({
           data: { latitude: input.lat, longitude: input.long },
         });
       } else {
-        if (!location.locationGroup) throw new Error("Location group not found");
+        if (!location.locationGroup) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location group not found" });
         await ctx.db.location.create({
           data: {
             autoCollect: location.autoCollect,

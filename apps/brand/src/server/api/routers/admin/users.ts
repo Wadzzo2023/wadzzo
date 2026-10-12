@@ -11,6 +11,7 @@ import { logAudit } from "@wadzzo/platform/server";
 import { isInPlatformScope, platformScope, relationScope } from "@wadzzo/platform/server";
 
 import { createTransport, type Transporter } from "nodemailer";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const userRouter = createTRPCRouter({
   // Admins only: this lists every user's email. Users who joined this platform;
@@ -197,6 +198,6 @@ const sendEmail = async (
 
   } catch (error) {
     console.error("Error sending email: ", error);
-    throw new Error("Failed to send email");
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to send email" });
   }
 };

@@ -12,6 +12,7 @@
 //       POST/DELETE routes pass creatorId in the JSON body.
 
 import { taskServerHeaders, taskServerUrl } from "./server-url";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 
@@ -79,7 +80,7 @@ export interface CreateHotspotInput {
 async function handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {
         const text = await res.text().catch(() => `HTTP ${res.status}`);
-        throw new Error(`Hotspot API error (${res.status}): ${text.slice(0, 300)}`);
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Hotspot API error (${res.status}): ${text.slice(0, 300)}` });
     }
     return res.json() as Promise<T>;
 }

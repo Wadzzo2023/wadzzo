@@ -6,6 +6,7 @@ import { z } from "zod";
 import { EnableCors } from "~/server/api-cors";
 
 import { db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,10 +48,10 @@ export default async function handler(
     },
   });
   if (bounty?.participants.length) {
-    throw new Error("You already joined this bounty");
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You already joined this bounty" });
   }
   if (bounty?.creatorId === userId) {
-    throw new Error("You can't join your own bounty");
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't join your own bounty" });
   }
   await db.bountyParticipant.create({
     data: {

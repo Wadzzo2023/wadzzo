@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ClaimXDR } from "~/lib/stellar/map/claim";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const trxRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
@@ -26,14 +27,14 @@ export const trxRouter = createTRPCRouter({
       });
 
       if (!location.locationGroup?.asset && !location.locationGroup?.pageAsset)
-        throw new Error("Not claimable");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Not claimable" });
 
       let code: string | undefined = undefined;
       let issuer: string | undefined = undefined;
 
       if (location.locationGroup.pageAsset) {
         if (!location.locationGroup.creator.pageAsset)
-          throw new Error("No page Asset, found!");
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "No page Asset, found!" });
 
         code = location.locationGroup.creator.pageAsset.code;
         issuer = location.locationGroup.creator.pageAsset.issuer;
@@ -54,6 +55,6 @@ export const trxRouter = createTRPCRouter({
         });
 
         return xdr;
-      } else throw new Error("Code and Issue not found");
+      } else throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Code and Issue not found" });
     }),
 });

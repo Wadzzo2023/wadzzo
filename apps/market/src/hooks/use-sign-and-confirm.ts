@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { env } from "~/env";
 import { api } from "~/utils/api";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type SignStep = "idle" | "signing" | "confirming" | "done" | "failed";
 
@@ -26,7 +27,7 @@ export function useSignAndConfirm() {
       walletType: session.data?.user.walletType,
       publicKey: session.data?.user.id
     });
-    if (!submitted) throw new Error("The transaction wasn't signed.");
+    if (!submitted) throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, { message: "The transaction wasn't signed." });
   }
 
   /** Sign and submit something with no ledger row (e.g. a follow trustline). */
@@ -57,7 +58,7 @@ export function useSignAndConfirm() {
         setStep("done");
         return true;
       }
-      if (result?.status === "FAILED") throw new Error(result.error ?? "The transaction failed.");
+      if (result?.status === "FAILED") throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: result.error ?? "The transaction failed." });
       // Still pending on Horizon: it will settle; history shows the outcome.
       setStep("done");
       return true;

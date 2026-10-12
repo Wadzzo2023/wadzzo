@@ -1,11 +1,12 @@
 import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /** Pin a file to IPFS (token images live there); resolves to its hash. */
 export async function uploadToIpfs(file: File) {
   const body = new FormData();
   body.append("file", file, file.name);
   const res = await fetch("/api/file", { method: "POST", body });
-  if (!res.ok) throw new Error("Couldn't upload the image");
+  if (!res.ok) throw new AppError(ErrorCodes.UPLOAD_FAILED, { message: "Couldn't upload the image" });
   return res.text();
 }
 

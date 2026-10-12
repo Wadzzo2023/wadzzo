@@ -5,6 +5,7 @@ import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { Horizon, Keypair, Operation, TransactionBuilder, } from "@stellar/stellar-sdk";
 import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 export async function getVanitySubscriptionXDR({
@@ -68,7 +69,7 @@ export async function createOrRenewVanitySubscription(
     const endDate = addMonths(now, 1)
 
     if (!creator) {
-        throw new Error('Creator not found')
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: 'Creator not found' })
     }
 
 
@@ -169,13 +170,13 @@ export async function verifyVanityPayment({
     try {
         tx = await server.transactions().transaction(txHash).call();
     } catch {
-        throw new Error("We couldn't find your payment on the network yet. Try again in a moment.");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "We couldn't find your payment on the network yet. Try again in a moment." });
     }
-    if (!tx.successful) throw new Error("That payment didn't go through.");
+    if (!tx.successful) throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "That payment didn't go through." });
 
     const created = new Date(tx.created_at);
-    if (after && created <= after) throw new Error("That payment has already been used.");
-    if (Date.now() - created.getTime() > PAYMENT_MAX_AGE_MS) throw new Error("That payment is too old to use.");
+    if (after && created <= after) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "That payment has already been used." });
+    if (Date.now() - created.getTime() > PAYMENT_MAX_AGE_MS) throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "That payment is too old to use." });
 
     const platform = Keypair.fromSecret(MOTHER_SECRET).publicKey();
     const ops = await server.operations().forTransaction(txHash).call();
@@ -190,5 +191,5 @@ export async function verifyVanityPayment({
             Number(p.amount) >= amount - 1e-7
         );
     });
-    if (!paid) throw new Error("That transaction isn't the vanity URL payment.");
+    if (!paid) throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "That transaction isn't the vanity URL payment." });
 }

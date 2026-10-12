@@ -24,6 +24,7 @@ import { truncateString } from "@wadzzo/utils/string";
 import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 /**
@@ -78,7 +79,7 @@ export const authOptions: NextAuthOptions = {
           if (!user.emailVerified) {
             await sendEmailVerification(user);
             const errorCode = "auth/unverified-email";
-            throw new Error(`Firebase: Error (${errorCode}).`);
+            throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: `Firebase: Error (${errorCode}).` });
           }
           const data = await getUserPublicKey({ email: email, uid: user.uid, fromAppSign });
           const sessionUser = await dbUser(
@@ -113,7 +114,7 @@ export const authOptions: NextAuthOptions = {
               emailVerified: true,
             };
           }
-          throw new Error("Invalid signature");
+          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
         }
         // wallet rabet and frieghter
         if (
@@ -143,7 +144,7 @@ export const authOptions: NextAuthOptions = {
               emailVerified: true,
             };
           }
-          throw new Error("Invalid signature");
+          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
         }
 
         // provider logins

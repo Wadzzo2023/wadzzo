@@ -24,6 +24,7 @@ import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { Horizon } from "@stellar/stellar-sdk";
 import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const WBalanceRouter = createTRPCRouter({
   getWalletsBalance: protectedProcedure.query(async ({ ctx, input }) => {
@@ -61,7 +62,7 @@ export const WBalanceRouter = createTRPCRouter({
           try {
             if (asset.includes(":")) {
               const [code, issuer] = asset.split(":");
-              if (!issuer) throw new Error("Issuer is undefined");
+              if (!issuer) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is undefined" });
 
               const account = await server.loadAccount(issuer);
               console.log("account.home_domain", account.home_domain);
@@ -86,7 +87,7 @@ export const WBalanceRouter = createTRPCRouter({
       }
     } catch (error) {
       console.error("Error fetching claimable balances:", error)
-      throw new Error("Failed to fetch claimable balances")
+      throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Failed to fetch claimable balances" })
     }
   }
   ),

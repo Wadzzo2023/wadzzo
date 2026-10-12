@@ -2,6 +2,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const s3Client = new S3Client({
   region: env.AWS_BUCKET_REGION,
@@ -138,11 +139,11 @@ export async function getSignedURL({
 
   console.log("fileType", fileType);
   if (fileSize > convertSize(uploaderType[endPoint].maxFileSize)) {
-    throw new Error("File is too large");
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
   }
 
   if (!allowedFileTypes.includes(fileType)) {
-    throw new Error("File type not allowed");
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "File type not allowed" });
   }
 
   const genFileName = generateFileName();

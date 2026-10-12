@@ -7,6 +7,7 @@ import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 
 // const transporter: Transporter = createTransport({
@@ -31,7 +32,7 @@ import { db } from "@wadzzo/db";
 //         console.log("Email sent successfully:", result);
 //     } catch (error) {
 //         console.error("Error sending email: ", error);
-//         throw new Error("Failed to send email");
+//         throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to send email" });
 //     }
 // };
 

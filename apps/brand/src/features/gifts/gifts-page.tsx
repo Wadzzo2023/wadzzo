@@ -22,6 +22,7 @@ import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { fetchPubkeyfromEmail } from "~/utils/get-pubkey";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Kind = "PAGEASSET" | "PLATFORMASSET" | "ITEM";
 /** `balance` is what can be given away now; for an item that's its stock plus what can still be minted (Infinity = open edition). */
@@ -128,10 +129,10 @@ export default function GiftsPage() {
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Signing took too long. Check your wallet window or network and try again.")), 90_000)),
       ]);
       console.info("[gift] signed and submitted", { ok });
-      if (!ok) throw new Error("The transaction wasn't signed");
+      if (!ok) throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, { message: "The transaction wasn't signed" });
       const done = await confirmItem.mutateAsync({ txId: res.txId });
       console.info("[gift] confirmed", done);
-      if (done.status === "FAILED") throw new Error("The gift didn't go through on Stellar");
+      if (done.status === "FAILED") throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: "The gift didn't go through on Stellar" });
       toast.success(res.quote.delivery === "claimable" ? `Sent ${qty} ${asset.name ?? asset.code} 🎁 — they accept it from their wallet` : `Sent ${qty} ${asset.name ?? asset.code} 🎁`);
       setConfirming(false);
       setAmount("1");

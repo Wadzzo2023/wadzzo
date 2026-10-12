@@ -9,6 +9,7 @@ import {
 import { env } from "~/env";
 import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { type AccountType } from "../../fan/utils";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const log = console;
 
@@ -54,7 +55,7 @@ export async function firstTransection({
   // for (const balance of transactionInializer.balances) {
   //   if (balance.asset_type === "native") {
   //     if (Number(balance.balance) < 5) {
-  //       throw new Error("You don't have sufficient balance");
+  //       throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "You don't have sufficient balance" });
   //     }
   //     log.info(`XLM Balance for ${balance.balance}`);
   //     break;

@@ -37,6 +37,7 @@ import {
 } from "~/server/api/trpc";
 import { db } from "@wadzzo/db";
 import { PaymentMethodEnum } from "../bounty/bounty";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 enum assetType {
   PAGEASSET = "PAGEASSET",
   PLATFORMASSET = "PLATFORMASSET",
@@ -295,10 +296,10 @@ export const trxRouter = createTRPCRouter({
               return xdr;
             }
           } else {
-            throw new Error("Issuer is invalid");
+            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is invalid" });
           }
         }
-        throw new Error("creator has no page asset");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "creator has no page asset" });
       }
     }),
 
@@ -325,7 +326,7 @@ export const trxRouter = createTRPCRouter({
           },
         },
       });
-      if (!isFollower) throw new Error("User is not a follower");
+      if (!isFollower) throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "User is not a follower" });
 
       const creator = await db.creator.findUniqueOrThrow({
         where: { id: creatorId },
@@ -362,11 +363,11 @@ export const trxRouter = createTRPCRouter({
               signWith: input.signWith,
             });
           } else {
-            throw new Error("Issuer is invalid");
+            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is invalid" });
           }
         }
         else {
-          throw new Error("creator has no page asset");
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "creator has no page asset" });
         }
       }
       else if (input.assetType === assetType.PLATFORMASSET) {

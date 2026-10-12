@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { ERROR_DEFINITIONS, isAppError } from "@wadzzo/errors";
 import { ZodError } from "zod";
 
 /**
@@ -42,6 +43,9 @@ const fail = (status: number, code: string, message: string) => Response.json({ 
 export function errorResponse(e: unknown): Response {
   if (e instanceof HttpError) return fail(e.status, e.code, e.message);
   if (e instanceof ZodError) return fail(400, "BAD_REQUEST", zodMessage(e));
+  // Same wire codes as before (tRPC names); the app code decides which one.
+  // Server-side failures (5xx) keep the generic body below: their messages are for logs.
+  if (isAppError(e) && e.status < 500) return fail(e.status, ERROR_DEFINITIONS[e.code].trpc, e.message);
   if (e instanceof TRPCError) {
     const message = e.cause instanceof ZodError ? zodMessage(e.cause) : e.message;
     return fail(STATUS[e.code] ?? 500, e.code, message);

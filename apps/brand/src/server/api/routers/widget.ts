@@ -12,6 +12,7 @@ import {
 import { platformScope } from "@wadzzo/platform/server";
 import { Location } from "~/types/game/location";
 import { findNearestLocation } from "~/utils/geo";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
@@ -33,7 +34,7 @@ export const widgetRouter = createTRPCRouter({
       });
 
       if (!location) {
-        throw new Error("Location not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location not found" });
       }
 
       // Check if user is authorized to generate descriptions for this pin
@@ -49,16 +50,14 @@ export const widgetRouter = createTRPCRouter({
       });
 
       if (!locationGroup) {
-        throw new Error(
-          "You are not authorized to generate descriptions for this location",
-        );
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not authorized to generate descriptions for this location", });
       }
 
       // Get the URL from the location group or create a Google Maps URL if not available
       const locationUrl = locationGroup.link;
 
       if (!locationUrl) {
-        throw new Error("Location URL not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location URL not found" });
       }
 
       try {
@@ -121,7 +120,7 @@ export const widgetRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error generating descriptions:", error);
-        throw new Error("Failed to generate descriptions");
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to generate descriptions" });
       }
     }),
 

@@ -8,6 +8,7 @@ import {
 import { MOTHER_SECRET, STORAGE_SECRET } from "../SECRET";
 import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 async function checkSiteAssetTrustLine(accPub: string) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -54,7 +55,7 @@ export async function sendSiteAsset2pub(
   );
 
   if (!hasTrust)
-    throw new Error(`User does not have trustline for ${PLATFORM_ASSET.code}`);
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: `User does not have trustline for ${PLATFORM_ASSET.code}` });
 
   const Tx = new TransactionBuilder(transactionInitializer, {
     fee: BASE_FEE,

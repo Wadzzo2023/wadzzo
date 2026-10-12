@@ -5,6 +5,7 @@ import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 
 import { ArButton } from "~/components/ui/ArButton";
 import type { ModelViewerElement } from "~/types/model-viewer";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── ArPhotoFrame ──────────────────────────────────────────────────────────
@@ -111,7 +112,7 @@ async function buildFrameGlb(
     maxTextureSize: 1024,
   });
   if (!(result instanceof ArrayBuffer)) {
-    throw new Error("GLTFExporter returned JSON, not a binary .glb");
+    throw new AppError(ErrorCodes.INTERNAL, { message: "GLTFExporter returned JSON, not a binary .glb" });
   }
   return new Blob([result], { type: "model/gltf-binary" });
 }

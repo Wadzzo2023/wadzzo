@@ -19,6 +19,7 @@ import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { api } from "~/utils/api";
 import { db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type Balances = (
   | Horizon.HorizonApi.BalanceLineNative
@@ -147,7 +148,7 @@ export async function SendAssets({
   const account = await server.loadAccount(userPubKey);
 
   if (userPubKey === recipientId) {
-    throw new Error("You can't send asset to yourself");
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't send asset to yourself" });
   }
   const accBalance = account.balances.find((balance) => {
     if (
@@ -162,7 +163,7 @@ export async function SendAssets({
   });
 
   if (!accBalance || parseFloat(accBalance.balance) < amount) {
-    throw new Error("Balance is not enough to send the asset.");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Balance is not enough to send the asset." });
   }
 
   const receiverAccount = await server.loadAccount(recipientId);
@@ -239,7 +240,7 @@ export async function AddAssetTrustLine({
   const server = new Horizon.Server(STELLAR_URL);
   const account = await server.loadAccount(userPubKey);
   if (asset_code.toUpperCase() === "XLM") {
-    throw new Error("TrustLine can't be added on XML");
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: "TrustLine can't be added on XML" });
   }
 
   const findAsset = account.balances.find((balance) => {
@@ -256,7 +257,7 @@ export async function AddAssetTrustLine({
   });
 
   if (findAsset) {
-    throw new Error("TrustLine already exists.");
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "TrustLine already exists." });
   }
   const asset = new Asset(asset_code, asset_issuer);
   const transaction = new TransactionBuilder(account, {
@@ -454,12 +455,12 @@ export async function AcceptClaimableBalance({
   console.log("balanceId", balanceId)
   const balance = await server.claimableBalances().claimant(userPubKey).claimableBalance(balanceId).call();
   if (!balance) {
-    throw new Error("Balance not found");
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Balance not found" });
   }
   const assetCode = balance.asset.split(":")[0];
   const assetIssuer = balance.asset.split(":")[1];
   if (!assetCode || !assetIssuer) {
-    throw new Error("Asset code or issuer not found")
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset code or issuer not found" })
   }
   //checking if  trustline exists
   const hasTrust = account.balances.some((balance) => {
@@ -499,7 +500,7 @@ export async function AcceptClaimableBalance({
     return singedXdr;
 
   } catch (error) {
-    throw new Error("Error in accepting claimable balance");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Error in accepting claimable balance" });
   }
 }
 

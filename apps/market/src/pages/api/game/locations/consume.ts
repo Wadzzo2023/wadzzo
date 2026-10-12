@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generateRedeemCode } from "~/utils/redeem";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export default async function handler(
   req: NextApiRequest,
@@ -54,7 +55,7 @@ export default async function handler(
       if (!exists) return code;
     }
     // Extremely unlikely — 32^6 = ~1 billion combinations
-    throw new Error("Could not generate a unique redeem code");
+    throw new AppError(ErrorCodes.INTERNAL, { message: "Could not generate a unique redeem code" });
   };
 
   if (location.locationGroup.multiPin) {

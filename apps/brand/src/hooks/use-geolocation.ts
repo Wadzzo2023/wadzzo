@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import toast from "react-hot-toast"
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type SetMapCenter = (center: { lat: number; lng: number }) => void
 type SetMapZoom = (zoom: number) => void
@@ -87,7 +88,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
         )
 
         if (!response.ok) {
-            throw new Error('Mapbox API error')
+            throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: 'Mapbox API error' })
         }
 
         const data = await response.json() as {

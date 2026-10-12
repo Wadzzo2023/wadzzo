@@ -1,6 +1,7 @@
 import { createHmac } from "crypto";
 
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const PRODUCTION_URL = "https://portal.actn.xyz/wadzzo/api/";
 
@@ -12,9 +13,7 @@ const PRODUCTION_URL = "https://portal.actn.xyz/wadzzo/api/";
 export function taskServerUrl() {
   const url = env.EXPRESS_SERVER_URL ?? (process.env.NODE_ENV === "production" ? PRODUCTION_URL : undefined);
   if (!url)
-    throw new Error(
-      "The task server isn't configured for local dev. Run package/express-wadzzo on the dev database and set EXPRESS_SERVER_URL (e.g. http://localhost:4000).",
-    );
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "The task server isn't configured for local dev. Run package/express-wadzzo on the dev database and set EXPRESS_SERVER_URL (e.g. http://localhost:4000).", });
   return url.replace(/\/$/, "");
 }
 

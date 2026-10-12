@@ -11,6 +11,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const UserAboutShema = z.object({
   bio: z
     .string()
@@ -110,25 +111,25 @@ export const userRouter = createTRPCRouter({
       });
 
       if (!getRedeem) {
-        throw new Error("Invalid redeem code");
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid redeem code" });
       }
 
       if (getRedeem.assetRedeem.creatorId === user) {
-        throw new Error("You can't claim your own reward");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't claim your own reward" });
       }
 
       if (
         getRedeem.redeemConsumers.find((consumer) => consumer.userId === user)
       ) {
-        throw new Error("You have already claimed this reward");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You have already claimed this reward" });
       }
 
       if (getRedeem._count.redeemConsumers >= getRedeem.totalRedeemable) {
-        throw new Error("Redeem code limit exceeded");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code limit exceeded" });
       }
 
       if (!getRedeem.assetRedeem.creatorId) {
-        throw new Error("Creator does not exist");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator does not exist" });
       }
 
       const getStorageAcc = await ctx.db.creator.findUnique({
@@ -142,7 +143,7 @@ export const userRouter = createTRPCRouter({
       });
 
       if (!getStorageAcc) {
-        throw new Error("Creator does not have a storage account");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator does not have a storage account" });
       }
 
       const stroageACC = await StellarAccount.loadOrThrow(getStorageAcc.storagePub);
@@ -152,7 +153,7 @@ export const userRouter = createTRPCRouter({
       );
 
       if (tokenNumber < 1) {
-        throw new Error("Insufficient token balance");
+        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Insufficient token balance" });
       }
 
       const UserAcc = await StellarAccount.loadOrThrow(user);
@@ -171,7 +172,7 @@ export const userRouter = createTRPCRouter({
           storageSecret: getStorageAcc.storageSecret,
         });
       } else {
-        throw new Error("You have already has trust for this asset");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You have already has trust for this asset" });
       }
     }),
   getClaimHistory: protectedProcedure.query(async ({ ctx }) => {

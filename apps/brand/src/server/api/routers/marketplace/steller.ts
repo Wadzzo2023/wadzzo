@@ -20,6 +20,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { api } from "~/utils/api";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type authDocType = {
   pubkey: string;
@@ -48,14 +49,14 @@ export const stellarRouter = createTRPCRouter({
         select: { creatorId: true, id: true },
       });
 
-      if (!dbAsset) throw new Error("asset not found");
+      if (!dbAsset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
 
       const marketAsset = await ctx.db.marketAsset.findFirst({
         where: { AND: [{ assetId: dbAsset.id }, { placerId: placerId }] },
         select: { price: true, priceUSD: true },
       });
 
-      if (!marketAsset) throw new Error("asset is not in market");
+      if (!marketAsset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset is not in market" });
 
       console.log("marketAsset", marketAsset);
       // validate and transform input
@@ -71,7 +72,7 @@ export const stellarRouter = createTRPCRouter({
           select: { storageSecret: true },
         });
         if (!storage?.storageSecret) {
-          throw new Error("storage does not exist");
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
         }
         sellerStorageSec = storage.storageSecret;
       } else {
@@ -140,7 +141,7 @@ export const stellarRouter = createTRPCRouter({
         });
         return xdr;
       } else {
-        throw new Error("No email attached to the account");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "No email attached to the account" });
       }
     }),
 
@@ -175,7 +176,7 @@ export const stellarRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       if (!input.price && !input.cost) {
-        throw new Error("price or cost is required");
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "price or cost is required" });
       }
       if (input.price && input.cost) {
         const priceInXLM = await getXLMPriceByPlatformAsset(input.price);

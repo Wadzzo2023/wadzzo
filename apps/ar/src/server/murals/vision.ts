@@ -2,6 +2,7 @@ import { GoogleAuth } from "google-auth-library";
 
 import { env } from "~/env";
 import type { RejectCode } from "~/lib/murals/constants";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Cloud Vision ───────────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ function client() {
 async function annotate(requests: { image: { content: string }; features: { type: string; maxResults?: number }[] }[]) {
   const c = client()!;
   const res = await c.request<{ responses: AnnotateResponse[] }>({ url: ENDPOINT, method: "POST", data: { requests } });
-  for (const r of res.data.responses) if (r.error) throw new Error(`Cloud Vision: ${r.error.message}`);
+  for (const r of res.data.responses) if (r.error) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Cloud Vision: ${r.error.message}` });
   return res.data.responses;
 }
 
@@ -93,7 +94,7 @@ export async function checkWithVision(
   clipScore: number,
 ): Promise<{ ok: true; report: VisionReport } | { ok: false; code: RejectCode; report: VisionReport }> {
   if (!client()) {
-    if (process.env.NODE_ENV === "production") throw new Error("GOOGLE_VISION_CREDENTIALS is not set");
+    if (process.env.NODE_ENV === "production") throw new AppError(ErrorCodes.CONFIG_MISSING, { message: "GOOGLE_VISION_CREDENTIALS is not set" });
     return { ok: true, report: { skipped: true, units: 0 } };
   }
   const centre = frames[1]!;

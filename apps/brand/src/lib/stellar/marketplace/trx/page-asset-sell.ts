@@ -9,6 +9,7 @@ import {
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 // Shared helper for building and signing transaction
 async function buildAssetBuyTransaction({
@@ -49,7 +50,7 @@ async function buildAssetBuyTransaction({
         }
         console.log("Storage balance:", storageBalance, storageSecret, assetToBuy.code, assetToBuy.issuer);
         if (storageBalance < amountToSell) {
-            throw new Error("Insufficient asset balance in storage account.");
+            throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Insufficient asset balance in storage account." });
         }
 
         let userBalance;
@@ -60,7 +61,7 @@ async function buildAssetBuyTransaction({
         }
 
         if (userBalance < price) {
-            throw new Error("User has insufficient balance for payment.");
+            throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "User has insufficient balance for payment." });
         }
 
         const txBuilder = new TransactionBuilder(motherAccount, {

@@ -5,6 +5,7 @@ import { AccountSchema } from "~/lib/stellar/fan/utils";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { MAX_ASSET_LIMIT } from "../admin/creator";
 import { BADWORDS } from "~/utils/banned-word";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 /** Palette names the fan apps map to theme-safe classes. */
 export const TIER_COLORS = ["green", "blue", "purple", "gold", "rose", "slate"] as const;
 
@@ -304,7 +305,7 @@ export const membershipRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.creatorId) {
-        throw new Error("You can't follow yourself");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't follow yourself" });
       }
       const fol = await ctx.db.follow.create({
         data: { creatorId: input.creatorId, userId },
@@ -333,14 +334,14 @@ export const membershipRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.creatorId) {
-        throw new Error("You can't unfollow yourself");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't unfollow yourself" });
       }
       const fol = await ctx.db.follow.findFirst({
         where: { creatorId: input.creatorId, userId },
       });
 
       if (!fol) {
-        throw new Error("You are not following this creator");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not following this creator" });
       }
 
       // delete his follow

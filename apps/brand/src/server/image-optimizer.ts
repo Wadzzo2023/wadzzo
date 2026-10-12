@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "./s3";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 function getAwsS3PublicUrl(key: string) {
     return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`;
@@ -11,7 +12,7 @@ function getAwsS3PublicUrl(key: string) {
 export async function createOptimizedImage(sourceUrl: string): Promise<string> {
     const response = await fetch(sourceUrl);
     if (!response.ok) {
-        throw new Error(`Failed to fetch image from ${sourceUrl}`);
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Failed to fetch image from ${sourceUrl}` });
     }
 
     const buffer = Buffer.from(await response.arrayBuffer());

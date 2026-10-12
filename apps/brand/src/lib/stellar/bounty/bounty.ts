@@ -12,6 +12,7 @@ import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFe
 import { MOTHER_SECRET } from "../marketplace/SECRET";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const assetIssuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 const assetCode = "USDC";
@@ -139,15 +140,13 @@ export async function SendBountyBalanceToUserAccount({
     !platformAssetBalance ||
     parseFloat(platformAssetBalance.balance) < prize
   ) {
-    throw new Error("Balance is not enough to send the asset.");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Balance is not enough to send the asset." });
   }
 
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new Error(
-      "Please make sure you have at least 1 XLM in your account.",
-    );
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
   }
 
   const transaction = new TransactionBuilder(account, {
@@ -226,15 +225,13 @@ export async function SendBountyBalanceToWinner({
     !platformAssetBalance ||
     parseFloat(platformAssetBalance.balance) < prize
   ) {
-    throw new Error("Balance is not enough to send the asset.");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Balance is not enough to send the asset." });
   }
 
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new Error(
-      "Please make sure you have at least 1 XLM in your account.",
-    );
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
   }
   //console.log("XLMBalance", XLMBalance);
 
@@ -254,7 +251,7 @@ export async function SendBountyBalanceToWinner({
   });
 
   if (!hasTrust) {
-    throw new Error(`User Doesn't have trust, Please trust the ${PLATFORM_ASSET.code} first.`);
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: `User Doesn't have trust, Please trust the ${PLATFORM_ASSET.code} first.` });
   }
 
 
@@ -288,9 +285,7 @@ export async function SendBountyBalanceToWinnerViaXLM({
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new Error(
-      "Please make sure you have at least 1 XLM in your account.",
-    );
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
   }
 
   const transaction = new TransactionBuilder(account, {
@@ -382,7 +377,7 @@ export async function SwapUserAssetToMotherUSDC({
   });
 
   if (!receiverHasTrustOnUSDC) {
-    throw new Error("Please Contact Admin to add USDC trustline");
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: "Please Contact Admin to add USDC trustline" });
   }
 
   if (!senderHasTrustOnUSDC) {
@@ -390,9 +385,7 @@ export async function SwapUserAssetToMotherUSDC({
       !platformAssetBalance ||
       parseFloat(platformAssetBalance.balance) < priceInBand
     ) {
-      throw new Error(
-        `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`,
-      );
+      throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`, });
     }
     transaction.addOperation(
       Operation.changeTrust({
@@ -405,9 +398,7 @@ export async function SwapUserAssetToMotherUSDC({
     !platformAssetBalance ||
     parseFloat(platformAssetBalance.balance) < priceInBand
   ) {
-    throw new Error(
-      `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`,
-    );
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`, });
   }
   transaction
     .addOperation(

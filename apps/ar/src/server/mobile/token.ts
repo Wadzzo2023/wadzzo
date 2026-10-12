@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 
 import { env } from "~/env";
 import type { AuthUser } from "~/server/auth/credentials";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Mobile session tokens ──────────────────────────────────────────────────
@@ -26,7 +27,7 @@ export type MobileTokenClaims = {
 
 function secret() {
   const s = env.MOBILE_JWT_SECRET ?? env.NEXTAUTH_SECRET;
-  if (!s) throw new Error("MOBILE_JWT_SECRET (or NEXTAUTH_SECRET) is not set");
+  if (!s) throw new AppError(ErrorCodes.CONFIG_MISSING, { message: "MOBILE_JWT_SECRET (or NEXTAUTH_SECRET) is not set" });
   return s;
 }
 

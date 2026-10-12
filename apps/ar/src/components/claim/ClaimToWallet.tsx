@@ -11,6 +11,7 @@ import { env } from "~/env";
 import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Method = "PLATFORM_ASSET" | "XLM";
 
@@ -90,10 +91,10 @@ function ClaimSheet({ open, onClose, consumerId, itemName, pending, onDone }: { 
         walletType: session.data?.user.walletType,
         publicKey: session.data?.user.id
       });
-      if (!submitted) throw new Error("The transaction wasn't signed.");
+      if (!submitted) throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, { message: "The transaction wasn't signed." });
       setStep("confirming");
       const result = await confirm.mutateAsync({ txId: res.txId });
-      if (result?.status === "FAILED") throw new Error(result.error ?? "The transaction failed.");
+      if (result?.status === "FAILED") throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: result.error ?? "The transaction failed." });
       setStep("done");
       onDone();
     } catch (e) {

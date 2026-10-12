@@ -32,6 +32,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const BountyCommentSchema = z.object({
   bountyId: z.number(),
   parentId: z.number().optional(),
@@ -310,10 +311,10 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (bounty?.participants.length) {
-        throw new Error("You already joined this bounty");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You already joined this bounty" });
       }
       if (bounty?.creatorId === ctx.session.user.id) {
-        throw new Error("You can't join your own bounty");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't join your own bounty" });
       }
       await ctx.db.bountyParticipant.create({
         data: {
@@ -520,7 +521,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       await ctx.db.bountySubmission.create({
         data: {
@@ -571,10 +572,10 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       if (bounty.userId !== ctx.session.user.id) {
-        throw new Error("You are not the owner of this bounty");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
       }
       await ctx.db.bountySubmission.update({
         where: {
@@ -637,7 +638,7 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       return bounty;
     }),
@@ -654,7 +655,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       return {
         isOwner: bounty.creatorId === ctx.session.user.id,
@@ -676,7 +677,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       await assertOwnerOrAdmin(ctx, bounty.creatorId);
       const [joined, entered] = await Promise.all([
@@ -756,7 +757,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!winners) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       // Only the bounty's brand (or an admin) pays out, only to someone who
       // submitted and hasn't won yet, and the amount comes from the bounty.
@@ -769,9 +770,7 @@ export const BountyRoute = createTRPCRouter({
       if (alreadyWon) throw new TRPCError({ code: "BAD_REQUEST", message: "This user is already a winner" });
 
       if (winners.currentWinnerCount === winners.totalWinner) {
-        throw new Error(
-          "Bounty has finished, you can't send balance to winner",
-        );
+        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Bounty has finished, you can't send balance to winner", });
       }
 
       if (winners.priceInXLM) {
@@ -812,13 +811,13 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       if (bounty.currentWinnerCount === bounty.totalWinner) {
-        throw new Error("Bounty has reached the maximum number of winners");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Bounty has reached the maximum number of winners" });
       }
       if (bounty.creatorId !== ctx.session.user.id) {
-        throw new Error("You are not the owner of this bounty");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
       }
       const [submitted, alreadyWon] = await Promise.all([
         ctx.db.bountySubmission.findFirst({ where: { bountyId: input.BountyId, userId: input.userId }, select: { id: true } }),
@@ -896,7 +895,7 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!Submission) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       const submission = await ctx.db.bountySubmission.findUnique({
         where: {
@@ -905,7 +904,7 @@ export const BountyRoute = createTRPCRouter({
         select: { userId: true, bountyId: true, status: true, bounty: { select: { creatorId: true, title: true } } },
       });
       if (!submission) {
-        throw new Error("Submission not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Submission not found" });
       }
 
       await assertOwnerOrAdmin(ctx, submission.bounty.creatorId);
@@ -951,7 +950,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (hasBountyWinner) {
-        throw new Error("Bounty has a winner, you can't delete this bounty");
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Bounty has a winner, you can't delete this bounty" });
       }
 
       const bounty = await ctx.db.bounty.findUnique({
@@ -960,7 +959,7 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       // The refund always goes back to the bounty's brand, for the bounty's
       // own prize, and only the brand or an admin can ask for it.
@@ -998,10 +997,10 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       if (bounty.creatorId !== ctx.session.user.id) {
-        throw new Error("You are not the owner of this bounty");
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
       }
       await ctx.db.bounty.update({
         where: {
@@ -1270,7 +1269,7 @@ export const BountyRoute = createTRPCRouter({
         const prevXDR = findXDR.xdr;
         const isSubmitted = await checkXDRSubmitted(prevXDR);
         if (isSubmitted) {
-          throw new Error("You already submitted the XDR");
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You already submitted the XDR" });
         }
       }
 
@@ -1438,7 +1437,7 @@ export const BountyRoute = createTRPCRouter({
         select: { creatorId: true },
       });
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       const newContent = input.media
         ? `${content} ${input.media.map((media) => media.url).join(" ")}`
@@ -1588,7 +1587,7 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
       // Only the fan in this thread, the bounty's brand, or an admin.
       await assertOwnerOrAdmin(ctx, input.userId, bounty.creatorId);
@@ -1639,7 +1638,7 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new Error("Bounty not found");
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       }
 
       // Fetch the doubts between the user and creator

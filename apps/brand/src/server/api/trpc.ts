@@ -12,7 +12,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { isAppError } from "@wadzzo/errors";
+import { appErrorMiddleware } from "@wadzzo/errors/trpc";
+import { z, ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "@wadzzo/db";
@@ -86,12 +88,16 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
+        appCode: isAppError(error.cause) ? error.cause.code : null,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
       },
     };
   },
 });
+
+/** Every procedure starts here: an `AppError` thrown anywhere below becomes the matching tRPC error. */
+const baseProcedure = t.procedure.use(t.middleware(appErrorMiddleware));
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -115,7 +121,7 @@ export const createCallerFactory = t.createCallerFactory;
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure;
+export const publicProcedure = baseProcedure;
 
 /**
  * Protected (authenticated) procedure
@@ -125,7 +131,7 @@ export const publicProcedure = t.procedure;
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -137,7 +143,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   });
 });
 
-export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
+export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -169,7 +175,7 @@ export const superAdminProcedure = adminProcedure.use(({ ctx, next }) => {
   return next();
 });
 
-export const creatorProcedure = t.procedure.use(async ({ ctx, next }) => {
+export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

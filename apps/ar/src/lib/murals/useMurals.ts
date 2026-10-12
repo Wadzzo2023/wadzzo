@@ -5,6 +5,7 @@ import { api } from "~/utils/api";
 
 import { MATCH_SIMILARITY, type ScanResult, type ScanPlatform } from "./constants";
 import { bestSimilarity } from "./score";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Murals data hooks ──────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ export function useSubmitMuralScan() {
 
   const run = useCallback(
     async ({ frames, fix, sweep, platform }: SubmitArgs): Promise<ScanResult> => {
-      if (busy.current) throw new Error("A scan is already being sent");
+      if (busy.current) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "A scan is already being sent" });
       busy.current = true;
       try {
         const started = await start.mutateAsync({ lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy });
@@ -70,7 +71,7 @@ export function useSubmitMuralScan() {
         await Promise.all(
           started.frames.map(async ({ uploadUrl }, i) => {
             const res = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: frames[i] });
-            if (!res.ok) throw new Error("Upload failed — check your connection and try again");
+            if (!res.ok) throw new AppError(ErrorCodes.UPLOAD_FAILED, { message: "Upload failed — check your connection and try again" });
           }),
         );
 

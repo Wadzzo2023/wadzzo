@@ -8,6 +8,7 @@ import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { env } from "~/env";
 import { networkPassphrase } from "@wadzzo/wallet/config";
 import type { Db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * Secrets the server signs with. Issuer secrets are stored encrypted
@@ -17,7 +18,7 @@ import type { Db } from "@wadzzo/db";
 function key() {
   const raw = env.ISSUER_ENCRYPTION_KEY;
   const buf = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
-  if (buf.length !== 32) throw new Error("ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)");
+  if (buf.length !== 32) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)" });
   return buf;
 }
 
@@ -30,7 +31,7 @@ export function encryptSecret(secret: string) {
 
 export function decryptSecret(payload: string) {
   const [v, iv, tag, data] = payload.split(":");
-  if (v !== "v1" || !iv || !tag || !data) throw new Error("Unknown secret format");
+  if (v !== "v1" || !iv || !tag || !data) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Unknown secret format" });
   const decipher = createDecipheriv("aes-256-gcm", key(), Buffer.from(iv, "base64"));
   decipher.setAuthTag(Buffer.from(tag, "base64"));
   return Buffer.concat([decipher.update(Buffer.from(data, "base64")), decipher.final()]).toString("utf8");

@@ -13,6 +13,7 @@ import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const log = console;
 
@@ -45,10 +46,10 @@ export async function sendGift({
 
   console.log("Tokens", tokens, price)
   if (!tokens) {
-    throw new Error("Asset not found");
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
   }
   if (Number(tokens) < price) {
-    throw new Error("Not enough balance");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Not enough balance" });
   }
 
   const extraCost = await getplatformAssetNumberForXLM(1);
@@ -144,10 +145,10 @@ export const sendGitfAsPlatformAsset = async ({
   const senderAdcc = await StellarAccount.loadOrThrow(creatorId);
   const token = senderAdcc.tokenBalance(assetCode, assetIssuer);
   if (!token) {
-    throw new Error("Asset not found");
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
   }
   if (Number(token) < amount) {
-    throw new Error("Not enough balance");
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Not enough balance" });
   }
   const hasReciverTrust = receiverAcc.hasTrustline(assetCode, assetIssuer);
   const Tx1 = new TransactionBuilder(transactionInializer, {
@@ -155,7 +156,7 @@ export const sendGitfAsPlatformAsset = async ({
     networkPassphrase,
   })
   if (!hasReciverTrust) {
-    throw new Error("Reciver has no trustline")
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Reciver has no trustline" })
   }
   Tx1.addOperation(
     Operation.payment({

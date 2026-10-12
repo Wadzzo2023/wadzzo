@@ -13,6 +13,7 @@ import { env } from "~/env";
 import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import type { db as Db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /*
  * Creator items under the lazy-mint model. Every creator has ONE issuer
@@ -39,7 +40,7 @@ function key() {
   const raw = env.ISSUER_ENCRYPTION_KEY;
   if (!raw) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Minting isn't configured on this server (ISSUER_ENCRYPTION_KEY)." });
   const buf = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
-  if (buf.length !== 32) throw new Error("ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)");
+  if (buf.length !== 32) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)" });
   return buf;
 }
 
@@ -52,7 +53,7 @@ function encryptSecret(secret: string) {
 
 export function decryptSecret(payload: string) {
   const [v, iv, tag, data] = payload.split(":");
-  if (v !== "v1" || !iv || !tag || !data) throw new Error("Unknown secret format");
+  if (v !== "v1" || !iv || !tag || !data) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Unknown secret format" });
   const decipher = createDecipheriv("aes-256-gcm", key(), Buffer.from(iv, "base64"));
   decipher.setAuthTag(Buffer.from(tag, "base64"));
   return Buffer.concat([decipher.update(Buffer.from(data, "base64")), decipher.final()]).toString("utf8");
