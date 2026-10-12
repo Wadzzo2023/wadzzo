@@ -27,18 +27,18 @@ export function StatCard({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        "flex flex-col gap-1 rounded-xl border bg-card p-4 text-left transition-colors",
+        "bg-card flex flex-col gap-1 rounded-xl border p-4 text-left transition-colors",
         onClick && "hover:border-line-bright",
         active && "border-primary/50 bg-primary/5",
         className,
       )}
     >
-      <span className="flex items-center gap-1.5 font-hud text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <span className="font-hud text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase">
         {Icon && <Icon className="size-3.5" />}
         {label}
       </span>
-      <span className="font-hud text-2xl font-bold tabular-nums text-foreground">{value}</span>
-      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+      <span className="font-hud text-foreground text-2xl font-bold tabular-nums">{value}</span>
+      {hint && <span className="text-muted-foreground text-xs">{hint}</span>}
     </Comp>
   );
 }

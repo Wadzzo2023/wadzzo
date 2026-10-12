@@ -3,17 +3,11 @@ import { verifyMessageSignature } from "@albedo-link/signature-verification";
 import axios from "axios";
 import { type GetServerSidePropsContext } from "next";
 
-import {
-  getServerSession,
-  type NextAuthOptions,
-} from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { WalletType, type WadzzoSessionUser as User } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
 import { firebaseAuth } from "@wadzzo/wallet/firebase";
@@ -28,7 +22,6 @@ import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
-
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -72,19 +65,21 @@ export const authOptions: NextAuthOptions = {
         // email pass login
         if (cred.walletType == WalletType.emailPass) {
           const { email, password, fromAppSign } = cred;
-          const userCredential = await signInWithEmailAndPassword(
-            firebaseAuth,
-            email,
-            password,
-          );
+          const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
           const user = userCredential.user;
 
           if (!user.emailVerified) {
             await sendEmailVerification(user);
             const errorCode = "auth/unverified-email";
-            throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: `Firebase: Error (${errorCode}).` });
+            throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+              message: `Firebase: Error (${errorCode}).`,
+            });
           }
-          const data = await getUserPublicKey({ email: email, uid: user.uid, fromAppSign });
+          const data = await getUserPublicKey({
+            email: email,
+            uid: user.uid,
+            fromAppSign,
+          });
           const sessionUser = await dbUser(
             data.publicKey,
             fromAppSign,
@@ -105,19 +100,16 @@ export const authOptions: NextAuthOptions = {
 
           const isValid = verifyMessageSignature(pubkey, token, signature);
           if (isValid) {
-            const sessionUser = await dbUser(
-              pubkey,
-              fromAppSign,
-              undefined,
-              cred.walletType,
-            );
+            const sessionUser = await dbUser(pubkey, fromAppSign, undefined, cred.walletType);
             return {
               ...sessionUser,
               walletType: WalletType.albedo,
               emailVerified: true,
             };
           }
-          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
+          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+            message: "Invalid signature",
+          });
         }
         // wallet rabet and frieghter
         if (
@@ -135,36 +127,25 @@ export const authOptions: NextAuthOptions = {
             xdr: signedXDR,
           });
           if (isValid) {
-            const sessionUser = await dbUser(
-              pubkey,
-              fromAppSign,
-              undefined,
-              cred.walletType,
-            );
+            const sessionUser = await dbUser(pubkey, fromAppSign, undefined, cred.walletType);
             return {
               ...sessionUser,
               walletType: cred.walletType,
               emailVerified: true,
             };
           }
-          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
+          throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+            message: "Invalid signature",
+          });
         }
 
         // provider logins
-        if (
-          cred.walletType == WalletType.google ||
-          cred.walletType == WalletType.facebook
-        ) {
+        if (cred.walletType == WalletType.google || cred.walletType == WalletType.facebook) {
           const { token, email, fromAppSign } = cred;
 
           const { uid } = await verifyFirebaseIdToken(token);
           const data = await getUserPublicKey({ uid, email, fromAppSign });
-          const sessionUser = await dbUser(
-            data.publicKey,
-            fromAppSign,
-            email,
-            cred.walletType,
-          );
+          const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
           return {
             ...sessionUser,
             walletType: cred.walletType,
@@ -179,12 +160,7 @@ export const authOptions: NextAuthOptions = {
           if (token) {
             const { uid } = await verifyFirebaseIdToken(token);
             const data = await getUserPublicKey({ uid, email, fromAppSign });
-            const sessionUser = await dbUser(
-              data.publicKey,
-              fromAppSign,
-              email,
-              cred.walletType,
-            );
+            const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
             return {
               ...sessionUser,
               walletType: cred.walletType,
@@ -196,12 +172,7 @@ export const authOptions: NextAuthOptions = {
               const { uid } = await getOrCreateFirebaseUserFromApple(appleToken, email);
 
               const data = await getUserPublicKey({ uid, email, fromAppSign });
-              const sessionUser = await dbUser(
-                data.publicKey,
-                fromAppSign,
-                email,
-                cred.walletType,
-              );
+              const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
               return {
                 ...sessionUser,
                 walletType: cred.walletType,
@@ -216,8 +187,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-
-
 };
 
 /**
@@ -232,17 +201,15 @@ export const getServerAuthSession = (ctx: {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };
 
-async function dbUser(
-  pubkey: string,
-  fromAppSign?: string,
-  email?: string,
-  signUpMethod?: string,
-) {
+async function dbUser(pubkey: string, fromAppSign?: string, email?: string, signUpMethod?: string) {
   const platform = await getCurrentPlatform();
   const user = await db.user.findUnique({ where: { id: pubkey } });
   // if user exists, check if email is set, if not set it
   if (user) {
-    await recordUserPlatform(platform, user.id, { signUpMethod, isNewUser: false });
+    await recordUserPlatform(platform, user.id, {
+      signUpMethod,
+      isNewUser: false,
+    });
     const profileEmail = user.email;
     if (!profileEmail && email) {
       await db.user.update({
@@ -272,7 +239,10 @@ async function dbUser(
         signupPlatformId: platform.id,
       },
     });
-    await recordUserPlatform(platform, data.id, { signUpMethod, isNewUser: true });
+    await recordUserPlatform(platform, data.id, {
+      signUpMethod,
+      isNewUser: true,
+    });
     return data;
   }
 }
@@ -280,24 +250,21 @@ async function dbUser(
 async function getUserPublicKey({
   uid,
   email,
-  fromAppSign
+  fromAppSign,
 }: {
   uid: string;
   email: string;
   fromAppSign: string | undefined;
 }) {
-  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(
-    USER_ACCOUNT_URL,
-    {
-      params: {
-        uid,
-        email,
-        from: env.NEXT_PUBLIC_ASSET_CODE ?? "Wadzzo",
-        // registered platforms are funded by their own account (stellar-accounts config/platforms)
-        platform: env.PLATFORM_SLUG,
-        fromAppSign: fromAppSign ? "true" : "false",
-      },
+  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(USER_ACCOUNT_URL, {
+    params: {
+      uid,
+      email,
+      from: env.NEXT_PUBLIC_ASSET_CODE ?? "Wadzzo",
+      // registered platforms are funded by their own account (stellar-accounts config/platforms)
+      platform: env.PLATFORM_SLUG,
+      fromAppSign: fromAppSign ? "true" : "false",
     },
-  );
+  });
   return res.data;
 }

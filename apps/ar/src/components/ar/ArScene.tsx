@@ -3,12 +3,7 @@ import { ChevronLeft, Navigation, ScanLine, Zap } from "lucide-react";
 import { useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  AR_CAPTURE_RADIUS,
-  bearingDegrees,
-  distanceMeters,
-  formatDistance,
-} from "~/lib/ar/geo";
+import { AR_CAPTURE_RADIUS, bearingDegrees, distanceMeters, formatDistance } from "~/lib/ar/geo";
 import { angleDelta } from "~/lib/ar/heading";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
 import type { ArPin, GeoFix } from "~/lib/ar/types";
@@ -137,8 +132,7 @@ export function ArScene({
   useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
-    const measure = () =>
-      setViewport({ w: el.clientWidth, h: el.clientHeight });
+    const measure = () => setViewport({ w: el.clientWidth, h: el.clientHeight });
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -149,9 +143,7 @@ export function ArScene({
   const scenePins = useMemo(() => {
     if (focusPinId) return pins.filter((p) => p.id === focusPinId);
     if (!fix) return [];
-    return pins.filter(
-      (p) => ignoreRange === true || distanceMeters(fix, p) <= AR_CAPTURE_RADIUS,
-    );
+    return pins.filter((p) => ignoreRange === true || distanceMeters(fix, p) <= AR_CAPTURE_RADIUS);
   }, [pins, fix, focusPinId, ignoreRange]);
 
   // ── Project them ───────────────────────────────────────────────────────
@@ -177,8 +169,7 @@ export function ArScene({
         // Where the pin sits vertically in the world, then where that lands
         // relative to wherever the camera is currently aimed.
         const pinElevation =
-          (Math.atan2(PIN_HEIGHT_OFFSET_M, Math.max(distance, 1)) * 180) /
-          Math.PI;
+          (Math.atan2(PIN_HEIGHT_OFFSET_M, Math.max(distance, 1)) * 180) / Math.PI;
         const verticalOffset = pinElevation - elevation;
 
         return {
@@ -190,9 +181,7 @@ export function ArScene({
           // Screen y grows downward, so a pin above the camera axis subtracts.
           y: 50 - (verticalOffset / verticalFov) * 100,
           size,
-          inView:
-            Math.abs(offset) < FOV / 2 + 6 &&
-            Math.abs(verticalOffset) < verticalFov / 2 + 10,
+          inView: Math.abs(offset) < FOV / 2 + 6 && Math.abs(verticalOffset) < verticalFov / 2 + 10,
           capturable:
             pinStatus(pin) === "collectible" &&
             (ignoreRange === true || distance <= AR_CAPTURE_RADIUS),
@@ -207,8 +196,7 @@ export function ArScene({
     // must not keep a pin locked just because it's still dead ahead in
     // bearing. The cone is slightly taller than wide because the vertical
     // scale is coarser on a portrait frame.
-    const cone = (p: Placed) =>
-      Math.hypot(p.offset, p.verticalOffset * 0.6);
+    const cone = (p: Placed) => Math.hypot(p.offset, p.verticalOffset * 0.6);
 
     const candidates = placed
       .filter((p) => cone(p) < LOCK_DEGREES)
@@ -248,7 +236,7 @@ export function ArScene({
   return (
     <div
       ref={sceneRef}
-      className="relative h-full w-full touch-none select-none overflow-hidden bg-black"
+      className="relative h-full w-full touch-none overflow-hidden bg-black select-none"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
@@ -298,10 +286,10 @@ export function ArScene({
         <button
           onClick={() => router.back()}
           aria-label="Leave AR"
-          className="ar-glass pointer-events-auto flex h-9 items-center gap-1 rounded-full pl-1.5 pr-3 text-ar-dim"
+          className="ar-glass text-ar-dim pointer-events-auto flex h-9 items-center gap-1 rounded-full pr-3 pl-1.5"
         >
           <ChevronLeft size={17} strokeWidth={2.4} />
-          <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.14em]">
+          <span className="font-hud text-[10px] font-semibold tracking-[0.14em] uppercase">
             Exit
           </span>
         </button>
@@ -326,14 +314,14 @@ export function ArScene({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
-              className="ar-glass mx-auto max-w-[19rem] rounded-ar px-4 py-3 text-center"
+              className="ar-glass rounded-ar mx-auto max-w-[19rem] px-4 py-3 text-center"
             >
-              <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-green">
+              <p className="font-hud text-ar-green text-[11px] font-semibold tracking-[0.14em] uppercase">
                 {placed.length === 0
                   ? "Nothing in range"
                   : `${placed.length} drop${placed.length === 1 ? "" : "s"} around you`}
               </p>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-ar-dim">
+              <p className="text-ar-dim mt-1 text-[11.5px] leading-relaxed">
                 {placed.length === 0
                   ? `Walk within ${AR_CAPTURE_RADIUS} m of a pin and it'll appear here.`
                   : manual
@@ -381,105 +369,104 @@ function ArPinObject({
       className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
       style={{ left: `${x}%`, top: `${y}%`, opacity: haze }}
     >
-    <motion.button
-      onClick={(e) => {
-        e.stopPropagation();
-        onTap();
-      }}
-      aria-label={`${pin.title}, ${formatDistance(distance)} away`}
-      className="block"
-      animate={{ y: [0, -9, 0] }}
-      transition={{
-        duration: 3.4,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: (distance % 10) / 5,
-      }}
-    >
-      <span className="relative block" style={{ width: size, height: size }}>
-        {/* Ground beam — anchors the object to a place rather than the glass */}
-        <span
-          aria-hidden
-          className="absolute left-1/2 top-full h-[42px] w-[2px] -translate-x-1/2"
-          style={{
-            background: `linear-gradient(180deg, hsl(${meta.hsl}/0.75), transparent)`,
-          }}
-        />
-        <span
-          aria-hidden
-          className="absolute left-1/2 top-[calc(100%+38px)] h-[10px] -translate-x-1/2 rounded-[50%]"
-          style={{
-            width: size * 0.62,
-            background: `radial-gradient(ellipse, hsl(${meta.hsl}/0.5), transparent 70%)`,
-          }}
-        />
-
-        {/* Rotating rarity ring */}
-        <motion.span
-          aria-hidden
-          className="absolute -inset-[9%] rounded-full border-2 border-dashed"
-          style={{ borderColor: `hsl(${meta.hsl} / ${dead ? 0.25 : 0.7})` }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: dead ? 40 : 16, repeat: Infinity, ease: "linear" }}
-        />
-
-        {targeted && (
+      <motion.button
+        onClick={(e) => {
+          e.stopPropagation();
+          onTap();
+        }}
+        aria-label={`${pin.title}, ${formatDistance(distance)} away`}
+        className="block"
+        animate={{ y: [0, -9, 0] }}
+        transition={{
+          duration: 3.4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: (distance % 10) / 5,
+        }}
+      >
+        <span className="relative block" style={{ width: size, height: size }}>
+          {/* Ground beam — anchors the object to a place rather than the glass */}
           <span
             aria-hidden
-            className="animate-pulse-ring absolute -inset-[9%] rounded-full border-2"
-            style={{ borderColor: `hsl(${meta.hsl})` }}
-          />
-        )}
-
-        {/* The coin */}
-        <motion.span
-          className={cn(
-            "absolute inset-0 overflow-hidden rounded-full border-[3px]",
-            dead && "saturate-[0.25]",
-          )}
-          style={{
-            borderColor: `hsl(${meta.hsl})`,
-            boxShadow: targeted
-              ? `0 0 0 4px hsl(${meta.hsl}/0.25), 0 0 42px 4px hsl(${meta.hsl}/0.85)`
-              : `0 0 22px 0 hsl(${meta.hsl}/0.55)`,
-          }}
-          animate={{ scale: targeted ? 1.1 : 1 }}
-          transition={{ type: "spring", stiffness: 380, damping: 24 }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={pin.imageUrl}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="eager"
-          />
-          <span
-            aria-hidden
-            className="absolute inset-0"
+            className="absolute top-full left-1/2 h-[42px] w-[2px] -translate-x-1/2"
             style={{
-              background: `linear-gradient(145deg, hsl(0 0% 100% / 0.28), transparent 46%, hsl(${meta.hsl}/0.35))`,
+              background: `linear-gradient(180deg, hsl(${meta.hsl}/0.75), transparent)`,
             }}
           />
-          {pin.autoCollect && capturable && (
-            <span className="absolute bottom-[6%] left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full bg-ar-green text-ar-green-ink">
-              <Zap size={11} strokeWidth={3.2} />
-            </span>
-          )}
-        </motion.span>
+          <span
+            aria-hidden
+            className="absolute top-[calc(100%+38px)] left-1/2 h-[10px] -translate-x-1/2 rounded-[50%]"
+            style={{
+              width: size * 0.62,
+              background: `radial-gradient(ellipse, hsl(${meta.hsl}/0.5), transparent 70%)`,
+            }}
+          />
 
-        {/* Distance tag */}
-        <span
-          className="font-hud absolute -bottom-[22px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-2 py-[2px] text-[9px] font-bold uppercase tracking-[0.1em] backdrop-blur-sm"
-          style={{
-            borderColor: `hsl(${meta.hsl}/0.55)`,
-            color: `hsl(${meta.hsl})`,
-            background: "hsl(var(--ar-void) / 0.7)",
-          }}
-        >
-          {status === "collected" ? "Collected" : formatDistance(distance)}
+          {/* Rotating rarity ring */}
+          <motion.span
+            aria-hidden
+            className="absolute -inset-[9%] rounded-full border-2 border-dashed"
+            style={{ borderColor: `hsl(${meta.hsl} / ${dead ? 0.25 : 0.7})` }}
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: dead ? 40 : 16,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+
+          {targeted && (
+            <span
+              aria-hidden
+              className="animate-pulse-ring absolute -inset-[9%] rounded-full border-2"
+              style={{ borderColor: `hsl(${meta.hsl})` }}
+            />
+          )}
+
+          {/* The coin */}
+          <motion.span
+            className={cn(
+              "absolute inset-0 overflow-hidden rounded-full border-[3px]",
+              dead && "saturate-[0.25]",
+            )}
+            style={{
+              borderColor: `hsl(${meta.hsl})`,
+              boxShadow: targeted
+                ? `0 0 0 4px hsl(${meta.hsl}/0.25), 0 0 42px 4px hsl(${meta.hsl}/0.85)`
+                : `0 0 22px 0 hsl(${meta.hsl}/0.55)`,
+            }}
+            animate={{ scale: targeted ? 1.1 : 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 24 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={pin.imageUrl} alt="" className="h-full w-full object-cover" loading="eager" />
+            <span
+              aria-hidden
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(145deg, hsl(0 0% 100% / 0.28), transparent 46%, hsl(${meta.hsl}/0.35))`,
+              }}
+            />
+            {pin.autoCollect && capturable && (
+              <span className="bg-ar-green text-ar-green-ink absolute bottom-[6%] left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full">
+                <Zap size={11} strokeWidth={3.2} />
+              </span>
+            )}
+          </motion.span>
+
+          {/* Distance tag */}
+          <span
+            className="font-hud absolute -bottom-[22px] left-1/2 -translate-x-1/2 rounded-full border px-2 py-[2px] text-[9px] font-bold tracking-[0.1em] whitespace-nowrap uppercase backdrop-blur-sm"
+            style={{
+              borderColor: `hsl(${meta.hsl}/0.55)`,
+              color: `hsl(${meta.hsl})`,
+              background: "hsl(var(--ar-void) / 0.7)",
+            }}
+          >
+            {status === "collected" ? "Collected" : formatDistance(distance)}
+          </span>
         </span>
-      </span>
-    </motion.button>
+      </motion.button>
     </div>
   );
 }
@@ -503,10 +490,10 @@ export function ArBillboard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 26, scale: 0.95 }}
       transition={{ type: "spring", stiffness: 420, damping: 32 }}
-      className="ar-glass mx-auto max-w-[22rem] rounded-ar-lg p-3.5"
+      className="ar-glass rounded-ar-lg mx-auto max-w-[22rem] p-3.5"
     >
       <div className="flex items-start gap-3">
-        <div className="relative h-[58px] w-[42px] shrink-0 overflow-hidden rounded-[9px] border border-ar-line">
+        <div className="border-ar-line relative h-[58px] w-[42px] shrink-0 overflow-hidden rounded-[9px] border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={pin.imageUrl} alt="" className="h-full w-full object-cover" />
         </div>
@@ -516,20 +503,20 @@ export function ArBillboard({
             <RarityPlate rarity={rarity} size="sm" />
             <StatusBadge status={status} />
           </div>
-          <h2 className="font-hud truncate text-[14.5px] font-bold leading-tight text-ar-text">
+          <h2 className="font-hud text-ar-text truncate text-[14.5px] leading-tight font-bold">
             {pin.title}
           </h2>
-          <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-ar-faint">
+          <p className="text-ar-faint mt-0.5 flex items-center gap-1.5 text-[11px]">
             <span className="truncate">{pin.brandName}</span>
             <span aria-hidden>&middot;</span>
-            <span className="font-hud shrink-0 font-bold tabular-nums text-ar-green-hot">
+            <span className="font-hud text-ar-green-hot shrink-0 font-bold tabular-nums">
               {formatDistance(distance)}
             </span>
           </p>
         </div>
       </div>
 
-      <p className="mt-2.5 line-clamp-2 text-[11.5px] leading-relaxed text-ar-dim">
+      <p className="text-ar-dim mt-2.5 line-clamp-2 text-[11.5px] leading-relaxed">
         {pin.description}
       </p>
 
@@ -572,7 +559,7 @@ export function Reticle({ locked, armed }: { locked: boolean; armed: boolean }) 
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+      className="pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
     >
       <motion.svg
         viewBox="0 0 64 64"
@@ -587,13 +574,7 @@ export function Reticle({ locked, armed }: { locked: boolean; armed: boolean }) 
           "M62 44v13a5 5 0 0 1-5 5H44",
           "M20 62H7a5 5 0 0 1-5-5V44",
         ].map((d) => (
-          <path
-            key={d}
-            d={d}
-            stroke={color}
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
+          <path key={d} d={d} stroke={color} strokeWidth="2.2" strokeLinecap="round" />
         ))}
         <circle cx="32" cy="32" r="1.8" fill={color} />
       </motion.svg>
@@ -625,11 +606,11 @@ export function CompassStrip({ heading, manual }: { heading: number; manual: boo
             </span>
           );
         })}
-        <span className="absolute left-1/2 top-[15px] h-[6px] w-[1.5px] -translate-x-1/2 bg-ar-green-hot" />
+        <span className="bg-ar-green-hot absolute top-[15px] left-1/2 h-[6px] w-[1.5px] -translate-x-1/2" />
       </div>
 
       {manual && (
-        <span className="font-hud absolute right-4 top-0 rounded-full border border-ar-line bg-ar-void/70 px-2 py-[1px] text-[8px] font-semibold uppercase tracking-[0.14em] text-ar-faint">
+        <span className="font-hud border-ar-line bg-ar-void/70 text-ar-faint absolute top-0 right-4 rounded-full border px-2 py-[1px] text-[8px] font-semibold tracking-[0.14em] uppercase">
           Drag to look
         </span>
       )}
@@ -652,8 +633,8 @@ export function ArRadar({ placed, heading }: { placed: Placed[]; heading: number
             "conic-gradient(from 0deg, transparent 0deg, hsl(var(--ar-green)/0.3) 40deg, transparent 66deg)",
         }}
       />
-      <span className="absolute inset-[22%] rounded-full border border-ar-green/25" />
-      <span className="absolute inset-[40%] rounded-full border border-ar-green/20" />
+      <span className="border-ar-green/25 absolute inset-[22%] rounded-full border" />
+      <span className="border-ar-green/20 absolute inset-[40%] rounded-full border" />
 
       {/* Field-of-view wedge, so the radar says which way you're looking. */}
       <div
@@ -673,7 +654,7 @@ export function ArRadar({ placed, heading }: { placed: Placed[]; heading: number
         return (
           <span
             key={p.pin.id}
-            className="absolute left-1/2 top-1/2 h-[6px] w-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute top-1/2 left-1/2 h-[6px] w-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               transform: `translate(calc(-50% + ${Math.sin(rad) * r}px), calc(-50% + ${-Math.cos(rad) * r}px))`,
               background: `hsl(${meta.hsl})`,
@@ -683,8 +664,8 @@ export function ArRadar({ placed, heading }: { placed: Placed[]; heading: number
         );
       })}
 
-      <span className="absolute left-1/2 top-1/2 h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_8px_white]" />
-      <span className="font-hud absolute inset-x-0 bottom-[5px] text-center text-[7.5px] font-bold tabular-nums tracking-[0.1em] text-white/60">
+      <span className="absolute top-1/2 left-1/2 h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_8px_white]" />
+      <span className="font-hud absolute inset-x-0 bottom-[5px] text-center text-[7.5px] font-bold tracking-[0.1em] text-white/60 tabular-nums">
         {Math.round(heading)}&deg;
       </span>
     </div>
@@ -710,13 +691,7 @@ export function EdgeArrow({ placed }: { placed: Placed }) {
   const verticalMiss = Math.abs(verticalOffset) / (FOV / 2) / 1.9;
   const vertical = verticalMiss > horizontalMiss;
 
-  const dir = vertical
-    ? verticalOffset > 0
-      ? "up"
-      : "down"
-    : offset > 0
-      ? "right"
-      : "left";
+  const dir = vertical ? (verticalOffset > 0 ? "up" : "down") : offset > 0 ? "right" : "left";
 
   const rotation = { up: 0, right: 90, down: 180, left: -90 }[dir];
   const edge = {
@@ -732,9 +707,7 @@ export function EdgeArrow({ placed }: { placed: Placed }) {
   // Centring goes through motion's own x/y — it owns the whole transform once
   // it animates any part of it, and would drop a Tailwind `-translate-*`.
   const bob = 4;
-  const style = vertical
-    ? { x: "-50%" as const }
-    : { y: "-50%" as const };
+  const style = vertical ? { x: "-50%" as const } : { y: "-50%" as const };
   const animate = vertical
     ? { y: dir === "up" ? ["-50%", "-58%", "-50%"] : ["-50%", "-42%", "-50%"] }
     : { x: dir === "right" ? [0, bob, 0] : [0, -bob, 0] };
@@ -796,7 +769,7 @@ function SimulatedFeed({ heading, muted }: { heading: number; muted?: boolean })
 
       <div className="ar-grid-fine absolute inset-x-0 bottom-0 h-[45%] opacity-40" />
       {!muted && (
-        <span className="font-hud absolute left-1/2 top-[30%] -translate-x-1/2 rounded-full border border-ar-line bg-ar-void/70 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-ar-faint">
+        <span className="font-hud border-ar-line bg-ar-void/70 text-ar-faint absolute top-[30%] left-1/2 -translate-x-1/2 rounded-full border px-3 py-1 text-[9px] font-semibold tracking-[0.2em] uppercase">
           Simulated view
         </span>
       )}

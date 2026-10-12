@@ -12,10 +12,7 @@ import {
   getXLMPrice,
   getXlmUsdPrice,
 } from "~/lib/stellar/fan/get_token_price";
-import {
-  createRedeemXDRAsset,
-  createRedeemXDRNative,
-} from "~/lib/stellar/fan/redeem";
+import { createRedeemXDRAsset, createRedeemXDRNative } from "~/lib/stellar/fan/redeem";
 import { AccountSchema } from "~/lib/stellar/fan/utils";
 import {
   createOrRenewVanitySubscription,
@@ -48,8 +45,14 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { platformBranding } from "@wadzzo/platform/branding";
 /** A vanity URL is free to claim if nobody else has it. */
 async function assertVanityFree(db: import("@wadzzo/db").Db, vanityURL: string, creatorId: string) {
-  const taken = await db.creator.findUnique({ where: { vanityURL }, select: { id: true } });
-  if (taken && taken.id !== creatorId) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "That URL is taken. Try another." });
+  const taken = await db.creator.findUnique({
+    where: { vanityURL },
+    select: { id: true },
+  });
+  if (taken && taken.id !== creatorId)
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+      message: "That URL is taken. Try another.",
+    });
 }
 
 export const brandCreateRequestSchema = z.object({
@@ -70,10 +73,7 @@ export const brandCreateRequestSchema = z.object({
   assetThumbnail: z.url().optional(),
 });
 export const CreatorAboutShema = z.object({
-  description: z
-    .string()
-    .max(100, { message: "Bio must be lass than 101 character" })
-    .nullable(),
+  description: z.string().max(100, { message: "Bio must be lass than 101 character" }).nullable(),
   name: z
     .string()
     .min(3, { message: "Name must be between 3 to 98 characters" })
@@ -117,7 +117,9 @@ export const creatorRouter = createTRPCRouter({
         where: { id: id },
       });
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const packages = await ctx.db.subscription.findMany({
         where: { creatorId: creator.id },
@@ -135,7 +137,9 @@ export const creatorRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
       });
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const feature = await ctx.db.subscription.delete({
         where: { id: input.id, creatorId: creator.id },
@@ -151,7 +155,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (creator) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Creator already exists" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Creator already exists",
+        });
       }
       const circularProfileUrl = input.profileUrl
         ? await createCircularImage(input.profileUrl)
@@ -271,7 +277,12 @@ export const creatorRouter = createTRPCRouter({
       },
     });
     // A brand belongs to one platform; on another (non-root) one it is read-only context, not a working account.
-    return creator && { ...creator, onThisPlatform: brandWorksOnPlatform(ctx.platform, creator.platformId) };
+    return (
+      creator && {
+        ...creator,
+        onThisPlatform: brandWorksOnPlatform(ctx.platform, creator.platformId),
+      }
+    );
   }),
   /** Everything the brand profile page header needs, in one call (no secrets). */
   profileOverview: protectedProcedure.query(async ({ ctx }) => {
@@ -289,7 +300,15 @@ export const creatorRouter = createTRPCRouter({
         approved: true,
         customPageAssetCodeIssuer: true,
         vanitySubscription: true,
-        pageAsset: { select: { code: true, issuer: true, thumbnail: true, price: true, priceUSD: true } },
+        pageAsset: {
+          select: {
+            code: true,
+            issuer: true,
+            thumbnail: true,
+            price: true,
+            priceUSD: true,
+          },
+        },
         _count: { select: { followers: true, posts: true, Bounty: true } },
       },
     });
@@ -345,7 +364,14 @@ export const creatorRouter = createTRPCRouter({
     return {
       ...rest,
       pageAsset,
-      counts: { followers: _count.followers, posts: _count.posts, bounties: _count.Bounty, pins, hotspots, storeItems },
+      counts: {
+        followers: _count.followers,
+        posts: _count.posts,
+        bounties: _count.Bounty,
+        pins,
+        hotspots,
+        storeItems,
+      },
       recentPins,
     };
   }),
@@ -360,24 +386,21 @@ export const creatorRouter = createTRPCRouter({
     return creator;
   }),
 
+  makeMeCreator: protectedProcedure.input(AccountSchema).mutation(async ({ ctx, input: i }) => {
+    const id = ctx.session.user.id;
+    const data = await ctx.db.creator.create({
+      data: {
+        name: truncateString(id),
+        aprovalSend: true,
+        bio: id,
 
-  makeMeCreator: protectedProcedure
-    .input(AccountSchema)
-    .mutation(async ({ ctx, input: i }) => {
-      const id = ctx.session.user.id;
-      const data = await ctx.db.creator.create({
-        data: {
-          name: truncateString(id),
-          aprovalSend: true,
-          bio: id,
-
-          user: { connect: { id: id } },
-          platform: { connect: { id: ctx.platform.id } },
-          storagePub: i.publicKey,
-          storageSecret: i.secretKey,
-        },
-      });
-    }),
+        user: { connect: { id: id } },
+        platform: { connect: { id: ctx.platform.id } },
+        storagePub: i.publicKey,
+        storageSecret: i.secretKey,
+      },
+    });
+  }),
 
   updateCreatorProfile: protectedProcedure
     .input(CreatorAboutShema)
@@ -517,71 +540,73 @@ export const creatorRouter = createTRPCRouter({
       };
     }),
 
-  getCreatorPageAssetBalance: protectedProcedure.query(
-    async ({ ctx, input }) => {
-      const creatorId = ctx.session.user.id;
+  getCreatorPageAssetBalance: protectedProcedure.query(async ({ ctx, input }) => {
+    const creatorId = ctx.session.user.id;
 
-      const creator = await ctx.db.creator.findUniqueOrThrow({
-        where: { id: creatorId },
-        include: { pageAsset: true },
-      });
+    const creator = await ctx.db.creator.findUniqueOrThrow({
+      where: { id: creatorId },
+      include: { pageAsset: true },
+    });
 
-      const creatorStoragePub = creator.storagePub;
-      const creatorPageAsset = creator.pageAsset;
+    const creatorStoragePub = creator.storagePub;
+    const creatorPageAsset = creator.pageAsset;
 
-      const storageAcc = await StellarAccount.loadOrThrow(creatorStoragePub);
+    const storageAcc = await StellarAccount.loadOrThrow(creatorStoragePub);
 
-      if (creatorPageAsset) {
-        const bal = storageAcc.tokenBalance(
-          creatorPageAsset.code,
-          creatorPageAsset.issuer,
-        );
-        if (bal) {
+    if (creatorPageAsset) {
+      const bal = storageAcc.tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer);
+      if (bal) {
+        return {
+          balance: bal,
+          assetCode: creatorPageAsset.code,
+          assetIssuer: creatorPageAsset.issuer,
+        };
+      } else {
+        return {
+          balance: 0,
+          assetCode: creatorPageAsset.code,
+          assetIssuer: creatorPageAsset.issuer,
+        };
+      }
+    } else {
+      if (creator.customPageAssetCodeIssuer) {
+        const [code, issuer] = creator.customPageAssetCodeIssuer.split("-");
+
+        const assetCode = z.string().max(12).min(1).parse(code);
+        const assetIssuer = z.string().length(56).safeParse(issuer);
+
+        if (assetIssuer.success === false)
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+            message: "invalid issuer",
+          });
+
+        console.log("storage Acc", storageAcc);
+
+        const bal = storageAcc.tokenBalance(assetCode, assetIssuer.data);
+
+        if (bal >= 0) {
           return {
             balance: bal,
-            assetCode: creatorPageAsset.code,
-            assetIssuer: creatorPageAsset.issuer,
+            assetCode: assetCode,
+            assetIssuer: assetIssuer.data,
           };
         } else {
-          return {
-            balance: 0,
-            assetCode: creatorPageAsset.code,
-            assetIssuer: creatorPageAsset.issuer,
-          };
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+            message: "Invalid asset code or issuer",
+          });
         }
-      } else {
-        if (creator.customPageAssetCodeIssuer) {
-          const [code, issuer] = creator.customPageAssetCodeIssuer.split("-");
-
-          const assetCode = z.string().max(12).min(1).parse(code);
-          const assetIssuer = z.string().length(56).safeParse(issuer);
-
-          if (assetIssuer.success === false) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "invalid issuer" });
-
-          console.log("storage Acc", storageAcc);
-
-          const bal = storageAcc.tokenBalance(assetCode, assetIssuer.data);
-
-          if (bal >= 0) {
-            return {
-              balance: bal,
-              assetCode: assetCode,
-              assetIssuer: assetIssuer.data,
-            };
-          } else {
-            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset code or issuer" });
-          }
-        } else return null; // no page asset yet — a normal state, not an error
-      }
-    },
-  ),
+      } else return null; // no page asset yet — a normal state, not an error
+    }
+  }),
   getCreatorShopAssetBalance: creatorProcedure.query(async ({ ctx }) => {
     const creator = await ctx.db.creator.findUnique({
       where: { id: ctx.session.user.id },
     });
 
     if (!creator) {
-      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+        message: "Creator not found",
+      });
     }
 
     const creatorStoragePub = creator.storagePub;
@@ -606,7 +631,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const storagePubKey = creator.storagePub;
 
@@ -660,19 +687,25 @@ export const creatorRouter = createTRPCRouter({
         include: { pageAsset: true },
       });
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const asset = await ctx.db.asset.findUnique({
         where: { id: assetId },
       });
       if (!asset) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Asset not found",
+        });
       }
       const findRedeem = await ctx.db.redeem.findUnique({
         where: { code: redeemCode },
       });
       if (findRedeem) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code already exists" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Redeem code already exists",
+        });
       }
       const code = await ctx.db.redeem.create({
         data: {
@@ -688,10 +721,7 @@ export const creatorRouter = createTRPCRouter({
     .input(z.object({ assetCode: z.string(), issuer: z.string() }))
     .mutation(async ({ ctx, input }) => {
       console.log("input", input);
-      console.log(
-        "process.env.NEXT_PUBLIC_STELLAR_PUBNET",
-        process.env.NEXT_PUBLIC_STELLAR_PUBNET,
-      );
+      console.log("process.env.NEXT_PUBLIC_STELLAR_PUBNET", process.env.NEXT_PUBLIC_STELLAR_PUBNET);
 
       const isPubnet = process.env.NEXT_PUBLIC_STELLAR_PUBNET === "true"; // Explicit comparison
 
@@ -716,8 +746,7 @@ export const creatorRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { assetId, maxRedeems, signWith, redeemCode, paymentMethod } =
-        input;
+      const { assetId, maxRedeems, signWith, redeemCode, paymentMethod } = input;
 
       const creatorId = ctx.session.user.id;
 
@@ -727,7 +756,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
 
       const asset = await ctx.db.asset.findUnique({
@@ -735,7 +766,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!asset) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Asset not found",
+        });
       }
 
       const findRedeem = await ctx.db.redeem.findUnique({
@@ -743,7 +776,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (findRedeem) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code founded!" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Redeem code founded!",
+        });
       }
 
       if (paymentMethod === "xlm") {
@@ -781,10 +816,13 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const state = vanityState(creator.vanitySubscription);
-      if (state !== "expired" && input.vanityURL) await assertVanityFree(ctx.db, input.vanityURL, userId);
+      if (state !== "expired" && input.vanityURL)
+        await assertVanityFree(ctx.db, input.vanityURL, userId);
       return getVanitySubscriptionXDR({
         amount: vanityPrice(state),
         signWith: input.signWith,
@@ -808,12 +846,15 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
       const state = vanityState(creator.vanitySubscription);
       const amount = vanityPrice(state);
       // Renewing keeps the current URL; setting or changing claims a new one.
-      const vanityURL = state === "expired" && creator.vanityURL ? creator.vanityURL : input.vanityURL;
+      const vanityURL =
+        state === "expired" && creator.vanityURL ? creator.vanityURL : input.vanityURL;
       if (state !== "expired") await assertVanityFree(ctx.db, vanityURL, userId);
 
       await verifyVanityPayment({
@@ -865,7 +906,9 @@ export const creatorRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { code, issuer } = input;
       if (!code || !issuer) {
-        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Code and issuer are required" });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+          message: "Code and issuer are required",
+        });
       }
 
       const priceUSDAsset = await getAssetPriceByCoddenIssuer({
@@ -905,15 +948,31 @@ export const creatorRouter = createTRPCRouter({
       const creatorId = ctx.session.user.id;
       const creator = await ctx.db.creator.findUnique({
         where: { id: creatorId },
-        select: { customPageAssetCodeIssuer: true, pageAsset: { select: { code: true } } },
+        select: {
+          customPageAssetCodeIssuer: true,
+          pageAsset: { select: { code: true } },
+        },
       });
-      if (!creator) throw new TRPCError({ code: "NOT_FOUND", message: "Set up your brand first" });
+      if (!creator)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Set up your brand first",
+        });
       if (creator.pageAsset ?? creator.customPageAssetCodeIssuer)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Your brand already has a page asset" });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Your brand already has a page asset",
+        });
 
       if (input.type === "new") {
         await ctx.db.creatorPageAsset.create({
-          data: { creatorId, code: input.code, issuer: BLANK_KEYWORD, thumbnail: input.thumbnail, limit: 0 },
+          data: {
+            creatorId,
+            code: input.code,
+            issuer: BLANK_KEYWORD,
+            thumbnail: input.thumbnail,
+            limit: 0,
+          },
         });
         return { status: "pending" as const };
       }
@@ -923,7 +982,11 @@ export const creatorRouter = createTRPCRouter({
         .get(`https://api.stellar.expert/explorer/${network}/asset/${input.code}-${input.issuer}`)
         .then((r) => r.status === 200)
         .catch(() => false);
-      if (!exists) throw new TRPCError({ code: "BAD_REQUEST", message: `We couldn't find ${input.code} from that issuer on Stellar` });
+      if (!exists)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `We couldn't find ${input.code} from that issuer on Stellar`,
+        });
 
       await ctx.db.creator.update({
         where: { id: creatorId },
@@ -950,7 +1013,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
 
       const { price, priceUSD } = input;
@@ -987,8 +1052,7 @@ export const creatorRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { code, issuer, price, signWith, creatorId, method, priceInXLM } =
-        input;
+      const { code, issuer, price, signWith, creatorId, method, priceInXLM } = input;
 
       const currentUser = ctx.session.user.id;
       const creator = await ctx.db.creator.findUnique({
@@ -1002,7 +1066,9 @@ export const creatorRouter = createTRPCRouter({
       });
 
       if (!creator) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator not found",
+        });
       }
 
       const acc = await StellarAccount.loadOrThrow(creator.storagePub);

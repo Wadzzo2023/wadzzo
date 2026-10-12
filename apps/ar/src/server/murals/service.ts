@@ -13,10 +13,17 @@ type Db = AppDb | Prisma.TransactionClient;
 
 /** The single settings row; created with the schema defaults on first use. */
 export function getMuralSettings(db: Db): Promise<MuralSettings> {
-  return db.muralSettings.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+  return db.muralSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1 },
+  });
 }
 
-export function toMuralCard(m: Mural, settings: Pick<MuralSettings, "confirmationsNeeded">): MuralCard {
+export function toMuralCard(
+  m: Mural,
+  settings: Pick<MuralSettings, "confirmationsNeeded">,
+): MuralCard {
   return {
     id: m.id,
     title: m.title ?? m.autoTitle,
@@ -39,13 +46,27 @@ export function toMuralCard(m: Mural, settings: Pick<MuralSettings, "confirmatio
 export async function creditCoins(
   tx: Prisma.TransactionClient,
   /** platformId: the platform (site) the coins were earned on; each has its own balance */
-  entry: { userId: string; amount: number; reason: CoinReason; platformId: string; muralId?: string; scanId?: string; note?: string },
+  entry: {
+    userId: string;
+    amount: number;
+    reason: CoinReason;
+    platformId: string;
+    muralId?: string;
+    scanId?: string;
+    note?: string;
+  },
 ): Promise<number> {
   await tx.coinLedger.create({ data: entry });
   const { balance } = await tx.coinBalance.upsert({
-    where: { userId_platformId: { userId: entry.userId, platformId: entry.platformId } },
+    where: {
+      userId_platformId: { userId: entry.userId, platformId: entry.platformId },
+    },
     update: { balance: { increment: entry.amount } },
-    create: { userId: entry.userId, platformId: entry.platformId, balance: entry.amount },
+    create: {
+      userId: entry.userId,
+      platformId: entry.platformId,
+      balance: entry.amount,
+    },
   });
   return balance;
 }
@@ -60,5 +81,8 @@ export const LIVE_MURAL: Prisma.MuralWhereInput = {
 export function boxAround(lat: number, lng: number, radiusM: number) {
   const dLat = radiusM / 111_320;
   const dLng = radiusM / (111_320 * Math.max(0.01, Math.cos((lat * Math.PI) / 180)));
-  return { latitude: { gte: lat - dLat, lte: lat + dLat }, longitude: { gte: lng - dLng, lte: lng + dLng } };
+  return {
+    latitude: { gte: lat - dLat, lte: lat + dLat },
+    longitude: { gte: lng - dLng, lte: lng + dLng },
+  };
 }

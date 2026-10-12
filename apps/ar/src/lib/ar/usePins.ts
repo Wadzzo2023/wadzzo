@@ -54,11 +54,7 @@ export function useBrands(): ArBrand[] {
  * is stale the moment this lands. Refetching pins is what makes a locked pin
  * visibly turn collectible.
  */
-export type FollowPhase =
-  | "preparing"
-  | "signing"
-  | "confirming"
-  | "unfollowing";
+export type FollowPhase = "preparing" | "signing" | "confirming" | "unfollowing";
 
 /**
  * What the button says at each stage. These are not decoration — following
@@ -84,10 +80,7 @@ export function useToggleFollow() {
   const [error, setError] = useState<string | null>(null);
 
   const settle = async () => {
-    await Promise.all([
-      utils.brands.list.invalidate(),
-      utils.pins.list.invalidate(),
-    ]);
+    await Promise.all([utils.brands.list.invalidate(), utils.pins.list.invalidate()]);
   };
 
   const followXdr = api.brands.followXdr.useMutation();
@@ -108,7 +101,7 @@ export function useToggleFollow() {
         const signed = await signAndSubmitTransaction({
           xdr: step.xdr,
           publicKey: session?.user?.id,
-          walletType: session?.user?.walletType
+          walletType: session?.user?.walletType,
         });
         if (!signed) {
           setError("Transaction failed while signing.");
@@ -293,10 +286,7 @@ export function useCollectedPinsQuery(args: {
     },
   );
 
-  const pins = useMemo(
-    () => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS,
-    [query.data],
-  );
+  const pins = useMemo(() => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS, [query.data]);
 
   const last = query.data?.pages.at(-1);
   return {
@@ -342,10 +332,7 @@ export function useBrandPinsQuery(args: {
     },
   );
 
-  const pins = useMemo(
-    () => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS,
-    [query.data],
-  );
+  const pins = useMemo(() => query.data?.pages.flatMap((p) => p.pins) ?? EMPTY_PINS, [query.data]);
 
   return {
     ...query,

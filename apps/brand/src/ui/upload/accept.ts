@@ -2,12 +2,22 @@ import type { EndPointType } from "~/server/s3";
 
 /** What each S3 endpoint accepts: the `accept` string and a human hint. */
 export const ENDPOINT_ACCEPT: Record<EndPointType, { accept: string; hint: string }> = {
-  imageUploader: { accept: "image/jpeg,image/png,image/webp,image/gif", hint: "PNG, JPG, WEBP or GIF" },
-  profileUploader: { accept: "image/jpeg,image/png,image/webp,image/gif", hint: "PNG, JPG, WEBP or GIF" },
-  coverUploader: { accept: "image/jpeg,image/png,image/webp,image/gif", hint: "PNG, JPG, WEBP or GIF · wide images work best" },
+  imageUploader: {
+    accept: "image/jpeg,image/png,image/webp,image/gif",
+    hint: "PNG, JPG, WEBP or GIF",
+  },
+  profileUploader: {
+    accept: "image/jpeg,image/png,image/webp,image/gif",
+    hint: "PNG, JPG, WEBP or GIF",
+  },
+  coverUploader: {
+    accept: "image/jpeg,image/png,image/webp,image/gif",
+    hint: "PNG, JPG, WEBP or GIF · wide images work best",
+  },
   videoUploader: { accept: "video/mp4,video/webm", hint: "MP4 or WEBM" },
   musicUploader: {
-    accept: "audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/flac,audio/alac,audio/aiff,audio/wma,audio/m4a",
+    accept:
+      "audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/flac,audio/alac,audio/aiff,audio/wma,audio/m4a",
     hint: "MP3, WAV, OGG, AAC, FLAC or M4A",
   },
   modelUploader: { accept: ".obj,.glb", hint: "3D model: GLB or OBJ" },
@@ -42,7 +52,13 @@ export function fileMatchesAccept(file: File, accept: string) {
     .split(",")
     .map((a) => a.trim().toLowerCase())
     .filter(Boolean)
-    .some((a) => (a.startsWith(".") ? name.endsWith(a) : a.endsWith("/*") ? type.startsWith(a.slice(0, -1)) : type === a));
+    .some((a) =>
+      a.startsWith(".")
+        ? name.endsWith(a)
+        : a.endsWith("/*")
+          ? type.startsWith(a.slice(0, -1))
+          : type === a,
+    );
 }
 
 export function formatBytes(bytes: number) {

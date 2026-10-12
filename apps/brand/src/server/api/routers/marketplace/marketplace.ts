@@ -2,25 +2,23 @@ import { Keypair } from "@stellar/stellar-sdk";
 import { z } from "zod";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import {
-  sendNft2StorageXDR,
-  sendNftback,
-} from "~/lib/stellar/marketplace/trx/nft_2_storage";
+import { sendNft2StorageXDR, sendNftback } from "~/lib/stellar/marketplace/trx/nft_2_storage";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import { ItemPrivacy, MarketAsset } from "@wadzzo/db";
-import {
-  adminProcedure,
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { adminProcedure, createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { type MarketAssetType } from "~/lib/state/play/use-modal-store";
 import { logAudit } from "@wadzzo/platform/server";
 import { platformScope } from "@wadzzo/platform/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const BackMarketFormSchema = z.object({
   placingCopies: z
-    .number({ error: (issue) => (issue.input === undefined ? "Placing Copies  must be a number" : "Placing Copies must be a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Placing Copies  must be a number"
+          : "Placing Copies must be a number",
+    })
     .nonnegative()
     .int(),
   code: z
@@ -50,7 +48,12 @@ export const AssetSelectAllProperty = {
 };
 export const PlaceMarketFormSchema = z.object({
   placingCopies: z
-    .number({ error: (issue) => (issue.input === undefined ? "Placing Copies  must be a number" : "Placing Copies must be a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Placing Copies  must be a number"
+          : "Placing Copies must be a number",
+    })
     .nonnegative()
     .int(),
   code: z
@@ -73,7 +76,9 @@ export const marketRouter = createTRPCRouter({
         select: { storagePub: true, storageSecret: true },
       });
       if (!storage?.storagePub) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "storage does not exist",
+        });
       }
 
       const assetAmount = placingCopies.toString();
@@ -101,7 +106,9 @@ export const marketRouter = createTRPCRouter({
         select: { storageSecret: true },
       });
       if (!storage?.storageSecret) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "storage does not exist",
+        });
       }
 
       const assetAmount = placingCopies.toString();
@@ -136,7 +143,10 @@ export const marketRouter = createTRPCRouter({
         where: { code_issuer: { code, issuer } },
       });
 
-      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
+      if (!asset)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "asset not found",
+        });
 
       const placerId = userId;
 
@@ -164,7 +174,10 @@ export const marketRouter = createTRPCRouter({
         select: { id: true, creatorId: true },
       });
 
-      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
+      if (!asset)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "asset not found",
+        });
 
       console.log("asset", asset, code, issuer);
 
@@ -175,9 +188,6 @@ export const marketRouter = createTRPCRouter({
       });
     }),
 
-
-
-
   getFanMarketNfts: protectedProcedure
     .input(
       z.object({
@@ -187,8 +197,8 @@ export const marketRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { limit, cursor, skip } = input
-      const currentUserId = ctx.session.user.id
+      const { limit, cursor, skip } = input;
+      const currentUserId = ctx.session.user.id;
 
       const fetchAndFilterItems = async (
         currentLimit: number,
@@ -196,7 +206,6 @@ export const marketRouter = createTRPCRouter({
         currentSkip: number | undefined,
 
         accumulatedItems: MarketAssetType[] = [],
-
       ): Promise<{ nfts: MarketAssetType[]; nextCursor: number | null }> => {
         const items = await ctx.db.marketAsset.findMany({
           take: currentLimit,
@@ -225,71 +234,79 @@ export const marketRouter = createTRPCRouter({
               },
             },
           },
-          where: { placerId: { not: null }, type: { equals: "FAN" }, ...platformScope(ctx) },
-        })
+          where: {
+            placerId: { not: null },
+            type: { equals: "FAN" },
+            ...platformScope(ctx),
+          },
+        });
 
-        const stellarAcc = await StellarAccount.loadOrThrow(currentUserId)
+        const stellarAcc = await StellarAccount.loadOrThrow(currentUserId);
 
         const filteredItems = items.filter((item) => {
-          const creatorPageAsset = item.asset.creator?.pageAsset
-          const creatorCustomPageAsset = item.asset.creator?.customPageAssetCodeIssuer
-          let code: string | undefined
-          let issuer: string | undefined
+          const creatorPageAsset = item.asset.creator?.pageAsset;
+          const creatorCustomPageAsset = item.asset.creator?.customPageAssetCodeIssuer;
+          let code: string | undefined;
+          let issuer: string | undefined;
 
           if (creatorCustomPageAsset) {
-            [code, issuer] = creatorCustomPageAsset.split("-")
+            [code, issuer] = creatorCustomPageAsset.split("-");
           } else if (creatorPageAsset) {
-            code = creatorPageAsset.code
-            issuer = creatorPageAsset.issuer
+            code = creatorPageAsset.code;
+            issuer = creatorPageAsset.issuer;
           }
 
-          if (!code || !issuer) return false
+          if (!code || !issuer) return false;
 
           if (item.asset.privacy === ItemPrivacy.PUBLIC) {
-            return true
+            return true;
           }
 
           if (item.asset.creatorId !== item.placerId) {
-            return true
+            return true;
           }
 
           if (item.asset.privacy === ItemPrivacy.PRIVATE) {
-            return stellarAcc.hasTrustline(code, issuer)
+            return stellarAcc.hasTrustline(code, issuer);
           }
 
           if (item.asset.privacy === ItemPrivacy.TIER) {
-            return item.asset.tier && item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
+            return (
+              item.asset.tier && item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
+            );
           }
 
-          return false
-        })
+          return false;
+        });
 
-        const newAccumulatedItems = [...accumulatedItems, ...filteredItems]
+        const newAccumulatedItems = [...accumulatedItems, ...filteredItems];
 
         if (newAccumulatedItems.length >= limit || items.length < currentLimit) {
           // We have enough items or there are no more items to fetch
-          // @ts-expect-error: This error occurs because of an intentional type mismatch due to X.
-          const nextCursor = newAccumulatedItems.length > limit ? newAccumulatedItems[limit - 1].id : null
+          const nextCursor =
+            newAccumulatedItems.length > limit
+              ? (newAccumulatedItems[limit - 1]?.id ?? null)
+              : null;
           return {
             nfts: newAccumulatedItems.slice(0, limit),
             nextCursor,
-          }
+          };
         } else {
           // We need to fetch more items
-          const lastItem = items[items.length - 1]
+          const lastItem = items[items.length - 1];
           if (lastItem) {
-            return fetchAndFilterItems(currentLimit, lastItem.id, 0, newAccumulatedItems)
+            return fetchAndFilterItems(currentLimit, lastItem.id, 0, newAccumulatedItems);
           } else {
             // If there are no items left, return what we have
             return {
               nfts: newAccumulatedItems,
               nextCursor: null,
-            }
+            };
           }
         }
-      }
+      };
 
-      return fetchAndFilterItems(limit, cursor, skip)
+      return fetchAndFilterItems(limit, cursor, skip);
     }),
 
   getPageAssets: protectedProcedure
@@ -321,8 +338,8 @@ export const marketRouter = createTRPCRouter({
         cursor: cursor ? { id: cursor } : undefined,
         orderBy: {
           pageAsset: {
-            creatorId: "asc"
-          }
+            creatorId: "asc",
+          },
         },
       });
 
@@ -390,7 +407,10 @@ export const marketRouter = createTRPCRouter({
 
         if (item.asset.privacy === ItemPrivacy.PRIVATE) {
           const creatorPageAsset = item.asset.creator?.pageAsset;
-          if (creatorPageAsset && stellarAcc.hasTrustline(creatorPageAsset.code, creatorPageAsset.issuer)) {
+          if (
+            creatorPageAsset &&
+            stellarAcc.hasTrustline(creatorPageAsset.code, creatorPageAsset.issuer)
+          ) {
             return true;
           }
         } else if (item.asset.privacy === ItemPrivacy.TIER) {
@@ -398,7 +418,8 @@ export const marketRouter = createTRPCRouter({
           if (
             creatorPageAsset &&
             item.asset.tier &&
-            item.asset.tier.price <= stellarAcc.tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer)
+            item.asset.tier.price <=
+              stellarAcc.tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer)
           ) {
             return true;
           }
@@ -417,7 +438,6 @@ export const marketRouter = createTRPCRouter({
         nextCursor,
       };
     }),
-
 
   getCreatorNftsByCreatorID: protectedProcedure
     .input(
@@ -438,7 +458,6 @@ export const marketRouter = createTRPCRouter({
         currentSkip: number | undefined,
 
         accumulatedItems: MarketAssetType[] = [],
-
       ): Promise<{ nfts: MarketAssetType[]; nextCursor: number | null }> => {
         const items = await ctx.db.marketAsset.findMany({
           take: currentLimit,
@@ -501,8 +520,7 @@ export const marketRouter = createTRPCRouter({
 
           if (item.asset.privacy === ItemPrivacy.TIER) {
             return (
-              item.asset.tier &&
-              item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
+              item.asset.tier && item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
             );
           }
 
@@ -512,8 +530,10 @@ export const marketRouter = createTRPCRouter({
         const newAccumulatedItems = [...accumulatedItems, ...filteredItems];
 
         if (newAccumulatedItems.length >= limit || items.length < currentLimit) {
-          // @ts-expect-error: This error occurs because of an intentional type mismatch due to X.
-          const nextCursor = newAccumulatedItems.length > limit ? newAccumulatedItems[limit - 1].id : null;
+          const nextCursor =
+            newAccumulatedItems.length > limit
+              ? (newAccumulatedItems[limit - 1]?.id ?? null)
+              : null;
           return {
             nfts: newAccumulatedItems.slice(0, limit),
             nextCursor,
@@ -533,7 +553,6 @@ export const marketRouter = createTRPCRouter({
 
       return fetchAndFilterItems(limit, cursor, skip);
     }),
-
 
   getACreatorNfts: protectedProcedure
     .input(
@@ -578,15 +597,12 @@ export const marketRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { code, issuer } = input;
 
-      const adminStoragePub = Keypair.fromSecret(
-        env.STORAGE_SECRET,
-      ).publicKey();
+      const adminStoragePub = Keypair.fromSecret(env.STORAGE_SECRET).publicKey();
 
       const bal = await StellarAccount.loadOrThrow(adminStoragePub);
       const copy = bal.tokenBalance(code, issuer);
       return copy;
     }),
-
 
   getMarketAssetAvailableCopy: protectedProcedure
     .input(z.object({ id: z.number().optional() }))
@@ -604,7 +620,10 @@ export const marketRouter = createTRPCRouter({
         include: { asset: { select: { code: true, issuer: true } } },
       });
 
-      if (!marketItem) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "market item not found" });
+      if (!marketItem)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "market item not found",
+        });
 
       const placerId = marketItem.placerId;
 
@@ -614,15 +633,15 @@ export const marketRouter = createTRPCRouter({
           where: { id: placerId },
         });
 
-        if (!placer) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "seller not found" });
+        if (!placer)
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+            message: "seller not found",
+          });
 
         const placerStorage = placer.storagePub;
 
         const bal = await StellarAccount.loadOrThrow(placerStorage);
-        const copy = bal.tokenBalance(
-          marketItem.asset.code,
-          marketItem.asset.issuer,
-        );
+        const copy = bal.tokenBalance(marketItem.asset.code, marketItem.asset.issuer);
 
         return copy;
       } else {
@@ -630,10 +649,7 @@ export const marketRouter = createTRPCRouter({
         const adminStorage = Keypair.fromSecret(env.STORAGE_SECRET).publicKey();
 
         const bal = await StellarAccount.loadOrThrow(adminStorage);
-        const copy = bal.tokenBalance(
-          marketItem.asset.code,
-          marketItem.asset.issuer,
-        );
+        const copy = bal.tokenBalance(marketItem.asset.code, marketItem.asset.issuer);
 
         return copy;
       }
@@ -661,7 +677,12 @@ export const marketRouter = createTRPCRouter({
             ...platformScope(ctx),
           },
         });
-        await logAudit(ctx, { action: "asset.delete", entityType: "Asset", entityId: assetId, targetPlatformId: asset?.platformId });
+        await logAudit(ctx, {
+          action: "asset.delete",
+          entityType: "Asset",
+          entityId: assetId,
+          targetPlatformId: asset?.platformId,
+        });
       } else if (marketId) {
         const marketAsset = await ctx.db.marketAsset.findUniqueOrThrow({
           where: {
@@ -675,64 +696,70 @@ export const marketRouter = createTRPCRouter({
             ...platformScope(ctx),
           },
         });
-        await logAudit(ctx, { action: "asset.delete", entityType: "Asset", entityId: marketAsset.assetId, targetPlatformId: marketAsset.platformId });
+        await logAudit(ctx, {
+          action: "asset.delete",
+          entityType: "Asset",
+          entityId: marketAsset.assetId,
+          targetPlatformId: marketAsset.platformId,
+        });
       }
     }),
 
-  userCanBuyThisMarketAsset: protectedProcedure
-    .input(z.number())
-    .query(async ({ ctx, input }) => {
-      const pubkey = ctx.session.user.id;
+  userCanBuyThisMarketAsset: protectedProcedure.input(z.number()).query(async ({ ctx, input }) => {
+    const pubkey = ctx.session.user.id;
 
-      const stellarAcc = await StellarAccount.loadOrThrow(pubkey);
+    const stellarAcc = await StellarAccount.loadOrThrow(pubkey);
 
-      // check
-      const marketAsset = await ctx.db.marketAsset.findUnique({
-        where: { id: input },
-        include: {
-          asset: {
-            include: {
-              tier: { include: { creator: { include: { pageAsset: true } } } },
-            },
+    // check
+    const marketAsset = await ctx.db.marketAsset.findUnique({
+      where: { id: input },
+      include: {
+        asset: {
+          include: {
+            tier: { include: { creator: { include: { pageAsset: true } } } },
           },
-        }
+        },
+      },
+    });
+    console.log("marketAsset", marketAsset);
+    if (!marketAsset) return false;
+
+    if (marketAsset.privacy === ItemPrivacy.PUBLIC) {
+      return true;
+    }
+
+    // secondary market if placerId is not the creatorId
+    if (marketAsset.placerId !== marketAsset.asset.creatorId) {
+      return true;
+    }
+    if (marketAsset.privacy === ItemPrivacy.PRIVATE && marketAsset.placerId) {
+      const creatorPageAsset = await ctx.db.creator.findUniqueOrThrow({
+        where: { id: marketAsset.placerId },
+        select: {
+          pageAsset: true,
+        },
       });
-      console.log("marketAsset", marketAsset);
-      if (!marketAsset) return false;
-
-      if (marketAsset.privacy === ItemPrivacy.PUBLIC) {
+      if (!creatorPageAsset.pageAsset) return false;
+      const hasTrust = stellarAcc.hasTrustline(
+        creatorPageAsset.pageAsset?.code,
+        creatorPageAsset.pageAsset?.issuer,
+      );
+      if (hasTrust) {
         return true;
       }
-
-      // secondary market if placerId is not the creatorId
-      if (marketAsset.placerId !== marketAsset.asset.creatorId) {
-        return true;
-      }
-      if (marketAsset.privacy === ItemPrivacy.PRIVATE && marketAsset.placerId) {
-        const creatorPageAsset = await ctx.db.creator.findUniqueOrThrow({
-          where: { id: marketAsset.placerId },
-          select: {
-            pageAsset: true
-          }
-        })
-        if (!creatorPageAsset.pageAsset) return false;
-        const hasTrust = stellarAcc.hasTrustline(creatorPageAsset.pageAsset?.code, creatorPageAsset.pageAsset?.issuer);
-        if (hasTrust) {
-          return true;
-        }
-      }
-      const tier = marketAsset.asset.tier;
-      if (tier) {
-        const pageAsset = tier.creator.pageAsset;
-        if (pageAsset) {
-          if (marketAsset.privacy === ItemPrivacy.TIER) {
-            const { code, issuer } = pageAsset;
-            const bal = stellarAcc.tokenBalance(code, issuer);
-            if (bal >= tier.price) {
-              return true;
-            }
+    }
+    const tier = marketAsset.asset.tier;
+    if (tier) {
+      const pageAsset = tier.creator.pageAsset;
+      if (pageAsset) {
+        if (marketAsset.privacy === ItemPrivacy.TIER) {
+          const { code, issuer } = pageAsset;
+          const bal = stellarAcc.tokenBalance(code, issuer);
+          if (bal >= tier.price) {
+            return true;
           }
         }
       }
-    }),
+    }
+  }),
 });

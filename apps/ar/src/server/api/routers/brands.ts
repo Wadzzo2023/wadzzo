@@ -6,16 +6,8 @@ import { z } from "zod";
 import type { ArBrand } from "~/lib/ar/types";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { platformScope } from "@wadzzo/platform/scope";
-import {
-  buildFollowTrustlineXdr,
-  creatorAsset,
-  signWithFor,
-} from "~/lib/stellar/follow-creator";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { buildFollowTrustlineXdr, creatorAsset, signWithFor } from "~/lib/stellar/follow-creator";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
@@ -44,8 +36,7 @@ import { platformBranding } from "@wadzzo/platform/branding";
  * balance. Only the row goes.
  */
 
-const AVATAR_FALLBACK =
-  `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;
+const AVATAR_FALLBACK = `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;
 
 /** `Creator.id` is a 56-char Stellar pubkey; show it the way the app does. */
 const shortHandle = (id: string) => `${id.slice(0, 3)}…${id.slice(-3)}`;
@@ -200,7 +191,11 @@ export const brandsRouter = createTRPCRouter({
     .query(async ({ ctx, input }): Promise<ArBrand> => {
       const userId = ctx.session?.user.id ?? null;
       const creator = await ctx.db.creator.findFirst({
-        where: { id: input.id, pageAsset: { isNot: null }, ...platformScope(ctx) },
+        where: {
+          id: input.id,
+          pageAsset: { isNot: null },
+          ...platformScope(ctx),
+        },
         select: brandSelect,
       });
       if (!creator) {
@@ -237,12 +232,7 @@ export const brandsRouter = createTRPCRouter({
     const { pinCounts, categories } = await brandFacets(ctx.db, ids);
 
     return creators.map((c) =>
-      toArBrand(
-        c,
-        true,
-        pinCounts.get(c.id) ?? 0,
-        [...(categories.get(c.id) ?? [])].sort(),
-      ),
+      toArBrand(c, true, pinCounts.get(c.id) ?? 0, [...(categories.get(c.id) ?? [])].sort()),
     );
   }),
 

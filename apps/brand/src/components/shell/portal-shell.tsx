@@ -55,7 +55,8 @@ export function PortalShell({ children }: { children: ReactNode }) {
     }
   };
 
-  if (access.session.status === "loading") return <CenteredSpinner className="min-h-dvh" label="Signing you in" />;
+  if (access.session.status === "loading")
+    return <CenteredSpinner className="min-h-dvh" label="Signing you in" />;
   if (!access.signedIn) return <SignInScreen />;
 
   const isAdminRoute = pathname.startsWith("/admin");
@@ -63,15 +64,23 @@ export function PortalShell({ children }: { children: ReactNode }) {
 
   if (isOnboardingRoute) {
     return (
-      <div className="flex min-h-dvh flex-col bg-background">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-card/95 px-4 backdrop-blur-sm supports-[backdrop-filter]:bg-card/80 sm:px-8">
+      <div className="bg-background flex min-h-dvh flex-col">
+        <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 backdrop-blur-sm sm:px-8">
           <div className="flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-              <Image src={platformBranding.assets.loading} alt="" width={20} height={20} className="object-contain" />
+            <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
+              <Image
+                src={platformBranding.assets.loading}
+                alt=""
+                width={20}
+                height={20}
+                className="object-contain"
+              />
             </span>
             <span className="leading-tight">
-              <span className="block font-hud text-base font-bold tracking-tight">{platformBranding.name}</span>
-              <span className="block font-hud text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-hud block text-base font-bold tracking-tight">
+                {platformBranding.name}
+              </span>
+              <span className="font-hud text-muted-foreground block text-[10px] font-semibold tracking-[0.18em] uppercase">
                 Brand Onboarding
               </span>
             </span>
@@ -85,7 +94,9 @@ export function PortalShell({ children }: { children: ReactNode }) {
     );
   }
 
-  const title = [...BRAND_NAV.flatMap((g) => g.items), ...ADMIN_NAV.items].find((i) => isActive(pathname, i))?.label;
+  const title = [...BRAND_NAV.flatMap((g) => g.items), ...ADMIN_NAV.items].find((i) =>
+    isActive(pathname, i),
+  )?.label;
 
   const page = isAdminRoute ? (
     <AdminGate access={access}>{children}</AdminGate>
@@ -98,7 +109,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
   const homeHref = access.isAdmin && !access.approved ? "/admin/creators" : "/pins";
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="bg-background flex min-h-dvh">
       <Sidebar
         collapsed={collapsed}
         onToggle={toggle}

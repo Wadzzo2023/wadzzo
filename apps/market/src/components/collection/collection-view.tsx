@@ -1,6 +1,16 @@
 "use client";
 
-import { Copy, ExternalLink, Layers, Pencil, Play, Repeat2, Sparkles, Store, Undo2 } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  Layers,
+  Pencil,
+  Play,
+  Repeat2,
+  Sparkles,
+  Store,
+  Undo2,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -28,8 +38,10 @@ type Created = RouterOutputs["collection"]["created"][number];
 type Tab = "owned" | "selling" | "created";
 
 const num = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-const grid = "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
-const glassBadge = "flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-md";
+const grid =
+  "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
+const glassBadge =
+  "flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-md";
 
 /** Everything I own, what I'm reselling, and (for creators) what I made. */
 export function CollectionView() {
@@ -53,12 +65,21 @@ export function CollectionView() {
   const listedCopies = owned.data?.reduce((s, x) => s + x.listed, 0) ?? 0;
   const isCreator = (created.data?.length ?? 0) > 0;
 
-  const resell = (x: Owned) => (storage.data?.exists && storage.data.active ? setListing(x) : setSetup(x));
+  const resell = (x: Owned) =>
+    storage.data?.exists && storage.data.active ? setListing(x) : setSetup(x);
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "owned", label: "Owned", count: ownedItems.length },
     { id: "selling", label: "Selling", count: selling.length },
-    ...(isCreator ? [{ id: "created" as const, label: "Created", count: created.data?.length }] : []),
+    ...(isCreator
+      ? [
+          {
+            id: "created" as const,
+            label: "Created",
+            count: created.data?.length,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -73,15 +94,30 @@ export function CollectionView() {
         description="Items you bought, claimed or were gifted. Open one to play its full content, or resell it to other fans."
         image={ownedItems[0]?.asset.thumbnail ?? created.data?.[0]?.thumbnail ?? null}
         stats={[
-          { icon: Layers, label: "Items", value: owned.data ? num.format(ownedItems.length) : "–" },
-          { icon: Copy, label: "Copies", value: owned.data ? num.format(copies) : "–" },
-          { icon: Store, label: "Listed for resale", value: owned.data ? num.format(listedCopies) : "–" },
+          {
+            icon: Layers,
+            label: "Items",
+            value: owned.data ? num.format(ownedItems.length) : "–",
+          },
+          {
+            icon: Copy,
+            label: "Copies",
+            value: owned.data ? num.format(copies) : "–",
+          },
+          {
+            icon: Store,
+            label: "Listed for resale",
+            value: owned.data ? num.format(listedCopies) : "–",
+          },
         ]}
       />
 
       <PageBody wide className="space-y-6 pt-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="glass flex w-fit max-w-full gap-1 overflow-x-auto rounded-xl p-1" role="tablist">
+          <div
+            className="glass flex w-fit max-w-full gap-1 overflow-x-auto rounded-xl p-1"
+            role="tablist"
+          >
             {tabs.map((t) => (
               <button
                 key={t.id}
@@ -91,11 +127,22 @@ export function CollectionView() {
                 onClick={() => setTab(t.id)}
                 className={cn(
                   "flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-4 text-sm font-semibold transition-colors",
-                  tab === t.id ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]" : "text-muted-foreground hover:text-foreground",
+                  tab === t.id
+                    ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {t.label}
-                {t.count != null && <span className={cn("rounded-full px-1.5 text-[11px] tabular-nums", tab === t.id ? "bg-black/15" : "bg-foreground/10")}>{t.count}</span>}
+                {t.count != null && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[11px] tabular-nums",
+                      tab === t.id ? "bg-black/15" : "bg-foreground/10",
+                    )}
+                  >
+                    {t.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -120,7 +167,16 @@ export function CollectionView() {
           ) : q && ownedItems.length ? (
             <EmptyState icon={Layers} title="No items match" description="Try a different name." />
           ) : (
-            <EmptyState icon={Layers} title="No items yet" description="Items you buy, claim or receive as gifts show up here." action={<Button asChild className="rounded-xl"><Link href="/marketplace">Browse the marketplace</Link></Button>} />
+            <EmptyState
+              icon={Layers}
+              title="No items yet"
+              description="Items you buy, claim or receive as gifts show up here."
+              action={
+                <Button asChild className="rounded-xl">
+                  <Link href="/marketplace">Browse the marketplace</Link>
+                </Button>
+              }
+            />
           )
         ) : tab === "selling" ? (
           shownSelling.length ? (
@@ -130,7 +186,11 @@ export function CollectionView() {
               ))}
             </div>
           ) : (
-            <EmptyState icon={Store} title={q && selling.length ? "No listings match" : "Nothing listed"} description="Resell an item from the Owned tab — it waits in your storage until someone buys it." />
+            <EmptyState
+              icon={Store}
+              title={q && selling.length ? "No listings match" : "Nothing listed"}
+              description="Resell an item from the Owned tab — it waits in your storage until someone buys it."
+            />
           )
         ) : (
           <div className={grid}>
@@ -155,7 +215,13 @@ export function CollectionView() {
           <ListDialog
             open
             onOpenChange={(o) => !o && setListing(null)}
-            item={{ assetId: listing.asset.id, name: listing.asset.name, owned: listing.owned, royaltyPercent: listing.asset.royaltyPercent, currentPrice: listing.listing?.price }}
+            item={{
+              assetId: listing.asset.id,
+              name: listing.asset.name,
+              owned: listing.owned,
+              royaltyPercent: listing.asset.royaltyPercent,
+              currentPrice: listing.listing?.price,
+            }}
           />
         )}
       </PageBody>
@@ -163,13 +229,33 @@ export function CollectionView() {
   );
 }
 
-function Art({ id, thumbnail, name, mediaType, children }: { id: number; thumbnail: string; name: string; mediaType: Owned["asset"]["mediaType"]; children?: React.ReactNode }) {
+function Art({
+  id,
+  thumbnail,
+  name,
+  mediaType,
+  children,
+}: {
+  id: number;
+  thumbnail: string;
+  name: string;
+  mediaType: Owned["asset"]["mediaType"];
+  children?: React.ReactNode;
+}) {
   const meta = MEDIA_META[mediaType];
   return (
-    <Link href={`/item/${id}`} className="relative block aspect-square overflow-hidden rounded-xl bg-surface-2">
+    <Link
+      href={`/item/${id}`}
+      className="bg-surface-2 relative block aspect-square overflow-hidden rounded-xl"
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={thumbnail} alt={name} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-110" />
-      <span className={cn(glassBadge, "absolute left-2 top-2")}>
+      <img
+        src={thumbnail}
+        alt={name}
+        loading="lazy"
+        className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
+      />
+      <span className={cn(glassBadge, "absolute top-2 left-2")}>
         <meta.icon className="size-3" /> {meta.label}
       </span>
       {children}
@@ -177,23 +263,35 @@ function Art({ id, thumbnail, name, mediaType, children }: { id: number; thumbna
   );
 }
 
-const card = "glass group flex flex-col rounded-2xl p-2 transition-all duration-300 hover:glow hover:-translate-y-1";
+const card =
+  "glass group flex flex-col rounded-2xl p-2 transition-all duration-300 hover:glow hover:-translate-y-1";
 
 function OwnedCard({ x, onResell }: { x: Owned; onResell: () => void }) {
   return (
     <div className={card}>
-      <Art id={x.asset.id} thumbnail={x.asset.thumbnail} name={x.asset.name} mediaType={x.asset.mediaType}>
-        {x.owned > 1 && <span className={cn(glassBadge, "absolute right-2 top-2")}>×{x.owned}</span>}
+      <Art
+        id={x.asset.id}
+        thumbnail={x.asset.thumbnail}
+        name={x.asset.name}
+        mediaType={x.asset.mediaType}
+      >
+        {x.owned > 1 && (
+          <span className={cn(glassBadge, "absolute top-2 right-2")}>×{x.owned}</span>
+        )}
         <span className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-          <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_-4px_hsl(var(--primary)/0.9)]">
+          <span className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full shadow-[0_0_30px_-4px_hsl(var(--primary)/0.9)]">
             <Play className="ml-0.5 size-5" />
           </span>
         </span>
       </Art>
-      <div className="flex flex-1 flex-col gap-1 px-1.5 pb-1 pt-2.5">
-        <p className="truncate font-hud text-[15px] font-semibold">{x.asset.name}</p>
-        <p className="truncate text-xs text-muted-foreground">{x.asset.creator?.name ?? "Wadzzo"}</p>
-        {x.listed > 0 && <p className="text-xs font-medium text-primary">{x.listed} listed for resale</p>}
+      <div className="flex flex-1 flex-col gap-1 px-1.5 pt-2.5 pb-1">
+        <p className="font-hud truncate text-[15px] font-semibold">{x.asset.name}</p>
+        <p className="text-muted-foreground truncate text-xs">
+          {x.asset.creator?.name ?? "Wadzzo"}
+        </p>
+        {x.listed > 0 && (
+          <p className="text-primary text-xs font-medium">{x.listed} listed for resale</p>
+        )}
         <div className="mt-auto grid grid-cols-2 gap-1.5 pt-2">
           <Button asChild size="sm" variant="outline" className="rounded-lg">
             <Link href={`/item/${x.asset.id}`}>Open</Link>
@@ -210,7 +308,9 @@ function OwnedCard({ x, onResell }: { x: Owned; onResell: () => void }) {
 function SellingCard({ x }: { x: Owned }) {
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState(x.listing?.price ?? 0);
-  const update = api.collection.updatePrice.useMutation({ onSuccess: () => setEditing(false) });
+  const update = api.collection.updatePrice.useMutation({
+    onSuccess: () => setEditing(false),
+  });
   const unlist = api.collection.unlistPrepare.useMutation();
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
@@ -225,24 +325,44 @@ function SellingCard({ x }: { x: Owned }) {
 
   return (
     <div className={card}>
-      <Art id={x.asset.id} thumbnail={x.asset.thumbnail} name={x.asset.name} mediaType={x.asset.mediaType}>
-        <span className={cn(glassBadge, "absolute right-2 top-2")}>{x.listed} in storage</span>
+      <Art
+        id={x.asset.id}
+        thumbnail={x.asset.thumbnail}
+        name={x.asset.name}
+        mediaType={x.asset.mediaType}
+      >
+        <span className={cn(glassBadge, "absolute top-2 right-2")}>{x.listed} in storage</span>
       </Art>
-      <div className="flex flex-1 flex-col gap-2 px-1.5 pb-1 pt-2.5">
-        <p className="truncate font-hud text-[15px] font-semibold">{x.asset.name}</p>
-        <div className="rounded-xl bg-foreground/[0.04] px-2.5 py-2 ring-1 ring-foreground/[0.06]">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Your price</p>
+      <div className="flex flex-1 flex-col gap-2 px-1.5 pt-2.5 pb-1">
+        <p className="font-hud truncate text-[15px] font-semibold">{x.asset.name}</p>
+        <div className="bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl px-2.5 py-2 ring-1">
+          <p className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+            Your price
+          </p>
           <Price tokens={x.listing.price} usd={x.listing.priceUSD} size="sm" />
         </div>
         <div className="mt-auto grid grid-cols-2 gap-1.5">
-          <Button size="sm" variant="outline" className="rounded-lg" onClick={() => setEditing(true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => setEditing(true)}
+          >
             <Pencil className="size-3.5" /> Price
           </Button>
-          <Button size="sm" variant="ghost" className="rounded-lg" disabled={unlist.isPending || sign.busy} onClick={() => void takeBack()}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-lg"
+            disabled={unlist.isPending || sign.busy}
+            onClick={() => void takeBack()}
+          >
             <Undo2 className="size-3.5" /> {sign.busy ? "…" : "Take back"}
           </Button>
         </div>
-        {(unlist.error ?? sign.error) && <p className="text-xs text-destructive">{unlist.error?.message ?? sign.error}</p>}
+        {(unlist.error ?? sign.error) && (
+          <p className="text-destructive text-xs">{unlist.error?.message ?? sign.error}</p>
+        )}
       </div>
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent className="sm:max-w-sm">
@@ -250,8 +370,19 @@ function SellingCard({ x }: { x: Owned }) {
             <DialogTitle className="font-hud">Change price</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <Input type="number" min={0} step="any" value={price || ""} onChange={(e) => setPrice(Number(e.target.value))} aria-label={`Price in ${PLATFORM_ASSET.code}`} />
-            <Button className="w-full rounded-xl" disabled={price <= 0 || update.isPending} onClick={() => update.mutate({ listingId: x.listing!.id, price })}>
+            <Input
+              type="number"
+              min={0}
+              step="any"
+              value={price || ""}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              aria-label={`Price in ${PLATFORM_ASSET.code}`}
+            />
+            <Button
+              className="w-full rounded-xl"
+              disabled={price <= 0 || update.isPending}
+              onClick={() => update.mutate({ listingId: x.listing!.id, price })}
+            >
               Save
             </Button>
           </div>
@@ -267,19 +398,21 @@ function CreatedCard({ a }: { a: Created }) {
     <div className={card}>
       <Art id={a.id} thumbnail={a.thumbnail} name={a.name} mediaType={a.mediaType}>
         {a.marketItems.length > 0 && (
-          <span className={cn(glassBadge, "absolute right-2 top-2")}>
+          <span className={cn(glassBadge, "absolute top-2 right-2")}>
             <Sparkles className="size-3" /> On sale
           </span>
         )}
       </Art>
-      <div className="flex flex-1 flex-col gap-2 px-1.5 pb-1 pt-2.5">
-        <p className="truncate font-hud text-[15px] font-semibold">{a.name}</p>
+      <div className="flex flex-1 flex-col gap-2 px-1.5 pt-2.5 pb-1">
+        <p className="font-hud truncate text-[15px] font-semibold">{a.name}</p>
         <div className="space-y-1">
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex justify-between text-xs">
             <span>Stock</span>
-            <span className="font-semibold tabular-nums text-foreground">{a.stock.toLocaleString("en-US")}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {a.stock.toLocaleString("en-US")}
+            </span>
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex justify-between text-xs">
             <span>Minted</span>
             <span className="tabular-nums">
               {a.mintedCount.toLocaleString("en-US")}
@@ -287,13 +420,20 @@ function CreatedCard({ a }: { a: Created }) {
             </span>
           </div>
           {pct != null && (
-            <div className="h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]">
-              <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400" style={{ width: `${Math.max(pct, 2)}%` }} />
+            <div className="bg-foreground/[0.08] h-1.5 overflow-hidden rounded-full">
+              <div
+                className="from-primary h-full rounded-full bg-gradient-to-r to-cyan-400"
+                style={{ width: `${Math.max(pct, 2)}%` }}
+              />
             </div>
           )}
         </div>
         <Button asChild size="sm" variant="outline" className="mt-auto rounded-lg">
-          <a href={`${env.NEXT_PUBLIC_BRAND_PORTAL_URL.replace(/\/$/, "")}/stores/${a.id}`} target="_blank" rel="noreferrer">
+          <a
+            href={`${env.NEXT_PUBLIC_BRAND_PORTAL_URL.replace(/\/$/, "")}/stores/${a.id}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             Manage <ExternalLink className="size-3.5" />
           </a>
         </Button>

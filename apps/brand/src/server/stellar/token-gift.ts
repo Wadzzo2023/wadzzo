@@ -20,11 +20,20 @@ const hashOf = (tx: Transaction) => {
 function giftOf(tx: Transaction) {
   for (const op of tx.operations) {
     if (op.type === "payment" && op.asset.getCode() !== "XLM") {
-      return { to: op.destination, code: op.asset.getCode(), amount: Number(op.amount) };
+      return {
+        to: op.destination,
+        code: op.asset.getCode(),
+        amount: Number(op.amount),
+      };
     }
     if (op.type === "createClaimableBalance" && !op.asset.isNative()) {
       const claimant = op.claimants[0];
-      if (claimant) return { to: claimant.destination, code: op.asset.getCode(), amount: Number(op.amount) };
+      if (claimant)
+        return {
+          to: claimant.destination,
+          code: op.asset.getCode(),
+          amount: Number(op.amount),
+        };
     }
   }
   return null;
@@ -35,7 +44,12 @@ function giftOf(tx: Transaction) {
  * never sees the result. After the brand's wallet submitted one, this checks it on Stellar,
  * records it, and tells the fan — once. Only gifts to the brand's own followers count.
  */
-export async function confirmTokenGift(db: DbClient, creatorId: string, xdr: string, platformId: Platform["id"]) {
+export async function confirmTokenGift(
+  db: DbClient,
+  creatorId: string,
+  xdr: string,
+  platformId: Platform["id"],
+) {
   let tx: Transaction;
   try {
     tx = TransactionBuilder.fromXDR(xdr, networkPassphrase) as Transaction;
@@ -44,7 +58,10 @@ export async function confirmTokenGift(db: DbClient, creatorId: string, xdr: str
   }
   const gift = giftOf(tx);
   if (!gift) return { status: "INVALID" as const };
-  const follower = await db.follow.findUnique({ where: { userId_creatorId: { userId: gift.to, creatorId } }, select: { id: true } });
+  const follower = await db.follow.findUnique({
+    where: { userId_creatorId: { userId: gift.to, creatorId } },
+    select: { id: true },
+  });
   if (!follower) return { status: "INVALID" as const };
 
   const txHash = hashOf(tx);
@@ -60,7 +77,13 @@ export async function confirmTokenGift(db: DbClient, creatorId: string, xdr: str
   if (!ok) return { status: "FAILED" as const };
 
   // Already recorded (a second confirm of the same gift): nothing more to do, and no second notification.
-  if (await db.assetTransaction.findUnique({ where: { txHash }, select: { id: true } })) return { status: "SUCCESS" as const };
+  if (
+    await db.assetTransaction.findUnique({
+      where: { txHash },
+      select: { id: true },
+    })
+  )
+    return { status: "SUCCESS" as const };
   try {
     await db.assetTransaction.create({
       data: {
@@ -80,7 +103,18 @@ export async function confirmTokenGift(db: DbClient, creatorId: string, xdr: str
   } catch {
     return { status: "SUCCESS" as const };
   }
-  await notifyFan(db, { actorId: creatorId, type: "GIFT_RECEIVED", entityId: 0, userId: gift.to, meta: { item: gift.code, assetId: 0, qty: Math.floor(gift.amount), amount: gift.amount, currency: gift.code } });
+  await notifyFan(db, {
+    actorId: creatorId,
+    type: "GIFT_RECEIVED",
+    entityId: 0,
+    userId: gift.to,
+    meta: {
+      item: gift.code,
+      assetId: 0,
+      qty: Math.floor(gift.amount),
+      amount: gift.amount,
+      currency: gift.code,
+    },
+  });
   return { status: "SUCCESS" as const };
 }
-

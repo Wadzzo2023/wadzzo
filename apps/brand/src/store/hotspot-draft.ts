@@ -21,6 +21,10 @@ export const useHotspotDraft = create<{
       set: (feature, shape) => set({ feature, shape }),
       clear: () => set({ feature: null }),
     }),
-    { name: "wadzzo.hotspot-draft", storage: createJSONStorage(() => sessionStorage), partialize: (s) => ({ feature: s.feature, shape: s.shape }) },
+    {
+      name: "wadzzo.hotspot-draft",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (s) => ({ feature: s.feature, shape: s.shape }),
+    },
   ),
 );

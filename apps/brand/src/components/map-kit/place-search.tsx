@@ -11,7 +11,12 @@ import { parseCoordinates, type LatLng } from "./geo";
 export type Place = LatLng & { name: string; address?: string };
 
 type GeocodeFeature = {
-  properties: { name?: string; full_address?: string; place_formatted?: string; coordinates: { latitude: number; longitude: number } };
+  properties: {
+    name?: string;
+    full_address?: string;
+    place_formatted?: string;
+    coordinates: { latitude: number; longitude: number };
+  };
 };
 
 /**
@@ -80,7 +85,17 @@ export function PlaceSearch({
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  const options: Place[] = coords ? [{ ...coords, name: `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, address: "Coordinates" }] : q.trim().length < 3 ? [] : results;
+  const options: Place[] = coords
+    ? [
+        {
+          ...coords,
+          name: `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+          address: "Coordinates",
+        },
+      ]
+    : q.trim().length < 3
+      ? []
+      : results;
   const choose = (p: Place) => {
     onSelect(p);
     setQ(p.name);
@@ -89,8 +104,8 @@ export function PlaceSearch({
 
   return (
     <div ref={box} className={cn("relative", className)}>
-      <div className="flex h-10 items-center gap-2 rounded-lg border bg-card px-3 shadow-sm focus-within:ring-2 focus-within:ring-ring">
-        <Search className="size-4 shrink-0 text-muted-foreground" />
+      <div className="bg-card focus-within:ring-ring flex h-10 items-center gap-2 rounded-lg border px-3 shadow-sm focus-within:ring-2">
+        <Search className="text-muted-foreground size-4 shrink-0" />
         <input
           value={q}
           onChange={(e) => {
@@ -101,47 +116,64 @@ export function PlaceSearch({
           onKeyDown={(e) => {
             if (!options.length) return;
             if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive((a) => (a + 1) % options.length);
-    }
-            else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((a) => (a - 1 + options.length) % options.length);
-    }
-            else if (e.key === "Enter") {
-      e.preventDefault();
-      choose(options[active]!);
-    }
-            else if (e.key === "Escape") setOpen(false);
+              e.preventDefault();
+              setActive((a) => (a + 1) % options.length);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActive((a) => (a - 1 + options.length) % options.length);
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              choose(options[active]!);
+            } else if (e.key === "Escape") setOpen(false);
           }}
           placeholder={placeholder}
-          className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent text-sm outline-none"
           role="combobox"
           aria-expanded={open && options.length > 0}
           aria-controls={listId}
           aria-autocomplete="list"
         />
-        {loading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+        {loading && <Loader2 className="text-muted-foreground size-4 animate-spin" />}
         {q && !loading && (
-          <button type="button" onClick={() => (setQ(""), setResults([]))} aria-label="Clear search" className="text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => (setQ(""), setResults([]))}
+            aria-label="Clear search"
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X className="size-4" />
           </button>
         )}
       </div>
       {open && options.length > 0 && (
-        <ul id={listId} role="listbox" className="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg">
+        <ul
+          id={listId}
+          role="listbox"
+          className="bg-popover absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border shadow-lg"
+        >
           {options.map((p, i) => (
             <li key={`${p.lat},${p.lng},${i}`} role="option" aria-selected={i === active}>
               <button
                 type="button"
                 onMouseEnter={() => setActive(i)}
                 onClick={() => choose(p)}
-                className={cn("flex w-full items-start gap-2.5 px-3 py-2 text-left", i === active && "bg-accent")}
+                className={cn(
+                  "flex w-full items-start gap-2.5 px-3 py-2 text-left",
+                  i === active && "bg-accent",
+                )}
               >
-                {coords ? <Crosshair className="mt-0.5 size-4 shrink-0 text-primary" /> : <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />}
+                {coords ? (
+                  <Crosshair className="text-primary mt-0.5 size-4 shrink-0" />
+                ) : (
+                  <MapPin className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                )}
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium">{p.name}</span>
-                  {p.address && <span className="block truncate text-xs text-muted-foreground">{p.address}</span>}
+                  {p.address && (
+                    <span className="text-muted-foreground block truncate text-xs">
+                      {p.address}
+                    </span>
+                  )}
                 </span>
               </button>
             </li>

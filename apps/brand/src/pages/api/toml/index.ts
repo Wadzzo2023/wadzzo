@@ -9,10 +9,7 @@ import { getCurrentPlatform } from "@wadzzo/platform/server";
 import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (await applyCors(req, res, { origin: "*" })) return;
 
   let FullTomlContent = documentationToml();

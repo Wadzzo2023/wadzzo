@@ -75,15 +75,7 @@ function deriveArUser(sessionUser: {
 export { deriveArUser };
 
 export type GateIntent =
-  | "collect"
-  | "follow"
-  | "profile"
-  | "settings"
-  | "redeem"
-  | "ar"
-  | "bounty"
-  | "events"
-  | "murals";
+  "collect" | "follow" | "profile" | "settings" | "redeem" | "ar" | "bounty" | "events" | "murals";
 
 export const GATE_COPY: Record<GateIntent, { title: string; body: string }> = {
   collect: {
@@ -197,11 +189,7 @@ export const useMapUi = create<MapUiState>()((set) => ({
   selectPin: (selectedPinId) => set({ selectedPinId }),
   autoCollected: [],
   pushAutoCollected: (id) =>
-    set((s) =>
-      s.autoCollected.includes(id)
-        ? s
-        : { autoCollected: [...s.autoCollected, id] },
-    ),
+    set((s) => (s.autoCollected.includes(id) ? s : { autoCollected: [...s.autoCollected, id] })),
   clearAutoCollected: () => set({ autoCollected: [] }),
 }));
 

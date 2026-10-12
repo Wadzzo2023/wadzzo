@@ -4,7 +4,6 @@
 import { SphMercProjection } from "./sphmerc-projection.js";
 import * as THREE from "three";
 
-
 class LocationBased {
   constructor(scene, camera, options = {}) {
     this._scene = scene;
@@ -47,7 +46,7 @@ class LocationBased {
         },
         {
           enableHighAccuracy: true,
-        }
+        },
       );
       return true;
     }
@@ -72,7 +71,7 @@ class LocationBased {
       coords: {
         longitude: lon,
         latitude: lat,
-        accuracy: acc
+        accuracy: acc,
       },
     });
   }
@@ -88,7 +87,7 @@ class LocationBased {
     return [projectedPos[0], -projectedPos[1]];
   }
 
-  add(object, lon, lat, elev, properties = { }) {
+  add(object, lon, lat, elev, properties = {}) {
     object.properties = properties;
     this.setWorldPosition(object, lon, lat, elev);
     this._scene.add(object);
@@ -130,17 +129,10 @@ class LocationBased {
         this._lastCoords.latitude = position.coords.latitude;
 
         if (!this.initialPosition) {
-          this.setWorldOrigin(
-            position.coords.longitude,
-            position.coords.latitude
-          );
+          this.setWorldOrigin(position.coords.longitude, position.coords.latitude);
         }
 
-        this.setWorldPosition(
-          this._camera,
-          position.coords.longitude,
-          position.coords.latitude
-        );
+        this.setWorldPosition(this._camera, position.coords.longitude, position.coords.latitude);
 
         if (this._eventHandlers["gpsupdate"]) {
           this._eventHandlers["gpsupdate"](position, distMoved);

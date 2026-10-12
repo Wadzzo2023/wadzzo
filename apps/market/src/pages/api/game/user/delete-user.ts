@@ -1,4 +1,3 @@
-
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
@@ -8,7 +7,6 @@ import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
-
 
 // const transporter: Transporter = createTransport({
 //     service: "Gmail",
@@ -27,7 +25,6 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 //             text: `The following user has requested to delete their data:\n\nUser ID: ${userId}\nUser Email: ${userEmail}`,
 //         };
 
-
 //         const result = transporter.sendMail(mailOptions);
 //         console.log("Email sent successfully:", result);
 //     } catch (error) {
@@ -36,60 +33,57 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 //     }
 // };
 
-export default async function handler(req: NextApiRequest,
-    res: NextApiResponse,) {
-    await EnableCors(req, res);
-    const token = await getToken({ req });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await EnableCors(req, res);
+  const token = await getToken({ req });
 
-    if (!token?.sub) {
-        return res.status(401).json({
-            error: "User is not authenticated",
-        });
+  if (!token?.sub) {
+    return res.status(401).json({
+      error: "User is not authenticated",
+    });
+  }
+  if (token.email) {
+    await deleteFirebaseUserByEmail(token.email);
+  }
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        id: token.sub,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-    if (token.email) {
-        await deleteFirebaseUserByEmail(token.email);
-    }
-    try {
-        const user = await db.user.findUnique({
-            where: {
-                id: token.sub,
-            },
-        });
+    await db.user.delete({
+      where: {
+        id: token.sub,
+      },
+      include: {
+        sessions: true,
+        accounts: true,
+        actorNotificationObjects: true,
+        Admin: true,
+        assets: true,
+        Bounty: true,
+        BountyComment: true,
+        BountyDoubt: true,
+        BountyDoubtMessage: true,
+        BountyParticipant: true,
+        BountySubmission: true,
+        BountyWinner: true,
+        comments: true,
+        likes: true,
+        followings: true,
+        LocationConsumer: true,
+        RedeemConsumer: true,
+        songs: true,
+        creator: true,
+      },
+    });
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-        await db.user.delete({
-            where: {
-                id: token.sub,
-            },
-            include: {
-                sessions: true,
-                accounts: true,
-                actorNotificationObjects: true,
-                Admin: true,
-                assets: true,
-                Bounty: true,
-                BountyComment: true,
-                BountyDoubt: true,
-                BountyDoubtMessage: true,
-                BountyParticipant: true,
-                BountySubmission: true,
-                BountyWinner: true,
-                comments: true,
-                likes: true,
-                followings: true,
-                LocationConsumer: true,
-                RedeemConsumer: true,
-                songs: true,
-                creator: true,
-            }
-        })
-
-
-        res.status(200).json({ message: "User data is deleted successfully!" });
-    } catch (error) {
-        res.status(500).json({ message: "Error deleting data or sending email" });
-    }
-
+    res.status(200).json({ message: "User data is deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting data or sending email" });
+  }
 }

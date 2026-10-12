@@ -30,7 +30,11 @@ async function viewerToday(
   const out = new Map<string, number>();
   if (!userId || murals.length === 0) return out;
   const scans = await db.muralScan.findMany({
-    where: { userId, muralId: { in: murals.map((m) => m.id) }, createdAt: { gte: new Date(Date.now() - 36 * 3600_000) } },
+    where: {
+      userId,
+      muralId: { in: murals.map((m) => m.id) },
+      createdAt: { gte: new Date(Date.now() - 36 * 3600_000) },
+    },
     select: { muralId: true, localDay: true },
   });
   for (const m of murals) {
@@ -68,7 +72,10 @@ export const muralsRouter = createTRPCRouter({
       const today = await viewerToday(ctx.db, ctx.session?.user.id, murals);
       return {
         dailyLimit: settings.dailyScansPerMural,
-        murals: murals.map((m) => ({ ...toMuralCard(m, settings), scansToday: today.get(m.id) ?? 0 })),
+        murals: murals.map((m) => ({
+          ...toMuralCard(m, settings),
+          scansToday: today.get(m.id) ?? 0,
+        })),
       };
     }),
 
@@ -76,14 +83,28 @@ export const muralsRouter = createTRPCRouter({
   nearby: publicProcedure.input(z.object({ lat, lng })).query(async ({ ctx, input }) => {
     const settings = await getMuralSettings(ctx.db);
     const murals = await ctx.db.mural.findMany({
-      where: { ...LIVE_MURAL, ...platformScope(ctx), ...boxAround(input.lat, input.lng, NEARBY_RADIUS_M) },
+      where: {
+        ...LIVE_MURAL,
+        ...platformScope(ctx),
+        ...boxAround(input.lat, input.lng, NEARBY_RADIUS_M),
+      },
       include: { embeddings: { select: { vector: true } } },
     });
     const inRange = murals
-      .map((m) => ({ m, distanceM: distanceMeters(input, { lat: m.latitude, lng: m.longitude }) }))
+      .map((m) => ({
+        m,
+        distanceM: distanceMeters(input, {
+          lat: m.latitude,
+          lng: m.longitude,
+        }),
+      }))
       .filter((x) => x.distanceM <= NEARBY_RADIUS_M)
       .sort((a, b) => a.distanceM - b.distanceM);
-    const today = await viewerToday(ctx.db, ctx.session?.user.id, inRange.map((x) => x.m));
+    const today = await viewerToday(
+      ctx.db,
+      ctx.session?.user.id,
+      inRange.map((x) => x.m),
+    );
     return {
       dailyLimit: settings.dailyScansPerMural,
       murals: inRange.map(({ m, distanceM }) => ({
@@ -98,13 +119,17 @@ export const muralsRouter = createTRPCRouter({
   byId: publicProcedure.input(z.object({ id: z.string().min(1) })).query(async ({ ctx, input }) => {
     const settings = await getMuralSettings(ctx.db);
     const userId = ctx.session?.user.id;
-    const mural = await ctx.db.mural.findFirst({ where: { id: input.id, mergedIntoId: null, ...platformScope(ctx) } });
+    const mural = await ctx.db.mural.findFirst({
+      where: { id: input.id, mergedIntoId: null, ...platformScope(ctx) },
+    });
     if (!mural) return null;
     // Rejected murals are hidden, except a "not a mural" one from the people
     // who scanned it — it stays (greyed) in their collection. Fraud: never.
     if (mural.status === "REJECTED") {
       if (mural.rejectReason === "FRAUD" || !userId) return null;
-      const scanned = await ctx.db.muralScan.count({ where: { muralId: mural.id, userId } });
+      const scanned = await ctx.db.muralScan.count({
+        where: { muralId: mural.id, userId },
+      });
       if (!scanned) return null;
     }
     if (!userId) return { mural: toMuralCard(mural, settings), mine: null };
@@ -112,7 +137,14 @@ export const muralsRouter = createTRPCRouter({
     const scans = await ctx.db.muralScan.findMany({
       where: { muralId: mural.id, userId },
       orderBy: { createdAt: "desc" },
-      select: { id: true, createdAt: true, coinsAwarded: true, discoveryRank: true, keyframes: true, localDay: true },
+      select: {
+        id: true,
+        createdAt: true,
+        coinsAwarded: true,
+        discoveryRank: true,
+        keyframes: true,
+        localDay: true,
+      },
     });
     const day = localDay(timeZoneAt(mural.latitude, mural.longitude));
     return {
@@ -124,7 +156,12 @@ export const muralsRouter = createTRPCRouter({
         coinsEarned: scans.reduce((a, s) => a + s.coinsAwarded, 0),
         rank: scans.find((s) => s.discoveryRank)?.discoveryRank ?? null,
         canName: !mural.title && scans.some((s) => s.discoveryRank),
-        history: scans.map(({ id, createdAt, coinsAwarded, keyframes }) => ({ id, createdAt, coinsAwarded, keyframes })),
+        history: scans.map(({ id, createdAt, coinsAwarded, keyframes }) => ({
+          id,
+          createdAt,
+          coinsAwarded,
+          keyframes,
+        })),
       },
     };
   }),
@@ -141,7 +178,10 @@ export const muralsRouter = createTRPCRouter({
         lng,
         accuracy: z.number().min(0),
         mock: z.boolean().optional(),
-        sweep: z.object({ spanDeg: z.number().min(0).max(360), durationMs: z.number().int().min(0) }),
+        sweep: z.object({
+          spanDeg: z.number().min(0).max(360),
+          durationMs: z.number().int().min(0),
+        }),
         platform: z.enum(["web", "ios", "android"]),
       }),
     )
@@ -159,7 +199,12 @@ export const muralsRouter = createTRPCRouter({
 
   /** Collection › Murals: one card per mural the viewer has scanned. */
   mine: protectedProcedure
-    .input(z.object({ cursor: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(48).default(24) }))
+    .input(
+      z.object({
+        cursor: z.number().int().min(0).default(0),
+        limit: z.number().int().min(1).max(48).default(24),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const settings = await getMuralSettings(ctx.db);
@@ -167,7 +212,14 @@ export const muralsRouter = createTRPCRouter({
         by: ["muralId"],
         // Not `NOT: { rejectReason: "FRAUD" }` — SQL NOT on a NULL reason is
         // NULL, which would drop every mural that was never rejected.
-        where: { userId, mural: { mergedIntoId: null, ...platformScope(ctx), OR: [{ rejectReason: null }, { rejectReason: { not: "FRAUD" } }] } },
+        where: {
+          userId,
+          mural: {
+            mergedIntoId: null,
+            ...platformScope(ctx),
+            OR: [{ rejectReason: null }, { rejectReason: { not: "FRAUD" } }],
+          },
+        },
         _count: { _all: true },
         _sum: { coinsAwarded: true },
         _max: { createdAt: true },
@@ -175,7 +227,9 @@ export const muralsRouter = createTRPCRouter({
         orderBy: { _max: { createdAt: "desc" } },
       });
       const page = groups.slice(input.cursor, input.cursor + input.limit);
-      const murals = await ctx.db.mural.findMany({ where: { id: { in: page.map((g) => g.muralId) } } });
+      const murals = await ctx.db.mural.findMany({
+        where: { id: { in: page.map((g) => g.muralId) } },
+      });
       const latest = await ctx.db.muralScan.findMany({
         where: { userId, muralId: { in: page.map((g) => g.muralId) } },
         orderBy: { createdAt: "desc" },

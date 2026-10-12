@@ -22,7 +22,7 @@ export function MapModeButton({
       aria-label={`Switch to the ${next} map`}
       title={`Switch to the ${next} map`}
       className={cn(
-        "ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full font-hud text-[12px] font-bold tracking-wide text-ar-dim transition-colors hover:text-ar-text",
+        "ar-glass font-hud text-ar-dim hover:text-ar-text pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full text-[12px] font-bold tracking-wide transition-colors",
         className,
       )}
     >

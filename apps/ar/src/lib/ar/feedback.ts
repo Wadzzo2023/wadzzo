@@ -40,8 +40,7 @@ export function audioContext(): AudioContext | null {
     // Older iOS Safari only exposes the prefixed constructor.
     const Ctor =
       window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return null;
     ctx ??= new Ctor();
     // Safari suspends the context whenever the tab loses focus; without this
@@ -172,9 +171,7 @@ export function vibrate(pattern: number | number[], enabled: boolean) {
 
 /** Whether this browser implements the Vibration API at all. */
 export function canVibrate(): boolean {
-  return (
-    typeof navigator !== "undefined" && typeof navigator.vibrate === "function"
-  );
+  return typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
 }
 
 /**

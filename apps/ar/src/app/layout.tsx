@@ -13,8 +13,14 @@ import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: `${platformBranding.name} AR — Collect the real world`,
-  description: "Find digital collectibles at real places, capture them in AR, and build your collection. No app install required.",
-  icons: { icon: [{ url: platformBranding.assets.favicon }, { url: platformBranding.assets.mark, type: "image/png" }] },
+  description:
+    "Find digital collectibles at real places, capture them in AR, and build your collection. No app install required.",
+  icons: {
+    icon: [
+      { url: platformBranding.assets.favicon },
+      { url: platformBranding.assets.mark, type: "image/png" },
+    ],
+  },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent" },
 };
 

@@ -33,7 +33,7 @@ const CAPTION_PERKS = [
  */
 export function DeviceFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-0 isolate flex items-center justify-center bg-ar-void">
+    <div className="bg-ar-void fixed inset-0 isolate flex items-center justify-center">
       <AmbientBackdrop />
 
       {/* Caption, wide screens only — orients someone who opened this on a
@@ -44,27 +44,27 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
           — the previous version stacked a tiny "Wadzzo" eyebrow over a huge
           "AR", which read as if AR were the product name and Wadzzo its
           subtitle. It's the other way around everywhere else in the app. */}
-      <div className="pointer-events-none absolute left-10 top-1/2 hidden max-w-[19rem] -translate-y-1/2 xl:block">
+      <div className="pointer-events-none absolute top-1/2 left-10 hidden max-w-[19rem] -translate-y-1/2 xl:block">
         {/* Icon in a framed, gently pulsing plate rather than floating bare —
             gives it the same presence the boot sequence gives it, at rest. */}
         <div className="relative mb-5 flex h-16 w-16 items-center justify-center">
           <span
             aria-hidden
-            className="absolute inset-0 rounded-2xl border border-ar-green/30 bg-ar-surface/60"
+            className="border-ar-green/30 bg-ar-surface/60 absolute inset-0 rounded-2xl border"
           />
           <span
             aria-hidden
-            className="animate-pulse-ring absolute inset-0 rounded-2xl border border-ar-green-hot/50"
+            className="animate-pulse-ring border-ar-green-hot/50 absolute inset-0 rounded-2xl border"
           />
           <BrandMark glow className="relative h-9 w-auto" />
         </div>
 
         <div className="flex items-center gap-2">
-          <p className="font-hud text-4xl font-bold leading-none tracking-tight text-ar-text">
+          <p className="font-hud text-ar-text text-4xl leading-none font-bold tracking-tight">
             {platformBranding.wordmark.letters.join("")}
           </p>
           <span
-            className="font-hud flex h-6 items-center rounded-[6px] border border-ar-green px-1.5 text-[13px] font-bold tracking-[0.1em] text-ar-green-hot"
+            className="font-hud border-ar-green text-ar-green-hot flex h-6 items-center rounded-[6px] border px-1.5 text-[13px] font-bold tracking-[0.1em]"
             style={{
               background: "hsl(var(--ar-green) / 0.14)",
               boxShadow:
@@ -75,24 +75,21 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
           </span>
         </div>
 
-        <p className="font-hud mt-2 text-[10.5px] uppercase tracking-[0.32em] text-ar-green">
+        <p className="font-hud text-ar-green mt-2 text-[10.5px] tracking-[0.32em] uppercase">
           Collect the real world.
         </p>
 
-        <p className="mt-4 text-[13px] leading-relaxed text-ar-faint">
-          A mobile web app. No install, no store — scan a code and you&rsquo;re
-          already inside it.
+        <p className="text-ar-faint mt-4 text-[13px] leading-relaxed">
+          A mobile web app. No install, no store — scan a code and you&rsquo;re already inside it.
         </p>
 
-        <div className="mt-5 space-y-2.5 border-t border-ar-line pt-4">
+        <div className="border-ar-line mt-5 space-y-2.5 border-t pt-4">
           {CAPTION_PERKS.map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-2.5">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] border border-ar-green/35 bg-ar-green/10 text-ar-green-hot">
+              <span className="border-ar-green/35 bg-ar-green/10 text-ar-green-hot flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] border">
                 <Icon size={12} strokeWidth={2.3} />
               </span>
-              <span className="text-[12px] leading-snug text-ar-dim">
-                {text}
-              </span>
+              <span className="text-ar-dim text-[12px] leading-snug">{text}</span>
             </div>
           ))}
         </div>
@@ -104,7 +101,7 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
           "relative z-10 h-full w-full",
           // Tablet: a centred slab with a hairline edge.
           "sm:h-[min(100dvh-3rem,1000px)] sm:w-[min(100%-3rem,600px)] sm:rounded-[36px]",
-          "sm:border sm:border-ar-line sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95)]",
+          "sm:border-ar-line sm:border sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95)]",
           // Desktop: a real phone shell.
           "lg:h-[min(100dvh-4rem,932px)] lg:w-[430px] lg:rounded-[56px]",
           "lg:border-[11px] lg:border-[#171d19]",
@@ -115,9 +112,9 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
         ].join(" ")}
       >
         {/* Side keys — desktop only, purely to sell the object. */}
-        <span className="absolute -left-[15px] top-[132px] hidden h-12 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
-        <span className="absolute -left-[15px] top-[196px] hidden h-20 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
-        <span className="absolute -right-[15px] top-[176px] hidden h-28 w-[4px] rounded-r-sm bg-[#242b26] lg:block" />
+        <span className="absolute top-[132px] -left-[15px] hidden h-12 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
+        <span className="absolute top-[196px] -left-[15px] hidden h-20 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
+        <span className="absolute top-[176px] -right-[15px] hidden h-28 w-[4px] rounded-r-sm bg-[#242b26] lg:block" />
 
         {/* Screen. `isolate` keeps the app's blend modes (holo foil, camera
             overlays) from reaching the bezel and backdrop behind it.
@@ -132,13 +129,13 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
             instead of as an ordinary desktop modal spanning the browser. */}
         <div
           data-ar-app-frame
-          className="ar-noise ar-screen-clip relative isolate h-full w-full overflow-hidden bg-ar-bg"
+          className="ar-noise ar-screen-clip bg-ar-bg relative isolate h-full w-full overflow-hidden"
         >
           {children}
 
           {/* Dynamic island, drawn over the app the way the real one is. */}
-          <div className="pointer-events-none absolute left-1/2 top-[11px] z-50 hidden h-[30px] w-[112px] -translate-x-1/2 rounded-full bg-black lg:block">
-            <span className="absolute right-[13px] top-1/2 h-[9px] w-[9px] -translate-y-1/2 rounded-full bg-[#0d1a12] ring-1 ring-white/10" />
+          <div className="pointer-events-none absolute top-[11px] left-1/2 z-50 hidden h-[30px] w-[112px] -translate-x-1/2 rounded-full bg-black lg:block">
+            <span className="absolute top-1/2 right-[13px] h-[9px] w-[9px] -translate-y-1/2 rounded-full bg-[#0d1a12] ring-1 ring-white/10" />
           </div>
         </div>
       </div>
@@ -157,11 +154,11 @@ function AmbientBackdrop() {
       aria-hidden
       className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block"
     >
-      <div className="ar-grid absolute inset-0 opacity-40 [mask-image:radial-gradient(70%_60%_at_50%_45%,black,transparent)]" />
-      <div className="absolute left-1/2 top-1/2 h-[780px] w-[780px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.16),transparent_62%)] blur-[70px]" />
-      <div className="animate-float absolute left-[14%] top-[18%] h-72 w-72 rounded-full bg-[radial-gradient(circle,hsl(192_88%_56%/0.14),transparent_65%)] blur-[80px]" />
+      <div className="ar-grid absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_45%,black,transparent)] opacity-40" />
+      <div className="absolute top-1/2 left-1/2 h-[780px] w-[780px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.16),transparent_62%)] blur-[70px]" />
+      <div className="animate-float absolute top-[18%] left-[14%] h-72 w-72 rounded-full bg-[radial-gradient(circle,hsl(192_88%_56%/0.14),transparent_65%)] blur-[80px]" />
       <div
-        className="animate-float absolute bottom-[12%] right-[12%] h-80 w-80 rounded-full bg-[radial-gradient(circle,hsl(272_82%_66%/0.13),transparent_65%)] blur-[80px]"
+        className="animate-float absolute right-[12%] bottom-[12%] h-80 w-80 rounded-full bg-[radial-gradient(circle,hsl(272_82%_66%/0.13),transparent_65%)] blur-[80px]"
         style={{ animationDelay: "2s" }}
       />
       <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_50%,transparent_35%,hsl(var(--ar-void))_100%)]" />

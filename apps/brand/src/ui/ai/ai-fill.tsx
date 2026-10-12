@@ -44,9 +44,9 @@ export function AiFillCard<F extends FillForm>({
   const run = () => fill.mutate({ form, prompt, ...localNow(), context: context ?? {} });
 
   return (
-    <section className="relative overflow-hidden rounded-xl border border-primary/30 bg-linear-to-br from-primary/10 via-card to-card p-5">
+    <section className="border-primary/30 from-primary/10 via-card to-card relative overflow-hidden rounded-xl border bg-linear-to-br p-5">
       <div className="mb-3 flex items-center gap-2">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <span className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-lg">
           <Sparkles className="size-4" />
         </span>
         <h2 className="font-hud text-base font-semibold">Fill with AI</h2>
@@ -64,7 +64,7 @@ export function AiFillCard<F extends FillForm>({
         rows={2}
         maxLength={2000}
         placeholder={placeholder}
-        className="resize-none bg-card"
+        className="bg-card resize-none"
         aria-label="Describe what you want the AI to fill in"
       />
       {examples && !prompt && (
@@ -74,7 +74,7 @@ export function AiFillCard<F extends FillForm>({
               key={ex}
               type="button"
               onClick={() => setPrompt(ex)}
-              className="rounded-full border bg-card px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              className="bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground rounded-full border px-2.5 py-1 text-xs transition-colors"
             >
               {ex}
             </button>
@@ -82,7 +82,9 @@ export function AiFillCard<F extends FillForm>({
         </div>
       )}
       <div className="mt-3 flex items-center gap-2">
-        <p className="hidden text-xs text-muted-foreground sm:block">Nothing is published — you review every field first.</p>
+        <p className="text-muted-foreground hidden text-xs sm:block">
+          Nothing is published — you review every field first.
+        </p>
         <div className="ml-auto flex gap-2">
           {undo && !fill.isPending && (
             <Button
@@ -97,7 +99,12 @@ export function AiFillCard<F extends FillForm>({
               <Undo2 /> Undo
             </Button>
           )}
-          <Button type="button" size="sm" onClick={run} disabled={fill.isPending || prompt.trim().length < 3}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={run}
+            disabled={fill.isPending || prompt.trim().length < 3}
+          >
             {fill.isPending ? <Loader2 className="animate-spin" /> : <Wand2 />}
             {fill.isPending ? "Filling…" : "Fill form"}
           </Button>

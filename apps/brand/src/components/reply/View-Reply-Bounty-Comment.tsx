@@ -1,28 +1,30 @@
-import { formatPostCreatedAt } from "~/utils/format-date"
-import { useSession } from "next-auth/react"
-import React, { useState } from "react"
+import { formatPostCreatedAt } from "~/utils/format-date";
+import { useSession } from "next-auth/react";
+import React, { useState } from "react";
 import type { BountyComment } from "@wadzzo/db";
-import { api } from "~/utils/api"
-import CustomAvatar from "../common/custom-avatar"
-import ContextMenu from "../common/context-menu"
-import { CommentFormatter } from "../common/comment-formatter"
-import clsx from "clsx"
+import { api } from "~/utils/api";
+import CustomAvatar from "../common/custom-avatar";
+import ContextMenu from "../common/context-menu";
+import { CommentFormatter } from "../common/comment-formatter";
+import clsx from "clsx";
 
 export default function ViewReplyBountyComment({
   comment,
 }: {
   comment: BountyComment & {
     user: {
-      name: string | null
-      image: string | null
-    }
-  }
+      name: string | null;
+      image: string | null;
+    };
+  };
 }) {
-  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   return (
     <div className="relative">
-      <div className={clsx("flex items-start justify-between gap-4 text-sm", isDeleting && "blur-xs")}>
+      <div
+        className={clsx("flex items-start justify-between gap-4 text-sm", isDeleting && "blur-xs")}
+      >
         <div className="flex w-full gap-2">
           <div className="h-auto w-auto rounded-full">
             <CustomAvatar className="h-12 w-12" url={comment.user.image} />
@@ -42,22 +44,22 @@ export default function ViewReplyBountyComment({
         </div>
       </div>
       {isDeleting && (
-        <div className="absolute z-10 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 px-4 py-2 rounded-md shadow-md">
+        <div className="bg-background/80 absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform rounded-md px-4 py-2 shadow-md">
           <p className="text-foreground font-semibold">Deleting...</p>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function ShowMore({ content }: { content: string }) {
-  const [isExpanded, setIsExpanded] = React.useState<boolean>(false)
+  const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
   return (
     <>
       <p>{isExpanded ? content : content.slice(0, 50)}</p>
       {!isExpanded && <button onClick={() => setIsExpanded(!isExpanded)}>See More</button>}
     </>
-  )
+  );
 }
 
 function CommentContextMenu({
@@ -65,29 +67,28 @@ function CommentContextMenu({
   bountyCommentId,
   setIsDeleting,
 }: {
-  commentatorId: string
-  bountyCommentId: number
-  setIsDeleting: (value: boolean) => void
+  commentatorId: string;
+  bountyCommentId: number;
+  setIsDeleting: (value: boolean) => void;
 }) {
-  const { data } = useSession()
-  const deletePost = api.bounty.Bounty.deleteBountyComment.useMutation()
+  const { data } = useSession();
+  const deletePost = api.bounty.Bounty.deleteBountyComment.useMutation();
 
   const handleDelete = () => {
-    setIsDeleting(true)
+    setIsDeleting(true);
     deletePost.mutate(bountyCommentId, {
       onSuccess: () => {
-        console.log("deleted")
+        console.log("deleted");
       },
       onError: () => {
-        setIsDeleting(false)
+        setIsDeleting(false);
       },
-    })
-  }
+    });
+  };
 
   if (data?.user?.id === commentatorId) {
-    return <ContextMenu handleDelete={handleDelete} isLoading={deletePost.isPending} />
+    return <ContextMenu handleDelete={handleDelete} isLoading={deletePost.isPending} />;
   }
 
-  return null
+  return null;
 }
-

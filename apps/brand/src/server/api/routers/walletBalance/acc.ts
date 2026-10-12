@@ -15,11 +15,7 @@ import {
   PlatformAssetBalance,
 } from "~/lib/stellar/walletBalance/acc";
 import { User } from "firebase/auth";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { Horizon } from "@stellar/stellar-sdk";
 import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
@@ -31,66 +27,76 @@ export const WBalanceRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
     return await BalanceWithHomeDomain({ userPub: userId });
   }),
-  getGiftWithHomeBalance: protectedProcedure.input(z.object({
+  getGiftWithHomeBalance: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish().default(10),
+        cursor: z.string().nullish(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, cursor } = input;
+      const server = new Horizon.Server(STELLAR_URL);
+      // Wadzzo and Bandcoin keep their known domains; a partner token uses its own home domain.
+      const assetCode = PLATFORM_ASSET.code.toLowerCase();
+      const homeDomain =
+        assetCode === "wadzzo"
+          ? "app.wadzzo.com"
+          : assetCode === "bandcoin"
+            ? "bandcoin.io"
+            : env.NEXT_PUBLIC_HOME_DOMAIN;
+      try {
+        const claimableBalancesCall = server.claimableBalances();
 
-    limit: z.number().min(1).max(100).nullish().default(10),
-    cursor: z.string().nullish(),
-  })).query(async ({ input, ctx }) => {
-    const { limit, cursor } = input
-    const server = new Horizon.Server(STELLAR_URL);
-    // Wadzzo and Bandcoin keep their known domains; a partner token uses its own home domain.
-    const assetCode = PLATFORM_ASSET.code.toLowerCase();
-    const homeDomain = assetCode === "wadzzo" ? "app.wadzzo.com" : assetCode === "bandcoin" ? "bandcoin.io" : env.NEXT_PUBLIC_HOME_DOMAIN
-    try {
-      const claimableBalancesCall = server.claimableBalances()
+        if (limit) {
+          claimableBalancesCall.limit(limit);
+        }
+        if (cursor) {
+          claimableBalancesCall.cursor(cursor);
+        }
+        console.log(ctx.session.user.id);
+        const claimableBalances = await claimableBalancesCall.claimant(ctx.session.user.id).call();
+        const filteredBalances = await Promise.all(
+          claimableBalances.records.map(async (balance) => {
+            const asset = balance.asset;
+            if (!asset) return false;
 
-      if (limit) {
-        claimableBalancesCall.limit(limit)
-      }
-      if (cursor) {
-        claimableBalancesCall.cursor(cursor)
-      }
-      console.log(ctx.session.user.id)
-      const claimableBalances = await claimableBalancesCall
-        .claimant(ctx.session.user.id)
-        .call()
-      const filteredBalances = await Promise.all(
-        claimableBalances.records.map(async (balance) => {
-          const asset = balance.asset;
-          if (!asset) return false;
+            try {
+              if (asset.includes(":")) {
+                const [code, issuer] = asset.split(":");
+                if (!issuer)
+                  throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+                    message: "Issuer is undefined",
+                  });
 
-          try {
-            if (asset.includes(":")) {
-              const [code, issuer] = asset.split(":");
-              if (!issuer) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is undefined" });
+                const account = await server.loadAccount(issuer);
+                console.log("account.home_domain", account.home_domain);
 
-              const account = await server.loadAccount(issuer);
-              console.log("account.home_domain", account.home_domain);
-
-              return account.home_domain === homeDomain;
+                return account.home_domain === homeDomain;
+              }
+              return false;
+            } catch (error) {
+              console.error("Error checking home_domain:", error);
+              return false;
             }
-            return false;
-          } catch (error) {
-            console.error("Error checking home_domain:", error);
-            return false;
-          }
-        })
-      );
-      const validBalances = claimableBalances.records.filter((_, i) => filteredBalances[i]);
+          }),
+        );
+        const validBalances = claimableBalances.records.filter((_, i) => filteredBalances[i]);
 
-      return {
-        balances: validBalances,
-        nextCursor:
-          claimableBalances.records.length > 0
-            ? claimableBalances.records[claimableBalances.records.length - 1]?.paging_token
-            : undefined,
+        return {
+          balances: validBalances,
+          nextCursor:
+            claimableBalances.records.length > 0
+              ? claimableBalances.records[claimableBalances.records.length - 1]?.paging_token
+              : undefined,
+        };
+      } catch (error) {
+        console.error("Error fetching claimable balances:", error);
+        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+          message: "Failed to fetch claimable balances",
+        });
       }
-    } catch (error) {
-      console.error("Error fetching claimable balances:", error)
-      throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Failed to fetch claimable balances" })
-    }
-  }
-  ),
+    }),
 
   getNativeBalance: protectedProcedure.query(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
@@ -172,11 +178,14 @@ export const WBalanceRouter = createTRPCRouter({
       z.object({
         limit: z.number().min(1).max(100).nullish().default(10),
         cursor: z.string().nullish(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const userId = ctx.session.user.id;
-      const result = await RecentTransactionHistory({ userPubKey: userId, input });
+      const result = await RecentTransactionHistory({
+        userPubKey: userId,
+        input,
+      });
       return {
         items: result.items,
         nextCursor: result.nextCursor,
@@ -207,7 +216,6 @@ export const WBalanceRouter = createTRPCRouter({
         userPubKey: userPubKey,
         balanceId: input.balanceId,
         signWith: input.signWith,
-
       });
     }),
 
@@ -237,19 +245,12 @@ export const WBalanceRouter = createTRPCRouter({
       });
     }),
 
-  checkingPlatformTrustLine: protectedProcedure.query(
-    async ({ ctx, input }) => {
-      const userPubKey = ctx.session.user.id;
-      return await CheckHasTrustLineOnPlatformAsset({ userPubKey: userPubKey });
-    },
-  ),
+  checkingPlatformTrustLine: protectedProcedure.query(async ({ ctx, input }) => {
+    const userPubKey = ctx.session.user.id;
+    return await CheckHasTrustLineOnPlatformAsset({ userPubKey: userPubKey });
+  }),
   getPlatformAssetBalance: protectedProcedure.query(async ({ ctx, input }) => {
     const userPubKey = ctx.session.user.id;
     return await PlatformAssetBalance({ userPubKey: userPubKey });
   }),
-
-
 });
-
-
-

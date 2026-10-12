@@ -8,7 +8,11 @@ import { ListingCard, ListingCardSkeleton, ListingGrid } from "./listing-card";
 
 /** Pages after the first (the first is rendered on the server). */
 export function LoadMoreListings({ input, cursor }: { input: ListingsInput; cursor: number }) {
-  const q = api.market.listings.useInfiniteQuery(input, { initialCursor: cursor, getNextPageParam: (p) => p.nextCursor, enabled: false });
+  const q = api.market.listings.useInfiniteQuery(input, {
+    initialCursor: cursor,
+    getNextPageParam: (p) => p.nextCursor,
+    enabled: false,
+  });
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   const hasMore = q.data ? q.hasNextPage : true;
 

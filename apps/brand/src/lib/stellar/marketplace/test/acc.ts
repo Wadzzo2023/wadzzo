@@ -31,12 +31,8 @@ export async function getCreatorPageAssetBalance({
 
   const balances = transactionInializer.balances;
   const asset = balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum12" ||
-      balance.asset_type === "credit_alphanum4"
-    ) {
-      if (balance.asset_code === code && balance.asset_issuer === issuer)
-        return balance.balance;
+    if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
+      if (balance.asset_code === code && balance.asset_issuer === issuer) return balance.balance;
     }
   });
   console.log("Asset Balance:", asset);
@@ -44,7 +40,7 @@ export async function getCreatorPageAssetBalance({
     balance: asset ? asset.balance : "0",
     code: code,
   };
-};
+}
 export async function getAssetBalance({
   pubkey,
   code,
@@ -58,12 +54,8 @@ export async function getAssetBalance({
   const balances = await accountBalances({ userPub: pubkey });
 
   const asset = balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum12" ||
-      balance.asset_type === "credit_alphanum4"
-    ) {
-      if (balance.asset_code === code && balance.asset_issuer === issuer)
-        return balance.balance;
+    if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
+      if (balance.asset_code === code && balance.asset_issuer === issuer) return balance.balance;
     }
   });
 
@@ -83,10 +75,7 @@ export function getAssetBalanceFromBalance({
 }) {
   if (!balances || !code || !issuer) return 0;
   for (const balance of balances) {
-    if (
-      balance.asset_type === "credit_alphanum12" ||
-      balance.asset_type === "credit_alphanum4"
-    ) {
+    if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
       if (balance.asset_code === code && balance.asset_issuer === issuer)
         return parseFloat(balance.balance);
     }
@@ -112,11 +101,7 @@ export async function getAccountInfos(pubkey: string) {
   return { balances: allBallances, xlm, platformAssetBal };
 }
 
-export async function accountDetailsWithHomeDomain({
-  userPub,
-}: {
-  userPub: string;
-}) {
+export async function accountDetailsWithHomeDomain({ userPub }: { userPub: string }) {
   const server = new Horizon.Server(STELLAR_URL);
 
   const account = await server.loadAccount(userPub);
@@ -126,10 +111,7 @@ export async function accountDetailsWithHomeDomain({
 
   const balances = await Promise.all(
     account.balances.map(async (balance) => {
-      if (
-        balance.asset_type === "credit_alphanum12" ||
-        balance.asset_type === "credit_alphanum4"
-      ) {
+      if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
         if (
           balance.asset_code == PLATFORM_ASSET.code &&
           balance.asset_issuer == PLATFORM_ASSET.issuer
@@ -188,11 +170,7 @@ function copyToBalance(copy: number): string {
   return amount;
 }
 
-export async function getAccounXLM_PlatformBalance({
-  userPub,
-}: {
-  userPub: string;
-}) {
+export async function getAccounXLM_PlatformBalance({ userPub }: { userPub: string }) {
   const { xlmBalance, siteAssetBalance } = await accountDetailsWithHomeDomain({
     userPub,
   });

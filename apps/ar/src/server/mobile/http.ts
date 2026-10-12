@@ -37,7 +37,8 @@ function zodMessage(e: ZodError) {
   return path ? `${path}: ${issue.message}` : issue.message;
 }
 
-const fail = (status: number, code: string, message: string) => Response.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
+const fail = (status: number, code: string, message: string) =>
+  Response.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
 
 /** Turns anything thrown while handling a request into the API's error response. */
 export function errorResponse(e: unknown): Response {
@@ -45,7 +46,8 @@ export function errorResponse(e: unknown): Response {
   if (e instanceof ZodError) return fail(400, "BAD_REQUEST", zodMessage(e));
   // Same wire codes as before (tRPC names); the app code decides which one.
   // Server-side failures (5xx) keep the generic body below: their messages are for logs.
-  if (isAppError(e) && e.status < 500) return fail(e.status, ERROR_DEFINITIONS[e.code].trpc, e.message);
+  if (isAppError(e) && e.status < 500)
+    return fail(e.status, ERROR_DEFINITIONS[e.code].trpc, e.message);
   if (e instanceof TRPCError) {
     const message = e.cause instanceof ZodError ? zodMessage(e.cause) : e.message;
     return fail(STATUS[e.code] ?? 500, e.code, message);
@@ -60,7 +62,10 @@ export function errorResponse(e: unknown): Response {
 }
 
 /** The caller's address from the proxy headers (there's no socket in route handlers). */
-export const clientIp = (req: Request) => req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "unknown";
+export const clientIp = (req: Request) =>
+  req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+  req.headers.get("x-real-ip") ??
+  "unknown";
 
 /**
  * Tiny fixed-window limiter. In-memory, so per server instance — a speed bump

@@ -12,7 +12,8 @@ import { PageBody, PageHeader } from "~/ui/page-header";
 
 export const metadata: Metadata = {
   title: "Marketplace",
-  description: "Buy digital items — art, music, video and 3D — from creators, or from other fans on the resale market.",
+  description:
+    "Buy digital items — art, music, video and 3D — from creators, or from other fans on the resale market.",
   alternates: { canonical: "/marketplace" },
 };
 
@@ -34,10 +35,18 @@ export default async function MarketplacePage({ searchParams }: PageProps<"/mark
 
   return (
     <PageBody wide className="space-y-5">
-      <PageHeader eyebrow="Marketplace" title="Discover items" description="Drops straight from creators — minted the moment you buy — and resales from other fans." />
+      <PageHeader
+        eyebrow="Marketplace"
+        title="Discover items"
+        description="Drops straight from creators — minted the moment you buy — and resales from other fans."
+      />
       <MarketFilters current={input} />
       {first.items.length === 0 ? (
-        <EmptyState icon={Store} title="Nothing here yet" description="Try another filter, or check back soon for new drops." />
+        <EmptyState
+          icon={Store}
+          title="Nothing here yet"
+          description="Try another filter, or check back soon for new drops."
+        />
       ) : (
         <>
           <ListingGrid>
@@ -45,7 +54,9 @@ export default async function MarketplacePage({ searchParams }: PageProps<"/mark
               <ListingCard key={l.id} listing={l} />
             ))}
           </ListingGrid>
-          {first.nextCursor && <LoadMoreListings key={JSON.stringify(input)} input={input} cursor={first.nextCursor} />}
+          {first.nextCursor && (
+            <LoadMoreListings key={JSON.stringify(input)} input={input} cursor={first.nextCursor} />
+          )}
         </>
       )}
     </PageBody>

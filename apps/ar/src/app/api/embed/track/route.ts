@@ -12,7 +12,10 @@ import { HttpError, clientIp, rateLimit } from "~/server/mobile/http";
  */
 export const dynamic = "force-dynamic";
 
-const COLUMN: Record<EmbedEvent, "views" | "pinTaps" | "openClicks" | "eventsClicks" | "bountiesClicks"> = {
+const COLUMN: Record<
+  EmbedEvent,
+  "views" | "pinTaps" | "openClicks" | "eventsClicks" | "bountiesClicks"
+> = {
   view: "views",
   pinTap: "pinTaps",
   open: "openClicks",
@@ -27,7 +30,8 @@ export async function POST(req: Request) {
     const raw = await req.text();
     const body: unknown = raw ? JSON.parse(raw) : undefined;
     const { id, e } = (body ?? {}) as { id?: unknown; e?: unknown };
-    if (typeof id !== "string" || id === "preview" || typeof e !== "string" || !(e in COLUMN)) return noContent();
+    if (typeof id !== "string" || id === "preview" || typeof e !== "string" || !(e in COLUMN))
+      return noContent();
     // Generous for real use (a visitor tapping around), tight enough that a
     // loop can't inflate a brand's numbers much.
     rateLimit(`embed:${clientIp(req)}:${id}`, 60, 60_000);

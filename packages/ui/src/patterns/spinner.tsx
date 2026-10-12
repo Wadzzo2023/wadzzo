@@ -4,7 +4,13 @@ import { cn } from "../lib/cn";
 
 /** The one busy indicator (same Loader2 spin as the fan apps). */
 export function Spinner({ className, label = "Loading" }: { className?: string; label?: string }) {
-  return <Loader2 role="status" aria-label={label} className={cn("size-5 animate-spin text-primary", className)} />;
+  return (
+    <Loader2
+      role="status"
+      aria-label={label}
+      className={cn("text-primary size-5 animate-spin", className)}
+    />
+  );
 }
 
 /** A centred spinner that fills its container — for whole-page/section waits. */

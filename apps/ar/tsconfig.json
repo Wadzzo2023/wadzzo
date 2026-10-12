@@ -13,11 +13,7 @@
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
     /* Bundled projects */
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "ES2022"
-    ],
+    "lib": ["dom", "dom.iterable", "ES2022"],
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -30,12 +26,8 @@
     "incremental": true,
     /* Path Aliases (relative to this file; no baseUrl — deprecated in TS 6) */
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "package/*": [
-        "./package/*"
-      ]
+      "~/*": ["./src/*"],
+      "package/*": ["./package/*"]
     }
   },
   "include": [

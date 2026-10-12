@@ -20,8 +20,8 @@ export const downloadAttachment = async (url: string, fileName: string) => {
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.style.display = 'none';
+    const a = document.createElement("a");
+    a.style.display = "none";
     a.href = blobUrl;
     a.download = fileName;
     document.body.appendChild(a);
@@ -29,6 +29,6 @@ export const downloadAttachment = async (url: string, fileName: string) => {
 
     window.URL.revokeObjectURL(blobUrl);
   } catch (error) {
-    console.error('Error downloading file:', error);
+    console.error("Error downloading file:", error);
   }
 };

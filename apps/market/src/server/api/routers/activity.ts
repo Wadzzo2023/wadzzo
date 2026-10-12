@@ -21,9 +21,17 @@ export const activityRouter = createTRPCRouter({
       if (!input.cursor) await settleOpenFor(ctx.db, me);
 
       const mine: Prisma.AssetTransactionWhereInput =
-        input.role === "bought" ? { buyerId: me } : input.role === "sold" ? { sellerId: me } : { OR: [{ buyerId: me }, { sellerId: me }] };
+        input.role === "bought"
+          ? { buyerId: me }
+          : input.role === "sold"
+            ? { sellerId: me }
+            : { OR: [{ buyerId: me }, { sellerId: me }] };
       const rows = await ctx.db.assetTransaction.findMany({
-        where: { ...mine, ...(input.type && { type: input.type }), NOT: { status: "PENDING", txHash: null } },
+        where: {
+          ...mine,
+          ...(input.type && { type: input.type }),
+          NOT: { status: "PENDING", txHash: null },
+        },
         select: {
           id: true,
           type: true,
@@ -43,7 +51,9 @@ export const activityRouter = createTRPCRouter({
           createdAt: true,
           buyerId: true,
           sellerId: true,
-          asset: { select: { id: true, name: true, code: true, thumbnail: true } },
+          asset: {
+            select: { id: true, name: true, code: true, thumbnail: true },
+          },
           buyer: { select: { id: true, name: true } },
           seller: { select: { id: true, name: true } },
         },
@@ -53,6 +63,9 @@ export const activityRouter = createTRPCRouter({
         skip: input.cursor ? 1 : 0,
       });
       const items = rows.slice(0, input.limit);
-      return { items, nextCursor: rows.length > input.limit ? (items.at(-1)?.id ?? null) : null };
+      return {
+        items,
+        nextCursor: rows.length > input.limit ? (items.at(-1)?.id ?? null) : null,
+      };
     }),
 });

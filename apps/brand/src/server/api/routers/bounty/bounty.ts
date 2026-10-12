@@ -1,5 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { BountyStatus, MediaType, NotificationType, type Prisma, SubmissionViewType, UserRole } from "@wadzzo/db"; // Assuming you are using Prisma
+import {
+  BountyStatus,
+  MediaType,
+  NotificationType,
+  type Prisma,
+  SubmissionViewType,
+  UserRole,
+} from "@wadzzo/db"; // Assuming you are using Prisma
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -26,45 +33,35 @@ import {
   getXLMPriceByPlatformAsset,
 } from "~/lib/stellar/fan/get_token_price";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const BountyCommentSchema = z.object({
   bountyId: z.number(),
   parentId: z.number().optional(),
-  content: z
-    .string()
-    .min(1, { message: "Minimum 5 character is required!" })
-    .trim(),
+  content: z.string().min(1, { message: "Minimum 5 character is required!" }).trim(),
 });
 const MediaInfo = z.object({
   url: z.string(),
   type: z.string().default(MediaType.IMAGE),
-})
+});
 
-type MediaInfoType = z.TypeOf<typeof MediaInfo>
+type MediaInfoType = z.TypeOf<typeof MediaInfo>;
 export const SubmissionMediaInfo = z.object({
   url: z.string(),
   name: z.string(),
   size: z.number(),
   type: z.string(),
-})
-type SubmissionMediaInfoType = z.TypeOf<typeof SubmissionMediaInfo>
+});
+type SubmissionMediaInfoType = z.TypeOf<typeof SubmissionMediaInfo>;
 export const PaymentMethodEnum = z.enum(["asset", "xlm", "usdc", "card"]);
 export type PaymentMethod = z.infer<typeof PaymentMethodEnum>;
-
 
 const getAllBountyByUserIdInput = z.object({
   limit: z.number().min(1).max(100).default(10),
   cursor: z.uuid().nullish(),
   search: z.string().optional(),
-  sortBy: z
-    .enum(["DATE_ASC", "DATE_DESC", "PRICE_ASC", "PRICE_DESC"])
-    .optional(),
+  sortBy: z.enum(["DATE_ASC", "DATE_DESC", "PRICE_ASC", "PRICE_DESC"]).optional(),
   status: z.enum(["ALL", "ACTIVE", "FINISHED"]).optional(),
 });
 
@@ -76,9 +73,7 @@ export const BountyRoute = createTRPCRouter({
       z.object({
         signWith: custodialSignerSchema,
         prize: z.number().min(0.00001, { message: "Prize can't less than 0" }),
-        xlmPrice: z
-          .number()
-          .min(0.00001, { message: "XLM Price can't less than 0" }),
+        xlmPrice: z.number().min(0.00001, { message: "XLM Price can't less than 0" }),
         method: PaymentMethodEnum,
       }),
     )
@@ -110,16 +105,10 @@ export const BountyRoute = createTRPCRouter({
     .input(
       z.object({
         title: z.string().min(1, { message: "Title can't be empty" }),
-        totalWinner: z
-          .number()
-          .min(1, { message: "Please select at least 1 winner" }),
-        prizeInUSD: z
-          .number()
-          .min(0.00001, { message: "Prize can't less than 0" }),
+        totalWinner: z.number().min(1, { message: "Please select at least 1 winner" }),
+        prizeInUSD: z.number().min(0.00001, { message: "Prize can't less than 0" }),
         prize: z.number().min(0.00001, { message: "Prize can't less than 0" }),
-        requiredBalance: z
-          .number()
-          .min(0, { message: "Required Balance can't be less than 0" }),
+        requiredBalance: z.number().min(0, { message: "Required Balance can't be less than 0" }),
         content: z.string().min(2, { message: "Description can't be empty" }),
 
         priceInXLM: z.number().optional(),
@@ -128,7 +117,6 @@ export const BountyRoute = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
       const bounty = await ctx.db.bounty.create({
         data: {
           platformId: ctx.platform.id,
@@ -181,9 +169,7 @@ export const BountyRoute = createTRPCRouter({
         cursor: z.number().nullish(),
         skip: z.number().optional(),
         search: z.string().optional(),
-        sortBy: z
-          .enum(["DATE_ASC", "DATE_DESC", "PRICE_ASC", "PRICE_DESC"])
-          .optional(),
+        sortBy: z.enum(["DATE_ASC", "DATE_DESC", "PRICE_ASC", "PRICE_DESC"]).optional(),
         status: z.enum(["ALL", "ACTIVE", "FINISHED"]).optional(),
       }),
     )
@@ -311,10 +297,14 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (bounty?.participants.length) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You already joined this bounty" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "You already joined this bounty",
+        });
       }
       if (bounty?.creatorId === ctx.session.user.id) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't join your own bounty" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You can't join your own bounty",
+        });
       }
       await ctx.db.bountyParticipant.create({
         data: {
@@ -514,14 +504,15 @@ export const BountyRoute = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
       const bounty = await ctx.db.bounty.findUnique({
         where: {
           id: input.BountyId,
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       await ctx.db.bountySubmission.create({
         data: {
@@ -530,10 +521,10 @@ export const BountyRoute = createTRPCRouter({
           bountyId: input.BountyId,
           medias: input.medias
             ? {
-              createMany: {
-                data: input.medias,
-              },
-            }
+                createMany: {
+                  data: input.medias,
+                },
+              }
             : undefined,
         },
       });
@@ -572,10 +563,14 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       if (bounty.userId !== ctx.session.user.id) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You are not the owner of this bounty",
+        });
       }
       await ctx.db.bountySubmission.update({
         where: {
@@ -588,11 +583,11 @@ export const BountyRoute = createTRPCRouter({
             createMany: {
               data: input.medias
                 ? input.medias.map((media) => ({
-                  url: media.url,
-                  name: media.name,
-                  size: media.size,
-                  type: media.type,
-                }))
+                    url: media.url,
+                    name: media.name,
+                    size: media.size,
+                    type: media.type,
+                  }))
                 : [],
             },
           },
@@ -638,7 +633,9 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       return bounty;
     }),
@@ -655,7 +652,9 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       return {
         isOwner: bounty.creatorId === ctx.session.user.id,
@@ -665,9 +664,7 @@ export const BountyRoute = createTRPCRouter({
   deleteBounty: protectedProcedure
     .input(
       z.object({
-        BountyId: z
-          .number()
-          .min(1, { message: "Bounty ID can't be less than 0" }),
+        BountyId: z.number().min(1, { message: "Bounty ID can't be less than 0" }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -677,12 +674,20 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       await assertOwnerOrAdmin(ctx, bounty.creatorId);
       const [joined, entered] = await Promise.all([
-        ctx.db.bountyParticipant.findMany({ where: { bountyId: input.BountyId }, select: { userId: true } }),
-        ctx.db.bountySubmission.findMany({ where: { bountyId: input.BountyId }, select: { userId: true } }),
+        ctx.db.bountyParticipant.findMany({
+          where: { bountyId: input.BountyId },
+          select: { userId: true },
+        }),
+        ctx.db.bountySubmission.findMany({
+          where: { bountyId: input.BountyId },
+          select: { userId: true },
+        }),
       ]);
       await ctx.db.bounty.delete({
         where: {
@@ -722,19 +727,12 @@ export const BountyRoute = createTRPCRouter({
       return await getplatformAssetNumberForXLM(input.xlm);
     }),
 
-
   getSendBalanceToWinnerXdr: protectedProcedure
     .input(
       z.object({
-        prize: z
-          .number()
-          .min(0.00001, { message: "Prize can't less than 00001" }),
-        userId: z
-          .string()
-          .min(1, { message: "Bounty ID can't be less than 0" }),
-        BountyId: z
-          .number()
-          .min(1, { message: "Bounty ID can't be less than 0" }),
+        prize: z.number().min(0.00001, { message: "Prize can't less than 00001" }),
+        userId: z.string().min(1, { message: "Bounty ID can't be less than 0" }),
+        BountyId: z.number().min(1, { message: "Bounty ID can't be less than 0" }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -757,20 +755,38 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!winners) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       // Only the bounty's brand (or an admin) pays out, only to someone who
       // submitted and hasn't won yet, and the amount comes from the bounty.
       await assertOwnerOrAdmin(ctx, winners.creatorId);
       const [submitted, alreadyWon] = await Promise.all([
-        ctx.db.bountySubmission.findFirst({ where: { bountyId: input.BountyId, userId: userPubKey }, select: { id: true } }),
-        ctx.db.bountyWinner.findFirst({ where: { bountyId: input.BountyId, userId: userPubKey }, select: { id: true } }),
+        ctx.db.bountySubmission.findFirst({
+          where: { bountyId: input.BountyId, userId: userPubKey },
+          select: { id: true },
+        }),
+        ctx.db.bountyWinner.findFirst({
+          where: { bountyId: input.BountyId, userId: userPubKey },
+          select: { id: true },
+        }),
       ]);
-      if (!submitted) throw new TRPCError({ code: "BAD_REQUEST", message: "This user hasn't submitted to the bounty" });
-      if (alreadyWon) throw new TRPCError({ code: "BAD_REQUEST", message: "This user is already a winner" });
+      if (!submitted)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user hasn't submitted to the bounty",
+        });
+      if (alreadyWon)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user is already a winner",
+        });
 
       if (winners.currentWinnerCount === winners.totalWinner) {
-        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Bounty has finished, you can't send balance to winner", });
+        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+          message: "Bounty has finished, you can't send balance to winner",
+        });
       }
 
       if (winners.priceInXLM) {
@@ -788,9 +804,7 @@ export const BountyRoute = createTRPCRouter({
   makeBountyWinner: protectedProcedure
     .input(
       z.object({
-        BountyId: z
-          .number()
-          .min(1, { message: "Bounty ID can't be less than 0" }),
+        BountyId: z.number().min(1, { message: "Bounty ID can't be less than 0" }),
         userId: z.string().min(1, { message: "User ID can't be less than 0" }),
       }),
     )
@@ -811,20 +825,40 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       if (bounty.currentWinnerCount === bounty.totalWinner) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Bounty has reached the maximum number of winners" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Bounty has reached the maximum number of winners",
+        });
       }
       if (bounty.creatorId !== ctx.session.user.id) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You are not the owner of this bounty",
+        });
       }
       const [submitted, alreadyWon] = await Promise.all([
-        ctx.db.bountySubmission.findFirst({ where: { bountyId: input.BountyId, userId: input.userId }, select: { id: true } }),
-        ctx.db.bountyWinner.findFirst({ where: { bountyId: input.BountyId, userId: input.userId }, select: { id: true } }),
+        ctx.db.bountySubmission.findFirst({
+          where: { bountyId: input.BountyId, userId: input.userId },
+          select: { id: true },
+        }),
+        ctx.db.bountyWinner.findFirst({
+          where: { bountyId: input.BountyId, userId: input.userId },
+          select: { id: true },
+        }),
       ]);
-      if (!submitted) throw new TRPCError({ code: "BAD_REQUEST", message: "This user hasn't submitted to the bounty" });
-      if (alreadyWon) throw new TRPCError({ code: "BAD_REQUEST", message: "This user is already a winner" });
+      if (!submitted)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user hasn't submitted to the bounty",
+        });
+      if (alreadyWon)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This user is already a winner",
+        });
       await ctx.db.bounty.update({
         where: {
           id: input.BountyId,
@@ -837,17 +871,29 @@ export const BountyRoute = createTRPCRouter({
           },
           currentWinnerCount: {
             increment: 1,
-          }
+          },
         },
       });
 
       // That was the last winner: everyone else who joined or entered hears it's over.
       if (bounty.currentWinnerCount + 1 >= bounty.totalWinner) {
         const [joined, entered, winners, info] = await Promise.all([
-          ctx.db.bountyParticipant.findMany({ where: { bountyId: input.BountyId }, select: { userId: true } }),
-          ctx.db.bountySubmission.findMany({ where: { bountyId: input.BountyId }, select: { userId: true } }),
-          ctx.db.bountyWinner.findMany({ where: { bountyId: input.BountyId }, select: { userId: true } }),
-          ctx.db.bounty.findUnique({ where: { id: input.BountyId }, select: { title: true } }),
+          ctx.db.bountyParticipant.findMany({
+            where: { bountyId: input.BountyId },
+            select: { userId: true },
+          }),
+          ctx.db.bountySubmission.findMany({
+            where: { bountyId: input.BountyId },
+            select: { userId: true },
+          }),
+          ctx.db.bountyWinner.findMany({
+            where: { bountyId: input.BountyId },
+            select: { userId: true },
+          }),
+          ctx.db.bounty.findUnique({
+            where: { id: input.BountyId },
+            select: { title: true },
+          }),
         ]);
         const won = new Set(winners.map((w) => w.userId));
         await notify(ctx.db, {
@@ -880,9 +926,7 @@ export const BountyRoute = createTRPCRouter({
   updateBountySubmissionStatus: protectedProcedure
     .input(
       z.object({
-        creatorId: z
-          .string()
-          .min(1, { message: "User ID can't be less than 0" }),
+        creatorId: z.string().min(1, { message: "User ID can't be less than 0" }),
         submissionId: z.number(),
         status: z.enum(SubmissionViewType),
       }),
@@ -895,16 +939,25 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!Submission) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       const submission = await ctx.db.bountySubmission.findUnique({
         where: {
           id: input.submissionId,
         },
-        select: { userId: true, bountyId: true, status: true, bounty: { select: { creatorId: true, title: true } } },
+        select: {
+          userId: true,
+          bountyId: true,
+          status: true,
+          bounty: { select: { creatorId: true, title: true } },
+        },
       });
       if (!submission) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Submission not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Submission not found",
+        });
       }
 
       await assertOwnerOrAdmin(ctx, submission.bounty.creatorId);
@@ -918,7 +971,11 @@ export const BountyRoute = createTRPCRouter({
       });
 
       // Approved, rejected or put on review: tell the person who entered ("checked" is just the brand opening it).
-      const reviewed: SubmissionViewType[] = [SubmissionViewType.APPROVED, SubmissionViewType.REJECTED, SubmissionViewType.ONREVIEW];
+      const reviewed: SubmissionViewType[] = [
+        SubmissionViewType.APPROVED,
+        SubmissionViewType.REJECTED,
+        SubmissionViewType.ONREVIEW,
+      ];
       if (reviewed.includes(input.status) && input.status !== submission.status) {
         await notifyFan(ctx.db, {
           actorId: submission.bounty.creatorId,
@@ -934,13 +991,8 @@ export const BountyRoute = createTRPCRouter({
     .input(
       z.object({
         prize: z.number().min(0.00001, { message: "Prize can't less than 0" }),
-        creatorId: z
-          .string()
-          .min(1, { message: "User ID can't be less than 0" })
-          .optional(),
-        bountyId: z
-          .number()
-          .min(1, { message: "Bounty ID can't be less than 0" }),
+        creatorId: z.string().min(1, { message: "User ID can't be less than 0" }).optional(),
+        bountyId: z.number().min(1, { message: "Bounty ID can't be less than 0" }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -950,7 +1002,9 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (hasBountyWinner) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Bounty has a winner, you can't delete this bounty" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Bounty has a winner, you can't delete this bounty",
+        });
       }
 
       const bounty = await ctx.db.bounty.findUnique({
@@ -959,7 +1013,9 @@ export const BountyRoute = createTRPCRouter({
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       // The refund always goes back to the bounty's brand, for the bounty's
       // own prize, and only the brand or an admin can ask for it.
@@ -982,25 +1038,26 @@ export const BountyRoute = createTRPCRouter({
         BountyId: z.number(),
         title: z.string().min(1, { message: "Title can't be empty" }),
         status: z.enum(BountyStatus).optional(),
-        requiredBalance: z
-          .number()
-          .min(0, { message: "Required Balance can't be less than 0" }),
+        requiredBalance: z.number().min(0, { message: "Required Balance can't be less than 0" }),
         content: z.string().min(2, { message: "Description can't be empty" }),
         medias: z.array(MediaInfo).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
       const bounty = await ctx.db.bounty.findUnique({
         where: {
           id: input.BountyId,
         },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       if (bounty.creatorId !== ctx.session.user.id) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not the owner of this bounty" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You are not the owner of this bounty",
+        });
       }
       await ctx.db.bounty.update({
         where: {
@@ -1066,14 +1123,9 @@ export const BountyRoute = createTRPCRouter({
         select: { userId: true },
       });
 
-      const previousCommenterIds = previousCommenters.map(
-        (comment) => comment.userId,
-      );
+      const previousCommenterIds = previousCommenters.map((comment) => comment.userId);
 
-      const usersToNotify = new Set([
-        bountys?.creatorId,
-        ...previousCommenterIds,
-      ]);
+      const usersToNotify = new Set([bountys?.creatorId, ...previousCommenterIds]);
 
       usersToNotify.delete(ctx.session.user.id);
 
@@ -1088,10 +1140,7 @@ export const BountyRoute = createTRPCRouter({
             isUser: false,
             Notification: {
               create: Array.from(usersToNotify)
-                .filter(
-                  (notifierId): notifierId is string =>
-                    notifierId !== undefined,
-                )
+                .filter((notifierId): notifierId is string => notifierId !== undefined)
                 .map((notifierId) => ({
                   notifierId,
                   isCreator: notifierId === bountys?.creatorId,
@@ -1204,7 +1253,10 @@ export const BountyRoute = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const owner = await ctx.db.bounty.findUnique({ where: { id: input.BountyId }, select: { creatorId: true } });
+      const owner = await ctx.db.bounty.findUnique({
+        where: { id: input.BountyId },
+        select: { creatorId: true },
+      });
       if (!owner) throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
       await assertOwnerOrAdmin(ctx, owner.creatorId);
       const submissions = await ctx.db.bountySubmission.findMany({
@@ -1238,7 +1290,6 @@ export const BountyRoute = createTRPCRouter({
         }),
       );
 
-
       return detailedSubmissions;
     }),
   swapAssetToUSDC: protectedProcedure
@@ -1269,7 +1320,9 @@ export const BountyRoute = createTRPCRouter({
         const prevXDR = findXDR.xdr;
         const isSubmitted = await checkXDRSubmitted(prevXDR);
         if (isSubmitted) {
-          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You already submitted the XDR" });
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+            message: "You already submitted the XDR",
+          });
         }
       }
 
@@ -1437,7 +1490,9 @@ export const BountyRoute = createTRPCRouter({
         select: { creatorId: true },
       });
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       const newContent = input.media
         ? `${content} ${input.media.map((media) => media.url).join(" ")}`
@@ -1587,7 +1642,9 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
       // Only the fan in this thread, the bounty's brand, or an admin.
       await assertOwnerOrAdmin(ctx, input.userId, bounty.creatorId);
@@ -1611,7 +1668,6 @@ export const BountyRoute = createTRPCRouter({
       });
 
       // Debugging purposes: check the retrieved bounty doubts
-
 
       // Map messages to extract content and role
       const messages = bountyDoubts.flatMap((doubt) =>
@@ -1638,7 +1694,9 @@ export const BountyRoute = createTRPCRouter({
       });
 
       if (!bounty) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Bounty not found",
+        });
       }
 
       // Fetch the doubts between the user and creator
@@ -1660,7 +1718,6 @@ export const BountyRoute = createTRPCRouter({
       });
 
       // Debugging purposes: check the retrieved bounty doubts
-
 
       // Map messages to extract content and role
       const messages = bountyDoubts.flatMap((doubt) =>

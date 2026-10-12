@@ -3,7 +3,15 @@
 import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/alert-dialog";
 import { Button } from "../components/button";
 
 /**
@@ -38,7 +46,11 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
-          <Button variant={destructive ? "destructive" : "default"} onClick={onConfirm} disabled={busy}>
+          <Button
+            variant={destructive ? "destructive" : "default"}
+            onClick={onConfirm}
+            disabled={busy}
+          >
             {busy && <Loader2 className="animate-spin" />}
             {confirmLabel}
           </Button>

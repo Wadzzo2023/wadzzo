@@ -20,81 +20,103 @@ export const creatorRouter = createTRPCRouter({
   getCreators: adminProcedure
     .input(z.object({ platformId: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
-    const creators = await ctx.db.creator.findMany({
-      select: {
-        platformId: true,
-        platform: { select: { name: true } },
-        id: true,
-        name: true,
-        profileUrl: true,
-        joinedAt: true,
-        approved: true,
-        extraFields: true,
-        customPageAssetCodeIssuer: true,
-        vanityURL: true,
-        pageAsset: { select: { code: true, thumbnail: true, issuer: true } },
-        _count: { select: { followers: true, LocationGroup: true, posts: true } },
-      },
-      where: { aprovalSend: true, ...platformScope(ctx, input?.platformId) },
-      orderBy: { joinedAt: "desc" },
-    });
-    return creators;
-  }),
+      const creators = await ctx.db.creator.findMany({
+        select: {
+          platformId: true,
+          platform: { select: { name: true } },
+          id: true,
+          name: true,
+          profileUrl: true,
+          joinedAt: true,
+          approved: true,
+          extraFields: true,
+          customPageAssetCodeIssuer: true,
+          vanityURL: true,
+          pageAsset: { select: { code: true, thumbnail: true, issuer: true } },
+          _count: {
+            select: { followers: true, LocationGroup: true, posts: true },
+          },
+        },
+        where: { aprovalSend: true, ...platformScope(ctx, input?.platformId) },
+        orderBy: { joinedAt: "desc" },
+      });
+      return creators;
+    }),
 
   // One brand for the admin detail page. Explicit fields: no storage or
   // issuer secrets ever leave the server.
-  getCreator: adminProcedure
-    .input(z.string())
-    .query(async ({ ctx, input }) => {
-      await assertCreatorInScope(ctx, input);
-      const creator = await ctx.db.creator.findUniqueOrThrow({
-        where: { id: input },
-        select: {
-          id: true,
-          platformId: true,
-          platform: { select: { name: true } },
-          name: true,
-          bio: true,
-          profileUrl: true,
-          coverUrl: true,
-          vanityURL: true,
-          joinedAt: true,
-          approved: true,
-          aprovalSend: true,
-          extraFields: true,
-          storagePub: true,
-          customPageAssetCodeIssuer: true,
-          user: { select: { email: true } },
-          pageAsset: { select: { code: true, issuer: true, thumbnail: true, price: true, priceUSD: true } },
-          _count: { select: { followers: true, posts: true, Bounty: true, LocationGroup: true, hotspots: true, assets: true } },
-          LocationGroup: {
-            orderBy: { createdAt: "desc" },
-            take: 8,
-            select: {
-              id: true,
-              title: true,
-              image: true,
-              type: true,
-              startDate: true,
-              endDate: true,
-              approved: true,
-              _count: { select: { locations: true } },
-            },
+  getCreator: adminProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    await assertCreatorInScope(ctx, input);
+    const creator = await ctx.db.creator.findUniqueOrThrow({
+      where: { id: input },
+      select: {
+        id: true,
+        platformId: true,
+        platform: { select: { name: true } },
+        name: true,
+        bio: true,
+        profileUrl: true,
+        coverUrl: true,
+        vanityURL: true,
+        joinedAt: true,
+        approved: true,
+        aprovalSend: true,
+        extraFields: true,
+        storagePub: true,
+        customPageAssetCodeIssuer: true,
+        user: { select: { email: true } },
+        pageAsset: {
+          select: {
+            code: true,
+            issuer: true,
+            thumbnail: true,
+            price: true,
+            priceUSD: true,
           },
         },
-      });
-      const collected = await ctx.db.locationConsumer.count({ where: { location: { locationGroup: { creatorId: input } } } });
-      return { ...creator, collected };
-    }),
+        _count: {
+          select: {
+            followers: true,
+            posts: true,
+            Bounty: true,
+            LocationGroup: true,
+            hotspots: true,
+            assets: true,
+          },
+        },
+        LocationGroup: {
+          orderBy: { createdAt: "desc" },
+          take: 8,
+          select: {
+            id: true,
+            title: true,
+            image: true,
+            type: true,
+            startDate: true,
+            endDate: true,
+            approved: true,
+            _count: { select: { locations: true } },
+          },
+        },
+      },
+    });
+    const collected = await ctx.db.locationConsumer.count({
+      where: { location: { locationGroup: { creatorId: input } } },
+    });
+    return { ...creator, collected };
+  }),
 
-  deleteCreator: adminProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input }) => {
-      const platformId = await assertCreatorInScope(ctx, input);
-      const deleted = await ctx.db.creator.delete({ where: { id: input } });
-      await logAudit(ctx, { action: "brand.delete", entityType: "Creator", entityId: input, targetPlatformId: platformId });
-      return deleted;
-    }),
+  deleteCreator: adminProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+    const platformId = await assertCreatorInScope(ctx, input);
+    const deleted = await ctx.db.creator.delete({ where: { id: input } });
+    await logAudit(ctx, {
+      action: "brand.delete",
+      entityType: "Creator",
+      entityId: input,
+      targetPlatformId: platformId,
+    });
+    return deleted;
+  }),
 
   creatorAction: adminProcedure
     .input(
@@ -157,7 +179,12 @@ export const creatorRouter = createTRPCRouter({
           },
         });
       }
-      await logAudit(ctx, { action: `brand.${action}`, entityType: "Creator", entityId: creatorId, targetPlatformId: platformId });
+      await logAudit(ctx, {
+        action: `brand.${action}`,
+        entityType: "Creator",
+        entityId: creatorId,
+        targetPlatformId: platformId,
+      });
     }),
 
   creatorRequestXdr: adminProcedure
@@ -201,17 +228,15 @@ export const creatorRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
-  creatorIDfromVanityURL: creatorProcedure
-    .input(z.string())
-    .query(async ({ input, ctx }) => {
-      const creator = await ctx.db.creator.findUnique({
-        where: { vanityURL: input },
-        include: {
-          vanitySubscription: true,
-        },
-      });
-      return creator;
-    }),
+  creatorIDfromVanityURL: creatorProcedure.input(z.string()).query(async ({ input, ctx }) => {
+    const creator = await ctx.db.creator.findUnique({
+      where: { vanityURL: input },
+      include: {
+        vanitySubscription: true,
+      },
+    });
+    return creator;
+  }),
   updateNavPermission: adminProcedure
     .input(
       z.object({
@@ -232,9 +257,7 @@ export const creatorRouter = createTRPCRouter({
         meta: { navPermission: input.navPermission },
       });
 
-      const currentExtraFields = creatorExtraFiledsSchema.parse(
-        creator?.extraFields,
-      );
+      const currentExtraFields = creatorExtraFiledsSchema.parse(creator?.extraFields);
 
       return await ctx.db.creator.update({
         where: { id: input.creatorId },
@@ -246,5 +269,4 @@ export const creatorRouter = createTRPCRouter({
         },
       });
     }),
-
 });

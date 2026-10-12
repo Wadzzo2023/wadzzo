@@ -69,43 +69,64 @@ export const AnnouncementInput = z
   });
 
 async function creatorIdOf(db: Db, userId: string) {
-  const creator = await db.creator.findUnique({ where: { id: userId }, select: { id: true } });
+  const creator = await db.creator.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
   if (!creator) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Only brands can post events" });
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Only brands can post events",
+    });
   }
   return creator.id;
 }
 
 /** Linked pins and bounties must be the brand's own. */
-async function assertOwnLinks(
-  db: Db,
-  creatorId: string,
-  pinIds: string[],
-  bountyIds: number[],
-) {
+async function assertOwnLinks(db: Db, creatorId: string, pinIds: string[], bountyIds: number[]) {
   if (pinIds.length) {
-    const n = await db.locationGroup.count({ where: { id: { in: pinIds }, creatorId } });
+    const n = await db.locationGroup.count({
+      where: { id: { in: pinIds }, creatorId },
+    });
     if (n !== new Set(pinIds).size) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "You can only link your own pins" });
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "You can only link your own pins",
+      });
     }
   }
   if (bountyIds.length) {
-    const n = await db.bounty.count({ where: { id: { in: bountyIds }, creatorId } });
+    const n = await db.bounty.count({
+      where: { id: { in: bountyIds }, creatorId },
+    });
     if (n !== new Set(bountyIds).size) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "You can only link your own bounties" });
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "You can only link your own bounties",
+      });
     }
   }
 }
 
 async function ownEvent(db: Db, creatorId: string, id: string) {
-  const row = await db.creatorEvent.findFirst({ where: { id, creatorId }, select: { id: true } });
+  const row = await db.creatorEvent.findFirst({
+    where: { id, creatorId },
+    select: { id: true },
+  });
   if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
   return row;
 }
 
 async function ownAnnouncement(db: Db, creatorId: string, id: string) {
-  const row = await db.creatorAnnouncement.findFirst({ where: { id, creatorId }, select: { id: true } });
-  if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Announcement not found" });
+  const row = await db.creatorAnnouncement.findFirst({
+    where: { id, creatorId },
+    select: { id: true },
+  });
+  if (!row)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Announcement not found",
+    });
   return row;
 }
 
@@ -149,7 +170,10 @@ export const eventsRouter = createTRPCRouter({
       const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
       const now = new Date();
       return ctx.db.creatorEvent.findMany({
-        where: { creatorId, endDate: input.when === "upcoming" ? { gte: now } : { lt: now } },
+        where: {
+          creatorId,
+          endDate: input.when === "upcoming" ? { gte: now } : { lt: now },
+        },
         orderBy: { startDate: input.when === "upcoming" ? "asc" : "desc" },
         include: {
           pins: { select: { id: true, title: true } },
@@ -214,17 +238,15 @@ export const eventsRouter = createTRPCRouter({
       return { deleted: true };
     }),
 
-  attendees: creatorProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
-      await ownEvent(ctx.db, creatorId, input.id);
-      return ctx.db.eventRsvp.findMany({
-        where: { eventId: input.id },
-        orderBy: { createdAt: "asc" },
-        select: { id: true, createdAt: true, user: userSelect },
-      });
-    }),
+  attendees: creatorProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+    const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
+    await ownEvent(ctx.db, creatorId, input.id);
+    return ctx.db.eventRsvp.findMany({
+      where: { eventId: input.id },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, createdAt: true, user: userSelect },
+    });
+  }),
 
   /** Pickers for linking: the brand's own live pins and bounties. */
   linkOptions: creatorProcedure.query(async ({ ctx }) => {
@@ -260,7 +282,11 @@ export const eventsRouter = createTRPCRouter({
   createAnnouncement: creatorProcedure.input(AnnouncementInput).mutation(async ({ ctx, input }) => {
     const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
     return ctx.db.creatorAnnouncement.create({
-      data: { ...announcementData(input), creatorId, platformId: ctx.platform.id },
+      data: {
+        ...announcementData(input),
+        creatorId,
+        platformId: ctx.platform.id,
+      },
       select: { id: true },
     });
   }),
@@ -309,7 +335,12 @@ export const eventsRouter = createTRPCRouter({
         return ctx.db.eventComment.findMany({
           where: { eventId: input.id },
           orderBy: { createdAt: "desc" },
-          select: { id: true, content: true, createdAt: true, user: userSelect },
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            user: userSelect,
+          },
         });
       }
       await ownAnnouncement(ctx.db, creatorId, input.id);
@@ -321,7 +352,12 @@ export const eventsRouter = createTRPCRouter({
     }),
 
   deleteComment: creatorProcedure
-    .input(z.object({ kind: z.enum(["event", "announcement"]), commentId: z.string() }))
+    .input(
+      z.object({
+        kind: z.enum(["event", "announcement"]),
+        commentId: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
       const owned =
@@ -332,11 +368,17 @@ export const eventsRouter = createTRPCRouter({
           : await ctx.db.announcementComment.count({
               where: { id: input.commentId, announcement: { creatorId } },
             });
-      if (!owned) throw new TRPCError({ code: "NOT_FOUND", message: "Comment not found" });
+      if (!owned)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Comment not found",
+        });
       if (input.kind === "event") {
         await ctx.db.eventComment.delete({ where: { id: input.commentId } });
       } else {
-        await ctx.db.announcementComment.delete({ where: { id: input.commentId } });
+        await ctx.db.announcementComment.delete({
+          where: { id: input.commentId },
+        });
       }
       return { deleted: true };
     }),

@@ -1,591 +1,651 @@
-"use client"
+"use client";
 
-import { type ChangeEvent, useEffect, useRef, useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, FormProvider, type SubmitHandler, useForm, useFormContext } from "react-hook-form"
-import { z } from "zod"
-import toast from "react-hot-toast"
-import { Loader, MapPin, ImageIcon, Settings, CheckCircle, Coins, Wand2, Calendar, Tag, Plus } from "lucide-react"
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Controller,
+  FormProvider,
+  type SubmitHandler,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
+import { z } from "zod";
+import toast from "react-hot-toast";
+import {
+  Loader,
+  MapPin,
+  ImageIcon,
+  Settings,
+  CheckCircle,
+  Coins,
+  Wand2,
+  Calendar,
+  Tag,
+  Plus,
+} from "lucide-react";
 import { Input } from "@wadzzo/ui/components/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { Button } from "@wadzzo/ui/components/button";
-import { useCreatorStorageAcc } from "~/lib/state/wallete/stellar-balances"
-import { api } from "~/utils/api"
-import { BADWORDS } from "~/utils/banned-word"
+import { useCreatorStorageAcc } from "~/lib/state/wallete/stellar-balances";
+import { api } from "~/utils/api";
+import { BADWORDS } from "~/utils/banned-word";
 import { PinType } from "@wadzzo/db";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@wadzzo/ui/components/card";
 import { Badge } from "@wadzzo/ui/components/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
-import { Dropzone } from "~/ui/upload/dropzone"
-import { AiImageButton } from "~/ui/ai/ai-image"
+import { Dropzone } from "~/ui/upload/dropzone";
+import { AiImageButton } from "~/ui/ai/ai-image";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { LocationAddressDisplay } from "~/components/map/address-display"
+import { LocationAddressDisplay } from "~/components/map/address-display";
 
 // Define types for assets and pins
 export type AssetType = {
-    id: number
-    code: string
-    issuer: string
-    thumbnail: string
-}
+  id: number;
+  code: string;
+  issuer: string;
+  thumbnail: string;
+};
 
-export const PAGE_ASSET_NUM = -10
+export const PAGE_ASSET_NUM = -10;
 /** Stands in for "no cap": an open-edition item can be minted as long as fans claim it. */
-export const OPEN_EDITION = 1_000_000
-export const NO_ASSET = -99
+export const OPEN_EDITION = 1_000_000;
+export const NO_ASSET = -99;
 
 export const createPinFormSchema = z.object({
-    lat: z.number().min(-180).max(180),
-    lng: z.number().min(-180).max(180),
-    description: z.string().optional(),
-    title: z
-        .string()
-        .min(3, "Title must be at least 3 characters long")
-        .refine(
-            (value) => {
-                return !BADWORDS.some((word) => value.toLowerCase().includes(word.toLowerCase()))
-            },
-            {
-                message: "Input contains banned words.",
-            },
-        ),
-    image: z.url().optional(),
-    startDate: z.date(),
-    endDate: z.date().min(new Date(new Date().setHours(0, 0, 0, 0)), "End date cannot be in the past"),
-    url: z.url("Please enter a valid URL").optional(),
-    autoCollect: z.boolean(),
-    token: z.number().optional(),
-    tokenAmount: z.number().nonnegative().optional(),
-    pinNumber: z.number().nonnegative().min(1, "Number of pins must be at least 1"),
-    radius: z.number().nonnegative("Radius cannot be negative").default(50), // Set default radius to 50
-    pinCollectionLimit: z.number().min(1, "Collection limit must be greater than 0"),
-    tier: z.string().optional(),
-    multiPin: z.boolean().default(false),
-    type: z.enum(PinType).default(PinType.OTHER),
-    tags: z.array(z.string()).default([]),
-
-})
-export type CreatePinType = z.infer<typeof createPinFormSchema>
+  lat: z.number().min(-180).max(180),
+  lng: z.number().min(-180).max(180),
+  description: z.string().optional(),
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters long")
+    .refine(
+      (value) => {
+        return !BADWORDS.some((word) => value.toLowerCase().includes(word.toLowerCase()));
+      },
+      {
+        message: "Input contains banned words.",
+      },
+    ),
+  image: z.url().optional(),
+  startDate: z.date(),
+  endDate: z
+    .date()
+    .min(new Date(new Date().setHours(0, 0, 0, 0)), "End date cannot be in the past"),
+  url: z.url("Please enter a valid URL").optional(),
+  autoCollect: z.boolean(),
+  token: z.number().optional(),
+  tokenAmount: z.number().nonnegative().optional(),
+  pinNumber: z.number().nonnegative().min(1, "Number of pins must be at least 1"),
+  radius: z.number().nonnegative("Radius cannot be negative").default(50), // Set default radius to 50
+  pinCollectionLimit: z.number().min(1, "Collection limit must be greater than 0"),
+  tier: z.string().optional(),
+  multiPin: z.boolean().default(false),
+  type: z.enum(PinType).default(PinType.OTHER),
+  tags: z.array(z.string()).default([]),
+});
+export type CreatePinType = z.infer<typeof createPinFormSchema>;
 
 export function CollectionInputs({
+  setSelectedToken,
+  setRemainingBalance,
+  assetsQuery,
 
-    setSelectedToken,
-    setRemainingBalance,
-    assetsQuery,
-
-    selectedToken,
-    remainingBalance,
+  selectedToken,
+  remainingBalance,
 }: {
-    setSelectedToken: (asset: (AssetType & { bal: number } | undefined)) => void
-    setRemainingBalance: (balance: number) => void
-    assetsQuery: {
-        data?: {
-            pageAsset?: {
-                code: string;
-                creatorId: string;
-                issuer: string;
-                thumbnail: string | null;
-            }
-            shopAsset: AssetType[]
-        }
-    }
+  setSelectedToken: (asset: (AssetType & { bal: number }) | undefined) => void;
+  setRemainingBalance: (balance: number) => void;
+  assetsQuery: {
+    data?: {
+      pageAsset?: {
+        code: string;
+        creatorId: string;
+        issuer: string;
+        thumbnail: string | null;
+      };
+      shopAsset: AssetType[];
+    };
+  };
 
-    selectedToken: (AssetType & { bal: number } | undefined)
-    remainingBalance: number
+  selectedToken: (AssetType & { bal: number }) | undefined;
+  remainingBalance: number;
 }) {
-    const { control, register, formState: { errors } } = useFormContext<z.infer<typeof createPinFormSchema>>()
-    const { getAssetBalance } = useCreatorStorageAcc()
-    // Items are minted when a fan claims them, so what a pin can hand out is the stock plus what the item's limit still lets us mint.
-    const items = api.fan.gift.items.useQuery(undefined, { retry: false })
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<z.infer<typeof createPinFormSchema>>();
+  const { getAssetBalance } = useCreatorStorageAcc();
+  // Items are minted when a fan claims them, so what a pin can hand out is the stock plus what the item's limit still lets us mint.
+  const items = api.fan.gift.items.useQuery(undefined, { retry: false });
 
-    return (
-        <div className="space-y-4">
-            <div className="space-y-2">
-                <Label className="text-sm font-medium">Choose Token</Label>
-                <Controller
-                    name="token"
-                    control={control}
-                    render={({ field }) => (
-                        <Select
-                            onValueChange={(value) => {
-                                const selectedAssetId = Number(value)
-                                field.onChange(selectedAssetId === NO_ASSET ? undefined : selectedAssetId)
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Choose Token</Label>
+        <Controller
+          name="token"
+          control={control}
+          render={({ field }) => (
+            <Select
+              onValueChange={(value) => {
+                const selectedAssetId = Number(value);
+                field.onChange(selectedAssetId === NO_ASSET ? undefined : selectedAssetId);
 
-                                if (selectedAssetId === NO_ASSET) {
-                                    setSelectedToken(undefined)
-                                    setRemainingBalance(0)
-                                    return
-                                }
+                if (selectedAssetId === NO_ASSET) {
+                  setSelectedToken(undefined);
+                  setRemainingBalance(0);
+                  return;
+                }
 
-                                if (selectedAssetId === PAGE_ASSET_NUM) {
-                                    const pageAsset = assetsQuery.data?.pageAsset
-                                    if (pageAsset) {
-                                        const bal = getAssetBalance({
-                                            code: pageAsset.code,
-                                            issuer: pageAsset.issuer,
+                if (selectedAssetId === PAGE_ASSET_NUM) {
+                  const pageAsset = assetsQuery.data?.pageAsset;
+                  if (pageAsset) {
+                    const bal = getAssetBalance({
+                      code: pageAsset.code,
+                      issuer: pageAsset.issuer,
+                    });
+                    setSelectedToken({
+                      bal,
+                      code: pageAsset.code,
+                      issuer: pageAsset.issuer,
+                      id: PAGE_ASSET_NUM,
+                      thumbnail: pageAsset.thumbnail ?? "",
+                    });
+                    setRemainingBalance(bal);
+                  } else {
+                    toast.error("No page asset found");
+                  }
+                  return;
+                }
 
-                                        })
-                                        setSelectedToken({
-                                            bal,
-                                            code: pageAsset.code,
-                                            issuer: pageAsset.issuer,
-                                            id: PAGE_ASSET_NUM,
-                                            thumbnail: pageAsset.thumbnail ?? "",
-                                        })
-                                        setRemainingBalance(bal)
-                                    } else {
-                                        toast.error("No page asset found")
-                                    }
-                                    return
-                                }
-
-                                const selectedAsset = assetsQuery.data?.shopAsset.find(
-                                    (asset: AssetType) => asset.id === selectedAssetId,
-                                )
-                                if (selectedAsset) {
-                                    const item = items.data?.find((i) => i.id === selectedAsset.id)
-                                    const bal = item
-                                        ? item.mintable === null
-                                            ? OPEN_EDITION
-                                            : item.stock + item.mintable
-                                        : getAssetBalance({
-                                              code: selectedAsset.code,
-                                              issuer: selectedAsset.issuer,
-                                          })
-                                    setSelectedToken({ ...selectedAsset, bal: bal })
-                                    setRemainingBalance(bal)
-                                }
-                            }}
-                            defaultValue={NO_ASSET.toString()}
-                        >
-                            <SelectTrigger className="bg-card border-border">
-                                <SelectValue placeholder="Choose Token" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={NO_ASSET.toString()}>Pin (No asset)</SelectItem>
-                                {assetsQuery.data?.pageAsset && (
-                                    <SelectItem value={PAGE_ASSET_NUM.toString()}>
-                                        {assetsQuery.data.pageAsset.code} - Page Asset
-                                    </SelectItem>
-                                )}
-                                {assetsQuery.data?.shopAsset?.map((asset: AssetType) => (
-                                    <SelectItem key={asset.id} value={asset.id.toString()}>
-                                        {asset.code}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="radius" className="text-sm font-medium">
-                        Radius (meters)
-                    </Label>
-                    <Input
-                        type="number"
-                        id="radius"
-                        min={0}
-                        {...register("radius", { valueAsNumber: true })}
-                        className="bg-card border-border focus:ring-ring"
-                        placeholder="50"
-                    />
-                    {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="pinNumber" className="text-sm font-medium">
-                        Number of Pins
-                    </Label>
-                    <Input
-                        type="number"
-                        id="pinNumber"
-                        min={1}
-                        {...register("pinNumber", { valueAsNumber: true })}
-                        className="bg-card border-border focus:ring-ring"
-                        placeholder="1"
-                    />
-                    {errors.pinNumber && <p className="text-destructive text-sm">{errors.pinNumber.message}</p>}
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
-                    Pin Collection Limit
-                </Label>
-                <Input
-                    type="number"
-                    id="pinCollectionLimit"
-                    min={0}
-                    {...register("pinCollectionLimit", { valueAsNumber: true })}
-                    className="bg-card border-border focus:ring-ring"
-                    placeholder="Enter collection limit"
-                />
-                {selectedToken && (
-                    <div className="text-xs space-y-1 p-2 bg-muted rounded">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Available Balance:</span>
-                            <span className="font-medium">{selectedToken.bal}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Remaining Balance:</span>
-                            <span className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-accent"}`}>
-                                {remainingBalance}
-                            </span>
-                        </div>
-                    </div>
+                const selectedAsset = assetsQuery.data?.shopAsset.find(
+                  (asset: AssetType) => asset.id === selectedAssetId,
+                );
+                if (selectedAsset) {
+                  const item = items.data?.find((i) => i.id === selectedAsset.id);
+                  const bal = item
+                    ? item.mintable === null
+                      ? OPEN_EDITION
+                      : item.stock + item.mintable
+                    : getAssetBalance({
+                        code: selectedAsset.code,
+                        issuer: selectedAsset.issuer,
+                      });
+                  setSelectedToken({ ...selectedAsset, bal: bal });
+                  setRemainingBalance(bal);
+                }
+              }}
+              defaultValue={NO_ASSET.toString()}
+            >
+              <SelectTrigger className="bg-card border-border">
+                <SelectValue placeholder="Choose Token" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_ASSET.toString()}>Pin (No asset)</SelectItem>
+                {assetsQuery.data?.pageAsset && (
+                  <SelectItem value={PAGE_ASSET_NUM.toString()}>
+                    {assetsQuery.data.pageAsset.code} - Page Asset
+                  </SelectItem>
                 )}
-                {selectedToken && remainingBalance < 0 && (
-                    <p className="text-destructive text-sm">Insufficient token balance</p>
-                )}
-                {errors.pinCollectionLimit && <p className="text-destructive text-sm">{errors.pinCollectionLimit.message}</p>}
-            </div>
+                {assetsQuery.data?.shopAsset?.map((asset: AssetType) => (
+                  <SelectItem key={asset.id} value={asset.id.toString()}>
+                    {asset.code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="radius" className="text-sm font-medium">
+            Radius (meters)
+          </Label>
+          <Input
+            type="number"
+            id="radius"
+            min={0}
+            {...register("radius", { valueAsNumber: true })}
+            className="bg-card border-border focus:ring-ring"
+            placeholder="50"
+          />
+          {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
         </div>
-    )
+
+        <div className="space-y-2">
+          <Label htmlFor="pinNumber" className="text-sm font-medium">
+            Number of Pins
+          </Label>
+          <Input
+            type="number"
+            id="pinNumber"
+            min={1}
+            {...register("pinNumber", { valueAsNumber: true })}
+            className="bg-card border-border focus:ring-ring"
+            placeholder="1"
+          />
+          {errors.pinNumber && (
+            <p className="text-destructive text-sm">{errors.pinNumber.message}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
+          Pin Collection Limit
+        </Label>
+        <Input
+          type="number"
+          id="pinCollectionLimit"
+          min={0}
+          {...register("pinCollectionLimit", { valueAsNumber: true })}
+          className="bg-card border-border focus:ring-ring"
+          placeholder="Enter collection limit"
+        />
+        {selectedToken && (
+          <div className="bg-muted space-y-1 rounded p-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Available Balance:</span>
+              <span className="font-medium">{selectedToken.bal}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Remaining Balance:</span>
+              <span
+                className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-accent"}`}
+              >
+                {remainingBalance}
+              </span>
+            </div>
+          </div>
+        )}
+        {selectedToken && remainingBalance < 0 && (
+          <p className="text-destructive text-sm">Insufficient token balance</p>
+        )}
+        {errors.pinCollectionLimit && (
+          <p className="text-destructive text-sm">{errors.pinCollectionLimit.message}</p>
+        )}
+      </div>
+    </div>
+  );
 }
 /** Pin cover image: a wide drag-and-drop area with preview, plus "Generate" with AI. */
 export function ImageUploadField({
-    value,
-    onChange,
-    ai,
+  value,
+  onChange,
+  ai,
 }: {
-    value?: string
-    onChange: (url: string | undefined) => void
-    ai?: { form: "pin" | "hotspot"; suggestedPrompt: string }
+  value?: string;
+  onChange: (url: string | undefined) => void;
+  ai?: { form: "pin" | "hotspot"; suggestedPrompt: string };
 }) {
-    return (
-        <div className="space-y-2">
-            <div className="flex min-h-7 items-center justify-between gap-2">
-                <Label className="text-sm font-medium">Cover image</Label>
-                {ai && (
-                    <AiImageButton form={ai.form} aspect="wide" className="h-7 px-2.5 text-xs" label="Generate" suggestedPrompt={ai.suggestedPrompt} onImage={(url) => onChange(url)} />
-                )}
-            </div>
-            <Dropzone endpoint="imageUploader" shape="wide" value={value} onChange={(url) => onChange(url)} label="Drop the pin's cover image" />
-        </div>
-    )
+  return (
+    <div className="space-y-2">
+      <div className="flex min-h-7 items-center justify-between gap-2">
+        <Label className="text-sm font-medium">Cover image</Label>
+        {ai && (
+          <AiImageButton
+            form={ai.form}
+            aspect="wide"
+            className="h-7 px-2.5 text-xs"
+            label="Generate"
+            suggestedPrompt={ai.suggestedPrompt}
+            onImage={(url) => onChange(url)}
+          />
+        )}
+      </div>
+      <Dropzone
+        endpoint="imageUploader"
+        shape="wide"
+        value={value}
+        onChange={(url) => onChange(url)}
+        label="Drop the pin's cover image"
+      />
+    </div>
+  );
 }
-
 
 export function PinTypeToggles() {
-    const { control } = useFormContext<CreatePinType>()
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-4">
-                <Settings className="w-4 h-4 text-muted-foreground" />
-                <h4 className="text-sm font-semibold text-foreground">Advanced Settings</h4>
+  const { control } = useFormContext<CreatePinType>();
+  return (
+    <div className="space-y-4">
+      <div className="mb-4 flex items-center space-x-2">
+        <Settings className="text-muted-foreground h-4 w-4" />
+        <h4 className="text-foreground text-sm font-semibold">Advanced Settings</h4>
+      </div>
+
+      <div className="space-y-3">
+        <Card className="border-border hover:border-info/30 border transition-colors duration-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <Label
+                  htmlFor="multiPin"
+                  className="text-foreground cursor-pointer text-sm font-medium"
+                >
+                  Multi Pin
+                </Label>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Allow multiple pins to be collected from this location
+                </p>
+              </div>
+              <Controller
+                name="multiPin"
+                control={control} // Fixed to use control instead of register
+                render={({ field }) => (
+                  <Switch id="multiPin" checked={field.value} onCheckedChange={field.onChange} />
+                )}
+              />
             </div>
-
-            <div className="space-y-3">
-
-
-                <Card className="border border-border hover:border-info/30 transition-colors duration-200">
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <Label htmlFor="multiPin" className="text-sm font-medium cursor-pointer text-foreground">
-                                    Multi Pin
-                                </Label>
-                                <p className="text-xs text-muted-foreground mt-1">Allow multiple pins to be collected from this location</p>
-                            </div>
-                            <Controller
-                                name="multiPin"
-                                control={control} // Fixed to use control instead of register
-                                render={({ field }) => <Switch id="multiPin" checked={field.value} onCheckedChange={field.onChange} />}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-    )
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }
 export function TiersOptions({ creatorId }: { creatorId?: string } = {}) {
-    const tiersQuery = api.fan.member.getAllMembership.useQuery({ creatorId })
-    const { control } = useFormContext<CreatePinType>()
-    if (tiersQuery.isLoading) return <div className="skeleton h-10 w-20"></div>;
-    if (tiersQuery.data) {
-        return (
-            <div className="space-y-2">
-                <Label className="text-sm font-medium">Choose Tier</Label>
-                <Controller
-                    name="tier"
-                    control={control}
-                    render={({ field }) => (
-                        <Select
-                            onValueChange={(value) => {
-                                field.onChange(value)
-                            }}
-                        >
-                            <SelectTrigger className="bg-card border-border">
-                                <SelectValue placeholder="Choose Tier" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="public">Public</SelectItem>
-                                <SelectItem value="private">Only Followers</SelectItem>
-                                {tiersQuery.data.map((model) => (
-
-                                    <SelectItem key={model.id} value={model.id.toString()}>
-                                        {`${model.name} : ${model.price} ${model.creator.pageAsset?.code}`}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
-            </div>
-            // <div>
-            //     <h4 className="text-sm font-semibold text-foreground">Tier Settings</h4>
-            //     <Controller
-            //         name="tier"
-            //         control={control}
-            //         render={({ field }) => (
-            //             <select {...field} className="select select-bordered ">
-            //                 <option disabled>Choose Tier</option>
-            //                 <option value="public">Public</option>
-            //                 <option value="private">Only Followers</option>
-            //                 {tiersQuery.data.map((model) => (
-            //                     <option
-            //                         key={model.id}
-            //                         value={model.id}
-            //                     >{`${model.name} : ${model.price} ${model.creator.pageAsset?.code}`}</option>
-            //                 ))}
-            //             </select>
-            //         )}
-            //     />
-            // </div>
-        );
-    }
+  const tiersQuery = api.fan.member.getAllMembership.useQuery({ creatorId });
+  const { control } = useFormContext<CreatePinType>();
+  if (tiersQuery.isLoading) return <div className="skeleton h-10 w-20"></div>;
+  if (tiersQuery.data) {
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Choose Tier</Label>
+        <Controller
+          name="tier"
+          control={control}
+          render={({ field }) => (
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+              }}
+            >
+              <SelectTrigger className="bg-card border-border">
+                <SelectValue placeholder="Choose Tier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="private">Only Followers</SelectItem>
+                {tiersQuery.data.map((model) => (
+                  <SelectItem key={model.id} value={model.id.toString()}>
+                    {`${model.name} : ${model.price} ${model.creator.pageAsset?.code}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+      // <div>
+      //     <h4 className="text-sm font-semibold text-foreground">Tier Settings</h4>
+      //     <Controller
+      //         name="tier"
+      //         control={control}
+      //         render={({ field }) => (
+      //             <select {...field} className="select select-bordered ">
+      //                 <option disabled>Choose Tier</option>
+      //                 <option value="public">Public</option>
+      //                 <option value="private">Only Followers</option>
+      //                 {tiersQuery.data.map((model) => (
+      //                     <option
+      //                         key={model.id}
+      //                         value={model.id}
+      //                     >{`${model.name} : ${model.price} ${model.creator.pageAsset?.code}`}</option>
+      //                 ))}
+      //             </select>
+      //         )}
+      //     />
+      // </div>
+    );
+  }
 }
 
 export function EnhanceDescriptionButton({ className }: { className?: string }) {
-    const { watch, setValue } = useFormContext<z.infer<typeof createPinFormSchema>>()
-    const description = watch("description")
-    const [isLoading, setIsLoading] = useState(false)
-    const enhanceDescriptionMutation = api.pinAgent.enhanceDescription.useMutation({
-        onSuccess: (data) => {
-            setValue("description", data.enhancedDescription)
-            toast.success("Description enhanced!")
-        },
-        onError: (err) => {
-            toast.error(err.message || "Failed to enhance description")
-        },
-    })
+  const { watch, setValue } = useFormContext<z.infer<typeof createPinFormSchema>>();
+  const description = watch("description");
+  const [isLoading, setIsLoading] = useState(false);
+  const enhanceDescriptionMutation = api.pinAgent.enhanceDescription.useMutation({
+    onSuccess: (data) => {
+      setValue("description", data.enhancedDescription);
+      toast.success("Description enhanced!");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to enhance description");
+    },
+  });
 
-    const handleEnhance = async () => {
-        if (!description || description.trim().length === 0) {
-            toast.error("Please enter a description first")
-            return
-        }
-
-        setIsLoading(true)
-        enhanceDescriptionMutation.mutate({
-            description: description.trim(),
-        })
-        setIsLoading(false)
+  const handleEnhance = async () => {
+    if (!description || description.trim().length === 0) {
+      toast.error("Please enter a description first");
+      return;
     }
 
-    return (
-        <Button
-            type="button"
+    setIsLoading(true);
+    enhanceDescriptionMutation.mutate({
+      description: description.trim(),
+    });
+    setIsLoading(false);
+  };
 
-            size="sm"
-            onClick={handleEnhance}
-            disabled={!description || description.trim().length === 0 || enhanceDescriptionMutation.isPending}
-            className={`${className} h-6 w-6 px-2 text-xs gap-1 hover:bg-primary/10  rounded-full`}
-        >
-            {enhanceDescriptionMutation.isPending ? (
-                <>
-                    <Loader className="w-3 h-3 animate-spin" />
+  return (
+    <Button
+      type="button"
 
-                </>
-            ) : (
-                <>
-                    <Wand2 className="w-3 h-3" />
-
-                </>
-            )}
-        </Button>
-    )
+      size="sm"
+      onClick={handleEnhance}
+      disabled={
+        !description || description.trim().length === 0 || enhanceDescriptionMutation.isPending
+      }
+      className={`${className} hover:bg-primary/10 h-6 w-6 gap-1 rounded-full px-2 text-xs`}
+    >
+      {enhanceDescriptionMutation.isPending ? (
+        <>
+          <Loader className="h-3 w-3 animate-spin" />
+        </>
+      ) : (
+        <>
+          <Wand2 className="h-3 w-3" />
+        </>
+      )}
+    </Button>
+  );
 }
 export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
-    const { watch, getValues } = useFormContext<CreatePinType>()
-    const title = watch("title")
-    const description = watch("description")
-    const type = watch("type")
+  const { watch, getValues } = useFormContext<CreatePinType>();
+  const title = watch("title");
+  const description = watch("description");
+  const type = watch("type");
 
-    const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
-    const [newTagInput, setNewTagInput] = useState("")
-    const [aiTags, setAiTags] = useState<string[]>([]) // AI suggested labels
-    // "Fill with AI" hands its tag ideas in here as one-click suggestions.
-    // (adjusted during render when a new set of suggestions arrives)
-    const [seenSuggestions, setSeenSuggestions] = useState(suggestions)
-    if (seenSuggestions !== suggestions) {
-        setSeenSuggestions(suggestions)
-        if (suggestions?.length) setAiTags(suggestions)
-    }
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [aiTags, setAiTags] = useState<string[]>([]); // AI suggested labels
+  // "Fill with AI" hands its tag ideas in here as one-click suggestions.
+  // (adjusted during render when a new set of suggestions arrives)
+  const [seenSuggestions, setSeenSuggestions] = useState(suggestions);
+  if (seenSuggestions !== suggestions) {
+    setSeenSuggestions(suggestions);
+    if (suggestions?.length) setAiTags(suggestions);
+  }
 
-    const myTagsQuery = api.tag.myTags.useQuery({})
+  const myTagsQuery = api.tag.myTags.useQuery({});
 
-    const createTagM = api.tag.create.useMutation({
-        onSuccess: () => { void myTagsQuery.refetch() },
-        onError: (err) => toast.error(err.message),
-    })
+  const createTagM = api.tag.create.useMutation({
+    onSuccess: () => {
+      void myTagsQuery.refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
-    const aiGenerateM = api.tag.aiGenerate.useMutation({
-        onSuccess: (data) => {
-            setAiTags(data.tags)
-            toast.success("AI tags generated!")
+  const aiGenerateM = api.tag.aiGenerate.useMutation({
+    onSuccess: (data) => {
+      setAiTags(data.tags);
+      toast.success("AI tags generated!");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleCreateTag = () => {
+    const label = newTagInput.trim();
+    if (!label) return;
+    createTagM.mutate(
+      { label },
+      {
+        onSuccess: (tag) => {
+          setSelectedTagIds((prev) => [...prev, tag.id]);
+          setNewTagInput("");
         },
-        onError: (err) => toast.error(err.message),
-    })
+      },
+    );
+  };
 
-    const handleCreateTag = () => {
-        const label = newTagInput.trim()
-        if (!label) return
-        createTagM.mutate({ label }, {
-            onSuccess: (tag) => {
-                setSelectedTagIds((prev) => [...prev, tag.id])
-                setNewTagInput("")
-            },
-        })
-    }
+  const handleAiGenerate = () => {
+    aiGenerateM.mutate({
+      title: title ?? "",
+      description: description ?? "",
+      type: type ?? "OTHER",
+      latitude: getValues("lat"),
+      longitude: getValues("lng"),
+    });
+  };
 
-    const handleAiGenerate = () => {
-        aiGenerateM.mutate({
-            title: title ?? "",
-            description: description ?? "",
-            type: type ?? "OTHER",
-            latitude: getValues("lat"),
-            longitude: getValues("lng"),
-        })
-    }
+  const handleAddAiTag = (label: string) => {
+    createTagM.mutate(
+      { label },
+      {
+        onSuccess: (tag) => {
+          setSelectedTagIds((prev) => (prev.includes(tag.id) ? prev : [...prev, tag.id]));
+          setAiTags((prev) => prev.filter((t) => t !== label));
+        },
+      },
+    );
+  };
 
-    const handleAddAiTag = (label: string) => {
-        createTagM.mutate({ label }, {
-            onSuccess: (tag) => {
-                setSelectedTagIds((prev) =>
-                    prev.includes(tag.id) ? prev : [...prev, tag.id]
-                )
-                setAiTags((prev) => prev.filter((t) => t !== label))
-            },
-        })
-    }
+  const toggleTag = (id: string) => {
+    setSelectedTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+  };
 
-    const toggleTag = (id: string) => {
-        setSelectedTagIds((prev) =>
-            prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
-        )
-    }
+  // sync to form
+  const { setValue } = useFormContext<CreatePinType>();
+  useEffect(() => {
+    setValue("tags", selectedTagIds);
+  }, [selectedTagIds, setValue]);
 
-    // sync to form
-    const { setValue } = useFormContext<CreatePinType>()
-    useEffect(() => {
-        setValue("tags", selectedTagIds)
-    }, [selectedTagIds, setValue])
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Tag className="text-primary h-5 w-5" />
+          Tags
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <div className="flex flex-1 items-center gap-2">
+            <Input
+              placeholder="New tag name..."
+              value={newTagInput}
+              onChange={(e) => setNewTagInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
+              className="bg-card border-border"
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleCreateTag}
+              disabled={!newTagInput.trim() || createTagM.isPending}
+            >
+              {createTagM.isPending ? (
+                <Loader className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+              New Tag
+            </Button>
+          </div>
 
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <Tag className="w-5 h-5 text-primary" />
-                    Tags
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleAiGenerate}
+            disabled={!title || aiGenerateM.isPending}
+            className="border-primary/40 text-primary hover:bg-primary/10"
+          >
+            {aiGenerateM.isPending ? (
+              <Loader className="mr-1 h-3 w-3 animate-spin" />
+            ) : (
+              <Wand2 className="mr-1 h-3 w-3" />
+            )}
+            AI Tags
+          </Button>
+        </div>
 
-                {/* Action buttons */}
-                <div className="flex gap-2">
-                    <div className="flex items-center gap-2 flex-1">
-                        <Input
-                            placeholder="New tag name..."
-                            value={newTagInput}
-                            onChange={(e) => setNewTagInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
-                            className="bg-card border-border"
-                        />
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={handleCreateTag}
-                            disabled={!newTagInput.trim() || createTagM.isPending}
-                        >
-                            {createTagM.isPending ? <Loader className="w-3 h-3 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            New Tag
-                        </Button>
-                    </div>
+        {/* AI suggested tags */}
+        {aiTags.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium">
+              AI Suggestions — click to add:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {aiTags.map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleAddAiTag(label)}
+                  className="border-primary/50 text-primary hover:bg-primary/10 flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-xs transition-colors"
+                >
+                  <Plus className="h-3 w-3" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={handleAiGenerate}
-                        disabled={!title || aiGenerateM.isPending}
-                        className="border-primary/40 text-primary hover:bg-primary/10"
-                    >
-                        {aiGenerateM.isPending
-                            ? <Loader className="w-3 h-3 animate-spin mr-1" />
-                            : <Wand2 className="w-3 h-3 mr-1" />}
-                        AI Tags
-                    </Button>
-                </div>
+        {/* Creator's existing tags */}
+        {myTagsQuery.isLoading && <p className="text-muted-foreground text-xs">Loading tags...</p>}
+        {myTagsQuery.data && myTagsQuery.data.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium">Your tags:</p>
+            <div className="flex flex-wrap gap-2">
+              {myTagsQuery.data.map((tag) => {
+                const selected = selectedTagIds.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleTag(tag.id)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                      selected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {selected && <span className="mr-1">✓</span>}
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-                {/* AI suggested tags */}
-                {aiTags.length > 0 && (
-                    <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground font-medium">AI Suggestions — click to add:</p>
-                        <div className="flex flex-wrap gap-2">
-                            {aiTags.map((label) => (
-                                <button
-                                    key={label}
-                                    type="button"
-                                    onClick={() => handleAddAiTag(label)}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-full border border-dashed border-primary/50 text-primary text-xs hover:bg-primary/10 transition-colors"
-                                >
-                                    <Plus className="w-3 h-3" />
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Creator's existing tags */}
-                {myTagsQuery.isLoading && <p className="text-xs text-muted-foreground">Loading tags...</p>}
-                {myTagsQuery.data && myTagsQuery.data.length > 0 && (
-                    <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground font-medium">Your tags:</p>
-                        <div className="flex flex-wrap gap-2">
-                            {myTagsQuery.data.map((tag) => {
-                                const selected = selectedTagIds.includes(tag.id)
-                                return (
-                                    <button
-                                        key={tag.id}
-                                        type="button"
-                                        onClick={() => toggleTag(tag.id)}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${selected
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "bg-muted text-muted-foreground border-border hover:border-primary/50"
-                                            }`}
-                                    >
-                                        {selected && <span className="mr-1">✓</span>}
-                                        {tag.label}
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {selectedTagIds.length > 0 && (
-                    <p className="text-xs text-muted-foreground">{selectedTagIds.length} tag(s) selected</p>
-                )}
-            </CardContent>
-        </Card>
-    )
+        {selectedTagIds.length > 0 && (
+          <p className="text-muted-foreground text-xs">{selectedTagIds.length} tag(s) selected</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

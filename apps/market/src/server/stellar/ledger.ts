@@ -14,7 +14,13 @@ import { platformToUsd } from "@wadzzo/stellar/prices";
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Types that hand a copy to `buyerId` and so create an ownership record. */
-const DELIVERS = new Set<AssetTransaction["type"]>(["PURCHASE", "RESALE_PURCHASE", "CLAIM", "GIFT", "GIFT_CLAIM"]);
+const DELIVERS = new Set<AssetTransaction["type"]>([
+  "PURCHASE",
+  "RESALE_PURCHASE",
+  "CLAIM",
+  "GIFT",
+  "GIFT_CLAIM",
+]);
 
 /**
  * Settles a PENDING transaction from what Horizon says about its hash:
@@ -50,17 +56,30 @@ async function applySuccess(db: Db, row: AssetTransaction) {
     applied = true;
 
     if (row.assetId && row.minted > 0) {
-      await tx.asset.update({ where: { id: row.assetId }, data: { mintedCount: { increment: row.minted } } });
+      await tx.asset.update({
+        where: { id: row.assetId },
+        data: { mintedCount: { increment: row.minted } },
+      });
     }
     if (row.assetId && row.buyerId && DELIVERS.has(row.type)) {
-      await tx.user_Asset.create({ data: { userId: row.buyerId, assetId: row.assetId } });
+      await tx.user_Asset.create({
+        data: { userId: row.buyerId, assetId: row.assetId },
+      });
     }
     if (row.type === "LIST" && row.assetId && row.sellerId) {
       // Copies are in storage: the listing goes live (or its price updates).
       const priceUSD = await platformToUsd(row.price);
       await tx.marketAsset.upsert({
-        where: { assetId_placerId: { assetId: row.assetId, placerId: row.sellerId } },
-        create: { assetId: row.assetId, placerId: row.sellerId, price: row.price, priceUSD, platformId: row.platformId },
+        where: {
+          assetId_placerId: { assetId: row.assetId, placerId: row.sellerId },
+        },
+        create: {
+          assetId: row.assetId,
+          placerId: row.sellerId,
+          price: row.price,
+          priceUSD,
+          platformId: row.platformId,
+        },
         update: { price: row.price, priceUSD },
       });
     }
@@ -73,20 +92,30 @@ async function applySuccess(db: Db, row: AssetTransaction) {
 
 /** After taking copies back: remove the listing once its storage holds none. */
 async function dropEmptyListing(db: Db, listingId: number) {
-  const l = await db.marketAsset.findUnique({ where: { id: listingId }, include: { asset: true, placer: { select: { storagePub: true } } } });
+  const l = await db.marketAsset.findUnique({
+    where: { id: listingId },
+    include: { asset: true, placer: { select: { storagePub: true } } },
+  });
   if (!l?.placer) return;
   const storage = await StellarAccount.load(l.placer.storagePub);
-  if ((storage?.tokenBalance(l.asset.code, l.asset.issuer) ?? 0) < 1) await db.marketAsset.delete({ where: { id: listingId } });
+  if ((storage?.tokenBalance(l.asset.code, l.asset.issuer) ?? 0) < 1)
+    await db.marketAsset.delete({ where: { id: listingId } });
 }
 
 function markFailed(db: Db, row: AssetTransaction, error: string) {
-  return db.assetTransaction.update({ where: { id: row.id }, data: { status: "FAILED", error } });
+  return db.assetTransaction.update({
+    where: { id: row.id },
+    data: { status: "FAILED", error },
+  });
 }
 
 /** Settle a user's open transactions (e.g. a tab closed right after signing). */
 export async function settleOpenFor(db: Db, userId: string) {
   const open = await db.assetTransaction.findMany({
-    where: { status: "PENDING", OR: [{ buyerId: userId }, { sellerId: userId }] },
+    where: {
+      status: "PENDING",
+      OR: [{ buyerId: userId }, { sellerId: userId }],
+    },
     select: { id: true },
     take: 20,
   });

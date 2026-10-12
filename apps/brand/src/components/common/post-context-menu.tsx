@@ -3,28 +3,23 @@ import { api } from "~/utils/api";
 import ContextMenu from "./context-menu";
 
 export function PostContextMenu({
-    creatorId,
-    postId,
-    setDeletePostId
+  creatorId,
+  postId,
+  setDeletePostId,
 }: {
-    creatorId: string;
-    postId: number;
-    setDeletePostId: (postId: number) => void;
+  creatorId: string;
+  postId: number;
+  setDeletePostId: (postId: number) => void;
 }) {
-    const { data } = useSession();
-    const deletePost = api.fan.post.deletePost.useMutation();
+  const { data } = useSession();
+  const deletePost = api.fan.post.deletePost.useMutation();
 
-    const handleDelete = () => {
-        setDeletePostId(postId);
-        deletePost.mutate(postId)
-    };
+  const handleDelete = () => {
+    setDeletePostId(postId);
+    deletePost.mutate(postId);
+  };
 
-    if (data?.user?.id === creatorId) {
-        return (
-            <ContextMenu
-                handleDelete={handleDelete}
-                isLoading={deletePost.isPending}
-            />
-        );
-    }
+  if (data?.user?.id === creatorId) {
+    return <ContextMenu handleDelete={handleDelete} isLoading={deletePost.isPending} />;
+  }
 }

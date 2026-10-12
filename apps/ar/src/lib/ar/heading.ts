@@ -93,8 +93,7 @@ export function headingFromEuler(
   gamma: number | null,
 ): number | null {
   if (alpha == null || beta == null || gamma == null) return null;
-  if (!Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma))
-    return null;
+  if (!Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma)) return null;
 
   const q = deviceQuaternion(alpha, beta, gamma);
   _forward.set(0, 0, -1).applyQuaternion(q);
@@ -126,10 +125,7 @@ export function headingFromEuler(
  * vertical axis can't change how far up or down the camera tips — so it stays
  * meaningful even where the heading itself is degenerate.
  */
-export function elevationFromEuler(
-  beta: number | null,
-  gamma: number | null,
-): number | null {
+export function elevationFromEuler(beta: number | null, gamma: number | null): number | null {
   if (beta == null || gamma == null) return null;
   if (!Number.isFinite(beta) || !Number.isFinite(gamma)) return null;
 

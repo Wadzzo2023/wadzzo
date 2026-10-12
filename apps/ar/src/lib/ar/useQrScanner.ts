@@ -71,8 +71,7 @@ export function useQrScanner({
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let detector: BarcodeDetectorLike | null = null;
-    let decodeFallback: ((d: ImageData) => { data: string } | null) | null =
-      null;
+    let decodeFallback: ((d: ImageData) => { data: string } | null) | null = null;
     const canvas = document.createElement("canvas");
 
     const setup = async () => {
@@ -106,17 +105,7 @@ export function useQrScanner({
       const side = Math.min(video.videoWidth, video.videoHeight) * CROP_FRACTION;
       const sx = (video.videoWidth - side) / 2;
       const sy = (video.videoHeight - side) / 2;
-      ctx.drawImage(
-        video,
-        sx,
-        sy,
-        side,
-        side,
-        0,
-        0,
-        DECODE_SIZE_PX,
-        DECODE_SIZE_PX,
-      );
+      ctx.drawImage(video, sx, sy, side, side, 0, 0, DECODE_SIZE_PX, DECODE_SIZE_PX);
       return true;
     };
 

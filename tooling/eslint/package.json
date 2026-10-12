@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./index.mjs" },
+  "exports": {
+    ".": "./index.mjs"
+  },
   "dependencies": {
     "eslint-config-next": "catalog:",
     "typescript-eslint": "catalog:"
   },
-  "peerDependencies": { "eslint": "catalog:" }
+  "peerDependencies": {
+    "eslint": "catalog:"
+  }
 }

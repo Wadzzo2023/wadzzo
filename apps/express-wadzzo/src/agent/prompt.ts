@@ -3,44 +3,51 @@
 import type { BrandContext } from "./context";
 
 function brandFacts(b: BrandContext): string {
-    const c = b.counts;
-    const types = Object.entries(b.pinTypes)
-        .map(([t, n]) => `${t.toLowerCase()} ${n}`)
-        .join(", ");
-    const habits = b.habits
-        ? `Usual pin settings: type ${b.habits.type}, lasting about ${b.habits.durationDays} days, ${b.habits.autoCollect ? "auto-collect" : "tap to collect"}.`
-        : "No pins yet, so no usual settings.";
-    const recent = b.recentPins.length ? `Recent pins: ${b.recentPins.map((p) => `“${p.title}” (${p.type.toLowerCase()})`).join(", ")}.` : "";
-    const area = b.homeArea
-        ? `Home area: ${b.homeArea.name} (${b.homeAreaSource === "brand" ? "set by the brand" : `the ${b.platformName} default`}). ` +
-          `Bounds: ${b.homeArea.box.south.toFixed(3)},${b.homeArea.box.west.toFixed(3)} to ${b.homeArea.box.north.toFixed(3)},${b.homeArea.box.east.toFixed(3)}.`
-        : "Home area: NOT SET. Before any place search, ask where to search (and mention Settings › Home area).";
+  const c = b.counts;
+  const types = Object.entries(b.pinTypes)
+    .map(([t, n]) => `${t.toLowerCase()} ${n}`)
+    .join(", ");
+  const habits = b.habits
+    ? `Usual pin settings: type ${b.habits.type}, lasting about ${b.habits.durationDays} days, ${b.habits.autoCollect ? "auto-collect" : "tap to collect"}.`
+    : "No pins yet, so no usual settings.";
+  const recent = b.recentPins.length
+    ? `Recent pins: ${b.recentPins.map((p) => `“${p.title}” (${p.type.toLowerCase()})`).join(", ")}.`
+    : "";
+  const area = b.homeArea
+    ? `Home area: ${b.homeArea.name} (${b.homeAreaSource === "brand" ? "set by the brand" : `the ${b.platformName} default`}). ` +
+      `Bounds: ${b.homeArea.box.south.toFixed(3)},${b.homeArea.box.west.toFixed(3)} to ${b.homeArea.box.north.toFixed(3)},${b.homeArea.box.east.toFixed(3)}.`
+    : "Home area: NOT SET. Before any place search, ask where to search (and mention Settings › Home area).";
 
-    return [
-        `Brand: ${b.name}${b.bio ? ` — ${b.bio.slice(0, 300)}` : ""}`,
-        `Platform: ${b.platformName}`,
-        area,
-        `On the map now: ${c.activePins} active pins, ${c.upcomingPins} upcoming, ${c.inReviewPins} in review, ${c.expiredPins} expired` +
-            `${types ? ` (live by type: ${types})` : ""}; hotspots ${c.hotspotsActive} active / ${c.hotspotsPaused} paused; ` +
-            `${c.upcomingEvents} upcoming events; ${c.announcements} announcements.`,
-        habits,
-        recent,
-    ]
-        .filter(Boolean)
-        .join("\n");
+  return [
+    `Brand: ${b.name}${b.bio ? ` — ${b.bio.slice(0, 300)}` : ""}`,
+    `Platform: ${b.platformName}`,
+    area,
+    `On the map now: ${c.activePins} active pins, ${c.upcomingPins} upcoming, ${c.inReviewPins} in review, ${c.expiredPins} expired` +
+      `${types ? ` (live by type: ${types})` : ""}; hotspots ${c.hotspotsActive} active / ${c.hotspotsPaused} paused; ` +
+      `${c.upcomingEvents} upcoming events; ${c.announcements} announcements.`,
+    habits,
+    recent,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 /** "Friday 2026-10-10" in the person's time zone (UTC when unknown). */
 function localToday(timeZone = "UTC"): string {
-    const now = new Date();
-    const date = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
-    const weekday = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" }).format(now);
-    return `${weekday} ${date} (${timeZone})`;
+  const now = new Date();
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  const weekday = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" }).format(now);
+  return `${weekday} ${date} (${timeZone})`;
 }
 
 export function systemPrompt(b: BrandContext, timeZone?: string): string {
-    const today = localToday(timeZone);
-    return `You are the map assistant inside ${b.platformName}'s brand portal. You help ONE brand — ${b.name} — find places on the map, drop pins in bulk, manage its pins, hotspots, events and announcements, and understand how fans collect its pins.
+  const today = localToday(timeZone);
+  return `You are the map assistant inside ${b.platformName}'s brand portal. You help ONE brand — ${b.name} — find places on the map, drop pins in bulk, manage its pins, hotspots, events and announcements, and understand how fans collect its pins.
 
 Today is ${today}.
 

@@ -11,19 +11,15 @@ import { Spinner } from "@wadzzo/ui/components/spinner";
 export const BountyCommentSchema = z.object({
   bountyId: z.number(),
   parentId: z.number().optional(),
-  content: z
-    .string()
-    .min(1, { message: "Minimum 5 character is required!" })
-    .trim(),
+  content: z.string().min(1, { message: "Minimum 5 character is required!" }).trim(),
 });
 
 export function AddBountyComment({ bountyId }: { bountyId: number }) {
-  const createBountyCommentMutation =
-    api.bounty.Bounty.createBountyComment.useMutation({
-      onSuccess: () => {
-        reset();
-      },
-    });
+  const createBountyCommentMutation = api.bounty.Bounty.createBountyComment.useMutation({
+    onSuccess: () => {
+      reset();
+    },
+  });
   const {
     register,
     handleSubmit,
@@ -36,32 +32,26 @@ export function AddBountyComment({ bountyId }: { bountyId: number }) {
   });
   const contentValue = watch("content");
 
-  const onSubmit: SubmitHandler<z.infer<typeof BountyCommentSchema>> = (
-    data,
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof BountyCommentSchema>> = (data) => {
     createBountyCommentMutation.mutate(data);
   };
 
   return (
-    <div className=" px-4 pb-2 ">
+    <div className="px-4 pb-2">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <label className="form-control ">
-          <div className="flex items-center  gap-2">
+        <label className="form-control">
+          <div className="flex items-center gap-2">
             <Textarea
               {...register("content")}
-              className="w-full  border  shadow-xs shadow-slate-300"
+              className="w-full border shadow-xs shadow-slate-300"
             />
             <Button
-              disabled={
-                createBountyCommentMutation.isPending || !contentValue?.trim()
-              }
+              disabled={createBountyCommentMutation.isPending || !contentValue?.trim()}
               className="flex items-center gap-1 shadow-xs shadow-black"
               type="submit"
             >
               {createBountyCommentMutation.isPending ? (
-                <Spinner
-                  size='small'
-                  className="text-black" />
+                <Spinner size="small" className="text-black" />
               ) : (
                 <Send size={14} />
               )}
@@ -70,9 +60,7 @@ export function AddBountyComment({ bountyId }: { bountyId: number }) {
           </div>
           {errors.content && (
             <div className="label">
-              <span className="label-text-alt text-warning">
-                {errors.content.message}
-              </span>
+              <span className="label-text-alt text-warning">{errors.content.message}</span>
             </div>
           )}
         </label>

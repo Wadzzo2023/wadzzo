@@ -11,7 +11,12 @@ export function SearchField({ value }: { value?: string }) {
     <SearchInput
       value={value}
       placeholder="Search items, creators, posts, bounties"
-      onSearch={(q) => q.trim() !== (value ?? "") && router.push(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search", { scroll: false })}
+      onSearch={(q) =>
+        q.trim() !== (value ?? "") &&
+        router.push(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search", {
+          scroll: false,
+        })
+      }
     />
   );
 }

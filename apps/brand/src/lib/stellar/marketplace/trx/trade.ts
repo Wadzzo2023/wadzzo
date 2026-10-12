@@ -21,15 +21,8 @@ export async function tradeAssetXDR(props: {
   signWith: CustodialSigner;
 }) {
   // take siteAsset and send xlm from storage
-  const {
-    amount,
-    buyingAsset,
-    price,
-    sellingAsset,
-    creatorStorageSecret,
-    pubkey,
-    signWith,
-  } = props;
+  const { amount, buyingAsset, price, sellingAsset, creatorStorageSecret, pubkey, signWith } =
+    props;
 
   // const creatorStorage = Keypair.fromSecret(creatorStorageSecret);
 
@@ -82,15 +75,8 @@ export async function buyOfferXDR(props: {
   signWith: CustodialSigner;
 }) {
   // take siteAsset and send xlm from storage
-  const {
-    amount,
-    buyingAsset,
-    price,
-    sellingAsset,
-    creatorStorageSecret,
-    pubkey,
-    signWith,
-  } = props;
+  const { amount, buyingAsset, price, sellingAsset, creatorStorageSecret, pubkey, signWith } =
+    props;
 
   // const creatorStorage = Keypair.fromSecret(creatorStorageSecret);
 

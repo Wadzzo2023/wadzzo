@@ -7,10 +7,7 @@ import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { db } from "@wadzzo/db/server";
 import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await NextCors(req, res, {
     // Options
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],

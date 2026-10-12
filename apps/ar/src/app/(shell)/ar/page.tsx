@@ -55,10 +55,8 @@ const COMPASS_ENABLED = true;
 export default function ArScreen() {
   const router = useRouter();
   const { query: urlQuery, ready: urlReady } = useQueryParams();
-  const focusPinId =
-    typeof urlQuery.pin === "string" ? urlQuery.pin : undefined;
-  const preferPinId =
-    typeof urlQuery.target === "string" ? urlQuery.target : undefined;
+  const focusPinId = typeof urlQuery.pin === "string" ? urlQuery.pin : undefined;
+  const preferPinId = typeof urlQuery.target === "string" ? urlQuery.target : undefined;
 
   const [entered, setEntered] = useState(false);
   const [requesting, setRequesting] = useState(false);
@@ -97,10 +95,7 @@ export default function ArScreen() {
    * out here would make its one job impossible.
    */
   const pins = useMemo(
-    () =>
-      discoveryPins.filter(
-        (p) => p.id === focusPinId || (!p.locked && !p.collected),
-      ),
+    () => discoveryPins.filter((p) => p.id === focusPinId || (!p.locked && !p.collected)),
     [discoveryPins, focusPinId],
   );
 
@@ -172,10 +167,7 @@ export default function ArScreen() {
 
     /** Resolve to `null` if `p` hasn't settled within `ms`. */
     const within = <T,>(p: Promise<T>, ms: number) =>
-      Promise.race([
-        p,
-        new Promise<null>((r) => setTimeout(() => r(null), ms)),
-      ]);
+      Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
 
     const gotCamera = await within(camera.start(), 12_000);
 
@@ -184,7 +176,7 @@ export default function ArScreen() {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-     
+
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       // The watch in useGeolocation already triggers the location prompt; this
       // just gives the gate something to wait on before it steps aside.
@@ -286,7 +278,7 @@ export default function ArScreen() {
             exit={{ opacity: 0, y: -12 }}
             className="ar-glass absolute left-1/2 z-50 max-w-[min(86%,23rem)] rounded-2xl px-4 py-2.5"
           >
-            <p className="font-hud text-center text-[11px] font-semibold leading-relaxed tracking-[0.03em] text-ar-danger">
+            <p className="font-hud text-ar-danger text-center text-[11px] leading-relaxed font-semibold tracking-[0.03em]">
               {captureError}
             </p>
           </motion.div>
@@ -308,4 +300,3 @@ export default function ArScreen() {
     </AppShell>
   );
 }
-

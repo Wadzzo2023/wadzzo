@@ -13,4 +13,3 @@ export const AssetSchema = z.object({
 });
 
 export type MyAssetType = z.infer<typeof AssetSchema>;
-

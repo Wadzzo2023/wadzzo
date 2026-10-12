@@ -132,8 +132,7 @@ type PinSeed = Omit<ArPin, "lat" | "lng"> & {
   bearing: number;
 };
 
-const iso = (daysFromNow: number) =>
-  new Date(Date.now() + daysFromNow * 86_400_000).toISOString();
+const iso = (daysFromNow: number) => new Date(Date.now() + daysFromNow * 86_400_000).toISOString();
 
 /**
  * A stand-in creator tier ladder, so fixtures can sit on a rung the way a real
@@ -183,10 +182,7 @@ const tier = (price: number): PinAccess => ({
   creatorTierPrices: MOCK_TIER_PRICES,
 });
 
-const B = Object.fromEntries(MOCK_BRANDS.map((b) => [b.id, b])) as Record<
-  string,
-  ArBrand
->;
+const B = Object.fromEntries(MOCK_BRANDS.map((b) => [b.id, b])) as Record<string, ArBrand>;
 
 const PIN_SEEDS: PinSeed[] = [
   // ── Inside the 75 m AR radius ──────────────────────────────────────────
@@ -230,8 +226,7 @@ const PIN_SEEDS: PinSeed[] = [
     id: "pin-relay-summit",
     brand: B["brand-relay"]!,
     title: "Summit Collectible — Ridge Climb",
-    description:
-      "You only get this one by actually riding up here. 8% average over 2.1 km.",
+    description: "You only get this one by actually riding up here. 8% average over 2.1 km.",
     supply: 42,
     access: tier(250),
     dist: 71,
@@ -306,8 +301,7 @@ const PIN_SEEDS: PinSeed[] = [
     id: "pin-relay-tuneup",
     brand: B["brand-relay"]!,
     title: "Workshop Tune-Up",
-    description:
-      "Full drivetrain service. Redeemable at the Eastside workshop, walk-ins welcome.",
+    description: "Full drivetrain service. Redeemable at the Eastside workshop, walk-ins welcome.",
     supply: 120,
     access: tier(50),
     dist: 420,
@@ -318,8 +312,7 @@ const PIN_SEEDS: PinSeed[] = [
     id: "pin-atlas-bridge",
     brand: B["brand-atlas"]!,
     title: "Iron Bridge, 1911",
-    description:
-      "Stop 9 of 17. Frame the eastern truss from the riverside path.",
+    description: "Stop 9 of 17. Frame the eastern truss from the riverside path.",
     supply: 1_400,
     dist: 505,
     bearing: 156,
@@ -360,8 +353,7 @@ const PIN_SEEDS: PinSeed[] = [
     id: "pin-lumen-opening",
     brand: B["brand-lumen"]!,
     title: "Opening Week Collectible",
-    description:
-      "Issued for seven days only when the Downtown bar opened. Won't be minted again.",
+    description: "Issued for seven days only when the Downtown bar opened. Won't be minted again.",
     supply: 500,
     access: FOLLOWERS,
     dist: 210,

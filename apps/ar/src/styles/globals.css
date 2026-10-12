@@ -3,7 +3,6 @@
 @import "tailwind-scrollbar-hide/v4";
 @import "./styles.css";
 
-
 /* Class names used inside the shared packages (Tailwind only scans the app by default). */
 @source "../../../../packages/ui/src";
 @source "../../../../packages/wallet/src";
@@ -124,36 +123,36 @@
 
 @layer base {
   :root {
-      --background: 0 0% 100%;
-      --foreground: 240 10% 3.9%;
-      --card: 0 0% 100%;
-      --card-foreground: 240 10% 3.9%;
-      --popover: 0 0% 100%;
-      --popover-foreground: 240 10% 3.9%;
-      --primary: 142.1 76.2% 36.3%;
-      /* Brand alternate color (greditnet) */
-      --greditnet: 142.1 76.2% 36.3%;
-      --primary-foreground: 355.7 100% 97.3%;
-      --secondary: 240 4.8% 95.9%;
-      --secondary-foreground: 240 5.9% 10%;
-      --muted: 240 4.8% 95.9%;
-      --muted-foreground: 240 3.8% 46.1%;
-      --accent: 240 4.8% 95.9%;
-      --accent-foreground: 240 5.9% 10%;
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 0 0% 98%;
-      --border: 240 5.9% 90%;
-      --input: 240 5.9% 90%;
-      --ring: 142.1 76.2% 36.3%;
-      --radius: 0.5rem;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142.1 76.2% 36.3%;
+    /* Brand alternate color (greditnet) */
+    --greditnet: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
 
-      /* Bounty-themed semantic tokens — gold for trophies / crowns /
+    /* Bounty-themed semantic tokens — gold for trophies / crowns /
          prizes / winners, warning for paused state, success for live. */
-      --gold: 45 93% 47%;
-      --gold-foreground: 48 100% 96%;
-      --warning: 38 92% 50%;
-      --warning-foreground: 26 83% 14%;
-    }
+    --gold: 45 93% 47%;
+    --gold-foreground: 48 100% 96%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 26 83% 14%;
+  }
 
   .dark {
     /* Lighter dark background for better visibility */
@@ -199,7 +198,7 @@
     --warning: 38 92% 55%;
     --warning-foreground: 26 83% 14%;
   }
-  }
+}
 
 @layer base {
   * {
@@ -207,15 +206,17 @@
   }
 
   body {
-    @apply overflow-x-hidden bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
 @layer utilities {
   /* Brand-primary gradient text used on accent words in headings. */
   .text-gradient-primary {
-    @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+    @apply from-primary to-primary/60 bg-gradient-to-r bg-clip-text text-transparent;
   }
 }
 
@@ -287,8 +288,12 @@
   caret-color: currentColor;
 }
 @keyframes skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @layer utilities {
@@ -328,7 +333,7 @@
     @apply relative inline-flex;
   }
 
-  .avatar>div {
+  .avatar > div {
     @apply block aspect-square overflow-hidden;
   }
 
@@ -347,20 +352,19 @@
     mask-image: url("data:image/svg+xml,%3csvg width='182' height='201' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M.3 65.486c0-9.196 6.687-20.063 14.211-25.078l61.86-35.946c8.36-5.016 20.899-5.016 29.258 0l61.86 35.946c8.36 5.015 14.211 15.882 14.211 25.078v71.055c0 9.196-6.687 20.063-14.211 25.079l-61.86 35.945c-8.36 4.18-20.899 4.18-29.258 0L14.51 161.62C6.151 157.44.3 145.737.3 136.54V65.486Z' fill='black' fill-rule='nonzero'/%3e%3c/svg%3e");
     transform: rotate(90deg);
   }
-    @keyframes fall {
-      0% {
-        transform: translateY(-10%) rotate(0deg);
-      }
-  
-      100% {
-        transform: translateY(110vh) rotate(360deg);
-      }
+  @keyframes fall {
+    0% {
+      transform: translateY(-10%) rotate(0deg);
     }
-  
-    .animate-fall {
-      animation-name: fall;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
+
+    100% {
+      transform: translateY(110vh) rotate(360deg);
     }
-  
+  }
+
+  .animate-fall {
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
 }

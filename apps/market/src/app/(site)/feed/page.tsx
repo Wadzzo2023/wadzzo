@@ -6,7 +6,8 @@ import { PageBody } from "~/ui/page-header";
 
 export const metadata: Metadata = {
   title: "Feed",
-  description: "Latest posts from creators on Wadzzo — drops, behind-the-scenes and members-only updates.",
+  description:
+    "Latest posts from creators on Wadzzo — drops, behind-the-scenes and members-only updates.",
   alternates: { canonical: "/feed" },
 };
 

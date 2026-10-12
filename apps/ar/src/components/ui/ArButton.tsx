@@ -43,15 +43,12 @@ interface BaseProps {
   children?: ReactNode;
 }
 
-const baseClass = (
-  { variant = "outline", size = "md", block }: BaseProps,
-  extra?: string,
-) =>
+const baseClass = ({ variant = "outline", size = "md", block }: BaseProps, extra?: string) =>
   cn(
-    "font-hud relative inline-flex select-none items-center justify-center whitespace-nowrap",
-    "font-semibold uppercase tracking-[0.08em] transition-colors",
+    "font-hud relative inline-flex items-center justify-center whitespace-nowrap select-none",
+    "font-semibold tracking-[0.08em] uppercase transition-colors",
     "disabled:pointer-events-none disabled:opacity-40",
-    "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
+    "focus-visible:ring-ar-green focus-visible:ring-offset-ar-bg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
     VARIANTS[variant],
     SIZES[size],
     block && "w-full",
@@ -67,7 +64,17 @@ export const ArButton = forwardRef<
   HTMLButtonElement,
   BaseProps & React.ButtonHTMLAttributes<HTMLButtonElement>
 >(function ArButton(
-  { variant, size = "md", icon: Icon, iconRight: IconRight, block, busy, className, children, ...rest },
+  {
+    variant,
+    size = "md",
+    icon: Icon,
+    iconRight: IconRight,
+    block,
+    busy,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
   const iconSize = size === "sm" ? 14 : size === "lg" ? 19 : 16;
@@ -77,10 +84,7 @@ export const ArButton = forwardRef<
       // `aria-busy` rather than `disabled` so screen readers announce the work
       // instead of the control disappearing from the tab order mid-flow.
       aria-busy={busy ? true : undefined}
-      className={cn(
-        baseClass({ variant, size, block }, className),
-        busy && "pointer-events-none",
-      )}
+      className={cn(baseClass({ variant, size, block }, className), busy && "pointer-events-none")}
       {...rest}
     >
       {busy ? (
@@ -140,18 +144,14 @@ export function ArIconButton({
       aria-pressed={active}
       className={cn(
         "ar-glass relative flex h-11 w-11 items-center justify-center rounded-full",
-        "text-ar-dim transition-colors hover:text-ar-text",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green",
+        "text-ar-dim hover:text-ar-text transition-colors",
+        "focus-visible:ring-ar-green focus-visible:ring-2 focus-visible:outline-hidden",
         active && "!border-ar-green/60 text-ar-green-hot ar-glow",
         className,
       )}
       {...(rest as React.ComponentProps<typeof motion.button>)}
     >
-      <Icon
-        size={19}
-        strokeWidth={2.1}
-        className={cn(busy && "animate-spin-slow")}
-      />
+      <Icon size={19} strokeWidth={2.1} className={cn(busy && "animate-spin-slow")} />
     </motion.button>
   );
 }

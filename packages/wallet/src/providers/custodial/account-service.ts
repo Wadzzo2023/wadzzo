@@ -3,7 +3,10 @@ import axios from "axios";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 import { USER_ACCOUNT_URL } from "../../config/service-urls";
-import { accountServiceResponseSchema, type AccountServiceResponse } from "./account-service-schema";
+import {
+  accountServiceResponseSchema,
+  type AccountServiceResponse,
+} from "./account-service-schema";
 
 /**
  * Asks the accounts service for (and, on first use, creates) the Stellar

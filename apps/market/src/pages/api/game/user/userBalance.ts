@@ -6,11 +6,7 @@ import { getToken } from "next-auth/jwt";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { EnableCors } from "~/server/api-cors";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
   if (!token?.sub) {

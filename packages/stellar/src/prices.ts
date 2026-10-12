@@ -23,19 +23,26 @@ async function cached(key: string, load: () => Promise<number>) {
 export function xlmUsd() {
   return cached("xlm", async () => {
     try {
-      const { data } = await axios.get<{ price: number }>("https://api.stellar.expert/explorer/public/asset/XLM", { timeout: 8000 });
+      const { data } = await axios.get<{ price: number }>(
+        "https://api.stellar.expert/explorer/public/asset/XLM",
+        { timeout: 8000 },
+      );
       if (data.price > 0) return data.price;
     } catch {
       /* fall through to Binance */
     }
-    const { data } = await axios.get<{ price: string }>("https://api.binance.com/api/v3/avgPrice?symbol=XLMUSDT", { timeout: 8000 });
+    const { data } = await axios.get<{ price: string }>(
+      "https://api.binance.com/api/v3/avgPrice?symbol=XLMUSDT",
+      { timeout: 8000 },
+    );
     return parseFloat(data.price);
   });
 }
 
 /** USD per platform token. Wadzzo is pegged at one cent (as the old flow assumed). */
 export function platformUsd() {
-  if (PLATFORM_ASSET.code.toLowerCase() === "wadzzo" || !stellarNetwork.isMainnet) return Promise.resolve(0.01);
+  if (PLATFORM_ASSET.code.toLowerCase() === "wadzzo" || !stellarNetwork.isMainnet)
+    return Promise.resolve(0.01);
   return cached("platform", async () => {
     const { data } = await axios.get<{ price?: number }>(
       `https://api.stellar.expert/explorer/public/asset/${PLATFORM_ASSET.code}-${PLATFORM_ASSET.issuer}`,

@@ -3,7 +3,9 @@
   "private": true,
   "description": "Wadzzo monorepo: brand portal, fan marketplace, AR collector, mobile app and the shared packages behind them.",
   "packageManager": "pnpm@12.9.1",
-  "engines": { "node": ">=20.19.0" },
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@wadzzo/prettier-config": "workspace:*",
     "prettier": "catalog:",
+    "prettier-plugin-tailwindcss": "catalog:",
     "turbo": "^2.5.0",
     "typescript": "catalog:"
   },

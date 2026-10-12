@@ -1,23 +1,26 @@
 import { Asset, Horizon } from "@stellar/stellar-sdk";
 import { z } from "zod";
 import { STELLAR_URL } from "@wadzzo/wallet/config";
-import {
-  buyOfferXDR,
-  tradeAssetXDR,
-} from "~/lib/stellar/marketplace/trx/trade";
+import { buyOfferXDR, tradeAssetXDR } from "~/lib/stellar/marketplace/trx/trade";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const tradeFormSchema = z.object({
   selling: z.string(),
   buying: z.string(),
-  amount: z.number({ error: (issue) => (issue.input === undefined ? "Amount  must be a number" : "Amount must be a number") }).positive(),
-  price: z.number({ error: (issue) => (issue.input === undefined ? "Price  must be a number" : "Price must be a number") }).positive(),
+  amount: z
+    .number({
+      error: (issue) =>
+        issue.input === undefined ? "Amount  must be a number" : "Amount must be a number",
+    })
+    .positive(),
+  price: z
+    .number({
+      error: (issue) =>
+        issue.input === undefined ? "Price  must be a number" : "Price must be a number",
+    })
+    .positive(),
 });
 export const tradeRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
@@ -62,17 +65,13 @@ export const tradeRouter = createTRPCRouter({
         !offer.selling.asset_code ||
         !offer.selling.asset_issuer
       )
-        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset" });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+          message: "Invalid asset",
+        });
 
-      const buyingAsset = new Asset(
-        offer.buying.asset_code,
-        offer.buying.asset_issuer,
-      );
+      const buyingAsset = new Asset(offer.buying.asset_code, offer.buying.asset_issuer);
 
-      const sellingAsset = new Asset(
-        offer.selling.asset_code,
-        offer.selling.asset_issuer,
-      );
+      const sellingAsset = new Asset(offer.selling.asset_code, offer.selling.asset_issuer);
 
       //
       const xdr = await buyOfferXDR({
@@ -97,19 +96,19 @@ export const tradeRouter = createTRPCRouter({
     return offers;
   }),
 
-  getOffer: protectedProcedure
-    .input(z.string())
-    .query(async ({ ctx, input }) => {
-      const server = new Horizon.Server(STELLAR_URL);
-      const offer = await server.offers().offer(input).call();
-      return offer;
-    }),
+  getOffer: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    const server = new Horizon.Server(STELLAR_URL);
+    const offer = await server.offers().offer(input).call();
+    return offer;
+  }),
 });
 
 function assetFromInput(input: string) {
   const [code, issuer] = input.split("-");
   if (!code || !issuer) {
-    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid asset input" });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "Invalid asset input",
+    });
   }
   return new Asset(code, issuer);
 }

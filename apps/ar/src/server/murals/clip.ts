@@ -34,7 +34,9 @@ function load(): Promise<Vision> {
     if (process.env.VERCEL) tjs.env.cacheDir = "/tmp/transformers-cache";
     const [processor, model] = await Promise.all([
       tjs.AutoProcessor.from_pretrained(MODEL),
-      tjs.CLIPVisionModelWithProjection.from_pretrained(MODEL, { dtype: "fp16" }),
+      tjs.CLIPVisionModelWithProjection.from_pretrained(MODEL, {
+        dtype: "fp16",
+      }),
     ]);
     return {
       processor: processor as unknown as Vision["processor"],

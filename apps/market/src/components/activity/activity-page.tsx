@@ -10,7 +10,11 @@ import { ActivityView } from "./activity-view";
 export function ActivityPage() {
   const { session } = useRequireAuth();
   return (
-    <SignedIn icon={Activity} title="Your activity" description="Sign in to see your purchases, sales and listings.">
+    <SignedIn
+      icon={Activity}
+      title="Your activity"
+      description="Sign in to see your purchases, sales and listings."
+    >
       {session && <ActivityView me={session.user.id} />}
     </SignedIn>
   );

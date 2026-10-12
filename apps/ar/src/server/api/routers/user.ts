@@ -37,14 +37,8 @@ export const userRouter = createTRPCRouter({
       // trustline to this specific asset — genuinely holds none of it. Not
       // an error case; `createOrNull`/`getTokenBalance` already resolve both
       // to the same honest zero.
-      balance: account?.tokenBalance(
-        PLATFORM_ASSET.code,
-        PLATFORM_ASSET.issuer,
-      ) ?? 0,
-      hasTrustline: account?.hasTrustline(
-        PLATFORM_ASSET.code,
-        PLATFORM_ASSET.issuer,
-      ) ?? false,
+      balance: account?.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ?? 0,
+      hasTrustline: account?.hasTrustline(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ?? false,
     };
   }),
 
@@ -115,10 +109,7 @@ export const userRouter = createTRPCRouter({
           },
         });
       } catch (e) {
-        if (
-          e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === "P2002"
-        ) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
           throw new TRPCError({
             code: "CONFLICT",
             message: "That name is already taken",

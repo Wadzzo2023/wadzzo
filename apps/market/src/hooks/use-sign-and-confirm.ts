@@ -25,9 +25,12 @@ export function useSignAndConfirm() {
     const submitted = await signAndSubmitTransaction({
       xdr: xdr,
       walletType: session.data?.user.walletType,
-      publicKey: session.data?.user.id
+      publicKey: session.data?.user.id,
     });
-    if (!submitted) throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, { message: "The transaction wasn't signed." });
+    if (!submitted)
+      throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, {
+        message: "The transaction wasn't signed.",
+      });
   }
 
   /** Sign and submit something with no ledger row (e.g. a follow trustline). */
@@ -58,7 +61,10 @@ export function useSignAndConfirm() {
         setStep("done");
         return true;
       }
-      if (result?.status === "FAILED") throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: result.error ?? "The transaction failed." });
+      if (result?.status === "FAILED")
+        throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, {
+          message: result.error ?? "The transaction failed.",
+        });
       // Still pending on Horizon: it will settle; history shows the outcome.
       setStep("done");
       return true;
@@ -69,5 +75,12 @@ export function useSignAndConfirm() {
     }
   }
 
-  return { run, signOnly, step, error, busy: step === "signing" || step === "confirming", reset: () => (setStep("idle"), setError(null)) };
+  return {
+    run,
+    signOnly,
+    step,
+    error,
+    busy: step === "signing" || step === "confirming",
+    reset: () => (setStep("idle"), setError(null)),
+  };
 }

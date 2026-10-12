@@ -1,4 +1,12 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import MapGL, { Marker, type MapRef } from "react-map-gl/mapbox";
 import Supercluster from "supercluster";
 
@@ -53,7 +61,21 @@ export const EmbedMap = forwardRef<
     selectedMuralId?: string | null;
     onSelectMural?: (id: string) => void;
   }
->(function EmbedMap({ pins, initial, cooperative, selectedId, onSelect, onViewport, me, murals, selectedMuralId, onSelectMural }, ref) {
+>(function EmbedMap(
+  {
+    pins,
+    initial,
+    cooperative,
+    selectedId,
+    onSelect,
+    onViewport,
+    me,
+    murals,
+    selectedMuralId,
+    onSelectMural,
+  },
+  ref,
+) {
   const mapRef = useRef<MapRef | null>(null);
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
@@ -62,7 +84,13 @@ export const EmbedMap = forwardRef<
   const [view, setView] = useState<{ bounds: Bounds; zoom: number } | null>(null);
 
   useImperativeHandle(ref, () => ({
-    flyTo: (c, zoom) => mapRef.current?.flyTo({ center: [c.lng, c.lat], zoom: zoom ?? 14, duration: 900, essential: true }),
+    flyTo: (c, zoom) =>
+      mapRef.current?.flyTo({
+        center: [c.lng, c.lat],
+        zoom: zoom ?? 14,
+        duration: 900,
+        essential: true,
+      }),
     flyToPin: (pin) =>
       mapRef.current?.flyTo({
         center: [pin.lng, pin.lat],
@@ -70,7 +98,11 @@ export const EmbedMap = forwardRef<
         duration: 800,
         essential: true,
       }),
-    zoomBy: (d) => mapRef.current?.easeTo({ zoom: (mapRef.current.getZoom() ?? 12) + d, duration: 250 }),
+    zoomBy: (d) =>
+      mapRef.current?.easeTo({
+        zoom: (mapRef.current.getZoom() ?? 12) + d,
+        duration: 250,
+      }),
   }));
 
   const report = useCallback(() => {
@@ -79,11 +111,18 @@ export const EmbedMap = forwardRef<
     const b = map.getBounds();
     if (!b) return;
     const zoom = map.getZoom();
-    setView({ bounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], zoom });
+    setView({
+      bounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+      zoom,
+    });
     const c = map.getCenter();
     const center = { lat: c.lat, lng: c.lng };
     const radiusKm = distanceMeters(center, { lat: b.getNorth(), lng: b.getEast() }) / 1000;
-    onViewport({ center, radiusKm: Math.min(Math.max(radiusKm, 0.5), 2000), zoom });
+    onViewport({
+      center,
+      radiusKm: Math.min(Math.max(radiusKm, 0.5), 2000),
+      zoom,
+    });
   }, [onViewport]);
 
   const index = useMemo(() => {
@@ -105,7 +144,11 @@ export const EmbedMap = forwardRef<
   );
 
   // The selected pin always shows as itself, even while its neighbours cluster.
-  const selectedInCluster = selectedId != null && !clusters.some((c) => !("cluster" in c.properties && c.properties.cluster) && c.properties.id === selectedId);
+  const selectedInCluster =
+    selectedId != null &&
+    !clusters.some(
+      (c) => !("cluster" in c.properties && c.properties.cluster) && c.properties.id === selectedId,
+    );
   const selectedPin = selectedId ? byId.get(selectedId) : undefined;
 
   useEffect(() => {
@@ -120,7 +163,7 @@ export const EmbedMap = forwardRef<
 
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="ar-grid absolute inset-0 flex items-center justify-center bg-ar-bg text-[12px] text-ar-faint">
+      <div className="ar-grid bg-ar-bg text-ar-faint absolute inset-0 flex items-center justify-center text-[12px]">
         Map unavailable
       </div>
     );
@@ -133,7 +176,12 @@ export const EmbedMap = forwardRef<
       <MapGL
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
-        initialViewState={{ longitude: initial.center.lng, latitude: initial.center.lat, zoom: initial.zoom, pitch: is3d ? 45 : 0 }}
+        initialViewState={{
+          longitude: initial.center.lng,
+          latitude: initial.center.lat,
+          zoom: initial.zoom,
+          pitch: is3d ? 45 : 0,
+        }}
         mapStyle={mapStyleFor(mapMode, theme)}
         maxPitch={is3d ? 60 : 0}
         cooperativeGestures={cooperative}
@@ -150,21 +198,40 @@ export const EmbedMap = forwardRef<
       >
         {clusters.map((c) => {
           const [lng, lat] = c.geometry.coordinates as [number, number];
-          const props = c.properties as { cluster?: boolean; point_count?: number; cluster_id?: number; id?: string };
+          const props = c.properties as {
+            cluster?: boolean;
+            point_count?: number;
+            cluster_id?: number;
+            id?: string;
+          };
           if (props.cluster && props.cluster_id != null) {
             const count = props.point_count ?? 0;
             const size = count < 10 ? 36 : count < 50 ? 44 : 52;
             return (
-              <Marker key={`c-${props.cluster_id}`} longitude={lng} latitude={lat} anchor="center" style={{ zIndex: 5 }}>
+              <Marker
+                key={`c-${props.cluster_id}`}
+                longitude={lng}
+                latitude={lat}
+                anchor="center"
+                style={{ zIndex: 5 }}
+              >
                 <button
                   aria-label={`${count} drops here — zoom in`}
                   onClick={(e) => {
                     e.stopPropagation();
                     const z = Math.min(index.getClusterExpansionZoom(props.cluster_id!), 18);
-                    mapRef.current?.easeTo({ center: [lng, lat], zoom: z, duration: 500 });
+                    mapRef.current?.easeTo({
+                      center: [lng, lat],
+                      zoom: z,
+                      duration: 500,
+                    });
                   }}
-                  className="font-hud flex items-center justify-center rounded-full border-2 border-ar-green bg-ar-green/25 text-[13px] font-bold text-ar-text backdrop-blur-xs transition-transform hover:scale-110"
-                  style={{ width: size, height: size, boxShadow: "0 0 0 4px hsl(var(--ar-green) / 0.18)" }}
+                  className="font-hud border-ar-green bg-ar-green/25 text-ar-text flex items-center justify-center rounded-full border-2 text-[13px] font-bold backdrop-blur-xs transition-transform hover:scale-110"
+                  style={{
+                    width: size,
+                    height: size,
+                    boxShadow: "0 0 0 4px hsl(var(--ar-green) / 0.18)",
+                  }}
                 >
                   {count}
                 </button>
@@ -173,20 +240,40 @@ export const EmbedMap = forwardRef<
           }
           const pin = props.id ? byId.get(props.id) : undefined;
           if (!pin) return null;
-          return <PinAt key={pin.id} pin={pin} selected={pin.id === selectedId} onSelect={onSelect} />;
+          return (
+            <PinAt key={pin.id} pin={pin} selected={pin.id === selectedId} onSelect={onSelect} />
+          );
         })}
 
-        {selectedInCluster && selectedPin && <PinAt pin={selectedPin} selected onSelect={onSelect} />}
+        {selectedInCluster && selectedPin && (
+          <PinAt pin={selectedPin} selected onSelect={onSelect} />
+        )}
 
         {(view?.zoom ?? initial.zoom) >= MURAL_MIN_ZOOM &&
           murals?.map((m) => (
-            <Marker key={`mural-${m.id}`} longitude={m.longitude} latitude={m.latitude} anchor="bottom" style={{ zIndex: m.id === selectedMuralId ? 20 : 9 }}>
-              <MuralMarker mural={m} dailyLimit={Infinity} selected={m.id === selectedMuralId} onSelect={() => onSelectMural?.(m.id)} />
+            <Marker
+              key={`mural-${m.id}`}
+              longitude={m.longitude}
+              latitude={m.latitude}
+              anchor="bottom"
+              style={{ zIndex: m.id === selectedMuralId ? 20 : 9 }}
+            >
+              <MuralMarker
+                mural={m}
+                dailyLimit={Infinity}
+                selected={m.id === selectedMuralId}
+                onSelect={() => onSelectMural?.(m.id)}
+              />
             </Marker>
           ))}
 
         {me && (
-          <Marker longitude={me.lng} latitude={me.lat} anchor="center" style={{ zIndex: 30, pointerEvents: "none" }}>
+          <Marker
+            longitude={me.lng}
+            latitude={me.lat}
+            anchor="center"
+            style={{ zIndex: 30, pointerEvents: "none" }}
+          >
             <span className="relative flex h-5 w-5 items-center justify-center">
               <span className="absolute inset-0 animate-ping rounded-full bg-sky-400/50" />
               <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-sky-500 shadow-sm" />
@@ -198,9 +285,22 @@ export const EmbedMap = forwardRef<
   );
 });
 
-function PinAt({ pin, selected, onSelect }: { pin: ArPin; selected: boolean; onSelect: (id: string) => void }) {
+function PinAt({
+  pin,
+  selected,
+  onSelect,
+}: {
+  pin: ArPin;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
   return (
-    <Marker longitude={pin.lng} latitude={pin.lat} anchor="bottom" style={{ zIndex: selected ? 20 : 10 }}>
+    <Marker
+      longitude={pin.lng}
+      latitude={pin.lat}
+      anchor="bottom"
+      style={{ zIndex: selected ? 20 : 10 }}
+    >
       <PinMarker pin={pin} selected={selected} inRange={false} onSelect={() => onSelect(pin.id)} />
     </Marker>
   );

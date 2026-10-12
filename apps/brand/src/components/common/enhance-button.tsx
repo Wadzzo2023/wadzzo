@@ -6,10 +6,20 @@ import toast from "react-hot-toast";
 import { Button } from "@wadzzo/ui/components/button";
 import { api } from "~/utils/api";
 
-export const plainText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+export const plainText = (html: string) =>
+  html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 /** "Enhance with AI" for a rich-text field (used by the create pages). */
-export function EnhanceButton({ text, onEnhanced }: { text: string; onEnhanced: (t: string) => void }) {
+export function EnhanceButton({
+  text,
+  onEnhanced,
+}: {
+  text: string;
+  onEnhanced: (t: string) => void;
+}) {
   const enhance = api.pinAgent.enhanceDescription.useMutation({
     onSuccess: (d) => {
       onEnhanced(d.enhancedDescription);
@@ -19,7 +29,13 @@ export function EnhanceButton({ text, onEnhanced }: { text: string; onEnhanced: 
   });
   return (
     <div className="flex justify-end">
-      <Button type="button" variant="outline" size="sm" disabled={!plainText(text ?? "") || enhance.isPending} onClick={() => enhance.mutate({ description: text.trim() })}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={!plainText(text ?? "") || enhance.isPending}
+        onClick={() => enhance.mutate({ description: text.trim() })}
+      >
         {enhance.isPending ? <Loader2 className="animate-spin" /> : <Wand2 />} Enhance with AI
       </Button>
     </div>

@@ -11,7 +11,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 export async function applyCors(
   req: NextApiRequest,
   res: NextApiResponse,
-  { origin, methods = ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"] }: { origin: string; methods?: string[] },
+  {
+    origin,
+    methods = ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+  }: { origin: string; methods?: string[] },
 ): Promise<boolean> {
   res.setHeader("Access-Control-Allow-Origin", origin);
   if (origin !== "*") res.setHeader("Vary", "Origin");
@@ -27,5 +30,7 @@ export async function applyCors(
 
 /** The game API's CORS policy (the Amplify-hosted game client). */
 export function EnableCors(req: NextApiRequest, res: NextApiResponse) {
-  return applyCors(req, res, { origin: "https://main.d3rraj3hpq09um.amplifyapp.com" });
+  return applyCors(req, res, {
+    origin: "https://main.d3rraj3hpq09um.amplifyapp.com",
+  });
 }

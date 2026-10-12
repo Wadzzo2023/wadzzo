@@ -9,9 +9,11 @@ import type { ReactNode } from "react";
 import { Providers } from "./providers";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-
 export const metadata: Metadata = {
-  title: { default: `${platformBranding.name} Brand Portal`, template: `%s · ${platformBranding.name} Brand Portal` },
+  title: {
+    default: `${platformBranding.name} Brand Portal`,
+    template: `%s · ${platformBranding.name} Brand Portal`,
+  },
   description: `Create and manage your drops, stores, posts, bounties and events on ${platformBranding.name}.`,
   icons: { icon: platformBranding.assets.favicon },
 };
@@ -21,8 +23,14 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: platformBranding.colors.portalThemeLight },
-    { media: "(prefers-color-scheme: dark)", color: platformBranding.colors.portalThemeDark },
+    {
+      media: "(prefers-color-scheme: light)",
+      color: platformBranding.colors.portalThemeLight,
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: platformBranding.colors.portalThemeDark,
+    },
   ],
 };
 

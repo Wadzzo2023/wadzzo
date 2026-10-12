@@ -41,10 +41,19 @@ export function PinMarker({
   const meta = RARITY_META[rarity];
 
   const live = status === "collectible";
-  const dead = status === "expired" || status === "depleted" || (pin.endsAt != null && new Date(pin.endsAt).getTime() < Date.now());
+  const dead =
+    status === "expired" ||
+    status === "depleted" ||
+    (pin.endsAt != null && new Date(pin.endsAt).getTime() < Date.now());
   const ring = dead ? "var(--ar-locked)" : meta.hsl;
   // First match wins: expired beats collected, so an old pin you collected still reads as over.
-  const opacity = dead ? "opacity-40" : status === "locked" ? "opacity-60" : status === "collected" ? "opacity-80" : "opacity-100";
+  const opacity = dead
+    ? "opacity-40"
+    : status === "locked"
+      ? "opacity-60"
+      : status === "collected"
+        ? "opacity-80"
+        : "opacity-100";
   const outer = pin.autoCollect ? "rounded-[10px]" : "rounded-full";
   const inner = pin.autoCollect ? "rounded-[6px]" : "rounded-full";
 
@@ -69,11 +78,7 @@ export function PinMarker({
 
       <motion.span
         className="relative block"
-        animate={
-          inRange && live
-            ? { y: [0, -5, 0] }
-            : { y: 0 }
-        }
+        animate={inRange && live ? { y: [0, -5, 0] } : { y: 0 }}
         transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
         whileTap={{ scale: 0.9 }}
       >
@@ -88,7 +93,10 @@ export function PinMarker({
             <span
               aria-hidden
               className={cn("animate-pulse-ring absolute inset-0 border", outer)}
-              style={{ borderColor: `hsl(${meta.hsl})`, animationDelay: "1.1s" }}
+              style={{
+                borderColor: `hsl(${meta.hsl})`,
+                animationDelay: "1.1s",
+              }}
             />
           </>
         )}
@@ -114,10 +122,7 @@ export function PinMarker({
           }}
         >
           {failed ? (
-            <span
-              className="font-hud text-[15px] font-bold"
-              style={{ color: `hsl(${ring})` }}
-            >
+            <span className="font-hud text-[15px] font-bold" style={{ color: `hsl(${ring})` }}>
               {pin.brandName.charAt(0)}
             </span>
           ) : (
@@ -127,10 +132,7 @@ export function PinMarker({
               alt=""
               onError={() => setFailed(true)}
               loading="lazy"
-              className={cn(
-                "h-[30px] w-[30px] object-cover",
-                inner,
-              )}
+              className={cn("h-[30px] w-[30px] object-cover", inner)}
             />
           )}
 
@@ -154,13 +156,7 @@ export function PinMarker({
   );
 }
 
-function CornerFlag({
-  tone,
-  Icon,
-}: {
-  tone: "gold" | "green" | "muted";
-  Icon: typeof Check;
-}) {
+function CornerFlag({ tone, Icon }: { tone: "gold" | "green" | "muted"; Icon: typeof Check }) {
   const cls = {
     gold: "bg-rarity-legendary text-[hsl(30_90%_10%)]",
     green: "bg-ar-green text-ar-green-ink",
@@ -170,7 +166,7 @@ function CornerFlag({
   return (
     <span
       className={cn(
-        "absolute -right-[5px] -top-[5px] flex h-[17px] w-[17px] items-center justify-center rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.8)]",
+        "absolute -top-[5px] -right-[5px] flex h-[17px] w-[17px] items-center justify-center rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.8)]",
         cls,
       )}
     >

@@ -16,7 +16,6 @@ export interface Location {
   aiUrlDescriptions?: string[];
   redeemCode: string | null;
   isRedeemed: boolean | null;
-
 }
 
 export interface ConsumedLocation extends Location {

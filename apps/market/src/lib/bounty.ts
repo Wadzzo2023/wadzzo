@@ -1,4 +1,3 @@
-
 import type { Tone } from "@wadzzo/ui/patterns/status-pill";
 import type { RouterOutputs } from "~/utils/api";
 
@@ -22,7 +21,10 @@ export const ENTRY_STATUS: Record<EntryStatus, { label: string; tone: Tone }> = 
 };
 
 /** The one badge for where the viewer stands on a bounty. */
-export function viewerBadge(b: Pick<BountyCardData, "viewer" | "open">): { label: string; tone: Tone } {
+export function viewerBadge(b: Pick<BountyCardData, "viewer" | "open">): {
+  label: string;
+  tone: Tone;
+} {
   if (b.viewer.won) return { label: "You won", tone: "warning" };
   if (b.viewer.latestEntryStatus) return ENTRY_STATUS[b.viewer.latestEntryStatus];
   if (!b.open) return { label: "Closed", tone: "neutral" };
@@ -30,7 +32,12 @@ export function viewerBadge(b: Pick<BountyCardData, "viewer" | "open">): { label
   return { label: "Open", tone: "success" };
 }
 
-export const formatUsd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: n < 10 ? 2 : 0 });
+export const formatUsd = (n: number) =>
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: n < 10 ? 2 : 0,
+  });
 
 export const formatTokens = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 

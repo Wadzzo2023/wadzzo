@@ -2,7 +2,18 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { formatDistanceToNowStrict } from "date-fns";
-import { Frame, CalendarDays, ExternalLink, LocateFixed, Lock, Minus, Navigation, Plus, Target, X } from "lucide-react";
+import {
+  Frame,
+  CalendarDays,
+  ExternalLink,
+  LocateFixed,
+  Lock,
+  Minus,
+  Navigation,
+  Plus,
+  Target,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { EmbedMap, type EmbedMapHandle, type Viewport } from "~/components/embed/EmbedMap";
@@ -66,8 +77,12 @@ function usePreviewBridge(initial: EmbedConfig, origins: string[] | undefined) {
     if (!origins) return;
     const onMessage = (e: MessageEvent) => {
       if (!origins.includes(e.origin)) return;
-      const data = e.data as { type?: string; config?: Record<string, unknown> } | null;
-      if (data?.type === "wadzzo-embed:config" && data.config) setConfig(normalizeConfig(data.config, "preview"));
+      const data = e.data as {
+        type?: string;
+        config?: Record<string, unknown>;
+      } | null;
+      if (data?.type === "wadzzo-embed:config" && data.config)
+        setConfig(normalizeConfig(data.config, "preview"));
     };
     window.addEventListener("message", onMessage);
     window.parent.postMessage({ type: "wadzzo-embed:ready" }, "*");
@@ -76,7 +91,13 @@ function usePreviewBridge(initial: EmbedConfig, origins: string[] | undefined) {
   return config;
 }
 
-export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: EmbedConfig; previewOrigins?: string[] }) {
+export function EmbedClient({
+  initialConfig,
+  previewOrigins,
+}: {
+  initialConfig: EmbedConfig;
+  previewOrigins?: string[];
+}) {
   const config = usePreviewBridge(initialConfig, previewOrigins);
   useEmbedTheme(config.theme);
   const mapRef = useRef<EmbedMapHandle>(null);
@@ -118,7 +139,11 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
       types: config.pinTypes.length ? config.pinTypes : undefined,
       brandId: brandFilter(config),
     },
-    { enabled: area != null, placeholderData: keepPreviousData, staleTime: 60_000 },
+    {
+      enabled: area != null,
+      placeholderData: keepPreviousData,
+      staleTime: 60_000,
+    },
   );
   const allPins = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
   const pins = useMemo(
@@ -130,7 +155,8 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
     return (Object.keys(PIN_TYPE_LABEL) as ArPinType[]).filter((t) => seen.has(t));
   }, [allPins]);
 
-  const selected = pins.find((p) => p.id === selectedId) ?? (searchPin?.id === selectedId ? searchPin : null);
+  const selected =
+    pins.find((p) => p.id === selectedId) ?? (searchPin?.id === selectedId ? searchPin : null);
 
   // ── Murals (approved only; plan §7) ───────────────────────────────────
   // Same viewport as the pins, as a box, rounded to ~1 km so pans reuse it.
@@ -153,15 +179,23 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
         })()
       : null;
   const muralsQuery = api.murals.inArea.useQuery(
-    { ...(muralBox ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: false },
-    { enabled: muralBox != null, placeholderData: keepPreviousData, staleTime: 60_000 },
+    {
+      ...(muralBox ?? { north: 0, south: 0, east: 0, west: 0 }),
+      includeUnverified: false,
+    },
+    {
+      enabled: muralBox != null,
+      placeholderData: keepPreviousData,
+      staleTime: 60_000,
+    },
   );
   const murals = config.showMurals ? (muralsQuery.data?.murals ?? []) : [];
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
   const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;
   const origin = me ?? viewport?.center ?? { lat: config.centerLat, lng: config.centerLng };
   const nearby = useMemo(
-    () => [...pins].sort((a, b) => distanceMeters(origin, a) - distanceMeters(origin, b)).slice(0, 20),
+    () =>
+      [...pins].sort((a, b) => distanceMeters(origin, a) - distanceMeters(origin, b)).slice(0, 20),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [pins, origin.lat, origin.lng],
   );
@@ -200,39 +234,69 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
     );
   };
 
-  const meFix: GeoFix | null = me ? { ...me, accuracy: 0, heading: null, speed: null, timestamp: 0 } : null;
+  const meFix: GeoFix | null = me
+    ? { ...me, accuracy: 0, heading: null, speed: null, timestamp: 0 }
+    : null;
   // Relative on purpose: links in the iframe resolve against wadzzoAR, not
   // the host site, and the markup matches between server and client.
-  const openUrl = (pin: ArPin) => `/collection/${encodeURIComponent(pin.id)}?ref=embed-${config.id}`;
+  const openUrl = (pin: ArPin) =>
+    `/collection/${encodeURIComponent(pin.id)}?ref=embed-${config.id}`;
   const links = [
-    config.eventsUrl && { key: "events" as const, label: config.eventsLabel, url: config.eventsUrl, icon: CalendarDays },
-    config.bountiesUrl && { key: "bounties" as const, label: config.bountiesLabel, url: config.bountiesUrl, icon: Target },
-  ].filter(Boolean) as { key: "events" | "bounties"; label: string; url: string; icon: typeof Target }[];
+    config.eventsUrl && {
+      key: "events" as const,
+      label: config.eventsLabel,
+      url: config.eventsUrl,
+      icon: CalendarDays,
+    },
+    config.bountiesUrl && {
+      key: "bounties" as const,
+      label: config.bountiesLabel,
+      url: config.bountiesUrl,
+      icon: Target,
+    },
+  ].filter(Boolean) as {
+    key: "events" | "bounties";
+    label: string;
+    url: string;
+    icon: typeof Target;
+  }[];
 
   return (
     <div
-      className="relative flex h-screen w-screen overflow-hidden bg-ar-bg text-ar-text"
-      style={{ ...accentVars(config.accentColor), ["--ar-top-inset" as string]: "0px" }}
+      className="bg-ar-bg text-ar-text relative flex h-screen w-screen overflow-hidden"
+      style={{
+        ...accentVars(config.accentColor),
+        ["--ar-top-inset" as string]: "0px",
+      }}
     >
       {/* ── Side list (wide embeds) ─────────────────────────────────── */}
       {config.showNearby && (
-        <aside className="hidden w-[290px] shrink-0 flex-col border-r border-ar-line bg-ar-surface md:flex">
-          <div className="border-b border-ar-line px-4 py-3">
-            <p className="font-hud text-[10px] font-semibold uppercase tracking-[0.22em] text-ar-green">
+        <aside className="border-ar-line bg-ar-surface hidden w-[290px] shrink-0 flex-col border-r md:flex">
+          <div className="border-ar-line border-b px-4 py-3">
+            <p className="font-hud text-ar-green text-[10px] font-semibold tracking-[0.22em] uppercase">
               {me ? "Near you" : "In view"}
             </p>
-            <p className="text-[12px] text-ar-faint">
-              {pinsQuery.isLoading ? "Loading drops…" : `${pins.length} drop${pins.length === 1 ? "" : "s"} on the map`}
+            <p className="text-ar-faint text-[12px]">
+              {pinsQuery.isLoading
+                ? "Loading drops…"
+                : `${pins.length} drop${pins.length === 1 ? "" : "s"} on the map`}
             </p>
           </div>
-          <ul className="ar-scroll flex-1 divide-y divide-ar-line">
+          <ul className="ar-scroll divide-ar-line flex-1 divide-y">
             {nearby.map((p) => (
               <li key={p.id}>
-                <NearbyRow pin={p} distance={distanceMeters(origin, p)} active={p.id === selectedId} onClick={() => select(p.id)} />
+                <NearbyRow
+                  pin={p}
+                  distance={distanceMeters(origin, p)}
+                  active={p.id === selectedId}
+                  onClick={() => select(p.id)}
+                />
               </li>
             ))}
             {!pinsQuery.isLoading && nearby.length === 0 && (
-              <li className="px-4 py-8 text-center text-[12px] text-ar-faint">No drops here — try zooming out.</li>
+              <li className="text-ar-faint px-4 py-8 text-center text-[12px]">
+                No drops here — try zooming out.
+              </li>
             )}
           </ul>
         </aside>
@@ -243,7 +307,10 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
         <EmbedMap
           ref={mapRef}
           pins={pins}
-          initial={{ center: { lat: config.centerLat, lng: config.centerLng }, zoom: config.zoom }}
+          initial={{
+            center: { lat: config.centerLat, lng: config.centerLng },
+            zoom: config.zoom,
+          }}
           cooperative={config.gestureMode === "COOPERATIVE"}
           selectedId={selectedId}
           onSelect={select}
@@ -251,7 +318,12 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
             setViewport(v);
             if (previewOrigins) {
               window.parent.postMessage(
-                { type: "wadzzo-embed:view", lat: v.center.lat, lng: v.center.lng, zoom: v.zoom },
+                {
+                  type: "wadzzo-embed:view",
+                  lat: v.center.lat,
+                  lng: v.center.lng,
+                  zoom: v.zoom,
+                },
                 "*",
               );
             }
@@ -268,12 +340,20 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
 
         {/* Top bar */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start gap-2 p-3">
-          {config.showSearch && <MapSearchButton onClick={() => setSearchOpen(true)} className="pointer-events-auto" />}
+          {config.showSearch && (
+            <MapSearchButton onClick={() => setSearchOpen(true)} className="pointer-events-auto" />
+          )}
           {config.showFilterChips && presentTypes.length > 1 && (
             <div className="ar-scroll-x pointer-events-auto flex min-w-0 gap-1.5">
-              <FilterChip active={typeFilter == null} onClick={() => setTypeFilter(null)}>All</FilterChip>
+              <FilterChip active={typeFilter == null} onClick={() => setTypeFilter(null)}>
+                All
+              </FilterChip>
               {presentTypes.map((t) => (
-                <FilterChip key={t} active={typeFilter === t} onClick={() => setTypeFilter(typeFilter === t ? null : t)}>
+                <FilterChip
+                  key={t}
+                  active={typeFilter === t}
+                  onClick={() => setTypeFilter(typeFilter === t ? null : t)}
+                >
                   {PIN_TYPE_LABEL[t]}
                 </FilterChip>
               ))}
@@ -285,8 +365,13 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
                 <LocateFixed size={16} className={cn(locating && "animate-pulse")} />
               </RoundButton>
             )}
-            <RoundButton label={`Switch to the ${mapMode === "3d" ? "2D" : "3D"} map`} onClick={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}>
-              <span className="font-hud text-[10px] font-bold">{mapMode === "3d" ? "2D" : "3D"}</span>
+            <RoundButton
+              label={`Switch to the ${mapMode === "3d" ? "2D" : "3D"} map`}
+              onClick={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
+            >
+              <span className="font-hud text-[10px] font-bold">
+                {mapMode === "3d" ? "2D" : "3D"}
+              </span>
             </RoundButton>
             <RoundButton label="Zoom in" onClick={() => mapRef.current?.zoomBy(1)}>
               <Plus size={16} />
@@ -298,7 +383,7 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
         </div>
 
         {notice && (
-          <div className="ar-glass absolute left-1/2 top-14 z-40 max-w-[85%] -translate-x-1/2 rounded-2xl px-4 py-2 text-center text-[12px] text-ar-text">
+          <div className="ar-glass text-ar-text absolute top-14 left-1/2 z-40 max-w-[85%] -translate-x-1/2 rounded-2xl px-4 py-2 text-center text-[12px]">
             {notice}
           </div>
         )}
@@ -314,10 +399,14 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
                   className="ar-glass flex w-[210px] shrink-0 items-center gap-2.5 rounded-2xl p-2 text-left"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.imageUrl} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
+                  <img
+                    src={p.imageUrl}
+                    alt=""
+                    className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                  />
                   <span className="min-w-0">
                     <span className="block truncate text-[12.5px] font-semibold">{p.title}</span>
-                    <span className="block truncate text-[11px] text-ar-faint">
+                    <span className="text-ar-faint block truncate text-[11px]">
                       {formatDistance(distanceMeters(origin, p))} · {p.brandName}
                     </span>
                   </span>
@@ -329,7 +418,14 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
           {selectedMural && (
             <MuralPreviewCard
               mural={selectedMural}
-              distance={me ? distanceMeters(me, { lat: selectedMural.latitude, lng: selectedMural.longitude }) : null}
+              distance={
+                me
+                  ? distanceMeters(me, {
+                      lat: selectedMural.latitude,
+                      lng: selectedMural.longitude,
+                    })
+                  : null
+              }
               openUrl={`/murals/${encodeURIComponent(selectedMural.id)}?ref=embed-${config.id}`}
               onOpen={() => track(config.id, "open")}
               onClose={() => setSelectedMuralId(null)}
@@ -355,7 +451,7 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => track(config.id, l.key)}
-                  className="ar-key ar-key-primary font-hud inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[11px] font-bold uppercase tracking-[0.08em]"
+                  className="ar-key ar-key-primary font-hud inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[11px] font-bold tracking-[0.08em] uppercase"
                 >
                   <l.icon size={14} strokeWidth={2.4} />
                   {l.label}
@@ -366,7 +462,7 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="ar-glass pointer-events-auto shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold text-ar-dim hover:text-ar-text"
+              className="ar-glass text-ar-dim hover:text-ar-text pointer-events-auto shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold"
             >
               Powered by <span className="text-ar-green-hot">{platformBranding.name}</span>
             </a>
@@ -416,22 +512,26 @@ function MuralPreviewCard({
       <button
         onClick={onClose}
         aria-label="Close"
-        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ar-void/60 text-white"
+        className="bg-ar-void/60 absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-white"
       >
         <X size={15} />
       </button>
       <div className="flex gap-3 p-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={mural.coverUrl} alt="" className="h-[96px] w-[78px] shrink-0 rounded-2xl border-2 border-rarity-epic object-cover" />
+        <img
+          src={mural.coverUrl}
+          alt=""
+          className="border-rarity-epic h-[96px] w-[78px] shrink-0 rounded-2xl border-2 object-cover"
+        />
         <div className="min-w-0 flex-1 pr-6">
-          <p className="font-hud flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-rarity-epic">
+          <p className="font-hud text-rarity-epic flex items-center gap-1 text-[9.5px] font-semibold tracking-[0.18em] uppercase">
             <Frame size={10} strokeWidth={2.6} /> Mural
           </p>
-          <p className="line-clamp-2 text-[14.5px] font-semibold leading-snug">{mural.title}</p>
-          <p className="mt-0.5 truncate text-[11.5px] text-ar-dim">
+          <p className="line-clamp-2 text-[14.5px] leading-snug font-semibold">{mural.title}</p>
+          <p className="text-ar-dim mt-0.5 truncate text-[11.5px]">
             {mural.artist ? `by ${mural.artist}` : "Street art"}
           </p>
-          <p className="mt-1.5 text-[11px] text-ar-faint">
+          <p className="text-ar-faint mt-1.5 text-[11px]">
             {distance != null ? `${formatDistance(distance)} away · ` : ""}
             Scan it with the {platformBranding.name} camera to earn coins
           </p>
@@ -443,7 +543,7 @@ function MuralPreviewCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={onOpen}
-          className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold uppercase tracking-[0.08em]"
+          className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold tracking-[0.08em] uppercase"
         >
           Open in {platformBranding.name} <ExternalLink size={14} strokeWidth={2.4} />
         </a>
@@ -452,7 +552,7 @@ function MuralPreviewCard({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Directions"
-          className="ar-key flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ar-text"
+          className="ar-key text-ar-text flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
         >
           <Navigation size={15} />
         </a>
@@ -480,24 +580,28 @@ function PreviewCard({
       <button
         onClick={onClose}
         aria-label="Close"
-        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ar-void/60 text-white"
+        className="bg-ar-void/60 absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-white"
       >
         <X size={15} />
       </button>
       <div className="flex gap-3 p-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={pin.imageUrl} alt="" className="h-[84px] w-[84px] shrink-0 rounded-2xl object-cover" />
+        <img
+          src={pin.imageUrl}
+          alt=""
+          className="h-[84px] w-[84px] shrink-0 rounded-2xl object-cover"
+        />
         <div className="min-w-0 flex-1 pr-6">
-          <p className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.18em] text-ar-green">
+          <p className="font-hud text-ar-green text-[9.5px] font-semibold tracking-[0.18em] uppercase">
             {PIN_TYPE_LABEL[pin.type].replace(/s$/, "")}
           </p>
-          <p className="line-clamp-2 text-[14.5px] font-semibold leading-snug">{pin.title}</p>
+          <p className="line-clamp-2 text-[14.5px] leading-snug font-semibold">{pin.title}</p>
           <div className="mt-1 flex items-center gap-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={pin.brandImageUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
-            <span className="truncate text-[11.5px] text-ar-dim">{pin.brandName}</span>
+            <span className="text-ar-dim truncate text-[11.5px]">{pin.brandName}</span>
           </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-ar-faint">
+          <div className="text-ar-faint mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
             <RarityPlate rarity={pin.rarity} size="sm" />
             {distance != null && <span>{formatDistance(distance)} away</span>}
             {ends && ends > new Date() && <span>Ends in {formatDistanceToNowStrict(ends)}</span>}
@@ -505,7 +609,7 @@ function PreviewCard({
         </div>
       </div>
       {pin.locked && pin.lockReason && (
-        <p className="mx-3 mb-2 flex items-center gap-1.5 rounded-xl bg-white/[0.04] px-2.5 py-1.5 text-[11.5px] text-ar-dim">
+        <p className="text-ar-dim mx-3 mb-2 flex items-center gap-1.5 rounded-xl bg-white/[0.04] px-2.5 py-1.5 text-[11.5px]">
           <Lock size={12} className="shrink-0" /> {pin.lockReason}
         </p>
       )}
@@ -515,7 +619,7 @@ function PreviewCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={onOpen}
-          className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold uppercase tracking-[0.08em]"
+          className="ar-key ar-key-primary font-hud flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-bold tracking-[0.08em] uppercase"
         >
           Open in {platformBranding.name} <ExternalLink size={14} strokeWidth={2.4} />
         </a>
@@ -524,7 +628,7 @@ function PreviewCard({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Directions"
-          className="ar-key flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ar-text"
+          className="ar-key text-ar-text flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
         >
           <Navigation size={15} />
         </a>
@@ -533,31 +637,56 @@ function PreviewCard({
   );
 }
 
-function NearbyRow({ pin, distance, active, onClick }: { pin: ArPin; distance: number; active: boolean; onClick: () => void }) {
+function NearbyRow({
+  pin,
+  distance,
+  active,
+  onClick,
+}: {
+  pin: ArPin;
+  distance: number;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
-      className={cn("flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-ar-green/[0.06]", active && "bg-ar-green/[0.1]")}
+      className={cn(
+        "hover:bg-ar-green/[0.06] flex w-full items-center gap-3 px-4 py-2.5 text-left",
+        active && "bg-ar-green/[0.1]",
+      )}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={pin.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[13px] font-semibold">{pin.title}</span>
-        <span className="block truncate text-[11px] text-ar-faint">{pin.brandName}</span>
+        <span className="text-ar-faint block truncate text-[11px]">{pin.brandName}</span>
       </span>
-      <span className="font-hud shrink-0 text-[10.5px] font-bold tabular-nums text-ar-dim">{formatDistance(distance)}</span>
+      <span className="font-hud text-ar-dim shrink-0 text-[10.5px] font-bold tabular-nums">
+        {formatDistance(distance)}
+      </span>
     </button>
   );
 }
 
-function FilterChip({ children, active, onClick }: { children: string; active: boolean; onClick: () => void }) {
+function FilterChip({
+  children,
+  active,
+  onClick,
+}: {
+  children: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "font-hud h-9 shrink-0 rounded-full border px-3.5 text-[11px] font-semibold uppercase tracking-[0.08em] backdrop-blur-md",
-        active ? "border-ar-green/70 bg-ar-green/25 text-ar-text" : "border-ar-line bg-ar-surface/80 text-ar-dim hover:text-ar-text",
+        "font-hud h-9 shrink-0 rounded-full border px-3.5 text-[11px] font-semibold tracking-[0.08em] uppercase backdrop-blur-md",
+        active
+          ? "border-ar-green/70 bg-ar-green/25 text-ar-text"
+          : "border-ar-line bg-ar-surface/80 text-ar-dim hover:text-ar-text",
       )}
     >
       {children}
@@ -565,7 +694,17 @@ function FilterChip({ children, active, onClick }: { children: string; active: b
   );
 }
 
-function RoundButton({ children, label, onClick, active }: { children: React.ReactNode; label: string; onClick: () => void; active?: boolean }) {
+function RoundButton({
+  children,
+  label,
+  onClick,
+  active,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+}) {
   return (
     <button
       onClick={onClick}

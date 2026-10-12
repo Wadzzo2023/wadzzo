@@ -71,7 +71,10 @@ export function venueMapImage(
 // ── Add to calendar (.ics) ───────────────────────────────────────────────
 
 const icsDate = (iso: string) =>
-  new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  new Date(iso)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 
 /** RFC 5545 text escaping, then 75-octet line folding. */
 const icsText = (s: string) =>
@@ -90,7 +93,16 @@ function fold(line: string) {
 
 export type IcsEvent = Pick<
   ArEventDetail,
-  "id" | "title" | "description" | "link" | "venueName" | "address" | "latitude" | "longitude" | "startDate" | "endDate"
+  | "id"
+  | "title"
+  | "description"
+  | "link"
+  | "venueName"
+  | "address"
+  | "latitude"
+  | "longitude"
+  | "startDate"
+  | "endDate"
 > & { brand: { name: string } };
 
 export function eventIcs(e: IcsEvent, pageUrl: string) {

@@ -1,5 +1,14 @@
 import { create } from "zustand";
-import { type AdminAsset, type Asset, type ItemPrivacy, type LocationGroup, type MarketAsset, type SubmissionAttachment, type Location, type LocationConsumer } from "@wadzzo/db";
+import {
+  type AdminAsset,
+  type Asset,
+  type ItemPrivacy,
+  type LocationGroup,
+  type MarketAsset,
+  type SubmissionAttachment,
+  type Location,
+  type LocationConsumer,
+} from "@wadzzo/db";
 
 import { type Horizon } from "@stellar/stellar-sdk";
 export type AssetRightType = AssetType & { copies: number };

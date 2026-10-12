@@ -1,10 +1,4 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
 import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
@@ -50,9 +44,7 @@ export async function buildFollowTrustlineXdr({
 
   // Sequence comes from mother, not the user — mother is the transaction's
   // source account and the one paying the fee.
-  const transactionInitializer = await server.loadAccount(
-    motherAccount.publicKey(),
-  );
+  const transactionInitializer = await server.loadAccount(motherAccount.publicKey());
 
   const tx = new TransactionBuilder(transactionInitializer, {
     fee: "200",

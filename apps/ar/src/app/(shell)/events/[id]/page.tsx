@@ -56,7 +56,10 @@ export default function EventDetailScreen() {
 
   const detail = api.events.byId.useQuery(
     { id },
-    { enabled: Boolean(id), retry: (n, e) => e.data?.code !== "NOT_FOUND" && n < 2 },
+    {
+      enabled: Boolean(id),
+      retry: (n, e) => e.data?.code !== "NOT_FOUND" && n < 2,
+    },
   );
   const event = detail.data;
 
@@ -66,8 +69,10 @@ export default function EventDetailScreen() {
     return (
       <AppShell tabs={false}>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
-            {detail.error?.data?.code === "NOT_FOUND" ? "Event not found" : "Couldn't load this event"}
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
+            {detail.error?.data?.code === "NOT_FOUND"
+              ? "Event not found"
+              : "Couldn't load this event"}
           </p>
           <ArLinkButton href="/events" variant="primary">
             All events
@@ -89,17 +94,19 @@ export default function EventDetailScreen() {
               <BrandAvatar
                 src={event.brand.imageUrl}
                 loading="eager"
-                className="h-[56px] w-[56px] rounded-[16px] ring-[3px] ring-ar-bg"
+                className="ring-ar-bg h-[56px] w-[56px] rounded-[16px] ring-[3px]"
               />
-              <span className="font-hud mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-dim">
+              <span className="font-hud text-ar-dim mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase">
                 {event.brand.name}
               </span>
             </Link>
-            <h1 className="mt-3 text-[21px] font-semibold leading-tight text-ar-text">{event.title}</h1>
+            <h1 className="text-ar-text mt-3 text-[21px] leading-tight font-semibold">
+              {event.title}
+            </h1>
           </div>
 
           {/* ── Facts ────────────────────────────────────────────── */}
-          <div className="mx-5 mt-4 divide-y divide-ar-line overflow-hidden rounded-ar-lg border border-ar-line bg-white/[0.02]">
+          <div className="divide-ar-line rounded-ar-lg border-ar-line mx-5 mt-4 divide-y overflow-hidden border bg-white/[0.02]">
             <WhenRow event={event} />
             <WhereRow event={event} />
             {event.link && (
@@ -109,24 +116,29 @@ export default function EventDetailScreen() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03]"
               >
-                <ExternalLink size={16} strokeWidth={2.3} className="shrink-0 text-ar-green-hot" />
+                <ExternalLink size={16} strokeWidth={2.3} className="text-ar-green-hot shrink-0" />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13.5px] font-semibold text-ar-text">
+                  <span className="text-ar-text block text-[13.5px] font-semibold">
                     {event.linkLabel ?? "Tickets & info"}
                   </span>
-                  <span className="block truncate text-[11.5px] text-ar-faint">
+                  <span className="text-ar-faint block truncate text-[11.5px]">
                     {event.link.replace(/^https?:\/\//, "")}
                   </span>
                 </span>
               </a>
             )}
             <div className="flex items-center gap-3 px-4 py-3">
-              <Users size={16} strokeWidth={2.3} className="shrink-0 text-ar-green-hot" />
-              <span className={cn("text-[13.5px] font-semibold", event.isFull ? "text-rarity-legendary" : "text-ar-text")}>
+              <Users size={16} strokeWidth={2.3} className="text-ar-green-hot shrink-0" />
+              <span
+                className={cn(
+                  "text-[13.5px] font-semibold",
+                  event.isFull ? "text-rarity-legendary" : "text-ar-text",
+                )}
+              >
                 {spotsLabel(event)}
               </span>
               {event.capacity != null && (
-                <span className="font-hud ml-auto text-[11px] tabular-nums text-ar-faint">
+                <span className="font-hud text-ar-faint ml-auto text-[11px] tabular-nums">
                   {event.goingCount} going
                 </span>
               )}
@@ -135,24 +147,24 @@ export default function EventDetailScreen() {
 
           {/* ── About ────────────────────────────────────────────── */}
           <section className="px-5 pt-5">
-            <h2 className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-green">
+            <h2 className="font-hud text-ar-green mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
               About
             </h2>
-            <p className="whitespace-pre-line break-words text-[14px] leading-relaxed text-ar-dim">
+            <p className="text-ar-dim text-[14px] leading-relaxed break-words whitespace-pre-line">
               {event.description}
             </p>
           </section>
 
           <Linked event={event} />
 
-          <div className="px-5 pb-8 pt-6">
+          <div className="px-5 pt-6 pb-8">
             <CommentsSection target={{ kind: "event", id: event.id }} />
           </div>
         </div>
 
         {/* ── Pinned bottom bar ────────────────────────────────────── */}
         <div
-          className="ar-tabbar-surface relative z-30 rounded-t-ar-xl px-4 pt-3"
+          className="ar-tabbar-surface rounded-t-ar-xl relative z-30 px-4 pt-3"
           style={{ paddingBottom: "max(12px, var(--ar-safe-bottom))" }}
         >
           <RsvpAction event={event} />
@@ -181,9 +193,9 @@ function Hero({ event }: { event: ArEventDetail }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={event.coverImage} alt="" className="h-full w-full object-cover" />
       ) : (
-        <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
+        <div className="ar-grid from-ar-green/25 via-ar-surface to-ar-bg h-full w-full bg-linear-to-br" />
       )}
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
+      <div className="from-ar-void/70 to-ar-bg pointer-events-none absolute inset-0 bg-linear-to-b via-transparent" />
 
       <div
         className="absolute inset-x-0 top-0 flex items-center justify-between px-4"
@@ -195,22 +207,24 @@ function Hero({ event }: { event: ArEventDetail }) {
             else void router.push("/events");
           }}
           aria-label="Back"
-          className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+          className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
         >
           <ChevronLeft size={17} strokeWidth={2.4} />
         </button>
         <div className="flex items-center gap-2">
           {copied && (
-            <span className="font-hud ar-glass rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-green-hot">
+            <span className="font-hud ar-glass text-ar-green-hot rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-[0.12em] uppercase">
               Link copied
             </span>
           )}
           <button
             aria-label="Share this event"
             onClick={() =>
-              void shareLink(event.title, window.location.href).then((r) => setCopied(r === "copied"))
+              void shareLink(event.title, window.location.href).then((r) =>
+                setCopied(r === "copied"),
+              )
             }
-            className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+            className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
           >
             <Share2 size={15} strokeWidth={2.2} />
           </button>
@@ -220,13 +234,15 @@ function Hero({ event }: { event: ArEventDetail }) {
       {state && (
         <span
           className={cn(
-            "font-hud absolute bottom-10 right-5 inline-flex h-[22px] items-center gap-1 rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] backdrop-blur-xs",
+            "font-hud absolute right-5 bottom-10 inline-flex h-[22px] items-center gap-1 rounded-full border px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase backdrop-blur-xs",
             state === "live"
               ? "border-ar-green/60 bg-ar-green/20 text-ar-green-hot"
               : "border-ar-line bg-ar-surface/70 text-ar-dim",
           )}
         >
-          {state === "live" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ar-green-hot" />}
+          {state === "live" && (
+            <span className="bg-ar-green-hot h-1.5 w-1.5 animate-pulse rounded-full" />
+          )}
           {state === "live" ? "Happening now" : "Ended"}
         </span>
       )}
@@ -237,13 +253,15 @@ function Hero({ event }: { event: ArEventDetail }) {
 function WhenRow({ event }: { event: ArEventDetail }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <Clock size={16} strokeWidth={2.3} className="shrink-0 text-ar-green-hot" />
-      <span className="min-w-0 flex-1 text-[13.5px] font-semibold text-ar-text">{eventWhen(event)}</span>
+      <Clock size={16} strokeWidth={2.3} className="text-ar-green-hot shrink-0" />
+      <span className="text-ar-text min-w-0 flex-1 text-[13.5px] font-semibold">
+        {eventWhen(event)}
+      </span>
       {!event.isPast && (
         <a
           href={icsPath(event.id)}
           aria-label="Add to calendar"
-          className="font-hud flex shrink-0 items-center gap-1 rounded-full border border-ar-line-bright px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ar-dim hover:text-ar-text"
+          className="font-hud border-ar-line-bright text-ar-dim hover:text-ar-text flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase"
         >
           <CalendarPlus size={12} strokeWidth={2.4} />
           Add
@@ -262,11 +280,11 @@ function WhereRow({ event }: { event: ArEventDetail }) {
   return (
     <div>
       <div className="flex items-center gap-3 px-4 py-3">
-        <MapPin size={16} strokeWidth={2.3} className="shrink-0 text-ar-green-hot" />
+        <MapPin size={16} strokeWidth={2.3} className="text-ar-green-hot shrink-0" />
         <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold text-ar-text">{place ?? "Venue"}</span>
+          <span className="text-ar-text block text-[13.5px] font-semibold">{place ?? "Venue"}</span>
           {event.venueName && event.address && (
-            <span className="block text-[11.5px] leading-snug text-ar-faint">{event.address}</span>
+            <span className="text-ar-faint block text-[11.5px] leading-snug">{event.address}</span>
           )}
         </span>
         {hasPin && (
@@ -274,7 +292,7 @@ function WhereRow({ event }: { event: ArEventDetail }) {
             href={directionsUrl(event.latitude!, event.longitude!)}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-hud flex shrink-0 items-center gap-1 rounded-full border border-ar-line-bright px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ar-dim hover:text-ar-text"
+            className="font-hud border-ar-line-bright text-ar-dim hover:text-ar-text flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase"
           >
             <Navigation size={11} strokeWidth={2.4} />
             Go
@@ -294,7 +312,7 @@ function WhereRow({ event }: { event: ArEventDetail }) {
             src={venueMapImage(event.latitude!, event.longitude!, MAPBOX_TOKEN, theme)}
             alt={`Map of ${place ?? "the venue"}`}
             loading="lazy"
-            className="h-[130px] w-full rounded-ar object-cover"
+            className="rounded-ar h-[130px] w-full object-cover"
           />
         </a>
       )}
@@ -306,12 +324,18 @@ function Linked({ event }: { event: ArEventDetail }) {
   if (event.pins.length === 0 && event.bounties.length === 0) return null;
   return (
     <section className="pt-6">
-      <h2 className="font-hud mb-2 px-5 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-green">
+      <h2 className="font-hud text-ar-green mb-2 px-5 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
         At this event
       </h2>
       <div className="ar-scroll-x flex gap-2.5 px-5">
         {event.pins.map((p) => (
-          <LinkedTile key={p.id} href={`/directions/${p.id}`} image={p.imageUrl} label="Drop" title={p.title} />
+          <LinkedTile
+            key={p.id}
+            href={`/directions/${p.id}`}
+            image={p.imageUrl}
+            label="Drop"
+            title={p.title}
+          />
         ))}
         {event.bounties.map((b) => (
           <LinkedTile
@@ -342,21 +366,23 @@ function LinkedTile({
   icon?: boolean;
 }) {
   return (
-    <Link href={href} className="ar-bevel w-[140px] shrink-0 overflow-hidden rounded-ar">
+    <Link href={href} className="ar-bevel rounded-ar w-[140px] shrink-0 overflow-hidden">
       <div className="relative h-[84px]">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" />
         ) : (
-          <div className="ar-grid flex h-full w-full items-center justify-center bg-linear-to-br from-ar-green/20 to-ar-surface">
+          <div className="ar-grid from-ar-green/20 to-ar-surface flex h-full w-full items-center justify-center bg-linear-to-br">
             {icon && <Target size={22} className="text-ar-green-hot" />}
           </div>
         )}
-        <span className="font-hud ar-glass absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-ar-green-hot">
+        <span className="font-hud ar-glass text-ar-green-hot absolute top-1.5 left-1.5 rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-[0.12em] uppercase">
           {label}
         </span>
       </div>
-      <p className="line-clamp-2 px-2.5 py-2 text-[12px] font-semibold leading-snug text-ar-text">{title}</p>
+      <p className="text-ar-text line-clamp-2 px-2.5 py-2 text-[12px] leading-snug font-semibold">
+        {title}
+      </p>
     </Link>
   );
 }
@@ -382,7 +408,9 @@ function RsvpAction({ event }: { event: ArEventDetail }) {
   const going = event.viewer.going;
   return (
     <div>
-      {rsvp.error && <p className="mb-2 text-center text-[12px] text-ar-danger">{rsvp.error.message}</p>}
+      {rsvp.error && (
+        <p className="text-ar-danger mb-2 text-center text-[12px]">{rsvp.error.message}</p>
+      )}
       {going ? (
         <ArButton
           block

@@ -5,79 +5,70 @@ import { MediaInfo, PostSchema } from "~/types/post";
 export { MediaInfo, PostSchema };
 import { StellarAccount } from "@wadzzo/stellar/account";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";
 export const CommentSchema = z.object({
   postId: z.number(),
   parentId: z.number().optional(),
-  content: z
-    .string()
-    .min(1, { message: "Minimum 5 character is required!" })
-    .trim(),
+  content: z.string().min(1, { message: "Minimum 5 character is required!" }).trim(),
 });
 
 export const postRouter = createTRPCRouter({
-  create: protectedProcedure
-    .input(PostSchema)
-    .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
+  create: protectedProcedure.input(PostSchema).mutation(async ({ ctx, input }) => {
+    // simulate a slow db call
 
-      // console.log("media", input.medias);
+    // console.log("media", input.medias);
 
-      const post = await ctx.db.post.create({
-        data: {
-          platformId: ctx.platform.id,
-          heading: input.heading,
-          content: input.content,
-          creatorId: ctx.session.user.id,
-          // "public" (or anything that isn't a tier id) means no tier.
-          subscriptionId: /^\d+$/.test(input.subscription ?? "") ? Number(input.subscription) : null,
-          medias: input.medias
-            ? {
+    const post = await ctx.db.post.create({
+      data: {
+        platformId: ctx.platform.id,
+        heading: input.heading,
+        content: input.content,
+        creatorId: ctx.session.user.id,
+        // "public" (or anything that isn't a tier id) means no tier.
+        subscriptionId: /^\d+$/.test(input.subscription ?? "") ? Number(input.subscription) : null,
+        medias: input.medias
+          ? {
               createMany: {
                 data: input.medias,
               },
             }
-            : undefined,
+          : undefined,
+      },
+    });
+
+    const followers = await ctx.db.follow.findMany({
+      where: { creatorId: ctx.session.user.id },
+      select: { userId: true },
+    });
+
+    const followerIds = followers.map((follower) => follower.userId);
+
+    const createNotification = async (notifierId: string) => {
+      await ctx.db.notificationObject.create({
+        data: {
+          actorId: ctx.session.user.id,
+          entityType: NotificationType.POST,
+          entityId: post.id,
+          isUser: true,
+          Notification: {
+            create: [
+              {
+                notifierId,
+                isCreator: false,
+              },
+            ],
+          },
         },
       });
+    };
 
-      const followers = await ctx.db.follow.findMany({
-        where: { creatorId: ctx.session.user.id },
-        select: { userId: true },
-      });
+    for (const followerId of followerIds) {
+      await createNotification(followerId);
+    }
 
-      const followerIds = followers.map((follower) => follower.userId);
-
-      const createNotification = async (notifierId: string) => {
-        await ctx.db.notificationObject.create({
-          data: {
-            actorId: ctx.session.user.id,
-            entityType: NotificationType.POST,
-            entityId: post.id,
-            isUser: true,
-            Notification: {
-              create: [
-                {
-                  notifierId,
-                  isCreator: false,
-                },
-              ],
-            },
-          },
-        });
-      };
-
-      for (const followerId of followerIds) {
-        await createNotification(followerId);
-      }
-
-      return post;
-    }),
+    return post;
+  }),
 
   getPosts: protectedProcedure
     .input(
@@ -111,7 +102,13 @@ export const postRouter = createTRPCRouter({
           medias: true,
           subscription: true,
           creator: {
-            select: { name: true, id: true, profileUrl: true, pageAsset: true, customPageAssetCodeIssuer: true },
+            select: {
+              name: true,
+              id: true,
+              profileUrl: true,
+              pageAsset: true,
+              customPageAssetCodeIssuer: true,
+            },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -179,95 +176,103 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  getAPost: protectedProcedure
-    .input(z.number())
-    .query(async ({ input, ctx }) => {
-      const userId = ctx.session.user.id;
+  getAPost: protectedProcedure.input(z.number()).query(async ({ input, ctx }) => {
+    const userId = ctx.session.user.id;
 
-      const post = await ctx.db.post.findUnique({
-        where: { id: input },
-        include: {
-          _count: { select: { likes: true, comments: true } },
-          creator: {
-            select: {
-              name: true,
-              id: true,
-              profileUrl: true,
-              pageAsset: true,
-              customPageAssetCodeIssuer: true,
-            },
+    const post = await ctx.db.post.findUnique({
+      where: { id: input },
+      include: {
+        _count: { select: { likes: true, comments: true } },
+        creator: {
+          select: {
+            name: true,
+            id: true,
+            profileUrl: true,
+            pageAsset: true,
+            customPageAssetCodeIssuer: true,
           },
-          subscription: { select: { price: true, name: true } },
-          medias: true,
         },
-      });
+        subscription: { select: { price: true, name: true } },
+        medias: true,
+      },
+    });
 
+    if (post) {
+      // The brand always sees its own posts.
+      if (post.creatorId === userId) return post;
+      if (post.subscription) {
+        let pageAssetCode: string | undefined;
+        let pageAssetIssuer: string | undefined;
 
-
-
-
-
-      if (post) {
-        // The brand always sees its own posts.
-        if (post.creatorId === userId) return post;
-        if (post.subscription) {
-          let pageAssetCode: string | undefined;
-          let pageAssetIssuer: string | undefined;
-
-          const pageAsset = post.creator.pageAsset;
-          if (pageAsset) {
-            pageAssetCode = pageAsset.code;
-            pageAssetIssuer = pageAsset.issuer;
-          } else {
-            const customPageAssetCodeIssuer =
-              post.creator.customPageAssetCodeIssuer;
-            if (customPageAssetCodeIssuer) {
-              const [code, issuer] = customPageAssetCodeIssuer.split("-");
-              pageAssetCode = code;
-              pageAssetIssuer = issuer;
-            }
-          }
-
-          const acc = await StellarAccount.loadOrThrow(userId);
-
-          if (
-            acc.tokenBalance(pageAssetCode ?? "", pageAssetIssuer ?? "") >=
-            post.subscription.price
-          ) {
-            return post;
-          } else {
-            return false;
+        const pageAsset = post.creator.pageAsset;
+        if (pageAsset) {
+          pageAssetCode = pageAsset.code;
+          pageAssetIssuer = pageAsset.issuer;
+        } else {
+          const customPageAssetCodeIssuer = post.creator.customPageAssetCodeIssuer;
+          if (customPageAssetCodeIssuer) {
+            const [code, issuer] = customPageAssetCodeIssuer.split("-");
+            pageAssetCode = code;
+            pageAssetIssuer = issuer;
           }
         }
 
-        if (!post.subscription) return post;
-      }
-    }),
+        const acc = await StellarAccount.loadOrThrow(userId);
 
-  deletePost: protectedProcedure
-    .input(z.number())
-    .mutation(async ({ input, ctx }) => {
-      const userId = ctx.session.user.id;
-      const post = await ctx.db.post.findUnique({
-        where: { id: input },
-        select: { creatorId: true },
-      });
-      if (post?.creatorId === userId) {
-        await ctx.db.post.delete({ where: { id: input } });
+        if (
+          acc.tokenBalance(pageAssetCode ?? "", pageAssetIssuer ?? "") >= post.subscription.price
+        ) {
+          return post;
+        } else {
+          return false;
+        }
       }
-    }),
+
+      if (!post.subscription) return post;
+    }
+  }),
+
+  deletePost: protectedProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+    const userId = ctx.session.user.id;
+    const post = await ctx.db.post.findUnique({
+      where: { id: input },
+      select: { creatorId: true },
+    });
+    if (post?.creatorId === userId) {
+      await ctx.db.post.delete({ where: { id: input } });
+    }
+  }),
 
   getSecretMessage: protectedProcedure.query(async ({ ctx }) => {
     return "secret message";
   }),
 
-  likeApost: protectedProcedure
-    .input(z.number())
-    .mutation(async ({ input: postId, ctx }) => {
-      const userId = ctx.session.user.id;
+  likeApost: protectedProcedure.input(z.number()).mutation(async ({ input: postId, ctx }) => {
+    const userId = ctx.session.user.id;
 
-      const oldLike = await ctx.db.like.findUnique({
-        where: { postId_userId: { postId, userId } },
+    const oldLike = await ctx.db.like.findUnique({
+      where: { postId_userId: { postId, userId } },
+      include: {
+        post: {
+          select: {
+            creatorId: true,
+          },
+        },
+      },
+    });
+
+    if (oldLike) {
+      await ctx.db.like.update({
+        data: { status: true },
+        where: {
+          postId_userId: { postId: postId, userId },
+        },
+      });
+      return oldLike;
+    } else {
+      // first time.
+      const like = await ctx.db.like.create({
+        data: { userId, postId },
         include: {
           post: {
             select: {
@@ -276,93 +281,66 @@ export const postRouter = createTRPCRouter({
           },
         },
       });
-
-      if (oldLike) {
-        await ctx.db.like.update({
-          data: { status: true },
-          where: {
-            postId_userId: { postId: postId, userId },
-          },
-        });
-        return oldLike;
-      } else {
-        // first time.
-        const like = await ctx.db.like.create({
-          data: { userId, postId },
-          include: {
-            post: {
-              select: {
-                creatorId: true,
+      if (like.post.creatorId === userId) return like;
+      await ctx.db.notificationObject.create({
+        data: {
+          actorId: ctx.session.user.id,
+          entityType: NotificationType.LIKE,
+          entityId: postId,
+          isUser: false,
+          Notification: {
+            create: [
+              {
+                notifierId: like.post.creatorId,
+                isCreator: true,
               },
-            },
+            ],
           },
-        });
-        if (like.post.creatorId === userId) return like;
-        await ctx.db.notificationObject.create({
-          data: {
-            actorId: ctx.session.user.id,
-            entityType: NotificationType.LIKE,
-            entityId: postId,
-            isUser: false,
-            Notification: {
-              create: [
-                {
-                  notifierId: like.post.creatorId,
-                  isCreator: true,
-                },
-              ],
-            },
-          },
-        });
-        // create notification
-        // void ctx.db.post
-        //   .findUnique({ where: { id: postId }, select: { creatorId: true } })
-        //   .then(async (creator) => {
-        //     if (creator) {
-        //       await ctx.db.notificationObject.create({
-        //         data: {
-        //           actorId: userId,
-        //           entityId: postId,
-        //           entityType: NotificationType.LIKE,
-        //           Notification: {
-        //             create: [{ notifierId: creator.creatorId }],
-        //           },
-        //         },
-        //       });
-        //     }
-        //   })
-        //   .catch(console.error);
-
-        return like;
-      }
-    }),
-
-  unLike: protectedProcedure
-    .input(z.number())
-    .mutation(async ({ input: postId, ctx }) => {
-      await ctx.db.like.update({
-        data: { status: false },
-        where: {
-          postId_userId: { postId: postId, userId: ctx.session.user.id },
         },
       });
-    }),
+      // create notification
+      // void ctx.db.post
+      //   .findUnique({ where: { id: postId }, select: { creatorId: true } })
+      //   .then(async (creator) => {
+      //     if (creator) {
+      //       await ctx.db.notificationObject.create({
+      //         data: {
+      //           actorId: userId,
+      //           entityId: postId,
+      //           entityType: NotificationType.LIKE,
+      //           Notification: {
+      //             create: [{ notifierId: creator.creatorId }],
+      //           },
+      //         },
+      //       });
+      //     }
+      //   })
+      //   .catch(console.error);
 
-  getLikes: publicProcedure
-    .input(z.number())
-    .query(async ({ input: postId, ctx }) => {
-      return await ctx.db.like.count({
-        where: { postId },
-      });
-    }),
+      return like;
+    }
+  }),
 
-  isLiked: protectedProcedure
-    .input(z.number())
-    .query(async ({ input: postId, ctx }) => {
-      return await ctx.db.like.findFirst({
-        where: { userId: ctx.session.user.id, postId, status: true },
-      });
-    }),
+  unLike: protectedProcedure.input(z.number()).mutation(async ({ input: postId, ctx }) => {
+    await ctx.db.like.update({
+      data: { status: false },
+      where: {
+        postId_userId: { postId: postId, userId: ctx.session.user.id },
+      },
+    });
+  }),
+
+  getLikes: publicProcedure.input(z.number()).query(async ({ input: postId, ctx }) => {
+    return await ctx.db.like.count({
+      where: { postId },
+    });
+  }),
+
+  isLiked: protectedProcedure.input(z.number()).query(async ({ input: postId, ctx }) => {
+    return await ctx.db.like.findFirst({
+      where: { userId: ctx.session.user.id, postId, status: true },
+    });
+  }),
 
   getComments: publicProcedure
     .input(z.object({ postId: z.number(), limit: z.number().optional() }))
@@ -408,79 +386,70 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createComment: protectedProcedure
-    .input(CommentSchema)
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
-      let comment;
+  createComment: protectedProcedure.input(CommentSchema).mutation(async ({ ctx, input }) => {
+    const userId = ctx.session.user.id;
+    let comment;
 
-      if (input.parentId) {
-        comment = await ctx.db.comment.create({
-          data: {
-            content: input.content,
-            postId: input.postId,
-            userId,
-            parentCommentID: input.parentId,
-          },
-        });
-      } else {
-        comment = await ctx.db.comment.create({
-          data: {
-            content: input.content,
-            postId: input.postId,
-            userId,
-          },
-        });
-      }
-
-      const post = await ctx.db.post.findUnique({
-        where: { id: input.postId },
-        select: { creatorId: true },
-      });
-
-      const previousCommenters = await ctx.db.comment.findMany({
-        where: {
+    if (input.parentId) {
+      comment = await ctx.db.comment.create({
+        data: {
+          content: input.content,
           postId: input.postId,
-          userId: { not: userId },
+          userId,
+          parentCommentID: input.parentId,
         },
-        distinct: ["userId"],
-        select: { userId: true },
       });
+    } else {
+      comment = await ctx.db.comment.create({
+        data: {
+          content: input.content,
+          postId: input.postId,
+          userId,
+        },
+      });
+    }
 
-      const previousCommenterIds = previousCommenters.map(
-        (comment) => comment.userId,
-      );
+    const post = await ctx.db.post.findUnique({
+      where: { id: input.postId },
+      select: { creatorId: true },
+    });
 
-      const usersToNotify = new Set([post?.creatorId, ...previousCommenterIds]);
+    const previousCommenters = await ctx.db.comment.findMany({
+      where: {
+        postId: input.postId,
+        userId: { not: userId },
+      },
+      distinct: ["userId"],
+      select: { userId: true },
+    });
 
-      usersToNotify.delete(userId);
+    const previousCommenterIds = previousCommenters.map((comment) => comment.userId);
 
-      if (usersToNotify.size > 0) {
-        await ctx.db.notificationObject.create({
-          data: {
-            actorId: userId,
-            entityType: input.parentId
-              ? NotificationType.REPLY
-              : NotificationType.COMMENT,
-            entityId: input.postId,
-            isUser: false,
-            Notification: {
-              create: Array.from(usersToNotify)
-                .filter(
-                  (notifierId): notifierId is string =>
-                    notifierId !== undefined,
-                )
-                .map((notifierId) => ({
-                  notifierId,
-                  isCreator: notifierId === post?.creatorId, // Mark if the notifier is the post creator
-                })),
-            },
+    const usersToNotify = new Set([post?.creatorId, ...previousCommenterIds]);
+
+    usersToNotify.delete(userId);
+
+    if (usersToNotify.size > 0) {
+      await ctx.db.notificationObject.create({
+        data: {
+          actorId: userId,
+          entityType: input.parentId ? NotificationType.REPLY : NotificationType.COMMENT,
+          entityId: input.postId,
+          isUser: false,
+          Notification: {
+            create: Array.from(usersToNotify)
+              .filter((notifierId): notifierId is string => notifierId !== undefined)
+              .map((notifierId) => ({
+                notifierId,
+                isCreator: notifierId === post?.creatorId, // Mark if the notifier is the post creator
+              })),
           },
-        });
-      }
+        },
+      });
+    }
 
-      return comment;
-    }),
+    return comment;
+  }),
   deleteComment: protectedProcedure
     .input(z.number())
     .mutation(async ({ input: commentId, ctx }) => {

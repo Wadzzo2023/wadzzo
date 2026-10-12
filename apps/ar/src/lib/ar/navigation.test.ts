@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { dueCue, formatNavDistance, indexRoute, progressAt, snapToRoute, splitRoute } from "./navigation";
+import {
+  dueCue,
+  formatNavDistance,
+  indexRoute,
+  progressAt,
+  snapToRoute,
+  splitRoute,
+} from "./navigation";
 import type { Route } from "./useDirections";
 
 // An L-shaped route in Dhaka: ~111 m north, then ~102 m east.
@@ -15,9 +22,40 @@ const route: Route = {
   profile: "walking",
   summary: "Test Road",
   steps: [
-    { instruction: "Head north", banner: "Test Road", type: "depart", distance: 111, duration: 90, name: "Test Road", location: A, voice: [{ distanceAlong: 100, text: "In 100 metres, turn right" }, { distanceAlong: 20, text: "Turn right" }] },
-    { instruction: "Turn right", banner: "East Road", type: "turn", modifier: "right", distance: 102, duration: 90, name: "East Road", location: B, voice: [] },
-    { instruction: "You have arrived", banner: "", type: "arrive", distance: 0, duration: 0, name: "", location: C, voice: [] },
+    {
+      instruction: "Head north",
+      banner: "Test Road",
+      type: "depart",
+      distance: 111,
+      duration: 90,
+      name: "Test Road",
+      location: A,
+      voice: [
+        { distanceAlong: 100, text: "In 100 metres, turn right" },
+        { distanceAlong: 20, text: "Turn right" },
+      ],
+    },
+    {
+      instruction: "Turn right",
+      banner: "East Road",
+      type: "turn",
+      modifier: "right",
+      distance: 102,
+      duration: 90,
+      name: "East Road",
+      location: B,
+      voice: [],
+    },
+    {
+      instruction: "You have arrived",
+      banner: "",
+      type: "arrive",
+      distance: 0,
+      duration: 0,
+      name: "",
+      location: C,
+      voice: [],
+    },
   ],
 };
 

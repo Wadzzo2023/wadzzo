@@ -14,12 +14,23 @@ interface CustomAvatarProps {
  * Round profile picture. Size comes from `className` (default 56px); the
  * image fills it. Falls back to the default avatar icon.
  */
-export default function CustomAvatar({ url, size = 200, className, winnerCount }: CustomAvatarProps) {
+export default function CustomAvatar({
+  url,
+  size = 200,
+  className,
+  winnerCount,
+}: CustomAvatarProps) {
   return (
     <div className="relative shrink-0">
-      <div className={cn("size-14 overflow-hidden rounded-full border bg-surface-2", className)}>
+      <div className={cn("bg-surface-2 size-14 overflow-hidden rounded-full border", className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url ?? platformBranding.assets.avatar} alt="Avatar" width={size} height={size} className="size-full object-cover" />
+        <img
+          src={url ?? platformBranding.assets.avatar}
+          alt="Avatar"
+          width={size}
+          height={size}
+          className="size-full object-cover"
+        />
       </div>
       {winnerCount && winnerCount > 0 ? (
         <span className="absolute -bottom-1 -left-1 flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-full bg-[#DBDC2C] px-1 text-[10px] font-bold text-black">

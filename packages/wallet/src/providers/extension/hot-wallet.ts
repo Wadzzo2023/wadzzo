@@ -7,7 +7,8 @@ import { createExtensionProvider } from "../extension-provider";
 import type { ExtensionWallet } from "../wallet-provider";
 
 const isHotWalletInstalled = (): boolean =>
-  typeof window !== "undefined" && Boolean((window as Window & { hotExtension?: unknown }).hotExtension);
+  typeof window !== "undefined" &&
+  Boolean((window as Window & { hotExtension?: unknown }).hotExtension);
 
 const hotWallet: ExtensionWallet = {
   type: WalletType.hotWallet,
@@ -21,7 +22,7 @@ const hotWallet: ExtensionWallet = {
     }
     try {
       const result = await HOT.request("stellar:getAddress", {});
-      return (result).address;
+      return result.address;
     } catch (cause) {
       throw new AppError(ErrorCodes.WALLET_CONNECTION_REJECTED, {
         message: "Failed to get address from HOT Wallet.",

@@ -19,7 +19,10 @@ export function putFile(url: string, file: File, onProgress?: (pct: number) => v
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
     };
-    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+    xhr.onload = () =>
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new Error(`Upload failed (${xhr.status})`));
     xhr.onerror = () => reject(new Error("Upload failed — check your connection"));
     xhr.send(file);
   });
@@ -27,5 +30,10 @@ export function putFile(url: string, file: File, onProgress?: (pct: number) => v
 
 /** What the server needs to sign an upload. */
 export async function describeFile(file: File) {
-  return { fileName: file.name, fileType: file.type, fileSize: file.size, checksum: await sha256Hex(file) };
+  return {
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    checksum: await sha256Hex(file),
+  };
 }

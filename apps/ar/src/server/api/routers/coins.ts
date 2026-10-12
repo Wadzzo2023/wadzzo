@@ -12,13 +12,23 @@ export const coinsRouter = createTRPCRouter({
   balance: protectedProcedure.query(async ({ ctx }) => {
     // each platform (site) has its own balance
     const row = await ctx.db.coinBalance.findUnique({
-      where: { userId_platformId: { userId: ctx.session.user.id, platformId: ctx.platform.id } },
+      where: {
+        userId_platformId: {
+          userId: ctx.session.user.id,
+          platformId: ctx.platform.id,
+        },
+      },
     });
     return { balance: row?.balance ?? 0 };
   }),
 
   history: protectedProcedure
-    .input(z.object({ cursor: z.string().optional(), limit: z.number().int().min(1).max(50).default(30) }))
+    .input(
+      z.object({
+        cursor: z.string().optional(),
+        limit: z.number().int().min(1).max(50).default(30),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.coinLedger.findMany({
         // the same balance `balance` reads: coins earned on this platform

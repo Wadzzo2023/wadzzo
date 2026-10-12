@@ -54,7 +54,11 @@ const uploadBody = z.object({
       z.object({
         fileName: z.string().max(255),
         fileType: z.string().regex(/^image\//, "Only images can be used here"),
-        fileSize: z.number().int().positive().max(20 * 1024 * 1024),
+        fileSize: z
+          .number()
+          .int()
+          .positive()
+          .max(20 * 1024 * 1024),
         checksum: z.string().max(100),
       }),
     )
@@ -88,21 +92,46 @@ export const ROUTES: Route[] = [
       };
     },
   },
-  { method: "GET", path: "/auth/me", auth: "required", handler: ({ caller }) => caller.user.profile() },
+  {
+    method: "GET",
+    path: "/auth/me",
+    auth: "required",
+    handler: ({ caller }) => caller.user.profile(),
+  },
   // No server-side revocation by decision; kept so it can be added later
   // without an app update.
-  { method: "DELETE", path: "/auth/session", auth: "required", handler: async () => ({ ok: true }) },
+  {
+    method: "DELETE",
+    path: "/auth/session",
+    auth: "required",
+    handler: async () => ({ ok: true }),
+  },
 
   // ── Me ──────────────────────────────────────────────────────────────────
-  { method: "GET", path: "/me/profile", auth: "required", handler: ({ caller }) => caller.user.profile() },
+  {
+    method: "GET",
+    path: "/me/profile",
+    auth: "required",
+    handler: ({ caller }) => caller.user.profile(),
+  },
   {
     method: "PATCH",
     path: "/me/profile",
     auth: "required",
     handler: ({ caller, body }) => caller.user.updateProfile(body as never),
   },
-  { method: "DELETE", path: "/me", auth: "required", handler: ({ caller }) => caller.user.deleteAccount() },
-  { method: "GET", path: "/me/balance", auth: "required", handler: ({ caller }) => caller.user.platformBalance() },
+  {
+    method: "DELETE",
+    path: "/me",
+    auth: "required",
+    handler: ({ caller }) => caller.user.deleteAccount(),
+  },
+  {
+    method: "GET",
+    path: "/me/balance",
+    auth: "required",
+    handler: ({ caller }) => caller.user.platformBalance(),
+  },
   {
     method: "GET",
     path: "/me/collection",
@@ -116,8 +145,18 @@ export const ROUTES: Route[] = [
         sort: query.sort as never,
       }),
   },
-  { method: "GET", path: "/me/following", auth: "required", handler: ({ caller }) => caller.brands.followed() },
-  { method: "GET", path: "/me/bounties", auth: "required", handler: ({ caller }) => caller.bounty.mine() },
+  {
+    method: "GET",
+    path: "/me/following",
+    auth: "required",
+    handler: ({ caller }) => caller.brands.followed(),
+  },
+  {
+    method: "GET",
+    path: "/me/bounties",
+    auth: "required",
+    handler: ({ caller }) => caller.bounty.mine(),
+  },
   {
     method: "GET",
     path: "/me/bounty-attention",
@@ -133,7 +172,11 @@ export const ROUTES: Route[] = [
     // `?lat=&lng=&radiusKm=` → only pins in that circle. Without them (older
     // app builds), every live pin, as before.
     handler: ({ caller, query }) =>
-      caller.pins.list({ lat: num(query.lat), lng: num(query.lng), radiusKm: num(query.radiusKm) }),
+      caller.pins.list({
+        lat: num(query.lat),
+        lng: num(query.lng),
+        radiusKm: num(query.radiusKm),
+      }),
   },
   // Before /pins/:id — both are two segments and the first match wins.
   {
@@ -141,9 +184,20 @@ export const ROUTES: Route[] = [
     path: "/pins/search",
     auth: "optional",
     handler: ({ caller, query }) =>
-      caller.pins.search({ q: query.q ?? "", lat: num(query.lat), lng: num(query.lng), limit: num(query.limit), brandId: query.brandId ? query.brandId : undefined }),
+      caller.pins.search({
+        q: query.q ?? "",
+        lat: num(query.lat),
+        lng: num(query.lng),
+        limit: num(query.limit),
+        brandId: query.brandId ? query.brandId : undefined,
+      }),
   },
-  { method: "GET", path: "/pins/:id", auth: "optional", handler: ({ caller, params }) => caller.pins.byId({ id: params.id! }) },
+  {
+    method: "GET",
+    path: "/pins/:id",
+    auth: "optional",
+    handler: ({ caller, params }) => caller.pins.byId({ id: params.id! }),
+  },
   {
     method: "POST",
     path: "/pins/:id/collect",
@@ -165,8 +219,18 @@ export const ROUTES: Route[] = [
   },
 
   // ── Brands ──────────────────────────────────────────────────────────────
-  { method: "GET", path: "/brands", auth: "optional", handler: ({ caller }) => caller.brands.list() },
-  { method: "GET", path: "/brands/:id", auth: "optional", handler: ({ caller, params }) => caller.brands.byId({ id: params.id! }) },
+  {
+    method: "GET",
+    path: "/brands",
+    auth: "optional",
+    handler: ({ caller }) => caller.brands.list(),
+  },
+  {
+    method: "GET",
+    path: "/brands/:id",
+    auth: "optional",
+    handler: ({ caller, params }) => caller.brands.byId({ id: params.id! }),
+  },
   {
     method: "GET",
     path: "/brands/:id/pins",
@@ -207,20 +271,43 @@ export const ROUTES: Route[] = [
         cursor: num(query.cursor) ?? null,
       }),
   },
-  { method: "GET", path: "/bounties/:id", auth: "optional", handler: (c) => c.caller.bounty.byId({ id: idParam(c, "id") }) },
-  { method: "POST", path: "/bounties/:id/join", auth: "required", handler: (c) => c.caller.bounty.join({ id: idParam(c, "id") }) },
-  { method: "GET", path: "/bounties/:id/entries", auth: "required", handler: (c) => c.caller.bounty.entries({ bountyId: idParam(c, "id") }) },
+  {
+    method: "GET",
+    path: "/bounties/:id",
+    auth: "optional",
+    handler: (c) => c.caller.bounty.byId({ id: idParam(c, "id") }),
+  },
+  {
+    method: "POST",
+    path: "/bounties/:id/join",
+    auth: "required",
+    handler: (c) => c.caller.bounty.join({ id: idParam(c, "id") }),
+  },
+  {
+    method: "GET",
+    path: "/bounties/:id/entries",
+    auth: "required",
+    handler: (c) => c.caller.bounty.entries({ bountyId: idParam(c, "id") }),
+  },
   {
     method: "POST",
     path: "/bounties/:id/entries",
     auth: "required",
-    handler: (c) => c.caller.bounty.createEntry({ ...(c.body as object), bountyId: idParam(c, "id") } as never),
+    handler: (c) =>
+      c.caller.bounty.createEntry({
+        ...(c.body as object),
+        bountyId: idParam(c, "id"),
+      } as never),
   },
   {
     method: "PATCH",
     path: "/entries/:entryId",
     auth: "required",
-    handler: (c) => c.caller.bounty.updateEntry({ ...(c.body as object), entryId: idParam(c, "entryId") } as never),
+    handler: (c) =>
+      c.caller.bounty.updateEntry({
+        ...(c.body as object),
+        entryId: idParam(c, "entryId"),
+      } as never),
   },
   {
     method: "DELETE",
@@ -232,14 +319,27 @@ export const ROUTES: Route[] = [
     method: "POST",
     path: "/bounties/:id/uploads",
     auth: "required",
-    handler: (c) => c.caller.bounty.uploadUrls({ ...(c.body as object), bountyId: idParam(c, "id") } as never),
+    handler: (c) =>
+      c.caller.bounty.uploadUrls({
+        ...(c.body as object),
+        bountyId: idParam(c, "id"),
+      } as never),
   },
-  { method: "GET", path: "/bounties/:id/comments", auth: "optional", handler: (c) => c.caller.bounty.comments({ bountyId: idParam(c, "id") }) },
+  {
+    method: "GET",
+    path: "/bounties/:id/comments",
+    auth: "optional",
+    handler: (c) => c.caller.bounty.comments({ bountyId: idParam(c, "id") }),
+  },
   {
     method: "POST",
     path: "/bounties/:id/comments",
     auth: "required",
-    handler: (c) => c.caller.bounty.addComment({ ...(c.body as object), bountyId: idParam(c, "id") } as never),
+    handler: (c) =>
+      c.caller.bounty.addComment({
+        ...(c.body as object),
+        bountyId: idParam(c, "id"),
+      } as never),
   },
   {
     method: "DELETE",
@@ -247,12 +347,21 @@ export const ROUTES: Route[] = [
     auth: "required",
     handler: (c) => c.caller.bounty.deleteComment({ commentId: idParam(c, "commentId") }),
   },
-  { method: "GET", path: "/bounties/:id/thread", auth: "required", handler: (c) => c.caller.bounty.thread({ bountyId: idParam(c, "id") }) },
+  {
+    method: "GET",
+    path: "/bounties/:id/thread",
+    auth: "required",
+    handler: (c) => c.caller.bounty.thread({ bountyId: idParam(c, "id") }),
+  },
   {
     method: "POST",
     path: "/bounties/:id/thread",
     auth: "required",
-    handler: (c) => c.caller.bounty.sendMessage({ ...(c.body as object), bountyId: idParam(c, "id") } as never),
+    handler: (c) =>
+      c.caller.bounty.sendMessage({
+        ...(c.body as object),
+        bountyId: idParam(c, "id"),
+      } as never),
   },
 
   // ── Events & announcements ──────────────────────────────────────────────
@@ -269,12 +378,21 @@ export const ROUTES: Route[] = [
         cursor: query.cursor ? query.cursor : null,
       }),
   },
-  { method: "GET", path: "/events/:id", auth: "optional", handler: (c) => c.caller.events.byId({ id: c.params.id! }) },
+  {
+    method: "GET",
+    path: "/events/:id",
+    auth: "optional",
+    handler: (c) => c.caller.events.byId({ id: c.params.id! }),
+  },
   {
     method: "POST",
     path: "/events/:id/rsvp",
     auth: "required",
-    handler: (c) => c.caller.events.rsvp({ ...(c.body as object), id: c.params.id! } as never),
+    handler: (c) =>
+      c.caller.events.rsvp({
+        ...(c.body as object),
+        id: c.params.id!,
+      } as never),
   },
   {
     method: "GET",
@@ -287,13 +405,20 @@ export const ROUTES: Route[] = [
     path: "/events/:id/comments",
     auth: "required",
     handler: (c) =>
-      c.caller.events.addComment({ ...(c.body as object), target: { kind: "event", id: c.params.id! } } as never),
+      c.caller.events.addComment({
+        ...(c.body as object),
+        target: { kind: "event", id: c.params.id! },
+      } as never),
   },
   {
     method: "DELETE",
     path: "/event-comments/:commentId",
     auth: "required",
-    handler: (c) => c.caller.events.deleteComment({ kind: "event", commentId: c.params.commentId! }),
+    handler: (c) =>
+      c.caller.events.deleteComment({
+        kind: "event",
+        commentId: c.params.commentId!,
+      }),
   },
   {
     method: "GET",
@@ -307,7 +432,12 @@ export const ROUTES: Route[] = [
         cursor: query.cursor ? query.cursor : null,
       }),
   },
-  { method: "GET", path: "/announcements/:id", auth: "optional", handler: (c) => c.caller.events.announcement({ id: c.params.id! }) },
+  {
+    method: "GET",
+    path: "/announcements/:id",
+    auth: "optional",
+    handler: (c) => c.caller.events.announcement({ id: c.params.id! }),
+  },
   {
     method: "GET",
     path: "/announcements/:id/comments",
@@ -319,13 +449,20 @@ export const ROUTES: Route[] = [
     path: "/announcements/:id/comments",
     auth: "required",
     handler: (c) =>
-      c.caller.events.addComment({ ...(c.body as object), target: { kind: "announcement", id: c.params.id! } } as never),
+      c.caller.events.addComment({
+        ...(c.body as object),
+        target: { kind: "announcement", id: c.params.id! },
+      } as never),
   },
   {
     method: "DELETE",
     path: "/announcement-comments/:commentId",
     auth: "required",
-    handler: (c) => c.caller.events.deleteComment({ kind: "announcement", commentId: c.params.commentId! }),
+    handler: (c) =>
+      c.caller.events.deleteComment({
+        kind: "announcement",
+        commentId: c.params.commentId!,
+      }),
   },
 
   // ── Murals + coins (docs/murals/plan.md §5.1) ──────────────────────────
@@ -348,7 +485,8 @@ export const ROUTES: Route[] = [
     method: "GET",
     path: "/murals/nearby",
     auth: "optional",
-    handler: ({ caller, query }) => caller.murals.nearby({ lat: num(query.lat)!, lng: num(query.lng)! }),
+    handler: ({ caller, query }) =>
+      caller.murals.nearby({ lat: num(query.lat)!, lng: num(query.lng)! }),
   },
   {
     method: "POST",
@@ -360,28 +498,50 @@ export const ROUTES: Route[] = [
     method: "POST",
     path: "/murals/scans/:id/submit",
     auth: "required",
-    handler: ({ caller, params, body }) => caller.murals.submitScan({ ...(body as object), sessionId: params.id! } as never),
+    handler: ({ caller, params, body }) =>
+      caller.murals.submitScan({
+        ...(body as object),
+        sessionId: params.id!,
+      } as never),
   },
-  { method: "GET", path: "/murals/:id", auth: "optional", handler: ({ caller, params }) => caller.murals.byId({ id: params.id! }) },
+  {
+    method: "GET",
+    path: "/murals/:id",
+    auth: "optional",
+    handler: ({ caller, params }) => caller.murals.byId({ id: params.id! }),
+  },
   {
     method: "PATCH",
     path: "/murals/:id",
     auth: "required",
-    handler: ({ caller, params, body }) => caller.murals.name({ ...(body as object), muralId: params.id! } as never),
+    handler: ({ caller, params, body }) =>
+      caller.murals.name({ ...(body as object), muralId: params.id! } as never),
   },
   {
     method: "GET",
     path: "/me/murals",
     auth: "required",
-    handler: ({ caller, query }) => caller.murals.mine({ cursor: num(query.cursor) ?? 0, limit: num(query.limit) ?? 24 }),
+    handler: ({ caller, query }) =>
+      caller.murals.mine({
+        cursor: num(query.cursor) ?? 0,
+        limit: num(query.limit) ?? 24,
+      }),
   },
-  { method: "GET", path: "/me/coins", auth: "required", handler: ({ caller }) => caller.coins.balance() },
+  {
+    method: "GET",
+    path: "/me/coins",
+    auth: "required",
+    handler: ({ caller }) => caller.coins.balance(),
+  },
   {
     method: "GET",
     path: "/me/coins/history",
     auth: "required",
     handler: ({ caller, query }) =>
-      caller.coins.history({ cursor: query.cursor ? query.cursor : undefined, limit: num(query.limit) ?? 30 }),
+      caller.coins.history({
+        cursor: query.cursor ? query.cursor : undefined,
+        limit: num(query.limit) ?? 30,
+      }),
   },
 
   // ── Uploads (profile images) ────────────────────────────────────────────

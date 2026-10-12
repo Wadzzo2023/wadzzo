@@ -13,17 +13,48 @@ const ids = z.array(z.number().int()).min(1).max(200);
 export const notificationRouter = createTRPCRouter({
   /** Newest first, repeats folded into one line. */
   list: protectedProcedure
-    .input(z.object({ category: z.string().optional(), unreadOnly: z.boolean().default(false), limit: z.number().int().min(1).max(50).default(20), cursor: z.number().int().nullish() }))
-    .query(({ ctx, input }) => inbox.listInbox(ctx.db, ctx.session.user.id, { scope: SCOPE, ...input })),
+    .input(
+      z.object({
+        category: z.string().optional(),
+        unreadOnly: z.boolean().default(false),
+        limit: z.number().int().min(1).max(50).default(20),
+        cursor: z.number().int().nullish(),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      inbox.listInbox(ctx.db, ctx.session.user.id, { scope: SCOPE, ...input }),
+    ),
 
-  unseenCount: protectedProcedure.query(({ ctx }) => inbox.unreadCount(ctx.db, ctx.session.user.id, SCOPE)),
-  unreadByCategory: protectedProcedure.query(({ ctx }) => inbox.unreadByCategory(ctx.db, ctx.session.user.id, SCOPE)),
+  unseenCount: protectedProcedure.query(({ ctx }) =>
+    inbox.unreadCount(ctx.db, ctx.session.user.id, SCOPE),
+  ),
+  unreadByCategory: protectedProcedure.query(({ ctx }) =>
+    inbox.unreadByCategory(ctx.db, ctx.session.user.id, SCOPE),
+  ),
 
-  markRead: protectedProcedure.input(z.object({ ids })).mutation(async ({ ctx, input }) => void (await inbox.markRead(ctx.db, ctx.session.user.id, input.ids))),
-  markUnread: protectedProcedure.input(z.object({ ids })).mutation(async ({ ctx, input }) => void (await inbox.markUnread(ctx.db, ctx.session.user.id, input.ids))),
+  markRead: protectedProcedure
+    .input(z.object({ ids }))
+    .mutation(
+      async ({ ctx, input }) => void (await inbox.markRead(ctx.db, ctx.session.user.id, input.ids)),
+    ),
+  markUnread: protectedProcedure
+    .input(z.object({ ids }))
+    .mutation(
+      async ({ ctx, input }) =>
+        void (await inbox.markUnread(ctx.db, ctx.session.user.id, input.ids)),
+    ),
   markAllRead: protectedProcedure
     .input(z.object({ category: z.string().optional() }).optional())
-    .mutation(async ({ ctx, input }) => void (await inbox.markAllRead(ctx.db, ctx.session.user.id, SCOPE, input?.category))),
-  remove: protectedProcedure.input(z.object({ ids })).mutation(async ({ ctx, input }) => void (await inbox.remove(ctx.db, ctx.session.user.id, input.ids))),
-  clearRead: protectedProcedure.mutation(async ({ ctx }) => void (await inbox.clearRead(ctx.db, ctx.session.user.id, SCOPE))),
+    .mutation(
+      async ({ ctx, input }) =>
+        void (await inbox.markAllRead(ctx.db, ctx.session.user.id, SCOPE, input?.category)),
+    ),
+  remove: protectedProcedure
+    .input(z.object({ ids }))
+    .mutation(
+      async ({ ctx, input }) => void (await inbox.remove(ctx.db, ctx.session.user.id, input.ids)),
+    ),
+  clearRead: protectedProcedure.mutation(
+    async ({ ctx }) => void (await inbox.clearRead(ctx.db, ctx.session.user.id, SCOPE)),
+  ),
 });

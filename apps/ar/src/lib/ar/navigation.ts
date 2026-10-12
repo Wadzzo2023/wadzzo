@@ -30,21 +30,25 @@ const rad = (d: number) => (d * Math.PI) / 180;
 export function haversine(a: LngLat, b: LngLat) {
   const dLat = rad(b[1] - a[1]);
   const dLng = rad(b[0] - a[0]);
-  const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[1])) * Math.cos(rad(b[1])) * Math.sin(dLng / 2) ** 2;
+  const s =
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[1])) * Math.cos(rad(b[1])) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
 }
 
 /** Initial bearing a → b, degrees clockwise from north. */
 export function bearing(a: LngLat, b: LngLat) {
   const y = Math.sin(rad(b[0] - a[0])) * Math.cos(rad(b[1]));
-  const x = Math.cos(rad(a[1])) * Math.sin(rad(b[1])) - Math.sin(rad(a[1])) * Math.cos(rad(b[1])) * Math.cos(rad(b[0] - a[0]));
+  const x =
+    Math.cos(rad(a[1])) * Math.sin(rad(b[1])) -
+    Math.sin(rad(a[1])) * Math.cos(rad(b[1])) * Math.cos(rad(b[0] - a[0]));
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
 export function indexRoute(route: Route): RouteIndex {
   const coords = route.coordinates;
   const cum = [0];
-  for (let i = 1; i < coords.length; i++) cum.push(cum[i - 1]! + haversine(coords[i - 1]!, coords[i]!));
+  for (let i = 1; i < coords.length; i++)
+    cum.push(cum[i - 1]! + haversine(coords[i - 1]!, coords[i]!));
   const total = cum[cum.length - 1] ?? 0;
   // Step distances are Mapbox's along-road metres; scale to our polyline so
   // rounding differences can't push the last step past the end.
@@ -77,7 +81,11 @@ export interface Snap {
  * at street scale (< 0.1% error over a few km). `hint` (the last snap's
  * `along`) keeps a route that doubles back from jumping to the wrong leg.
  */
-export function snapToRoute(index: RouteIndex, fix: { lat: number; lng: number }, hint?: number): Snap | null {
+export function snapToRoute(
+  index: RouteIndex,
+  fix: { lat: number; lng: number },
+  hint?: number,
+): Snap | null {
   const { coords, cum } = index;
   if (coords.length < 2) return null;
   const kx = Math.cos(rad(fix.lat)) * 111_320;
@@ -86,12 +94,16 @@ export function snapToRoute(index: RouteIndex, fix: { lat: number; lng: number }
   const py = (c: LngLat) => (c[1] - fix.lat) * ky;
   let best: { d: number; seg: number; t: number } | null = null;
   for (let i = 0; i < coords.length - 1; i++) {
-    const ax = px(coords[i]!), ay = py(coords[i]!);
-    const bx = px(coords[i + 1]!), by = py(coords[i + 1]!);
-    const vx = bx - ax, vy = by - ay;
+    const ax = px(coords[i]!),
+      ay = py(coords[i]!);
+    const bx = px(coords[i + 1]!),
+      by = py(coords[i + 1]!);
+    const vx = bx - ax,
+      vy = by - ay;
     const len2 = vx * vx + vy * vy;
     const t = len2 ? Math.max(0, Math.min(1, -(ax * vx + ay * vy) / len2)) : 0;
-    const cx = ax + vx * t, cy = ay + vy * t;
+    const cx = ax + vx * t,
+      cy = ay + vy * t;
     let d = Math.hypot(cx, cy);
     // Prefer staying near where we were: a small penalty for jumping far back.
     if (hint != null) {
@@ -101,7 +113,8 @@ export function snapToRoute(index: RouteIndex, fix: { lat: number; lng: number }
     if (!best || d < best.d) best = { d, seg: i, t };
   }
   if (!best) return null;
-  const a = coords[best.seg]!, b = coords[best.seg + 1]!;
+  const a = coords[best.seg]!,
+    b = coords[best.seg + 1]!;
   const point: LngLat = [a[0] + (b[0] - a[0]) * best.t, a[1] + (b[1] - a[1]) * best.t];
   return {
     point,

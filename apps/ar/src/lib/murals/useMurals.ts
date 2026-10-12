@@ -21,7 +21,11 @@ export function useNearbyMurals(fix: GeoFix | null) {
   const lng = fix ? grid(fix.lng) : null;
   const query = api.murals.nearby.useQuery(
     { lat: lat ?? 0, lng: lng ?? 0 },
-    { enabled: lat != null && lng != null, staleTime: 60_000, refetchOnWindowFocus: false },
+    {
+      enabled: lat != null && lng != null,
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
   );
   const murals = useMemo(() => query.data?.murals ?? [], [query.data]);
 
@@ -40,7 +44,12 @@ export function useNearbyMurals(fix: GeoFix | null) {
     [murals],
   );
 
-  return { murals, dailyLimit: query.data?.dailyLimit ?? null, matchVector, refetch: query.refetch };
+  return {
+    murals,
+    dailyLimit: query.data?.dailyLimit ?? null,
+    matchVector,
+    refetch: query.refetch,
+  };
 }
 
 export type SubmitArgs = {
@@ -62,16 +71,36 @@ export function useSubmitMuralScan() {
 
   const run = useCallback(
     async ({ frames, fix, sweep, platform }: SubmitArgs): Promise<ScanResult> => {
-      if (busy.current) throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "A scan is already being sent" });
+      if (busy.current)
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "A scan is already being sent",
+        });
       busy.current = true;
       try {
-        const started = await start.mutateAsync({ lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy });
-        if (!started.ok) return { kind: "rejected", code: started.code, message: started.message, retryable: started.retryable };
+        const started = await start.mutateAsync({
+          lat: fix.lat,
+          lng: fix.lng,
+          accuracy: fix.accuracy,
+        });
+        if (!started.ok)
+          return {
+            kind: "rejected",
+            code: started.code,
+            message: started.message,
+            retryable: started.retryable,
+          };
 
         await Promise.all(
           started.frames.map(async ({ uploadUrl }, i) => {
-            const res = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": "image/jpeg" }, body: frames[i] });
-            if (!res.ok) throw new AppError(ErrorCodes.UPLOAD_FAILED, { message: "Upload failed — check your connection and try again" });
+            const res = await fetch(uploadUrl, {
+              method: "PUT",
+              headers: { "Content-Type": "image/jpeg" },
+              body: frames[i],
+            });
+            if (!res.ok)
+              throw new AppError(ErrorCodes.UPLOAD_FAILED, {
+                message: "Upload failed — check your connection and try again",
+              });
           }),
         );
 

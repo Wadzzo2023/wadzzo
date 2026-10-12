@@ -22,14 +22,22 @@ type Access = ReturnType<typeof usePortalAccess>;
 /** Signed out: one clear screen with the wallet/email sign-in. */
 export function SignInScreen() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-2xl border bg-card p-8 text-center">
-        <span className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-          <Image src={platformBranding.assets.loading} alt="" width={32} height={32} className="object-contain" />
+    <div className="bg-background flex min-h-dvh items-center justify-center px-4">
+      <div className="bg-card w-full max-w-sm rounded-2xl border p-8 text-center">
+        <span className="bg-primary/10 mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl">
+          <Image
+            src={platformBranding.assets.loading}
+            alt=""
+            width={32}
+            height={32}
+            className="object-contain"
+          />
         </span>
-        <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Brand portal</p>
-        <h1 className="mt-1 font-hud text-2xl font-bold">Sign in to {platformBranding.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="font-hud text-primary text-[11px] font-semibold tracking-[0.18em] uppercase">
+          Brand portal
+        </p>
+        <h1 className="font-hud mt-1 text-2xl font-bold">Sign in to {platformBranding.name}</h1>
+        <p className="text-muted-foreground mt-2 text-sm">
           Create drops, run bounties and stores, and see how fans engage with your brand.
         </p>
         <div className="mt-6 flex justify-center [&_button]:w-full">
@@ -72,8 +80,8 @@ export function CreatorGate({ access, children }: { access: Access; children: Re
   if (shouldRedirectAdmin) {
     return (
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-3 text-center">
-        <Loader2 className="size-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Redirecting to admin portal...</p>
+        <Loader2 className="text-primary size-6 animate-spin" />
+        <p className="text-muted-foreground text-sm">Redirecting to admin portal...</p>
       </div>
     );
   }
@@ -99,11 +107,11 @@ export function CreatorGate({ access, children }: { access: Access; children: Re
 function OtherPlatformCard({ platformName }: { platformName: string }) {
   return (
     <div className="max-w-sm text-center">
-      <ShieldAlert className="mx-auto mb-3 size-8 text-muted-foreground" />
+      <ShieldAlert className="text-muted-foreground mx-auto mb-3 size-8" />
       <h1 className="font-hud text-xl font-bold">This brand is on {platformName}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Your account is already a brand on {platformName}, and a brand belongs to one platform only. Sign in with a different
-        account to create a brand here.
+      <p className="text-muted-foreground mt-1 text-sm">
+        Your account is already a brand on {platformName}, and a brand belongs to one platform only.
+        Sign in with a different account to create a brand here.
       </p>
     </div>
   );
@@ -116,9 +124,12 @@ export function AdminGate({ access, children }: { access: Access; children: Reac
   return (
     <div className="flex min-h-[70dvh] items-center justify-center px-4">
       <div className="max-w-sm text-center">
-        <ShieldAlert className="mx-auto mb-3 size-8 text-muted-foreground" />
+        <ShieldAlert className="text-muted-foreground mx-auto mb-3 size-8" />
         <h1 className="font-hud text-xl font-bold">Admins only</h1>
-        <p className="mt-1 text-sm text-muted-foreground">This area is for {platformBranding.name} admins. Your account doesn&apos;t have admin access.</p>
+        <p className="text-muted-foreground mt-1 text-sm">
+          This area is for {platformBranding.name} admins. Your account doesn&apos;t have admin
+          access.
+        </p>
         <Button asChild variant="outline" className="mt-5">
           <Link href="/pins">Back to your portal</Link>
         </Button>
@@ -164,8 +175,8 @@ export function OnboardingGate({ access, children }: { access: Access; children:
   if (hasSubmittedOrIsCreator) {
     return (
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-3 text-center">
-        <Loader2 className="size-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Redirecting to your portal...</p>
+        <Loader2 className="text-primary size-6 animate-spin" />
+        <p className="text-muted-foreground text-sm">Redirecting to your portal...</p>
       </div>
     );
   }

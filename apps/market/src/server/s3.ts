@@ -6,7 +6,12 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "~/env";
-import { ENTRY_FILE_TYPES, IMAGE_FILE_TYPES, MAX_ENTRY_FILE_BYTES, MAX_IMAGE_BYTES } from "~/lib/upload-files";
+import {
+  ENTRY_FILE_TYPES,
+  IMAGE_FILE_TYPES,
+  MAX_ENTRY_FILE_BYTES,
+  MAX_IMAGE_BYTES,
+} from "~/lib/upload-files";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export { MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES } from "~/lib/upload-files";
@@ -18,7 +23,10 @@ export { MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES } from "~/lib/upload-files";
  */
 export const s3Client = new S3Client({
   region: env.AWS_BUCKET_REGION,
-  credentials: { accessKeyId: env.AWS_ACCESS_KEY, secretAccessKey: env.AWS_SECRET_ACCESS_KEY },
+  credentials: {
+    accessKeyId: env.AWS_ACCESS_KEY,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 const EXPIRES_IN_SECONDS = 60 * 10;
@@ -32,26 +40,64 @@ export function isOwnS3Url(url: string) {
   return url.startsWith(publicS3Url(""));
 }
 
-async function sign({ fileType, fileSize, checksum, fileName }: { fileType: string; fileSize: number; checksum: string; fileName: string }) {
+async function sign({
+  fileType,
+  fileSize,
+  checksum,
+  fileName,
+}: {
+  fileType: string;
+  fileSize: number;
+  checksum: string;
+  fileName: string;
+}) {
   const key = crypto.randomBytes(32).toString("hex");
   const uploadUrl = await getSignedUrl(
     s3Client,
-    new PutObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key, ContentType: fileType, ContentLength: fileSize, ChecksumSHA256: checksum }),
+    new PutObjectCommand({
+      Bucket: env.AWS_BUCKET_NAME,
+      Key: key,
+      ContentType: fileType,
+      ContentLength: fileSize,
+      ChecksumSHA256: checksum,
+    }),
     { expiresIn: EXPIRES_IN_SECONDS },
   );
   return { uploadUrl, fileUrl: publicS3Url(key), fileName };
 }
 
 /** A bounty entry attachment. */
-export async function signEntryUpload(file: { fileType: string; fileSize: number; checksum: string; fileName: string }) {
-  if (file.fileSize > MAX_ENTRY_FILE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
-  if (!(ENTRY_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "That file type can't be attached" });
+export async function signEntryUpload(file: {
+  fileType: string;
+  fileSize: number;
+  checksum: string;
+  fileName: string;
+}) {
+  if (file.fileSize > MAX_ENTRY_FILE_BYTES)
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "File is too large",
+    });
+  if (!(ENTRY_FILE_TYPES as readonly string[]).includes(file.fileType))
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "That file type can't be attached",
+    });
   return sign(file);
 }
 
 /** A profile picture or cover image. */
-export async function signImageUpload(file: { fileType: string; fileSize: number; checksum: string; fileName: string }) {
-  if (file.fileSize > MAX_IMAGE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Image is too large (max 10 MB)" });
-  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.fileType)) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Use a JPG, PNG, WebP or GIF image" });
+export async function signImageUpload(file: {
+  fileType: string;
+  fileSize: number;
+  checksum: string;
+  fileName: string;
+}) {
+  if (file.fileSize > MAX_IMAGE_BYTES)
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "Image is too large (max 10 MB)",
+    });
+  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.fileType))
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "Use a JPG, PNG, WebP or GIF image",
+    });
   return sign(file);
 }

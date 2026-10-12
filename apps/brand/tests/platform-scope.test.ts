@@ -19,12 +19,16 @@ describe("platformScope", () => {
   });
 
   it("narrows the root platform to one platform when filtered", () => {
-    expect(platformScope(wadzzo, "clintoncounty")).toEqual({ platformId: "clintoncounty" });
+    expect(platformScope(wadzzo, "clintoncounty")).toEqual({
+      platformId: "clintoncounty",
+    });
   });
 
   it("limits a sub-platform to its own rows, ignoring any filter", () => {
     expect(platformScope(clinton)).toEqual({ platformId: "clintoncounty" });
-    expect(platformScope(clinton, "wadzzo")).toEqual({ platformId: "clintoncounty" });
+    expect(platformScope(clinton, "wadzzo")).toEqual({
+      platformId: "clintoncounty",
+    });
   });
 
   it("leaves optional relations unfiltered when unscoped", () => {
@@ -47,7 +51,10 @@ describe("inPlatformScope", () => {
 
 describe("canAdminPlatform", () => {
   const wadzzoAdmin = { platformId: "wadzzo", platform: { isRoot: true } };
-  const clintonAdmin = { platformId: "clintoncounty", platform: { isRoot: false } };
+  const clintonAdmin = {
+    platformId: "clintoncounty",
+    platform: { isRoot: false },
+  };
 
   it("lets Wadzzo admins manage every platform's panel", () => {
     expect(canAdminPlatform(wadzzoAdmin, wadzzo.platform)).toBe(true);
@@ -77,7 +84,12 @@ describe("brandWorksOnPlatform", () => {
 
 describe("admin nav", () => {
   const adminItems = (isSuperAdmin: boolean) =>
-    getVisibleNavGroups({ isAdmin: true, isApprovedCreator: false, navPermission: false, isSuperAdmin })
+    getVisibleNavGroups({
+      isAdmin: true,
+      isApprovedCreator: false,
+      navPermission: false,
+      isSuperAdmin,
+    })
       .flatMap((g) => g.items)
       .map((i) => i.href);
 
@@ -89,6 +101,8 @@ describe("admin nav", () => {
   });
 
   it("keeps the everyday admin pages for every admin", () => {
-    expect(adminItems(false)).toEqual(expect.arrayContaining(["/admin/creators", "/admin/users", "/admin/pins"]));
+    expect(adminItems(false)).toEqual(
+      expect.arrayContaining(["/admin/creators", "/admin/users", "/admin/pins"]),
+    );
   });
 });

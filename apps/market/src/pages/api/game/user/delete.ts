@@ -4,10 +4,7 @@ import { EnableCors } from "~/server/api-cors";
 
 import { db } from "@wadzzo/db/server";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   try {
     const token = await getToken({ req });
@@ -24,8 +21,6 @@ export default async function handler(
     }
   } catch (e) {
     console.error(e);
-    res
-      .status(500)
-      .json({ error: "An error occurred while processing your request" });
+    res.status(500).json({ error: "An error occurred while processing your request" });
   }
 }

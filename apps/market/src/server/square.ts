@@ -9,16 +9,30 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const square = new SquareClient({
   token: env.SQUARE_ACCESS_TOKEN,
-  environment: env.SQUARE_ENVIRONMENT.toLowerCase() === "production" ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
+  environment:
+    env.SQUARE_ENVIRONMENT.toLowerCase() === "production"
+      ? SquareEnvironment.Production
+      : SquareEnvironment.Sandbox,
 });
 
 function describe(e: unknown) {
-  if (e instanceof SquareError && e.errors.length) return e.errors.map((x) => x.detail ?? x.code).join("; ");
+  if (e instanceof SquareError && e.errors.length)
+    return e.errors.map((x) => x.detail ?? x.code).join("; ");
   return e instanceof Error ? e.message : "unknown error";
 }
 
 /** Charges a card (Square Web Payments token). Returns the payment id, or throws with Square's reason. */
-export async function chargeCard({ sourceId, verificationToken, usd, note }: { sourceId: string; verificationToken?: string; usd: number; note: string }) {
+export async function chargeCard({
+  sourceId,
+  verificationToken,
+  usd,
+  note,
+}: {
+  sourceId: string;
+  verificationToken?: string;
+  usd: number;
+  note: string;
+}) {
   try {
     const res = await square.payments.create({
       idempotencyKey: randomUUID(),
@@ -28,11 +42,16 @@ export async function chargeCard({ sourceId, verificationToken, usd, note }: { s
       amountMoney: { currency: "USD", amount: BigInt(Math.round(usd * 100)) },
     });
     if (res.payment?.status !== "COMPLETED" || !res.payment.id) {
-      throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: res.errors?.map((x) => x.detail ?? x.code).join("; ") ?? "Payment was not completed" });
+      throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+        message:
+          res.errors?.map((x) => x.detail ?? x.code).join("; ") ?? "Payment was not completed",
+      });
     }
     return res.payment.id;
   } catch (e) {
-    throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: `Card payment failed: ${describe(e)}` });
+    throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+      message: `Card payment failed: ${describe(e)}`,
+    });
   }
 }
 

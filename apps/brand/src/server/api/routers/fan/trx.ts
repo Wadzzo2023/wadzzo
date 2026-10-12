@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { buyAssetTrx } from "~/lib/stellar/fan/buy_asset";
-import {
-  creatorPageAccCreate,
-  creatorPageAccCreateWithXLM,
-} from "~/lib/stellar/fan/clawback";
+import { creatorPageAccCreate, creatorPageAccCreateWithXLM } from "~/lib/stellar/fan/clawback";
 import { createAsset } from "~/lib/stellar/fan/create_asset";
 import {
   getPlatformAssetPrice,
@@ -18,30 +15,20 @@ import { Keypair } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
 import { PLATFORM_ASSET, PLATFORM_FEE, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
-import {
-  createStorageTrx,
-  createStorageTrxWithXLM,
-} from "~/lib/stellar/fan/create_storage";
+import { createStorageTrx, createStorageTrxWithXLM } from "~/lib/stellar/fan/create_storage";
 import { follow_creator } from "~/lib/stellar/fan/follow_creator";
 import { sendGift, sendGitfAsPlatformAsset } from "~/lib/stellar/fan/send_gift";
 import { trustCustomPageAsset } from "~/lib/stellar/fan/trust_custom_page_asset";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import {
-  createUniAsset,
-  createUniAssetWithXLM,
-} from "~/lib/stellar/uni_create_asset";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createUniAsset, createUniAssetWithXLM } from "~/lib/stellar/uni_create_asset";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { db } from "@wadzzo/db/server";
 import { PaymentMethodEnum } from "../bounty/bounty";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 enum assetType {
   PAGEASSET = "PAGEASSET",
   PLATFORMASSET = "PLATFORMASSET",
-  SHOPASSET = "SHOPASSET"
+  SHOPASSET = "SHOPASSET",
 }
 export const trxRouter = createTRPCRouter({
   createCreatorPageAsset: protectedProcedure
@@ -119,7 +106,11 @@ export const trxRouter = createTRPCRouter({
 
   createAssetTrx: protectedProcedure
     .input(
-      z.object({ code: z.string(), limit: z.number(), signWith: custodialSignerSchema }),
+      z.object({
+        code: z.string(),
+        limit: z.number(),
+        signWith: custodialSignerSchema,
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const assetAmout = await getplatformAssetNumberForXLM();
@@ -228,14 +219,17 @@ export const trxRouter = createTRPCRouter({
     return await getPlatformAssetPrice();
   }),
 
-  getAssetNumberforXlm: publicProcedure
-    .input(z.number().optional())
-    .query(async ({ input }) => {
-      return await getplatformAssetNumberForXLM(input);
-    }),
+  getAssetNumberforXlm: publicProcedure.input(z.number().optional()).query(async ({ input }) => {
+    return await getplatformAssetNumberForXLM(input);
+  }),
 
   createStorageAccount: protectedProcedure
-    .input(z.object({ signWith: custodialSignerSchema, native: z.boolean().optional() }))
+    .input(
+      z.object({
+        signWith: custodialSignerSchema,
+        native: z.boolean().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       if (input.native) {
         return await createStorageTrxWithXLM({
@@ -251,7 +245,12 @@ export const trxRouter = createTRPCRouter({
     }),
 
   followCreatorTRX: protectedProcedure
-    .input(z.object({ creatorId: z.string().min(56), signWith: custodialSignerSchema }))
+    .input(
+      z.object({
+        creatorId: z.string().min(56),
+        signWith: custodialSignerSchema,
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const { creatorId, signWith } = input;
       const userId = ctx.session.user.id;
@@ -296,27 +295,37 @@ export const trxRouter = createTRPCRouter({
               return xdr;
             }
           } else {
-            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is invalid" });
+            throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+              message: "Issuer is invalid",
+            });
           }
         }
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "creator has no page asset" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "creator has no page asset",
+        });
       }
     }),
 
   giftFollowerXDR: protectedProcedure // only logged creator can do that
-    .input(z.object({
-      pubkey: z.string().length(56),
-      amount: z.number({
-        error: (issue) => (issue.input === undefined ? "Amount is required" : "Amount must be a number"),
-      }).int().positive(),
-      assetCode: z.string().min(1),
-      assetIssuer: z.string().min(1),
-      assetType: z.enum(assetType),
-      signWith: custodialSignerSchema,
-    }))
+    .input(
+      z.object({
+        pubkey: z.string().length(56),
+        amount: z
+          .number({
+            error: (issue) =>
+              issue.input === undefined ? "Amount is required" : "Amount must be a number",
+          })
+          .int()
+          .positive(),
+        assetCode: z.string().min(1),
+        assetIssuer: z.string().min(1),
+        assetType: z.enum(assetType),
+        signWith: custodialSignerSchema,
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const creatorId = ctx.session.user.id;
-      const { pubkey, amount, assetCode, assetIssuer } = input
+      const { pubkey, amount, assetCode, assetIssuer } = input;
 
       const isFollower = await ctx.db.follow.findUnique({
         where: {
@@ -326,7 +335,10 @@ export const trxRouter = createTRPCRouter({
           },
         },
       });
-      if (!isFollower) throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "User is not a follower" });
+      if (!isFollower)
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "User is not a follower",
+        });
 
       const creator = await db.creator.findUniqueOrThrow({
         where: { id: creatorId },
@@ -338,7 +350,7 @@ export const trxRouter = createTRPCRouter({
       if (input.assetType === assetType.PAGEASSET) {
         if (creator.pageAsset) {
           const { code, issuer } = creator.pageAsset;
-          console.log(code, issuer)
+          console.log(code, issuer);
           // send email
 
           return await sendGift({
@@ -363,14 +375,16 @@ export const trxRouter = createTRPCRouter({
               signWith: input.signWith,
             });
           } else {
-            throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Issuer is invalid" });
+            throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+              message: "Issuer is invalid",
+            });
           }
+        } else {
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+            message: "creator has no page asset",
+          });
         }
-        else {
-          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "creator has no page asset" });
-        }
-      }
-      else if (input.assetType === assetType.PLATFORMASSET) {
+      } else if (input.assetType === assetType.PLATFORMASSET) {
         return await sendGitfAsPlatformAsset({
           reciver: pubkey,
           creatorId: creatorId,
@@ -378,9 +392,8 @@ export const trxRouter = createTRPCRouter({
           assetCode: assetCode,
           assetIssuer: assetIssuer,
           signWith: input.signWith,
-        })
-      }
-      else if (input.assetType === assetType.SHOPASSET) {
+        });
+      } else if (input.assetType === assetType.SHOPASSET) {
         return await sendGift({
           customerPubkey: pubkey,
           creatorPageAsset: { code: assetCode, issuer: assetIssuer },
@@ -390,18 +403,13 @@ export const trxRouter = createTRPCRouter({
           signWith: input.signWith,
         });
       }
-
-
-
     }),
 
   getRequiredPlatformAsset: publicProcedure
     .input(
       z.object({
         xlm: z.number(),
-        platformAsset: z
-          .number()
-          .default(Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset)),
+        platformAsset: z.number().default(Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset)),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -421,11 +429,11 @@ export const trxRouter = createTRPCRouter({
       const { code, issuer, signWith } = input;
 
       const creator = await ctx.db.creator.findUniqueOrThrow({
-        where: { id: ctx.session.user.id, },
+        where: { id: ctx.session.user.id },
         select: {
           storageSecret: true,
           storagePub: true,
-        }
+        },
       });
 
       const requiredPlatformAsset = await getplatformAssetNumberForXLM(0.5);

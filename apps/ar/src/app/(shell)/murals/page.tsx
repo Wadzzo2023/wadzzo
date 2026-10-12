@@ -22,7 +22,11 @@ import { useAuth } from "~/lib/ar/store";
 import { useCamera } from "~/lib/ar/useCamera";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useGeolocation } from "~/lib/ar/useGeolocation";
-import { MAX_GPS_ACCURACY_M, SWEEP_SIDE_DEG, type ScanResult as Result } from "~/lib/murals/constants";
+import {
+  MAX_GPS_ACCURACY_M,
+  SWEEP_SIDE_DEG,
+  type ScanResult as Result,
+} from "~/lib/murals/constants";
 import type { Outline } from "~/lib/murals/localize";
 import { startMuralPack, useMuralPack, verifyMuralPack } from "~/lib/murals/pack";
 import { sfx } from "~/lib/murals/sfx";
@@ -66,7 +70,8 @@ const GATE: GateCopy = {
     motion: "No motion sensor — the left/right check needs a phone.",
   },
   cta: "Allow & start scanning",
-  footnote: "The camera stays on your phone until you finish a scan — then 3 photos are sent to verify it.",
+  footnote:
+    "The camera stays on your phone until you finish a scan — then 3 photos are sent to verify it.",
 };
 
 /** Hold the "Mural found" moment before the sweep starts. */
@@ -112,7 +117,10 @@ export default function MuralsScreen() {
   const packOk = integrity === "ok";
 
   // Only while looking: the model stays loaded, the loop pauses while sending.
-  const detector = useMuralDetector({ video: camera.videoNode, enabled: live && packOk });
+  const detector = useMuralDetector({
+    video: camera.videoNode,
+    enabled: live && packOk,
+  });
   const nearby = useNearbyMurals(fix);
   const target = targetId ? nearby.murals.find((m) => m.id === targetId) : undefined;
   const balance = useCoinBalance(signedIn);
@@ -144,7 +152,11 @@ export default function MuralsScreen() {
     [camera.videoNode],
   );
 
-  const sweep = useMuralSweep({ heading: compass.heading, active: phase === "sweeping", onCapture });
+  const sweep = useMuralSweep({
+    heading: compass.heading,
+    active: phase === "sweeping",
+    onCapture,
+  });
   const captured = frameUrls.map(Boolean) as [boolean, boolean, boolean];
 
   // Haptic tick every 3° of turn while sweeping.
@@ -225,7 +237,8 @@ export default function MuralsScreen() {
       }))
       .then((r) => {
         setVerifyOutcome(r.kind === "rejected" ? { failed: failedCheck(r.code) } : "ok");
-        if (r.kind !== "rejected") feedback.captured(r.kind === "discovered" ? "legendary" : "epic");
+        if (r.kind !== "rejected")
+          feedback.captured(r.kind === "discovered" ? "legendary" : "epic");
         // Let the last tick land before the card swaps.
         setTimeout(() => {
           setResult(r);
@@ -252,7 +265,14 @@ export default function MuralsScreen() {
   // ── Gate ────────────────────────────────────────────────────────────────
   const states = useMemo<Record<"camera" | "location" | "motion", PermState>>(
     () => ({
-      camera: camera.state === "ready" ? "granted" : camera.state === "denied" ? "denied" : camera.state === "unsupported" ? "unsupported" : "pending",
+      camera:
+        camera.state === "ready"
+          ? "granted"
+          : camera.state === "denied"
+            ? "denied"
+            : camera.state === "unsupported"
+              ? "unsupported"
+              : "pending",
       location: fix ? "granted" : geoStatus === "denied" ? "denied" : "pending",
       motion: compass.permission,
     }),
@@ -264,7 +284,8 @@ export default function MuralsScreen() {
     setRequesting(true);
     setGateError(null);
     await compass.request();
-    const within = <T,>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+    const within = <T,>(p: Promise<T>, ms: number) =>
+      Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
     const gotCamera = await within(camera.start(), 12_000);
     setRequesting(false);
     if (gotCamera === false) {
@@ -281,49 +302,130 @@ export default function MuralsScreen() {
   if (phase === "gate") {
     return (
       <AppShell tabs={false} bleed>
-        <ArPermissionGate states={states} requesting={requesting} onRequest={handleRequest} error={gateError} copy={GATE} />
+        <ArPermissionGate
+          states={states}
+          requesting={requesting}
+          onRequest={handleRequest}
+          error={gateError}
+          copy={GATE}
+        />
       </AppShell>
     );
   }
 
   // ── Guidance copy ───────────────────────────────────────────────────────
   const roughGps = fix && fix.accuracy > MAX_GPS_ACCURACY_M;
-  const { title, sub, Icon } = ((): { title: string; sub: string | null; Icon: LucideIcon } => {
+  const { title, sub, Icon } = ((): {
+    title: string;
+    sub: string | null;
+    Icon: LucideIcon;
+  } => {
     if (!packOk) {
-      if (integrity === "checking") return { title: "Checking the mural pack…", sub: "Making sure every file is intact.", Icon: Download };
-      if (integrity === "failed") return { title: "Mural pack damaged", sub: "Repairing it now — scanning unlocks when it's fixed.", Icon: Download };
+      if (integrity === "checking")
+        return {
+          title: "Checking the mural pack…",
+          sub: "Making sure every file is intact.",
+          Icon: Download,
+        };
+      if (integrity === "failed")
+        return {
+          title: "Mural pack damaged",
+          sub: "Repairing it now — scanning unlocks when it's fixed.",
+          Icon: Download,
+        };
       return { title: "Mural pack needed", sub: null, Icon: Download };
     }
-    if (detector.state === "loading") return { title: "Starting the mural finder…", sub: "One moment.", Icon: Download };
-    if (detector.state === "error") return { title: "Couldn't start the mural finder", sub: "Reload, or repair the pack in Profile › Downloads.", Icon: Frame };
+    if (detector.state === "loading")
+      return {
+        title: "Starting the mural finder…",
+        sub: "One moment.",
+        Icon: Download,
+      };
+    if (detector.state === "error")
+      return {
+        title: "Couldn't start the mural finder",
+        sub: "Reload, or repair the pack in Profile › Downloads.",
+        Icon: Frame,
+      };
     if (!fix) {
       return geoStatus === "denied"
-        ? { title: "Location is off", sub: "Murals need your location — allow it in site settings.", Icon: MapPin }
-        : { title: "Finding your location…", sub: "Hold on a moment.", Icon: MapPin };
+        ? {
+            title: "Location is off",
+            sub: "Murals need your location — allow it in site settings.",
+            Icon: MapPin,
+          }
+        : {
+            title: "Finding your location…",
+            sub: "Hold on a moment.",
+            Icon: MapPin,
+          };
     }
     if (phase === "searching") {
-      if (detector.quality === "dark") return { title: "Too dark", sub: "Find more light, or move closer.", Icon: Frame };
-      if (detector.quality === "blurry") return { title: "Hold steady", sub: "Give the camera a second to focus.", Icon: Frame };
+      if (detector.quality === "dark")
+        return {
+          title: "Too dark",
+          sub: "Find more light, or move closer.",
+          Icon: Frame,
+        };
+      if (detector.quality === "blurry")
+        return {
+          title: "Hold steady",
+          sub: "Give the camera a second to focus.",
+          Icon: Frame,
+        };
       if (detector.score >= 0.25) return { title: "Hold it there…", sub: null, Icon: Frame };
-      if (target) return { title: `Point at “${target.title}”`, sub: "Fill the frame with it.", Icon: Frame };
-      return { title: "Point at a mural or street art", sub: "Murals, graffiti, painted walls — fill the frame with it.", Icon: Frame };
+      if (target)
+        return {
+          title: `Point at “${target.title}”`,
+          sub: "Fill the frame with it.",
+          Icon: Frame,
+        };
+      return {
+        title: "Point at a mural or street art",
+        sub: "Murals, graffiti, painted walls — fill the frame with it.",
+        Icon: Frame,
+      };
     }
     if (phase === "locked") {
-      if (!signedIn) return { title: "Mural found", sub: `Sign in to collect it and earn ${platformBranding.coinName}.`, Icon: Frame };
+      if (!signedIn)
+        return {
+          title: "Mural found",
+          sub: `Sign in to collect it and earn ${platformBranding.coinName}.`,
+          Icon: Frame,
+        };
       if (atLimit && match) {
-        return { title: `${match.title} · ${match.scansToday}/${nearby.dailyLimit} today`, sub: "Come back after midnight to scan it again.", Icon: Frame };
+        return {
+          title: `${match.title} · ${match.scansToday}/${nearby.dailyLimit} today`,
+          sub: "Come back after midnight to scan it again.",
+          Icon: Frame,
+        };
       }
-      return match ? { title: match.title, sub: "Get ready to turn", Icon: Frame } : { title: "Mural found", sub: "Looks new — let's check it", Icon: Frame };
+      return match
+        ? { title: match.title, sub: "Get ready to turn", Icon: Frame }
+        : {
+            title: "Mural found",
+            sub: "Looks new — let's check it",
+            Icon: Frame,
+          };
     }
     // sweeping
-    const turn = sweep.tooFast ? "A little slower" : sweep.step === "left" ? "Slowly turn left" : sweep.step === "right" ? "Now turn right" : "Back to the middle";
+    const turn = sweep.tooFast
+      ? "A little slower"
+      : sweep.step === "left"
+        ? "Slowly turn left"
+        : sweep.step === "right"
+          ? "Now turn right"
+          : "Back to the middle";
     return manual
-      ? { title: turn, sub: "No motion sensor — drag sideways to turn.", Icon: Hand }
+      ? {
+          title: turn,
+          sub: "No motion sensor — drag sideways to turn.",
+          Icon: Hand,
+        }
       : { title: turn, sub: "Keep the mural in view.", Icon: Frame };
   })();
 
   const nearbyCount = nearby.murals.length;
-
 
   return (
     <AppShell tabs={false} bleed>
@@ -347,16 +449,24 @@ export default function MuralsScreen() {
           className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
           style={{ opacity: camera.isPlaying ? 1 : 0 }}
         />
-        {!camera.isPlaying && <div className="ar-grid absolute inset-0 bg-ar-void" />}
+        {!camera.isPlaying && <div className="ar-grid bg-ar-void absolute inset-0" />}
 
         {/* Soft vignette so chrome reads over any wall. */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_42%,transparent_38%,hsl(var(--ar-void)/0.55)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-linear-to-t from-ar-void/85 via-ar-void/40 to-ar-void/0" />
+        <div className="from-ar-void/85 via-ar-void/40 to-ar-void/0 pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-linear-to-t" />
 
         {/* The outline replaces the static brackets once the art is found. */}
         {live && !(phase === "sweeping" ? sweepOutline : detector.outline) && (
           <MuralViewfinder
-            state={phase === "sweeping" ? "sweeping" : phase === "locked" ? "locked" : detector.state === "ready" ? "searching" : "idle"}
+            state={
+              phase === "sweeping"
+                ? "sweeping"
+                : phase === "locked"
+                  ? "locked"
+                  : detector.state === "ready"
+                    ? "searching"
+                    : "idle"
+            }
             score={detector.score}
           />
         )}
@@ -369,22 +479,35 @@ export default function MuralsScreen() {
             score={detector.score}
             offsetX={phase === "sweeping" ? -sweep.delta * pxPerDeg : 0}
             targetOffsetX={
-              phase !== "sweeping" ? null : sweep.step === "left" ? SWEEP_SIDE_DEG * pxPerDeg : sweep.step === "right" ? -SWEEP_SIDE_DEG * pxPerDeg : sweep.step === "centre" ? 0 : null
+              phase !== "sweeping"
+                ? null
+                : sweep.step === "left"
+                  ? SWEEP_SIDE_DEG * pxPerDeg
+                  : sweep.step === "right"
+                    ? -SWEEP_SIDE_DEG * pxPerDeg
+                    : sweep.step === "centre"
+                      ? 0
+                      : null
             }
           />
         )}
         {phase === "sweeping" && <EdgeChevrons step={sweep.step} />}
 
         {/* ── Top chrome ─────────────────────────────────────────────── */}
-        <div className="absolute inset-x-0 z-20 flex items-start justify-between px-4" style={{ top: "calc(var(--ar-top-inset) + 14px)" }}>
+        <div
+          className="absolute inset-x-0 z-20 flex items-start justify-between px-4"
+          style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
+        >
           {signedIn ? (
             <button
               onClick={() => void router.push("/collection?tab=murals")}
-              className="ar-glass flex h-9 items-center gap-1.5 rounded-full px-3 text-gold"
+              className="ar-glass text-gold flex h-9 items-center gap-1.5 rounded-full px-3"
               aria-label={`${platformBranding.coinName} balance`}
             >
               <Coins size={14} strokeWidth={2.5} />
-              <span className="font-hud text-[12px] font-bold tabular-nums">{(balance.data?.balance ?? 0).toLocaleString()}</span>
+              <span className="font-hud text-[12px] font-bold tabular-nums">
+                {(balance.data?.balance ?? 0).toLocaleString()}
+              </span>
             </button>
           ) : (
             <span className="w-9" />
@@ -393,16 +516,23 @@ export default function MuralsScreen() {
           <button
             onClick={() => router.back()}
             aria-label="Close camera"
-            className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+            className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
           >
             <X size={17} strokeWidth={2.4} />
           </button>
         </div>
 
         {live && (nearbyCount > 0 || roughGps) && (
-          <div className="absolute left-1/2 z-20 -translate-x-1/2" style={{ top: "calc(var(--ar-top-inset) + 60px)" }}>
-            <span className="ar-glass font-hud inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ar-dim">
-              <MapPin size={11} strokeWidth={2.6} className={roughGps ? "text-warning" : "text-rarity-epic"} />
+          <div
+            className="absolute left-1/2 z-20 -translate-x-1/2"
+            style={{ top: "calc(var(--ar-top-inset) + 60px)" }}
+          >
+            <span className="ar-glass font-hud text-ar-dim inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10.5px] font-bold tracking-[0.12em] whitespace-nowrap uppercase">
+              <MapPin
+                size={11}
+                strokeWidth={2.6}
+                className={roughGps ? "text-warning" : "text-rarity-epic"}
+              />
               {roughGps
                 ? `Location rough · ±${Math.round(fix.accuracy)} m`
                 : `${nearbyCount} mural${nearbyCount === 1 ? "" : "s"} nearby`}
@@ -412,21 +542,24 @@ export default function MuralsScreen() {
 
         {/* ── Bottom guidance ────────────────────────────────────────── */}
         {live && (
-          <div className="absolute inset-x-0 bottom-0 z-20 px-5" style={{ paddingBottom: "max(22px, var(--ar-safe-bottom))" }}>
+          <div
+            className="absolute inset-x-0 bottom-0 z-20 px-5"
+            style={{ paddingBottom: "max(22px, var(--ar-safe-bottom))" }}
+          >
             <AnimatePresence>
               {toast && (
                 <motion.p
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mx-auto mb-2 w-fit rounded-full bg-ar-void/80 px-3 py-1.5 text-[11.5px] text-ar-text"
+                  className="bg-ar-void/80 text-ar-text mx-auto mb-2 w-fit rounded-full px-3 py-1.5 text-[11.5px]"
                 >
                   {toast}
                 </motion.p>
               )}
             </AnimatePresence>
 
-            <div className="ar-glass mx-auto max-w-[21rem] rounded-ar-lg p-4 text-center">
+            <div className="ar-glass rounded-ar-lg mx-auto max-w-[21rem] p-4 text-center">
               {!packOk ? (
                 <div className="mb-2 text-left">
                   <PackPanel compact />
@@ -442,31 +575,56 @@ export default function MuralsScreen() {
                     "mx-auto mb-2.5 flex h-9 w-9 items-center justify-center rounded-full border",
                     phase === "locked"
                       ? "border-rarity-epic/60 bg-rarity-epic/20 text-rarity-epic"
-                      : "border-white/20 bg-white/[0.06] text-ar-dim",
+                      : "text-ar-dim border-white/20 bg-white/[0.06]",
                   )}
                 >
                   <Icon size={17} strokeWidth={2.3} />
                 </span>
               )}
 
-              <p className="font-hud mt-1 text-[13px] font-bold uppercase tracking-[0.12em] text-ar-text" aria-live="polite">
+              <p
+                className="font-hud text-ar-text mt-1 text-[13px] font-bold tracking-[0.12em] uppercase"
+                aria-live="polite"
+              >
                 {title}
               </p>
-              {sub && <p className="mx-auto mt-1.5 max-w-[17rem] text-[11.5px] leading-relaxed text-ar-dim">{sub}</p>}
-
+              {sub && (
+                <p className="text-ar-dim mx-auto mt-1.5 max-w-[17rem] text-[11.5px] leading-relaxed">
+                  {sub}
+                </p>
+              )}
 
               {detector.state === "error" && (
-                <ArButton variant="primary" size="md" block icon={RotateCcw} className="mt-3" onClick={() => router.reload()}>
+                <ArButton
+                  variant="primary"
+                  size="md"
+                  block
+                  icon={RotateCcw}
+                  className="mt-3"
+                  onClick={() => router.reload()}
+                >
                   Reload
                 </ArButton>
               )}
               {phase === "locked" && !signedIn && (
-                <ArButton variant="primary" size="md" block className="mt-3" onClick={() => requireAuth("murals")}>
+                <ArButton
+                  variant="primary"
+                  size="md"
+                  block
+                  className="mt-3"
+                  onClick={() => requireAuth("murals")}
+                >
                   Sign in to collect
                 </ArButton>
               )}
               {phase === "locked" && atLimit && (
-                <ArButton variant="ghost" size="md" block className="mt-2" onClick={() => void router.push("/map")}>
+                <ArButton
+                  variant="ghost"
+                  size="md"
+                  block
+                  className="mt-2"
+                  onClick={() => void router.push("/map")}
+                >
                   Find other murals
                 </ArButton>
               )}
@@ -481,10 +639,15 @@ export default function MuralsScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-30 flex items-center justify-center bg-ar-void/80 px-6 backdrop-blur-[3px]"
+              className="bg-ar-void/80 absolute inset-0 z-30 flex items-center justify-center px-6 backdrop-blur-[3px]"
             >
               {phase === "sending" && (
-                <ScanVerifying frames={[frameUrls[0], frameUrls[1], frameUrls[2]].filter((u): u is string => Boolean(u))} outcome={verifyOutcome} />
+                <ScanVerifying
+                  frames={[frameUrls[0], frameUrls[1], frameUrls[2]].filter((u): u is string =>
+                    Boolean(u),
+                  )}
+                  outcome={verifyOutcome}
+                />
               )}
               {phase === "result" && result && (
                 <ScanResult

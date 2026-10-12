@@ -30,9 +30,16 @@ export function CostBreakdown({
         <div key={l.key + l.label} className="flex items-start justify-between gap-3">
           <dt className="min-w-0">
             <span className={cn(!l.inTotal && "text-muted-foreground")}>{l.label}</span>
-            {l.hint && <span className="block text-xs text-muted-foreground">{l.hint}</span>}
+            {l.hint && <span className="text-muted-foreground block text-xs">{l.hint}</span>}
           </dt>
-          <dd className={cn("shrink-0 font-medium tabular-nums", !l.inTotal && "text-muted-foreground")}>{formatAmount(l.amount, l.currency)}</dd>
+          <dd
+            className={cn(
+              "shrink-0 font-medium tabular-nums",
+              !l.inTotal && "text-muted-foreground",
+            )}
+          >
+            {formatAmount(l.amount, l.currency)}
+          </dd>
         </div>
       ))}
     </dl>
@@ -44,9 +51,11 @@ export function CostBreakdown({
         <dd className="font-hud text-lg font-bold tabular-nums">{formatAmount(total, currency)}</dd>
       </div>
       {balance != null && (
-        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="text-muted-foreground flex items-center justify-between gap-3 text-xs">
           <dt>Your balance</dt>
-          <dd className={cn("tabular-nums", balance < total && "font-semibold text-destructive")}>{formatAmount(balance, currency)}</dd>
+          <dd className={cn("tabular-nums", balance < total && "text-destructive font-semibold")}>
+            {formatAmount(balance, currency)}
+          </dd>
         </div>
       )}
     </dl>
@@ -54,26 +63,33 @@ export function CostBreakdown({
 
   if (collapsible) {
     return (
-      <details className={cn("group rounded-xl bg-foreground/[0.04] p-3.5 ring-1 ring-foreground/[0.06]", className)}>
+      <details
+        className={cn(
+          "group bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-3.5 ring-1",
+          className,
+        )}
+      >
         {/* closed: only the total shows; the hint lives in <summary> so it stays visible */}
         <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
           {totals}
-          <span className="mt-1.5 flex items-center justify-center gap-1 text-xs font-medium text-primary">
+          <span className="text-primary mt-1.5 flex items-center justify-center gap-1 text-xs font-medium">
             <span className="group-open:hidden">See breakdown</span>
             <span className="hidden group-open:inline">Hide breakdown</span>
             <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" />
           </span>
         </summary>
-        <div className="mt-3 border-t border-foreground/[0.08] pt-3">{rows}</div>
+        <div className="border-foreground/[0.08] mt-3 border-t pt-3">{rows}</div>
       </details>
     );
   }
 
   return (
-    <div className={cn("rounded-xl bg-foreground/[0.04] p-4 ring-1 ring-foreground/[0.06]", className)}>
+    <div
+      className={cn("bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-4 ring-1", className)}
+    >
       <p className="label-caps mb-3">Cost breakdown</p>
       {rows}
-      <div className="mt-2.5 border-t border-foreground/[0.08] pt-2.5">{totals}</div>
+      <div className="border-foreground/[0.08] mt-2.5 border-t pt-2.5">{totals}</div>
     </div>
   );
 }
@@ -85,10 +101,18 @@ const ACTION: Record<NonNullable<Problem["action"]>, { label: string; href?: str
 };
 
 /** Why an action can't go through yet, each with what to do about it. */
-export function ProblemList({ problems, creatorHref, onFollow }: { problems: Problem[]; creatorHref?: string; onFollow?: () => void }) {
+export function ProblemList({
+  problems,
+  creatorHref,
+  onFollow,
+}: {
+  problems: Problem[];
+  creatorHref?: string;
+  onFollow?: () => void;
+}) {
   if (!problems.length) {
     return (
-      <p className="flex items-center gap-2 rounded-lg tone-success px-3 py-2 text-sm font-medium">
+      <p className="tone-success flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
         <CheckCircle2 className="size-4" /> Ready — this transaction will go through.
       </p>
     );
@@ -97,11 +121,19 @@ export function ProblemList({ problems, creatorHref, onFollow }: { problems: Pro
     <ul className="space-y-2" aria-live="polite">
       {problems.map((p) => {
         const action = p.action ? ACTION[p.action] : null;
-        const href = p.action === "join_tier" ? (creatorHref ? `${creatorHref}?tab=membership` : undefined) : action?.href;
+        const href =
+          p.action === "join_tier"
+            ? creatorHref
+              ? `${creatorHref}?tab=membership`
+              : undefined
+            : action?.href;
         return (
-          <li key={p.code} className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm sm:flex-row sm:items-center">
+          <li
+            key={p.code}
+            className="border-destructive/30 bg-destructive/5 flex flex-col gap-2 rounded-lg border p-3 text-sm sm:flex-row sm:items-center"
+          >
             <span className="flex min-w-0 flex-1 items-start gap-2">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
+              <AlertTriangle className="text-destructive mt-0.5 size-4 shrink-0" />
               <span>{p.message}</span>
             </span>
             {action &&

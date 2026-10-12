@@ -1,10 +1,4 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
 import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
@@ -26,9 +20,7 @@ export async function creatorAprovalTrx({
   storage?: AccountType;
 }) {
   const server = new Horizon.Server(STELLAR_URL);
-  const storageAcc = storage
-    ? Keypair.fromSecret(storage.secretKey)
-    : Keypair.random();
+  const storageAcc = storage ? Keypair.fromSecret(storage.secretKey) : Keypair.random();
 
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
 
@@ -37,9 +29,7 @@ export async function creatorAprovalTrx({
   const asset = new Asset(pageAsset.code, issuerAcc.publicKey());
 
   // mother start trx
-  const transactionInitializer = await server.loadAccount(
-    motherAcc.publicKey(),
-  );
+  const transactionInitializer = await server.loadAccount(motherAcc.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInitializer, {
     fee: TrxBaseFee,

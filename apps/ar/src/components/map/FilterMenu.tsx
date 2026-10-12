@@ -61,7 +61,7 @@ export function FilterMenu({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 top-[calc(100%+4px)] z-40 flex flex-col items-start gap-1"
+            className="absolute top-[calc(100%+4px)] left-0 z-40 flex flex-col items-start gap-1"
           >
             {others.map((f) => (
               <Chip

@@ -11,13 +11,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { AR_CAPTURE_RADIUS } from "~/lib/ar/geo";
 import { pinStatus, RARITY_META } from "~/lib/ar/rarity";
@@ -50,7 +44,7 @@ export function WadzzoCardBack({
   return (
     <div
       className={cn(
-        "relative aspect-[5/7] w-full select-none overflow-hidden rounded-[inherit]",
+        "relative aspect-[5/7] w-full overflow-hidden rounded-[inherit] select-none",
         "border-[6px] border-[#0c1f14] bg-[#05110a]",
         "shadow-[inset_0_0_24px_rgba(0,0,0,0.9),0_12px_32px_-8px_rgba(0,0,0,0.95)]",
         className,
@@ -61,31 +55,31 @@ export function WadzzoCardBack({
       <div className="ar-grid-fine absolute inset-0 opacity-30" />
 
       {/* Outer ornate border framing */}
-      <div className="absolute inset-2 rounded-[9px] border border-ar-green/35 shadow-[0_0_10px_hsl(var(--ar-green)/0.2)]" />
-      <div className="absolute inset-3 rounded-[7px] border border-ar-green/15" />
+      <div className="border-ar-green/35 absolute inset-2 rounded-[9px] border shadow-[0_0_10px_hsl(var(--ar-green)/0.2)]" />
+      <div className="border-ar-green/15 absolute inset-3 rounded-[7px] border" />
 
       {/* Corner Energy Pips */}
-      <span className="absolute left-3.5 top-3.5 h-2 w-2 rounded-full border border-ar-green bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green))]" />
-      <span className="absolute right-3.5 top-3.5 h-2 w-2 rounded-full border border-ar-green bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green))]" />
-      <span className="absolute bottom-3.5 left-3.5 h-2 w-2 rounded-full border border-ar-green bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green))]" />
-      <span className="absolute bottom-3.5 right-3.5 h-2 w-2 rounded-full border border-ar-green bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green))]" />
+      <span className="border-ar-green bg-ar-green-hot absolute top-3.5 left-3.5 h-2 w-2 rounded-full border shadow-[0_0_8px_hsl(var(--ar-green))]" />
+      <span className="border-ar-green bg-ar-green-hot absolute top-3.5 right-3.5 h-2 w-2 rounded-full border shadow-[0_0_8px_hsl(var(--ar-green))]" />
+      <span className="border-ar-green bg-ar-green-hot absolute bottom-3.5 left-3.5 h-2 w-2 rounded-full border shadow-[0_0_8px_hsl(var(--ar-green))]" />
+      <span className="border-ar-green bg-ar-green-hot absolute right-3.5 bottom-3.5 h-2 w-2 rounded-full border shadow-[0_0_8px_hsl(var(--ar-green))]" />
 
       {/* Top Header Banner */}
       <div className="absolute inset-x-0 top-4 text-center">
-        <span className="font-hud text-glow-soft text-[11.5px] font-bold uppercase tracking-[0.38em] text-ar-green-hot">
+        <span className="font-hud text-glow-soft text-ar-green-hot text-[11.5px] font-bold tracking-[0.38em] uppercase">
           W A D Z Z O
         </span>
       </div>
 
       {/* Center Medallion with Wadzzo Logo */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full border-2 border-ar-green/50 bg-linear-to-br from-ar-surface-3 via-ar-surface to-ar-void p-3 shadow-[0_0_24px_hsl(var(--ar-green)/0.4),inset_0_0_16px_rgba(0,0,0,0.85)]">
+        <div className="border-ar-green/50 from-ar-surface-3 via-ar-surface to-ar-void relative flex h-[100px] w-[100px] items-center justify-center rounded-full border-2 bg-linear-to-br p-3 shadow-[0_0_24px_hsl(var(--ar-green)/0.4),inset_0_0_16px_rgba(0,0,0,0.85)]">
           {/* Animated orbiting rings */}
           <div
-            className="absolute inset-1 animate-spin rounded-full border border-dashed border-ar-green/35"
+            className="border-ar-green/35 absolute inset-1 animate-spin rounded-full border border-dashed"
             style={{ animationDuration: "28s" }}
           />
-          <div className="absolute -inset-1.5 rounded-full border border-ar-green/25" />
+          <div className="border-ar-green/25 absolute -inset-1.5 rounded-full border" />
 
           {/* Official Wadzzo Logo Mark from public folder */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -102,15 +96,15 @@ export function WadzzoCardBack({
 
       {/* Bottom Footer Banner */}
       <div className="absolute inset-x-0 bottom-4 px-3 text-center">
-        <span className="font-hud block text-[8px] font-semibold uppercase tracking-[0.26em] text-ar-dim">
+        <span className="font-hud text-ar-dim block text-[8px] font-semibold tracking-[0.26em] uppercase">
           {loading ? "INITIALIZING HOLOGRAM…" : "AR COLLECTIBLE"}
         </span>
         {pin ? (
-          <p className="font-hud mt-0.5 text-[7px] uppercase tracking-[0.16em] text-ar-faint">
+          <p className="font-hud text-ar-faint mt-0.5 text-[7px] tracking-[0.16em] uppercase">
             STELLAR • SOROBAN VERIFIED
           </p>
         ) : (
-          <p className="font-hud mt-0.5 text-[7px] uppercase tracking-[0.16em] text-ar-faint">
+          <p className="font-hud text-ar-faint mt-0.5 text-[7px] tracking-[0.16em] uppercase">
             COLLECT THE REAL WORLD
           </p>
         )}
@@ -118,7 +112,7 @@ export function WadzzoCardBack({
 
       {/* Shimmer sweep animation when in loading state */}
       {loading && (
-        <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-linear-to-r from-transparent via-ar-green/20 to-transparent" />
+        <div className="via-ar-green/20 pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-linear-to-r from-transparent to-transparent" />
       )}
 
       {/* Dynamic specular glare over the card back */}
@@ -180,8 +174,7 @@ export function HoloCard({
   const frame = useRef<number | null>(null);
   const rarity = pin.rarity;
   const status = pinStatus(pin);
-  const spent =
-    status === "expired" || (pin.collected && pin.isRedeemed === true);
+  const spent = status === "expired" || (pin.collected && pin.isRedeemed === true);
   const meta = RARITY_META[rarity];
 
   // Loading state: starts true, flips to false when card art loads or timeout passes
@@ -233,10 +226,7 @@ export function HoloCard({
         );
 
         // Simon Goellner's foil depth calculations:
-        el.style.setProperty(
-          "--pos",
-          `${50 + (0.5 - px) * 140}% ${50 + (0.5 - py) * 140}%`,
-        );
+        el.style.setProperty("--pos", `${50 + (0.5 - px) * 140}% ${50 + (0.5 - py) * 140}%`);
         el.style.setProperty("--background-x", `${37 + px * 26}%`);
         el.style.setProperty("--background-y", `${33 + py * 34}%`);
 
@@ -267,9 +257,7 @@ export function HoloCard({
   // Serial out of supply calculation
   const serial =
     pin.supply != null
-      ? (Array.from(pin.id).reduce((a, c) => a + c.charCodeAt(0), 0) %
-          pin.supply) +
-        1
+      ? (Array.from(pin.id).reduce((a, c) => a + c.charCodeAt(0), 0) % pin.supply) + 1
       : null;
 
   return (
@@ -301,7 +289,7 @@ export function HoloCard({
         className={cn(
           "holo group block w-full text-left",
           "rounded-[inherit] transition-colors duration-300",
-          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green focus-visible:ring-offset-2 focus-visible:ring-offset-ar-bg",
+          "focus-visible:ring-ar-green focus-visible:ring-offset-ar-bg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
         )}
         data-rarity={rarity}
         data-spent={spent || undefined}
@@ -325,9 +313,7 @@ export function HoloCard({
             // rendered with square corners. A real `border` doesn't have
             // that failure mode: it's painted as part of the box itself, so
             // it always follows border-radius regardless of any transform.
-            border: spent
-              ? "1.5px solid transparent"
-              : `1.5px solid hsl(${meta.hsl} / 0.45)`,
+            border: spent ? "1.5px solid transparent" : `1.5px solid hsl(${meta.hsl} / 0.45)`,
           } as React.CSSProperties
         }
       >
@@ -357,11 +343,7 @@ export function HoloCard({
           {!oneFace && (
             <div className="tcg-card__face tcg-card__back">
               {creatorBack && isLoaded ? (
-                <PokemonTcgCreatorFront
-                  pin={pin}
-                  brand={brand}
-                  priority={priority}
-                />
+                <PokemonTcgCreatorFront pin={pin} brand={brand} priority={priority} />
               ) : (
                 <WadzzoCardBack loading={!isLoaded} pin={pin} />
               )}
@@ -402,10 +384,10 @@ export function HoloCard({
                 ? "Show the creator on the back"
                 : "Show the back"
           }
-          className="ar-glass absolute -right-3 -top-3 z-30 flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold text-ar-dim shadow-md transition-transform active:scale-95"
+          className="ar-glass text-ar-dim absolute -top-3 -right-3 z-30 flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold shadow-md transition-transform active:scale-95"
         >
           <RotateCw size={11} strokeWidth={2.4} />
-          <span className="font-hud uppercase tracking-[0.1em]">
+          <span className="font-hud tracking-[0.1em] uppercase">
             {flipped ? "Front" : creatorBack ? "Creator" : "Back"}
           </span>
         </button>
@@ -440,12 +422,10 @@ function TcgName({
   return (
     <div className="tcg-name">
       <div className="min-w-0 flex-1">
-        <span className="tcg-name__eyebrow font-hud block font-semibold uppercase text-ar-faint">
+        <span className="tcg-name__eyebrow font-hud text-ar-faint block font-semibold uppercase">
           {eyebrow}
         </span>
-        <h3 className="tcg-name__title font-hud truncate font-bold text-ar-text">
-          {title}
-        </h3>
+        <h3 className="tcg-name__title font-hud text-ar-text truncate font-bold">{title}</h3>
       </div>
       <span
         className="tcg-name__badge flex shrink-0 items-center justify-center rounded-full border"
@@ -493,7 +473,7 @@ function TcgArtChip({
 
 /** The card's one paragraph of real copy. Cropped, never pushed off-card. */
 function TcgDescription({ children }: { children: ReactNode }) {
-  return <p className="tcg-description line-clamp-3 text-ar-dim">{children}</p>;
+  return <p className="tcg-description text-ar-dim line-clamp-3">{children}</p>;
 }
 
 function TcgFooter({
@@ -570,7 +550,7 @@ function PokemonTcgCreatorFront({
     <div
       className={cn(
         "tcg-face relative flex h-full w-full flex-col overflow-hidden",
-        "select-none border-[5px]",
+        "border-[5px] select-none",
       )}
       style={{
         borderColor: platformBranding.colors.cardBorder,
@@ -594,13 +574,13 @@ function PokemonTcgCreatorFront({
             onLoad={onImageLoaded}
             className="absolute inset-0 h-full w-full"
           />
-          <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/15" />
+          <span className="pointer-events-none absolute inset-0 ring-1 ring-white/15 ring-inset" />
 
           <div className="tcg-art__overlay">
             <span className="tcg-art__overlay-title font-hud line-clamp-2 font-bold text-white">
               {creatorName}
             </span>
-            <span className="tcg-art__overlay-brand font-hud truncate font-semibold uppercase text-white/65">
+            <span className="tcg-art__overlay-brand font-hud truncate font-semibold text-white/65 uppercase">
               {handle}
             </span>
           </div>
@@ -611,19 +591,11 @@ function PokemonTcgCreatorFront({
           fg={verified ? "hsl(var(--ar-void))" : "hsl(var(--ar-text-faint))"}
         >
           {verified ? (
-            <BadgeCheck
-              className="h-[3.4cqw] w-[3.4cqw] shrink-0"
-              strokeWidth={2.8}
-            />
+            <BadgeCheck className="h-[3.4cqw] w-[3.4cqw] shrink-0" strokeWidth={2.8} />
           ) : (
-            <Users
-              className="h-[3.4cqw] w-[3.4cqw] shrink-0"
-              strokeWidth={2.8}
-            />
+            <Users className="h-[3.4cqw] w-[3.4cqw] shrink-0" strokeWidth={2.8} />
           )}
-          <span className="min-w-0 truncate">
-            {verified ? "Verified" : "Creator"}
-          </span>
+          <span className="min-w-0 truncate">{verified ? "Verified" : "Creator"}</span>
         </TcgArtChip>
         <TcgArtChip align="end" bg="hsl(var(--ar-void))" fg={`hsl(${accent})`}>
           <span className="min-w-0 truncate">{origin}</span>
@@ -631,7 +603,7 @@ function PokemonTcgCreatorFront({
       </div>
 
       <div className="tcg-subline">
-        <span className="font-hud truncate font-semibold uppercase tracking-[0.12em] text-ar-text">
+        <span className="font-hud text-ar-text truncate font-semibold tracking-[0.12em] uppercase">
           {handle}
         </span>
       </div>
@@ -650,18 +622,18 @@ function PokemonTcgCreatorFront({
             >
               <Sparkles className="h-[65%] w-[65%]" strokeWidth={2.8} />
             </span>
-            <span className="font-hud font-bold uppercase text-ar-text">
+            <span className="font-hud text-ar-text font-bold uppercase">
               {dropsCount} {dropsCount === 1 ? "drop" : "drops"}
             </span>
           </>
         }
         center={
-          <span className="font-hud truncate font-semibold text-ar-dim">
+          <span className="font-hud text-ar-dim truncate font-semibold">
             {compact(followersCount)} followers
           </span>
         }
         right={
-          <span className="font-hud font-bold uppercase tracking-[0.14em] text-ar-faint">
+          <span className="font-hud text-ar-faint font-bold tracking-[0.14em] uppercase">
             {platformBranding.name} &bull; AR
           </span>
         }
@@ -732,7 +704,7 @@ function PokemonTcgFront({
     <div
       className={cn(
         "tcg-face relative flex h-full w-full flex-col overflow-hidden",
-        "select-none border-[5px]",
+        "border-[5px] select-none",
         getFrameBorderClasses(pin.rarity),
       )}
       style={{
@@ -747,12 +719,7 @@ function PokemonTcgFront({
       />
 
       <div className="tcg-art">
-        <div
-          className={cn(
-            "tcg-art__frame",
-            interactive ? "aspect-[16/11]" : "aspect-[5/4]",
-          )}
-        >
+        <div className={cn("tcg-art__frame", interactive ? "aspect-[16/11]" : "aspect-[5/4]")}>
           <CardArt
             src={pin.imageUrl}
             alt={pin.title}
@@ -764,26 +731,22 @@ function PokemonTcgFront({
           />
 
           {(pin.collected || status === "expired" || status === "locked") && (
-            <div className="absolute right-[2.4cqw] top-[2.4cqw] z-10">
+            <div className="absolute top-[2.4cqw] right-[2.4cqw] z-10">
               <StateStamp
                 kind={
-                  status === "locked"
-                    ? "locked"
-                    : status === "expired"
-                      ? "expired"
-                      : "collected"
+                  status === "locked" ? "locked" : status === "expired" ? "expired" : "collected"
                 }
               />
             </div>
           )}
 
-          <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/15" />
+          <span className="pointer-events-none absolute inset-0 ring-1 ring-white/15 ring-inset" />
 
           <div className="tcg-art__overlay">
             <span className="tcg-art__overlay-title font-hud line-clamp-2 font-bold text-white">
               {pin.title}
             </span>
-            <span className="tcg-art__overlay-brand font-hud truncate font-semibold uppercase text-white/65">
+            <span className="tcg-art__overlay-brand font-hud truncate font-semibold text-white/65 uppercase">
               {pin.brandName}
             </span>
           </div>
@@ -801,15 +764,8 @@ function PokemonTcgFront({
           {meta.short}
           <span className="opacity-80">{meta.label}</span>
         </TcgArtChip>
-        <TcgArtChip
-          align="end"
-          bg="hsl(var(--ar-void))"
-          fg={`hsl(${meta.hsl})`}
-        >
-          <DetectionIcon
-            className="h-[3.4cqw] w-[3.4cqw] shrink-0"
-            strokeWidth={2.8}
-          />
+        <TcgArtChip align="end" bg="hsl(var(--ar-void))" fg={`hsl(${meta.hsl})`}>
+          <DetectionIcon className="h-[3.4cqw] w-[3.4cqw] shrink-0" strokeWidth={2.8} />
           <span className="min-w-0 truncate">
             {pin.autoCollect ? "Auto" : `${AR_CAPTURE_RADIUS}m`}
           </span>
@@ -821,7 +777,7 @@ function PokemonTcgFront({
           <span className="tcg-subline__avatar shrink-0 overflow-hidden rounded-full ring-1 ring-white/25">
             <BrandAvatar src={pin.brandImageUrl} className="h-full w-full" />
           </span>
-          <span className="font-hud truncate font-semibold uppercase tracking-[0.12em] text-ar-text">
+          <span className="font-hud text-ar-text truncate font-semibold tracking-[0.12em] uppercase">
             {pin.brandName}
           </span>
         </span>
@@ -841,27 +797,23 @@ function PokemonTcgFront({
             >
               <FooterStatusIcon className="h-[65%] w-[65%]" strokeWidth={2.8} />
             </span>
-            <span className="font-hud font-bold uppercase text-ar-text">
-              {footerStatus.label}
-            </span>
+            <span className="font-hud text-ar-text font-bold uppercase">{footerStatus.label}</span>
           </>
         }
         center={
-          <span className="font-hud truncate font-semibold tabular-nums text-ar-dim">
+          <span className="font-hud text-ar-dim truncate font-semibold tabular-nums">
             {serialLabel}
           </span>
         }
         right={
           pin.redeemCode ? (
-            <span className="font-hud truncate font-bold uppercase tracking-[0.08em] text-ar-green-hot">
+            <span className="font-hud text-ar-green-hot truncate font-bold tracking-[0.08em] uppercase">
               Code {pin.redeemCode}
             </span>
           ) : pin.locked && pin.lockReason ? (
-            <span className="font-hud truncate font-semibold text-ar-faint">
-              {pin.lockReason}
-            </span>
+            <span className="font-hud text-ar-faint truncate font-semibold">{pin.lockReason}</span>
           ) : (
-            <span className="font-hud font-bold uppercase tracking-[0.14em] text-ar-faint">
+            <span className="font-hud text-ar-faint font-bold tracking-[0.14em] uppercase">
               {platformBranding.name} &bull; AR
             </span>
           )
@@ -933,7 +885,7 @@ function CardArt({
         }}
       >
         <span
-          className="font-hud text-[56px] font-bold leading-none opacity-35"
+          className="font-hud text-[56px] leading-none font-bold opacity-35"
           style={{ color: `hsl(${rarity})` }}
         >
           {title.trim().charAt(0).toUpperCase()}

@@ -37,7 +37,10 @@ export const isAppError = (error: unknown): error is AppError =>
 export function toAppError(error: unknown, fallback: ErrorCode = "INTERNAL"): AppError {
   if (isAppError(error)) return error;
   const message = error instanceof Error ? error.message : undefined;
-  return new AppError(fallback, { cause: error, ...(message ? { details: { original: message } } : {}) });
+  return new AppError(fallback, {
+    cause: error,
+    ...(message ? { details: { original: message } } : {}),
+  });
 }
 
 /** A setting a feature needs; throws CONFIG_MISSING naming the variable. */

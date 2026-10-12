@@ -46,7 +46,11 @@ function CountUp({ to }: { to: number }) {
   const [v, setV] = useState(reduce ? to : 0);
   useEffect(() => {
     if (reduce) return setV(to);
-    const c = animate(0, to, { duration: 0.9, ease: "easeOut", onUpdate: (x) => setV(Math.round(x)) });
+    const c = animate(0, to, {
+      duration: 0.9,
+      ease: "easeOut",
+      onUpdate: (x) => setV(Math.round(x)),
+    });
     return () => c.stop();
   }, [to, reduce]);
   return <>{v.toLocaleString()}</>;
@@ -60,7 +64,9 @@ function Dots({ filled, total, className }: { filled: number; total: number; cla
           key={i}
           className={cn(
             "h-2 w-2 rounded-full",
-            i < filled ? "bg-rarity-epic shadow-[0_0_6px_hsl(var(--rarity-epic)/0.8)]" : "bg-white/20",
+            i < filled
+              ? "bg-rarity-epic shadow-[0_0_6px_hsl(var(--rarity-epic)/0.8)]"
+              : "bg-white/20",
           )}
         />
       ))}
@@ -74,14 +80,16 @@ function MuralPhoto({ src, verified }: { src: string; verified: boolean }) {
       initial={{ scale: 0.85, rotate: -3, opacity: 0 }}
       animate={{ scale: 1, rotate: -2, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 18 }}
-      className="relative mx-auto h-[132px] w-[106px] rounded-[14px] border-2 border-rarity-epic/80 p-[3px] shadow-[0_10px_30px_-8px_hsl(var(--rarity-epic)/0.7)]"
+      className="border-rarity-epic/80 relative mx-auto h-[132px] w-[106px] rounded-[14px] border-2 p-[3px] shadow-[0_10px_30px_-8px_hsl(var(--rarity-epic)/0.7)]"
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
       <img src={src} alt="" className="h-full w-full rounded-[10px] object-cover" />
       <span
         className={cn(
-          "font-hud absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-2 py-[2px] text-[8.5px] font-bold uppercase tracking-[0.14em]",
-          verified ? "border-ar-green/60 bg-ar-void text-ar-green-hot" : "border-white/30 bg-ar-void text-ar-dim",
+          "font-hud absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-full border px-2 py-[2px] text-[8.5px] font-bold tracking-[0.14em] whitespace-nowrap uppercase",
+          verified
+            ? "border-ar-green/60 bg-ar-void text-ar-green-hot"
+            : "bg-ar-void text-ar-dim border-white/30",
         )}
       >
         {verified ? "Verified" : "Unverified"}
@@ -115,23 +123,30 @@ export function ScanResult({
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="ar-glass mx-auto w-full max-w-[19rem] rounded-ar-lg p-6 text-center"
+        className="ar-glass rounded-ar-lg mx-auto w-full max-w-[19rem] p-6 text-center"
         role="alert"
       >
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-ar-danger/60 bg-ar-danger/15 text-ar-danger">
+        <span className="border-ar-danger/60 bg-ar-danger/15 text-ar-danger mx-auto flex h-12 w-12 items-center justify-center rounded-full border">
           <Icon size={22} strokeWidth={2.3} />
         </span>
-        <p className="font-hud mt-3 text-[13px] font-bold uppercase tracking-[0.12em] text-ar-text">
+        <p className="font-hud text-ar-text mt-3 text-[13px] font-bold tracking-[0.12em] uppercase">
           Couldn&apos;t collect
         </p>
-        <p className="mx-auto mt-1.5 max-w-[15rem] text-[12px] leading-relaxed text-ar-dim">{result.message}</p>
+        <p className="text-ar-dim mx-auto mt-1.5 max-w-[15rem] text-[12px] leading-relaxed">
+          {result.message}
+        </p>
         <div className="mt-4 space-y-2">
           {result.retryable && (
             <ArButton variant="primary" size="md" block icon={RotateCcw} onClick={onRetry}>
               Try again
             </ArButton>
           )}
-          <ArButton variant={result.retryable ? "ghost" : "primary"} size="md" block onClick={onDone}>
+          <ArButton
+            variant={result.retryable ? "ghost" : "primary"}
+            size="md"
+            block
+            onClick={onDone}
+          >
             Done
           </ArButton>
         </div>
@@ -151,11 +166,11 @@ export function ScanResult({
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="ar-glass relative mx-auto w-full max-w-[19.5rem] rounded-ar-lg px-5 pb-5 pt-6 text-center"
+        className="ar-glass rounded-ar-lg relative mx-auto w-full max-w-[19.5rem] px-5 pt-6 pb-5 text-center"
         role="status"
       >
         {discovered && (
-          <span className="font-hud absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-rarity-epic/70 bg-ar-void px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.16em] text-rarity-epic">
+          <span className="font-hud border-rarity-epic/70 bg-ar-void text-rarity-epic absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full border px-2.5 py-1 text-[9.5px] font-bold tracking-[0.16em] whitespace-nowrap uppercase">
             <Sparkles size={11} strokeWidth={2.6} />
             {first ? "Discoverer" : `Finder #${result.rank}`}
           </span>
@@ -163,31 +178,39 @@ export function ScanResult({
 
         {photo && <MuralPhoto src={photo} verified={verified} />}
 
-        <p className="font-hud mt-5 text-[15px] font-bold leading-tight text-ar-text">
-          {discovered ? (first ? "You discovered a new mural!" : "You helped verify this mural!") : mural.title}
+        <p className="font-hud text-ar-text mt-5 text-[15px] leading-tight font-bold">
+          {discovered
+            ? first
+              ? "You discovered a new mural!"
+              : "You helped verify this mural!"
+            : mural.title}
         </p>
-        {discovered && <p className="mt-1 text-[12px] text-ar-dim">{mural.title}</p>}
+        {discovered && <p className="text-ar-dim mt-1 text-[12px]">{mural.title}</p>}
 
         {/* Coins */}
-        <div className="mt-4 rounded-ar border border-gold/35 bg-gold/10 px-4 py-3">
-          <p className="font-hud flex items-center justify-center gap-1.5 text-[26px] font-bold leading-none text-gold">
+        <div className="rounded-ar border-gold/35 bg-gold/10 mt-4 border px-4 py-3">
+          <p className="font-hud text-gold flex items-center justify-center gap-1.5 text-[26px] leading-none font-bold">
             <Coins size={22} strokeWidth={2.4} />+<CountUp to={total} />
           </p>
           {discovered && (
-            <p className="mt-1.5 text-[11px] text-ar-dim">
-              {result.coins} scan · <span className="font-semibold text-gold">{result.bonus} discovery bonus</span>
+            <p className="text-ar-dim mt-1.5 text-[11px]">
+              {result.coins} scan ·{" "}
+              <span className="text-gold font-semibold">{result.bonus} discovery bonus</span>
             </p>
           )}
-          <p className="mt-1 text-[10.5px] uppercase tracking-[0.12em] text-ar-faint">
+          <p className="text-ar-faint mt-1 text-[10.5px] tracking-[0.12em] uppercase">
             {platformBranding.coinName} · balance {result.balance.toLocaleString()}
           </p>
         </div>
 
         {/* Progress */}
-        <div className="mt-3 space-y-1.5 text-[11.5px] text-ar-dim">
+        <div className="text-ar-dim mt-3 space-y-1.5 text-[11.5px]">
           {discovered && mural.status !== "APPROVED" && (
             <p className="flex items-center justify-center gap-2">
-              <Dots filled={Math.min(mural.distinctScanners, mural.confirmationsNeeded)} total={mural.confirmationsNeeded} />
+              <Dots
+                filled={Math.min(mural.distinctScanners, mural.confirmationsNeeded)}
+                total={mural.confirmationsNeeded}
+              />
               {mural.distinctScanners >= mural.confirmationsNeeded
                 ? "Sent for review"
                 : `${mural.distinctScanners} of ${mural.confirmationsNeeded} finders`}

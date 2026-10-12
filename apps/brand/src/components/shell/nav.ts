@@ -53,9 +53,19 @@ export const BRAND_NAV: NavGroup[] = [
     label: "Drops",
     items: [
       { href: "/pins", label: "Map", icon: Map, exclude: ["/pins/manage"] },
-      { href: "/pins/manage", label: "Pin management", shortLabel: "Pins", icon: MapPin },
+      {
+        href: "/pins/manage",
+        label: "Pin management",
+        shortLabel: "Pins",
+        icon: MapPin,
+      },
       { href: "/events", label: "Events", icon: CalendarDays },
-      { href: "/embeds", label: "Website Map", shortLabel: "Embeds", icon: Code2 },
+      {
+        href: "/embeds",
+        label: "Website Map",
+        shortLabel: "Embeds",
+        icon: Code2,
+      },
     ],
   },
   {
@@ -88,13 +98,44 @@ export const ADMIN_NAV: NavGroup = {
     { href: "/admin/creators", label: "Creators", icon: UserCheck },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/admins", label: "Admins", icon: Shield },
-    { href: "/admin/pins", label: "Pin review", shortLabel: "Review", icon: MapPin },
-    { href: "/admin/murals", label: "Mural review", shortLabel: "Murals", icon: Frame },
+    {
+      href: "/admin/pins",
+      label: "Pin review",
+      shortLabel: "Review",
+      icon: MapPin,
+    },
+    {
+      href: "/admin/murals",
+      label: "Mural review",
+      shortLabel: "Murals",
+      icon: Frame,
+    },
     { href: "/admin/maps", label: "All maps", shortLabel: "Maps", icon: Map },
-    { href: "/admin/home-area", label: "Home area", shortLabel: "Area", icon: MapPinned },
-    { href: "/admin/reports", label: "Collection reports", shortLabel: "Reports", icon: Flag },
-    { href: "/admin/audit", label: "Audit log", shortLabel: "Audit", icon: ScrollText, superAdmin: true },
-    { href: "/admin/platforms", label: "Platforms", icon: Building2, superAdmin: true },
+    {
+      href: "/admin/home-area",
+      label: "Home area",
+      shortLabel: "Area",
+      icon: MapPinned,
+    },
+    {
+      href: "/admin/reports",
+      label: "Collection reports",
+      shortLabel: "Reports",
+      icon: Flag,
+    },
+    {
+      href: "/admin/audit",
+      label: "Audit log",
+      shortLabel: "Audit",
+      icon: ScrollText,
+      superAdmin: true,
+    },
+    {
+      href: "/admin/platforms",
+      label: "Platforms",
+      icon: Building2,
+      superAdmin: true,
+    },
   ],
 };
 
@@ -106,16 +147,34 @@ export type BrandEntry = "join" | "finish" | "pending";
 export function brandEntryGroup(entry: BrandEntry): NavGroup {
   const item: NavItem =
     entry === "join"
-      ? { href: "/onboarding", label: "Join as a brand", shortLabel: "Brand", icon: Store }
+      ? {
+          href: "/onboarding",
+          label: "Join as a brand",
+          shortLabel: "Brand",
+          icon: Store,
+        }
       : entry === "finish"
-        ? { href: "/pins", label: "Finish brand setup", shortLabel: "Brand", icon: Store }
-        : { href: "/pins", label: "My brand application", shortLabel: "Brand", icon: Store };
+        ? {
+            href: "/pins",
+            label: "Finish brand setup",
+            shortLabel: "Brand",
+            icon: Store,
+          }
+        : {
+            href: "/pins",
+            label: "My brand application",
+            shortLabel: "Brand",
+            icon: Store,
+          };
   return { label: "Brand", items: [item] };
 }
 
 /** The admin group as this admin sees it: Wadzzo-only items need a Wadzzo admin. */
 export function adminNavFor(isSuperAdmin: boolean): NavGroup {
-  return { ...ADMIN_NAV, items: ADMIN_NAV.items.filter((i) => !i.superAdmin || isSuperAdmin) };
+  return {
+    ...ADMIN_NAV,
+    items: ADMIN_NAV.items.filter((i) => !i.superAdmin || isSuperAdmin),
+  };
 }
 
 /** Phone tab bar: Map · Stores · [+] · Bounties · More (decided). */
@@ -129,12 +188,45 @@ export const MOBILE_TABS: { left: NavItem[]; right: NavItem[] } = {
 
 /** What the "+ Create" button (phone) / "Create" menu (desktop) offers. */
 export const CREATE_ACTIONS: (NavItem & { description: string })[] = [
-  { href: "/pins/new", label: "New pin", icon: MapPin, description: "A drop on the map fans can collect" },
-  { href: "/pins/hotspots/new", label: "New hotspot", icon: Radar, description: "An area that keeps dropping pins" },
-  { href: "/bounties/new", label: "New bounty", icon: Target, description: "A task with a reward", gated: true },
-  { href: "/posts/new", label: "New post", icon: FileText, description: "Share with your followers", gated: true },
-  { href: "/stores/new", label: "New asset", icon: ImagePlus, description: "An NFT or item for your store", gated: true },
-  { href: "/events/new", label: "New event", icon: CalendarDays, description: "A date fans can RSVP to" },
+  {
+    href: "/pins/new",
+    label: "New pin",
+    icon: MapPin,
+    description: "A drop on the map fans can collect",
+  },
+  {
+    href: "/pins/hotspots/new",
+    label: "New hotspot",
+    icon: Radar,
+    description: "An area that keeps dropping pins",
+  },
+  {
+    href: "/bounties/new",
+    label: "New bounty",
+    icon: Target,
+    description: "A task with a reward",
+    gated: true,
+  },
+  {
+    href: "/posts/new",
+    label: "New post",
+    icon: FileText,
+    description: "Share with your followers",
+    gated: true,
+  },
+  {
+    href: "/stores/new",
+    label: "New asset",
+    icon: ImagePlus,
+    description: "An NFT or item for your store",
+    gated: true,
+  },
+  {
+    href: "/events/new",
+    label: "New event",
+    icon: CalendarDays,
+    description: "A date fans can RSVP to",
+  },
 ];
 
 export const CREATE_ICON = Plus;

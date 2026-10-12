@@ -72,5 +72,9 @@ const noSubscribe = () => () => undefined;
 
 /** False while rendering on the server and during hydration, true afterwards. */
 export function useIsClient(): boolean {
-  return useSyncExternalStore(noSubscribe, () => true, () => false);
+  return useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
 }

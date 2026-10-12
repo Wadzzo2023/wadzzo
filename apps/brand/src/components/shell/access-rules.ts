@@ -1,4 +1,11 @@
-import { adminNavFor, BRAND_NAV, brandEntryGroup, type BrandEntry, type NavGroup, type NavItem } from "./nav";
+import {
+  adminNavFor,
+  BRAND_NAV,
+  brandEntryGroup,
+  type BrandEntry,
+  type NavGroup,
+  type NavItem,
+} from "./nav";
 
 export interface PortalAccessState {
   isAdmin: boolean;
@@ -23,7 +30,8 @@ export function getPortalLandingRoute({ isAdmin, isApprovedCreator }: PortalAcce
   return "/pins";
 }
 
-export type BrandRecord = { onThisPlatform: boolean; aprovalSend: boolean; approved: boolean | null } | null | undefined;
+export type BrandRecord =
+  { onThisPlatform: boolean; aprovalSend: boolean; approved: boolean | null } | null | undefined;
 
 /** Which way into a brand an admin without a working one should be offered. */
 export function brandEntryFor(applies: boolean, c: BrandRecord): BrandEntry | null {

@@ -12,7 +12,10 @@ import { useStored } from "./use-stored";
 /** How often to check on a running answer, so progress steps feel live. */
 const POLL_MS = 600;
 
-export type ActionState = { status: ActionStatus; result: { message?: string; pinJobId?: string } | null };
+export type ActionState = {
+  status: ActionStatus;
+  result: { message?: string; pinJobId?: string } | null;
+};
 
 /**
  * The map agent chat for one brand (`creatorId`; omitted = the caller's own):
@@ -29,7 +32,14 @@ export function useAgentChat(creatorId?: string) {
   const [pendingText, setPendingText] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
 
-  const conversation = api.agent.conversation.useQuery({ creatorId, id: conversationId ?? "" }, { enabled: Boolean(conversationId), retry: false, refetchOnWindowFocus: false });
+  const conversation = api.agent.conversation.useQuery(
+    { creatorId, id: conversationId ?? "" },
+    {
+      enabled: Boolean(conversationId),
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  );
   // Deleted (or not this person's): behave as a new chat.
   const gone = conversation.error?.data?.code === "NOT_FOUND";
   const activeId = gone ? null : conversationId;
@@ -49,10 +59,15 @@ export function useAgentChat(creatorId?: string) {
           if (data.message && activeId) {
             const message = data.message;
             utils.agent.conversation.setData({ creatorId, id: activeId }, (old) =>
-              old && !old.messages.some((m) => m.id === message.id) ? { ...old, messages: [...old.messages, message] } : old,
+              old && !old.messages.some((m) => m.id === message.id)
+                ? { ...old, messages: [...old.messages, message] }
+                : old,
             );
             // Fetch the new message's proposals (they start out pending).
-            void utils.agent.conversation.invalidate({ creatorId, id: activeId });
+            void utils.agent.conversation.invalidate({
+              creatorId,
+              id: activeId,
+            });
           }
           void utils.agent.conversations.invalidate();
           setJobId(null);
@@ -99,12 +114,26 @@ export function useAgentChat(creatorId?: string) {
         utils.agent.conversation.setData({ creatorId, id }, (old) => {
           const messages = (old?.messages ?? []).map((m) =>
             m.id === answer?.messageId
-              ? { ...m, blocks: m.blocks.map((b) => (b.kind === "choices" && b.id === answer.blockId ? { ...b, answered: answer.labels } : b)) }
+              ? {
+                  ...m,
+                  blocks: m.blocks.map((b) =>
+                    b.kind === "choices" && b.id === answer.blockId
+                      ? { ...b, answered: answer.labels }
+                      : b,
+                  ),
+                }
               : m,
           );
           // A refetch that finished meanwhile may already include it.
-          const fresh = messages.some((m) => m.id === res.userMessage.id) ? messages : [...messages, res.userMessage];
-          return { id, title: old?.title ?? body.slice(0, 80), actions: old?.actions ?? {}, messages: fresh };
+          const fresh = messages.some((m) => m.id === res.userMessage.id)
+            ? messages
+            : [...messages, res.userMessage];
+          return {
+            id,
+            title: old?.title ?? body.slice(0, 80),
+            actions: old?.actions ?? {},
+            messages: fresh,
+          };
         });
         setConversationId(id);
         setSteps([]);
@@ -123,7 +152,9 @@ export function useAgentChat(creatorId?: string) {
   const setActionState = useCallback(
     (actionId: string, state: ActionState) => {
       if (!activeId) return;
-      utils.agent.conversation.setData({ creatorId, id: activeId }, (old) => (old ? { ...old, actions: { ...old.actions, [actionId]: state } } : old));
+      utils.agent.conversation.setData({ creatorId, id: activeId }, (old) =>
+        old ? { ...old, actions: { ...old.actions, [actionId]: state } } : old,
+      );
     },
     [creatorId, activeId, utils],
   );
@@ -134,8 +165,15 @@ export function useAgentChat(creatorId?: string) {
   const confirm = useCallback(
     async (actionId: string, edits?: ActionEdits) => {
       try {
-        const r = await confirmMutation.mutateAsync({ creatorId, actionId, edits });
-        setActionState(actionId, { status: "done", result: { message: r.message, pinJobId: r.pinJobId } });
+        const r = await confirmMutation.mutateAsync({
+          creatorId,
+          actionId,
+          edits,
+        });
+        setActionState(actionId, {
+          status: "done",
+          result: { message: r.message, pinJobId: r.pinJobId },
+        });
         toast.success(r.message);
         // Pins, hotspots and events may have changed.
         void utils.maps.pin.invalidate();
@@ -168,7 +206,10 @@ export function useAgentChat(creatorId?: string) {
     setFailed(null);
   }, [jobId, setConversationId]);
 
-  const messages: AgentMessage[] = useMemo(() => (activeId ? (conversation.data?.messages ?? []) : []), [activeId, conversation.data]);
+  const messages: AgentMessage[] = useMemo(
+    () => (activeId ? (conversation.data?.messages ?? []) : []),
+    [activeId, conversation.data],
+  );
 
   return {
     conversationId: activeId,

@@ -28,13 +28,7 @@ import type { ArPin, PinStatus, Rarity } from "./types";
  */
 
 /** Mirrors Prisma's `ItemPrivacy`, without importing the client into UI code. */
-export type PinPrivacy =
-  | "PUBLIC"
-  | "PRIVATE"
-  | "TIER"
-  | "DRAFT"
-  | "FOR_SALE"
-  | "NOT_FOR_SALE";
+export type PinPrivacy = "PUBLIC" | "PRIVATE" | "TIER" | "DRAFT" | "FOR_SALE" | "NOT_FOR_SALE";
 
 export interface PinAccess {
   privacy: PinPrivacy;
@@ -63,9 +57,7 @@ export function deriveRarity(access: PinAccess): Rarity {
   const price = access.subscriptionPrice;
   // Duplicate prices are collapsed first: two tiers priced the same are one
   // rung, so neither becomes a phantom "middle" that reads legendary.
-  const rungs = [...new Set(access.creatorTierPrices ?? [])].sort(
-    (a, b) => a - b,
-  );
+  const rungs = [...new Set(access.creatorTierPrices ?? [])].sort((a, b) => a - b);
 
   // Gated, but we can't place it on a ladder — a TIER drop with no resolvable
   // subscription, or a creator with a single tier. Both are "token holders
@@ -77,13 +69,7 @@ export function deriveRarity(access: PinAccess): Rarity {
   return "legendary";
 }
 
-export const RARITY_ORDER: Rarity[] = [
-  "common",
-  "rare",
-  "epic",
-  "legendary",
-  "mythic",
-];
+export const RARITY_ORDER: Rarity[] = ["common", "rare", "epic", "legendary", "mythic"];
 
 export const RARITY_META: Record<
   Rarity,
@@ -166,5 +152,8 @@ export function timeRemaining(endsAt: string | null, now = Date.now()) {
   if (hours < 24) return { label: `${Math.floor(hours)}h left`, urgent: true };
 
   const days = Math.floor(hours / 24);
-  return { label: `${days} day${days === 1 ? "" : "s"} left`, urgent: days <= 2 };
+  return {
+    label: `${days} day${days === 1 ? "" : "s"} left`,
+    urgent: days <= 2,
+  };
 }

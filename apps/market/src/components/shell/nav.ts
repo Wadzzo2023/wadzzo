@@ -1,11 +1,27 @@
-import { Activity, Home, Layers, Newspaper, Store, Target, Users, Wallet, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  Home,
+  Layers,
+  Newspaper,
+  Store,
+  Target,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 /**
  * Sidebar navigation. `MAIN` is browsing, `ACCOUNT` is the signed-in
  * wallet's own pages. Notifications are the bell in the header; Settings and
  * Sign out are in the avatar menu.
  */
-export type NavItem = { href: string; label: string; icon: LucideIcon; match?: string[]; authOnly?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match?: string[];
+  authOnly?: boolean;
+};
 
 export const MAIN: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
@@ -31,5 +47,7 @@ export const INFO_LINKS = [
 
 export function isActive(pathname: string, item: NavItem) {
   if (item.href === "/") return pathname === "/";
-  return [item.href, ...(item.match ?? [])].some((p) => pathname === p || pathname.startsWith(p + "/"));
+  return [item.href, ...(item.match ?? [])].some(
+    (p) => pathname === p || pathname.startsWith(p + "/"),
+  );
 }

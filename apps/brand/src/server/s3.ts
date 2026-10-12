@@ -77,8 +77,7 @@ export const endPoints = [
 ] as const;
 export type EndPointType = (typeof endPoints)[number];
 
-const generateFileName = (bytes = 32) =>
-  crypto.randomBytes(bytes).toString("hex");
+const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");
 
 function getAwsS3PublicUrl(key: string) {
   return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`;
@@ -139,11 +138,15 @@ export async function getSignedURL({
 
   console.log("fileType", fileType);
   if (fileSize > convertSize(uploaderType[endPoint].maxFileSize)) {
-    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "File is too large",
+    });
   }
 
   if (!allowedFileTypes.includes(fileType)) {
-    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "File type not allowed" });
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+      message: "File type not allowed",
+    });
   }
 
   const genFileName = generateFileName();
@@ -174,6 +177,13 @@ function convertSize(value: string) {
 /** Upload bytes made on the server (e.g. an AI-generated image); returns the public URL. */
 export async function uploadBufferToS3(body: Buffer, contentType: string) {
   const key = generateFileName();
-  await s3Client.send(new PutObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key, Body: body, ContentType: contentType }));
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: env.AWS_BUCKET_NAME,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
+  );
   return getAwsS3PublicUrl(key);
 }

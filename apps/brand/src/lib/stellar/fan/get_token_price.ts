@@ -27,9 +27,7 @@ export async function getXlmNumberForUSD(usd: number): Promise<number> {
   return xlmNumber;
 }
 
-export async function getPlatformAssetNumberForUSD(
-  usd: number,
-): Promise<number> {
+export async function getPlatformAssetNumberForUSD(usd: number): Promise<number> {
   const xlmNumber = await getXlmNumberForUSD(usd);
   const tokenNumber = await getplatformAssetNumberForXLM(xlmNumber);
   return tokenNumber;
@@ -79,16 +77,14 @@ export async function getplatformAssetNumberForXLM(xlm = 1.5) {
   return Math.ceil((xlm * xlmPrice) / price);
 }
 
-
-// 5000 bandcoin 
+// 5000 bandcoin
 // 1 bandcoin = 0.0001 usd
 // 1 xlm = 0.4 usd
 // 1 bandcoin = 0.0001 / 0.4 = 0.00025 xlm
 // 5000 bandcoin = 5000 * 0.00025 = 1.25 xlm
 
-
 // -----Note-----
-// amountOfPlatformAsset * priceOfPlatformAssetInUSD / priceOfXLMInUSD = amountOfXLM 
+// amountOfPlatformAsset * priceOfPlatformAssetInUSD / priceOfXLMInUSD = amountOfXLM
 
 export async function getXLMPriceByPlatformAsset(platformTokenToConvert: number) {
   const platformAssetPriceInUSD = PLATFORM_ASSET.code === "Wadzzo" ? 0.01 : await getAssetPrice();
@@ -99,9 +95,7 @@ export async function getXLMPriceByPlatformAsset(platformTokenToConvert: number)
   return Math.ceil((platformAssetPriceInUSD / xlmPriceInUSD) * platformTokenToConvert);
 }
 
-export async function getPlatformTokenNumberForUSD(
-  usd: number,
-): Promise<number> {
+export async function getPlatformTokenNumberForUSD(usd: number): Promise<number> {
   const platformAssetPrice = await getAssetPrice();
   const platformTokenNumber = usd / platformAssetPrice;
   return platformTokenNumber;
@@ -127,11 +121,12 @@ export async function getAssetToUSDCRate(): Promise<number> {
   }
 }
 
-
-
-export async function getAssetPriceByCoddenIssuer({ code, issuer }: {
-  code: string,
-  issuer: string
+export async function getAssetPriceByCoddenIssuer({
+  code,
+  issuer,
+}: {
+  code: string;
+  issuer: string;
 }): Promise<number> {
   try {
     const response = await axios.get<PlatformAssetInfo>(

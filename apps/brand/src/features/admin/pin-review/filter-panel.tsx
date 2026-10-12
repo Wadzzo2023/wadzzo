@@ -6,10 +6,25 @@ import type { ReactNode } from "react";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import { LOCS, NO_FILTERS, SUBMITTED, TYPE_LABEL, activeChips, type Filters, type LocCount, type SubmittedPreset } from "./model";
+import {
+  LOCS,
+  NO_FILTERS,
+  SUBMITTED,
+  TYPE_LABEL,
+  activeChips,
+  type Filters,
+  type LocCount,
+  type SubmittedPreset,
+} from "./model";
 
 type Brand = { id: string; name: string; count: number };
 
@@ -33,7 +48,11 @@ export function FilterButton({
       <PopoverTrigger asChild>
         <Button variant="outline" className={cn(active > 0 && "border-primary/50 text-primary")}>
           <SlidersHorizontal /> Filters
-          {active > 0 && <span className="rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground tabular-nums">{active}</span>}
+          {active > 0 && (
+            <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px] font-semibold tabular-nums">
+              {active}
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[min(92vw,380px)] p-0">
@@ -41,22 +60,36 @@ export function FilterButton({
           <Section title="Submitted">
             <Chips<SubmittedPreset>
               value={filters.submitted}
-              options={Object.entries(SUBMITTED).map(([value, label]) => ({ value: value as SubmittedPreset, label }))}
+              options={Object.entries(SUBMITTED).map(([value, label]) => ({
+                value: value as SubmittedPreset,
+                label,
+              }))}
               onChange={(submitted) => onChange({ submitted })}
             />
             {filters.submitted === "custom" && (
-              <DateRange from={filters.submittedFrom} to={filters.submittedTo} onChange={(from, to) => onChange({ submittedFrom: from, submittedTo: to })} />
+              <DateRange
+                from={filters.submittedFrom}
+                to={filters.submittedTo}
+                onChange={(from, to) => onChange({ submittedFrom: from, submittedTo: to })}
+              />
             )}
           </Section>
 
           <Section title="Live between" hint="Pins whose run overlaps these dates.">
-            <DateRange from={filters.liveFrom} to={filters.liveTo} onChange={(liveFrom, liveTo) => onChange({ liveFrom, liveTo })} />
+            <DateRange
+              from={filters.liveFrom}
+              to={filters.liveTo}
+              onChange={(liveFrom, liveTo) => onChange({ liveFrom, liveTo })}
+            />
           </Section>
 
           <Section title="Locations per pin">
             <Chips<LocCount>
               value={filters.locs}
-              options={Object.entries(LOCS).map(([value, label]) => ({ value: value as LocCount, label }))}
+              options={Object.entries(LOCS).map(([value, label]) => ({
+                value: value as LocCount,
+                label,
+              }))}
               onChange={(locs) => onChange({ locs })}
             />
           </Section>
@@ -67,8 +100,19 @@ export function FilterButton({
                 {types.map(({ type, count }) => {
                   const on = filters.types.includes(type);
                   return (
-                    <Chip key={type} on={on} onClick={() => onChange({ types: on ? filters.types.filter((t) => t !== type) : [...filters.types, type] })}>
-                      {TYPE_LABEL[type] ?? type} <span className="opacity-60 tabular-nums">{count}</span>
+                    <Chip
+                      key={type}
+                      on={on}
+                      onClick={() =>
+                        onChange({
+                          types: on
+                            ? filters.types.filter((t) => t !== type)
+                            : [...filters.types, type],
+                        })
+                      }
+                    >
+                      {TYPE_LABEL[type] ?? type}{" "}
+                      <span className="tabular-nums opacity-60">{count}</span>
                     </Chip>
                   );
                 })}
@@ -77,7 +121,10 @@ export function FilterButton({
           )}
 
           <Section title="Brand">
-            <Select value={filters.brand ?? "all"} onValueChange={(v) => onChange({ brand: v === "all" ? null : v })}>
+            <Select
+              value={filters.brand ?? "all"}
+              onValueChange={(v) => onChange({ brand: v === "all" ? null : v })}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -106,7 +153,9 @@ export function FilterButton({
           </Section>
         </div>
         <div className="flex items-center justify-between border-t px-4 py-2.5">
-          <span className="text-xs text-muted-foreground">{active ? `${active} active` : "No filters"}</span>
+          <span className="text-muted-foreground text-xs">
+            {active ? `${active} active` : "No filters"}
+          </span>
           <Button variant="ghost" size="sm" disabled={!active} onClick={() => onChange(NO_FILTERS)}>
             Clear all
           </Button>
@@ -117,20 +166,40 @@ export function FilterButton({
 }
 
 /** The active filters as chips under the toolbar, each removable. */
-export function ActiveFilters({ filters, onChange, brandName }: { filters: Filters; onChange: (patch: Partial<Filters>) => void; brandName: (id: string) => string }) {
+export function ActiveFilters({
+  filters,
+  onChange,
+  brandName,
+}: {
+  filters: Filters;
+  onChange: (patch: Partial<Filters>) => void;
+  brandName: (id: string) => string;
+}) {
   const chips = activeChips(filters, brandName);
   if (!chips.length) return null;
   return (
     <div className="mt-3 flex flex-wrap items-center gap-1.5">
       {chips.map((c) => (
-        <span key={c.key} className="inline-flex items-center gap-1 rounded-full border bg-card py-0.5 pr-1 pl-2.5 text-xs">
+        <span
+          key={c.key}
+          className="bg-card inline-flex items-center gap-1 rounded-full border py-0.5 pr-1 pl-2.5 text-xs"
+        >
           {c.label}
-          <button type="button" onClick={() => onChange(c.clear)} aria-label={`Remove filter: ${c.label}`} className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => onChange(c.clear)}
+            aria-label={`Remove filter: ${c.label}`}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-full p-0.5"
+          >
             <X className="size-3" />
           </button>
         </span>
       ))}
-      <button type="button" onClick={() => onChange(NO_FILTERS)} className="ml-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+      <button
+        type="button"
+        onClick={() => onChange(NO_FILTERS)}
+        className="text-muted-foreground hover:text-foreground ml-1 text-xs underline-offset-2 hover:underline"
+      >
         Clear all
       </button>
     </div>
@@ -141,13 +210,21 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
   return (
     <section>
       <h3 className="label-caps">{title}</h3>
-      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-muted-foreground mt-0.5 text-xs">{hint}</p>}
       <div className="mt-2 space-y-2">{children}</div>
     </section>
   );
 }
 
-function Chips<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
+function Chips<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}) {
   return (
     <div className="flex flex-wrap gap-1.5" role="radiogroup">
       {options.map((o) => (
@@ -159,7 +236,17 @@ function Chips<T extends string>({ value, options, onChange }: { value: T; optio
   );
 }
 
-function Chip({ on, onClick, children, role }: { on: boolean; onClick: () => void; children: ReactNode; role?: string }) {
+function Chip({
+  on,
+  onClick,
+  children,
+  role,
+}: {
+  on: boolean;
+  onClick: () => void;
+  children: ReactNode;
+  role?: string;
+}) {
   return (
     <button
       type="button"
@@ -169,7 +256,9 @@ function Chip({ on, onClick, children, role }: { on: boolean; onClick: () => voi
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-        on ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
+        on
+          ? "border-primary bg-primary text-primary-foreground"
+          : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
       )}
     >
       {children}
@@ -177,16 +266,36 @@ function Chip({ on, onClick, children, role }: { on: boolean; onClick: () => voi
   );
 }
 
-function DateRange({ from, to, onChange }: { from: string; to: string; onChange: (from: string, to: string) => void }) {
+function DateRange({
+  from,
+  to,
+  onChange,
+}: {
+  from: string;
+  to: string;
+  onChange: (from: string, to: string) => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-2">
-      <label className="space-y-1 text-xs text-muted-foreground">
+      <label className="text-muted-foreground space-y-1 text-xs">
         From
-        <Input type="date" value={from} max={to || undefined} onChange={(e) => onChange(e.target.value, to)} className="h-9" />
+        <Input
+          type="date"
+          value={from}
+          max={to || undefined}
+          onChange={(e) => onChange(e.target.value, to)}
+          className="h-9"
+        />
       </label>
-      <label className="space-y-1 text-xs text-muted-foreground">
+      <label className="text-muted-foreground space-y-1 text-xs">
         To
-        <Input type="date" value={to} min={from || undefined} onChange={(e) => onChange(from, e.target.value)} className="h-9" />
+        <Input
+          type="date"
+          value={to}
+          min={from || undefined}
+          onChange={(e) => onChange(from, e.target.value)}
+          className="h-9"
+        />
       </label>
     </div>
   );

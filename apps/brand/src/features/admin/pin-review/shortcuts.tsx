@@ -3,7 +3,13 @@
 import { Keyboard } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 
 export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["J"], label: "Next pin" },
@@ -18,7 +24,21 @@ export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["?"], label: "Show these shortcuts" },
 ];
 
-export type ShortcutHandlers = Partial<Record<"next" | "prev" | "open" | "select" | "approve" | "reject" | "edit" | "locations" | "escape" | "help", () => void>>;
+export type ShortcutHandlers = Partial<
+  Record<
+    | "next"
+    | "prev"
+    | "open"
+    | "select"
+    | "approve"
+    | "reject"
+    | "edit"
+    | "locations"
+    | "escape"
+    | "help",
+    () => void
+  >
+>;
 
 const KEYMAP: Record<string, keyof ShortcutHandlers> = {
   j: "next",
@@ -50,7 +70,9 @@ export function useReviewShortcuts(handlers: ShortcutHandlers, paused: boolean) 
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       // Enter on a focused button/link should do what that control does.
       if (e.key === "Enter" && t && /^(BUTTON|A)$/.test(t.tagName)) return;
-      const action = KEYMAP[e.key.length === 1 ? e.key.toLowerCase() : e.key] ?? (e.key === "?" ? "help" : undefined);
+      const action =
+        KEYMAP[e.key.length === 1 ? e.key.toLowerCase() : e.key] ??
+        (e.key === "?" ? "help" : undefined);
       const fn = action && ref.current[action];
       if (!fn) return;
       e.preventDefault();
@@ -61,15 +83,24 @@ export function useReviewShortcuts(handlers: ShortcutHandlers, paused: boolean) 
   }, [paused]);
 }
 
-export function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function ShortcutsDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-hud">
-            <Keyboard className="size-5 text-primary" /> Keyboard shortcuts
+          <DialogTitle className="font-hud flex items-center gap-2">
+            <Keyboard className="text-primary size-5" /> Keyboard shortcuts
           </DialogTitle>
-          <DialogDescription>Review pins without the mouse. Every approve and reject can be undone from the message that follows.</DialogDescription>
+          <DialogDescription>
+            Review pins without the mouse. Every approve and reject can be undone from the message
+            that follows.
+          </DialogDescription>
         </DialogHeader>
         <ul className="divide-y rounded-lg border">
           {SHORTCUTS.map((s) => (
@@ -77,7 +108,10 @@ export function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenC
               <span>{s.label}</span>
               <span className="flex gap-1">
                 {s.keys.map((k) => (
-                  <kbd key={k} className="min-w-6 rounded border bg-muted px-1.5 py-0.5 text-center font-mono text-xs">
+                  <kbd
+                    key={k}
+                    className="bg-muted min-w-6 rounded border px-1.5 py-0.5 text-center font-mono text-xs"
+                  >
                     {k}
                   </kbd>
                 ))}

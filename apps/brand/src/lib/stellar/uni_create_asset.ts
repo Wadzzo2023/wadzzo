@@ -1,12 +1,13 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "./fan/get_token_price";
 import { type AccountType } from "./fan/utils";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
@@ -45,15 +46,10 @@ export async function createUniAsset({
 
   // get total platform token
   const requiredAsset2refundXlm = await getplatformAssetNumberForXLM(2);
-  const total =
-    requiredAsset2refundXlm +
-    Number(PLATFORM_FEE) +
-    Number(TrxBaseFeeInPlatformAsset);
+  const total = requiredAsset2refundXlm + Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset);
 
   // here pubkey should be change for admin
-  const transactionInitializer = await server.loadAccount(
-    PLATFORM_MOTHER_ACC.publicKey(),
-  );
+  const transactionInitializer = await server.loadAccount(PLATFORM_MOTHER_ACC.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInitializer, {
     fee: TrxBaseFee,

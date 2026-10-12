@@ -18,10 +18,22 @@ function Obj({ url }: { url: string }) {
 }
 
 /** A 3D model (GLB/GLTF or OBJ) the viewer can rotate, zoom and pan. */
-export default function ModelViewer({ url, autoRotate = true }: { url: string; autoRotate?: boolean }) {
+export default function ModelViewer({
+  url,
+  autoRotate = true,
+}: {
+  url: string;
+  autoRotate?: boolean;
+}) {
   const isObj = /\.obj(\?|$)/i.test(url);
   return (
-    <Suspense fallback={<div className="flex size-full items-center justify-center"><Spinner /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex size-full items-center justify-center">
+          <Spinner />
+        </div>
+      }
+    >
       <Canvas camera={{ position: [0, 0, 4], fov: 45 }} dpr={[1, 2]} className="touch-none">
         <ambientLight intensity={0.6} />
         <directionalLight position={[3, 5, 2]} intensity={1.2} />

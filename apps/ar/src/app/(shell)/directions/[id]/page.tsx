@@ -48,10 +48,7 @@ import {
   RecenterButton,
   UserArrow,
 } from "~/components/directions/NavOverlays";
-import {
-  useNavCamera,
-  type Orientation,
-} from "~/components/directions/useNavCamera";
+import { useNavCamera, type Orientation } from "~/components/directions/useNavCamera";
 import { AppShell } from "~/components/shell/AppShell";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
@@ -105,9 +102,7 @@ type NavStyle = "classic" | "compass";
 const STYLE_KEY = "wadzzo.navStyle";
 const readStyle = (): NavStyle => {
   try {
-    return localStorage.getItem(STYLE_KEY) === "compass"
-      ? "compass"
-      : "classic";
+    return localStorage.getItem(STYLE_KEY) === "compass" ? "compass" : "classic";
   } catch {
     return "classic";
   }
@@ -118,21 +113,9 @@ const ROUTE = platformBranding.colors.mapRoute;
 const ROUTE_CASING = platformBranding.colors.mapRouteCasing;
 const NAV_GREEN = platformBranding.colors.mapNavAccent;
 const width = (lo: number, mid: number, hi: number) =>
-  [
-    "interpolate",
-    ["exponential", 1.5],
-    ["zoom"],
-    12,
-    lo,
-    15.5,
-    mid,
-    19,
-    hi,
-  ] as unknown as number;
+  ["interpolate", ["exponential", 1.5], ["zoom"], 12, lo, 15.5, mid, 19, hi] as unknown as number;
 
-function maneuverIcon(
-  step: Pick<RouteStep, "type" | "modifier"> | null,
-): LucideIcon {
+function maneuverIcon(step: Pick<RouteStep, "type" | "modifier"> | null): LucideIcon {
   if (!step) return ArrowUp;
   if (step.type === "arrive") return Flag;
   if (step.type === "roundabout" || step.type === "rotary") return RotateCcw;
@@ -214,12 +197,7 @@ export default function DirectionsScreen() {
   const id = typeof urlQuery.id === "string" ? urlQuery.id : null;
   const isMural = urlQuery.kind === "mural";
 
-  const {
-    fix,
-    status: geoStatus,
-    reason: geoReason,
-    retry: retryLocation,
-  } = useGeolocation();
+  const { fix, status: geoStatus, reason: geoReason, retry: retryLocation } = useGeolocation();
   const { pins, isLoading: pinsLoading } = usePinsQuery();
   const [mode, setMode] = useState<TravelMode>("walk");
 
@@ -366,12 +344,7 @@ export default function DirectionsScreen() {
   const [sheetIndex, setSheetIndex] = useState(0);
 
   const at = useMemo<[number, number] | null>(
-    () =>
-      fix
-        ? nav && nav.snap.off < 25
-          ? nav.snap.point
-          : [fix.lng, fix.lat]
-        : null,
+    () => (fix ? (nav && nav.snap.off < 25 ? nav.snap.point : [fix.lng, fix.lat]) : null),
     [fix, nav],
   );
   useNavCamera({
@@ -404,7 +377,7 @@ export default function DirectionsScreen() {
       navStyle === "compass"
         ? { top: 0, bottom: 0, left: 0, right: 0 }
         : { top: 230, bottom: NAV_PEEK + 40, left: 0, right: 0 },
-     
+
     [navStyle],
   );
   /** Fly to "you", in the current look; the frame loop takes over after. `o` = the orientation being switched to (state is still the old one). */
@@ -484,9 +457,7 @@ export default function DirectionsScreen() {
     setPhase("preview");
     setMenu(null);
     setFollowing(true);
-    mapRef.current
-      ?.getMap()
-      .setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+    mapRef.current?.getMap().setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
     fitRoute(route);
   };
 
@@ -518,9 +489,7 @@ export default function DirectionsScreen() {
   // Alternatives: click the grey line or its time bubble.
   const alts = routes.filter((r) => r.id !== route?.id);
   const onMapClick = (e: MapMouseEvent) => {
-    const hit = e.features?.find(
-      (f) => f.layer?.id === "alt-line" || f.layer?.id === "alt-casing",
-    );
+    const hit = e.features?.find((f) => f.layer?.id === "alt-line" || f.layer?.id === "alt-casing");
     const rid = hit?.properties?.rid as string | undefined;
     if (rid && !navigating) select(rid);
   };
@@ -529,20 +498,13 @@ export default function DirectionsScreen() {
     return (
       <AppShell tabs={false}>
         <div className="relative h-full">
-          <LocationGate
-            status={geoStatus}
-            reason={geoReason}
-            onRetry={retryLocation}
-          />
+          <LocationGate status={geoStatus} reason={geoReason} onRetry={retryLocation} />
         </div>
       </AppShell>
     );
   }
 
-  if (
-    !target &&
-    (isMural ? muralQuery.isLoading : pinsLoading || !urlReady)
-  ) {
+  if (!target && (isMural ? muralQuery.isLoading : pinsLoading || !urlReady)) {
     return (
       <AppShell tabs={false}>
         <DirectionsLoading mural={isMural} onBack={() => router.back()} />
@@ -554,7 +516,7 @@ export default function DirectionsScreen() {
     return (
       <AppShell>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
             {isMural ? "Mural not found" : "Pin not found"}
           </p>
           <ArLinkButton href="/map" variant="primary" size="md">
@@ -578,26 +540,15 @@ export default function DirectionsScreen() {
         icon: Navigation,
       };
   const turnText = progress
-    ? firstText(
-        route?.steps[progress.step]?.banner,
-        progress.next?.instruction,
-        target.title,
-      )
+    ? firstText(route?.steps[progress.step]?.banner, progress.next?.instruction, target.title)
     : "";
-  const street = progress
-    ? firstText(route?.steps[progress.step]?.name, route?.summary)
-    : "";
+  const street = progress ? firstText(route?.steps[progress.step]?.name, route?.summary) : "";
   const remainingSteps =
-    route && progress
-      ? route.steps.slice(progress.step + 1)
-      : (route?.steps ?? []);
+    route && progress ? route.steps.slice(progress.step + 1) : (route?.steps ?? []);
   const routeEnd = route?.coordinates[route.coordinates.length - 1];
   // Dotted "last metres" from the road to the drop, and (preview) from you to the road.
   const connectors: [number, number][][] = [];
-  if (
-    routeEnd &&
-    distanceMeters({ lng: routeEnd[0], lat: routeEnd[1] }, target) > 6
-  )
+  if (routeEnd && distanceMeters({ lng: routeEnd[0], lat: routeEnd[1] }, target) > 6)
     connectors.push([routeEnd, [target.lng, target.lat]]);
   const routeStart = route?.coordinates[0];
   if (
@@ -606,28 +557,19 @@ export default function DirectionsScreen() {
     distanceMeters({ lng: routeStart[0], lat: routeStart[1] }, fix) > 6
   )
     connectors.push([[fix.lng, fix.lat], routeStart]);
-  const kmh =
-    fix.speed != null && fix.speed >= 0 ? Math.round(fix.speed * 3.6) : null;
-  const leftMin = progress
-    ? Math.max(1, Math.round(progress.remainingTime / 60))
-    : 0;
+  const kmh = fix.speed != null && fix.speed >= 0 ? Math.round(fix.speed * 3.6) : null;
+  const leftMin = progress ? Math.max(1, Math.round(progress.remainingTime / 60)) : 0;
 
   const stepsList = (steps: RouteStep[]) => (
-    <ol className="divide-y divide-ar-line rounded-ar border border-ar-line">
+    <ol className="divide-ar-line rounded-ar border-ar-line divide-y border">
       {steps.map((step, i) => {
         const Icon = maneuverIcon(step);
         return (
           <li key={i} className="flex items-center gap-3 px-3.5 py-3">
-            <Icon
-              size={18}
-              strokeWidth={2.3}
-              className="shrink-0 text-ar-dim"
-            />
-            <span className="min-w-0 flex-1 text-[13px] text-ar-text">
-              {step.instruction}
-            </span>
+            <Icon size={18} strokeWidth={2.3} className="text-ar-dim shrink-0" />
+            <span className="text-ar-text min-w-0 flex-1 text-[13px]">{step.instruction}</span>
             {step.distance > 0 && (
-              <span className="font-hud shrink-0 text-[11px] font-bold tabular-nums text-ar-faint">
+              <span className="font-hud text-ar-faint shrink-0 text-[11px] font-bold tabular-nums">
                 {formatNavDistance(step.distance)}
               </span>
             )}
@@ -639,7 +581,7 @@ export default function DirectionsScreen() {
 
   return (
     <AppShell tabs={false}>
-      <div ref={boxRef} className="relative h-full select-none overflow-hidden">
+      <div ref={boxRef} className="relative h-full overflow-hidden select-none">
         {/* ── Map ─────────────────────────────────────────────────────── */}
         {MAPBOX_TOKEN ? (
           <MapGL
@@ -718,11 +660,7 @@ export default function DirectionsScreen() {
                     }}
                   />
                 </Source>
-                <Source
-                  id="done"
-                  type="geojson"
-                  data={line(navigating && nav ? nav.done : [])}
-                >
+                <Source id="done" type="geojson" data={line(navigating && nav ? nav.done : [])}>
                   <Layer
                     id="done-line"
                     type="line"
@@ -758,13 +696,7 @@ export default function DirectionsScreen() {
                 <Source
                   id="route"
                   type="geojson"
-                  data={line(
-                    !route
-                      ? []
-                      : navigating && nav
-                        ? nav.ahead
-                        : route.coordinates,
-                  )}
+                  data={line(!route ? [] : navigating && nav ? nav.ahead : route.coordinates)}
                 >
                   <Layer
                     id="route-glow"
@@ -836,26 +768,19 @@ export default function DirectionsScreen() {
               alts.map((r) => {
                 const mid = r.coordinates[Math.floor(r.coordinates.length / 2)];
                 if (!mid || !fastest) return null;
-                const diff = Math.round(
-                  (r.duration - (route?.duration ?? r.duration)) / 60,
-                );
+                const diff = Math.round((r.duration - (route?.duration ?? r.duration)) / 60);
                 return (
-                  <Marker
-                    key={r.id}
-                    longitude={mid[0]}
-                    latitude={mid[1]}
-                    anchor="bottom"
-                  >
+                  <Marker key={r.id} longitude={mid[0]} latitude={mid[1]} anchor="bottom">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         select(r.id);
                       }}
-                      className="font-hud rounded-[10px] border border-ar-line bg-ar-surface px-2 py-1 text-[11px] font-bold text-ar-dim shadow-lg"
+                      className="font-hud border-ar-line bg-ar-surface text-ar-dim rounded-[10px] border px-2 py-1 text-[11px] font-bold shadow-lg"
                     >
                       {formatDuration(r.duration)}
                       {diff !== 0 && (
-                        <span className="ml-1 font-medium text-ar-faint">
+                        <span className="text-ar-faint ml-1 font-medium">
                           {diff > 0 ? `+${diff}` : diff}
                         </span>
                       )}
@@ -867,15 +792,15 @@ export default function DirectionsScreen() {
               route &&
               route.coordinates.length > 2 &&
               (() => {
-                const mid =
-                  route.coordinates[
-                    Math.floor(route.coordinates.length * 0.45)
-                  ]!;
+                const mid = route.coordinates[Math.floor(route.coordinates.length * 0.45)]!;
                 return (
                   <Marker longitude={mid[0]} latitude={mid[1]} anchor="bottom">
                     <span
                       className="font-hud block rounded-[10px] border px-2 py-1 text-[11.5px] font-bold text-white shadow-lg"
-                      style={{ borderColor: ROUTE_CASING, backgroundColor: ROUTE }}
+                      style={{
+                        borderColor: ROUTE_CASING,
+                        backgroundColor: ROUTE,
+                      }}
                     >
                       {formatDuration(route.duration)}
                     </span>
@@ -900,25 +825,17 @@ export default function DirectionsScreen() {
             )}
 
             {/* Destination. */}
-            <Marker
-              longitude={target.lng}
-              latitude={target.lat}
-              anchor="bottom"
-            >
+            <Marker longitude={target.lng} latitude={target.lat} anchor="bottom">
               <span className="flex flex-col items-center">
                 <span
-                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[14px] border-[3px] bg-ar-surface"
+                  className="bg-ar-surface flex h-11 w-11 items-center justify-center overflow-hidden rounded-[14px] border-[3px]"
                   style={{
                     borderColor: `hsl(${meta.hsl})`,
                     boxShadow: `0 0 22px hsl(${meta.hsl} / 0.7)`,
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={target.imageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={target.imageUrl} alt="" className="h-full w-full object-cover" />
                 </span>
                 <span
                   className="h-3 w-[3px] rounded-full"
@@ -947,35 +864,27 @@ export default function DirectionsScreen() {
                     >
                       <defs>
                         <radialGradient id="beam" cx="50%" cy="100%" r="100%">
-                          <stop
-                            offset="0"
-                            stopColor={ROUTE}
-                            stopOpacity="0.55"
-                          />
-                          <stop
-                            offset="1"
-                            stopColor={ROUTE}
-                            stopOpacity="0"
-                          />
+                          <stop offset="0" stopColor={ROUTE} stopOpacity="0.55" />
+                          <stop offset="1" stopColor={ROUTE} stopOpacity="0" />
                         </radialGradient>
                       </defs>
-                      <path
-                        d="M27 27 L13 2 A28 28 0 0 1 41 2 Z"
-                        fill="url(#beam)"
-                      />
+                      <path d="M27 27 L13 2 A28 28 0 0 1 41 2 Z" fill="url(#beam)" />
                     </svg>
                   )}
                   <span
                     className="relative block h-[18px] w-[18px] rounded-full border-[3px] border-white"
-                    style={{ backgroundColor: ROUTE, boxShadow: `0 0 0 6px color-mix(in srgb, ${ROUTE} 25%, transparent)` }}
+                    style={{
+                      backgroundColor: ROUTE,
+                      boxShadow: `0 0 0 6px color-mix(in srgb, ${ROUTE} 25%, transparent)`,
+                    }}
                   />
                 </span>
               </Marker>
             )}
           </MapGL>
         ) : (
-          <div className="ar-grid flex h-full items-center justify-center bg-ar-surface">
-            <p className="font-hud text-[11px] uppercase tracking-[0.18em] text-ar-faint">
+          <div className="ar-grid bg-ar-surface flex h-full items-center justify-center">
+            <p className="font-hud text-ar-faint text-[11px] tracking-[0.18em] uppercase">
               Map preview
             </p>
           </div>
@@ -986,10 +895,7 @@ export default function DirectionsScreen() {
           <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(circle_at_50%_50%,rgba(4,8,6,0.12)_0%,rgba(4,8,6,0.5)_55%,rgba(4,8,6,0.85)_100%)]" />
         )}
         {navigating && hud && (
-          <CompassDial
-            ref={dialRef}
-            size={Math.min(300, Math.round(boxH * 0.38))}
-          />
+          <CompassDial ref={dialRef} size={Math.min(300, Math.round(boxH * 0.38))} />
         )}
         {navigating && <UserArrow ref={arrowRef} hud={hud} />}
 
@@ -1006,17 +912,17 @@ export default function DirectionsScreen() {
               <div className="flex items-center gap-3.5">
                 <NextIcon size={40} strokeWidth={2.6} className="shrink-0" />
                 <div className="min-w-0">
-                  <p className="font-hud text-[26px] font-bold tabular-nums leading-none">
+                  <p className="font-hud text-[26px] leading-none font-bold tabular-nums">
                     {formatNavDistance(progress.toNext)}
                   </p>
-                  <p className="mt-1 truncate text-[15px] font-semibold leading-snug text-white/95">
+                  <p className="mt-1 truncate text-[15px] leading-snug font-semibold text-white/95">
                     {turnText}
                   </p>
                 </div>
               </div>
             </div>
             {progress.then && progress.nextToThen < 150 && (
-              <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-b-[14px] rounded-t-[6px] bg-[#0a4214] px-3 py-1.5 text-[12.5px] font-semibold text-white/90">
+              <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-t-[6px] rounded-b-[14px] bg-[#0a4214] px-3 py-1.5 text-[12.5px] font-semibold text-white/90">
                 Then <ThenIcon size={16} strokeWidth={2.6} />
               </div>
             )}
@@ -1059,10 +965,10 @@ export default function DirectionsScreen() {
             </div>
             {/* Turn pill above you, street below — you sit at the centre in this look. */}
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2"
+              className="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2"
               style={{ marginTop: -78 }}
             >
-              <span className="flex items-center gap-2 whitespace-nowrap rounded-full bg-black/80 px-4 py-2 text-white shadow-lg ring-1 ring-white/10">
+              <span className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-2 whitespace-nowrap text-white shadow-lg ring-1 ring-white/10">
                 <NextIcon size={18} strokeWidth={2.8} />
                 <span className="font-hud text-[16px] font-bold tabular-nums">
                   {formatNavDistance(progress.toNext)}
@@ -1070,7 +976,7 @@ export default function DirectionsScreen() {
               </span>
             </div>
             <p
-              className="pointer-events-none absolute left-1/2 top-1/2 z-10 max-w-[70%] -translate-x-1/2 truncate text-center text-[15px] font-medium text-white/90"
+              className="pointer-events-none absolute top-1/2 left-1/2 z-10 max-w-[70%] -translate-x-1/2 truncate text-center text-[15px] font-medium text-white/90"
               style={{ marginTop: 40 }}
             >
               {street || turnText}
@@ -1088,11 +994,7 @@ export default function DirectionsScreen() {
                 unit={progress.remaining >= 1000 ? "km" : "m"}
                 label="Distance"
               />
-              <HudStat
-                value={arrivalTime(progress.remainingTime)}
-                label="Arrive"
-                align="right"
-              />
+              <HudStat value={arrivalTime(progress.remainingTime)} label="Arrive" align="right" />
             </div>
             <div
               className="absolute inset-x-0 z-10 flex items-center justify-center gap-3"
@@ -1104,7 +1006,7 @@ export default function DirectionsScreen() {
                 className="flex h-12 items-center gap-2 rounded-full bg-[#ef4444] px-5 text-white shadow-lg"
               >
                 <X size={18} strokeWidth={2.8} />
-                <span className="font-hud text-[12px] font-bold uppercase tracking-[0.14em]">
+                <span className="font-hud text-[12px] font-bold tracking-[0.14em] uppercase">
                   End
                 </span>
               </button>
@@ -1131,7 +1033,7 @@ export default function DirectionsScreen() {
             className="absolute inset-x-0 z-10 flex justify-center"
             style={{ top: "calc(var(--ar-top-inset) + 132px)" }}
           >
-            <span className="font-hud rounded-full bg-ar-surface px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ar-green-hot shadow-lg">
+            <span className="font-hud bg-ar-surface text-ar-green-hot rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-[0.14em] uppercase shadow-lg">
               Rerouting…
             </span>
           </div>
@@ -1176,9 +1078,7 @@ export default function DirectionsScreen() {
           <div
             className="absolute inset-x-0 z-20 flex justify-center"
             style={{
-              bottom: hud
-                ? "calc(env(safe-area-inset-bottom) + 170px)"
-                : NAV_PEEK + 16,
+              bottom: hud ? "calc(env(safe-area-inset-bottom) + 170px)" : NAV_PEEK + 16,
             }}
           >
             <RecenterButton onClick={recenter} />
@@ -1190,11 +1090,11 @@ export default function DirectionsScreen() {
           <button
             onClick={() => router.back()}
             aria-label="Back"
-            className="ar-glass absolute left-4 z-10 flex h-10 items-center gap-1 rounded-full pl-2 pr-3.5 text-ar-text"
+            className="ar-glass text-ar-text absolute left-4 z-10 flex h-10 items-center gap-1 rounded-full pr-3.5 pl-2"
             style={{ top: "calc(var(--ar-top-inset) + 12px)" }}
           >
             <ChevronLeft size={18} strokeWidth={2.4} />
-            <span className="font-hud text-[10.5px] font-semibold uppercase tracking-[0.14em]">
+            <span className="font-hud text-[10.5px] font-semibold tracking-[0.14em] uppercase">
               Back
             </span>
           </button>
@@ -1211,17 +1111,16 @@ export default function DirectionsScreen() {
                 <button
                   onClick={stop}
                   aria-label="End navigation"
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ar-danger/15 text-ar-danger"
+                  className="bg-ar-danger/15 text-ar-danger flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 >
                   <X size={22} strokeWidth={2.6} />
                 </button>
                 <div className="min-w-0 flex-1 text-center">
-                  <p className="font-hud text-[24px] font-bold leading-none text-ar-green-hot">
+                  <p className="font-hud text-ar-green-hot text-[24px] leading-none font-bold">
                     {formatDuration(progress.remainingTime)}
                   </p>
-                  <p className="mt-1 text-[12.5px] text-ar-dim">
-                    {formatNavDistance(progress.remaining)} ·{" "}
-                    {arrivalTime(progress.remainingTime)}
+                  <p className="text-ar-dim mt-1 text-[12.5px]">
+                    {formatNavDistance(progress.remaining)} · {arrivalTime(progress.remainingTime)}
                   </p>
                 </div>
                 <button
@@ -1230,7 +1129,7 @@ export default function DirectionsScreen() {
                     window.speechSynthesis?.cancel();
                   }}
                   aria-label={muted ? "Unmute voice" : "Mute voice"}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-ar-text"
+                  className="text-ar-text flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/[0.06]"
                 >
                   {muted ? (
                     <VolumeX size={20} strokeWidth={2.4} />
@@ -1242,7 +1141,7 @@ export default function DirectionsScreen() {
             }
           >
             <StylePicker value={navStyle} onChange={setNavStyle} />
-            <p className="font-hud mb-2 mt-4 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+            <p className="font-hud text-ar-faint mt-4 mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
               Next turns
             </p>
             {stepsList(remainingSteps)}
@@ -1256,12 +1155,12 @@ export default function DirectionsScreen() {
             onClick={() => setMenu(null)}
           >
             <div
-              className="max-h-[75%] w-full overflow-y-auto rounded-t-[24px] border-t border-ar-line bg-ar-bg px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pt-4"
+              className="border-ar-line bg-ar-bg max-h-[75%] w-full overflow-y-auto rounded-t-[24px] border-t px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
               onClick={(e) => e.stopPropagation()}
             >
               {menu === "style" ? (
                 <>
-                  <p className="font-hud mb-3 text-[12px] font-bold uppercase tracking-[0.18em] text-ar-dim">
+                  <p className="font-hud text-ar-dim mb-3 text-[12px] font-bold tracking-[0.18em] uppercase">
                     Navigation style
                   </p>
                   <StylePicker
@@ -1274,10 +1173,8 @@ export default function DirectionsScreen() {
                 </>
               ) : (
                 <>
-                  <p className="font-hud mb-1 text-[16px] font-bold text-ar-text">
-                    {target.title}
-                  </p>
-                  <p className="mb-3 text-[12.5px] text-ar-dim">
+                  <p className="font-hud text-ar-text mb-1 text-[16px] font-bold">{target.title}</p>
+                  <p className="text-ar-dim mb-3 text-[12.5px]">
                     {progress
                       ? `${formatDuration(progress.remainingTime)} · ${formatNavDistance(progress.remaining)}`
                       : ""}
@@ -1291,18 +1188,14 @@ export default function DirectionsScreen() {
 
         {/* ── Arrived ─────────────────────────────────────────────────── */}
         {navigating && nav?.arrived && (
-          <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-[24px] border-t border-ar-line bg-ar-bg px-5 pb-[calc(env(safe-area-inset-bottom)+18px)] pt-5">
+          <div className="border-ar-line bg-ar-bg absolute inset-x-0 bottom-0 z-20 rounded-t-[24px] border-t px-5 pt-5 pb-[calc(env(safe-area-inset-bottom)+18px)]">
             <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-ar-green/20 text-ar-green-hot">
+              <span className="bg-ar-green/20 text-ar-green-hot flex h-12 w-12 items-center justify-center rounded-full">
                 <Check size={26} strokeWidth={3} />
               </span>
               <div className="min-w-0">
-                <p className="font-hud text-[19px] font-bold text-ar-text">
-                  You&apos;ve arrived
-                </p>
-                <p className="truncate text-[13px] text-ar-dim">
-                  {target.title}
-                </p>
+                <p className="font-hud text-ar-text text-[19px] font-bold">You&apos;ve arrived</p>
+                <p className="text-ar-dim truncate text-[13px]">{target.title}</p>
               </div>
             </div>
             <div className="mt-4 grid gap-2">
@@ -1315,12 +1208,7 @@ export default function DirectionsScreen() {
               >
                 {handoff.label}
               </ArLinkButton>
-              <ArButton
-                variant="ghost"
-                size="md"
-                block
-                onClick={() => void router.push("/map")}
-              >
+              <ArButton variant="ghost" size="md" block onClick={() => void router.push("/map")}>
                 Done
               </ArButton>
             </div>
@@ -1340,26 +1228,18 @@ export default function DirectionsScreen() {
                     className="h-12 w-12 shrink-0 overflow-hidden rounded-[12px] border-2"
                     style={{
                       borderColor: `hsl(${meta.hsl} / 0.6)`,
-                      borderStyle:
-                        isMural && mural?.status !== "APPROVED"
-                          ? "dashed"
-                          : "solid",
+                      borderStyle: isMural && mural?.status !== "APPROVED" ? "dashed" : "solid",
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={target.imageUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={target.imageUrl} alt="" className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-hud truncate text-[16px] font-bold leading-tight text-ar-text">
+                    <p className="font-hud text-ar-text truncate text-[16px] leading-tight font-bold">
                       {target.title}
                     </p>
-                    <p className="truncate text-[12px] text-ar-faint">
-                      {target.subtitle} ·{" "}
-                      {formatDistance(distanceMeters(fix, target))} away
+                    <p className="text-ar-faint truncate text-[12px]">
+                      {target.subtitle} · {formatDistance(distanceMeters(fix, target))} away
                     </p>
                   </div>
                 </div>
@@ -1376,17 +1256,13 @@ export default function DirectionsScreen() {
                           "flex flex-1 items-center justify-center gap-1 rounded-full border px-2 py-2 transition-colors",
                           active
                             ? "border-transparent text-white"
-                            : "border-ar-line bg-white/[0.03] text-ar-dim",
+                            : "border-ar-line text-ar-dim bg-white/[0.03]",
                         )}
                         style={active ? { backgroundColor: NAV_GREEN } : undefined}
                       >
                         <Icon size={16} strokeWidth={2.2} />
-                        <span className="font-hud whitespace-nowrap text-[11.5px] font-bold tabular-nums">
-                          {t != null
-                            ? formatDuration(t)
-                            : routeLoading
-                              ? "…"
-                              : label}
+                        <span className="font-hud text-[11.5px] font-bold whitespace-nowrap tabular-nums">
+                          {t != null ? formatDuration(t) : routeLoading ? "…" : label}
                         </span>
                       </button>
                     );
@@ -1397,31 +1273,26 @@ export default function DirectionsScreen() {
                     {routeLoading && !route ? (
                       <>
                         <Skeleton rounded="rounded-full" className="h-6 w-32" />
-                        <Skeleton
-                          rounded="rounded-full"
-                          className="mt-2 h-3 w-44"
-                        />
+                        <Skeleton rounded="rounded-full" className="mt-2 h-3 w-44" />
                       </>
                     ) : route ? (
                       <>
-                        <p className="font-hud text-[24px] font-bold leading-none text-ar-green-hot">
+                        <p className="font-hud text-ar-green-hot text-[24px] leading-none font-bold">
                           {formatDuration(route.duration)}{" "}
-                          <span className="text-[15px] font-medium text-ar-dim">
+                          <span className="text-ar-dim text-[15px] font-medium">
                             ({formatNavDistance(route.distance)})
                           </span>
                         </p>
-                        <p className="mt-1.5 truncate text-[12px] text-ar-dim">
+                        <p className="text-ar-dim mt-1.5 truncate text-[12px]">
                           {route.id === fastest?.id
                             ? "Fastest route"
                             : `${Math.round((route.duration - (fastest?.duration ?? 0)) / 60)} min slower`}
                           {route.summary && <> · via {route.summary}</>}
-                          {mode === "transit" && (
-                            <> · {PROFILE_LABEL[route.profile]}</>
-                          )}
+                          {mode === "transit" && <> · {PROFILE_LABEL[route.profile]}</>}
                         </p>
                       </>
                     ) : routeError ? (
-                      <p className="text-[12px] text-ar-danger">{routeError}</p>
+                      <p className="text-ar-danger text-[12px]">{routeError}</p>
                     ) : null}
                   </div>
                   <ArButton
@@ -1438,24 +1309,24 @@ export default function DirectionsScreen() {
             }
           >
             {routes.length > 1 && (
-              <p className="mb-2 text-[11.5px] text-ar-faint">
-                {routes.length - 1} other route{routes.length > 2 ? "s" : ""} —
-                tap a grey line on the map to switch
+              <p className="text-ar-faint mb-2 text-[11.5px]">
+                {routes.length - 1} other route{routes.length > 2 ? "s" : ""} — tap a grey line on
+                the map to switch
               </p>
             )}
-            <p className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+            <p className="font-hud text-ar-faint mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
               Navigation style
             </p>
             <StylePicker value={navStyle} onChange={setNavStyle} />
             {route && (
               <>
-                <p className="font-hud mb-2 mt-4 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+                <p className="font-hud text-ar-faint mt-4 mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
                   Steps
                 </p>
                 {stepsList(route.steps)}
               </>
             )}
-            <p className="mt-3 px-1 text-[11px] leading-relaxed text-ar-faint">
+            <p className="text-ar-faint mt-3 px-1 text-[11px] leading-relaxed">
               {isMural
                 ? `Get within ${MURAL_SCAN_FROM_M} m and scan it with the Murals camera to earn ${platformBranding.coinName}.`
                 : "Get close and this drop becomes collectible in AR."}
@@ -1468,28 +1339,21 @@ export default function DirectionsScreen() {
 }
 
 /** Classic (Google-style) vs Compass HUD. */
-function StylePicker({
-  value,
-  onChange,
-}: {
-  value: NavStyle;
-  onChange: (s: NavStyle) => void;
-}) {
-  const opts: { id: NavStyle; icon: LucideIcon; title: string; sub: string }[] =
-    [
-      {
-        id: "classic",
-        icon: MapIcon,
-        title: "Classic",
-        sub: "3D map, turn banner",
-      },
-      {
-        id: "compass",
-        icon: Gauge,
-        title: "Compass",
-        sub: "Dial + speed, time, distance",
-      },
-    ];
+function StylePicker({ value, onChange }: { value: NavStyle; onChange: (s: NavStyle) => void }) {
+  const opts: { id: NavStyle; icon: LucideIcon; title: string; sub: string }[] = [
+    {
+      id: "classic",
+      icon: MapIcon,
+      title: "Classic",
+      sub: "3D map, turn banner",
+    },
+    {
+      id: "compass",
+      icon: Gauge,
+      title: "Compass",
+      sub: "Dial + speed, time, distance",
+    },
+  ];
   return (
     <div className="grid grid-cols-2 gap-2">
       {opts.map(({ id, icon: Icon, title, sub }) => {
@@ -1502,9 +1366,7 @@ function StylePicker({
             aria-pressed={on}
             className={cn(
               "flex items-center gap-2.5 rounded-[14px] border px-3 py-2.5 text-left transition-colors",
-              on
-                ? "bg-ar-green/12 border-ar-green/60"
-                : "border-ar-line bg-white/[0.03]",
+              on ? "bg-ar-green/12 border-ar-green/60" : "border-ar-line bg-white/[0.03]",
             )}
           >
             <Icon
@@ -1521,9 +1383,7 @@ function StylePicker({
               >
                 {title}
               </span>
-              <span className="block truncate text-[11px] text-ar-faint">
-                {sub}
-              </span>
+              <span className="text-ar-faint block truncate text-[11px]">{sub}</span>
             </span>
           </button>
         );

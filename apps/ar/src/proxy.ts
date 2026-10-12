@@ -13,13 +13,22 @@ export async function proxy(request: NextRequest) {
 
   if (id === "preview") {
     // Otherwise it would be a way to put the map on any site with no allowlist at all.
-    res.headers.set("Content-Security-Policy", `frame-ancestors 'self' ${brandOrigins().join(" ")}`);
+    res.headers.set(
+      "Content-Security-Policy",
+      `frame-ancestors 'self' ${brandOrigins().join(" ")}`,
+    );
     return res;
   }
 
   try {
-    const r = await fetch(new URL(`/api/embed/frame-policy/${encodeURIComponent(id)}`, request.url), { next: { revalidate: 30 } });
-    const { policy, live } = (await r.json()) as { policy: string; live: boolean };
+    const r = await fetch(
+      new URL(`/api/embed/frame-policy/${encodeURIComponent(id)}`, request.url),
+      { next: { revalidate: 30 } },
+    );
+    const { policy, live } = (await r.json()) as {
+      policy: string;
+      live: boolean;
+    };
     res.headers.set("Content-Security-Policy", policy);
     if (live) res.headers.set("Cache-Control", "public, s-maxage=30, stale-while-revalidate=300");
   } catch {

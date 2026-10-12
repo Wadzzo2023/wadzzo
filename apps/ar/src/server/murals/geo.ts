@@ -21,14 +21,23 @@ export function timeZoneAt(lat: number, lng: number): string {
 /** YYYY-MM-DD for `at` in `timeZone`. */
 export function localDay(timeZone: string, at = new Date()): string {
   // en-CA formats as ISO date.
-  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(at);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(at);
 }
 
 type GeocodeFeature = {
   properties?: {
     name?: string;
     feature_type?: string;
-    context?: { street?: { name?: string }; neighborhood?: { name?: string }; place?: { name?: string } };
+    context?: {
+      street?: { name?: string };
+      neighborhood?: { name?: string };
+      place?: { name?: string };
+    };
   };
 };
 

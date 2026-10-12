@@ -81,11 +81,11 @@ export function useEntryUpload(bountyId: number) {
         pending.map(async (p, i) => {
           const target = signed[i]!;
           try {
-            await put(target.uploadUrl, p.file, (pct) =>
-              patch(p.key, { progress: pct }),
-            );
+            await put(target.uploadUrl, p.file, (pct) => patch(p.key, { progress: pct }));
           } catch (e) {
-            patch(p.key, { error: e instanceof Error ? e.message : "Upload failed" });
+            patch(p.key, {
+              error: e instanceof Error ? e.message : "Upload failed",
+            });
             throw e;
           }
           patch(p.key, { progress: 100 });

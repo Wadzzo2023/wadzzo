@@ -14,11 +14,24 @@ import { useInboxActions } from "./use-inbox-actions";
 
 /** Unread count, refreshed every minute and when the tab regains focus (no live connection). */
 export function useUnreadCount() {
-  return api.fan.notification.inboxUnread.useQuery({ scope: "brand" }, { refetchInterval: 60_000, refetchOnWindowFocus: true }).data ?? 0;
+  return (
+    api.fan.notification.inboxUnread.useQuery(
+      { scope: "brand" },
+      { refetchInterval: 60_000, refetchOnWindowFocus: true },
+    ).data ?? 0
+  );
 }
 
 /** The bell: unread badge, and a short list with "mark all read" and a link to everything. */
-export function NotificationBell({ className, side = "bottom", align = "end" }: { className?: string; side?: "bottom" | "right"; align?: "start" | "end" }) {
+export function NotificationBell({
+  className,
+  side = "bottom",
+  align = "end",
+}: {
+  className?: string;
+  side?: "bottom" | "right";
+  align?: "start" | "end";
+}) {
   const [open, setOpen] = useState(false);
   const unread = useUnreadCount();
   const list = api.fan.notification.inbox.useQuery({ scope: "brand", limit: 8 }, { enabled: open });
@@ -27,12 +40,15 @@ export function NotificationBell({ className, side = "bottom", align = "end" }: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className={cn("relative flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground", className)}
+        className={cn(
+          "text-muted-foreground hover:bg-accent hover:text-foreground relative flex size-9 items-center justify-center rounded-lg transition-colors",
+          className,
+        )}
         aria-label={unread ? `Notifications (${unread} unread)` : "Notifications"}
       >
         <Bell className="size-5" />
         {unread > 0 && (
-          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+          <span className="bg-primary text-primary-foreground absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -44,7 +60,7 @@ export function NotificationBell({ className, side = "bottom", align = "end" }: 
             type="button"
             disabled={!unread || markAllRead.isPending}
             onClick={() => markAllRead.mutate({ scope: "brand" })}
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-40"
+            className="text-primary inline-flex items-center gap-1 text-xs font-medium hover:underline disabled:pointer-events-none disabled:opacity-40"
           >
             <CheckCheck className="size-3.5" /> Mark all read
           </button>
@@ -57,12 +73,25 @@ export function NotificationBell({ className, side = "bottom", align = "end" }: 
               ))}
             </div>
           ) : !list.data?.items.length ? (
-            <p className="px-4 py-10 text-center text-sm text-muted-foreground">You&apos;re all caught up.</p>
+            <p className="text-muted-foreground px-4 py-10 text-center text-sm">
+              You&apos;re all caught up.
+            </p>
           ) : (
-            list.data.items.map((item) => <NotificationRow key={item.ids[0]} item={item} compact onNavigate={() => setOpen(false)} />)
+            list.data.items.map((item) => (
+              <NotificationRow
+                key={item.ids[0]}
+                item={item}
+                compact
+                onNavigate={() => setOpen(false)}
+              />
+            ))
           )}
         </div>
-        <Link href="/notifications" onClick={() => setOpen(false)} className="block border-t px-4 py-2.5 text-center text-sm font-medium text-primary hover:bg-accent/60">
+        <Link
+          href="/notifications"
+          onClick={() => setOpen(false)}
+          className="text-primary hover:bg-accent/60 block border-t px-4 py-2.5 text-center text-sm font-medium"
+        >
           View all
         </Link>
       </PopoverContent>

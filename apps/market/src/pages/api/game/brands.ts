@@ -5,10 +5,7 @@ import { db } from "@wadzzo/db/server";
 import { Brand } from "~/types/game/brand";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
 
@@ -47,14 +44,11 @@ export default async function handler(
       last_name: "",
       email: "",
       logo: brand.pageAsset?.thumbnail ?? brand.profileUrl ?? avaterIconUrl,
-      followed_by_current_user: follows.some(
-        (follow) => follow.creatorId === brand.id,
-      ),
+      followed_by_current_user: follows.some((follow) => follow.creatorId === brand.id),
     };
   });
 
   return res.status(200).json({ users: bands });
 }
 
-export const avaterIconUrl =
-  `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;
+export const avaterIconUrl = `${platformBranding.urls.fanApp}${platformBranding.assets.avatar}`;

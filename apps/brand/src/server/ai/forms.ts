@@ -8,10 +8,20 @@ import { platformBranding } from "@wadzzo/platform/branding";
  * non-null values. Dates are local wall-clock "YYYY-MM-DDTHH:mm" in the
  * brand's timezone (what datetime-local inputs use).
  */
-const localDateTime = z.string().nullable().describe('Local date-time "YYYY-MM-DDTHH:mm" in the brand\'s timezone, or null');
-const imagePrompt = z.string().describe("A short visual brief for a cover image that fits this — subject, mood, style. No text in the image.");
+const localDateTime = z
+  .string()
+  .nullable()
+  .describe('Local date-time "YYYY-MM-DDTHH:mm" in the brand\'s timezone, or null');
+const imagePrompt = z
+  .string()
+  .describe(
+    "A short visual brief for a cover image that fits this — subject, mood, style. No text in the image.",
+  );
 const DAY_CHOICES = [1, 2, 3, 5, 7, 14, 30] as const;
-const dayChoice = z.number().int().describe(`One of ${DAY_CHOICES.join(", ")}`);
+const dayChoice = z
+  .number()
+  .int()
+  .describe(`One of ${DAY_CHOICES.join(", ")}`);
 
 export const FILL_SCHEMAS = {
   pin: z.object({
@@ -22,7 +32,11 @@ export const FILL_SCHEMAS = {
     startDate: localDateTime,
     endDate: localDateTime,
     pinNumber: z.number().int().min(1).max(50).describe("How many pins to drop"),
-    pinCollectionLimit: z.number().int().min(0).describe("Collections allowed per pin; 0 = unlimited"),
+    pinCollectionLimit: z
+      .number()
+      .int()
+      .min(0)
+      .describe("Collections allowed per pin; 0 = unlimited"),
     radius: z.number().int().min(5).max(1000).describe("Collection radius in metres"),
     autoCollect: z.boolean(),
     multiPin: z.boolean(),
@@ -39,14 +53,20 @@ export const FILL_SCHEMAS = {
     dropEveryDays: dayChoice,
     pinDurationDays: dayChoice,
     pinNumber: z.number().int().min(1).max(50).describe("Pins per drop"),
-    pinCollectionLimit: z.number().int().min(0).describe("Collections allowed per pin; 0 = unlimited"),
+    pinCollectionLimit: z
+      .number()
+      .int()
+      .min(0)
+      .describe("Collections allowed per pin; 0 = unlimited"),
     autoCollect: z.boolean(),
     multiPin: z.boolean(),
     imagePrompt,
   }),
   post: z.object({
     heading: z.string().describe("Post title, max 80 chars"),
-    contentHtml: z.string().describe("Post body as simple HTML (<p>, <strong>, <em>, <ul><li>). 60–200 words."),
+    contentHtml: z
+      .string()
+      .describe("Post body as simple HTML (<p>, <strong>, <em>, <ul><li>). 60–200 words."),
     imagePrompt,
   }),
   announcement: z.object({
@@ -58,15 +78,24 @@ export const FILL_SCHEMAS = {
   }),
   bounty: z.object({
     title: z.string().describe("Max 65 chars"),
-    contentHtml: z.string().describe("Task description as simple HTML: what to do, how winners are chosen, rules. 60–200 words."),
+    contentHtml: z
+      .string()
+      .describe(
+        "Task description as simple HTML: what to do, how winners are chosen, rules. 60–200 words.",
+      ),
     prizeInUSD: z.number().nullable().describe("Only if the brand mentioned a budget"),
     totalWinner: z.number().int().min(1).max(100),
-    requiredBalance: z.number().min(0).describe("Platform tokens fans must hold to join; usually 0"),
+    requiredBalance: z
+      .number()
+      .min(0)
+      .describe("Platform tokens fans must hold to join; usually 0"),
     imagePrompt,
   }),
   event: z.object({
     title: z.string().describe("Max 120 chars"),
-    description: z.string().describe("Plain text, 60–200 words: what's happening, who it's for, what to bring"),
+    description: z
+      .string()
+      .describe("Plain text, 60–200 words: what's happening, who it's for, what to bring"),
     start: localDateTime,
     end: localDateTime,
     inPerson: z.boolean(),
@@ -80,7 +109,9 @@ export const FILL_SCHEMAS = {
   asset: z.object({
     name: z.string().describe("Collectible name, max 60 chars"),
     description: z.string().describe("2–4 sentences on what buyers get"),
-    code: z.string().describe("On-chain asset code: 4–12 letters A–Z only, uppercase, derived from the name"),
+    code: z
+      .string()
+      .describe("On-chain asset code: 4–12 letters A–Z only, uppercase, derived from the name"),
     mediaType: z.enum(MediaType),
     limit: z.number().int().min(1).describe("Supply"),
     priceUSD: z.number().min(0),

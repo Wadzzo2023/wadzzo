@@ -6,17 +6,10 @@ import { claimRedeemXDR } from "~/lib/stellar/fan/redeem";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 export const UserAboutShema = z.object({
-  bio: z
-    .string()
-    .max(100, { message: "Bio must be less than 101 characters" })
-    .nullable(),
+  bio: z.string().max(100, { message: "Bio must be less than 101 characters" }).nullable(),
   name: z
     .string()
     .min(3, { message: "Name must be greater than 2 characters." })
@@ -28,21 +21,17 @@ export const userRouter = createTRPCRouter({
     return await ctx.db.user.findUnique({ where: { id: ctx.session.user.id } });
   }),
 
-  getUserById: publicProcedure
-    .input(z.string())
-    .query(async ({ input, ctx }) => {
-      const user = await ctx.db.user.findUnique({ where: { id: input } });
-      return user;
-    }),
-  updateUserProfile: protectedProcedure
-    .input(UserAboutShema)
-    .mutation(async ({ ctx, input }) => {
-      const { name, bio } = input;
-      await ctx.db.user.update({
-        data: { name, bio },
-        where: { id: ctx.session.user.id },
-      });
-    }),
+  getUserById: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
+    const user = await ctx.db.user.findUnique({ where: { id: input } });
+    return user;
+  }),
+  updateUserProfile: protectedProcedure.input(UserAboutShema).mutation(async ({ ctx, input }) => {
+    const { name, bio } = input;
+    await ctx.db.user.update({
+      data: { name, bio },
+      where: { id: ctx.session.user.id },
+    });
+  }),
 
   changeUserProfilePicture: protectedProcedure
     .input(z.string())
@@ -111,25 +100,33 @@ export const userRouter = createTRPCRouter({
       });
 
       if (!getRedeem) {
-        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid redeem code" });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+          message: "Invalid redeem code",
+        });
       }
 
       if (getRedeem.assetRedeem.creatorId === user) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't claim your own reward" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You can't claim your own reward",
+        });
       }
 
-      if (
-        getRedeem.redeemConsumers.find((consumer) => consumer.userId === user)
-      ) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You have already claimed this reward" });
+      if (getRedeem.redeemConsumers.find((consumer) => consumer.userId === user)) {
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "You have already claimed this reward",
+        });
       }
 
       if (getRedeem._count.redeemConsumers >= getRedeem.totalRedeemable) {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Redeem code limit exceeded" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Redeem code limit exceeded",
+        });
       }
 
       if (!getRedeem.assetRedeem.creatorId) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator does not exist" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator does not exist",
+        });
       }
 
       const getStorageAcc = await ctx.db.creator.findUnique({
@@ -143,7 +140,9 @@ export const userRouter = createTRPCRouter({
       });
 
       if (!getStorageAcc) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator does not have a storage account" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Creator does not have a storage account",
+        });
       }
 
       const stroageACC = await StellarAccount.loadOrThrow(getStorageAcc.storagePub);
@@ -153,14 +152,13 @@ export const userRouter = createTRPCRouter({
       );
 
       if (tokenNumber < 1) {
-        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Insufficient token balance" });
+        throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+          message: "Insufficient token balance",
+        });
       }
 
       const UserAcc = await StellarAccount.loadOrThrow(user);
-      const trust = UserAcc.hasTrustline(
-        getRedeem.assetRedeem.code,
-        getRedeem.assetRedeem.issuer,
-      );
+      const trust = UserAcc.hasTrustline(getRedeem.assetRedeem.code, getRedeem.assetRedeem.issuer);
 
       if (!trust) {
         return claimRedeemXDR({
@@ -172,7 +170,9 @@ export const userRouter = createTRPCRouter({
           storageSecret: getStorageAcc.storageSecret,
         });
       } else {
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "You have already has trust for this asset" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "You have already has trust for this asset",
+        });
       }
     }),
   getClaimHistory: protectedProcedure.query(async ({ ctx }) => {

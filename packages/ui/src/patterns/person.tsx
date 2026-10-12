@@ -9,11 +9,29 @@ function initial(text: string | null | undefined) {
 }
 
 /** A round avatar — the picture, or the first letter on a tinted circle. */
-export function Avatar({ src, name, className }: { src?: string | null; name?: string | null; className?: string }) {
+export function Avatar({
+  src,
+  name,
+  className,
+}: {
+  src?: string | null;
+  name?: string | null;
+  className?: string;
+}) {
   return src ? (
-    <img src={src} alt="" className={cn("size-9 shrink-0 rounded-full bg-muted object-cover", className)} />
+    <img
+      src={src}
+      alt=""
+      className={cn("bg-muted size-9 shrink-0 rounded-full object-cover", className)}
+    />
   ) : (
-    <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-sm font-semibold text-primary", className)} aria-hidden>
+    <span
+      className={cn(
+        "bg-primary/12 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
+        className,
+      )}
+      aria-hidden
+    >
       {initial(name)}
     </span>
   );
@@ -40,14 +58,17 @@ export function Person({
   className?: string;
 }) {
   // An empty name counts as no name.
-  const title = (name?.trim() ? name.trim() : undefined) ?? (id ? abbreviateAddress(id, 5) : "Unknown");
+  const title =
+    (name?.trim() ? name.trim() : undefined) ?? (id ? abbreviateAddress(id, 5) : "Unknown");
   const avatar = size === "sm" ? "size-7 text-xs" : size === "lg" ? "size-12 text-base" : "size-9";
   return (
     <div className={cn("flex min-w-0 items-center gap-3", className)}>
       <Avatar src={image} name={title} className={avatar} />
       <div className="min-w-0">
-        <p className={cn("truncate font-medium", size === "lg" ? "text-base" : "text-sm")}>{title}</p>
-        {sub && <div className="truncate text-xs text-muted-foreground">{sub}</div>}
+        <p className={cn("truncate font-medium", size === "lg" ? "text-base" : "text-sm")}>
+          {title}
+        </p>
+        {sub && <div className="text-muted-foreground truncate text-xs">{sub}</div>}
       </div>
     </div>
   );

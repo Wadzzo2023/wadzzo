@@ -11,13 +11,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
  *
  * Every page here is client-rendered, so DOMPurify always has a `window`.
  */
-export function RichText({
-  html,
-  className,
-}: {
-  html: string;
-  className?: string;
-}) {
+export function RichText({ html, className }: { html: string; className?: string }) {
   const clean = useMemo(
     () =>
       DOMPurify.sanitize(html, {
@@ -30,9 +24,9 @@ export function RichText({
   return (
     <div
       className={cn(
-        "break-words text-[13px] leading-relaxed text-ar-dim",
-        "[&_a]:text-ar-green-hot [&_a]:underline [&_h1]:text-[16px] [&_h1]:font-semibold [&_h1]:text-ar-text [&_h2]:text-[15px] [&_h2]:font-semibold [&_h2]:text-ar-text [&_h3]:font-semibold [&_h3]:text-ar-text",
-        "[&_img]:my-2 [&_img]:rounded-ar [&_li]:ml-4 [&_ol]:list-decimal [&_p+p]:mt-2 [&_strong]:text-ar-text [&_ul]:list-disc",
+        "text-ar-dim text-[13px] leading-relaxed break-words",
+        "[&_a]:text-ar-green-hot [&_h1]:text-ar-text [&_h2]:text-ar-text [&_h3]:text-ar-text [&_a]:underline [&_h1]:text-[16px] [&_h1]:font-semibold [&_h2]:text-[15px] [&_h2]:font-semibold [&_h3]:font-semibold",
+        "[&_img]:rounded-ar [&_strong]:text-ar-text [&_img]:my-2 [&_li]:ml-4 [&_ol]:list-decimal [&_p+p]:mt-2 [&_ul]:list-disc",
         className,
       )}
       dangerouslySetInnerHTML={{ __html: clean }}

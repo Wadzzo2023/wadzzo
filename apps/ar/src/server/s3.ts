@@ -51,9 +51,14 @@ export async function signEntryUpload({
   checksum: string;
   fileName: string;
 }) {
-  if (fileSize > MAX_ENTRY_FILE_BYTES) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "File is too large" });
+  if (fileSize > MAX_ENTRY_FILE_BYTES)
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "File is too large",
+    });
   if (!(ENTRY_FILE_TYPES as readonly string[]).includes(fileType)) {
-    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "That file type can't be attached" });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "That file type can't be attached",
+    });
   }
 
   const key = crypto.randomBytes(32).toString("hex");
@@ -84,7 +89,11 @@ export async function signMuralFrames(sessionId: string, count: number) {
       const key = `murals/${sessionId}/${i}-${crypto.randomBytes(8).toString("hex")}.jpg`;
       const uploadUrl = await getSignedUrl(
         s3Client,
-        new PutObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key, ContentType: "image/jpeg" }),
+        new PutObjectCommand({
+          Bucket: env.AWS_BUCKET_NAME,
+          Key: key,
+          ContentType: "image/jpeg",
+        }),
         { expiresIn: EXPIRES_IN_SECONDS },
       );
       return { key, uploadUrl };
@@ -95,6 +104,9 @@ export async function signMuralFrames(sessionId: string, count: number) {
 /** Bytes of an object this app wrote (mural keyframes). */
 export async function getObjectBytes(key: string) {
   const res = await s3Client.send(new GetObjectCommand({ Bucket: env.AWS_BUCKET_NAME, Key: key }));
-  if (!res.Body) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Empty S3 object ${key}` });
+  if (!res.Body)
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+      message: `Empty S3 object ${key}`,
+    });
   return Buffer.from(await res.Body.transformToByteArray());
 }

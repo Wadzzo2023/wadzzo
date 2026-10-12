@@ -32,9 +32,6 @@ async function query(perm: CameraPerm): Promise<PermAnswer> {
 }
 
 export async function readCameraPermissions(): Promise<PermAnswers> {
-  const [camera, location] = await Promise.all([
-    query("camera"),
-    query("location"),
-  ]);
+  const [camera, location] = await Promise.all([query("camera"), query("location")]);
   return { camera, location };
 }

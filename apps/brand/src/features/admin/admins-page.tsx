@@ -7,9 +7,22 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 import { Input } from "@wadzzo/ui/components/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
@@ -42,7 +55,8 @@ export default function AdminsPage() {
   });
 
   // The last-admin rule is per platform; the list spans platforms on the Wadzzo panel.
-  const countOn = (platformId: string) => admins.data?.filter((x) => x.platformId === platformId).length ?? 0;
+  const countOn = (platformId: string) =>
+    admins.data?.filter((x) => x.platformId === platformId).length ?? 0;
   const multiPlatform = new Set(admins.data?.map((a) => a.platformId)).size > 1;
 
   const columns: Column<Admin>[] = [
@@ -52,7 +66,12 @@ export default function AdminsPage() {
       skeleton: "person",
       cell: (a) => (
         <div className="flex items-center gap-2">
-          <Person name={a.user.name} image={a.user.image} id={a.id} sub={a.user.email ?? <span className="font-mono">{abbreviateAddress(a.id, 6)}</span>} />
+          <Person
+            name={a.user.name}
+            image={a.user.image}
+            id={a.id}
+            sub={a.user.email ?? <span className="font-mono">{abbreviateAddress(a.id, 6)}</span>}
+          />
           {a.id === me && <StatusPill tone="info">You</StatusPill>}
         </div>
       ),
@@ -63,12 +82,18 @@ export default function AdminsPage() {
       skeleton: "mono",
       cell: (a) => (
         <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <span className="font-mono text-xs text-muted-foreground">{abbreviateAddress(a.id, 8)}</span>
+          <span className="text-muted-foreground font-mono text-xs">
+            {abbreviateAddress(a.id, 8)}
+          </span>
           <Button
             variant="ghost"
             size="icon-sm"
             aria-label="Copy public key"
-            onClick={() => void navigator.clipboard.writeText(a.id).then(() => toast.success("Public key copied"))}
+            onClick={() =>
+              void navigator.clipboard
+                .writeText(a.id)
+                .then(() => toast.success("Public key copied"))
+            }
           >
             <Copy />
           </Button>
@@ -89,7 +114,11 @@ export default function AdminsPage() {
       id: "since",
       header: "Admin since",
       skeleton: "short",
-      cell: (a) => <span className="whitespace-nowrap text-muted-foreground">{format(new Date(a.joinedAt), "MMM d, yyyy")}</span>,
+      cell: (a) => (
+        <span className="text-muted-foreground whitespace-nowrap">
+          {format(new Date(a.joinedAt), "MMM d, yyyy")}
+        </span>
+      ),
     },
   ];
 
@@ -118,14 +147,23 @@ export default function AdminsPage() {
         onRetry={() => void admins.refetch()}
         actions={(a) => [
           {
-            label: a.id === me ? "You can't remove yourself" : countOn(a.platformId) <= 1 ? "The last admin can't be removed" : "Remove admin access",
+            label:
+              a.id === me
+                ? "You can't remove yourself"
+                : countOn(a.platformId) <= 1
+                  ? "The last admin can't be removed"
+                  : "Remove admin access",
             icon: Trash2,
             destructive: true,
             disabled: a.id === me || countOn(a.platformId) <= 1,
             onSelect: () => setRemoving(a),
           },
         ]}
-        empty={{ icon: Shield, title: "No admins", description: "Add someone's public key to make them an admin." }}
+        empty={{
+          icon: Shield,
+          title: "No admins",
+          description: "Add someone's public key to make them an admin.",
+        }}
       />
 
       {adding && <AddAdminDialog onClose={() => setAdding(false)} />}
@@ -145,7 +183,10 @@ export default function AdminsPage() {
 function AddAdminDialog({ onClose }: { onClose: () => void }) {
   const utils = api.useUtils();
   const { isSuperAdmin, platform } = usePortalAccess();
-  const platforms = api.admin.platforms.options.useQuery(undefined, { enabled: isSuperAdmin, refetchOnWindowFocus: false });
+  const platforms = api.admin.platforms.options.useQuery(undefined, {
+    enabled: isSuperAdmin,
+    refetchOnWindowFocus: false,
+  });
   const [key, setKey] = useState("");
   const [target, setTarget] = useState<string>();
   const [error, setError] = useState<string>();
@@ -170,10 +211,12 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={submit} noValidate>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-hud">
-              <ShieldCheck className="size-5 text-primary" /> Add an admin
+            <DialogTitle className="font-hud flex items-center gap-2">
+              <ShieldCheck className="text-primary size-5" /> Add an admin
             </DialogTitle>
-            <DialogDescription>They need an account already — ask them to sign in once, then paste their public key.</DialogDescription>
+            <DialogDescription>
+              They need an account already — ask them to sign in once, then paste their public key.
+            </DialogDescription>
           </DialogHeader>
           {isSuperAdmin && platforms.data && platforms.data.length > 1 && (
             <div className="mt-5">
@@ -192,7 +235,9 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
                   </SelectContent>
                 </Select>
               </Field>
-              <p className="mt-1.5 text-xs text-muted-foreground">An account is an admin of one platform. Choosing another moves it.</p>
+              <p className="text-muted-foreground mt-1.5 text-xs">
+                An account is an admin of one platform. Choosing another moves it.
+              </p>
             </div>
           )}
           <div className="my-5">

@@ -34,7 +34,9 @@ export default function ViewBountyComment({
 
   return (
     <div className="relative">
-      <div className={clsx("flex items-start justify-between w-full text-sm", isDeleting && "blur-xs")}>
+      <div
+        className={clsx("flex w-full items-start justify-between text-sm", isDeleting && "blur-xs")}
+      >
         <div className="flex w-full gap-2">
           <div className="h-auto w-auto rounded-full">
             <CustomAvatar
@@ -47,24 +49,16 @@ export default function ViewBountyComment({
             <h2 className="font-bold">{comment.user.name}</h2>
             <CommentFormatter content={comment.content} />
 
-            <p className="text-muted-foreground">
-              {formatPostCreatedAt(comment.createdAt)}
-            </p>
+            <p className="text-muted-foreground">{formatPostCreatedAt(comment.createdAt)}</p>
 
             <div className="w-full">
-              <div
-                onClick={() => setReplyBox((prev) => !prev)}
-                className="cursor-pointer"
-              >
+              <div onClick={() => setReplyBox((prev) => !prev)} className="cursor-pointer">
                 Reply
               </div>
 
               {replyBox && (
-                <div className="w-full ">
-                  <AddBountyReplyComment
-                    parentId={comment.id}
-                    bountyId={comment.bountyId}
-                  />
+                <div className="w-full">
+                  <AddBountyReplyComment parentId={comment.id} bountyId={comment.bountyId} />
                 </div>
               )}
             </div>
@@ -86,7 +80,7 @@ export default function ViewBountyComment({
         </div>
       </div>
       {isDeleting && (
-        <div className="absolute z-10 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background/80 px-4 py-2 rounded-md shadow-md">
+        <div className="bg-background/80 absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform rounded-md px-4 py-2 shadow-md">
           <p className="text-foreground font-semibold">Deleting...</p>
         </div>
       )}
@@ -99,9 +93,7 @@ function ShowMore({ content }: { content: string }) {
   return (
     <>
       <p>{isExpanded ? content : content.slice(0, 50)}</p>
-      {!isExpanded && (
-        <button onClick={() => setIsExpanded(!isExpanded)}>See More</button>
-      )}
+      {!isExpanded && <button onClick={() => setIsExpanded(!isExpanded)}>See More</button>}
     </>
   );
 }
@@ -127,7 +119,7 @@ function CommentContextMenu({
       onError: () => {
         setIsDeleting(false);
         // Handle error (e.g., show error message)
-      }
+      },
     });
   };
 

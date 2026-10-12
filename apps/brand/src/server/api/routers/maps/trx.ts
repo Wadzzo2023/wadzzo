@@ -21,20 +21,30 @@ export const trxRouter = createTRPCRouter({
         where: { id: input.locationId },
         include: {
           locationGroup: {
-            include: { creator: { include: { pageAsset: true }, omit: { storageSecret: false } }, asset: true },
+            include: {
+              creator: {
+                include: { pageAsset: true },
+                omit: { storageSecret: false },
+              },
+              asset: true,
+            },
           },
         },
       });
 
       if (!location.locationGroup?.asset && !location.locationGroup?.pageAsset)
-        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "Not claimable" });
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+          message: "Not claimable",
+        });
 
       let code: string | undefined = undefined;
       let issuer: string | undefined = undefined;
 
       if (location.locationGroup.pageAsset) {
         if (!location.locationGroup.creator.pageAsset)
-          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "No page Asset, found!" });
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+            message: "No page Asset, found!",
+          });
 
         code = location.locationGroup.creator.pageAsset.code;
         issuer = location.locationGroup.creator.pageAsset.issuer;
@@ -55,6 +65,9 @@ export const trxRouter = createTRPCRouter({
         });
 
         return xdr;
-      } else throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Code and Issue not found" });
+      } else
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Code and Issue not found",
+        });
     }),
 });

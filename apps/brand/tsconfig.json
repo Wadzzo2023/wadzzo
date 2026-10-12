@@ -13,11 +13,7 @@
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
     /* Bundled projects */
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "ES2022"
-    ],
+    "lib": ["dom", "dom.iterable", "ES2022"],
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -30,12 +26,8 @@
     "incremental": true,
     /* Path Aliases (relative to this file; no baseUrl — deprecated in TS 6) */
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "package/*": [
-        "./package/*"
-      ]
+      "~/*": ["./src/*"],
+      "package/*": ["./package/*"]
     }
   },
   "include": [
@@ -51,10 +43,5 @@
   // express-wadzzo is its own project with its own tsconfig. Tests have their
   // own (tests/tsconfig.json): some import the task server's code, whose
   // packages aren't installed where the app is built (e.g. Vercel).
-  "exclude": [
-    "node_modules",
-    ".next",
-    "package/express-wadzzo",
-    "tests"
-  ]
+  "exclude": ["node_modules", ".next", "package/express-wadzzo", "tests"]
 }

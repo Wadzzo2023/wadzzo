@@ -21,7 +21,7 @@ import { WalletChip } from "./wallet-chip";
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="bg-background flex min-h-dvh">
       <DesktopSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
@@ -35,18 +35,21 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
 function NotificationBell() {
   const { signedIn } = useRequireAuth();
-  const unseen = api.notification.unseenCount.useQuery(undefined, { enabled: signedIn, refetchInterval: 60_000 });
+  const unseen = api.notification.unseenCount.useQuery(undefined, {
+    enabled: signedIn,
+    refetchInterval: 60_000,
+  });
   if (!signedIn) return null;
   const n = unseen.data ?? 0;
   return (
     <Link
       href="/notifications"
-      className="relative flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      className="text-muted-foreground hover:bg-accent hover:text-foreground relative flex size-10 shrink-0 items-center justify-center rounded-full transition-colors"
       aria-label={n ? `Notifications (${n} new)` : "Notifications"}
     >
       <Bell className="size-5" />
       {n > 0 && (
-        <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+        <span className="bg-primary text-primary-foreground absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
           {n > 9 ? "9+" : n}
         </span>
       )}
@@ -57,7 +60,7 @@ function NotificationBell() {
 function TopBar() {
   const [searching, setSearching] = useState(false);
   return (
-    <header className="sticky top-0 z-40 border-b border-foreground/[0.06] bg-background/70 backdrop-blur-xl">
+    <header className="border-foreground/[0.06] bg-background/70 sticky top-0 z-40 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
         <MobileNav />
         <BrandMark compact className="xl:hidden" />
@@ -68,7 +71,7 @@ function TopBar() {
           <button
             type="button"
             onClick={() => setSearching((s) => !s)}
-            className="flex size-10 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-10 items-center justify-center rounded-full md:hidden"
             aria-label={searching ? "Close search" : "Search"}
             aria-expanded={searching}
           >

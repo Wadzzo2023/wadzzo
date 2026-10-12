@@ -88,7 +88,7 @@ export function useCamera({ enabled }: { enabled: boolean }) {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-     
+
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setState("unsupported");
       return false;
@@ -113,11 +113,7 @@ export function useCamera({ enabled }: { enabled: boolean }) {
       return true;
     } catch (err) {
       const name = (err as DOMException)?.name;
-      setState(
-        name === "NotAllowedError" || name === "SecurityError"
-          ? "denied"
-          : "unsupported",
-      );
+      setState(name === "NotAllowedError" || name === "SecurityError" ? "denied" : "unsupported");
       return false;
     }
   }, [wire]);

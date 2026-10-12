@@ -3,7 +3,13 @@
 import { usePathname, useRouter } from "next/navigation";
 
 import { MEDIA_META, MEDIA_TYPES } from "~/components/media/media-meta";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingsInput } from "~/server/api/routers/market";
 import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
@@ -19,18 +25,32 @@ export function MarketFilters({ current }: { current: ListingsInput }) {
   const router = useRouter();
   const pathname = usePathname() ?? "/marketplace";
   const set = (patch: Record<string, string | undefined>) => {
-    const next = { kind: current.kind, type: current.mediaType, sort: current.sort, q: current.search, ...patch };
+    const next = {
+      kind: current.kind,
+      type: current.mediaType,
+      sort: current.sort,
+      q: current.search,
+      ...patch,
+    };
     const sp = new URLSearchParams();
-    for (const [k, v] of Object.entries(next)) if (v && !(k === "kind" && v === "all") && !(k === "sort" && v === "new")) sp.set(k, v);
+    for (const [k, v] of Object.entries(next))
+      if (v && !(k === "kind" && v === "all") && !(k === "sort" && v === "new")) sp.set(k, v);
     router.push(`${pathname}${sp.size ? `?${sp}` : ""}`, { scroll: false });
   };
 
   return (
     <div className="space-y-3">
       <Toolbar>
-        <SearchInput value={current.search} onSearch={(q) => q !== (current.search ?? "") && set({ q: q || undefined })} placeholder="Search items or creators" />
+        <SearchInput
+          value={current.search}
+          onSearch={(q) => q !== (current.search ?? "") && set({ q: q || undefined })}
+          placeholder="Search items or creators"
+        />
         <div className="flex gap-2">
-          <Select value={current.mediaType ?? "any"} onValueChange={(v) => set({ type: v === "any" ? undefined : v })}>
+          <Select
+            value={current.mediaType ?? "any"}
+            onValueChange={(v) => set({ type: v === "any" ? undefined : v })}
+          >
             <SelectTrigger className="w-full sm:w-36" aria-label="Type">
               <SelectValue />
             </SelectTrigger>
@@ -67,7 +87,9 @@ export function MarketFilters({ current }: { current: ListingsInput }) {
               onClick={() => set({ kind: k.id })}
               className={cn(
                 "h-8 shrink-0 rounded-full border px-3.5 text-sm font-medium transition-colors",
-                active ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground",
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground hover:text-foreground",
               )}
             >
               {k.label}

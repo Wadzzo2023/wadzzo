@@ -12,9 +12,7 @@ import type { RouterOutputs } from "~/utils/api";
 
 export type BountyCard = RouterOutputs["bounty"]["list"]["items"][number];
 export type BountyDetail = RouterOutputs["bounty"]["byId"];
-export type EntryStatus = NonNullable<
-  BountyCard["viewer"]["latestEntryStatus"]
->;
+export type EntryStatus = NonNullable<BountyCard["viewer"]["latestEntryStatus"]>;
 
 export type Tone = "green" | "gold" | "danger" | "muted" | "info";
 

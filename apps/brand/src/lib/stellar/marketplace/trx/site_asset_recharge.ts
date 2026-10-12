@@ -1,10 +1,4 @@
-import {
-  BASE_FEE,
-  Keypair,
-  Operation,
-  Horizon,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { BASE_FEE, Keypair, Operation, Horizon, TransactionBuilder } from "@stellar/stellar-sdk";
 import { MOTHER_SECRET, STORAGE_SECRET } from "../SECRET";
 import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
@@ -14,14 +8,8 @@ async function checkSiteAssetTrustLine(accPub: string) {
   const server = new Horizon.Server(STELLAR_URL);
   const accRes = await server.loadAccount(accPub);
   for (const bal of accRes.balances) {
-    if (
-      bal.asset_type == "credit_alphanum12" ||
-      bal.asset_type == "credit_alphanum4"
-    ) {
-      if (
-        bal.asset_code == PLATFORM_ASSET.code &&
-        bal.asset_issuer == PLATFORM_ASSET.issuer
-      ) {
+    if (bal.asset_type == "credit_alphanum12" || bal.asset_type == "credit_alphanum4") {
+      if (bal.asset_code == PLATFORM_ASSET.code && bal.asset_issuer == PLATFORM_ASSET.issuer) {
         if (bal.is_authorized) {
           return true;
         }
@@ -44,18 +32,15 @@ export async function sendSiteAsset2pub(
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   // const userAcc = Keypair.fromSecret(secret);
 
-  const transactionInitializer = await server.loadAccount(
-    motherAcc.publicKey(),
-  );
+  const transactionInitializer = await server.loadAccount(motherAcc.publicKey());
 
   const userAcc = await StellarAccount.loadOrThrow(pubkey);
-  const hasTrust = userAcc.hasTrustline(
-    PLATFORM_ASSET.code,
-    PLATFORM_ASSET.issuer,
-  );
+  const hasTrust = userAcc.hasTrustline(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer);
 
   if (!hasTrust)
-    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: `User does not have trustline for ${PLATFORM_ASSET.code}` });
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, {
+      message: `User does not have trustline for ${PLATFORM_ASSET.code}`,
+    });
 
   const Tx = new TransactionBuilder(transactionInitializer, {
     fee: BASE_FEE,

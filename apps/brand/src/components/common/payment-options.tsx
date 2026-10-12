@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@wadzzo/ui/components/dialog";
 import { RadioGroup, RadioGroupItem } from "@wadzzo/ui/components/radio-group";
 import { Label } from "@wadzzo/ui/components/label";
 import { Coins, DollarSign, Loader2 } from "lucide-react";
@@ -52,8 +59,7 @@ export function PaymentChoose({
   costBreakdown?: CostBreakdownItem[];
 }) {
   console.log("const breakdonw", costBreakdown);
-  const { paymentMethod, setPaymentMethod, isOpen, setIsOpen } =
-    usePaymentMethodStore();
+  const { paymentMethod, setPaymentMethod, isOpen, setIsOpen } = usePaymentMethodStore();
 
   function handleOpen(open: boolean): void {
     if (beforeTrigger) {
@@ -82,12 +88,8 @@ export function PaymentChoose({
           </DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <RadioGroup
-            value={paymentMethod}
-            onValueChange={setPaymentMethod}
-            className="space-y-4"
-          >
-            <div className="flex items-center space-x-2 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50">
+          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-4">
+            <div className="border-border hover:bg-muted/50 flex items-center space-x-2 rounded-lg border p-4 transition-colors">
               <RadioGroupItem
                 value={PaymentMethodEnum.enum.asset}
                 id={PaymentMethodEnum.enum.asset}
@@ -109,19 +111,15 @@ export function PaymentChoose({
                   <Coins className="mr-3 h-6 w-6" />
                 )}
                 <div className="grow">
-                  <div className="font-medium">
-                    Pay with {PLATFORM_ASSET.code}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Use platform tokens
-                  </div>
+                  <div className="font-medium">Pay with {PLATFORM_ASSET.code}</div>
+                  <div className="text-muted-foreground text-sm">Use platform tokens</div>
                 </div>
                 <div className="text-right font-medium">
                   {requiredToken.toFixed(0)} {PLATFORM_ASSET.code}
                 </div>
               </Label>
             </div>
-            <div className="flex items-center space-x-2 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50">
+            <div className="border-border hover:bg-muted/50 flex items-center space-x-2 rounded-lg border p-4 transition-colors">
               <RadioGroupItem
                 value={PaymentMethodEnum.enum.xlm}
                 id={PaymentMethodEnum.enum.xlm}
@@ -134,32 +132,28 @@ export function PaymentChoose({
                 <DollarSign className="mr-3 h-6 w-6" />
                 <div className="grow">
                   <div className="font-medium">Pay with XLM</div>
-                  <div className="text-sm text-muted-foreground">
-                    Use Stellar Lumens
-                  </div>
+                  <div className="text-muted-foreground text-sm">Use Stellar Lumens</div>
                 </div>
-                <div className="text-right font-medium">
-                  {XLM_EQUIVALENT.toFixed(2)} XLM
-                </div>
+                <div className="text-right font-medium">{XLM_EQUIVALENT.toFixed(2)} XLM</div>
               </Label>
             </div>
           </RadioGroup>
         </div>
 
-        <div className="mt-6 space-y-3 border-t border-border pt-4">
+        <div className="border-border mt-6 space-y-3 border-t pt-4">
           {costBreakdown ? (
             costBreakdown.map((item, index) => (
               <div
                 key={index}
-                className={`flex justify-between ${item.highlighted ? "font-semibold" : ""
-                  } ${item.type === "total" ? "border-t border-border pt-2 text-lg" : "text-sm"}`}
+                className={`flex justify-between ${
+                  item.highlighted ? "font-semibold" : ""
+                } ${item.type === "total" ? "border-border border-t pt-2 text-lg" : "text-sm"}`}
               >
                 <span className={item.type === "fee" ? "text-muted-foreground" : ""}>
                   {item.label}
                 </span>
                 <span>
-                  {item.amount.toFixed(2)}{" "}
-                  {paymentMethod === "asset" ? PLATFORM_ASSET.code : "XLM"}
+                  {item.amount.toFixed(2)} {paymentMethod === "asset" ? PLATFORM_ASSET.code : "XLM"}
                 </span>
               </div>
             ))
@@ -167,25 +161,21 @@ export function PaymentChoose({
             <></>
           )}
         </div>
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-4 text-center text-sm">
           Your account will be charged{" "}
           {paymentMethod === "asset"
             ? `${requiredToken} ${PLATFORM_ASSET.code}`
             : `${XLM_EQUIVALENT} XLM`}{" "}
           to perform this action.
         </div>
-        <DialogFooter className=" flex flex-row items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsOpen(false)}
-            className=" w-full"
-          >
+        <DialogFooter className="flex flex-row items-center justify-between gap-2">
+          <Button variant="outline" onClick={() => setIsOpen(false)} className="w-full">
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={loading}
-            className="w-full  shadow-xs shadow-foreground"
+            className="shadow-foreground w-full shadow-xs"
           >
             {loading && <Loader2 className="mr-2 animate-spin" />}
             Confirm Payment

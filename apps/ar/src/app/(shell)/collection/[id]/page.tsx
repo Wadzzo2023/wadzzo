@@ -40,11 +40,7 @@ import { pinStatus, RARITY_META, timeRemaining } from "~/lib/ar/rarity";
 import { mapStyleFor, useMapMode, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import { useAuth } from "~/lib/ar/store";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
-import {
-  useBrandsQuery,
-  usePinsQuery,
-  useToggleFollow,
-} from "~/lib/ar/usePins";
+import { useBrandsQuery, usePinsQuery, useToggleFollow } from "~/lib/ar/usePins";
 import type { ArBrand, ArPin } from "~/lib/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
@@ -105,12 +101,7 @@ export default function CollectionDetail() {
   );
 
   const siblings = useMemo(
-    () =>
-      pin
-        ? pins
-            .filter((p) => p.brandId === pin.brandId && p.id !== pin.id)
-            .slice(0, 6)
-        : [],
+    () => (pin ? pins.filter((p) => p.brandId === pin.brandId && p.id !== pin.id).slice(0, 6) : []),
     [pins, pin],
   );
 
@@ -120,11 +111,7 @@ export default function CollectionDetail() {
   if (pinsLoading) {
     return (
       <AppShell>
-        <div
-          className="ar-scroll h-full px-5"
-          role="status"
-          aria-label="Loading collectible"
-        >
+        <div className="ar-scroll h-full px-5" role="status" aria-label="Loading collectible">
           <div className="mx-auto mt-16 max-w-[236px]">
             <Skeleton className="aspect-[3/4] w-full" rounded="rounded-ar-lg" />
           </div>
@@ -148,7 +135,7 @@ export default function CollectionDetail() {
     return (
       <AppShell>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
             Collectible not found
           </p>
           <ArLinkButton href="/collection" variant="primary" size="md">
@@ -169,9 +156,7 @@ export default function CollectionDetail() {
   // has nothing to number against, so it gets no serial at all.
   const serial =
     pin.supply != null
-      ? (Array.from(pin.id).reduce((a, c) => a + c.charCodeAt(0), 0) %
-          pin.supply) +
-        1
+      ? (Array.from(pin.id).reduce((a, c) => a + c.charCodeAt(0), 0) % pin.supply) + 1
       : null;
 
   const copyCode = async () => {
@@ -203,16 +188,16 @@ export default function CollectionDetail() {
             transparent keeps both readable without flattening the rarity wash
             behind the hero. */}
         <div
-          className="sticky top-0 z-30 flex items-center justify-between bg-linear-to-b from-ar-void via-ar-void/85 to-transparent px-4 pb-6"
+          className="from-ar-void via-ar-void/85 sticky top-0 z-30 flex items-center justify-between bg-linear-to-b to-transparent px-4 pb-6"
           style={{ paddingTop: "calc(var(--ar-top-inset) + 14px)" }}
         >
           <button
             onClick={() => router.back()}
             aria-label="Back"
-            className="ar-glass flex h-9 items-center gap-1 rounded-full pl-1.5 pr-3 text-ar-dim"
+            className="ar-glass text-ar-dim flex h-9 items-center gap-1 rounded-full pr-3 pl-1.5"
           >
             <ChevronLeft size={17} strokeWidth={2.4} />
-            <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.14em]">
+            <span className="font-hud text-[10px] font-semibold tracking-[0.14em] uppercase">
               Back
             </span>
           </button>
@@ -223,14 +208,14 @@ export default function CollectionDetail() {
                 .share?.({ title: pin.title, text: pin.description })
                 .catch(() => undefined);
             }}
-            className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-dim"
+            className="ar-glass text-ar-dim flex h-9 w-9 items-center justify-center rounded-full"
           >
             <Share2 size={15} strokeWidth={2.2} />
           </button>
         </div>
 
         {/* ── Hero card ────────────────────────────────────────────── */}
-        <div className="relative px-8 pb-1 pt-2">
+        <div className="relative px-8 pt-2 pb-1">
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -241,18 +226,11 @@ export default function CollectionDetail() {
                 once per session — the ritual is the point the first time and
                 an obstacle every time after. */}
             <PackOpening rarity={rarity} openedKey={pin.id}>
-              <HoloCard
-                pin={pin}
-                brand={brand}
-                creatorBack
-                interactive
-                priority
-                showFlipButton
-              />
+              <HoloCard pin={pin} brand={brand} creatorBack interactive priority showFlipButton />
             </PackOpening>
           </motion.div>
 
-          <p className="font-hud mt-3.5 text-center text-[9px] uppercase tracking-[0.22em] text-ar-faint">
+          <p className="font-hud text-ar-faint mt-3.5 text-center text-[9px] tracking-[0.22em] uppercase">
             Tilt to foil &bull; Tap Creator for the issuer
           </p>
         </div>
@@ -265,11 +243,11 @@ export default function CollectionDetail() {
             <DetectionBadge method={pin.detection} />
           </div>
 
-          <h1 className="font-hud text-center text-[23px] font-bold leading-tight text-ar-text">
+          <h1 className="font-hud text-ar-text text-center text-[23px] leading-tight font-bold">
             {pin.title}
           </h1>
 
-          <p className="mt-2.5 text-center text-[13px] leading-relaxed text-ar-dim">
+          <p className="text-ar-dim mt-2.5 text-center text-[13px] leading-relaxed">
             {pin.description}
           </p>
 
@@ -286,19 +264,15 @@ export default function CollectionDetail() {
           <div className="mt-3.5 flex items-center justify-center gap-2">
             <Link
               href={`/brands/${pin.brandId}`}
-              className="ar-glass flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 text-[12px] text-ar-dim transition-colors hover:text-ar-text"
+              className="ar-glass text-ar-dim hover:text-ar-text flex items-center gap-2 rounded-full py-1 pr-3 pl-1.5 text-[12px] transition-colors"
             >
               <BrandAvatar
                 src={brand?.avatarUrl ?? pin.brandImageUrl}
                 className="h-5 w-5 rounded-full ring-1 ring-white/15"
               />
-              <span className="font-medium text-ar-text">{pin.brandName}</span>
+              <span className="text-ar-text font-medium">{pin.brandName}</span>
               {brand?.verified && (
-                <BadgeCheck
-                  size={13}
-                  strokeWidth={2.4}
-                  className="text-ar-green-hot"
-                />
+                <BadgeCheck size={13} strokeWidth={2.4} className="text-ar-green-hot" />
               )}
             </Link>
 
@@ -333,7 +307,7 @@ export default function CollectionDetail() {
               scene at `/ar` does — that's a separate action below, not
               this one. */}
           <ArPhotoFrame imageUrl={pin.imageUrl} accentHsl={meta.hsl} />
-          <p className="text-center text-[11px] leading-relaxed text-ar-faint">
+          <p className="text-ar-faint text-center text-[11px] leading-relaxed">
             {pin.collected
               ? "It's yours — point your camera at a surface to place it in AR."
               : "Anyone can view it in AR from here — no distance limit."}
@@ -373,7 +347,7 @@ export default function CollectionDetail() {
         {/* ── Provenance ───────────────────────────────────────────── */}
         <section className="mt-7 px-5">
           <SectionTitle>Provenance</SectionTitle>
-          <div className="ar-bevel divide-y divide-ar-line rounded-ar">
+          <div className="ar-bevel divide-ar-line rounded-ar divide-y">
             <Row
               icon={Calendar}
               label="Collected"
@@ -385,22 +359,13 @@ export default function CollectionDetail() {
                 label="Serial"
                 value={
                   <>
-                    <span style={{ color: `hsl(${meta.hsl})` }}>
-                      #{serial.toLocaleString()}
-                    </span>
-                    <span className="text-ar-faint">
-                      {" "}
-                      / {pin.supply.toLocaleString()}
-                    </span>
+                    <span style={{ color: `hsl(${meta.hsl})` }}>#{serial.toLocaleString()}</span>
+                    <span className="text-ar-faint"> / {pin.supply.toLocaleString()}</span>
                   </>
                 }
               />
             )}
-            <Row
-              icon={detection.icon}
-              label="Claimed by"
-              value={detection.label}
-            />
+            <Row icon={detection.icon} label="Claimed by" value={detection.label} />
             <Row
               icon={Ticket}
               label="Drop window"
@@ -417,7 +382,7 @@ export default function CollectionDetail() {
               }
             />
           </div>
-          <p className="mt-2 px-1 text-[11px] leading-relaxed text-ar-faint">
+          <p className="text-ar-faint mt-2 px-1 text-[11px] leading-relaxed">
             {meta.blurb}. {detection.hint}
           </p>
         </section>
@@ -425,45 +390,47 @@ export default function CollectionDetail() {
         {/* ── Where ────────────────────────────────────────────────── */}
         <section className="mt-6 px-5">
           <SectionTitle>Where you found it</SectionTitle>
-          <div className="relative h-[168px] overflow-hidden rounded-ar border border-ar-line">
+          <div className="rounded-ar border-ar-line relative h-[168px] overflow-hidden border">
             {MAPBOX_TOKEN ? (
-              themeRead && <MapGL
-                mapboxAccessToken={MAPBOX_TOKEN}
-                initialViewState={{
-                  longitude: pin.lng,
-                  latitude: pin.lat,
-                  zoom: 15.4,
-                  pitch: mapMode === "3d" ? 40 : 0,
-                }}
-                mapStyle={mapStyleFor(mapMode, theme)}
-                attributionControl={false}
-                interactive={false}
-                style={{ width: "100%", height: "100%" }}
-              >
-                <Marker longitude={pin.lng} latitude={pin.lat} anchor="center">
-                  <span
-                    className="block h-4 w-4 rounded-full border-2"
-                    style={{
-                      borderColor: `hsl(${meta.hsl})`,
-                      background: `hsl(${meta.hsl}/0.35)`,
-                      boxShadow: `0 0 18px hsl(${meta.hsl})`,
-                    }}
-                  />
-                </Marker>
-              </MapGL>
+              themeRead && (
+                <MapGL
+                  mapboxAccessToken={MAPBOX_TOKEN}
+                  initialViewState={{
+                    longitude: pin.lng,
+                    latitude: pin.lat,
+                    zoom: 15.4,
+                    pitch: mapMode === "3d" ? 40 : 0,
+                  }}
+                  mapStyle={mapStyleFor(mapMode, theme)}
+                  attributionControl={false}
+                  interactive={false}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <Marker longitude={pin.lng} latitude={pin.lat} anchor="center">
+                    <span
+                      className="block h-4 w-4 rounded-full border-2"
+                      style={{
+                        borderColor: `hsl(${meta.hsl})`,
+                        background: `hsl(${meta.hsl}/0.35)`,
+                        boxShadow: `0 0 18px hsl(${meta.hsl})`,
+                      }}
+                    />
+                  </Marker>
+                </MapGL>
+              )
             ) : (
-              <div className="ar-grid flex h-full items-center justify-center bg-ar-surface">
+              <div className="ar-grid bg-ar-surface flex h-full items-center justify-center">
                 <MapPin size={22} className="text-ar-faint" />
               </div>
             )}
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_90%_at_50%_50%,transparent_40%,hsl(var(--ar-void)/0.8)_100%)]" />
-            <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
-              <span className="font-hud rounded-full border border-ar-line bg-ar-void/80 px-2.5 py-1 text-[9.5px] font-semibold tabular-nums tracking-[0.1em] text-ar-dim">
+            <div className="absolute right-3 bottom-2.5 left-3 flex items-center justify-between">
+              <span className="font-hud border-ar-line bg-ar-void/80 text-ar-dim rounded-full border px-2.5 py-1 text-[9.5px] font-semibold tracking-[0.1em] tabular-nums">
                 {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
               </span>
               <Link
                 href={`/map?focus=${pin.id}`}
-                className="font-hud rounded-full border border-ar-green/50 bg-ar-green/15 px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ar-green-hot"
+                className="font-hud border-ar-green/50 bg-ar-green/15 text-ar-green-hot rounded-full border px-2.5 py-1 text-[9.5px] font-semibold tracking-[0.1em] uppercase"
               >
                 On the map
               </Link>
@@ -477,10 +444,7 @@ export default function CollectionDetail() {
             <div className="px-5">
               <SectionTitle>More from {pin.brandName}</SectionTitle>
             </div>
-            <div
-              ref={siblingRailRef}
-              className="ar-scroll-x flex gap-3.5 px-5 pb-2"
-            >
+            <div ref={siblingRailRef} className="ar-scroll-x flex gap-3.5 px-5 pb-2">
               {siblings.map((s) => (
                 <div key={s.id} className="card-rail-item">
                   {/* `oneFace`: these are links to other drops, not objects to
@@ -502,36 +466,24 @@ export default function CollectionDetail() {
       </div>
 
       {/* ── Redeem sheet ───────────────────────────────────────────── */}
-      <BottomSheet
-        open={redeemOpen}
-        onClose={() => setRedeemOpen(false)}
-        labelledBy="redeem-title"
-      >
-        <div className="px-6 pb-4 pt-3 text-center">
-          <h2
-            id="redeem-title"
-            className="font-hud text-[19px] font-bold text-ar-text"
-          >
+      <BottomSheet open={redeemOpen} onClose={() => setRedeemOpen(false)} labelledBy="redeem-title">
+        <div className="px-6 pt-3 pb-4 text-center">
+          <h2 id="redeem-title" className="font-hud text-ar-text text-[19px] font-bold">
             Show this at the counter
           </h2>
-          <p className="mx-auto mt-1.5 max-w-[18rem] text-[12.5px] leading-relaxed text-ar-dim">
+          <p className="text-ar-dim mx-auto mt-1.5 max-w-[18rem] text-[12.5px] leading-relaxed">
             {pin.brandName} scans the code, or types it in. It only works once.
           </p>
 
-          <div className="mx-auto mt-5 w-fit rounded-ar-lg bg-white p-3.5">
-            <QRCode
-              value={pin.redeemCode ?? ""}
-              size={168}
-              bgColor="#ffffff"
-              fgColor="#07120c"
-            />
+          <div className="rounded-ar-lg mx-auto mt-5 w-fit bg-white p-3.5">
+            <QRCode value={pin.redeemCode ?? ""} size={168} bgColor="#ffffff" fgColor="#07120c" />
           </div>
 
           <button
             onClick={copyCode}
-            className="ar-bevel mx-auto mt-4 flex items-center gap-2.5 rounded-ar px-4 py-2.5"
+            className="ar-bevel rounded-ar mx-auto mt-4 flex items-center gap-2.5 px-4 py-2.5"
           >
-            <span className="font-hud text-[17px] font-bold tracking-[0.14em] text-ar-text">
+            <span className="font-hud text-ar-text text-[17px] font-bold tracking-[0.14em]">
               {pin.redeemCode}
             </span>
             {copied ? (
@@ -540,7 +492,7 @@ export default function CollectionDetail() {
               <Copy size={15} strokeWidth={2.2} className="text-ar-faint" />
             )}
           </button>
-          <p className="mt-2 text-[10.5px] text-ar-faint">
+          <p className="text-ar-faint mt-2 text-[10.5px]">
             {copied ? "Copied to clipboard" : "Tap the code to copy it"}
           </p>
         </div>
@@ -563,16 +515,12 @@ function CreatorInfoCard({
   followLabel?: string;
 }) {
   return (
-    <div className="ar-bevel relative overflow-hidden rounded-ar border border-ar-line/70 bg-linear-to-b from-ar-surface-2/90 to-ar-surface p-3.5 shadow-md">
+    <div className="ar-bevel rounded-ar border-ar-line/70 from-ar-surface-2/90 to-ar-surface relative overflow-hidden border bg-linear-to-b p-3.5 shadow-md">
       {/* Brand cover bleed in background */}
       {brand?.coverUrl && (
         <div className="pointer-events-none absolute inset-0 opacity-[0.14]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={brand.coverUrl}
-            alt=""
-            className="h-full w-full object-cover blur-[2px]"
-          />
+          <img src={brand.coverUrl} alt="" className="h-full w-full object-cover blur-[2px]" />
         </div>
       )}
 
@@ -589,31 +537,23 @@ function CreatorInfoCard({
               className="h-11 w-11 rounded-[13px] object-cover ring-2 ring-white/15 transition-transform group-hover:scale-105"
             />
             {brand?.verified && (
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-ar-surface-3 ring-1 ring-ar-line">
-                <BadgeCheck
-                  size={11}
-                  strokeWidth={2.6}
-                  className="text-ar-green-hot"
-                />
+              <span className="bg-ar-surface-3 ring-ar-line absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full ring-1">
+                <BadgeCheck size={11} strokeWidth={2.6} className="text-ar-green-hot" />
               </span>
             )}
           </div>
 
           <div className="min-w-0 flex-1">
-            <span className="font-hud block text-[7.5px] font-bold uppercase tracking-[0.2em] text-ar-faint">
+            <span className="font-hud text-ar-faint block text-[7.5px] font-bold tracking-[0.2em] uppercase">
               CREATOR
             </span>
-            <h3 className="truncate text-[13.5px] font-bold leading-snug text-ar-text transition-colors group-hover:text-ar-green-hot">
+            <h3 className="text-ar-text group-hover:text-ar-green-hot truncate text-[13.5px] leading-snug font-bold transition-colors">
               {pin.brandName}
             </h3>
             {brand?.tagline ? (
-              <p className="truncate text-[11px] text-ar-dim">
-                {brand.tagline}
-              </p>
+              <p className="text-ar-dim truncate text-[11px]">{brand.tagline}</p>
             ) : (
-              <p className="truncate text-[11px] text-ar-faint">
-                @{brand?.handle ?? "creator"}
-              </p>
+              <p className="text-ar-faint truncate text-[11px]">@{brand?.handle ?? "creator"}</p>
             )}
           </div>
         </Link>
@@ -632,7 +572,7 @@ function CreatorInfoCard({
           <Link
             href={`/brands/${pin.brandId}`}
             aria-label="View creator page"
-            className="ar-glass flex h-8 w-8 items-center justify-center rounded-full text-ar-faint transition-colors hover:text-ar-text"
+            className="ar-glass text-ar-faint hover:text-ar-text flex h-8 w-8 items-center justify-center rounded-full transition-colors"
           >
             <ChevronRight size={15} strokeWidth={2.4} />
           </Link>
@@ -641,20 +581,17 @@ function CreatorInfoCard({
 
       {/* Stats row */}
       {brand && (
-        <div className="relative mt-2.5 flex items-center gap-3.5 border-t border-white/5 pt-2 text-[10px] text-ar-dim">
+        <div className="text-ar-dim relative mt-2.5 flex items-center gap-3.5 border-t border-white/5 pt-2 text-[10px]">
           <span className="font-hud flex items-center gap-1 font-semibold tabular-nums">
             <Users size={11} className="text-ar-faint" />
-            <strong className="text-ar-text">
-              {compact(brand.followers)}
-            </strong>{" "}
-            followers
+            <strong className="text-ar-text">{compact(brand.followers)}</strong> followers
           </span>
           <span className="font-hud flex items-center gap-1 font-semibold tabular-nums">
             <MapPin size={11} className="text-ar-faint" />
             <strong className="text-ar-text">{brand.pinCount}</strong> drops
           </span>
           {brand.region && (
-            <span className="font-hud ml-auto truncate uppercase tracking-wider text-ar-faint">
+            <span className="font-hud text-ar-faint ml-auto truncate tracking-wider uppercase">
               {brand.region}
             </span>
           )}
@@ -666,7 +603,7 @@ function CreatorInfoCard({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-hud mb-2.5 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+    <h2 className="font-hud text-ar-faint mb-2.5 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
       {children}
     </h2>
   );
@@ -685,9 +622,9 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 px-3.5 py-3">
-      <span className="flex items-center gap-2.5 text-ar-faint">
+      <span className="text-ar-faint flex items-center gap-2.5">
         <Icon size={14} strokeWidth={2.1} />
-        <span className="font-hud text-[10.5px] font-semibold uppercase tracking-[0.12em]">
+        <span className="font-hud text-[10.5px] font-semibold tracking-[0.12em] uppercase">
           {label}
         </span>
       </span>

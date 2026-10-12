@@ -25,14 +25,19 @@ function resolveSlug() {
   for (const file of [`.env.${mode}.local`, ".env.local", `.env.${mode}`, ".env"]) {
     const full = path.join(appRoot, file);
     if (!fs.existsSync(full)) continue;
-    const match = /^\s*PLATFORM_SLUG\s*=\s*["']?([\w-]+)["']?\s*$/m.exec(fs.readFileSync(full, "utf8"));
+    const match = /^\s*PLATFORM_SLUG\s*=\s*["']?([\w-]+)["']?\s*$/m.exec(
+      fs.readFileSync(full, "utf8"),
+    );
     if (match?.[1]) return match[1];
   }
   return DEFAULT_SLUG;
 }
 
 const slug = resolveSlug();
-const themeFile = [path.join(platformRoot, "themes", slug, `${app}.css`), path.join(platformRoot, "themes", DEFAULT_SLUG, `${app}.css`)].find(fs.existsSync);
+const themeFile = [
+  path.join(platformRoot, "themes", slug, `${app}.css`),
+  path.join(platformRoot, "themes", DEFAULT_SLUG, `${app}.css`),
+].find(fs.existsSync);
 const target = path.join(appRoot, "src/styles/platform-theme.css");
 fs.mkdirSync(path.dirname(target), { recursive: true });
 fs.writeFileSync(
@@ -45,4 +50,6 @@ fs.rmSync(publicDir, { recursive: true, force: true });
 const assetsDir = path.join(platformRoot, "assets", slug, app);
 if (fs.existsSync(assetsDir)) fs.cpSync(assetsDir, publicDir, { recursive: true });
 
-console.log(`[platform] ${app}: ${slug}${themeFile ? "" : " (no theme)"}${fs.existsSync(assetsDir) ? " + assets" : ""}`);
+console.log(
+  `[platform] ${app}: ${slug}${themeFile ? "" : " (no theme)"}${fs.existsSync(assetsDir) ? " + assets" : ""}`,
+);

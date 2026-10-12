@@ -1,6 +1,11 @@
 "use client";
 
-import { useParams, usePathname, useRouter as useNextRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter as useNextRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useMemo } from "react";
 
 /**
@@ -35,11 +40,15 @@ export function useRouter() {
     () => ({
       pathname,
       push: (url: Url, _as?: unknown, opts?: NavOptions) => {
-        router.push(toHref(url, pathname), { scroll: opts?.scroll ?? !opts?.shallow });
+        router.push(toHref(url, pathname), {
+          scroll: opts?.scroll ?? !opts?.shallow,
+        });
         return Promise.resolve(true);
       },
       replace: (url: Url, _as?: unknown, opts?: NavOptions) => {
-        router.replace(toHref(url, pathname), { scroll: opts?.scroll ?? !opts?.shallow });
+        router.replace(toHref(url, pathname), {
+          scroll: opts?.scroll ?? !opts?.shallow,
+        });
         return Promise.resolve(true);
       },
       back: () => router.back(),

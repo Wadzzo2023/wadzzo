@@ -1,10 +1,7 @@
 /* eslint-disable */
 import { verifyMessageSignature } from "@albedo-link/signature-verification";
 import axios from "axios";
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { WalletType } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
 import { firebaseAuth } from "@wadzzo/wallet/firebase";
@@ -40,167 +37,135 @@ export type AuthUser = {
   emailVerified: boolean;
 };
 
-export async function authorizeCredentials(
-  cred: AuthCredential,
-): Promise<AuthUser | null> {
+export async function authorizeCredentials(cred: AuthCredential): Promise<AuthUser | null> {
+  // email pass login
+  if (cred.walletType == WalletType.emailPass) {
+    const { email, password, fromAppSign } = cred;
+    const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+    const user = userCredential.user;
 
-    // email pass login
-    if (cred.walletType == WalletType.emailPass) {
-      const { email, password, fromAppSign } = cred;
-      const userCredential = await signInWithEmailAndPassword(
-        firebaseAuth,
-        email,
-        password,
-      );
-      const user = userCredential.user;
-
-      if (!user.emailVerified) {
-        await sendEmailVerification(user);
-        const errorCode = "auth/unverified-email";
-        throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: `Firebase: Error (${errorCode}).` });
-      }
-      const data = await getUserPublicKey({ email: email, uid: user.uid, fromAppSign });
-      const sessionUser = await dbUser(
-        data.publicKey,
-        fromAppSign,
-        email,
-        WalletType.emailPass,
-      );
-      return {
-        ...sessionUser,
-        walletType: WalletType.emailPass,
-        email: email,
-        emailVerified: user.emailVerified,
-      };
-    }
-
-    // wallet login
-    if (cred.walletType == WalletType.albedo) {
-      const { pubkey, signature, token, fromAppSign } = cred;
-
-      const isValid = verifyMessageSignature(pubkey, token, signature);
-      if (isValid) {
-        const sessionUser = await dbUser(
-          pubkey,
-          fromAppSign,
-          undefined,
-          cred.walletType,
-        );
-        return {
-          ...sessionUser,
-          walletType: WalletType.albedo,
-          emailVerified: true,
-        };
-      }
-      throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
-    }
-    // wallet rabet and frieghter
-    if (
-      cred.walletType == WalletType.rabet ||
-      cred.walletType == WalletType.freighter ||
-      cred.walletType == WalletType.walletConnect ||
-      cred.walletType == WalletType.metamask ||
-      cred.walletType == WalletType.xBull ||
-      cred.walletType == WalletType.hana ||
-      cred.walletType == WalletType.hotWallet
-    ) {
-      const { pubkey, signedXDR, fromAppSign } = cred;
-      const isValid = await verifyTransactionSignature({
-        publicKey: pubkey,
-        xdr: signedXDR,
+    if (!user.emailVerified) {
+      await sendEmailVerification(user);
+      const errorCode = "auth/unverified-email";
+      throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+        message: `Firebase: Error (${errorCode}).`,
       });
-      if (isValid) {
-        const sessionUser = await dbUser(
-          pubkey,
-          fromAppSign,
-          undefined,
-          cred.walletType,
-        );
-        return {
-          ...sessionUser,
-          walletType: cred.walletType,
-          emailVerified: true,
-        };
-      }
-      throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, { message: "Invalid signature" });
     }
+    const data = await getUserPublicKey({
+      email: email,
+      uid: user.uid,
+      fromAppSign,
+    });
+    const sessionUser = await dbUser(data.publicKey, fromAppSign, email, WalletType.emailPass);
+    return {
+      ...sessionUser,
+      walletType: WalletType.emailPass,
+      email: email,
+      emailVerified: user.emailVerified,
+    };
+  }
 
-    // provider logins
-    if (
-      cred.walletType == WalletType.google ||
-      cred.walletType == WalletType.facebook
-    ) {
-      const { token, email, fromAppSign } = cred;
+  // wallet login
+  if (cred.walletType == WalletType.albedo) {
+    const { pubkey, signature, token, fromAppSign } = cred;
 
-      const { uid } = await verifyFirebaseIdToken(token);
-      const data = await getUserPublicKey({ uid, email, fromAppSign });
-      const sessionUser = await dbUser(
-        data.publicKey,
-        fromAppSign,
-        email,
-        cred.walletType,
-      );
+    const isValid = verifyMessageSignature(pubkey, token, signature);
+    if (isValid) {
+      const sessionUser = await dbUser(pubkey, fromAppSign, undefined, cred.walletType);
       return {
         ...sessionUser,
-        walletType: cred.walletType,
-        email: email,
+        walletType: WalletType.albedo,
         emailVerified: true,
       };
     }
+    throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+      message: "Invalid signature",
+    });
+  }
+  // wallet rabet and frieghter
+  if (
+    cred.walletType == WalletType.rabet ||
+    cred.walletType == WalletType.freighter ||
+    cred.walletType == WalletType.walletConnect ||
+    cred.walletType == WalletType.metamask ||
+    cred.walletType == WalletType.xBull ||
+    cred.walletType == WalletType.hana ||
+    cred.walletType == WalletType.hotWallet
+  ) {
+    const { pubkey, signedXDR, fromAppSign } = cred;
+    const isValid = await verifyTransactionSignature({
+      publicKey: pubkey,
+      xdr: signedXDR,
+    });
+    if (isValid) {
+      const sessionUser = await dbUser(pubkey, fromAppSign, undefined, cred.walletType);
+      return {
+        ...sessionUser,
+        walletType: cred.walletType,
+        emailVerified: true,
+      };
+    }
+    throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+      message: "Invalid signature",
+    });
+  }
 
-    if (cred.walletType == WalletType.apple) {
-      const { appleToken, token, email, fromAppSign } = cred;
+  // provider logins
+  if (cred.walletType == WalletType.google || cred.walletType == WalletType.facebook) {
+    const { token, email, fromAppSign } = cred;
 
-      if (token) {
-        const { uid } = await verifyFirebaseIdToken(token);
+    const { uid } = await verifyFirebaseIdToken(token);
+    const data = await getUserPublicKey({ uid, email, fromAppSign });
+    const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
+    return {
+      ...sessionUser,
+      walletType: cred.walletType,
+      email: email,
+      emailVerified: true,
+    };
+  }
+
+  if (cred.walletType == WalletType.apple) {
+    const { appleToken, token, email, fromAppSign } = cred;
+
+    if (token) {
+      const { uid } = await verifyFirebaseIdToken(token);
+      const data = await getUserPublicKey({ uid, email, fromAppSign });
+      const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
+      return {
+        ...sessionUser,
+        walletType: cred.walletType,
+        emailVerified: true,
+        email: email,
+      };
+    } else {
+      if (appleToken) {
+        const { uid } = await getOrCreateFirebaseUserFromApple(appleToken, email);
+
         const data = await getUserPublicKey({ uid, email, fromAppSign });
-        const sessionUser = await dbUser(
-          data.publicKey,
-          fromAppSign,
-          email,
-          cred.walletType,
-        );
+        const sessionUser = await dbUser(data.publicKey, fromAppSign, email, cred.walletType);
         return {
           ...sessionUser,
           walletType: cred.walletType,
           emailVerified: true,
           email: email,
         };
-      } else {
-        if (appleToken) {
-          const { uid } = await getOrCreateFirebaseUserFromApple(appleToken, email);
-
-          const data = await getUserPublicKey({ uid, email, fromAppSign });
-          const sessionUser = await dbUser(
-            data.publicKey,
-            fromAppSign,
-            email,
-            cred.walletType,
-          );
-          return {
-            ...sessionUser,
-            walletType: cred.walletType,
-            emailVerified: true,
-            email: email,
-          };
-        }
       }
     }
+  }
 
-    return null;
+  return null;
 }
 
-async function dbUser(
-  pubkey: string,
-  fromAppSign?: string,
-  email?: string,
-  signUpMethod?: string,
-) {
+async function dbUser(pubkey: string, fromAppSign?: string, email?: string, signUpMethod?: string) {
   const platform = await getCurrentPlatform();
   const user = await db.user.findUnique({ where: { id: pubkey } });
   // if user exists, check if email is set, if not set it
   if (user) {
-    await recordUserPlatform(platform, user.id, { signUpMethod, isNewUser: false });
+    await recordUserPlatform(platform, user.id, {
+      signUpMethod,
+      isNewUser: false,
+    });
     const profileEmail = user.email;
     if (!profileEmail && email) {
       await db.user.update({
@@ -230,7 +195,10 @@ async function dbUser(
         signupPlatformId: platform.id,
       },
     });
-    await recordUserPlatform(platform, data.id, { signUpMethod, isNewUser: true });
+    await recordUserPlatform(platform, data.id, {
+      signUpMethod,
+      isNewUser: true,
+    });
     return data;
   }
 }
@@ -238,24 +206,21 @@ async function dbUser(
 async function getUserPublicKey({
   uid,
   email,
-  fromAppSign
+  fromAppSign,
 }: {
   uid: string;
   email: string;
   fromAppSign: string | undefined;
 }) {
-  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(
-    USER_ACCOUNT_URL,
-    {
-      params: {
-        uid,
-        email,
-        from: env.NEXT_PUBLIC_ASSET_CODE ?? "ACTION",
-        // registered platforms are funded by their own account (stellar-accounts config/platforms)
-        platform: env.PLATFORM_SLUG,
-        fromAppSign: fromAppSign ? "true" : "false",
-      },
+  const res = await axios.get<z.infer<typeof accountServiceResponseSchema>>(USER_ACCOUNT_URL, {
+    params: {
+      uid,
+      email,
+      from: env.NEXT_PUBLIC_ASSET_CODE ?? "ACTION",
+      // registered platforms are funded by their own account (stellar-accounts config/platforms)
+      platform: env.PLATFORM_SLUG,
+      fromAppSign: fromAppSign ? "true" : "false",
     },
-  );
+  });
   return res.data;
 }

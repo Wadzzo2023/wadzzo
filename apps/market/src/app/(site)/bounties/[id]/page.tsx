@@ -20,17 +20,26 @@ async function load(params: Promise<{ id: string }>) {
   return Number.isInteger(id) ? getBounty(id) : null;
 }
 
-const plain = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const plain = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export async function generateMetadata({ params }: PageProps<"/bounties/[id]">): Promise<Metadata> {
   const b = await load(params);
   if (!b) return { title: "Bounty not found", robots: { index: false } };
-  const description = plain(b.description).slice(0, 180) || `A bounty by ${b.brand.name} on Wadzzo.`;
+  const description =
+    plain(b.description).slice(0, 180) || `A bounty by ${b.brand.name} on Wadzzo.`;
   return {
     title: `${b.title} · ${b.brand.name}`,
     description,
     alternates: { canonical: `/bounties/${b.id}` },
-    openGraph: { title: b.title, description, images: b.imageUrl ? [b.imageUrl] : undefined },
+    openGraph: {
+      title: b.title,
+      description,
+      images: b.imageUrl ? [b.imageUrl] : undefined,
+    },
   };
 }
 

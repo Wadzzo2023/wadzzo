@@ -152,12 +152,7 @@ export type HeadingSource = "sensor" | "manual";
  * real, actionable fix (use the HTTPS URL), unlike `unsupported`'s "this
  * device can't do it", so it needs its own copy.
  */
-export type HeadingPermission =
-  | "pending"
-  | "granted"
-  | "denied"
-  | "unsupported"
-  | "insecure";
+export type HeadingPermission = "pending" | "granted" | "denied" | "unsupported" | "insecure";
 
 /**
  * Raw ground truth for the temporary on-screen debug readout — see
@@ -273,11 +268,7 @@ export function useDeviceHeading() {
     ) => {
       if (anchorClosed.current || relative == null) return;
 
-      const trueHeading = headingFromEuler(
-        absoluteAlpha(alpha, webkitCompassHeading),
-        beta,
-        gamma,
-      );
+      const trueHeading = headingFromEuler(absoluteAlpha(alpha, webkitCompassHeading), beta, gamma);
       // Null covers both a degenerate pose and — via `absoluteAlpha` — iOS's
       // documented `-1` uncalibrated-compass sentinel. Either way there's no
       // north here to learn from.
@@ -302,13 +293,7 @@ export function useDeviceHeading() {
     (e: Event) => {
       if (anchorClosed.current) return;
       const ev = e as DeviceOrientationEvent;
-      collectAnchor(
-        ev.alpha,
-        ev.beta,
-        ev.gamma,
-        undefined,
-        latestRelative.current,
-      );
+      collectAnchor(ev.alpha, ev.beta, ev.gamma, undefined, latestRelative.current);
     },
     [collectAnchor],
   );
@@ -432,8 +417,7 @@ export function useDeviceHeading() {
 
     if (rawElevation != null) {
       const next =
-        smoothedElevation.current +
-        (rawElevation - smoothedElevation.current) * ELEVATION_SMOOTH;
+        smoothedElevation.current + (rawElevation - smoothedElevation.current) * ELEVATION_SMOOTH;
       const moved = Math.abs(next - smoothedElevation.current) > DEADBAND_DEG;
       smoothedElevation.current = next;
       if (moved) setElevation(smoothedElevation.current);
@@ -492,8 +476,7 @@ export function useDeviceHeading() {
       return false;
     }
 
-    const Ctor = window.DeviceOrientationEvent as unknown as
-      DeviceOrientationEventStatic;
+    const Ctor = window.DeviceOrientationEvent as unknown as DeviceOrientationEventStatic;
 
     if (typeof Ctor.requestPermission === "function") {
       try {

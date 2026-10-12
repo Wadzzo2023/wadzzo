@@ -11,12 +11,16 @@ import { serverApi } from "~/server/api/server";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
 
-const queryOf = (sp: Record<string, string | string[] | undefined>) => (typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "");
+const queryOf = (sp: Record<string, string | string[] | undefined>) =>
+  typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "";
 
 export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
   const q = queryOf(await searchParams);
   // result pages aren't indexed; the pages they point to are
-  return { title: q ? `“${q}” — Search` : "Search", robots: { index: false, follow: true } };
+  return {
+    title: q ? `“${q}” — Search` : "Search",
+    robots: { index: false, follow: true },
+  };
 }
 
 /** One search across items, creators, bounties and posts, each section linking to its full list. */
@@ -35,16 +39,28 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   const [listings, creators, bounties, postResults] = results ?? [];
   const posts = postResults?.items ?? [];
-  const total = (listings?.items.length ?? 0) + (creators?.items.length ?? 0) + (bounties?.items.length ?? 0) + posts.length;
+  const total =
+    (listings?.items.length ?? 0) +
+    (creators?.items.length ?? 0) +
+    (bounties?.items.length ?? 0) +
+    posts.length;
 
   return (
     <PageBody wide className="space-y-8">
       <PageHeader eyebrow="Search" title={q ? <>Results for “{q}”</> : "Search Wadzzo"} />
 
       {!results ? (
-        <EmptyState icon={Search} title="Search Wadzzo" description="Type at least 2 characters to find items, creators, posts and bounties." />
+        <EmptyState
+          icon={Search}
+          title="Search Wadzzo"
+          description="Type at least 2 characters to find items, creators, posts and bounties."
+        />
       ) : total === 0 ? (
-        <EmptyState icon={Search} title={`Nothing found for “${q}”`} description="Try a shorter word, or a creator's name." />
+        <EmptyState
+          icon={Search}
+          title={`Nothing found for “${q}”`}
+          description="Try a shorter word, or a creator's name."
+        />
       ) : (
         <>
           {listings && listings.items.length > 0 && (
@@ -76,22 +92,38 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {posts.length > 0 && (
             <Section title="Posts" href="/feed">
-              <ul className="glass divide-y divide-foreground/[0.06] overflow-hidden rounded-2xl">
+              <ul className="glass divide-foreground/[0.06] divide-y overflow-hidden rounded-2xl">
                 {posts.map((p) => {
                   const thumb = p.medias.find((m) => m.type === "IMAGE")?.url;
                   return (
                     <li key={p.id}>
-                      <Link href={`/posts/${p.id}`} className="flex items-center gap-3 p-3 transition-colors hover:bg-foreground/[0.04]">
+                      <Link
+                        href={`/posts/${p.id}`}
+                        className="hover:bg-foreground/[0.04] flex items-center gap-3 p-3 transition-colors"
+                      >
                         {thumb ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={thumb} alt="" className="size-12 shrink-0 rounded-xl object-cover" />
+                          <img
+                            src={thumb}
+                            alt=""
+                            className="size-12 shrink-0 rounded-xl object-cover"
+                          />
                         ) : (
-                          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">{p.locked ? <Lock className="size-5" /> : <Newspaper className="size-5" />}</span>
+                          <span className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
+                            {p.locked ? (
+                              <Lock className="size-5" />
+                            ) : (
+                              <Newspaper className="size-5" />
+                            )}
+                          </span>
                         )}
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold">{p.heading}</span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {p.creator.name} · {formatDistanceToNow(new Date(p.createdAt), { addSuffix: true })}
+                          <span className="text-muted-foreground block truncate text-xs">
+                            {p.creator.name} ·{" "}
+                            {formatDistanceToNow(new Date(p.createdAt), {
+                              addSuffix: true,
+                            })}
                           </span>
                         </span>
                       </Link>
@@ -112,7 +144,10 @@ function Section({ title, href, children }: { title: string; href: string; child
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="font-hud text-lg font-bold tracking-tight">{title}</h2>
-        <Link href={href} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        <Link
+          href={href}
+          className="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+        >
           See all <ArrowRight className="size-3.5" />
         </Link>
       </div>

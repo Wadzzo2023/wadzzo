@@ -1,13 +1,14 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import {
+  networkPassphrase,
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+} from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { getplatformAssetNumberForXLM as getPlatformAssetNumberForXLM } from "./get_token_price";
@@ -37,10 +38,7 @@ export async function createStorageTrx({
   // total platform token r
 
   const requiredAsset2refundXlm = await getPlatformAssetNumberForXLM(1);
-  const total =
-    requiredAsset2refundXlm +
-    Number(TrxBaseFeeInPlatformAsset) +
-    Number(PLATFORM_FEE);
+  const total = requiredAsset2refundXlm + Number(TrxBaseFeeInPlatformAsset) + Number(PLATFORM_FEE);
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,

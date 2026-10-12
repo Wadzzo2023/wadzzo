@@ -59,10 +59,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async () => {
   // The session comes from the request's cookies (App Router: next/headers).
-  const [session, platform] = await Promise.all([
-    getServerAuthSession(),
-    getCurrentPlatform(),
-  ]);
+  const [session, platform] = await Promise.all([getServerAuthSession(), getCurrentPlatform()]);
 
   return createInnerTRPCContext({
     session,
@@ -86,8 +83,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       data: {
         ...shape.data,
         appCode: isAppError(error.cause) ? error.cause.code : null,
-        zodError:
-          error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
+        zodError: error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
       },
     };
   },
@@ -150,7 +146,8 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
       select: { platformId: true, platform: { select: { isRoot: true } } },
     });
 
-    if (!admin || !canAdminPlatform(admin, ctx.platform)) throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!admin || !canAdminPlatform(admin, ctx.platform))
+      throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({
@@ -171,7 +168,8 @@ export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
       where: { id: ctx.session.user.id },
     });
 
-    if (!creator || creator.platformId !== ctx.platform.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+    if (!creator || creator.platformId !== ctx.platform.id)
+      throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({

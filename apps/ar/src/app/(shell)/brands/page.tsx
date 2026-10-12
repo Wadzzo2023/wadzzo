@@ -63,24 +63,20 @@ export default function BrandsScreen() {
 
         {/* ── Search ───────────────────────────────────────────────── */}
         <div className="px-5">
-          <div className="ar-bevel flex h-11 items-center gap-2.5 rounded-ar px-3.5">
-            <Search
-              size={15}
-              strokeWidth={2.2}
-              className="shrink-0 text-ar-faint"
-            />
+          <div className="ar-bevel rounded-ar flex h-11 items-center gap-2.5 px-3.5">
+            <Search size={15} strokeWidth={2.2} className="text-ar-faint shrink-0" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search brands"
               aria-label="Search brands"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
+              className="text-ar-text placeholder:text-ar-faint min-w-0 flex-1 bg-transparent text-[13px] outline-hidden"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
-                className="shrink-0 text-ar-faint hover:text-ar-text"
+                className="text-ar-faint hover:text-ar-text shrink-0"
               >
                 <X size={15} strokeWidth={2.4} />
               </button>
@@ -109,10 +105,8 @@ export default function BrandsScreen() {
         {/* A failed follow is otherwise silent — the button just returns to
             "Follow" and the user is left guessing whether they mis-tapped. */}
         {followError && (
-          <div className="mx-5 mt-3 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5">
-            <p className="text-[12px] leading-relaxed text-ar-danger">
-              {followError}
-            </p>
+          <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 mx-5 mt-3 border px-3.5 py-2.5">
+            <p className="text-ar-danger text-[12px] leading-relaxed">{followError}</p>
           </div>
         )}
 
@@ -121,9 +115,7 @@ export default function BrandsScreen() {
               keeps its shape instead of collapsing to the empty state and
               then jumping back open. */}
           {brandsLoading &&
-            Array.from({ length: 5 }).map((_, i) => (
-              <BrandRowSkeleton key={`skeleton-${i}`} />
-            ))}
+            Array.from({ length: 5 }).map((_, i) => <BrandRowSkeleton key={`skeleton-${i}`} />)}
 
           {shown.map((brand) => (
             <BrandRow
@@ -140,10 +132,10 @@ export default function BrandsScreen() {
 
           {!brandsLoading && shown.length === 0 && (
             <div className="py-16 text-center">
-              <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+              <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
                 No brands here
               </p>
-              <p className="mx-auto mt-1.5 max-w-[16rem] text-[12.5px] leading-relaxed text-ar-faint">
+              <p className="text-ar-faint mx-auto mt-1.5 max-w-[16rem] text-[12.5px] leading-relaxed">
                 {tab === "following"
                   ? "Follow a brand and their private drops start showing up on your map."
                   : "Nothing matches that search."}
@@ -170,10 +162,10 @@ function BrandRow({
   label: string;
 }) {
   return (
-    <div className="ar-bevel relative overflow-hidden rounded-ar">
+    <div className="ar-bevel rounded-ar relative overflow-hidden">
       {/* Cover bleed behind the row — brand identity without a whole hero. */}
       <div className="absolute inset-0">
-        { }
+        {}
         {brand.coverUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -183,7 +175,7 @@ function BrandRow({
             className="h-full w-full object-cover opacity-[0.14]"
           />
         )}
-        <div className="via-ar-surface/92 absolute inset-0 bg-linear-to-r from-ar-surface to-ar-surface/70" />
+        <div className="via-ar-surface/92 from-ar-surface to-ar-surface/70 absolute inset-0 bg-linear-to-r" />
       </div>
 
       <div className="relative flex items-center gap-3 p-3">
@@ -195,23 +187,23 @@ function BrandRow({
         </Link>
 
         <Link href={`/brands/${brand.id}`} className="min-w-0 flex-1">
-          <p className="flex items-center gap-1 text-[14px] font-semibold leading-tight text-ar-text">
+          <p className="text-ar-text flex items-center gap-1 text-[14px] leading-tight font-semibold">
             <span className="truncate">{brand.name}</span>
             {brand.verified && (
               <BadgeCheck
                 size={14}
                 strokeWidth={2.4}
-                className="shrink-0 text-ar-green-hot"
+                className="text-ar-green-hot shrink-0"
                 aria-label="Verified"
               />
             )}
           </p>
           {(brand.tagline ?? brand.bio) && (
-            <p className="mt-0.5 truncate text-[11.5px] text-ar-faint">
+            <p className="text-ar-faint mt-0.5 truncate text-[11.5px]">
               {brand.tagline ?? brand.bio}
             </p>
           )}
-          <p className="font-hud mt-1.5 flex items-center gap-3 text-[10px] font-semibold tabular-nums text-ar-dim">
+          <p className="font-hud text-ar-dim mt-1.5 flex items-center gap-3 text-[10px] font-semibold tabular-nums">
             <span className="flex items-center gap-1">
               <Users size={10} strokeWidth={2.6} />
               {compact(brand.followers)}
@@ -220,9 +212,7 @@ function BrandRow({
               <MapPin size={10} strokeWidth={2.6} />
               {brand.pinCount} live
             </span>
-            {brand.region && (
-              <span className="truncate text-ar-faint">{brand.region}</span>
-            )}
+            {brand.region && <span className="text-ar-faint truncate">{brand.region}</span>}
           </p>
         </Link>
 

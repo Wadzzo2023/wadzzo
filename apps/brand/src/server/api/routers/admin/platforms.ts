@@ -30,18 +30,37 @@ export const platformsRouter = createTRPCRouter({
 
   /** Platform picker for the Wadzzo admin filters. */
   options: superAdminProcedure.query(({ ctx }) =>
-    ctx.db.platform.findMany({ select: { id: true, name: true, isRoot: true }, orderBy: [{ isRoot: "desc" }, { name: "asc" }] }),
+    ctx.db.platform.findMany({
+      select: { id: true, name: true, isRoot: true },
+      orderBy: [{ isRoot: "desc" }, { name: "asc" }],
+    }),
   ),
 
   /** Every platform with its headline numbers. */
   list: superAdminProcedure.query(async ({ ctx }) => {
     const [platforms, users, brands, pins, claims, admins] = await Promise.all([
-      ctx.db.platform.findMany({ orderBy: [{ isRoot: "desc" }, { createdAt: "asc" }] }),
-      ctx.db.userPlatform.groupBy({ by: ["platformId"], _count: { _all: true } }),
-      ctx.db.creator.groupBy({ by: ["platformId"], where: { aprovalSend: true }, _count: { _all: true } }),
-      ctx.db.locationGroup.groupBy({ by: ["platformId"], where: { hidden: false }, _count: { _all: true } }),
+      ctx.db.platform.findMany({
+        orderBy: [{ isRoot: "desc" }, { createdAt: "asc" }],
+      }),
+      ctx.db.userPlatform.groupBy({
+        by: ["platformId"],
+        _count: { _all: true },
+      }),
+      ctx.db.creator.groupBy({
+        by: ["platformId"],
+        where: { aprovalSend: true },
+        _count: { _all: true },
+      }),
+      ctx.db.locationGroup.groupBy({
+        by: ["platformId"],
+        where: { hidden: false },
+        _count: { _all: true },
+      }),
       // collections are counted on the platform they were made on
-      ctx.db.locationConsumer.groupBy({ by: ["platformId"], _count: { _all: true } }),
+      ctx.db.locationConsumer.groupBy({
+        by: ["platformId"],
+        _count: { _all: true },
+      }),
       ctx.db.admin.groupBy({ by: ["platformId"], _count: { _all: true } }),
     ]);
     const [u, b, p, c, a] = [users, brands, pins, claims, admins].map(count);
@@ -58,22 +77,35 @@ export const platformsRouter = createTRPCRouter({
   }),
 
   /** Create or edit a platform. The root platform's slug and root flag never change. */
-  save: superAdminProcedure.input(PlatformInput.extend({ isNew: z.boolean() })).mutation(async ({ ctx, input }) => {
-    const { isNew, id, ...data } = input;
-    const existing = await ctx.db.platform.findUnique({ where: { id }, select: { id: true } });
-    if (isNew && existing) throw new TRPCError({ code: "CONFLICT", message: "A platform with that slug already exists" });
-    if (!isNew && !existing) throw new TRPCError({ code: "NOT_FOUND", message: "Platform not found" });
+  save: superAdminProcedure
+    .input(PlatformInput.extend({ isNew: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { isNew, id, ...data } = input;
+      const existing = await ctx.db.platform.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      if (isNew && existing)
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "A platform with that slug already exists",
+        });
+      if (!isNew && !existing)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Platform not found",
+        });
 
-    const platform = isNew
-      ? await ctx.db.platform.create({ data: { id, ...data } })
-      : await ctx.db.platform.update({ where: { id }, data });
-    await logAudit(ctx, {
-      action: isNew ? "platform.create" : "platform.update",
-      entityType: "Platform",
-      entityId: id,
-      targetPlatformId: id,
-      meta: data,
-    });
-    return platform;
-  }),
+      const platform = isNew
+        ? await ctx.db.platform.create({ data: { id, ...data } })
+        : await ctx.db.platform.update({ where: { id }, data });
+      await logAudit(ctx, {
+        action: isNew ? "platform.create" : "platform.update",
+        entityType: "Platform",
+        entityId: id,
+        targetPlatformId: id,
+        meta: data,
+      });
+      return platform;
+    }),
 });

@@ -7,10 +7,7 @@ import { db } from "@wadzzo/db/server";
 
 // import { getSession } from "next-auth/react";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
   // console.log(token, "..");
@@ -49,7 +46,11 @@ export default async function handler(
   if (creator.pageAsset) {
     const { code, issuer } = creator.pageAsset;
 
-    const xdr = await followTrustlineXdr(userId, { code, issuer }, userEmail ? { email: userEmail } : undefined);
+    const xdr = await followTrustlineXdr(
+      userId,
+      { code, issuer },
+      userEmail ? { email: userEmail } : undefined,
+    );
 
     res.status(200).json({ xdr });
   } else {
@@ -57,7 +58,11 @@ export default async function handler(
       const [code, issuer] = creator.customPageAssetCodeIssuer.split("-");
       const issuerVal = z.string().length(56).safeParse(issuer);
       if (issuerVal.success && code) {
-        const xdr = await followTrustlineXdr(userId, { code, issuer: issuerVal.data }, userEmail ? { email: userEmail } : undefined);
+        const xdr = await followTrustlineXdr(
+          userId,
+          { code, issuer: issuerVal.data },
+          userEmail ? { email: userEmail } : undefined,
+        );
         // console.log(xdr);
         res.status(200).json({ xdr });
       } else {

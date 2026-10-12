@@ -29,11 +29,11 @@ export function StatusBar() {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-50 hidden h-[52px] items-center justify-between px-8 pt-1 lg:flex">
-      <span className="font-hud text-[15px] font-semibold tabular-nums text-ar-text">
+      <span className="font-hud text-ar-text text-[15px] font-semibold tabular-nums">
         {time ?? " "}
       </span>
 
-      <div className="flex items-center gap-1.5 text-ar-text">
+      <div className="text-ar-text flex items-center gap-1.5">
         {/* Signal */}
         <svg viewBox="0 0 18 12" className="h-[11px] w-[17px]" fill="currentColor">
           {[0, 1, 2, 3].map((i) => (
@@ -80,19 +80,8 @@ export function StatusBar() {
             stroke="currentColor"
             strokeOpacity="0.4"
           />
-          <rect
-            x="2.2"
-            y="2.2"
-            width="14"
-            height="7.6"
-            rx="1.8"
-            fill="hsl(var(--ar-green))"
-          />
-          <path
-            d="M23.4 4.2c1.1.3 1.1 3.3 0 3.6V4.2Z"
-            fill="currentColor"
-            fillOpacity="0.4"
-          />
+          <rect x="2.2" y="2.2" width="14" height="7.6" rx="1.8" fill="hsl(var(--ar-green))" />
+          <path d="M23.4 4.2c1.1.3 1.1 3.3 0 3.6V4.2Z" fill="currentColor" fillOpacity="0.4" />
         </svg>
       </div>
     </div>

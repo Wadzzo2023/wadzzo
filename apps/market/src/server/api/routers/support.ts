@@ -4,7 +4,14 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { mailer, SUPPORT_EMAIL } from "~/server/mail";
 
-const SUPPORT_TOPICS = ["Account & sign-in", "Payments & wallet", "Items & collection", "Bounties", "Brands & memberships", "Something else"] as const;
+const SUPPORT_TOPICS = [
+  "Account & sign-in",
+  "Payments & wallet",
+  "Items & collection",
+  "Bounties",
+  "Brands & memberships",
+  "Something else",
+] as const;
 
 // A light brake on repeat sends from one address (per server instance).
 const recent = new Map<string, number[]>();
@@ -14,7 +21,11 @@ const MAX_PER_WINDOW = 3;
 function throttle(email: string) {
   const now = Date.now();
   const hits = (recent.get(email) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (hits.length >= MAX_PER_WINDOW) throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "You've sent a few messages already — we'll get back to you soon." });
+  if (hits.length >= MAX_PER_WINDOW)
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "You've sent a few messages already — we'll get back to you soon.",
+    });
   recent.set(email, [...hits, now]);
 }
 

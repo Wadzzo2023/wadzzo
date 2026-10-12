@@ -10,7 +10,12 @@ import { uploadFileType } from "./accept";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type UploadStatus = "idle" | "uploading" | "success" | "error";
-export type UploadedFile = { url: string; name: string; size: number; type: string };
+export type UploadedFile = {
+  url: string;
+  name: string;
+  size: number;
+  type: string;
+};
 
 async function sha256(file: File) {
   const hash = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
@@ -43,7 +48,10 @@ export function useS3Upload(endpoint: EndPointType) {
       signal: abort.current?.signal,
       onUploadProgress: (e) => onProgress(e.loaded),
     });
-    if (res.status !== 200) throw new AppError(ErrorCodes.UPLOAD_FAILED, { message: `Upload failed (${res.status})` });
+    if (res.status !== 200)
+      throw new AppError(ErrorCodes.UPLOAD_FAILED, {
+        message: `Upload failed (${res.status})`,
+      });
   };
 
   /** Upload one file; resolves to its public URL. */
@@ -61,10 +69,17 @@ export function useS3Upload(endpoint: EndPointType) {
           endPoint: endpoint,
           fileName: file.name,
         });
-        await put(signed.uploadUrl, file, (loaded) => setProgress(Math.round((loaded * 100) / file.size)));
+        await put(signed.uploadUrl, file, (loaded) =>
+          setProgress(Math.round((loaded * 100) / file.size)),
+        );
         setProgress(100);
         setStatus("success");
-        return { url: signed.fileUrl, name: file.name, size: file.size, type: file.type };
+        return {
+          url: signed.fileUrl,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        };
       } catch (e) {
         const message = e instanceof Error ? e.message : "Upload failed";
         setError(message);
@@ -101,9 +116,16 @@ export function useS3Upload(endpoint: EndPointType) {
         for (const f of files) {
           const s = signed.find((x) => x.fileName === f.name);
           if (!s) continue;
-          await put(s.uploadUrl, f, (loaded) => setProgress(Math.round(((done + loaded) * 100) / total)));
+          await put(s.uploadUrl, f, (loaded) =>
+            setProgress(Math.round(((done + loaded) * 100) / total)),
+          );
           done += f.size;
-          const u = { url: s.fileUrl, name: f.name, size: f.size, type: f.type };
+          const u = {
+            url: s.fileUrl,
+            name: f.name,
+            size: f.size,
+            type: f.type,
+          };
           out.push(u);
           onFileDone?.(u);
         }
@@ -120,5 +142,13 @@ export function useS3Upload(endpoint: EndPointType) {
     [endpoint, signMany],
   );
 
-  return { upload, uploadMany, status, progress, error, reset, busy: status === "uploading" };
+  return {
+    upload,
+    uploadMany,
+    status,
+    progress,
+    error,
+    reset,
+    busy: status === "uploading",
+  };
 }

@@ -76,9 +76,7 @@ export function PackOpening({
     if (!openedKey) return "sealed";
     if (typeof window === "undefined") return "sealed";
     try {
-      return window.sessionStorage.getItem(packStorageKey(openedKey))
-        ? "open"
-        : "sealed";
+      return window.sessionStorage.getItem(packStorageKey(openedKey)) ? "open" : "sealed";
     } catch {
       // Private browsing / storage disabled — just show the pack.
       return "sealed";
@@ -101,17 +99,11 @@ export function PackOpening({
   // motion the two beats collapse into one short fade.
   useEffect(() => {
     if (phase === "stripping") {
-      const id = setTimeout(
-        () => setPhase("tearing"),
-        reduced ? 0 : STRIP_MS,
-      );
+      const id = setTimeout(() => setPhase("tearing"), reduced ? 0 : STRIP_MS);
       return () => clearTimeout(id);
     }
     if (phase === "tearing") {
-      const id = setTimeout(
-        () => setPhase("open"),
-        reduced ? REDUCED_MS : TEAR_MS,
-      );
+      const id = setTimeout(() => setPhase("open"), reduced ? REDUCED_MS : TEAR_MS);
       return () => clearTimeout(id);
     }
   }, [phase, reduced]);
@@ -131,9 +123,7 @@ export function PackOpening({
             : { scale: 1, opacity: 1 }
         }
         transition={
-          reduced
-            ? { duration: 0.2 }
-            : { type: "spring", stiffness: 220, damping: 22, delay: 0.12 }
+          reduced ? { duration: 0.2 } : { type: "spring", stiffness: 220, damping: 22, delay: 0.12 }
         }
       >
         {children}
@@ -154,11 +144,17 @@ export function PackOpening({
               {tearing && !reduced && (
                 <motion.span
                   aria-hidden
-                  className="pointer-events-none absolute left-1/2 top-1/2 -z-10 block rounded-full"
+                  className="pointer-events-none absolute top-1/2 left-1/2 -z-10 block rounded-full"
                   style={{
                     background: `radial-gradient(circle, hsl(${meta.hsl}/0.85), hsl(${meta.hsl}/0.25) 45%, transparent 70%)`,
                   }}
-                  initial={{ width: 40, height: 40, x: "-50%", y: "-50%", opacity: 0 }}
+                  initial={{
+                    width: 40,
+                    height: 40,
+                    x: "-50%",
+                    y: "-50%",
+                    opacity: 0,
+                  }}
                   animate={{
                     width: 560,
                     height: 560,
@@ -206,7 +202,7 @@ export function PackOpening({
                   backgroundImage: `repeating-linear-gradient(90deg, hsl(${meta.hsl}/0.9) 0 3px, transparent 3px 7px)`,
                 }}
               />
-              <span className="font-hud absolute inset-0 flex items-center justify-center text-[7px] font-bold uppercase tracking-[0.3em] text-white/45">
+              <span className="font-hud absolute inset-0 flex items-center justify-center text-[7px] font-bold tracking-[0.3em] text-white/45 uppercase">
                 Tear
               </span>
             </motion.div>
@@ -243,14 +239,18 @@ export function PackOpening({
                   <BrandMark glow className="h-10 w-auto" />
 
                   <motion.span
-                    className="font-hud flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em]"
+                    className="font-hud flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold tracking-[0.18em] uppercase"
                     style={{
                       color: `hsl(${meta.hsl})`,
                       borderColor: `hsl(${meta.hsl}/0.5)`,
                       background: `hsl(${meta.hsl}/0.12)`,
                     }}
                     animate={reduced ? undefined : { scale: [1, 1.05, 1] }}
-                    transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{
+                      duration: 1.8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
                   >
                     <Sparkles size={11} strokeWidth={2.6} />
                     Tap to open

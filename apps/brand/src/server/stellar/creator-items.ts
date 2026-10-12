@@ -38,9 +38,16 @@ const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);
 
 function key() {
   const raw = env.ISSUER_ENCRYPTION_KEY;
-  if (!raw) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Minting isn't configured on this server (ISSUER_ENCRYPTION_KEY)." });
+  if (!raw)
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Minting isn't configured on this server (ISSUER_ENCRYPTION_KEY).",
+    });
   const buf = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
-  if (buf.length !== 32) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)" });
+  if (buf.length !== 32)
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "ISSUER_ENCRYPTION_KEY must be 32 bytes (64 hex chars or base64)",
+    });
   return buf;
 }
 
@@ -48,15 +55,25 @@ function encryptSecret(secret: string) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key(), iv);
   const data = Buffer.concat([cipher.update(secret, "utf8"), cipher.final()]);
-  return ["v1", iv.toString("base64"), cipher.getAuthTag().toString("base64"), data.toString("base64")].join(":");
+  return [
+    "v1",
+    iv.toString("base64"),
+    cipher.getAuthTag().toString("base64"),
+    data.toString("base64"),
+  ].join(":");
 }
 
 export function decryptSecret(payload: string) {
   const [v, iv, tag, data] = payload.split(":");
-  if (v !== "v1" || !iv || !tag || !data) throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Unknown secret format" });
+  if (v !== "v1" || !iv || !tag || !data)
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "Unknown secret format",
+    });
   const decipher = createDecipheriv("aes-256-gcm", key(), Buffer.from(iv, "base64"));
   decipher.setAuthTag(Buffer.from(tag, "base64"));
-  return Buffer.concat([decipher.update(Buffer.from(data, "base64")), decipher.final()]).toString("utf8");
+  return Buffer.concat([decipher.update(Buffer.from(data, "base64")), decipher.final()]).toString(
+    "utf8",
+  );
 }
 
 // ── chain helpers ────────────────────────────────────────────────────────────
@@ -74,22 +91,41 @@ export async function loadAccount(id: string) {
 export function spendableXlm(acc: Horizon.AccountResponse) {
   const native = acc.balances.find((b) => b.asset_type === "native");
   const balance = Number(native?.balance ?? 0);
-  const selling = Number(native && "selling_liabilities" in native ? native.selling_liabilities : 0);
-  const { num_sponsoring = 0, num_sponsored = 0 } = acc as unknown as { num_sponsoring?: number; num_sponsored?: number };
+  const selling = Number(
+    native && "selling_liabilities" in native ? native.selling_liabilities : 0,
+  );
+  const { num_sponsoring = 0, num_sponsored = 0 } = acc as unknown as {
+    num_sponsoring?: number;
+    num_sponsored?: number;
+  };
   const reserves = (2 + acc.subentry_count + num_sponsoring - num_sponsored) * BASE_RESERVE;
   return Math.max(0, balance - reserves - selling);
 }
 
-const CUSTODIAL = new Set<string>([WalletType.emailPass, WalletType.google, WalletType.facebook, WalletType.apple]);
+const CUSTODIAL = new Set<string>([
+  WalletType.emailPass,
+  WalletType.google,
+  WalletType.facebook,
+  WalletType.apple,
+]);
 /** Custodial creators are signed for here; wallet creators sign in the browser. */
-export const signerFor = (session: Session) => (CUSTODIAL.has(session.user.walletType) && session.user.email ? { email: session.user.email } : undefined);
+export const signerFor = (session: Session) =>
+  CUSTODIAL.has(session.user.walletType) && session.user.email
+    ? { email: session.user.email }
+    : undefined;
 
 /** The creator's issuer row, made (keypair generated, secret encrypted) on first use. */
 async function issuerFor(db: DbClient, creatorId: string) {
   const existing = await db.creatorIssuer.findUnique({ where: { creatorId } });
   if (existing) return existing;
   const kp = Keypair.random();
-  return db.creatorIssuer.create({ data: { creatorId, publicKey: kp.publicKey(), secretEncrypted: encryptSecret(kp.secret()) } });
+  return db.creatorIssuer.create({
+    data: {
+      creatorId,
+      publicKey: kp.publicKey(),
+      secretEncrypted: encryptSecret(kp.secret()),
+    },
+  });
 }
 
 // ── quote ────────────────────────────────────────────────────────────────────
@@ -108,34 +144,82 @@ export type CreateItemQuote = {
 };
 
 /** What creating an item will cost the creator in XLM, and whether it can go through. */
-export async function quoteCreateItem(db: DbClient, creatorId: string, { code, mintNow, limit }: { code: string; mintNow: number; limit: number | null }): Promise<CreateItemQuote> {
+export async function quoteCreateItem(
+  db: DbClient,
+  creatorId: string,
+  { code, mintNow, limit }: { code: string; mintNow: number; limit: number | null },
+): Promise<CreateItemQuote> {
   const problems: string[] = [];
   const issuer = await issuerFor(db, creatorId);
   const [creatorAcc, creator, taken] = await Promise.all([
     loadAccount(creatorId),
-    db.creator.findUnique({ where: { id: creatorId }, select: { storagePub: true } }),
-    code ? db.asset.findFirst({ where: { code: { equals: code, mode: "insensitive" }, issuer: issuer.publicKey }, select: { id: true } }) : null,
+    db.creator.findUnique({
+      where: { id: creatorId },
+      select: { storagePub: true },
+    }),
+    code
+      ? db.asset.findFirst({
+          where: {
+            code: { equals: code, mode: "insensitive" },
+            issuer: issuer.publicKey,
+          },
+          select: { id: true },
+        })
+      : null,
   ]);
   const issuerOnChain = issuer.active || Boolean(await loadAccount(issuer.publicKey));
-  if (!issuer.active && issuerOnChain) await db.creatorIssuer.update({ where: { creatorId }, data: { active: true } });
+  if (!issuer.active && issuerOnChain)
+    await db.creatorIssuer.update({
+      where: { creatorId },
+      data: { active: true },
+    });
 
-  if (taken) problems.push(`You already have an item with the code ${code.toUpperCase()}. Pick another code.`);
-  if (limit != null && mintNow > limit) problems.push(`You can't mint more than the supply (${limit}).`);
-  if (mintNow > 0 && !(creator?.storagePub && (await loadAccount(creator.storagePub)))) problems.push("Your storage account isn't set up yet, so copies can't be minted now. Choose “Mint later”.");
+  if (taken)
+    problems.push(
+      `You already have an item with the code ${code.toUpperCase()}. Pick another code.`,
+    );
+  if (limit != null && mintNow > limit)
+    problems.push(`You can't mint more than the supply (${limit}).`);
+  if (mintNow > 0 && !(creator?.storagePub && (await loadAccount(creator.storagePub))))
+    problems.push(
+      "Your storage account isn't set up yet, so copies can't be minted now. Choose “Mint later”.",
+    );
 
   const needsIssuer = !issuerOnChain;
   const ops = (needsIssuer ? 2 : 0) + (mintNow > 0 ? 3 : 0);
   const lines: CostLine[] = [];
-  if (needsIssuer) lines.push({ label: "Issuer account", amount: ISSUER_STARTING_XLM, hint: "One time — opens the account all your items are minted from" });
-  if (mintNow > 0) lines.push({ label: "Storage reserve", amount: BASE_RESERVE, hint: "Lets your storage hold this item; stays in your storage" });
+  if (needsIssuer)
+    lines.push({
+      label: "Issuer account",
+      amount: ISSUER_STARTING_XLM,
+      hint: "One time — opens the account all your items are minted from",
+    });
+  if (mintNow > 0)
+    lines.push({
+      label: "Storage reserve",
+      amount: BASE_RESERVE,
+      hint: "Lets your storage hold this item; stays in your storage",
+    });
   if (ops > 0) lines.push({ label: "Network fee", amount: FEE_XLM(1) });
   const totalXlm = lines.reduce((s, l) => s + l.amount, 0);
 
   const spendable = creatorAcc ? spendableXlm(creatorAcc) : 0;
   if (totalXlm > 0 && !creatorAcc) problems.push("Your wallet isn't active on Stellar yet.");
-  else if (totalXlm > spendable) problems.push(`You need ${totalXlm} XLM available; you have ${Math.floor(spendable * 1e7) / 1e7} XLM.`);
+  else if (totalXlm > spendable)
+    problems.push(
+      `You need ${totalXlm} XLM available; you have ${Math.floor(spendable * 1e7) / 1e7} XLM.`,
+    );
 
-  return { issuerPublicKey: issuer.publicKey, needsIssuer, mintNow, lines, totalXlm, spendableXlm: spendable, ok: problems.length === 0, problems };
+  return {
+    issuerPublicKey: issuer.publicKey,
+    needsIssuer,
+    mintNow,
+    lines,
+    totalXlm,
+    spendableXlm: spendable,
+    ok: problems.length === 0,
+    problems,
+  };
 }
 
 // ── create + confirm ─────────────────────────────────────────────────────────
@@ -164,8 +248,16 @@ export type CreateItemInput = {
 export async function createItem(ctx: Ctx, input: CreateItemInput) {
   const creatorId = ctx.session.user.id;
   const code = input.code.toUpperCase();
-  const q = await quoteCreateItem(ctx.db, creatorId, { code, mintNow: input.mintNow, limit: input.limit });
-  if (!q.ok) throw new TRPCError({ code: "PRECONDITION_FAILED", message: q.problems[0] ?? "This item can't be created." });
+  const q = await quoteCreateItem(ctx.db, creatorId, {
+    code,
+    mintNow: input.mintNow,
+    limit: input.limit,
+  });
+  if (!q.ok)
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: q.problems[0] ?? "This item can't be created.",
+    });
 
   const asset = await ctx.db.asset.create({
     data: {
@@ -182,31 +274,76 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
       tierId: input.tierId,
       creatorId,
       platformId: ctx.platform.id,
-      marketItems: { create: { price: input.price, priceUSD: input.priceUSD, placerId: creatorId, privacy: input.privacy, type: "FAN", platformId: ctx.platform.id } },
+      marketItems: {
+        create: {
+          price: input.price,
+          priceUSD: input.priceUSD,
+          placerId: creatorId,
+          privacy: input.privacy,
+          type: "FAN",
+          platformId: ctx.platform.id,
+        },
+      },
     },
     select: { id: true },
   });
 
   if (q.totalXlm === 0) return { assetId: asset.id, txId: null, xdr: null };
 
-  const issuerRow = await ctx.db.creatorIssuer.findUniqueOrThrow({ where: { creatorId } });
+  const issuerRow = await ctx.db.creatorIssuer.findUniqueOrThrow({
+    where: { creatorId },
+  });
   const issuerKp = Keypair.fromSecret(decryptSecret(issuerRow.secretEncrypted));
   const creatorAcc = await horizon().loadAccount(creatorId);
-  const tx = new TransactionBuilder(creatorAcc, { fee: TrxBaseFee, networkPassphrase }).setTimeout(TX_TIMEOUT_SECONDS);
+  const tx = new TransactionBuilder(creatorAcc, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  }).setTimeout(TX_TIMEOUT_SECONDS);
   const signers: Keypair[] = [];
 
   if (q.needsIssuer) {
-    tx.addOperation(Operation.createAccount({ destination: issuerKp.publicKey(), startingBalance: amt(ISSUER_STARTING_XLM) }));
-    tx.addOperation(Operation.setOptions({ source: issuerKp.publicKey(), homeDomain: env.NEXT_PUBLIC_HOME_DOMAIN }));
+    tx.addOperation(
+      Operation.createAccount({
+        destination: issuerKp.publicKey(),
+        startingBalance: amt(ISSUER_STARTING_XLM),
+      }),
+    );
+    tx.addOperation(
+      Operation.setOptions({
+        source: issuerKp.publicKey(),
+        homeDomain: env.NEXT_PUBLIC_HOME_DOMAIN,
+      }),
+    );
     signers.push(issuerKp);
   }
   if (input.mintNow > 0) {
-    const creator = await ctx.db.creator.findUniqueOrThrow({ where: { id: creatorId }, select: { storagePub: true, storageSecret: true } });
+    const creator = await ctx.db.creator.findUniqueOrThrow({
+      where: { id: creatorId },
+      select: { storagePub: true, storageSecret: true },
+    });
     const storageKp = Keypair.fromSecret(creator.storageSecret);
     const stellarAsset = new Asset(code, issuerKp.publicKey());
-    tx.addOperation(Operation.payment({ destination: creator.storagePub, asset: Asset.native(), amount: amt(BASE_RESERVE) }));
-    tx.addOperation(Operation.changeTrust({ source: creator.storagePub, asset: stellarAsset }));
-    tx.addOperation(Operation.payment({ source: issuerKp.publicKey(), destination: creator.storagePub, asset: stellarAsset, amount: amt(input.mintNow) }));
+    tx.addOperation(
+      Operation.payment({
+        destination: creator.storagePub,
+        asset: Asset.native(),
+        amount: amt(BASE_RESERVE),
+      }),
+    );
+    tx.addOperation(
+      Operation.changeTrust({
+        source: creator.storagePub,
+        asset: stellarAsset,
+      }),
+    );
+    tx.addOperation(
+      Operation.payment({
+        source: issuerKp.publicKey(),
+        destination: creator.storagePub,
+        asset: stellarAsset,
+        amount: amt(input.mintNow),
+      }),
+    );
     if (!signers.includes(issuerKp)) signers.push(issuerKp);
     signers.push(storageKp);
   }
@@ -222,7 +359,8 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
       minted: input.mintNow,
       method: "XLM",
       currency: "XLM",
-      reserveCost: (q.needsIssuer ? ISSUER_STARTING_XLM : 0) + (input.mintNow > 0 ? BASE_RESERVE : 0),
+      reserveCost:
+        (q.needsIssuer ? ISSUER_STARTING_XLM : 0) + (input.mintNow > 0 ? BASE_RESERVE : 0),
       networkFee: FEE_XLM(1),
       total: q.totalXlm,
       txHash: getTransactionHashHex(built),
@@ -230,7 +368,10 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
       platformId: ctx.platform.id,
     },
   });
-  const xdr = await signXdrForCustodialUser({ xdr: built.toXDR(), signWith: signerFor(ctx.session) });
+  const xdr = await signXdrForCustodialUser({
+    xdr: built.toXDR(),
+    signWith: signerFor(ctx.session),
+  });
   return { assetId: asset.id, txId: row.id, xdr };
 }
 
@@ -245,7 +386,9 @@ async function txSucceeded(hash: string): Promise<boolean | null> {
 
 /** After signing: record the result. Success marks the issuer active and counts minted copies; failure removes the item. */
 export async function confirmCreateItem(db: DbClient, creatorId: string, txId: string) {
-  const row = await db.assetTransaction.findFirst({ where: { id: txId, creatorId } });
+  const row = await db.assetTransaction.findFirst({
+    where: { id: txId, creatorId },
+  });
   if (!row?.txHash) throw new TRPCError({ code: "NOT_FOUND" });
   if (row.status !== "PENDING") return { status: row.status };
 
@@ -254,27 +397,50 @@ export async function confirmCreateItem(db: DbClient, creatorId: string, txId: s
     ok = await txSucceeded(row.txHash);
     if (ok === null) await new Promise((r) => setTimeout(r, 1500));
   }
-  if (ok === null && row.expiresAt && row.expiresAt > new Date()) return { status: "PENDING" as const };
+  if (ok === null && row.expiresAt && row.expiresAt > new Date())
+    return { status: "PENDING" as const };
 
   if (ok) {
     await db.$transaction([
-      db.assetTransaction.update({ where: { id: row.id }, data: { status: "SUCCESS", error: null } }),
+      db.assetTransaction.update({
+        where: { id: row.id },
+        data: { status: "SUCCESS", error: null },
+      }),
       db.creatorIssuer.update({ where: { creatorId }, data: { active: true } }),
-      ...(row.assetId && row.minted > 0 ? [db.asset.update({ where: { id: row.assetId }, data: { mintedCount: { increment: row.minted } } })] : []),
+      ...(row.assetId && row.minted > 0
+        ? [
+            db.asset.update({
+              where: { id: row.assetId },
+              data: { mintedCount: { increment: row.minted } },
+            }),
+          ]
+        : []),
     ]);
     return { status: "SUCCESS" as const };
   }
-  await db.assetTransaction.update({ where: { id: row.id }, data: { status: "FAILED", error: "The transaction didn't go through on Stellar." } });
+  await db.assetTransaction.update({
+    where: { id: row.id },
+    data: {
+      status: "FAILED",
+      error: "The transaction didn't go through on Stellar.",
+    },
+  });
   if (row.assetId) await db.asset.delete({ where: { id: row.assetId } }).catch(() => undefined);
   return { status: "FAILED" as const };
 }
 
 /** The creator cancelled signing: remove the unconfirmed item. */
 export async function cancelCreateItem(db: DbClient, creatorId: string, txId: string) {
-  const row = await db.assetTransaction.findFirst({ where: { id: txId, creatorId, status: "PENDING" } });
+  const row = await db.assetTransaction.findFirst({
+    where: { id: txId, creatorId, status: "PENDING" },
+  });
   if (!row) return;
   // still could have landed — only delete if Stellar doesn't know it
-  if (row.txHash && (await txSucceeded(row.txHash)) === true) return confirmCreateItem(db, creatorId, txId);
-  await db.assetTransaction.update({ where: { id: row.id }, data: { status: "FAILED", error: "Cancelled before signing." } });
+  if (row.txHash && (await txSucceeded(row.txHash)) === true)
+    return confirmCreateItem(db, creatorId, txId);
+  await db.assetTransaction.update({
+    where: { id: row.id },
+    data: { status: "FAILED", error: "Cancelled before signing." },
+  });
   if (row.assetId) await db.asset.delete({ where: { id: row.assetId } }).catch(() => undefined);
 }

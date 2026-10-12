@@ -227,12 +227,8 @@ export function useThemeRead(): boolean {
  * already open.
  */
 export function useTheme() {
-  const [preference, setPreferenceState] = useState<ThemePreference>(
-    readStoredPreference,
-  );
-  const [resolved, setResolved] = useState<ResolvedTheme>(() =>
-    resolveTheme(preference),
-  );
+  const [preference, setPreferenceState] = useState<ThemePreference>(readStoredPreference);
+  const [resolved, setResolved] = useState<ResolvedTheme>(() => resolveTheme(preference));
 
   const setPreference = useCallback((pref: ThemePreference) => {
     setPreferenceState(pref);

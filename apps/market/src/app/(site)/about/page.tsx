@@ -8,21 +8,47 @@ import { PageBody } from "~/ui/page-header";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Wadzzo connects fans with the creators and brands they love — collect items, join memberships and win rewards, all on Stellar.",
+  description:
+    "Wadzzo connects fans with the creators and brands they love — collect items, join memberships and win rewards, all on Stellar.",
   alternates: { canonical: "/about" },
 };
 
 const FOR_FANS = [
-  { icon: Layers, title: "Collect", text: "Art, video, music and 3D items from creators — yours in your own wallet, with full content only owners can open." },
-  { icon: Crown, title: "Join memberships", text: "Hold a brand's page token to unlock its tiers: members-only posts, items and perks." },
-  { icon: Target, title: "Win bounties", text: "Complete tasks brands post and get paid straight to your wallet when you win." },
-  { icon: Repeat2, title: "Resell", text: "List what you own for other fans. Creators earn a royalty on every resale." },
+  {
+    icon: Layers,
+    title: "Collect",
+    text: "Art, video, music and 3D items from creators — yours in your own wallet, with full content only owners can open.",
+  },
+  {
+    icon: Crown,
+    title: "Join memberships",
+    text: "Hold a brand's page token to unlock its tiers: members-only posts, items and perks.",
+  },
+  {
+    icon: Target,
+    title: "Win bounties",
+    text: "Complete tasks brands post and get paid straight to your wallet when you win.",
+  },
+  {
+    icon: Repeat2,
+    title: "Resell",
+    text: "List what you own for other fans. Creators earn a royalty on every resale.",
+  },
 ];
 
 const STEPS = [
-  { title: "Sign in", text: "With email or a social account — or bring your own Stellar wallet." },
-  { title: "Find what you love", text: "Browse the market, follow creators and keep up in your feed." },
-  { title: "See the full price, then confirm", text: "Every purchase shows exactly what it costs and whether it'll go through before you pay." },
+  {
+    title: "Sign in",
+    text: "With email or a social account — or bring your own Stellar wallet.",
+  },
+  {
+    title: "Find what you love",
+    text: "Browse the market, follow creators and keep up in your feed.",
+  },
+  {
+    title: "See the full price, then confirm",
+    text: "Every purchase shows exactly what it costs and whether it'll go through before you pay.",
+  },
 ];
 
 export default function AboutPage() {
@@ -44,11 +70,11 @@ export default function AboutPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {FOR_FANS.map((f) => (
             <div key={f.title} className="glass space-y-2 rounded-2xl p-5">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
                 <f.icon className="size-5" />
               </span>
               <h3 className="font-hud font-bold">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">{f.text}</p>
             </div>
           ))}
         </div>
@@ -59,10 +85,12 @@ export default function AboutPage() {
         <ol className="grid gap-3 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <li key={s.title} className="glass flex gap-4 rounded-2xl p-5">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary font-hud font-bold text-primary-foreground">{i + 1}</span>
+              <span className="bg-primary font-hud text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full font-bold">
+                {i + 1}
+              </span>
               <span>
                 <span className="block font-semibold">{s.title}</span>
-                <span className="block text-sm text-muted-foreground">{s.text}</span>
+                <span className="text-muted-foreground block text-sm">{s.text}</span>
               </span>
             </li>
           ))}
@@ -71,22 +99,34 @@ export default function AboutPage() {
 
       <section className="grid gap-3 lg:grid-cols-2">
         <div className="glass space-y-3 rounded-2xl p-6">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
             <Coins className="size-5" />
           </span>
           <h2 className="font-hud text-xl font-bold">For creators and brands</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">Sell items that are minted the moment a fan buys them, set up membership tiers around your own page token, post to your fans and run bounties — all from the brand portal.</p>
-          <a href={`${portal}/onboarding`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Sell items that are minted the moment a fan buys them, set up membership tiers around
+            your own page token, post to your fans and run bounties — all from the brand portal.
+          </p>
+          <a
+            href={`${portal}/onboarding`}
+            className="text-primary inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+          >
             Create your brand <ArrowRight className="size-4" />
           </a>
         </div>
         <div className="glass space-y-3 rounded-2xl p-6">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
             <ShieldCheck className="size-5" />
           </span>
           <h2 className="font-hud text-xl font-bold">Built on Stellar</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">Items, tokens and payments are real Stellar assets and transactions. What you own is in your wallet, and every transaction can be checked on the public ledger.</p>
-          <Link href="/faq" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Items, tokens and payments are real Stellar assets and transactions. What you own is in
+            your wallet, and every transaction can be checked on the public ledger.
+          </p>
+          <Link
+            href="/faq"
+            className="text-primary inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+          >
             Read the FAQ <ArrowRight className="size-4" />
           </Link>
         </div>

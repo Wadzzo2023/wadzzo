@@ -25,7 +25,7 @@ export function RarityPlate({
   return (
     <span
       className={cn(
-        "font-hud inline-flex items-center gap-1 rounded-[6px] border font-bold uppercase leading-none tracking-[0.12em]",
+        "font-hud inline-flex items-center gap-1 rounded-[6px] border leading-none font-bold tracking-[0.12em] uppercase",
         size === "sm" ? "h-[18px] px-1.5 text-[8.5px]" : "h-[22px] px-2 text-[10px]",
         mythic && "animate-gradient-x bg-[length:200%_200%]",
       )}
@@ -51,26 +51,20 @@ const TONE: Record<string, string> = {
   muted: "border-ar-line-bright bg-white/[0.05] text-ar-faint",
 };
 
-export function StatusBadge({
-  status,
-  className,
-}: {
-  status: PinStatus;
-  className?: string;
-}) {
+export function StatusBadge({ status, className }: { status: PinStatus; className?: string }) {
   const meta = STATUS_META[status];
   return (
     <span
       className={cn(
-        "font-hud inline-flex h-[22px] items-center gap-1.5 rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+        "font-hud inline-flex h-[22px] items-center gap-1.5 rounded-full border px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
         TONE[meta.tone],
         className,
       )}
     >
       {status === "collectible" && (
         <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-pulse-ring absolute inset-0 rounded-full bg-ar-green-hot" />
-          <span className="relative h-1.5 w-1.5 rounded-full bg-ar-green-hot" />
+          <span className="animate-pulse-ring bg-ar-green-hot absolute inset-0 rounded-full" />
+          <span className="bg-ar-green-hot relative h-1.5 w-1.5 rounded-full" />
         </span>
       )}
       {status === "locked" && <Lock size={10} strokeWidth={2.6} />}
@@ -114,7 +108,7 @@ export function DetectionBadge({
   return (
     <span
       className={cn(
-        "font-hud inline-flex h-[22px] items-center gap-1.5 rounded-full border border-ar-line-bright bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-dim",
+        "font-hud border-ar-line-bright text-ar-dim inline-flex h-[22px] items-center gap-1.5 rounded-full border bg-white/[0.05] px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
         className,
       )}
     >
@@ -142,10 +136,10 @@ export function Chip({
       onClick={onClick}
       aria-pressed={onClick ? active : undefined}
       className={cn(
-        "font-hud inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
+        "font-hud inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[11px] font-semibold tracking-[0.1em] uppercase transition-colors",
         active
           ? "border-ar-green/60 bg-ar-green/15 text-ar-green-hot shadow-[0_0_16px_-6px_hsl(var(--ar-green)/0.9)]"
-          : "border-ar-line bg-white/[0.04] text-ar-dim hover:text-ar-text",
+          : "border-ar-line text-ar-dim hover:text-ar-text bg-white/[0.04]",
         onClick && "cursor-pointer",
         className,
       )}
@@ -169,13 +163,13 @@ export function StatBlock({
     <div className="flex flex-col items-center gap-0.5">
       <span
         className={cn(
-          "font-hud text-[19px] font-bold leading-none tabular-nums",
+          "font-hud text-[19px] leading-none font-bold tabular-nums",
           accent ? "text-ar-green-hot text-glow-soft" : "text-ar-text",
         )}
       >
         {value}
       </span>
-      <span className="font-hud text-[9px] font-semibold uppercase tracking-[0.18em] text-ar-faint">
+      <span className="font-hud text-ar-faint text-[9px] font-semibold tracking-[0.18em] uppercase">
         {label}
       </span>
     </div>

@@ -3,10 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
   if (!token?.sub) {
@@ -32,7 +29,7 @@ export default async function handler(
       BountyWinner: {
         select: {
           userId: true,
-        }
+        },
       },
       totalWinner: true,
       status: true,
@@ -56,13 +53,11 @@ export default async function handler(
     },
   });
 
-
   const bountiesWithJoinStatus = allBounty.map((bounty) => ({
     ...bounty,
     isJoined: bounty.participants.length > 0,
     isOwner: bounty.creatorId === currentUserId,
   }));
-
 
   res.status(200).json({ allBounty: bountiesWithJoinStatus });
 }

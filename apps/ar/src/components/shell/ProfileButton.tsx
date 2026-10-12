@@ -25,8 +25,8 @@ export function ProfileButton({ className }: { className?: string }) {
       href="/profile"
       aria-label={count > 0 ? `Profile, ${count} new` : "Profile"}
       className={cn(
-        "ar-glass relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-dim",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ar-green",
+        "ar-glass text-ar-dim relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+        "focus-visible:ring-ar-green focus-visible:ring-2 focus-visible:outline-hidden",
         className,
       )}
     >
@@ -35,7 +35,7 @@ export function ProfileButton({ className }: { className?: string }) {
         <img
           src={user.avatarUrl}
           alt=""
-          className="h-[30px] w-[30px] rounded-full object-cover ring-1 ring-ar-green/50"
+          className="ring-ar-green/50 h-[30px] w-[30px] rounded-full object-cover ring-1"
         />
       ) : (
         <User size={17} strokeWidth={2.2} />
@@ -43,7 +43,7 @@ export function ProfileButton({ className }: { className?: string }) {
       {count > 0 && (
         <span
           aria-hidden
-          className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-ar-bg bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+          className="border-ar-bg bg-ar-green-hot absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
         />
       )}
     </Link>

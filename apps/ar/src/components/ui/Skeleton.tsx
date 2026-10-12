@@ -30,13 +30,7 @@ export function Skeleton({
  * A run of text bars. The last one is short, the way a wrapped paragraph
  * actually ends — equal-length bars read as a table, not prose.
  */
-export function SkeletonText({
-  lines = 2,
-  className,
-}: {
-  lines?: number;
-  className?: string;
-}) {
+export function SkeletonText({ lines = 2, className }: { lines?: number; className?: string }) {
   return (
     <div className={cn("space-y-1.5", className)}>
       {Array.from({ length: lines }).map((_, i) => (
@@ -53,7 +47,7 @@ export function SkeletonText({
 /** Matches `BrandRow` on /brands — same 52px avatar and three text lines. */
 export function BrandRowSkeleton() {
   return (
-    <div className="ar-bevel relative flex items-center gap-3 overflow-hidden rounded-ar p-3">
+    <div className="ar-bevel rounded-ar relative flex items-center gap-3 overflow-hidden p-3">
       <Skeleton className="h-[52px] w-[52px] shrink-0" rounded="rounded-[14px]" />
       <div className="min-w-0 flex-1">
         <Skeleton rounded="rounded-full" className="h-3 w-1/2" />
@@ -80,7 +74,7 @@ export function CardSkeleton() {
 /** Matches a card in the map's nearby rail — same 168px width and 34×46 art. */
 export function NearbyCardSkeleton() {
   return (
-    <div className="ar-glass flex w-[168px] shrink-0 items-center gap-2.5 rounded-ar p-2">
+    <div className="ar-glass rounded-ar flex w-[168px] shrink-0 items-center gap-2.5 p-2">
       <Skeleton className="h-[46px] w-[34px] shrink-0" rounded="rounded-[8px]" />
       <div className="min-w-0 flex-1">
         <Skeleton rounded="rounded-full" className="h-2.5 w-4/5" />
@@ -94,15 +88,9 @@ export function NearbyCardSkeleton() {
 /** A row of stat blocks, as on the collection header and brand page. */
 export function StatRowSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="ar-bevel flex items-center rounded-ar">
+    <div className="ar-bevel rounded-ar flex items-center">
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            "flex-1 px-3 py-2.5",
-            i > 0 && "border-l border-ar-line",
-          )}
-        >
+        <div key={i} className={cn("flex-1 px-3 py-2.5", i > 0 && "border-ar-line border-l")}>
           <Skeleton rounded="rounded-full" className="mx-auto h-4 w-10" />
           <Skeleton rounded="rounded-full" className="mx-auto mt-1.5 h-2 w-12" />
         </div>

@@ -8,7 +8,13 @@ import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown"
 import { MethodPicker } from "~/components/payment/method-picker";
 import { Price } from "~/components/price/price";
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { formatAmount } from "@wadzzo/stellar/quote";
@@ -23,7 +29,15 @@ type Profile = RouterOutputs["creator"]["profile"];
 type Offer = RouterOutputs["market"]["pageTokenSales"][number];
 
 /** Follow / Following (also adds the brand's page-token trustline, paid by the platform). */
-export function FollowButton({ creatorId, initial, className }: { creatorId: string; initial: boolean; className?: string }) {
+export function FollowButton({
+  creatorId,
+  initial,
+  className,
+}: {
+  creatorId: string;
+  initial: boolean;
+  className?: string;
+}) {
   const { requireAuth } = useRequireAuth();
   const [following, setFollowing] = useState(initial);
   const follow = api.creator.follow.useMutation();
@@ -46,7 +60,11 @@ export function FollowButton({ creatorId, initial, className }: { creatorId: str
       onClick={toggle}
       variant={following ? "outline" : "default"}
       disabled={follow.isPending || unfollow.isPending || sign.busy}
-      className={cn("rounded-full px-5", !following && "shadow-[0_0_24px_-6px_hsl(var(--primary)/0.8)]", className)}
+      className={cn(
+        "rounded-full px-5",
+        !following && "shadow-[0_0_24px_-6px_hsl(var(--primary)/0.8)]",
+        className,
+      )}
     >
       {following ? <UserCheck className="size-4" /> : <UserPlus className="size-4" />}
       {sign.busy ? "Confirm in wallet…" : following ? "Following" : "Follow"}
@@ -64,7 +82,13 @@ export function ShareButton({ title }: { title: string }) {
     }
   };
   return (
-    <Button variant="outline" size="icon" className="glass rounded-full" onClick={() => void share()} aria-label="Share">
+    <Button
+      variant="outline"
+      size="icon"
+      className="glass rounded-full"
+      onClick={() => void share()}
+      aria-label="Share"
+    >
       <Share2 className="size-4" />
     </Button>
   );
@@ -78,20 +102,31 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
   const held = profile.viewer.pageTokens;
 
   if (!profile.subscriptions.length && !offers.length) {
-    return <EmptyState icon={Coins} title="No membership yet" description={`${profile.name} hasn't set up membership tiers.`} />;
+    return (
+      <EmptyState
+        icon={Coins}
+        title="No membership yet"
+        description={`${profile.name} hasn't set up membership tiers.`}
+      />
+    );
   }
   return (
     <section id="tiers" className="scroll-mt-24 space-y-5">
       <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4">
         <div>
           <h2 className="font-hud text-lg font-bold">Membership</h2>
-          <p className="text-sm text-muted-foreground">Hold {profile.name}&apos;s page token ({code}) to unlock members-only posts and items.</p>
+          <p className="text-muted-foreground text-sm">
+            Hold {profile.name}&apos;s page token ({code}) to unlock members-only posts and items.
+          </p>
         </div>
         {profile.viewer.signedIn && (
-          <div className="rounded-xl bg-primary/10 px-4 py-2 text-right">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">You hold</p>
+          <div className="bg-primary/10 rounded-xl px-4 py-2 text-right">
+            <p className="text-primary text-[10px] font-semibold tracking-wider uppercase">
+              You hold
+            </p>
             <p className="font-hud text-lg font-bold tabular-nums">
-              {held.toLocaleString("en-US")} <span className="text-sm text-muted-foreground">{code}</span>
+              {held.toLocaleString("en-US")}{" "}
+              <span className="text-muted-foreground text-sm">{code}</span>
             </p>
           </div>
         )}
@@ -100,7 +135,13 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
       {profile.subscriptions.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {profile.subscriptions.map((t) => (
-            <TierCard key={t.id} tier={t} code={code} current={profile.viewer.tierId === t.id} reached={held >= t.price} />
+            <TierCard
+              key={t.id}
+              tier={t}
+              code={code}
+              current={profile.viewer.tierId === t.id}
+              reached={held >= t.price}
+            />
           ))}
         </div>
       )}
@@ -114,18 +155,23 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
                 key={o.id}
                 type="button"
                 onClick={requireAuth(() => setBuying(o))}
-                className="glass flex items-center gap-3 rounded-xl p-3 text-left transition-all hover:glow"
+                className="glass hover:glow flex items-center gap-3 rounded-xl p-3 text-left transition-all"
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                <span className="bg-primary/15 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
                   <Coins className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{o.title}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     {o.amountToSell.toLocaleString("en-US")} {code}
                   </span>
                 </span>
-                <Price tokens={o.price} usd={o.priceUSD} size="sm" className="shrink-0 items-end text-right" />
+                <Price
+                  tokens={o.price}
+                  usd={o.priceUSD}
+                  size="sm"
+                  className="shrink-0 items-end text-right"
+                />
               </button>
             ))}
           </div>
@@ -136,16 +182,28 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
   );
 }
 
-function PageTokenDialog({ offer, code, onClose }: { offer: Offer; code: string; onClose: () => void }) {
+function PageTokenDialog({
+  offer,
+  code,
+  onClose,
+}: {
+  offer: Offer;
+  code: string;
+  onClose: () => void;
+}) {
   const [payIn, setPayIn] = useState<"PLATFORM_ASSET" | "XLM">("PLATFORM_ASSET");
-  const quote = api.creator.pageTokenQuote.useQuery({ saleId: offer.id, payIn });
+  const quote = api.creator.pageTokenQuote.useQuery({
+    saleId: offer.id,
+    payIn,
+  });
   const prepare = api.creator.pageTokenPrepare.useMutation();
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
 
   const go = async () => {
     const res = await prepare.mutateAsync({ saleId: offer.id, payIn }).catch(() => null);
-    if (res?.ok && (await sign.run({ txId: res.txId, xdr: res.xdr }))) await utils.creator.profile.invalidate();
+    if (res?.ok && (await sign.run({ txId: res.txId, xdr: res.xdr })))
+      await utils.creator.profile.invalidate();
   };
 
   return (
@@ -154,12 +212,13 @@ function PageTokenDialog({ offer, code, onClose }: { offer: Offer; code: string;
         <DialogHeader>
           <DialogTitle className="font-hud">{offer.title}</DialogTitle>
           <DialogDescription>
-            {offer.amountToSell.toLocaleString("en-US")} {code} from {offer.placer?.name}.{offer.description ? ` ${offer.description}` : ""}
+            {offer.amountToSell.toLocaleString("en-US")} {code} from {offer.placer?.name}.
+            {offer.description ? ` ${offer.description}` : ""}
           </DialogDescription>
         </DialogHeader>
         {sign.step === "done" ? (
           <div className="space-y-3 py-4 text-center">
-            <CheckCircle2 className="mx-auto size-8 text-primary" />
+            <CheckCircle2 className="text-primary mx-auto size-8" />
             <p className="font-hud font-semibold">
               {offer.amountToSell.toLocaleString("en-US")} {code} added to your wallet
             </p>
@@ -169,18 +228,41 @@ function PageTokenDialog({ offer, code, onClose }: { offer: Offer; code: string;
           </div>
         ) : (
           <div className="space-y-4">
-            <MethodPicker value={payIn} onChange={(m) => setPayIn(m as "PLATFORM_ASSET" | "XLM")} methods={["PLATFORM_ASSET", "XLM"]} />
+            <MethodPicker
+              value={payIn}
+              onChange={(m) => setPayIn(m as "PLATFORM_ASSET" | "XLM")}
+              methods={["PLATFORM_ASSET", "XLM"]}
+            />
             {quote.data ? (
               <>
-                <CostBreakdown lines={quote.data.lines} total={quote.data.total} currency={quote.data.currency} balance={quote.data.balance} />
+                <CostBreakdown
+                  lines={quote.data.lines}
+                  total={quote.data.total}
+                  currency={quote.data.currency}
+                  balance={quote.data.balance}
+                />
                 {quote.data.problems.length > 0 && <ProblemList problems={quote.data.problems} />}
               </>
             ) : (
               <Skeleton className="h-36 rounded-xl" />
             )}
-            {(prepare.error ?? sign.error) && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{prepare.error?.message ?? sign.error}</p>}
-            <Button className="h-11 w-full rounded-xl font-bold" disabled={!quote.data?.ok || prepare.isPending || sign.busy} onClick={() => void go()}>
-              {sign.step === "signing" ? "Confirm in your wallet…" : sign.step === "confirming" ? "Confirming on Stellar…" : quote.data ? `Pay ${formatAmount(quote.data.total, quote.data.currency)}` : "Pay"}
+            {(prepare.error ?? sign.error) && (
+              <p className="tone-danger rounded-lg px-3 py-2 text-sm">
+                {prepare.error?.message ?? sign.error}
+              </p>
+            )}
+            <Button
+              className="h-11 w-full rounded-xl font-bold"
+              disabled={!quote.data?.ok || prepare.isPending || sign.busy}
+              onClick={() => void go()}
+            >
+              {sign.step === "signing"
+                ? "Confirm in your wallet…"
+                : sign.step === "confirming"
+                  ? "Confirming on Stellar…"
+                  : quote.data
+                    ? `Pay ${formatAmount(quote.data.total, quote.data.currency)}`
+                    : "Pay"}
             </Button>
           </div>
         )}

@@ -1,9 +1,23 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Download, Lightbulb, RotateCcw, ShieldCheck, TriangleAlert, Wifi } from "lucide-react";
+import {
+  Check,
+  Download,
+  Lightbulb,
+  RotateCcw,
+  ShieldCheck,
+  TriangleAlert,
+  Wifi,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";
-import { formatBytes, packProgress, startMuralPack, useMuralPack, type PackStatus } from "~/lib/murals/pack";
+import {
+  formatBytes,
+  packProgress,
+  startMuralPack,
+  useMuralPack,
+  type PackStatus,
+} from "~/lib/murals/pack";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PackArt } from "./PackArt";
@@ -35,7 +49,8 @@ const STAGES: { key: PackStatus[]; label: string }[] = [
   { key: ["verifying"], label: "Verify" },
   { key: ["ready"], label: "Ready" },
 ];
-const stageIndex = (s: PackStatus) => (s === "checking" ? 0 : s === "downloading" ? 1 : s === "verifying" ? 2 : s === "ready" ? 3 : 1);
+const stageIndex = (s: PackStatus) =>
+  s === "checking" ? 0 : s === "downloading" ? 1 : s === "verifying" ? 2 : s === "ready" ? 3 : 1;
 
 function eta(seconds: number) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "—";
@@ -53,17 +68,28 @@ function useTip(enabled: boolean) {
   return PACK_TIPS[i]!;
 }
 
-export function PackBar({ progress, active, failed }: { progress: number; active: boolean; failed?: boolean }) {
+export function PackBar({
+  progress,
+  active,
+  failed,
+}: {
+  progress: number;
+  active: boolean;
+  failed?: boolean;
+}) {
   return (
-    <div className="relative h-3 overflow-hidden rounded-full border border-white/10 bg-ar-void/60">
+    <div className="bg-ar-void/60 relative h-3 overflow-hidden rounded-full border border-white/10">
       <motion.div
-        className={cn("absolute inset-y-0 left-0 rounded-full", failed ? "bg-ar-danger" : "bg-linear-to-r from-cyan-400 via-rarity-epic to-fuchsia-500")}
+        className={cn(
+          "absolute inset-y-0 left-0 rounded-full",
+          failed ? "bg-ar-danger" : "via-rarity-epic bg-linear-to-r from-cyan-400 to-fuchsia-500",
+        )}
         initial={false}
         animate={{ width: `${Math.max(2, progress * 100)}%` }}
         transition={{ type: "spring", stiffness: 120, damping: 24 }}
       >
         {active && <span className="ar-pack-stripes absolute inset-0 opacity-40" />}
-        {active && <span className="absolute right-0 top-0 h-full w-6 bg-white/50 blur-[6px]" />}
+        {active && <span className="absolute top-0 right-0 h-full w-6 bg-white/50 blur-[6px]" />}
       </motion.div>
     </div>
   );
@@ -82,18 +108,31 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <div className="flex items-center gap-3">
-        <PackArt size={46} progress={p} done={done} spinning={s.status === "checking" || s.status === "verifying"} />
+        <PackArt
+          size={46}
+          progress={p}
+          done={done}
+          spinning={s.status === "checking" || s.status === "verifying"}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <p className="font-hud truncate text-[11px] font-bold uppercase tracking-[0.14em] text-ar-text">
-              {failed ? "Mural pack paused" : done ? "Mural pack ready" : s.status === "verifying" ? "Verifying files…" : "Downloading mural pack"}
+            <p className="font-hud text-ar-text truncate text-[11px] font-bold tracking-[0.14em] uppercase">
+              {failed
+                ? "Mural pack paused"
+                : done
+                  ? "Mural pack ready"
+                  : s.status === "verifying"
+                    ? "Verifying files…"
+                    : "Downloading mural pack"}
             </p>
-            <p className="font-hud text-[13px] font-bold tabular-nums text-rarity-epic">{done ? "100%" : `${pct}%`}</p>
+            <p className="font-hud text-rarity-epic text-[13px] font-bold tabular-nums">
+              {done ? "100%" : `${pct}%`}
+            </p>
           </div>
           <div className="mt-1.5">
             <PackBar progress={done ? 1 : p} active={active} failed={failed} />
           </div>
-          <p className="mt-1 truncate text-[10.5px] text-ar-faint">
+          <p className="text-ar-faint mt-1 truncate text-[10.5px]">
             {failed
               ? s.error?.message
               : s.status === "downloading"
@@ -106,13 +145,25 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="px-5 pb-2 pt-1">
+    <div className="px-5 pt-1 pb-2">
       <div className="flex items-center gap-4">
-        <PackArt size={92} progress={p} done={done} spinning={s.status === "checking" || s.status === "verifying"} />
+        <PackArt
+          size={92}
+          progress={p}
+          done={done}
+          spinning={s.status === "checking" || s.status === "verifying"}
+        />
         <div className="min-w-0">
-          <p className="font-hud text-[10px] font-semibold uppercase tracking-[0.28em] text-rarity-epic">Resource pack</p>
-          <h2 className="font-hud text-[20px] font-bold leading-tight text-ar-text">Mural Pack {s.version ? `v${s.version}` : ""}</h2>
-          <p className="mt-0.5 text-[11.5px] text-ar-dim">The street-art finder for the Murals camera · {s.totalBytes ? formatBytes(s.totalBytes) : "≈23 MB"}</p>
+          <p className="font-hud text-rarity-epic text-[10px] font-semibold tracking-[0.28em] uppercase">
+            Resource pack
+          </p>
+          <h2 className="font-hud text-ar-text text-[20px] leading-tight font-bold">
+            Mural Pack {s.version ? `v${s.version}` : ""}
+          </h2>
+          <p className="text-ar-dim mt-0.5 text-[11.5px]">
+            The street-art finder for the Murals camera ·{" "}
+            {s.totalBytes ? formatBytes(s.totalBytes) : "≈23 MB"}
+          </p>
         </div>
       </div>
 
@@ -127,14 +178,34 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
                 <span
                   className={cn(
                     "flex h-6 w-6 items-center justify-center rounded-full border-2 text-[10px] font-bold",
-                    reached ? "border-rarity-epic bg-rarity-epic text-white" : current ? (failed ? "border-ar-danger text-ar-danger" : "border-rarity-epic text-rarity-epic") : "border-ar-line text-ar-faint",
+                    reached
+                      ? "border-rarity-epic bg-rarity-epic text-white"
+                      : current
+                        ? failed
+                          ? "border-ar-danger text-ar-danger"
+                          : "border-rarity-epic text-rarity-epic"
+                        : "border-ar-line text-ar-faint",
                   )}
                 >
                   {reached ? <Check size={12} strokeWidth={3} /> : i + 1}
                 </span>
-                <span className={cn("font-hud mt-1 text-[9px] font-bold uppercase tracking-[0.12em]", reached || current ? "text-ar-text" : "text-ar-faint")}>{st.label}</span>
+                <span
+                  className={cn(
+                    "font-hud mt-1 text-[9px] font-bold tracking-[0.12em] uppercase",
+                    reached || current ? "text-ar-text" : "text-ar-faint",
+                  )}
+                >
+                  {st.label}
+                </span>
               </span>
-              {i < STAGES.length - 1 && <span className={cn("mx-1 mb-4 h-[2px] flex-1", i < si || done ? "bg-rarity-epic" : "bg-ar-line")} />}
+              {i < STAGES.length - 1 && (
+                <span
+                  className={cn(
+                    "mx-1 mb-4 h-[2px] flex-1",
+                    i < si || done ? "bg-rarity-epic" : "bg-ar-line",
+                  )}
+                />
+              )}
             </li>
           );
         })}
@@ -143,30 +214,58 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
       {/* Big bar */}
       <div className="mt-4">
         <div className="mb-1.5 flex items-baseline justify-between">
-          <p className="font-hud text-[12px] font-bold uppercase tracking-[0.12em] text-ar-text">
-            {failed ? "Paused" : done ? "Installed" : s.status === "verifying" ? "Verifying files…" : s.status === "checking" ? "Connecting…" : "Downloading"}
+          <p className="font-hud text-ar-text text-[12px] font-bold tracking-[0.12em] uppercase">
+            {failed
+              ? "Paused"
+              : done
+                ? "Installed"
+                : s.status === "verifying"
+                  ? "Verifying files…"
+                  : s.status === "checking"
+                    ? "Connecting…"
+                    : "Downloading"}
           </p>
-          <p className="font-hud text-[26px] font-bold leading-none tabular-nums text-rarity-epic">{done ? 100 : pct}%</p>
+          <p className="font-hud text-rarity-epic text-[26px] leading-none font-bold tabular-nums">
+            {done ? 100 : pct}%
+          </p>
         </div>
         <PackBar progress={done ? 1 : p} active={active} failed={failed} />
-        <div className="mt-2 grid grid-cols-3 text-[11px] text-ar-dim">
+        <div className="text-ar-dim mt-2 grid grid-cols-3 text-[11px]">
           <span className="tabular-nums">
-            {formatBytes(done ? s.totalBytes : s.receivedBytes)} / {s.totalBytes ? formatBytes(s.totalBytes) : "—"}
+            {formatBytes(done ? s.totalBytes : s.receivedBytes)} /{" "}
+            {s.totalBytes ? formatBytes(s.totalBytes) : "—"}
           </span>
-          <span className="text-center tabular-nums">{s.status === "downloading" ? `${formatBytes(s.speed)}/s` : "—"}</span>
-          <span className="text-right tabular-nums">{s.status === "downloading" ? `${eta((s.totalBytes - s.receivedBytes) / Math.max(1, s.speed))} left` : "—"}</span>
+          <span className="text-center tabular-nums">
+            {s.status === "downloading" ? `${formatBytes(s.speed)}/s` : "—"}
+          </span>
+          <span className="text-right tabular-nums">
+            {s.status === "downloading"
+              ? `${eta((s.totalBytes - s.receivedBytes) / Math.max(1, s.speed))} left`
+              : "—"}
+          </span>
         </div>
       </div>
 
       {failed && s.error && (
-        <div className="mt-4 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-3">
-          <p className="flex items-start gap-2 text-[12px] text-ar-text">
-            {s.error.code === "offline" ? <Wifi size={15} className="mt-0.5 shrink-0 text-ar-danger" /> : <TriangleAlert size={15} className="mt-0.5 shrink-0 text-ar-danger" />}
+        <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 mt-4 border px-3.5 py-3">
+          <p className="text-ar-text flex items-start gap-2 text-[12px]">
+            {s.error.code === "offline" ? (
+              <Wifi size={15} className="text-ar-danger mt-0.5 shrink-0" />
+            ) : (
+              <TriangleAlert size={15} className="text-ar-danger mt-0.5 shrink-0" />
+            )}
             {s.error.message}
           </p>
           <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className="text-[11px] text-ar-faint">{s.retryIn != null ? `Retrying in ${s.retryIn}s` : ""}</span>
-            <ArButton size="sm" variant="outline" icon={RotateCcw} onClick={() => void startMuralPack()}>
+            <span className="text-ar-faint text-[11px]">
+              {s.retryIn != null ? `Retrying in ${s.retryIn}s` : ""}
+            </span>
+            <ArButton
+              size="sm"
+              variant="outline"
+              icon={RotateCcw}
+              onClick={() => void startMuralPack()}
+            >
               Retry now
             </ArButton>
           </div>
@@ -174,15 +273,22 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
       )}
 
       {done ? (
-        <p className="mt-4 flex items-center gap-2 rounded-ar border border-ar-green/40 bg-ar-green/10 px-3.5 py-2.5 text-[12px] text-ar-text">
-          <ShieldCheck size={15} className="text-ar-green-hot" /> Verified and installed. The Murals camera is ready.
+        <p className="rounded-ar border-ar-green/40 bg-ar-green/10 text-ar-text mt-4 flex items-center gap-2 border px-3.5 py-2.5 text-[12px]">
+          <ShieldCheck size={15} className="text-ar-green-hot" /> Verified and installed. The Murals
+          camera is ready.
         </p>
       ) : (
         !failed && (
-          <div className="mt-4 flex min-h-[44px] items-start gap-2 rounded-ar border border-ar-line bg-white/[0.03] px-3.5 py-2.5">
-            <Lightbulb size={15} className="mt-0.5 shrink-0 text-rarity-legendary" />
+          <div className="rounded-ar border-ar-line mt-4 flex min-h-[44px] items-start gap-2 border bg-white/[0.03] px-3.5 py-2.5">
+            <Lightbulb size={15} className="text-rarity-legendary mt-0.5 shrink-0" />
             <AnimatePresence mode="wait">
-              <motion.p key={tip} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="text-[12px] leading-relaxed text-ar-dim">
+              <motion.p
+                key={tip}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="text-ar-dim text-[12px] leading-relaxed"
+              >
                 {tip}
               </motion.p>
             </AnimatePresence>
@@ -191,8 +297,9 @@ export function PackPanel({ compact = false }: { compact?: boolean }) {
       )}
 
       {!done && (
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[10.5px] text-ar-faint">
-          <Download size={11} /> Keep using {platformBranding.name} — this finishes in the background.
+        <p className="text-ar-faint mt-3 flex items-center justify-center gap-1.5 text-center text-[10.5px]">
+          <Download size={11} /> Keep using {platformBranding.name} — this finishes in the
+          background.
         </p>
       )}
     </div>

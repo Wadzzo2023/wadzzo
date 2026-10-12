@@ -122,7 +122,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
       role="status"
       aria-label={`Loading ${platformBranding.name} AR`}
       onClick={finish}
-      className="absolute inset-0 z-[100] cursor-pointer select-none overflow-hidden bg-ar-void"
+      className="bg-ar-void absolute inset-0 z-[100] cursor-pointer overflow-hidden select-none"
       initial={{ opacity: 1 }}
       animate={
         opening
@@ -145,7 +145,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         transition={{ duration: 1.1, ease: "easeOut" }}
       />
       <motion.div
-        className="absolute left-1/2 top-1/2 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.26),transparent_64%)] blur-[60px]"
+        className="absolute top-1/2 left-1/2 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.26),transparent_64%)] blur-[60px]"
         // Centring lives in motion's own `x`/`y`, not Tailwind's
         // `-translate-*`: motion writes a complete inline `transform` for the
         // values it animates, which silently drops the utility's translate.
@@ -159,7 +159,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         <motion.span
           key={c.id}
           aria-hidden
-          className="absolute rounded-full border border-ar-green/40 bg-linear-to-br from-ar-green/25 to-transparent"
+          className="border-ar-green/40 from-ar-green/25 absolute rounded-full border bg-linear-to-br to-transparent"
           style={{
             left: `${c.left}%`,
             top: `${c.top}%`,
@@ -187,7 +187,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         {phase === "ignite" && (
           <motion.div
             key="scan"
-            className="absolute inset-x-0 h-[3px] bg-linear-to-r from-transparent via-ar-green-hot to-transparent shadow-[0_0_30px_6px_hsl(var(--ar-green)/0.75)]"
+            className="via-ar-green-hot absolute inset-x-0 h-[3px] bg-linear-to-r from-transparent to-transparent shadow-[0_0_30px_6px_hsl(var(--ar-green)/0.75)]"
             initial={{ top: "-4%" }}
             animate={{ top: "104%" }}
             exit={{ opacity: 0 }}
@@ -203,7 +203,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
 
         {/* Tagline */}
         <motion.p
-          className="mt-5 text-center text-[12.5px] leading-relaxed text-ar-dim"
+          className="text-ar-dim mt-5 text-center text-[12.5px] leading-relaxed"
           initial={{ opacity: 0, y: 8 }}
           animate={{
             opacity: phase === "boot" || opening ? 1 : 0,
@@ -223,12 +223,9 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
         >
           <div className="flex w-full max-w-[240px] gap-[5px]">
             {BOOT_LINES.map((_, i) => (
-              <div
-                key={i}
-                className="h-[3px] flex-1 overflow-hidden rounded-full bg-ar-surface-3"
-              >
+              <div key={i} className="bg-ar-surface-3 h-[3px] flex-1 overflow-hidden rounded-full">
                 <motion.div
-                  className="h-full rounded-full bg-ar-green-hot shadow-[0_0_10px_hsl(var(--ar-green)/0.9)]"
+                  className="bg-ar-green-hot h-full rounded-full shadow-[0_0_10px_hsl(var(--ar-green)/0.9)]"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: i <= lineIndex ? 1 : 0 }}
                   style={{ originX: 0 }}
@@ -238,18 +235,18 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
             ))}
           </div>
 
-          <p className="font-hud flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.24em] text-ar-green">
-            <span className="tabular-nums text-ar-faint">
+          <p className="font-hud text-ar-green flex items-center gap-1.5 text-[10.5px] font-medium tracking-[0.24em] uppercase">
+            <span className="text-ar-faint tabular-nums">
               {String(lineIndex + 1).padStart(2, "0")}
             </span>
             <span>{typed}</span>
-            <span className="animate-blink inline-block h-[10px] w-[6px] bg-ar-green-hot" />
+            <span className="animate-blink bg-ar-green-hot inline-block h-[10px] w-[6px]" />
           </p>
         </motion.div>
 
         {/* Skip affordance — only once it's clear there's something to skip. */}
         <motion.p
-          className="font-hud absolute bottom-[5%] text-[9.5px] uppercase tracking-[0.3em] text-ar-faint"
+          className="font-hud text-ar-faint absolute bottom-[5%] text-[9.5px] tracking-[0.3em] uppercase"
           initial={{ opacity: 0 }}
           animate={{ opacity: phase === "boot" ? 0.75 : 0 }}
           transition={{ delay: 0.4, duration: 0.4 }}
@@ -264,7 +261,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
           <motion.span
             key="shock"
             aria-hidden
-            className="absolute left-1/2 top-1/2 h-40 w-40 rounded-full border-2 border-ar-green-hot"
+            className="border-ar-green-hot absolute top-1/2 left-1/2 h-40 w-40 rounded-full border-2"
             style={{ x: "-50%", y: "-50%" }}
             initial={{ scale: 0.2, opacity: 0.9 }}
             animate={{ scale: 6, opacity: 0 }}
@@ -293,7 +290,13 @@ function BootMark({ started }: { started: boolean }) {
       initial={{ opacity: 0, scale: 2.2, rotate: -16, filter: "blur(10px)" }}
       animate={
         started
-          ? { opacity: 1, scale: 1, rotate: 0, filter: "blur(0px)", y: [0, -6, 0] }
+          ? {
+              opacity: 1,
+              scale: 1,
+              rotate: 0,
+              filter: "blur(0px)",
+              y: [0, -6, 0],
+            }
           : { opacity: 0, scale: 2.2, rotate: -16, filter: "blur(10px)" }
       }
       transition={{
@@ -326,7 +329,7 @@ function Wordmark({ phase }: { phase: Phase }) {
         <motion.span
           key={color}
           aria-hidden
-          className="font-hud pointer-events-none absolute text-[52px] font-bold leading-none tracking-[0.04em] mix-blend-screen"
+          className="font-hud pointer-events-none absolute text-[52px] leading-none font-bold tracking-[0.04em] mix-blend-screen"
           style={{ color }}
           initial={{ x: dx * 3, opacity: 0 }}
           animate={{
@@ -339,7 +342,7 @@ function Wordmark({ phase }: { phase: Phase }) {
         </motion.span>
       ))}
 
-      <h1 className="font-hud relative flex text-[52px] font-bold leading-none tracking-[0.04em] text-ar-text">
+      <h1 className="font-hud text-ar-text relative flex text-[52px] leading-none font-bold tracking-[0.04em]">
         {WORDMARK.map((letter, i) => (
           <motion.span
             key={`${letter}-${i}`}
@@ -378,7 +381,7 @@ function Wordmark({ phase }: { phase: Phase }) {
 
         {/* The AR plate, stamped into the corner of the wordmark. */}
         <motion.span
-          className="font-hud absolute -right-[54px] -top-[6px] flex h-[30px] items-center rounded-[8px] border border-ar-green px-[9px] text-[16px] font-bold tracking-[0.12em] text-ar-green-hot"
+          className="font-hud border-ar-green text-ar-green-hot absolute -top-[6px] -right-[54px] flex h-[30px] items-center rounded-[8px] border px-[9px] text-[16px] font-bold tracking-[0.12em]"
           style={{
             background: "hsl(var(--ar-green) / 0.14)",
             boxShadow:
@@ -386,11 +389,14 @@ function Wordmark({ phase }: { phase: Phase }) {
           }}
           initial={{ opacity: 0, scale: 3.4, rotate: -14 }}
           animate={
-            showAr
-              ? { opacity: 1, scale: 1, rotate: -6 }
-              : { opacity: 0, scale: 3.4, rotate: -14 }
+            showAr ? { opacity: 1, scale: 1, rotate: -6 } : { opacity: 0, scale: 3.4, rotate: -14 }
           }
-          transition={{ type: "spring", stiffness: 420, damping: 17, mass: 0.8 }}
+          transition={{
+            type: "spring",
+            stiffness: 420,
+            damping: 17,
+            mass: 0.8,
+          }}
         >
           {platformBranding.wordmark.plate}
         </motion.span>

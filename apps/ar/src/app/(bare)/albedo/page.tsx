@@ -46,7 +46,7 @@ export default function AlbedoBridge() {
     // restored as-is on cleanup, so it must not be bound
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const original = window.open;
-    window.open = ((url?: string | URL) => {
+    window.open = (url?: string | URL) => {
       const host = frameHost.current;
       if (!host || !url) return null;
       host.innerHTML = "";
@@ -56,7 +56,7 @@ export default function AlbedoBridge() {
       iframe.style.cssText = "width:100%;height:100%;border:0;background:#fff";
       host.appendChild(iframe);
       return iframe.contentWindow;
-    });
+    };
     return () => {
       window.open = original;
     };
@@ -97,17 +97,17 @@ export default function AlbedoBridge() {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center gap-5 bg-ar-bg px-8 text-center"
+      className="bg-ar-bg flex min-h-screen flex-col items-center justify-center gap-5 px-8 text-center"
       style={{ fontFamily: "var(--nf-body)" }}
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-[18px] border border-ar-green/40 bg-ar-green/15 text-ar-green-hot">
+      <span className="border-ar-green/40 bg-ar-green/15 text-ar-green-hot flex h-14 w-14 items-center justify-center rounded-[18px] border">
         <Wallet size={24} strokeWidth={2.2} />
       </span>
       <div>
-        <h1 className="font-hud text-[20px] font-bold text-ar-text">
+        <h1 className="font-hud text-ar-text text-[20px] font-bold">
           {xdr ? "Approve in Albedo" : "Sign in with Albedo"}
         </h1>
-        <p className="mx-auto mt-2 max-w-[18rem] text-[13px] leading-relaxed text-ar-dim">
+        <p className="text-ar-dim mx-auto mt-2 max-w-[18rem] text-[13px] leading-relaxed">
           {xdr
             ? "Albedo will show the transaction. Approve it to finish following this brand."
             : "Albedo will ask you to confirm it's your wallet. Nothing is sent or spent."}
@@ -117,15 +117,15 @@ export default function AlbedoBridge() {
         <button
           onClick={() => void run()}
           disabled={busy}
-          className="ar-key ar-key-primary font-hud flex h-[54px] w-full max-w-[20rem] items-center justify-center gap-2 rounded-ar-lg text-[15px] font-semibold uppercase tracking-[0.08em] disabled:opacity-60"
+          className="ar-key ar-key-primary font-hud rounded-ar-lg flex h-[54px] w-full max-w-[20rem] items-center justify-center gap-2 text-[15px] font-semibold tracking-[0.08em] uppercase disabled:opacity-60"
         >
           {busy ? <Loader2 size={18} className="animate-spin" /> : null}
           {busy ? "Waiting for Albedo" : "Continue"}
         </button>
       ) : (
-        <p className="text-[12px] text-ar-faint">Nothing to sign.</p>
+        <p className="text-ar-faint text-[12px]">Nothing to sign.</p>
       )}
-      {error && <p className="text-[12px] text-ar-danger">{error}</p>}
+      {error && <p className="text-ar-danger text-[12px]">{error}</p>}
 
       <div
         ref={frameHost}

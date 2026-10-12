@@ -22,14 +22,7 @@ class WebcamRenderer {
     this.material = new THREE.MeshBasicMaterial({ map: this.texture });
     const mesh = new THREE.Mesh(this.geom, this.material);
     this.sceneWebcam.add(mesh);
-    this.cameraWebcam = new THREE.OrthographicCamera(
-      -0.5,
-      0.5,
-      0.5,
-      -0.5,
-      0,
-      10
-    );
+    this.cameraWebcam = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 10);
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const constraints = {
         video: {
@@ -47,9 +40,7 @@ class WebcamRenderer {
         })
         .catch((e) => {
           setTimeout(() => {
-            this.createErrorPopup(
-              "Webcam Error\nName: " + e.name + "\nMessage: " + e.message
-            );
+            this.createErrorPopup("Webcam Error\nName: " + e.name + "\nMessage: " + e.message);
           }, 1000);
         });
     } else {

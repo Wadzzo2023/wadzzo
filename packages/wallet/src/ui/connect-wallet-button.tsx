@@ -13,39 +13,36 @@ export function ConnectWalletButton({ text }: { text?: string }) {
 
   const setDialog = useConnectWalletDialogStore();
   return (
-    <div className="flex items-center gap-2  ">
+    <div className="flex items-center gap-2">
       <Button
-        size='lg'
+        size="lg"
 
-        onClick={() => setDialog.setIsOpen(true)} className=" p-2 shadow-xs  text-white shadow-black bg-[#39BD2B] hover:bg-[#31a128]  flex items-center gap-2">
-        <div className="flex items-center gap-2 ">
-
+        onClick={() => setDialog.setIsOpen(true)}
+        className="flex items-center gap-2 bg-[#39BD2B] p-2 text-white shadow-xs shadow-black hover:bg-[#31a128]"
+      >
+        <div className="flex items-center gap-2">
           <Image
             alt="logo"
 
             src={session.data?.user.image ?? "/favicon.ico"}
             height={200}
             width={200}
-            className="rounded-full h-8 w-8 border-2 bg-white"
+            className="h-8 w-8 rounded-full border-2 bg-white"
           />
 
           <span className="">
-            {session.status == "authenticated"
-              ? <span className="flex flex-col items-start">
-                <p>
-                  {session.data?.user.name}
-                </p>
-                <p>
-                  PUBKEY : {abbreviateAddress(session.data?.user.id)}
-                </p>
+            {session.status == "authenticated" ? (
+              <span className="flex flex-col items-start">
+                <p>{session.data?.user.name}</p>
+                <p>PUBKEY : {abbreviateAddress(session.data?.user.id)}</p>
               </span>
-              : "Login/Signup"}
+            ) : (
+              "Login/Signup"
+            )}
           </span>
         </div>
       </Button>
-      {session.status == "authenticated" &&
-        <LogOutButton />
-      }
+      {session.status == "authenticated" && <LogOutButton />}
     </div>
   );
 }
@@ -57,7 +54,10 @@ function LogOutButton() {
   }
   return (
     <Button className="flex flex-col p-3 shadow-xs shadow-black" onClick={disconnectWallet}>
-      <span> <LogOut /></span>
+      <span>
+        {" "}
+        <LogOut />
+      </span>
       <span className="text-xs">Logout</span>
     </Button>
   );

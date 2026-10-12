@@ -44,7 +44,8 @@ export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const IMAGE_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 
 export function imageFileProblem(file: File): string | null {
-  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.type)) return "Use a JPG, PNG, WebP or GIF image";
+  if (!(IMAGE_FILE_TYPES as readonly string[]).includes(file.type))
+    return "Use a JPG, PNG, WebP or GIF image";
   if (file.size > MAX_IMAGE_BYTES) return "Over the 10 MB limit";
   return null;
 }

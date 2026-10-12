@@ -9,10 +9,16 @@
  * `Access-Control-Allow-Origin` sidesteps that without needing every image
  * host to cooperate.
  */
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+};
 
 export function OPTIONS() {
-  return new Response(null, { status: 200, headers: { ...CORS, "Access-Control-Allow-Headers": "Content-Type" } });
+  return new Response(null, {
+    status: 200,
+    headers: { ...CORS, "Access-Control-Allow-Headers": "Content-Type" },
+  });
 }
 
 export async function GET(req: Request) {
@@ -21,9 +27,15 @@ export async function GET(req: Request) {
 
   try {
     const response = await fetch(imageUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
     });
-    if (!response.ok) return Response.json({ error: `Failed to fetch image: ${response.statusText}` }, { status: response.status });
+    if (!response.ok)
+      return Response.json(
+        { error: `Failed to fetch image: ${response.statusText}` },
+        { status: response.status },
+      );
 
     const buffer = await response.arrayBuffer();
     return new Response(buffer, {

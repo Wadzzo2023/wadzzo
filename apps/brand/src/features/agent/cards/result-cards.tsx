@@ -1,6 +1,14 @@
 "use client";
 
-import { CalendarDays, Download, Hexagon, Megaphone, MapPinned, Pin as PinIcon, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Download,
+  Hexagon,
+  Megaphone,
+  MapPinned,
+  Pin as PinIcon,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 
 import type { AgentBlock, PinStatus } from "~/lib/agent/contract";
@@ -14,15 +22,27 @@ export function PlacesCard({ block }: { block: Of<"places"> }) {
   const pinned = block.items.filter((i) => i.alreadyPinned).length;
   return (
     <Card icon={MapPinned} title={block.title} count={block.items.length}>
-      {pinned > 0 && <p className="border-b px-3 py-1.5 text-xs text-muted-foreground">{pinned} already have one of your pins nearby.</p>}
+      {pinned > 0 && (
+        <p className="text-muted-foreground border-b px-3 py-1.5 text-xs">
+          {pinned} already have one of your pins nearby.
+        </p>
+      )}
       <ShortList
         items={block.items}
         empty="Nothing found here. Try other words or a wider area."
         render={(p) => (
-          <MapRow key={p.key} id={p.key} lat={p.lat} lng={p.lng} aside={p.alreadyPinned ? <StatusPill tone="neutral">Pinned</StatusPill> : undefined}>
+          <MapRow
+            key={p.key}
+            id={p.key}
+            lat={p.lat}
+            lng={p.lng}
+            aside={p.alreadyPinned ? <StatusPill tone="neutral">Pinned</StatusPill> : undefined}
+          >
             <p className="truncate text-sm font-medium">{p.title}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {p.kind === "event" && p.startDate ? `${range(p.startDate, p.endDate ?? p.startDate)} · ` : ""}
+            <p className="text-muted-foreground truncate text-xs">
+              {p.kind === "event" && p.startDate
+                ? `${range(p.startDate, p.endDate ?? p.startDate)} · `
+                : ""}
               {p.address}
             </p>
           </MapRow>
@@ -47,15 +67,26 @@ export function PinsCard({ block, linkable }: { block: Of<"pins">; linkable: boo
         items={block.items}
         empty="No pins match."
         render={(p) => (
-          <MapRow key={p.id} id={p.id} lat={p.lat} lng={p.lng} aside={<StatusPill tone={PIN_STATUS[p.status].tone}>{PIN_STATUS[p.status].label}</StatusPill>}>
+          <MapRow
+            key={p.id}
+            id={p.id}
+            lat={p.lat}
+            lng={p.lng}
+            aside={
+              <StatusPill tone={PIN_STATUS[p.status].tone}>{PIN_STATUS[p.status].label}</StatusPill>
+            }
+          >
             {linkable ? (
-              <Link href={`/pins/${p.id}/edit`} className="block truncate text-sm font-medium hover:underline">
+              <Link
+                href={`/pins/${p.id}/edit`}
+                className="block truncate text-sm font-medium hover:underline"
+              >
                 {p.title}
               </Link>
             ) : (
               <p className="truncate text-sm font-medium">{p.title}</p>
             )}
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">
               {p.type.toLowerCase()} · {n(p.collected)} collected · {range(p.startDate, p.endDate)}
             </p>
           </MapRow>
@@ -72,16 +103,28 @@ export function HotspotsCard({ block, linkable }: { block: Of<"hotspots">; linka
         items={block.items}
         empty="No hotspots match."
         render={(h) => (
-          <MapRow key={h.id} id={h.id} aside={<StatusPill tone={h.isActive ? "success" : "neutral"}>{h.isActive ? "Active" : "Paused"}</StatusPill>}>
+          <MapRow
+            key={h.id}
+            id={h.id}
+            aside={
+              <StatusPill tone={h.isActive ? "success" : "neutral"}>
+                {h.isActive ? "Active" : "Paused"}
+              </StatusPill>
+            }
+          >
             {linkable ? (
-              <Link href={`/pins?hotspot=${h.id}`} className="block truncate text-sm font-medium hover:underline">
+              <Link
+                href={`/pins?hotspot=${h.id}`}
+                className="block truncate text-sm font-medium hover:underline"
+              >
                 {h.title}
               </Link>
             ) : (
               <p className="truncate text-sm font-medium">{h.title}</p>
             )}
-            <p className="truncate text-xs text-muted-foreground">
-              Every {h.dropEveryDays}d · pins last {h.pinDurationDays}d · {h.drops} drops · {range(h.startDate, h.endDate)}
+            <p className="text-muted-foreground truncate text-xs">
+              Every {h.dropEveryDays}d · pins last {h.pinDurationDays}d · {h.drops} drops ·{" "}
+              {range(h.startDate, h.endDate)}
             </p>
           </MapRow>
         )}
@@ -97,15 +140,28 @@ export function EventsCard({ block, linkable }: { block: Of<"events">; linkable:
         items={block.items}
         empty="No events."
         render={(e) => (
-          <MapRow key={e.id} id={e.id} lat={e.lat} lng={e.lng} aside={<span className="shrink-0 text-xs text-muted-foreground tabular-nums">{n(e.rsvps)} RSVPs</span>}>
+          <MapRow
+            key={e.id}
+            id={e.id}
+            lat={e.lat}
+            lng={e.lng}
+            aside={
+              <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+                {n(e.rsvps)} RSVPs
+              </span>
+            }
+          >
             {linkable ? (
-              <Link href={`/events/${e.id}/edit`} className="block truncate text-sm font-medium hover:underline">
+              <Link
+                href={`/events/${e.id}/edit`}
+                className="block truncate text-sm font-medium hover:underline"
+              >
                 {e.title}
               </Link>
             ) : (
               <p className="truncate text-sm font-medium">{e.title}</p>
             )}
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">
               {dayTime(e.startDate)} · {e.venueName ?? e.address ?? "Online"}
             </p>
           </MapRow>
@@ -127,8 +183,8 @@ export function AnnouncementsCard({ block }: { block: Of<"announcements"> }) {
               <p className="min-w-0 flex-1 truncate text-sm font-medium">{a.title}</p>
               {a.pinned && <StatusPill tone="primary">Pinned</StatusPill>}
             </div>
-            <p className="line-clamp-2 text-xs text-muted-foreground">{a.body}</p>
-            <p className="mt-0.5 text-[11px] text-faint">
+            <p className="text-muted-foreground line-clamp-2 text-xs">{a.body}</p>
+            <p className="text-faint mt-0.5 text-[11px]">
               {day(a.createdAt)} · {n(a.comments)} comments
             </p>
           </li>
@@ -139,9 +195,14 @@ export function AnnouncementsCard({ block }: { block: Of<"announcements"> }) {
 }
 
 function downloadCsv(name: string, rows: (string | number)[][]) {
-  const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = rows
+    .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: name });
+  const a = Object.assign(document.createElement("a"), {
+    href: url,
+    download: name,
+  });
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -156,13 +217,19 @@ export function CollectorsCard({ block }: { block: Of<"collectors"> }) {
         block.items.length > 0 && (
           <button
             type="button"
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1"
             aria-label="Download as CSV"
             title="Download as CSV"
             onClick={() =>
               downloadCsv("collectors.csv", [
                 ["Name", "Email", "Collections", "Redeemed", "Last collected"],
-                ...block.items.map((c) => [c.name ?? "", c.email ?? "", c.collected, c.redeemed, c.lastAt]),
+                ...block.items.map((c) => [
+                  c.name ?? "",
+                  c.email ?? "",
+                  c.collected,
+                  c.redeemed,
+                  c.lastAt,
+                ]),
               ])
             }
           >
@@ -176,14 +243,16 @@ export function CollectorsCard({ block }: { block: Of<"collectors"> }) {
         empty="Nobody has collected these pins yet."
         render={(c, i) => (
           <li key={`${c.email ?? c.name ?? ""}-${i}`} className="flex items-center gap-2 px-3 py-2">
-            <span className="w-5 shrink-0 text-right font-hud text-xs text-faint tabular-nums">{i + 1}</span>
+            <span className="font-hud text-faint w-5 shrink-0 text-right text-xs tabular-nums">
+              {i + 1}
+            </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{c.name ?? "Unnamed fan"}</p>
-              <p className="truncate text-xs text-muted-foreground">{c.email ?? "No email"}</p>
+              <p className="text-muted-foreground truncate text-xs">{c.email ?? "No email"}</p>
             </div>
             <div className="shrink-0 text-right">
               <p className="text-sm font-semibold tabular-nums">{n(c.collected)}</p>
-              <p className="text-[11px] text-faint tabular-nums">{c.redeemed} redeemed</p>
+              <p className="text-faint text-[11px] tabular-nums">{c.redeemed} redeemed</p>
             </div>
           </li>
         )}
@@ -191,4 +260,3 @@ export function CollectorsCard({ block }: { block: Of<"collectors"> }) {
     </Card>
   );
 }
-

@@ -29,8 +29,12 @@ type Backend = "webgpu" | "wasm";
 type Progress = { status: string; file?: string; loaded?: number };
 type Embeds = { image_embeds: { normalize(): { tolist(): number[][] } } };
 type Tjs = {
-  AutoProcessor: { from_pretrained(id: string, o: object): Promise<(img: unknown) => Promise<object>> };
-  CLIPVisionModelWithProjection: { from_pretrained(id: string, o: object): Promise<(inputs: object) => Promise<Embeds>> };
+  AutoProcessor: {
+    from_pretrained(id: string, o: object): Promise<(img: unknown) => Promise<object>>;
+  };
+  CLIPVisionModelWithProjection: {
+    from_pretrained(id: string, o: object): Promise<(inputs: object) => Promise<Embeds>>;
+  };
   RawImage: { fromCanvas(c: HTMLCanvasElement): unknown };
 };
 type Stats = {
@@ -110,13 +114,22 @@ export function MuralSpike() {
     setPhase("loading");
     try {
       // iOS needs both of these from the tap.
-      const Ctor = DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
-      if (typeof Ctor.requestPermission === "function") await Ctor.requestPermission().catch(() => null);
+      const Ctor = DeviceOrientationEvent as unknown as {
+        requestPermission?: () => Promise<string>;
+      };
+      if (typeof Ctor.requestPermission === "function")
+        await Ctor.requestPermission().catch(() => null);
       await camera.start();
 
       const tjs = (await import(/* webpackIgnore: true */ TJS)) as Tjs;
       const backend: Backend =
-        !forceWasm && "gpu" in navigator && (await (navigator as unknown as { gpu: { requestAdapter(): Promise<unknown> } }).gpu.requestAdapter())
+        !forceWasm &&
+        "gpu" in navigator &&
+        (await (
+          navigator as unknown as {
+            gpu: { requestAdapter(): Promise<unknown> };
+          }
+        ).gpu.requestAdapter())
           ? "webgpu"
           : "wasm";
 
@@ -125,11 +138,18 @@ export function MuralSpike() {
         if (p.status === "progress" && p.file) {
           bytes[p.file] = p.loaded ?? 0;
           // fp16 vision weights are ~22.9 MB; good enough for a spike bar.
-          setLoadPct(Math.min(99, Math.round((Object.values(bytes).reduce((a, b) => a + b, 0) / 23e6) * 100)));
+          setLoadPct(
+            Math.min(
+              99,
+              Math.round((Object.values(bytes).reduce((a, b) => a + b, 0) / 23e6) * 100),
+            ),
+          );
         }
       };
       const t0 = performance.now();
-      const processor = await tjs.AutoProcessor.from_pretrained(MODEL, { progress_callback });
+      const processor = await tjs.AutoProcessor.from_pretrained(MODEL, {
+        progress_callback,
+      });
       const model = await tjs.CLIPVisionModelWithProjection.from_pretrained(MODEL, {
         dtype: "fp16",
         device: backend,
@@ -154,7 +174,17 @@ export function MuralSpike() {
         if (video?.videoWidth) {
           // Centre square crop, 256px; the processor does the final 256→224.
           const s = Math.min(video.videoWidth, video.videoHeight);
-          ctx.drawImage(video, (video.videoWidth - s) / 2, (video.videoHeight - s) / 2, s, s, 0, 0, 256, 256);
+          ctx.drawImage(
+            video,
+            (video.videoWidth - s) / 2,
+            (video.videoHeight - s) / 2,
+            s,
+            s,
+            0,
+            0,
+            256,
+            256,
+          );
           const image = tjs.RawImage.fromCanvas(canvas);
           const t = performance.now();
           const { image_embeds } = await model(await processor(image));
@@ -176,7 +206,8 @@ export function MuralSpike() {
             }
             return nowLocked;
           });
-          const span = frameStamps.length > 1 ? frameStamps[frameStamps.length - 1]! - frameStamps[0]! : 0;
+          const span =
+            frameStamps.length > 1 ? frameStamps[frameStamps.length - 1]! - frameStamps[0]! : 0;
           setStats((st) => ({
             ...st,
             encodeMs: median(encodeTimes),
@@ -207,22 +238,42 @@ export function MuralSpike() {
 
   return (
     <div className="fixed inset-0 bg-black text-white">
-      <video ref={camera.attachVideo} playsInline muted autoPlay className="absolute inset-0 h-full w-full object-cover" />
+      <video
+        ref={camera.attachVideo}
+        playsInline
+        muted
+        autoPlay
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <canvas ref={canvasRef} width={256} height={256} className="hidden" />
 
       {/* Brackets */}
       <div
-        className={`pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[78vw] max-w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-3xl border-4 transition-all duration-300 ${
-          locked ? "scale-95 border-fuchsia-400 shadow-[0_0_40px_rgba(232,121,249,.6)]" : "border-white/40"
+        className={`pointer-events-none absolute top-1/2 left-1/2 aspect-square w-[78vw] max-w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-3xl border-4 transition-all duration-300 ${
+          locked
+            ? "scale-95 border-fuchsia-400 shadow-[0_0_40px_rgba(232,121,249,.6)]"
+            : "border-white/40"
         }`}
       />
 
       <div className="absolute inset-x-3 top-3 space-y-1 rounded-xl bg-black/60 p-3 font-mono text-[11px] leading-tight backdrop-blur-sm">
-        <div>backend {stats.backend ?? "—"} · load {stats.loadMs ? `${(stats.loadMs / 1000).toFixed(1)}s` : "—"} · dl {stats.downloadedMB?.toFixed(1) ?? "—"} MB</div>
-        <div>encode {stats.encodeMs?.toFixed(0) ?? "—"} ms · loop {stats.fps?.toFixed(1) ?? "—"} fps (target {targetFps})</div>
-        <div>score {pct}% · top “{stats.top ?? "—"}”</div>
-        <div>yaw Δ {yawDelta == null ? "—" : `${yawDelta.toFixed(0)}°`} · sweep L {sweep.left ? "✓" : "·"} R {sweep.right ? "✓" : "·"}</div>
-        <div className="h-1.5 overflow-hidden rounded-base bg-white/20">
+        <div>
+          backend {stats.backend ?? "—"} · load{" "}
+          {stats.loadMs ? `${(stats.loadMs / 1000).toFixed(1)}s` : "—"} · dl{" "}
+          {stats.downloadedMB?.toFixed(1) ?? "—"} MB
+        </div>
+        <div>
+          encode {stats.encodeMs?.toFixed(0) ?? "—"} ms · loop {stats.fps?.toFixed(1) ?? "—"} fps
+          (target {targetFps})
+        </div>
+        <div>
+          score {pct}% · top “{stats.top ?? "—"}”
+        </div>
+        <div>
+          yaw Δ {yawDelta == null ? "—" : `${yawDelta.toFixed(0)}°`} · sweep L{" "}
+          {sweep.left ? "✓" : "·"} R {sweep.right ? "✓" : "·"}
+        </div>
+        <div className="rounded-base h-1.5 overflow-hidden bg-white/20">
           <div className="h-full bg-fuchsia-400 transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
@@ -246,15 +297,26 @@ export function MuralSpike() {
         </div>
         {phase === "loading" && (
           <div className="mx-auto h-1.5 w-48 overflow-hidden rounded-full bg-white/20">
-            <div className="h-full bg-fuchsia-400 transition-all" style={{ width: `${loadPct}%` }} />
+            <div
+              className="h-full bg-fuchsia-400 transition-all"
+              style={{ width: `${loadPct}%` }}
+            />
           </div>
         )}
         {(phase === "idle" || phase === "error") && (
           <div className="flex items-center justify-center gap-3">
             <label className="flex items-center gap-1 text-sm">
-              <input type="checkbox" checked={forceWasm} onChange={(e) => setForceWasm(e.target.checked)} /> force WASM
+              <input
+                type="checkbox"
+                checked={forceWasm}
+                onChange={(e) => setForceWasm(e.target.checked)}
+              />{" "}
+              force WASM
             </label>
-            <button onClick={() => void start()} className="rounded-full bg-fuchsia-500 px-6 py-3 font-semibold">
+            <button
+              onClick={() => void start()}
+              className="rounded-full bg-fuchsia-500 px-6 py-3 font-semibold"
+            >
               Start
             </button>
           </div>

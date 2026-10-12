@@ -53,14 +53,9 @@ export function SessionSync() {
   useEffect(() => {
     if (status === "loading") return;
 
-    const userId =
-      status === "authenticated" && session?.user ? session.user.id : null;
+    const userId = status === "authenticated" && session?.user ? session.user.id : null;
 
-    setUser(
-      status === "authenticated" && session?.user
-        ? deriveArUser(session.user)
-        : null,
-    );
+    setUser(status === "authenticated" && session?.user ? deriveArUser(session.user) : null);
 
     if (previousUserId.current !== undefined && previousUserId.current !== userId) {
       void utils.invalidate();

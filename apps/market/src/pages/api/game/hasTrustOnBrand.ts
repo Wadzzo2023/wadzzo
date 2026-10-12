@@ -7,10 +7,7 @@ import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 // import { getSession } from "next-auth/react";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
   // console.log(token, "..");
@@ -54,10 +51,8 @@ export default async function handler(
     const userAcc = await server.loadAccount(userId);
 
     const hasTrust = userAcc.balances.some((balance) => {
-
       return (
-        (balance.asset_type === "credit_alphanum4" ||
-          balance.asset_type === "credit_alphanum12") &&
+        (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
         balance.asset_code === code &&
         balance.asset_issuer === issuer
       );

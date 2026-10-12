@@ -15,12 +15,18 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
 type Place = { id: string; name: string; address: string; coords: Coords };
 
 /** The map's search trigger: a glass circle beside the filter chip. */
-export function MapSearchButton({ onClick, className }: { onClick: () => void; className?: string }) {
+export function MapSearchButton({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
   return (
     <button
       onClick={onClick}
       aria-label="Search drops and places"
-      className={`ar-glass flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-dim hover:text-ar-text ${className ?? ""}`}
+      className={`ar-glass text-ar-dim hover:text-ar-text flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${className ?? ""}`}
     >
       <Search size={16} strokeWidth={2.4} />
     </button>
@@ -62,7 +68,10 @@ export function MapSearch({
   useEffect(() => {
     near.current = fix;
   }, [fix]);
-  const [term, setTerm] = useState<{ q: string; near: GeoFix | null }>({ q: "", near: null });
+  const [term, setTerm] = useState<{ q: string; near: GeoFix | null }>({
+    q: "",
+    near: null,
+  });
   useEffect(() => {
     const id = setTimeout(() => setTerm({ q, near: near.current }), DEBOUNCE_MS);
     return () => clearTimeout(id);
@@ -70,15 +79,28 @@ export function MapSearch({
   const debounced = term.q;
 
   const search = api.pins.search.useQuery(
-    { q: debounced, lat: term.near?.lat, lng: term.near?.lng, limit: 12, brandId },
-    { enabled: open && debounced.length >= 2, placeholderData: keepPreviousData, staleTime: 30_000 },
+    {
+      q: debounced,
+      lat: term.near?.lat,
+      lng: term.near?.lng,
+      limit: 12,
+      brandId,
+    },
+    {
+      enabled: open && debounced.length >= 2,
+      placeholderData: keepPreviousData,
+      staleTime: 30_000,
+    },
   );
   const pinsOn = open && q.length >= 2;
   const pinsLoading = pinsOn && (search.isFetching || debounced !== q);
   const pinHits = useMemo(
     () =>
       pinsOn && search.data
-        ? search.data.slice(0, MAX_PINS).map((p) => ({ pin: p, distance: fix ? distanceMeters(fix, p) : null }))
+        ? search.data.slice(0, MAX_PINS).map((p) => ({
+            pin: p,
+            distance: fix ? distanceMeters(fix, p) : null,
+          }))
         : [],
     [pinsOn, search.data, fix],
   );
@@ -105,7 +127,8 @@ export function MapSearch({
     onClose();
   };
 
-  const nothing = q.length >= 2 && !pinsLoading && !placesLoading && pinHits.length === 0 && places.length === 0;
+  const nothing =
+    q.length >= 2 && !pinsLoading && !placesLoading && pinHits.length === 0 && places.length === 0;
 
   return (
     <AnimatePresence>
@@ -118,7 +141,11 @@ export function MapSearch({
           transition={{ duration: 0.15 }}
           onKeyDown={(e) => e.key === "Escape" && close()}
         >
-          <button aria-label="Close search" onClick={close} className="absolute inset-0 bg-ar-void/55" />
+          <button
+            aria-label="Close search"
+            onClick={close}
+            className="bg-ar-void/55 absolute inset-0"
+          />
 
           <motion.div
             className="relative px-3"
@@ -128,8 +155,8 @@ export function MapSearch({
             exit={{ y: -16 }}
             transition={{ type: "spring", stiffness: 420, damping: 34 }}
           >
-            <div className="ar-glass flex h-12 items-center gap-2.5 rounded-full border-ar-green/45 pl-4 pr-1.5">
-              <Search size={17} strokeWidth={2.4} className="shrink-0 text-ar-green-hot" />
+            <div className="ar-glass border-ar-green/45 flex h-12 items-center gap-2.5 rounded-full pr-1.5 pl-4">
+              <Search size={17} strokeWidth={2.4} className="text-ar-green-hot shrink-0" />
               <input
                 autoFocus
                 value={query}
@@ -138,12 +165,12 @@ export function MapSearch({
                 aria-label="Search"
                 enterKeyHint="search"
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-[15px] text-ar-text outline-hidden placeholder:text-ar-faint"
+                className="text-ar-text placeholder:text-ar-faint min-w-0 flex-1 bg-transparent text-[15px] outline-hidden"
               />
               <button
                 onClick={query ? () => setQuery("") : close}
                 aria-label={query ? "Clear search" : "Close search"}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-dim hover:text-ar-text"
+                className="text-ar-dim hover:text-ar-text flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
               >
                 <X size={17} strokeWidth={2.4} />
               </button>
@@ -151,7 +178,9 @@ export function MapSearch({
 
             {q.length >= 2 && (
               <div className="ar-glass ar-scroll mt-2 max-h-[440px] rounded-[20px] py-1.5">
-                {(pinHits.length > 0 || pinsLoading) && <SectionLabel loading={pinsLoading}>Drops</SectionLabel>}
+                {(pinHits.length > 0 || pinsLoading) && (
+                  <SectionLabel loading={pinsLoading}>Drops</SectionLabel>
+                )}
                 {pinHits.map(({ pin, distance }) => (
                   <Row
                     key={pin.id}
@@ -161,7 +190,11 @@ export function MapSearch({
                     }}
                     leading={
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={pin.brandImageUrl} alt="" className="h-[34px] w-[34px] rounded-[10px] object-cover" />
+                      <img
+                        src={pin.brandImageUrl}
+                        alt=""
+                        className="h-[34px] w-[34px] rounded-[10px] object-cover"
+                      />
                     }
                     title={pin.title}
                     subtitle={pin.brandName}
@@ -169,7 +202,9 @@ export function MapSearch({
                   />
                 ))}
 
-                {(places.length > 0 || placesLoading) && <SectionLabel loading={placesLoading}>Places</SectionLabel>}
+                {(places.length > 0 || placesLoading) && (
+                  <SectionLabel loading={placesLoading}>Places</SectionLabel>
+                )}
                 {places.map((p) => (
                   <Row
                     key={p.id}
@@ -178,7 +213,7 @@ export function MapSearch({
                       onPickPlace(p.coords);
                     }}
                     leading={
-                      <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-ar-line bg-white/[0.04] text-ar-dim">
+                      <span className="border-ar-line text-ar-dim flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border bg-white/[0.04]">
                         <MapPin size={16} strokeWidth={2.2} />
                       </span>
                     }
@@ -190,8 +225,12 @@ export function MapSearch({
 
                 {nothing && (
                   <div className="px-6 py-6 text-center">
-                    <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.16em] text-ar-dim">No matches</p>
-                    <p className="mt-1 text-[12px] text-ar-faint">Try a brand name, a drop title, or a street or area.</p>
+                    <p className="font-hud text-ar-dim text-[11px] font-semibold tracking-[0.16em] uppercase">
+                      No matches
+                    </p>
+                    <p className="text-ar-faint mt-1 text-[12px]">
+                      Try a brand name, a drop title, or a street or area.
+                    </p>
                   </div>
                 )}
               </div>
@@ -205,9 +244,11 @@ export function MapSearch({
 
 function SectionLabel({ children, loading }: { children: string; loading?: boolean }) {
   return (
-    <div className="flex items-center gap-2 px-4 pb-1 pt-2.5">
-      <span className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ar-faint">{children}</span>
-      {loading && <Loader2 size={11} className="animate-spin text-ar-faint" />}
+    <div className="flex items-center gap-2 px-4 pt-2.5 pb-1">
+      <span className="font-hud text-ar-faint text-[9.5px] font-semibold tracking-[0.22em] uppercase">
+        {children}
+      </span>
+      {loading && <Loader2 size={11} className="text-ar-faint animate-spin" />}
     </div>
   );
 }
@@ -226,13 +267,22 @@ function Row({
   trailing?: string;
 }) {
   return (
-    <button onClick={onClick} className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-ar-green/[0.08]">
+    <button
+      onClick={onClick}
+      className="hover:bg-ar-green/[0.08] flex w-full items-center gap-3 px-4 py-2.5 text-left"
+    >
       {leading}
       <span className="min-w-0 flex-1">
-        <span className="font-hud block truncate text-[13px] font-bold text-ar-text">{title}</span>
-        {subtitle && <span className="mt-0.5 block truncate text-[11.5px] text-ar-faint">{subtitle}</span>}
+        <span className="font-hud text-ar-text block truncate text-[13px] font-bold">{title}</span>
+        {subtitle && (
+          <span className="text-ar-faint mt-0.5 block truncate text-[11.5px]">{subtitle}</span>
+        )}
       </span>
-      {trailing && <span className="font-hud shrink-0 text-[10.5px] font-bold tabular-nums text-ar-dim">{trailing}</span>}
+      {trailing && (
+        <span className="font-hud text-ar-dim shrink-0 text-[10.5px] font-bold tabular-nums">
+          {trailing}
+        </span>
+      )}
     </button>
   );
 }
@@ -240,9 +290,16 @@ function Row({
 /** Mapbox Geocoding v6 forward search, biased toward the viewer. */
 async function searchPlaces(q: string, near: GeoFix | null, signal: AbortSignal): Promise<Place[]> {
   if (!MAPBOX_TOKEN) return [];
-  const params = new URLSearchParams({ q, access_token: MAPBOX_TOKEN, limit: String(MAX_PLACES), autocomplete: "true" });
+  const params = new URLSearchParams({
+    q,
+    access_token: MAPBOX_TOKEN,
+    limit: String(MAX_PLACES),
+    autocomplete: "true",
+  });
   if (near) params.set("proximity", `${near.lng},${near.lat}`);
-  const res = await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${params.toString()}`, { signal });
+  const res = await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${params.toString()}`, {
+    signal,
+  });
   if (!res.ok) return [];
   const json = (await res.json()) as {
     features?: {

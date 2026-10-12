@@ -23,7 +23,10 @@ type Loaded = { config: EmbedConfig; previewOrigins?: string[] } | null;
 
 const load = cache(async (id: string, c: string | undefined): Promise<Loaded> => {
   if (id === "preview") {
-    return { config: normalizeConfig(decodePreview(c) ?? {}, "preview"), previewOrigins: brandOrigins() };
+    return {
+      config: normalizeConfig(decodePreview(c) ?? {}, "preview"),
+      previewOrigins: brandOrigins(),
+    };
   }
   const row = id ? await db.mapEmbed.findUnique({ where: { id } }) : null;
   return row?.enabled ? { config: normalizeConfig(row, row.id) } : null;
@@ -31,19 +34,29 @@ const load = cache(async (id: string, c: string | undefined): Promise<Loaded> =>
 
 const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
 
-export async function generateMetadata({ params, searchParams }: PageProps<"/embed/[id]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps<"/embed/[id]">): Promise<Metadata> {
   const loaded = await load((await params).id, one((await searchParams).c));
-  return { title: `${loaded?.config.name ?? "Map unavailable"} · ${platformBranding.name}`, robots: { index: false } };
+  return {
+    title: `${loaded?.config.name ?? "Map unavailable"} · ${platformBranding.name}`,
+    robots: { index: false },
+  };
 }
 
 export default async function EmbedPage({ params, searchParams }: PageProps<"/embed/[id]">) {
   const loaded = await load((await params).id, one((await searchParams).c));
   if (!loaded) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-ar-bg p-6 text-center">
+      <div className="bg-ar-bg flex h-screen w-screen items-center justify-center p-6 text-center">
         <div>
-          <p className="font-hud text-[12px] font-semibold uppercase tracking-[0.16em] text-ar-dim">Map unavailable</p>
-          <p className="mt-1 text-[12px] text-ar-faint">This {platformBranding.name} map has been turned off or removed.</p>
+          <p className="font-hud text-ar-dim text-[12px] font-semibold tracking-[0.16em] uppercase">
+            Map unavailable
+          </p>
+          <p className="text-ar-faint mt-1 text-[12px]">
+            This {platformBranding.name} map has been turned off or removed.
+          </p>
         </div>
       </div>
     );

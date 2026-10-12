@@ -11,16 +11,20 @@ function StepLine({ step }: { step: AgentStep }) {
     <li className="flex items-start gap-2 text-xs">
       <span className="mt-px flex size-4 shrink-0 items-center justify-center">
         {step.status === "running" ? (
-          <Loader2 className="size-3.5 animate-spin text-primary" />
+          <Loader2 className="text-primary size-3.5 animate-spin" />
         ) : step.status === "done" ? (
-          <Check className="size-3.5 text-success" />
+          <Check className="text-success size-3.5" />
         ) : (
-          <X className="size-3.5 text-destructive" />
+          <X className="text-destructive size-3.5" />
         )}
       </span>
       <span className="min-w-0">
-        <span className={cn(step.status === "running" ? "text-foreground" : "text-muted-foreground")}>{step.label}</span>
-        {step.detail && <span className="block text-[11px] text-faint">{step.detail}</span>}
+        <span
+          className={cn(step.status === "running" ? "text-foreground" : "text-muted-foreground")}
+        >
+          {step.label}
+        </span>
+        {step.detail && <span className="text-faint block text-[11px]">{step.detail}</span>}
       </span>
     </li>
   );
@@ -30,7 +34,11 @@ function StepLine({ step }: { step: AgentStep }) {
 export function LiveSteps({ steps }: { steps: AgentStep[] }) {
   const running = steps.some((s) => s.status === "running");
   return (
-    <div className="max-w-[92%] rounded-2xl rounded-tl-sm border bg-card px-3 py-2.5 shadow-xs" role="status" aria-live="polite">
+    <div
+      className="bg-card max-w-[92%] rounded-2xl rounded-tl-sm border px-3 py-2.5 shadow-xs"
+      role="status"
+      aria-live="polite"
+    >
       {steps.length === 0 ? (
         <Typing label="Thinking" />
       ) : (
@@ -51,11 +59,15 @@ export function LiveSteps({ steps }: { steps: AgentStep[] }) {
 
 function Typing({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+    <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
       {label}
       <span className="flex gap-0.5" aria-hidden>
         {[0, 150, 300].map((d) => (
-          <span key={d} className="size-1 animate-bounce rounded-full bg-current" style={{ animationDelay: `${d}ms` }} />
+          <span
+            key={d}
+            className="size-1 animate-bounce rounded-full bg-current"
+            style={{ animationDelay: `${d}ms` }}
+          />
         ))}
       </span>
     </span>
@@ -69,7 +81,12 @@ export function DoneSteps({ steps }: { steps: AgentStep[] }) {
   if (work.length === 0) return null;
   return (
     <div className="text-xs">
-      <button type="button" onClick={() => setOpen((o) => !o)} className="inline-flex items-center gap-1 text-faint hover:text-muted-foreground" aria-expanded={open}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="text-faint hover:text-muted-foreground inline-flex items-center gap-1"
+        aria-expanded={open}
+      >
         <ChevronDown className={cn("size-3 transition-transform", !open && "-rotate-90")} />
         What I did ({work.length} step{work.length === 1 ? "" : "s"})
       </button>

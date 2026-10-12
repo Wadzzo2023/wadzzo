@@ -96,7 +96,12 @@ const utf8 = new TextEncoder();
 export function buildZip(entries: ZipEntry[], when = new Date()): Uint8Array {
   const { time, date } = dosStamp(when);
   const out = new ByteWriter();
-  const central: { name: Uint8Array; crc: number; size: number; offset: number }[] = [];
+  const central: {
+    name: Uint8Array;
+    crc: number;
+    size: number;
+    offset: number;
+  }[] = [];
 
   for (const entry of entries) {
     const name = utf8.encode(entry.name);

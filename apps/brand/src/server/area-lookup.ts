@@ -10,15 +10,28 @@ import { TRPCError } from "@trpc/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org";
-const HEADERS = { "User-Agent": "Wadzzo brand portal (home area lookup)", "Accept-Language": "en" };
+const HEADERS = {
+  "User-Agent": "Wadzzo brand portal (home area lookup)",
+  "Accept-Language": "en",
+};
 const GAP_MS = 1100;
 const MAX_QUEUE = 20;
 /** Most points kept across all parts, and most parts (a country's islands). */
 const MAX_POINTS = 5000;
 const MAX_PARTS = 100;
 
-export type AreaMatch = { id: string; name: string; label: string; kind: string; spanDeg: number };
-export type AreaOutline = { type: "Feature"; properties: null; geometry: { type: "MultiPolygon"; coordinates: number[][][][] } };
+export type AreaMatch = {
+  id: string;
+  name: string;
+  label: string;
+  kind: string;
+  spanDeg: number;
+};
+export type AreaOutline = {
+  type: "Feature";
+  properties: null;
+  geometry: { type: "MultiPolygon"; coordinates: number[][][][] };
+};
 
 // ── Polite access: one request at a time, cached ───────────────────────────
 
@@ -28,14 +41,24 @@ const cache = new Map<string, unknown>();
 
 async function nominatim<T>(path: string): Promise<T> {
   if (cache.has(path)) return cache.get(path) as T;
-  if (queued >= MAX_QUEUE) throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Area search is busy. Try again in a moment." });
+  if (queued >= MAX_QUEUE)
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Area search is busy. Try again in a moment.",
+    });
   queued++;
   const turn = last.then(() => new Promise<void>((r) => setTimeout(r, GAP_MS)));
   last = turn;
   try {
     await turn;
-    const res = await fetch(`${NOMINATIM}${path}`, { headers: HEADERS, signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Nominatim ${res.status}` });
+    const res = await fetch(`${NOMINATIM}${path}`, {
+      headers: HEADERS,
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok)
+      throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+        message: `Nominatim ${res.status}`,
+      });
     const data = (await res.json()) as T;
     if (cache.size > 300) cache.delete(cache.keys().next().value!);
     cache.set(path, data);
@@ -43,7 +66,10 @@ async function nominatim<T>(path: string): Promise<T> {
   } catch (e) {
     if (e instanceof TRPCError) throw e;
     console.error("[area-lookup]", e);
-    throw new TRPCError({ code: "BAD_GATEWAY", message: "Couldn't reach the map service. Try again." });
+    throw new TRPCError({
+      code: "BAD_GATEWAY",
+      message: "Couldn't reach the map service. Try again.",
+    });
   } finally {
     queued--;
   }
@@ -51,7 +77,15 @@ async function nominatim<T>(path: string): Promise<T> {
 
 // ── Search ──────────────────────────────────────────────────────────────────
 
-type SearchHit = { osm_type: string; osm_id: number; name?: string; display_name: string; addresstype?: string; type?: string; boundingbox?: string[] };
+type SearchHit = {
+  osm_type: string;
+  osm_id: number;
+  name?: string;
+  display_name: string;
+  addresstype?: string;
+  type?: string;
+  boundingbox?: string[];
+};
 
 /** Places with an outline (countries, states, counties, cities…) matching `query`. */
 export async function findAreas(query: string): Promise<AreaMatch[]> {
@@ -66,7 +100,10 @@ export async function findAreas(query: string): Promise<AreaMatch[]> {
         name: h.name ?? h.display_name.split(",")[0]!,
         label: h.display_name,
         kind: (h.addresstype ?? h.type ?? "area").replace(/_/g, " "),
-        spanDeg: s !== undefined && n !== undefined && w !== undefined && e !== undefined ? Math.max(n - s, e - w) : 1,
+        spanDeg:
+          s !== undefined && n !== undefined && w !== undefined && e !== undefined
+            ? Math.max(n - s, e - w)
+            : 1,
       };
     });
 }
@@ -79,18 +116,37 @@ type Geometry = { type: string; coordinates: unknown };
 export async function areaOutline(id: string, spanDeg: number): Promise<AreaOutline> {
   // Ask for detail in proportion to the place's size: ~1/3000 of its width.
   const threshold = Math.min(0.05, Math.max(0.0002, spanDeg / 3000)).toFixed(4);
-  const q = new URLSearchParams({ osm_ids: id, format: "jsonv2", polygon_geojson: "1", polygon_threshold: threshold });
+  const q = new URLSearchParams({
+    osm_ids: id,
+    format: "jsonv2",
+    polygon_geojson: "1",
+    polygon_threshold: threshold,
+  });
   const [hit] = await nominatim<{ geojson?: Geometry }[]>(`/lookup?${q.toString()}`);
   const rings = outerRings(hit?.geojson);
-  if (!rings.length) throw new TRPCError({ code: "NOT_FOUND", message: "That place has no outline on the map. Try another match, or draw it." });
-  return { type: "Feature", properties: null, geometry: { type: "MultiPolygon", coordinates: fit(rings).map((r) => [r]) } };
+  if (!rings.length)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "That place has no outline on the map. Try another match, or draw it.",
+    });
+  return {
+    type: "Feature",
+    properties: null,
+    geometry: { type: "MultiPolygon", coordinates: fit(rings).map((r) => [r]) },
+  };
 }
 
 /** GeoJSON [lng, lat] outer rings → [lat, lng] rings. */
 function outerRings(g: Geometry | undefined): number[][][] {
   const polygons =
-    g?.type === "Polygon" ? [g.coordinates as number[][][]] : g?.type === "MultiPolygon" ? (g.coordinates as number[][][][]) : [];
-  return polygons.map((p) => (p[0] ?? []).map(([lng, lat]) => [round(lat!), round(lng!)])).filter((r) => r.length >= 4);
+    g?.type === "Polygon"
+      ? [g.coordinates as number[][][]]
+      : g?.type === "MultiPolygon"
+        ? (g.coordinates as number[][][][])
+        : [];
+  return polygons
+    .map((p) => (p[0] ?? []).map(([lng, lat]) => [round(lat!), round(lng!)]))
+    .filter((r) => r.length >= 4);
 }
 
 const round = (n: number) => Math.round(n * 1e5) / 1e5;
@@ -98,7 +154,8 @@ const round = (n: number) => Math.round(n * 1e5) / 1e5;
 /** Ring area in square degrees (for ranking parts). */
 function ringArea(r: number[][]) {
   let a = 0;
-  for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[j]![1]! + r[i]![1]!) * (r[j]![0]! - r[i]![0]!);
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++)
+    a += (r[j]![1]! + r[i]![1]!) * (r[j]![0]! - r[i]![0]!);
   return Math.abs(a / 2);
 }
 

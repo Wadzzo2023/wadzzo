@@ -13,7 +13,10 @@ import { platformBranding } from "@wadzzo/platform/branding";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pinataSDK = require("@pinata/sdk") as new (o: { pinataJWTKey: string }) => {
-  pinFileToIPFS: (s: Readable, o: { pinataMetadata: { name: string } }) => Promise<{ IpfsHash: string }>;
+  pinFileToIPFS: (
+    s: Readable,
+    o: { pinataMetadata: { name: string } },
+  ) => Promise<{ IpfsHash: string }>;
 };
 
 const formEnum = z.enum(FILL_FORMS);
@@ -26,7 +29,10 @@ const RULES = `Rules:
 - Respect every detail the brand gave (dates, numbers, names).`;
 
 async function brandLine(db: import("@wadzzo/db").Db, userId: string) {
-  const c = await db.creator.findUnique({ where: { id: userId }, select: { name: true, bio: true } });
+  const c = await db.creator.findUnique({
+    where: { id: userId },
+    select: { name: true, bio: true },
+  });
   return c ? `The brand is "${c.name}"${c.bio ? ` — ${c.bio.slice(0, 300)}` : ""}.` : "";
 }
 
@@ -34,7 +40,9 @@ const contextBlock = (ctx: Record<string, string>) => {
   const lines = Object.entries(ctx)
     .filter(([, v]) => v.trim())
     .map(([k, v]) => `- ${k}: ${v.slice(0, 1500)}`);
-  return lines.length ? `What's already in the form:\n${lines.join("\n")}` : "The form is empty so far.";
+  return lines.length
+    ? `What's already in the form:\n${lines.join("\n")}`
+    : "The form is empty so far.";
 };
 
 export const aiRouter = createTRPCRouter({
@@ -64,11 +72,18 @@ export const aiRouter = createTRPCRouter({
 It is now ${input.now} (${input.timeZone}). Choose sensible defaults for anything the brand didn't specify, and dates in the future.
 ${RULES}`,
             },
-            { role: "user", content: `${contextBlock(input.context)}\n\nWhat the brand wants:\n${input.prompt}` },
+            {
+              role: "user",
+              content: `${contextBlock(input.context)}\n\nWhat the brand wants:\n${input.prompt}`,
+            },
           ],
           text: { format: zodTextFormat(schema, "form") },
         });
-        if (!res.output_parsed) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The AI didn't return a form. Try rephrasing." });
+        if (!res.output_parsed)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "The AI didn't return a form. Try rephrasing.",
+          });
         return res.output_parsed;
       });
     }),
@@ -118,7 +133,11 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
         let text = res.output_text.trim().replace(/^```(?:html)?\s*|\s*```$/g, "");
         if (input.format === "text") text = text.replace(/^["“](.*)["”]$/s, "$1");
         if (input.maxChars) text = text.slice(0, input.maxChars);
-        if (!text) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The AI came back empty. Try again." });
+        if (!text)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "The AI came back empty. Try again.",
+          });
         return { text };
       });
     }),
@@ -134,7 +153,11 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const size = { square: "1024x1024", wide: "1536x1024", portrait: "1024x1536" }[input.aspect] as "1024x1024" | "1536x1024" | "1024x1536";
+      const size = {
+        square: "1024x1024",
+        wide: "1536x1024",
+        portrait: "1024x1536",
+      }[input.aspect] as "1024x1024" | "1536x1024" | "1024x1536";
       return withAiQuota(ctx.session.user.id, "image", async () => {
         const res = await openai.images.generate({
           model: IMAGE_MODEL,
@@ -144,15 +167,31 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
           n: 1,
         });
         const b64 = res.data?.[0]?.b64_json;
-        if (!b64) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No image came back. Try again." });
+        if (!b64)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "No image came back. Try again.",
+          });
         const bytes = Buffer.from(b64, "base64");
 
         if (input.destination === "ipfs") {
-          const stream = Object.assign(Readable.from(bytes), { path: "ai-thumbnail.png" });
-          const pinned = await new pinataSDK({ pinataJWTKey: env.PINATA_JWT }).pinFileToIPFS(stream, { pinataMetadata: { name: "ai-thumbnail.png" } });
-          return { url: ipfsHashToPinataGatewayUrl(pinned.IpfsHash), ipfsHash: pinned.IpfsHash };
+          const stream = Object.assign(Readable.from(bytes), {
+            path: "ai-thumbnail.png",
+          });
+          const pinned = await new pinataSDK({
+            pinataJWTKey: env.PINATA_JWT,
+          }).pinFileToIPFS(stream, {
+            pinataMetadata: { name: "ai-thumbnail.png" },
+          });
+          return {
+            url: ipfsHashToPinataGatewayUrl(pinned.IpfsHash),
+            ipfsHash: pinned.IpfsHash,
+          };
         }
-        return { url: await uploadBufferToS3(bytes, "image/png"), ipfsHash: null };
+        return {
+          url: await uploadBufferToS3(bytes, "image/png"),
+          ipfsHash: null,
+        };
       });
     }),
 });

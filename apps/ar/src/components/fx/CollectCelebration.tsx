@@ -21,13 +21,7 @@ import { Confetti } from "./Confetti";
  * Dismisses on tap, or on its own timer, then hands control back so the
  * caller can route to the card's detail screen.
  */
-export function CollectCelebration({
-  pin,
-  onDone,
-}: {
-  pin: ArPin;
-  onDone: () => void;
-}) {
+export function CollectCelebration({ pin, onDone }: { pin: ArPin; onDone: () => void }) {
   const reduceMotion = useReducedMotion();
   const rarity = pin.rarity;
   const meta = RARITY_META[rarity];
@@ -55,7 +49,7 @@ export function CollectCelebration({
   return (
     <motion.div
       onClick={onDone}
-      className="absolute inset-0 z-[80] flex cursor-pointer flex-col items-center justify-center overflow-hidden bg-ar-void/92 px-10 backdrop-blur-md"
+      className="bg-ar-void/92 absolute inset-0 z-[80] flex cursor-pointer flex-col items-center justify-center overflow-hidden px-10 backdrop-blur-md"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -64,17 +58,15 @@ export function CollectCelebration({
       {/* God rays, tinted to the rarity and turning slowly behind the card. */}
       <motion.div
         aria-hidden
-        className="absolute left-1/2 top-1/2 h-[760px] w-[760px] opacity-45"
+        className="absolute top-1/2 left-1/2 h-[760px] w-[760px] opacity-45"
         // See the note in BootSequence: motion's inline transform replaces
         // Tailwind's `-translate-*`, so centring has to go through x/y.
         style={{
           x: "-50%",
           y: "-50%",
           background: `conic-gradient(from 0deg, transparent 0deg, hsl(${meta.hsl}/0.5) 12deg, transparent 26deg, transparent 44deg, hsl(${meta.hsl}/0.42) 58deg, transparent 72deg, transparent 96deg, hsl(${meta.hsl}/0.5) 110deg, transparent 126deg, transparent 156deg, hsl(${meta.hsl}/0.42) 170deg, transparent 186deg, transparent 216deg, hsl(${meta.hsl}/0.5) 230deg, transparent 246deg, transparent 280deg, hsl(${meta.hsl}/0.42) 294deg, transparent 310deg, transparent 340deg, hsl(${meta.hsl}/0.5) 352deg, transparent 360deg)`,
-          maskImage:
-            "radial-gradient(circle, transparent 12%, black 34%, transparent 74%)",
-          WebkitMaskImage:
-            "radial-gradient(circle, transparent 12%, black 34%, transparent 74%)",
+          maskImage: "radial-gradient(circle, transparent 12%, black 34%, transparent 74%)",
+          WebkitMaskImage: "radial-gradient(circle, transparent 12%, black 34%, transparent 74%)",
         }}
         initial={{ rotate: 0, scale: 0.6, opacity: 0 }}
         animate={{ rotate: 360, scale: 1, opacity: 0.45 }}
@@ -88,7 +80,7 @@ export function CollectCelebration({
       {/* Landing shockwave */}
       <motion.span
         aria-hidden
-        className="absolute left-1/2 top-1/2 h-48 w-48 rounded-full border-2"
+        className="absolute top-1/2 left-1/2 h-48 w-48 rounded-full border-2"
         style={{ borderColor: `hsl(${meta.hsl})`, x: "-50%", y: "-50%" }}
         initial={{ scale: 0.3, opacity: 0 }}
         animate={{ scale: [0.3, 3.4], opacity: [0, 0.85, 0] }}
@@ -126,10 +118,15 @@ export function CollectCelebration({
         className="relative z-10 mt-7 flex flex-col items-center text-center"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.72, type: "spring", stiffness: 300, damping: 22 }}
+        transition={{
+          delay: 0.72,
+          type: "spring",
+          stiffness: 300,
+          damping: 22,
+        }}
       >
         <motion.span
-          className="font-hud rounded-[9px] border-2 px-3.5 py-1 text-[13px] font-bold uppercase tracking-[0.3em]"
+          className="font-hud rounded-[9px] border-2 px-3.5 py-1 text-[13px] font-bold tracking-[0.3em] uppercase"
           style={{
             borderColor: `hsl(${meta.hsl})`,
             color: `hsl(${meta.hsl})`,
@@ -147,15 +144,15 @@ export function CollectCelebration({
           Collected
         </motion.span>
 
-        <h2 className="font-hud mt-4 max-w-[16rem] text-[19px] font-bold leading-tight text-ar-text">
+        <h2 className="font-hud text-ar-text mt-4 max-w-[16rem] text-[19px] leading-tight font-bold">
           {pin.title}
         </h2>
-        <p className="mt-1.5 text-[12.5px] text-ar-dim">
+        <p className="text-ar-dim mt-1.5 text-[12.5px]">
           {meta.label} &middot; {pin.brandName}
         </p>
         {loud && (
           <p
-            className="font-hud mt-2 text-[10px] font-semibold uppercase tracking-[0.22em]"
+            className="font-hud mt-2 text-[10px] font-semibold tracking-[0.22em] uppercase"
             style={{ color: `hsl(${meta.hsl})` }}
           >
             {meta.blurb}
@@ -164,7 +161,7 @@ export function CollectCelebration({
       </motion.div>
 
       <motion.p
-        className="font-hud absolute bottom-[7%] text-[9.5px] uppercase tracking-[0.3em] text-ar-faint"
+        className="font-hud text-ar-faint absolute bottom-[7%] text-[9.5px] tracking-[0.3em] uppercase"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.8 }}
         transition={{ delay: 1.4 }}

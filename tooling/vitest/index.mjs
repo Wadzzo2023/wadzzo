@@ -11,7 +11,10 @@ const aliases = (appRoot) => [
 ];
 
 /** Fast unit tests (no network, no database). */
-export function unitTestConfig(appRoot, { include = ["tests/**/*.test.ts", "src/**/*.test.ts"] } = {}) {
+export function unitTestConfig(
+  appRoot,
+  { include = ["tests/**/*.test.ts", "src/**/*.test.ts"] } = {},
+) {
   return defineConfig({
     resolve: { alias: aliases(appRoot) },
     test: { environment: "node", include, exclude: ["node_modules/**", ".next/**", "e2e/**"] },
@@ -22,6 +25,11 @@ export function unitTestConfig(appRoot, { include = ["tests/**/*.test.ts", "src/
 export function e2eTestConfig(appRoot) {
   return defineConfig({
     resolve: { alias: aliases(appRoot) },
-    test: { include: ["e2e/**/*.test.ts"], environment: "node", testTimeout: 280_000, hookTimeout: 60_000 },
+    test: {
+      include: ["e2e/**/*.test.ts"],
+      environment: "node",
+      testTimeout: 280_000,
+      hookTimeout: 60_000,
+    },
   });
 }

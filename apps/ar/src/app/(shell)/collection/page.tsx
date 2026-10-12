@@ -84,7 +84,7 @@ export default function CollectionScreen() {
   const stats = {
     total: facets?.total ?? 0,
     brands: facets?.brands ?? 0,
-    best: facets?.best ?? ("common"),
+    best: facets?.best ?? "common",
   };
   const remaining = collection.total - shown.length;
   // Signed out there is nothing to fetch, so the query never runs and its
@@ -101,17 +101,12 @@ export default function CollectionScreen() {
             tab === "drops" && (
               <button
                 onClick={() =>
-                  setSort(
-                    (s) =>
-                      SORTS[
-                        (SORTS.findIndex((x) => x.id === s) + 1) % SORTS.length
-                      ]!.id,
-                  )
+                  setSort((s) => SORTS[(SORTS.findIndex((x) => x.id === s) + 1) % SORTS.length]!.id)
                 }
-                className="ar-glass flex h-9 items-center gap-1.5 rounded-full px-3 text-ar-dim"
+                className="ar-glass text-ar-dim flex h-9 items-center gap-1.5 rounded-full px-3"
               >
                 <ArrowUpDown size={13} strokeWidth={2.4} />
-                <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.12em]">
+                <span className="font-hud text-[10px] font-semibold tracking-[0.12em] uppercase">
                   {SORTS.find((s) => s.id === sort)?.label}
                 </span>
               </button>
@@ -140,18 +135,16 @@ export default function CollectionScreen() {
                 <StatRowSkeleton count={3} />
               </div>
             ) : (
-              <div className="mx-5 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
+              <div className="rounded-ar border-ar-line mx-5 flex items-center justify-around border bg-white/[0.03] py-3">
                 <StatBlock label="Collectibles" value={stats.total} accent />
-                <span className="h-8 w-px bg-ar-line" />
+                <span className="bg-ar-line h-8 w-px" />
                 <StatBlock label="Brands" value={stats.brands} />
-                <span className="h-8 w-px bg-ar-line" />
+                <span className="bg-ar-line h-8 w-px" />
                 <StatBlock
                   label="Best find"
                   value={
                     stats.total > 0 ? (
-                      <span
-                        style={{ color: `hsl(${RARITY_META[stats.best].hsl})` }}
-                      >
+                      <span style={{ color: `hsl(${RARITY_META[stats.best].hsl})` }}>
                         {RARITY_META[stats.best].short}
                       </span>
                     ) : (
@@ -164,24 +157,20 @@ export default function CollectionScreen() {
 
             {/* ── Search ───────────────────────────────────────────────── */}
             <div className="mx-5 mt-3">
-              <div className="ar-bevel flex h-11 items-center gap-2.5 rounded-ar px-3.5">
-                <Search
-                  size={15}
-                  strokeWidth={2.2}
-                  className="shrink-0 text-ar-faint"
-                />
+              <div className="ar-bevel rounded-ar flex h-11 items-center gap-2.5 px-3.5">
+                <Search size={15} strokeWidth={2.2} className="text-ar-faint shrink-0" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search your collectibles"
                   aria-label="Search your collection"
-                  className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
+                  className="text-ar-text placeholder:text-ar-faint min-w-0 flex-1 bg-transparent text-[13px] outline-hidden"
                 />
                 {query && (
                   <button
                     onClick={() => setQuery("")}
                     aria-label="Clear search"
-                    className="shrink-0 text-ar-faint hover:text-ar-text"
+                    className="text-ar-faint hover:text-ar-text shrink-0"
                   >
                     <X size={15} strokeWidth={2.4} />
                   </button>
@@ -190,10 +179,7 @@ export default function CollectionScreen() {
             </div>
 
             {/* ── Rarity filter ────────────────────────────────────────── */}
-            <div
-              ref={rarityRailRef}
-              className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1"
-            >
+            <div ref={rarityRailRef} className="ar-scroll-x mt-3 flex gap-1.5 px-5 pb-1">
               <Chip active={rarity === "all"} onClick={() => setRarity("all")}>
                 All {stats.total > 0 && `· ${stats.total}`}
               </Chip>
@@ -236,9 +222,7 @@ export default function CollectionScreen() {
                         oneFace
                         className="tcg-card--windowed"
                         priority={i < 4}
-                        onClick={() =>
-                          void router.push(`/collection/${pin.id}`)
-                        }
+                        onClick={() => void router.push(`/collection/${pin.id}`)}
                       />
                     ))}
 
@@ -258,9 +242,7 @@ export default function CollectionScreen() {
                         onClick={() => void collection.fetchNextPage()}
                       >
                         Show {Math.min(remaining, PAGE_SIZE)} more
-                        <span className="ml-1 text-ar-faint">
-                          &middot; {remaining} left
-                        </span>
+                        <span className="text-ar-faint ml-1">&middot; {remaining} left</span>
                       </ArButton>
                     </div>
                   )}
@@ -295,15 +277,15 @@ function EmptyState({
   if (filtered) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+        <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
           No matches
         </p>
-        <p className="mt-1.5 max-w-[16rem] text-[12.5px] leading-relaxed text-ar-faint">
+        <p className="text-ar-faint mt-1.5 max-w-[16rem] text-[12.5px] leading-relaxed">
           Nothing in your collection fits that search.
         </p>
         <button
           onClick={onClear}
-          className="font-hud mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-green-hot"
+          className="font-hud text-ar-green-hot mt-4 text-[11px] font-semibold tracking-[0.14em] uppercase"
         >
           Clear filters
         </button>
@@ -318,17 +300,17 @@ function EmptyState({
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-[92px] w-[66px] rounded-[11px] border border-dashed border-ar-line-bright bg-white/[0.02]"
+            className="border-ar-line-bright h-[92px] w-[66px] rounded-[11px] border border-dashed bg-white/[0.02]"
             style={{ transform: `rotate(${(i - 1) * 7}deg)` }}
           />
         ))}
       </div>
 
-      <Sparkles size={20} className="mb-3 text-ar-green-hot" strokeWidth={2} />
-      <p className="font-hud text-[15px] font-bold uppercase tracking-[0.1em] text-ar-text">
+      <Sparkles size={20} className="text-ar-green-hot mb-3" strokeWidth={2} />
+      <p className="font-hud text-ar-text text-[15px] font-bold tracking-[0.1em] uppercase">
         {signedIn ? "Nothing collected yet" : "Your collection is waiting"}
       </p>
-      <p className="mt-2 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+      <p className="text-ar-faint mt-2 max-w-[17rem] text-[12.5px] leading-relaxed">
         {signedIn
           ? "Find a pin on the map, walk to it, and capture it in AR. It lands here."
           : "Browse the map and see what's out there. Sign in when you find something worth keeping."}

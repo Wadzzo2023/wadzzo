@@ -46,7 +46,7 @@ export function BottomSheet({
           <motion.div
             aria-hidden
             onClick={dismissible ? onClose : undefined}
-            className="absolute inset-0 bg-ar-void/75 backdrop-blur-[6px]"
+            className="bg-ar-void/75 absolute inset-0 backdrop-blur-[6px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -58,22 +58,27 @@ export function BottomSheet({
             aria-modal="true"
             aria-labelledby={labelledBy}
             className={cn(
-              "ar-glass relative w-full rounded-t-ar-xl border-b-0 pb-[max(18px,var(--ar-safe-bottom))]",
+              "ar-glass rounded-t-ar-xl relative w-full border-b-0 pb-[max(18px,var(--ar-safe-bottom))]",
               "max-h-[86%] overflow-hidden",
               className,
             )}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 420, damping: 38, mass: 0.9 }}
+            transition={{
+              type: "spring",
+              stiffness: 420,
+              damping: 38,
+              mass: 0.9,
+            }}
             drag={dismissible ? "y" : false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.55 }}
             onDragEnd={handleDragEnd}
           >
             {dismissible && (
-              <div className="flex justify-center pb-1 pt-2.5">
-                <span className="h-[4px] w-9 rounded-full bg-ar-line-bright" />
+              <div className="flex justify-center pt-2.5 pb-1">
+                <span className="bg-ar-line-bright h-[4px] w-9 rounded-full" />
               </div>
             )}
             {children}

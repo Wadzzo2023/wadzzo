@@ -50,7 +50,7 @@ export function EntriesPanel({
 
   if (entries.isError) {
     return (
-      <p className="rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5 text-[12px] text-ar-danger">
+      <p className="rounded-ar border-ar-danger/40 bg-ar-danger/10 text-ar-danger border px-3.5 py-2.5 text-[12px]">
         Couldn&rsquo;t load your entries.
       </p>
     );
@@ -59,10 +59,10 @@ export function EntriesPanel({
   if (entries.data.length === 0) {
     return (
       <div className="py-10 text-center">
-        <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+        <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
           No entries yet
         </p>
-        <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+        <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
           {open
             ? "Read the brief, do the thing, then send it in with the button below."
             : "This bounty closed before you sent anything."}
@@ -119,12 +119,12 @@ function EntryCard({
   return (
     <article className="ar-bevel rounded-ar-lg p-3.5">
       <header className="flex items-center justify-between gap-2">
-        <p className="font-hud text-[10px] font-semibold uppercase tracking-[0.16em] text-ar-faint">
+        <p className="font-hud text-ar-faint text-[10px] font-semibold tracking-[0.16em] uppercase">
           Entry {number} &middot; {format(new Date(entry.createdAt), "d MMM, HH:mm")}
         </p>
         <span
           className={cn(
-            "font-hud inline-flex h-[20px] items-center rounded-full border px-2 text-[9.5px] font-semibold uppercase tracking-[0.12em]",
+            "font-hud inline-flex h-[20px] items-center rounded-full border px-2 text-[9.5px] font-semibold tracking-[0.12em] uppercase",
             TONE_CLASS[status.tone],
           )}
         >
@@ -151,7 +151,7 @@ function EntryCard({
               />
               <span
                 className={cn(
-                  "font-hud text-[8.5px] font-semibold uppercase tracking-[0.1em]",
+                  "font-hud text-[8.5px] font-semibold tracking-[0.1em] uppercase",
                   reached ? "text-ar-dim" : "text-ar-faint/60",
                 )}
               >
@@ -191,11 +191,11 @@ function EntryCard({
                 href={m.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2.5 rounded-ar border border-ar-line bg-white/[0.03] px-3 py-2"
+                className="rounded-ar border-ar-line flex items-center gap-2.5 border bg-white/[0.03] px-3 py-2"
               >
-                <Icon size={15} strokeWidth={2.2} className="shrink-0 text-ar-dim" />
-                <span className="min-w-0 flex-1 truncate text-[12px] text-ar-text">{m.name}</span>
-                <span className="font-hud shrink-0 text-[10px] text-ar-faint">
+                <Icon size={15} strokeWidth={2.2} className="text-ar-dim shrink-0" />
+                <span className="text-ar-text min-w-0 flex-1 truncate text-[12px]">{m.name}</span>
+                <span className="font-hud text-ar-faint shrink-0 text-[10px]">
                   {formatBytes(m.size)}
                 </span>
               </a>
@@ -205,20 +205,22 @@ function EntryCard({
       )}
 
       {editable && (
-        <div className="mt-3 flex gap-2 border-t border-ar-line pt-3">
+        <div className="border-ar-line mt-3 flex gap-2 border-t pt-3">
           <button
             onClick={onEdit}
-            className="font-hud flex h-8 items-center gap-1.5 rounded-full border border-ar-line px-3 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ar-dim hover:text-ar-text"
+            className="font-hud border-ar-line text-ar-dim hover:text-ar-text flex h-8 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-semibold tracking-[0.1em] uppercase"
           >
             <Pencil size={11} strokeWidth={2.5} />
             Edit
           </button>
           <button
-            onClick={() => (confirming ? remove.mutate({ entryId: entry.id }) : setConfirming(true))}
+            onClick={() =>
+              confirming ? remove.mutate({ entryId: entry.id }) : setConfirming(true)
+            }
             onBlur={() => setConfirming(false)}
             disabled={remove.isPending}
             className={cn(
-              "font-hud flex h-8 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-semibold uppercase tracking-[0.1em] disabled:opacity-50",
+              "font-hud flex h-8 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-semibold tracking-[0.1em] uppercase disabled:opacity-50",
               confirming
                 ? "border-ar-danger/60 bg-ar-danger/15 text-ar-danger"
                 : "border-ar-line text-ar-dim hover:text-ar-text",
@@ -228,7 +230,7 @@ function EntryCard({
             {remove.isPending ? "Deleting…" : confirming ? "Tap to confirm" : "Delete"}
           </button>
           {remove.error && (
-            <span className="self-center text-[11px] text-ar-danger">{remove.error.message}</span>
+            <span className="text-ar-danger self-center text-[11px]">{remove.error.message}</span>
           )}
         </div>
       )}

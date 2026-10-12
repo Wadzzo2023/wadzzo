@@ -120,14 +120,44 @@ export type AgentBlock =
       /** Labels the person picked, once answered. */
       answered?: string[];
     }
-  | { kind: "places"; id: string; title: string; items: PlaceItem[]; area?: string }
+  | {
+      kind: "places";
+      id: string;
+      title: string;
+      items: PlaceItem[];
+      area?: string;
+    }
   | { kind: "pins"; id: string; title: string; items: PinItem[] }
   | { kind: "hotspots"; id: string; title: string; items: HotspotItem[] }
   | { kind: "events"; id: string; title: string; items: EventItem[] }
-  | { kind: "announcements"; id: string; title: string; items: AnnouncementItem[] }
-  | { kind: "collectors"; id: string; title: string; items: CollectorItem[]; total: number }
-  | { kind: "report"; id: string; title: string; stats: ReportStat[]; bars?: { title: string; items: ReportBar[] }; note?: string }
-  | { kind: "proposal"; id: string; actionId: string; action: ProposedAction; summary: string };
+  | {
+      kind: "announcements";
+      id: string;
+      title: string;
+      items: AnnouncementItem[];
+    }
+  | {
+      kind: "collectors";
+      id: string;
+      title: string;
+      items: CollectorItem[];
+      total: number;
+    }
+  | {
+      kind: "report";
+      id: string;
+      title: string;
+      stats: ReportStat[];
+      bars?: { title: string; items: ReportBar[] };
+      note?: string;
+    }
+  | {
+      kind: "proposal";
+      id: string;
+      actionId: string;
+      action: ProposedAction;
+      summary: string;
+    };
 
 export type AgentBlockKind = AgentBlock["kind"];
 
@@ -216,14 +246,22 @@ export type ProposedAction =
   | { type: "create_pins"; items: PlaceItem[]; defaults: PinDefaults }
   | { type: "update_pins"; pins: NamedRef[]; changes: PinChanges }
   | { type: "hide_pins"; pins: NamedRef[] }
-  | { type: "hotspot_state"; hotspot: NamedRef; op: "pause" | "resume" | "delete" }
+  | {
+      type: "hotspot_state";
+      hotspot: NamedRef;
+      op: "pause" | "resume" | "delete";
+    }
   | { type: "update_hotspot"; hotspot: NamedRef; changes: HotspotChanges }
   | { type: "create_hotspot"; hotspot: HotspotDraft }
   | { type: "create_event"; event: EventDraft }
   | { type: "update_event"; event: NamedRef; changes: Partial<EventDraft> }
   | { type: "delete_event"; event: NamedRef }
   | { type: "create_announcement"; announcement: AnnouncementDraft }
-  | { type: "update_announcement"; announcement: NamedRef; changes: Partial<AnnouncementDraft> }
+  | {
+      type: "update_announcement";
+      announcement: NamedRef;
+      changes: Partial<AnnouncementDraft>;
+    }
   | { type: "delete_announcement"; announcement: NamedRef };
 
 export type ProposedActionType = ProposedAction["type"];

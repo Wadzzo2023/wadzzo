@@ -45,8 +45,7 @@ function ensureModelViewerLoaded(): Promise<void> {
     script.type = "module";
     script.src = MODEL_VIEWER_SRC;
     script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("model-viewer script failed to load"));
+    script.onerror = () => reject(new Error("model-viewer script failed to load"));
     document.head.appendChild(script);
   });
   return modelViewerLoading;
@@ -54,15 +53,9 @@ function ensureModelViewerLoaded(): Promise<void> {
 
 /** Parses a `RARITY_META`-style "H S% L%" body into fractions `setHSL` expects. */
 function parseHslBody(hsl: string): [h: number, s: number, l: number] | null {
-  const match = /^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/.exec(
-    hsl.trim(),
-  );
+  const match = /^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/.exec(hsl.trim());
   if (!match?.[1] || !match[2] || !match[3]) return null;
-  return [
-    Number(match[1]) / 360,
-    Number(match[2]) / 100,
-    Number(match[3]) / 100,
-  ];
+  return [Number(match[1]) / 360, Number(match[2]) / 100, Number(match[3]) / 100];
 }
 
 /** Builds a beveled picture-frame around `texture` and exports it as a `.glb` blob. */
@@ -112,7 +105,9 @@ async function buildFrameGlb(
     maxTextureSize: 1024,
   });
   if (!(result instanceof ArrayBuffer)) {
-    throw new AppError(ErrorCodes.INTERNAL, { message: "GLTFExporter returned JSON, not a binary .glb" });
+    throw new AppError(ErrorCodes.INTERNAL, {
+      message: "GLTFExporter returned JSON, not a binary .glb",
+    });
   }
   return new Blob([result], { type: "model/gltf-binary" });
 }
@@ -219,9 +214,7 @@ export function ArPhotoFrame({
       </ArButton>
 
       {notice && (
-        <p className="mt-2 text-center text-[11px] leading-relaxed text-ar-faint">
-          {notice}
-        </p>
+        <p className="text-ar-faint mt-2 text-center text-[11px] leading-relaxed">{notice}</p>
       )}
 
       {/* Off-screen: `activateAR()` needs the element mounted and loaded,

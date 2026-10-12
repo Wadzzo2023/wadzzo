@@ -69,17 +69,14 @@ export const accRouter = createTRPCRouter({
       where: { id: creatorId },
       include: {
         pageAsset: true,
-      }
-
-
+      },
     });
-    let assetCode = ""
-    let assetIssuer = ""
+    let assetCode = "";
+    let assetIssuer = "";
     if (storage.pageAsset) {
-      assetCode = storage.pageAsset.code
-      assetIssuer = storage.pageAsset.issuer
-    }
-    else if (storage.customPageAssetCodeIssuer) {
+      assetCode = storage.pageAsset.code;
+      assetIssuer = storage.pageAsset.issuer;
+    } else if (storage.customPageAssetCodeIssuer) {
       const [code, issuer] = storage.customPageAssetCodeIssuer.split(":");
       if (code && issuer) {
         assetCode = code;
@@ -90,21 +87,24 @@ export const accRouter = createTRPCRouter({
       pubkey: storage.storagePub,
       code: assetCode,
       issuer: assetIssuer,
-    })
-
-  }),
-  getCreatorStorageBallancesByID: creatorProcedure.input(z.object({
-    creatorId: z.string(),
-  })).query(async ({ ctx, input }) => {
-    const { creatorId } = input;
-
-    const storage = await ctx.db.creator.findUniqueOrThrow({
-      where: { id: creatorId },
-      select: { storagePub: true },
     });
-
-    return await accountBalances({ userPub: storage.storagePub });
   }),
+  getCreatorStorageBallancesByID: creatorProcedure
+    .input(
+      z.object({
+        creatorId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { creatorId } = input;
+
+      const storage = await ctx.db.creator.findUniqueOrThrow({
+        where: { id: creatorId },
+        select: { storagePub: true },
+      });
+
+      return await accountBalances({ userPub: storage.storagePub });
+    }),
   getCreatorStorageInfo: protectedProcedure.query(async ({ ctx, input }) => {
     const creatorId = ctx.session.user.id;
     const storage = await ctx.db.creator.findUnique({
@@ -112,7 +112,9 @@ export const accRouter = createTRPCRouter({
       select: { storagePub: true, storageSecret: true },
     });
     if (!storage?.storagePub) {
-      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+        message: "storage does not exist",
+      });
     }
 
     const { tokens: assets } = await accountDetailsWithHomeDomain({

@@ -29,8 +29,18 @@ const MAX_MURAL_MARKERS = 40;
 
 const EMPTY_MURALS: MapMural[] = [];
 
-type View = { bbox: [number, number, number, number]; zoom: number; center: Coords };
-type Group = { id: number; lng: number; lat: number; count: number; imgs: string[] };
+type View = {
+  bbox: [number, number, number, number];
+  zoom: number;
+  center: Coords;
+};
+type Group = {
+  id: number;
+  lng: number;
+  lat: number;
+  count: number;
+  imgs: string[];
+};
 
 function useClusters<T>(
   items: T[],
@@ -54,7 +64,11 @@ function useClusters<T>(
       items.map((t, i) => {
         const { lat, lng } = pos(t);
         const u = img(t);
-        return { type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lng, lat] }, properties: { i, imgs: u ? [u] : [] } };
+        return {
+          type: "Feature" as const,
+          geometry: { type: "Point" as const, coordinates: [lng, lat] },
+          properties: { i, imgs: u ? [u] : [] },
+        };
       }),
     );
     return sc;
@@ -63,24 +77,36 @@ function useClusters<T>(
   }, [items]);
 
   const result = useMemo(() => {
-    if (!view || items.length === 0) return { singles: items.filter(keep).slice(0, max), groups: [] as Group[] };
+    if (!view || items.length === 0)
+      return {
+        singles: items.filter(keep).slice(0, max),
+        groups: [] as Group[],
+      };
     const groups: Group[] = [];
     const singles: { t: T; d: number }[] = [];
     for (const f of index.getClusters(view.bbox, Math.floor(view.zoom))) {
       const [lng, lat] = f.geometry.coordinates as [number, number];
       if ("cluster" in f.properties && f.properties.cluster) {
         const cp = f.properties;
-        groups.push({ id: cp.cluster_id, lng, lat, count: cp.point_count, imgs: cp.imgs });
+        groups.push({
+          id: cp.cluster_id,
+          lng,
+          lat,
+          count: cp.point_count,
+          imgs: cp.imgs,
+        });
       } else {
         const t = items[(f.properties as { i: number }).i];
         if (t) singles.push({ t, d: distanceMeters(view.center, { lat, lng }) });
       }
     }
-    const shown = singles.sort((a, b) => a.d - b.d).slice(0, max).map((x) => x.t);
+    const shown = singles
+      .sort((a, b) => a.d - b.d)
+      .slice(0, max)
+      .map((x) => x.t);
     // The selected one always has its own marker, even inside a group.
     for (const t of items) if (keep(t) && !shown.includes(t)) shown.push(t);
     return { singles: shown, groups };
-     
   }, [index, items, view, max, keep]);
 
   return { ...result, index };
@@ -204,7 +230,11 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   // touched, so the bearing (and compass mode) carry over.
   useEffect(() => {
     if (!ready) return;
-    mapRef.current?.easeTo({ pitch: is3d ? 48 : 0, duration: 600, essential: true });
+    mapRef.current?.easeTo({
+      pitch: is3d ? 48 : 0,
+      duration: 600,
+      essential: true,
+    });
   }, [is3d, ready]);
 
   // Follow the fix while the viewer hasn't taken the wheel.
@@ -258,10 +288,20 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     const map = mapRef.current;
     const b = map?.getBounds();
     if (!map || !b) return;
-    onBoundsChange?.({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+    onBoundsChange?.({
+      north: b.getNorth(),
+      south: b.getSouth(),
+      east: b.getEast(),
+      west: b.getWest(),
+    });
     const c = map.getCenter();
     setView({
-      bbox: [Math.max(b.getWest(), -180), Math.max(b.getSouth(), -85), Math.min(b.getEast(), 180), Math.min(b.getNorth(), 85)],
+      bbox: [
+        Math.max(b.getWest(), -180),
+        Math.max(b.getSouth(), -85),
+        Math.min(b.getEast(), 180),
+        Math.min(b.getNorth(), 85),
+      ],
       zoom: map.getZoom(),
       center: { lat: c.lat, lng: c.lng },
     });
@@ -270,17 +310,37 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   // ── What to draw: groups when zoomed out, single markers when close ──
   const keepPin = useCallback((p: ArPin) => p.id === selectedId, [selectedId]);
   const keepMural = useCallback((m: MapMural) => m.id === selectedMuralId, [selectedMuralId]);
-  const pinLayer = useClusters(pins, (p) => p, (p) => p.brandImageUrl || p.imageUrl, view, MAX_MARKERS, keepPin);
-  const muralLayer = useClusters(murals ?? EMPTY_MURALS, (m) => ({ lat: m.latitude, lng: m.longitude }), (m) => m.coverUrl, view, MAX_MURAL_MARKERS, keepMural);
-  const openGroup = useCallback((index: Supercluster<{ i: number; imgs: string[] }, { imgs: string[] }>, g: Group | undefined) => {
-    if (!g) return;
-    mapRef.current?.easeTo({
-      center: [g.lng, g.lat],
-      zoom: Math.min(index.getClusterExpansionZoom(g.id) + 0.3, 19),
-      duration: 650,
-      essential: true,
-    });
-  }, []);
+  const pinLayer = useClusters(
+    pins,
+    (p) => p,
+    (p) => p.brandImageUrl || p.imageUrl,
+    view,
+    MAX_MARKERS,
+    keepPin,
+  );
+  const muralLayer = useClusters(
+    murals ?? EMPTY_MURALS,
+    (m) => ({ lat: m.latitude, lng: m.longitude }),
+    (m) => m.coverUrl,
+    view,
+    MAX_MURAL_MARKERS,
+    keepMural,
+  );
+  const openGroup = useCallback(
+    (
+      index: Supercluster<{ i: number; imgs: string[] }, { imgs: string[] }>,
+      g: Group | undefined,
+    ) => {
+      if (!g) return;
+      mapRef.current?.easeTo({
+        center: [g.lng, g.lat],
+        zoom: Math.min(index.getClusterExpansionZoom(g.id) + 0.3, 19),
+        duration: 650,
+        essential: true,
+      });
+    },
+    [],
+  );
 
   if (!MAPBOX_TOKEN) {
     return <MapFallback pins={pins} onSelect={onSelect} selectedId={selectedId} />;
@@ -315,7 +375,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         // Any user drag / zoom / rotate while compass mode is on turns it off.
         // (`originalEvent` is only set for user input, not our own easeTo.)
         onMoveStart={(e) => {
-          if ((e as { originalEvent?: unknown }).originalEvent && headingUp != null) onCompassGesture?.();
+          if ((e as { originalEvent?: unknown }).originalEvent && headingUp != null)
+            onCompassGesture?.();
         }}
         onClick={() => onSelect(null)}
         // A pitched map with 3D extrusions is what makes a city read as a
@@ -329,24 +390,46 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         style={{ width: "100%", height: "100%" }}
       >
         {muralLayer.groups.map((g) => (
-          <Marker key={`mg-${g.id}`} longitude={g.lng} latitude={g.lat} anchor="bottom" style={{ zIndex: 8 }}>
+          <Marker
+            key={`mg-${g.id}`}
+            longitude={g.lng}
+            latitude={g.lat}
+            anchor="bottom"
+            style={{ zIndex: 8 }}
+          >
             <ClusterBillboard
               id={g.id}
               count={g.count}
               images={g.imgs}
               tone="mural"
-              onOpen={(id) => openGroup(muralLayer.index, muralLayer.groups.find((x) => x.id === id))}
+              onOpen={(id) =>
+                openGroup(
+                  muralLayer.index,
+                  muralLayer.groups.find((x) => x.id === id),
+                )
+              }
             />
           </Marker>
         ))}
 
         {pinLayer.groups.map((g) => (
-          <Marker key={`g-${g.id}`} longitude={g.lng} latitude={g.lat} anchor="bottom" style={{ zIndex: 9 }}>
+          <Marker
+            key={`g-${g.id}`}
+            longitude={g.lng}
+            latitude={g.lat}
+            anchor="bottom"
+            style={{ zIndex: 9 }}
+          >
             <ClusterBillboard
               id={g.id}
               count={g.count}
               images={g.imgs}
-              onOpen={(id) => openGroup(pinLayer.index, pinLayer.groups.find((x) => x.id === id))}
+              onOpen={(id) =>
+                openGroup(
+                  pinLayer.index,
+                  pinLayer.groups.find((x) => x.id === id),
+                )
+              }
             />
           </Marker>
         ))}
@@ -379,11 +462,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
             <PinMarker
               pin={pin}
               selected={pin.id === selectedId}
-              inRange={
-                fix
-                  ? distanceMeters(fix, pin) <= AR_CAPTURE_RADIUS
-                  : false
-              }
+              inRange={fix ? distanceMeters(fix, pin) <= AR_CAPTURE_RADIUS : false}
               onSelect={() => onSelect(pin.id)}
             />
           </Marker>
@@ -423,12 +502,7 @@ function MapGrade({ theme }: { theme: ResolvedTheme }) {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
-      <div
-        className={cn(
-          "ar-grid absolute inset-0",
-          dark ? "opacity-[0.18]" : "opacity-[0.1]",
-        )}
-      />
+      <div className={cn("ar-grid absolute inset-0", dark ? "opacity-[0.18]" : "opacity-[0.1]")} />
       {/* Vignette, held back in light mode. `--ar-void` is near-black in dark
           and near-white in light, so the same 0.72 that gently fades the map
           into the bezel at night becomes a heavy white bloom in daylight —
@@ -461,12 +535,12 @@ function MapFallback({
   onSelect: (id: string | null) => void;
 }) {
   return (
-    <div className="ar-grid absolute inset-0 overflow-hidden bg-ar-bg">
-      <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ar-green/20" />
-      <div className="absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ar-green/25" />
-      <div className="absolute left-1/2 top-1/2 h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ar-green/30" />
+    <div className="ar-grid bg-ar-bg absolute inset-0 overflow-hidden">
+      <div className="border-ar-green/20 absolute top-1/2 left-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
+      <div className="border-ar-green/25 absolute top-1/2 left-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
+      <div className="border-ar-green/30 absolute top-1/2 left-1/2 h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full border" />
       <div
-        className="animate-spin-slow absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        className="animate-spin-slow absolute top-1/2 left-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           background:
             "conic-gradient(from 0deg, transparent 0deg, hsl(var(--ar-green)/0.28) 40deg, transparent 70deg)",
@@ -498,15 +572,14 @@ function MapFallback({
 
       <div
         className={cn(
-          "ar-glass absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-ar px-4 py-3 text-center",
+          "ar-glass rounded-ar absolute inset-x-5 top-1/2 -translate-y-1/2 px-4 py-3 text-center",
         )}
       >
-        <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.18em] text-ar-green">
+        <p className="font-hud text-ar-green text-[11px] font-semibold tracking-[0.18em] uppercase">
           Map preview
         </p>
-        <p className="mt-1 text-[12px] leading-relaxed text-ar-dim">
-          Set <code className="text-ar-text">NEXT_PUBLIC_MAPBOX_API</code> to
-          load live tiles.
+        <p className="text-ar-dim mt-1 text-[12px] leading-relaxed">
+          Set <code className="text-ar-text">NEXT_PUBLIC_MAPBOX_API</code> to load live tiles.
         </p>
       </div>
 

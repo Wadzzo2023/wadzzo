@@ -7,7 +7,7 @@ import { BountyRoute } from "./bounty";
  * All routers added in /api/routers should be manually added here.
  */
 export const BountyRouters = createTRPCRouter({
-    Bounty: BountyRoute,
+  Bounty: BountyRoute,
 });
 
 // export type definition of API

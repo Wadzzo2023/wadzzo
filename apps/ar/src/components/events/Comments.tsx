@@ -24,8 +24,9 @@ export function CommentsSection({ target }: { target: ArCommentTarget }) {
 
   return (
     <section>
-      <h2 className="font-hud mb-3 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-green">
-        Comments{comments.data && comments.data.length > 0 ? ` · ${comments.data.length}` : ""}
+      <h2 className="font-hud text-ar-green mb-3 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
+        Comments
+        {comments.data && comments.data.length > 0 ? ` · ${comments.data.length}` : ""}
       </h2>
       <Composer target={target} />
       <div className="mt-4">
@@ -35,11 +36,13 @@ export function CommentsSection({ target }: { target: ArCommentTarget }) {
             <Skeleton className="h-14 w-full" />
           </div>
         ) : comments.isError ? (
-          <p className="rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5 text-[12px] text-ar-danger">
+          <p className="rounded-ar border-ar-danger/40 bg-ar-danger/10 text-ar-danger border px-3.5 py-2.5 text-[12px]">
             Couldn&rsquo;t load comments.
           </p>
         ) : comments.data.length === 0 ? (
-          <p className="py-6 text-center text-[12.5px] text-ar-faint">No comments yet. Say something.</p>
+          <p className="text-ar-faint py-6 text-center text-[12.5px]">
+            No comments yet. Say something.
+          </p>
         ) : (
           <ol className="space-y-4">
             {comments.data.map((c) => (
@@ -83,7 +86,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
     return (
       <button
         onClick={() => requireAuth("events")}
-        className="ar-bevel flex h-11 w-full items-center rounded-[22px] px-4 text-left text-[13px] text-ar-faint"
+        className="ar-bevel text-ar-faint flex h-11 w-full items-center rounded-[22px] px-4 text-left text-[13px]"
       >
         Sign in to comment
       </button>
@@ -92,7 +95,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
 
   return (
     <div>
-      {add.error && <p className="mb-2 text-[12px] text-ar-danger">{add.error.message}</p>}
+      {add.error && <p className="text-ar-danger mb-2 text-[12px]">{add.error.message}</p>}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -116,7 +119,7 @@ function Composer({ target }: { target: ArCommentTarget }) {
           rows={1}
           maxLength={1000}
           placeholder="Add a comment"
-          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-hidden placeholder:text-ar-faint"
+          className="ar-bevel text-ar-text placeholder:text-ar-faint max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug outline-hidden"
         />
         <button
           type="submit"
@@ -154,10 +157,10 @@ function CommentRow({ comment, target }: { comment: ArComment; target: ArComment
       />
       <div className="min-w-0 flex-1">
         <p className="flex items-baseline gap-2">
-          <span className="truncate text-[12.5px] font-semibold text-ar-text">
+          <span className="text-ar-text truncate text-[12.5px] font-semibold">
             {comment.author.name ?? "Anonymous"}
           </span>
-          <span className="font-hud shrink-0 text-[10px] text-ar-faint">
+          <span className="font-hud text-ar-faint shrink-0 text-[10px]">
             {formatDistanceToNowStrict(new Date(comment.createdAt))}
           </span>
           {comment.mine && (
@@ -171,7 +174,7 @@ function CommentRow({ comment, target }: { comment: ArComment; target: ArComment
               disabled={remove.isPending}
               aria-label={confirming ? "Confirm delete" : "Delete comment"}
               className={cn(
-                "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em]",
+                "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold tracking-[0.1em] uppercase",
                 confirming ? "text-ar-danger" : "text-ar-faint hover:text-ar-text",
               )}
             >
@@ -180,7 +183,7 @@ function CommentRow({ comment, target }: { comment: ArComment; target: ArComment
             </button>
           )}
         </p>
-        <p className="mt-0.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ar-dim">
+        <p className="text-ar-dim mt-0.5 text-[13px] leading-relaxed break-words whitespace-pre-wrap">
           {comment.content}
         </p>
       </div>

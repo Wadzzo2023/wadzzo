@@ -2,7 +2,12 @@
  * Wallet types and schemas that are safe on the server *and* in the browser:
  * no React, no browser APIs, no secrets.
  */
-export { WalletType, CUSTODIAL_WALLET_TYPES, isCustodialWallet, isServerSignedWallet } from "./wallet-type";
+export {
+  WalletType,
+  CUSTODIAL_WALLET_TYPES,
+  isCustodialWallet,
+  isServerSignedWallet,
+} from "./wallet-type";
 export {
   authCredentialSchema,
   type AuthCredential,

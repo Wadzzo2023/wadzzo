@@ -11,10 +11,7 @@ export type AccBalanceType =
 
 interface Balance {
   balances: AccBalanceType[] | undefined;
-  getAssetBalance: (props: {
-    code?: string;
-    issuer?: string;
-  }) => string | undefined;
+  getAssetBalance: (props: { code?: string; issuer?: string }) => string | undefined;
   setBalance: (balances: AccBalanceType[]) => void;
   platformAssetBalance: number;
   setPlatformAssetBalance: (balances: AccBalanceType[]) => void;
@@ -42,14 +39,8 @@ export const useUserStellarAcc = create<Balance>((set, get) => ({
     const balances = get().balances;
     if (balances) {
       for (const balance of balances) {
-        if (
-          balance.asset_type == "credit_alphanum12" ||
-          balance.asset_type == "credit_alphanum4"
-        ) {
-          if (
-            balance.asset_code == props.code &&
-            balance.asset_issuer == props.issuer
-          ) {
+        if (balance.asset_type == "credit_alphanum12" || balance.asset_type == "credit_alphanum4") {
+          if (balance.asset_code == props.code && balance.asset_issuer == props.issuer) {
             return balance.balance;
           }
         }
@@ -59,10 +50,7 @@ export const useUserStellarAcc = create<Balance>((set, get) => ({
 
   setPlatformAssetBalance: (balances) => {
     for (const balance of balances) {
-      if (
-        balance.asset_type == "credit_alphanum12" ||
-        balance.asset_type == "credit_alphanum4"
-      )
+      if (balance.asset_type == "credit_alphanum12" || balance.asset_type == "credit_alphanum4")
         if (
           balance.asset_code == PLATFORM_ASSET.code &&
           balance.asset_issuer == PLATFORM_ASSET.issuer
@@ -88,8 +76,7 @@ export const useUserStellarAcc = create<Balance>((set, get) => ({
     if (!balances) return undefined;
     const trustline = balances.some((balance) => {
       if (
-        (balance.asset_type === "credit_alphanum12" ||
-          balance.asset_type === "credit_alphanum4") &&
+        (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") &&
         balance.asset_code === code &&
         balance.asset_issuer === issuer
       ) {
@@ -122,14 +109,8 @@ export const useCreatorStorageAcc = create<CreatorBalance>((set, get) => ({
     const balances = get().balances;
     if (balances) {
       for (const balance of balances) {
-        if (
-          balance.asset_type == "credit_alphanum12" ||
-          balance.asset_type == "credit_alphanum4"
-        ) {
-          if (
-            balance.asset_code == props.code &&
-            balance.asset_issuer == props.issuer
-          ) {
+        if (balance.asset_type == "credit_alphanum12" || balance.asset_type == "credit_alphanum4") {
+          if (balance.asset_code == props.code && balance.asset_issuer == props.issuer) {
             return Number(balance.balance);
           }
         }

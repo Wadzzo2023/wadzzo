@@ -1,6 +1,12 @@
 "use client";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { api } from "~/utils/api";
 
@@ -11,9 +17,18 @@ const ALL = "__all";
  * platform). Renders nothing for a sub-platform's admins — their lists are
  * already limited to their own platform by the server.
  */
-export function PlatformFilter({ value, onChange }: { value?: string; onChange: (platformId: string | undefined) => void }) {
+export function PlatformFilter({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (platformId: string | undefined) => void;
+}) {
   const { isSuperAdmin } = usePortalAccess();
-  const options = api.admin.platforms.options.useQuery(undefined, { enabled: isSuperAdmin, refetchOnWindowFocus: false });
+  const options = api.admin.platforms.options.useQuery(undefined, {
+    enabled: isSuperAdmin,
+    refetchOnWindowFocus: false,
+  });
   if (!isSuperAdmin) return null;
 
   return (

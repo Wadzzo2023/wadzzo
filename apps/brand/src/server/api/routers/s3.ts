@@ -15,11 +15,9 @@ export const s3Router = createTRPCRouter({
     return "you can now see this secret message!";
   }),
 
-  getSignedURL: protectedProcedure
-    .input(fileUploadSchema)
-    .mutation(({ ctx, input }) => {
-      return getSignedURL(input);
-    }),
+  getSignedURL: protectedProcedure.input(fileUploadSchema).mutation(({ ctx, input }) => {
+    return getSignedURL(input);
+  }),
 
   getSignedMultiURLs: protectedProcedure
     .input(

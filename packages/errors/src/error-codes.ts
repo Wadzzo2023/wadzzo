@@ -62,7 +62,11 @@ export const ERROR_DEFINITIONS = define({
   },
 
   // ── generic request problems ─────────────────────────────────────────────
-  VALIDATION_FAILED: { status: 400, trpc: "BAD_REQUEST", message: "Some of the details are invalid." },
+  VALIDATION_FAILED: {
+    status: 400,
+    trpc: "BAD_REQUEST",
+    message: "Some of the details are invalid.",
+  },
   RESOURCE_NOT_FOUND: { status: 404, trpc: "NOT_FOUND", message: "We couldn't find that." },
   RESOURCE_CONFLICT: {
     status: 409,
@@ -156,7 +160,11 @@ export const ERROR_DEFINITIONS = define({
   },
 
   // ── payments, storage, setup ─────────────────────────────────────────────
-  PAYMENT_FAILED: { status: 402, trpc: "PAYMENT_REQUIRED", message: "The payment didn't go through." },
+  PAYMENT_FAILED: {
+    status: 402,
+    trpc: "PAYMENT_REQUIRED",
+    message: "The payment didn't go through.",
+  },
   UPLOAD_FAILED: {
     status: 502,
     trpc: "BAD_GATEWAY",

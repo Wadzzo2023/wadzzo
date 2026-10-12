@@ -28,7 +28,10 @@ function mapToScreen(p: Pt, W: number, H: number, aspect: number): Pt {
   return { x: (W - dispW) / 2 + p.x * dispW, y: (H - dispH) / 2 + p.y * dispH };
 }
 
-const lerp = (a: Pt, b: Pt, t: number) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+const lerp = (a: Pt, b: Pt, t: number) => ({
+  x: a.x + (b.x - a.x) * t,
+  y: a.y + (b.y - a.y) * t,
+});
 
 /** Short L-shaped brackets at each corner, pointing along both edges. */
 function bracketPath(c: Pt[], len = 18) {
@@ -39,7 +42,10 @@ function bracketPath(c: Pt[], len = 18) {
       const toward = (q: Pt) => {
         const d = Math.hypot(q.x - p.x, q.y - p.y) || 1;
         const l = Math.min(len, d / 3);
-        return { x: p.x + ((q.x - p.x) / d) * l, y: p.y + ((q.y - p.y) / d) * l };
+        return {
+          x: p.x + ((q.x - p.x) / d) * l,
+          y: p.y + ((q.y - p.y) / d) * l,
+        };
       };
       const a = toward(prev);
       const b = toward(next);
@@ -75,14 +81,19 @@ export function MuralOutline({
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setSize({ W: e!.contentRect.width, H: e!.contentRect.height }));
+    const ro = new ResizeObserver(([e]) =>
+      setSize({ W: e!.contentRect.width, H: e!.contentRect.height }),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
   // New detection → new tween target, in screen px.
   useEffect(() => {
-    target.current = outline && size.W ? corners(outline).map((p) => mapToScreen(p, size.W, size.H, aspect)) : null;
+    target.current =
+      outline && size.W
+        ? corners(outline).map((p) => mapToScreen(p, size.W, size.H, aspect))
+        : null;
   }, [outline, size, aspect]);
 
   // Tween every frame towards the target.
@@ -125,13 +136,24 @@ export function MuralOutline({
                 // Notches at the mid-top and mid-bottom of the target edges.
                 const mx = (a.x + b.x) / 2 + targetOffsetX;
                 const my = (a.y + b.y) / 2;
-                return <path key={i} d={`M${mx},${my - 10} L${mx},${my + 10}`} stroke="hsl(var(--rarity-epic))" strokeWidth={3} strokeLinecap="round" />;
+                return (
+                  <path
+                    key={i}
+                    d={`M${mx},${my - 10} L${mx},${my + 10}`}
+                    stroke="hsl(var(--rarity-epic))"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                  />
+                );
               })}
             </g>
           )}
 
           {/* Soft fill so the art reads as "selected" */}
-          <polygon points={poly} fill={solid ? "hsl(var(--rarity-epic) / 0.10)" : "hsl(var(--rarity-epic) / 0.05)"} />
+          <polygon
+            points={poly}
+            fill={solid ? "hsl(var(--rarity-epic) / 0.10)" : "hsl(var(--rarity-epic) / 0.05)"}
+          />
           <polygon
             points={poly}
             fill="none"
@@ -141,19 +163,37 @@ export function MuralOutline({
             strokeDasharray={solid ? undefined : "10 8"}
             className={solid ? "ar-outline-glow" : "ar-outline-march"}
           />
-          {solid && <path d={bracketPath(pts)} fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />}
+          {solid && (
+            <path
+              d={bracketPath(pts)}
+              fill="none"
+              stroke="#fff"
+              strokeWidth={4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
         </svg>
       )}
 
       {/* Label chip at the top-left corner */}
       {pts && (
         <div
-          className="font-hud absolute flex -translate-y-[calc(100%+6px)] items-center gap-1.5 whitespace-nowrap rounded-full border border-rarity-epic/60 bg-ar-void/80 px-2 py-[3px] text-[10px] font-bold uppercase tracking-[0.14em] text-white transition-opacity"
-          style={{ left: Math.max(6, Math.min(pts[0]!.x, size.W - 120)), top: Math.max(30, pts[0]!.y) }}
+          className="font-hud border-rarity-epic/60 bg-ar-void/80 absolute flex -translate-y-[calc(100%+6px)] items-center gap-1.5 rounded-full border px-2 py-[3px] text-[10px] font-bold tracking-[0.14em] whitespace-nowrap text-white uppercase transition-opacity"
+          style={{
+            left: Math.max(6, Math.min(pts[0]!.x, size.W - 120)),
+            top: Math.max(30, pts[0]!.y),
+          }}
         >
-          <span className={solid ? "h-1.5 w-1.5 rounded-full bg-ar-green-hot" : "h-1.5 w-1.5 animate-pulse rounded-full bg-rarity-epic"} />
+          <span
+            className={
+              solid
+                ? "bg-ar-green-hot h-1.5 w-1.5 rounded-full"
+                : "bg-rarity-epic h-1.5 w-1.5 animate-pulse rounded-full"
+            }
+          />
           {kind}
-          <span className="tabular-nums text-rarity-epic">{Math.round(score * 100)}%</span>
+          <span className="text-rarity-epic tabular-nums">{Math.round(score * 100)}%</span>
         </div>
       )}
     </div>

@@ -1,10 +1,4 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
@@ -31,9 +25,7 @@ export async function follow_creator({
 
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
 
-  const transactionInializer = await server.loadAccount(
-    motherAccount.publicKey(),
-  );
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: "200", // mother paying fee but no return

@@ -7,7 +7,6 @@ import { WalletType } from "../../wallet-type";
 import { createExtensionProvider } from "../extension-provider";
 import type { ExtensionWallet } from "../wallet-provider";
 
-
 /** Freighter reports failures as `{ error }` objects instead of throwing. */
 const errorMessage = (error: unknown): string | undefined => {
   if (typeof error !== "object" || error === null || !("message" in error)) return undefined;

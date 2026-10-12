@@ -14,14 +14,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const scope = platformScope({ platform: await getCurrentPlatform() });
 
   const [items, creators, posts, bounties] = await Promise.all([
-    db.asset.findMany({ where: { ...scope, marketItems: { some: { placerId: { not: null } } }, creator: { approved: true } }, select: { id: true, updatedAt: true }, take: 5000 }),
-    db.creator.findMany({ where: { ...scope, approved: true }, select: { id: true, vanityURL: true }, take: 5000 }),
+    db.asset.findMany({
+      where: {
+        ...scope,
+        marketItems: { some: { placerId: { not: null } } },
+        creator: { approved: true },
+      },
+      select: { id: true, updatedAt: true },
+      take: 5000,
+    }),
+    db.creator.findMany({
+      where: { ...scope, approved: true },
+      select: { id: true, vanityURL: true },
+      take: 5000,
+    }),
     // members-only posts are left out: their bodies aren't public
-    db.post.findMany({ where: { ...scope, subscriptionId: null, creator: { approved: true } }, select: { id: true, updatedAt: true }, orderBy: { id: "desc" }, take: 5000 }),
-    db.bounty.findMany({ where: { ...scope, status: "APPROVED" }, select: { id: true, createdAt: true }, orderBy: { id: "desc" }, take: 5000 }),
+    db.post.findMany({
+      where: { ...scope, subscriptionId: null, creator: { approved: true } },
+      select: { id: true, updatedAt: true },
+      orderBy: { id: "desc" },
+      take: 5000,
+    }),
+    db.bounty.findMany({
+      where: { ...scope, status: "APPROVED" },
+      select: { id: true, createdAt: true },
+      orderBy: { id: "desc" },
+      take: 5000,
+    }),
   ]);
 
-  const pages: MetadataRoute.Sitemap = ["", "/marketplace", "/creators", "/bounties", "/feed", "/about", "/faq", "/support", "/privacy"].map((p) => ({
+  const pages: MetadataRoute.Sitemap = [
+    "",
+    "/marketplace",
+    "/creators",
+    "/bounties",
+    "/feed",
+    "/about",
+    "/faq",
+    "/support",
+    "/privacy",
+  ].map((p) => ({
     url: `${base}${p}`,
     changeFrequency: p === "" || p === "/marketplace" || p === "/feed" ? "daily" : "weekly",
     priority: p === "" ? 1 : 0.7,
@@ -29,9 +61,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...pages,
-    ...items.map((i) => ({ url: `${base}/item/${i.id}`, lastModified: i.updatedAt, priority: 0.6 })),
-    ...creators.map((c) => ({ url: `${base}/creator/${c.vanityURL ?? c.id}`, priority: 0.6 })),
-    ...posts.map((p) => ({ url: `${base}/posts/${p.id}`, lastModified: p.updatedAt, priority: 0.4 })),
-    ...bounties.map((b) => ({ url: `${base}/bounties/${b.id}`, lastModified: b.createdAt, priority: 0.5 })),
+    ...items.map((i) => ({
+      url: `${base}/item/${i.id}`,
+      lastModified: i.updatedAt,
+      priority: 0.6,
+    })),
+    ...creators.map((c) => ({
+      url: `${base}/creator/${c.vanityURL ?? c.id}`,
+      priority: 0.6,
+    })),
+    ...posts.map((p) => ({
+      url: `${base}/posts/${p.id}`,
+      lastModified: p.updatedAt,
+      priority: 0.4,
+    })),
+    ...bounties.map((b) => ({
+      url: `${base}/bounties/${b.id}`,
+      lastModified: b.createdAt,
+      priority: 0.5,
+    })),
   ];
 }

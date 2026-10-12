@@ -6,17 +6,8 @@ import { z } from "zod";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
-import {
-  isOwnS3Url,
-  MAX_ENTRY_FILE_BYTES,
-  MAX_ENTRY_FILES,
-  signEntryUpload,
-} from "~/server/s3";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { isOwnS3Url, MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES, signEntryUpload } from "~/server/s3";
 
 /**
  * ── Bounty ─────────────────────────────────────────────────────────────────
@@ -150,11 +141,7 @@ export type BountyCard = ReturnType<typeof toCard>;
 /** Plain text from the entry box → the HTML wadzz0's review screen renders. */
 function textToHtml(text: string) {
   const escape = (s: string) =>
-    s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   return text
     .split(/\n{2,}/)
     .map((para) => `<p>${escape(para).replace(/\n/g, "<br>")}</p>`)
@@ -175,19 +162,18 @@ function assertOwnMedia(medias: { url: string }[]) {
  * actually see. Unapproved bounties are invisible to everyone but people who
  * already joined (a bounty can be pulled after the fact).
  */
-async function loadForViewer(
-  db: Db,
-  bountyId: number,
-  userId: string,
-  ctx: PlatformContext,
-) {
+async function loadForViewer(db: Db, bountyId: number, userId: string, ctx: PlatformContext) {
   const bounty = await db.bounty.findUnique({
     where: { id: bountyId },
     include: { participants: { where: { userId }, select: { id: true } } },
   });
   const joined = Boolean(bounty?.participants.length);
   // Another platform's bounty doesn't exist here (web.wadzzo.com sees all).
-  if (!bounty || !isInPlatformScope(ctx, bounty.platformId) || (bounty.status !== "APPROVED" && !joined)) {
+  if (
+    !bounty ||
+    !isInPlatformScope(ctx, bounty.platformId) ||
+    (bounty.status !== "APPROVED" && !joined)
+  ) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
   }
   return { bounty, joined };
@@ -301,8 +287,7 @@ export const bountyRouter = createTRPCRouter({
         include: cardInclude(userId),
       });
 
-      const nextCursor =
-        rows.length > input.limit ? rows.pop()!.id : null;
+      const nextCursor = rows.length > input.limit ? rows.pop()!.id : null;
       return { items: rows.map(toCard), nextCursor };
     }),
 
@@ -317,36 +302,34 @@ export const bountyRouter = createTRPCRouter({
     return joins.map((j) => toCard(j.bounty));
   }),
 
-  byId: publicProcedure
-    .input(z.object({ id: z.number().int() }))
-    .query(async ({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
-      const row = await ctx.db.bounty.findUnique({
-        where: { id: input.id },
-        include: {
-          ...cardInclude(userId),
-          _count: {
-            select: { participants: true, submissions: true, comments: true },
-          },
+  byId: publicProcedure.input(z.object({ id: z.number().int() })).query(async ({ ctx, input }) => {
+    const userId = ctx.session?.user.id;
+    const row = await ctx.db.bounty.findUnique({
+      where: { id: input.id },
+      include: {
+        ...cardInclude(userId),
+        _count: {
+          select: { participants: true, submissions: true, comments: true },
         },
-      });
-      if (!row || !isInPlatformScope(ctx, row.platformId)) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
-      }
-      const card = toCard(row);
-      if (row.status !== "APPROVED" && !card.viewer.joined) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
-      }
-      return {
-        ...card,
-        description: row.description,
-        imageUrls: row.imageUrls,
-        status: row.status,
-        totalEntries: row._count.submissions,
-        commentCount: row._count.comments,
-        isOwner: userId === row.creatorId,
-      };
-    }),
+      },
+    });
+    if (!row || !isInPlatformScope(ctx, row.platformId)) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+    }
+    const card = toCard(row);
+    if (row.status !== "APPROVED" && !card.viewer.joined) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+    }
+    return {
+      ...card,
+      description: row.description,
+      imageUrls: row.imageUrls,
+      status: row.status,
+      totalEntries: row._count.submissions,
+      commentCount: row._count.comments,
+      isOwner: userId === row.creatorId,
+    };
+  }),
 
   join: protectedProcedure
     .input(z.object({ id: z.number().int() }))
@@ -370,9 +353,7 @@ export const bountyRouter = createTRPCRouter({
 
       if (bounty.requiredBalance > 0) {
         const account = await StellarAccount.load(userId);
-        const balance =
-          account?.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ??
-          0;
+        const balance = account?.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ?? 0;
         if (balance < bounty.requiredBalance) {
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -388,10 +369,7 @@ export const bountyRouter = createTRPCRouter({
       } catch (e) {
         // A double tap racing itself — the unique (bountyId, userId) index
         // already did the right thing.
-        if (
-          e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === "P2002"
-        ) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
           return { joined: true };
         }
         throw e;
@@ -438,9 +416,7 @@ export const bountyRouter = createTRPCRouter({
           bountyId: bounty.id,
           userId,
           content: textToHtml(input.content),
-          medias: input.medias.length
-            ? { createMany: { data: input.medias } }
-            : undefined,
+          medias: input.medias.length ? { createMany: { data: input.medias } } : undefined,
         },
         select: { id: true },
       });
@@ -546,7 +522,9 @@ export const bountyRouter = createTRPCRouter({
           },
         },
       });
-      const shape = (c: (typeof rows)[number] | (typeof rows)[number]["bountyChildComments"][number]) => ({
+      const shape = (
+        c: (typeof rows)[number] | (typeof rows)[number]["bountyChildComments"][number],
+      ) => ({
         id: c.id,
         content: c.content,
         createdAt: c.createdAt,
@@ -577,12 +555,11 @@ export const bountyRouter = createTRPCRouter({
           select: { bountyId: true, bountyParentCommentID: true },
         });
         // One level of replies, and only within the same bounty.
-        if (
-          !parent ||
-          parent.bountyId !== bounty.id ||
-          parent.bountyParentCommentID !== null
-        ) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Can't reply here" });
+        if (!parent || parent.bountyId !== bounty.id || parent.bountyParentCommentID !== null) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Can't reply here",
+          });
         }
       }
 
@@ -633,7 +610,10 @@ export const bountyRouter = createTRPCRouter({
         where: { id: input.commentId, userId: ctx.session.user.id },
       });
       if (count === 0) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Comment not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Comment not found",
+        });
       }
       return { id: input.commentId };
     }),
@@ -674,7 +654,10 @@ export const bountyRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { bounty, joined } = await loadForViewer(ctx.db, input.bountyId, userId, ctx);
       if (!joined) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Join this bounty first" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Join this bounty first",
+        });
       }
 
       const existing = await ctx.db.bountyDoubt.findFirst({
@@ -682,7 +665,11 @@ export const bountyRouter = createTRPCRouter({
         select: { id: true },
       });
 
-      const message = { senderId: userId, role: UserRole.USER, content: input.content };
+      const message = {
+        senderId: userId,
+        role: UserRole.USER,
+        content: input.content,
+      };
       if (existing) {
         await ctx.db.bountyDoubt.update({
           where: { id: existing.id },
@@ -703,9 +690,7 @@ export const bountyRouter = createTRPCRouter({
         actorId: userId,
         creatorId: bounty.creatorId,
         bountyId: bounty.id,
-        type: existing
-          ? NotificationType.BOUNTY_DOUBT_REPLY
-          : NotificationType.BOUNTY_DOUBT_CREATE,
+        type: existing ? NotificationType.BOUNTY_DOUBT_REPLY : NotificationType.BOUNTY_DOUBT_CREATE,
       });
       return { ok: true };
     }),

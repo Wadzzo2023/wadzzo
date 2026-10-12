@@ -13,7 +13,10 @@ export type PlatformContext = { platform: ScopePlatform };
  * root platform `filter` (the admin panel's platform dropdown) narrows it to one
  * platform; elsewhere it is ignored.
  */
-export function platformScope(ctx: PlatformContext, filter?: string | null): { platformId?: string } {
+export function platformScope(
+  ctx: PlatformContext,
+  filter?: string | null,
+): { platformId?: string } {
   if (!ctx.platform.isRoot) return { platformId: ctx.platform.id };
   return filter ? { platformId: filter } : {};
 }
@@ -47,7 +50,10 @@ export function canAdminPlatform(
  * platform's brands can manage and drop pins (the pins keep the brand's own
  * platform, so they show on both).
  */
-export function brandWorksOnPlatform(platform: ScopePlatform, brandPlatformId: string | null | undefined) {
+export function brandWorksOnPlatform(
+  platform: ScopePlatform,
+  brandPlatformId: string | null | undefined,
+) {
   return platform.isRoot || platform.id === brandPlatformId;
 }
 

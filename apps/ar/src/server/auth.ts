@@ -2,17 +2,11 @@
 import { verifyMessageSignature } from "@albedo-link/signature-verification";
 import axios from "axios";
 
-import {
-  getServerSession,
-  type NextAuthOptions,
-} from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { WalletType, type WadzzoSessionUser as User } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
 import { firebaseAuth } from "@wadzzo/wallet/firebase";
@@ -26,7 +20,6 @@ import { truncateString } from "@wadzzo/utils/string";
 import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
-
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -69,8 +62,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-
-
 };
 
 /**

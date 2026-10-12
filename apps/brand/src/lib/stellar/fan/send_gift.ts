@@ -7,7 +7,13 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 import { type MyAssetType } from "./utils";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
@@ -38,18 +44,25 @@ export async function sendGift({
   const assetStorage = Keypair.fromSecret(creatorStorageSec);
 
   const transactionInializer = await server.loadAccount(motherAccount.publicKey());
-  console.log("Secrate", creatorStorageSec)
-  console.log("Storage", assetStorage)
-  const tokens = (await StellarAccount.loadOrThrow(assetStorage.publicKey())).tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer);
+  console.log("Secrate", creatorStorageSec);
+  console.log("Storage", assetStorage);
+  const tokens = (await StellarAccount.loadOrThrow(assetStorage.publicKey())).tokenBalance(
+    creatorPageAsset.code,
+    creatorPageAsset.issuer,
+  );
   const accountDetails = await server.loadAccount(assetStorage.publicKey());
   console.log("Balances:", accountDetails.balances);
 
-  console.log("Tokens", tokens, price)
+  console.log("Tokens", tokens, price);
   if (!tokens) {
-    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Asset not found",
+    });
   }
   if (Number(tokens) < price) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Not enough balance" });
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Not enough balance",
+    });
   }
 
   const extraCost = await getplatformAssetNumberForXLM(1);
@@ -59,7 +72,7 @@ export async function sendGift({
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: "200",
     networkPassphrase,
-  })
+  });
   Tx1.addOperation(
     Operation.payment({
       asset: PLATFORM_ASSET,
@@ -67,13 +80,18 @@ export async function sendGift({
       source: creatorPub,
       destination: motherAccount.publicKey(),
     }),
-  )
-  if (creatorPageAsset.code !== PLATFORM_ASSET.code && creatorPageAsset.issuer !== PLATFORM_ASSET.issuer) {
-    const checkReciverHasTrust = (await StellarAccount.loadOrThrow(customerPubkey)).hasTrustline(creatorPageAsset.code, creatorPageAsset.issuer);
+  );
+  if (
+    creatorPageAsset.code !== PLATFORM_ASSET.code &&
+    creatorPageAsset.issuer !== PLATFORM_ASSET.issuer
+  ) {
+    const checkReciverHasTrust = (await StellarAccount.loadOrThrow(customerPubkey)).hasTrustline(
+      creatorPageAsset.code,
+      creatorPageAsset.issuer,
+    );
     if (!checkReciverHasTrust) {
       const claimants: Claimant[] = [
-        new Claimant(customerPubkey, Claimant.predicateUnconditional(),
-        ),
+        new Claimant(customerPubkey, Claimant.predicateUnconditional()),
       ];
 
       Tx1.addOperation(
@@ -82,7 +100,7 @@ export async function sendGift({
           amount: "1",
           destination: assetStorage.publicKey(),
           source: motherAccount.publicKey(),
-        })
+        }),
       );
       Tx1.addOperation(
         Operation.createClaimableBalance({
@@ -90,8 +108,8 @@ export async function sendGift({
           asset,
           source: assetStorage.publicKey(),
           claimants: claimants,
-        })
-      )
+        }),
+      );
 
       Tx1.setTimeout(0);
       const buildTrx = Tx1.build();
@@ -99,8 +117,7 @@ export async function sendGift({
       const xdr = buildTrx.toXDR();
       const singedXdr = signXdrForCustodialUser({ xdr, signWith });
       return singedXdr;
-    }
-    else {
+    } else {
       Tx1.addOperation(
         Operation.payment({
           asset,
@@ -108,7 +125,7 @@ export async function sendGift({
           source: assetStorage.publicKey(),
           destination: customerPubkey,
         }),
-      )
+      );
     }
     Tx1.setTimeout(0);
     const buildTrx = Tx1.build();
@@ -117,11 +134,7 @@ export async function sendGift({
     const singedXdr = signXdrForCustodialUser({ xdr, signWith });
     return singedXdr;
   }
-
-
-
 }
-
 
 export const sendGitfAsPlatformAsset = async ({
   reciver,
@@ -131,12 +144,12 @@ export const sendGitfAsPlatformAsset = async ({
   assetIssuer,
   signWith,
 }: {
-  reciver: string,
-  creatorId: string,
-  amount: number,
-  assetCode: string,
-  assetIssuer: string,
-  signWith: CustodialSigner,
+  reciver: string;
+  creatorId: string;
+  amount: number;
+  assetCode: string;
+  assetIssuer: string;
+  signWith: CustodialSigner;
 }) => {
   const server = new Horizon.Server(STELLAR_URL);
   const asset = new Asset(assetCode, assetIssuer);
@@ -145,18 +158,24 @@ export const sendGitfAsPlatformAsset = async ({
   const senderAdcc = await StellarAccount.loadOrThrow(creatorId);
   const token = senderAdcc.tokenBalance(assetCode, assetIssuer);
   if (!token) {
-    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Asset not found",
+    });
   }
   if (Number(token) < amount) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Not enough balance" });
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Not enough balance",
+    });
   }
   const hasReciverTrust = receiverAcc.hasTrustline(assetCode, assetIssuer);
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: "200",
     networkPassphrase,
-  })
+  });
   if (!hasReciverTrust) {
-    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Reciver has no trustline" })
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Reciver has no trustline",
+    });
   }
   Tx1.addOperation(
     Operation.payment({
@@ -165,12 +184,11 @@ export const sendGitfAsPlatformAsset = async ({
       source: creatorId,
       destination: reciver,
     }),
-  )
+  );
   Tx1.setTimeout(0);
   const buildTrx = Tx1.build();
   buildTrx.sign();
   const xdr = buildTrx.toXDR();
   const singedXdr = signXdrForCustodialUser({ xdr, signWith });
   return singedXdr;
-
-}
+};

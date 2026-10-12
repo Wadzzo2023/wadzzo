@@ -29,7 +29,11 @@ function assertFollowTx(xdr: string, userId: string) {
   }
   const mother = Keypair.fromSecret(env.MOTHER_SECRET).publicKey();
   if (tx.source !== mother) {
-    throw new HttpError(400, "BAD_REQUEST", `Transaction wasn't prepared by ${platformBranding.name}`);
+    throw new HttpError(
+      400,
+      "BAD_REQUEST",
+      `Transaction wasn't prepared by ${platformBranding.name}`,
+    );
   }
   const ok = tx.operations.every((op) => {
     if (op.type === "changeTrust") return op.source === userId;
@@ -49,10 +53,14 @@ async function submit(xdr: string, userId: string) {
   try {
     await new Horizon.Server(STELLAR_URL).submitTransaction(tx);
   } catch (e) {
-    const codes = (e as { response?: { data?: { extras?: { result_codes?: unknown } } } })
-      .response?.data?.extras?.result_codes;
+    const codes = (e as { response?: { data?: { extras?: { result_codes?: unknown } } } }).response
+      ?.data?.extras?.result_codes;
     console.error("[mobile follow] submit failed", codes ?? e);
-    throw new HttpError(502, "SUBMIT_FAILED", "The network rejected the follow transaction. Try again.");
+    throw new HttpError(
+      502,
+      "SUBMIT_FAILED",
+      "The network rejected the follow transaction. Try again.",
+    );
   }
 }
 

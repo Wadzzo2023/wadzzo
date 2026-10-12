@@ -33,7 +33,10 @@ export async function notify(
         isUser: false,
         meta,
         Notification: {
-          create: to.map((notifierId) => ({ notifierId, isCreator: creatorIds.includes(notifierId) })),
+          create: to.map((notifierId) => ({
+            notifierId,
+            isCreator: creatorIds.includes(notifierId),
+          })),
         },
       },
     });

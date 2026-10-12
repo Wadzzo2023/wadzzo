@@ -5,7 +5,12 @@ import { api } from "~/utils/api";
 /** Mark read / unread / delete, then refresh the lists and the badge. */
 export function useInboxActions() {
   const utils = api.useUtils();
-  const refresh = () => Promise.all([utils.fan.notification.inbox.invalidate(), utils.fan.notification.inboxUnread.invalidate(), utils.fan.notification.inboxUnreadByCategory.invalidate()]);
+  const refresh = () =>
+    Promise.all([
+      utils.fan.notification.inbox.invalidate(),
+      utils.fan.notification.inboxUnread.invalidate(),
+      utils.fan.notification.inboxUnreadByCategory.invalidate(),
+    ]);
   const opts = { onSuccess: () => void refresh() };
   return {
     markRead: api.fan.notification.markRead.useMutation(opts),

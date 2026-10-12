@@ -21,7 +21,11 @@ export function fromLocal(v: string | null | undefined) {
 }
 
 /** HTML → plain text (for passing rich-text fields as AI context). */
-export const htmlToText = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+export const htmlToText = (html: string) =>
+  html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 /** Small "12 left today" label; hidden for admins (unlimited). */
 export function AiQuota({ kind, className }: { kind: "text" | "image"; className?: string }) {
@@ -29,7 +33,13 @@ export function AiQuota({ kind, className }: { kind: "text" | "image"; className
   if (!usage.data || usage.data.unlimited) return null;
   const left = usage.data[kind] ?? 0;
   return (
-    <span className={cn("text-xs tabular-nums", left === 0 ? "text-destructive" : "text-muted-foreground", className)}>
+    <span
+      className={cn(
+        "text-xs tabular-nums",
+        left === 0 ? "text-destructive" : "text-muted-foreground",
+        className,
+      )}
+    >
       {left} {kind === "image" ? "image" : "AI"} {left === 1 ? "use" : "uses"} left today
     </span>
   );

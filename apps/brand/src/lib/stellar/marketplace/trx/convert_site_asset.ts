@@ -7,7 +7,13 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../SECRET";
-import { STROOP, STELLAR_URL, PLATFORM_ASSET, networkPassphrase, TrxBaseFee } from "@wadzzo/wallet/config";
+import {
+  STROOP,
+  STELLAR_URL,
+  PLATFORM_ASSET,
+  networkPassphrase,
+  TrxBaseFee,
+} from "@wadzzo/wallet/config";
 
 export async function covertSiteAsset2XLM(props: {
   siteAssetAmount: number;
@@ -18,9 +24,7 @@ export async function covertSiteAsset2XLM(props: {
   // take siteAsset and send xlm from storage
   const { pubkey, siteAssetAmount, xlm, secret } = props;
 
-  const assetAmount = (Number(siteAssetAmount) * Number(STROOP))
-    .toFixed(7)
-    .toString();
+  const assetAmount = (Number(siteAssetAmount) * Number(STROOP)).toFixed(7).toString();
 
   const server = new Horizon.Server(STELLAR_URL);
 

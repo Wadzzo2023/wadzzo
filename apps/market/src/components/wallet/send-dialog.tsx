@@ -5,7 +5,13 @@ import { CheckCircle2, Gift } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { formatAmount } from "@wadzzo/stellar/quote";
@@ -14,7 +20,13 @@ import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
 
 /** Anything in the wallet that can be sent. `issuer` is null for XLM. */
-export type SendableAsset = { code: string; issuer: string | null; balance: number; label: string; thumbnail: string | null };
+export type SendableAsset = {
+  code: string;
+  issuer: string | null;
+  balance: number;
+  label: string;
+  thumbnail: string | null;
+};
 
 const key = (a: { code: string; issuer: string | null }) => `${a.code}:${a.issuer ?? "native"}`;
 
@@ -23,7 +35,15 @@ const key = (a: { code: string; issuer: string | null }) => `${a.code}:${a.issue
  * whether it will go through; a token the recipient can't hold yet goes as a
  * gift they accept later.
  */
-export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset[]; initial?: SendableAsset; onClose: () => void }) {
+export function SendDialog({
+  assets,
+  initial,
+  onClose,
+}: {
+  assets: SendableAsset[];
+  initial?: SendableAsset;
+  onClose: () => void;
+}) {
   const [selected, setSelected] = useState(initial ? key(initial) : key(assets[0]!));
   const asset = assets.find((a) => key(a) === selected) ?? assets[0]!;
   const [to, setTo] = useState("");
@@ -31,16 +51,32 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
   const amount = Number(amountText);
   const ready = to.trim().length === 56 && Number.isFinite(amount) && amount > 0;
 
-  const input = useDeferredValue({ code: asset.code, issuer: asset.issuer, to: to.trim(), amount });
-  const quote = api.wallet.sendQuote.useQuery(input, { enabled: ready, placeholderData: keepPreviousData });
+  const input = useDeferredValue({
+    code: asset.code,
+    issuer: asset.issuer,
+    to: to.trim(),
+    amount,
+  });
+  const quote = api.wallet.sendQuote.useQuery(input, {
+    enabled: ready,
+    placeholderData: keepPreviousData,
+  });
   const prepare = api.wallet.sendPrepare.useMutation();
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
   const q = ready ? quote.data : undefined;
 
   const go = async () => {
-    const res = await prepare.mutateAsync({ code: asset.code, issuer: asset.issuer, to: to.trim(), amount }).catch(() => null);
-    if (res && (await sign.run(res))) await Promise.all([utils.wallet.balances.invalidate(), utils.activity.list.invalidate()]);
+    const res = await prepare
+      .mutateAsync({
+        code: asset.code,
+        issuer: asset.issuer,
+        to: to.trim(),
+        amount,
+      })
+      .catch(() => null);
+    if (res && (await sign.run(res)))
+      await Promise.all([utils.wallet.balances.invalidate(), utils.activity.list.invalidate()]);
   };
 
   return (
@@ -48,16 +84,23 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-hud">Send</DialogTitle>
-          <DialogDescription>Send XLM or any token in your wallet to a Stellar address.</DialogDescription>
+          <DialogDescription>
+            Send XLM or any token in your wallet to a Stellar address.
+          </DialogDescription>
         </DialogHeader>
 
         {sign.step === "done" ? (
           <div className="space-y-3 py-4 text-center">
-            <CheckCircle2 className="mx-auto size-10 text-primary" />
+            <CheckCircle2 className="text-primary mx-auto size-10" />
             <p className="font-hud font-semibold">
-              {prepare.data?.mode === "gift" ? "Gift sent" : "Sent"} {formatAmount(amount, asset.code)}
+              {prepare.data?.mode === "gift" ? "Gift sent" : "Sent"}{" "}
+              {formatAmount(amount, asset.code)}
             </p>
-            {prepare.data?.mode === "gift" && <p className="text-sm text-muted-foreground">It waits in their Pending gifts until they accept it.</p>}
+            {prepare.data?.mode === "gift" && (
+              <p className="text-muted-foreground text-sm">
+                It waits in their Pending gifts until they accept it.
+              </p>
+            )}
             <Button variant="outline" className="rounded-xl" onClick={onClose}>
               Done
             </Button>
@@ -65,8 +108,14 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
         ) : (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Asset</p>
-              <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl bg-foreground/[0.03] p-1 ring-1 ring-foreground/[0.08]" role="radiogroup" aria-label="Asset to send">
+              <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                Asset
+              </p>
+              <div
+                className="bg-foreground/[0.03] ring-foreground/[0.08] max-h-48 space-y-1 overflow-y-auto rounded-xl p-1 ring-1"
+                role="radiogroup"
+                aria-label="Asset to send"
+              >
                 {assets.map((a) => (
                   <button
                     key={key(a)}
@@ -74,7 +123,12 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
                     role="radio"
                     aria-checked={key(a) === selected}
                     onClick={() => setSelected(key(a))}
-                    className={cn("flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors", key(a) === selected ? "bg-primary/12 ring-1 ring-primary/40" : "hover:bg-foreground/[0.04]")}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors",
+                      key(a) === selected
+                        ? "bg-primary/12 ring-primary/40 ring-1"
+                        : "hover:bg-foreground/[0.04]",
+                    )}
                   >
                     {a.thumbnail ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -84,40 +138,76 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
                     )}
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{a.code}</span>
-                      <span className="block truncate text-xs text-muted-foreground">{a.label}</span>
+                      <span className="text-muted-foreground block truncate text-xs">
+                        {a.label}
+                      </span>
                     </span>
-                    <span className="text-sm font-semibold tabular-nums">{a.balance.toLocaleString("en-US", { maximumFractionDigits: 7 })}</span>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {a.balance.toLocaleString("en-US", {
+                        maximumFractionDigits: 7,
+                      })}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
             <label className="block space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">To</span>
-              <Input value={to} onChange={(e) => setTo(e.target.value.trim().toUpperCase())} placeholder="G… Stellar address" spellCheck={false} autoComplete="off" className="h-11 rounded-xl font-mono text-sm" />
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                To
+              </span>
+              <Input
+                value={to}
+                onChange={(e) => setTo(e.target.value.trim().toUpperCase())}
+                placeholder="G… Stellar address"
+                spellCheck={false}
+                autoComplete="off"
+                className="h-11 rounded-xl font-mono text-sm"
+              />
             </label>
 
             <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount</span>
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                Amount
+              </span>
               <div className="flex items-center gap-2">
-                <Input inputMode="decimal" value={amountText} onChange={(e) => setAmountText(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" aria-label={`Amount of ${asset.code}`} className="h-11 rounded-xl font-hud text-lg" />
-                <Button type="button" variant="outline" className="h-11 rounded-xl" onClick={() => setAmountText(String(asset.balance))}>
+                <Input
+                  inputMode="decimal"
+                  value={amountText}
+                  onChange={(e) => setAmountText(e.target.value.replace(/[^\d.]/g, ""))}
+                  placeholder="0"
+                  aria-label={`Amount of ${asset.code}`}
+                  className="font-hud h-11 rounded-xl text-lg"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 rounded-xl"
+                  onClick={() => setAmountText(String(asset.balance))}
+                >
                   Max
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Available: {asset.balance.toLocaleString("en-US", { maximumFractionDigits: 7 })} {asset.code}
+              <p className="text-muted-foreground text-xs">
+                Available:{" "}
+                {asset.balance.toLocaleString("en-US", {
+                  maximumFractionDigits: 7,
+                })}{" "}
+                {asset.code}
               </p>
             </div>
 
             {q && (
-              <div className="space-y-2 rounded-xl bg-foreground/[0.04] p-3.5 ring-1 ring-foreground/[0.06]">
+              <div className="bg-foreground/[0.04] ring-foreground/[0.06] space-y-2 rounded-xl p-3.5 ring-1">
                 {q.mode === "gift" && (
                   <p className="flex items-start gap-2 text-sm">
-                    <Gift className="mt-0.5 size-4 shrink-0 text-primary" /> They can&apos;t hold {asset.code} yet, so it&apos;s sent as a gift they accept from their wallet.
+                    <Gift className="text-primary mt-0.5 size-4 shrink-0" /> They can&apos;t hold{" "}
+                    {asset.code} yet, so it&apos;s sent as a gift they accept from their wallet.
                   </p>
                 )}
-                {q.mode === "create" && <p className="text-sm">This address isn&apos;t active yet — your XLM opens it.</p>}
+                {q.mode === "create" && (
+                  <p className="text-sm">This address isn&apos;t active yet — your XLM opens it.</p>
+                )}
                 <dl className="space-y-1 text-sm">
                   {q.lines.map((l) => (
                     <div key={l.key} className="flex justify-between gap-3">
@@ -130,16 +220,30 @@ export function SendDialog({ assets, initial, onClose }: { assets: SendableAsset
                   ))}
                 </dl>
                 {q.problems.map((p) => (
-                  <p key={p} className="rounded-lg tone-danger px-3 py-2 text-sm">
+                  <p key={p} className="tone-danger rounded-lg px-3 py-2 text-sm">
                     {p}
                   </p>
                 ))}
               </div>
             )}
 
-            {(prepare.error ?? sign.error) && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{prepare.error?.message ?? sign.error}</p>}
-            <Button className="h-11 w-full rounded-xl font-bold" disabled={!q?.ok || quote.isFetching || prepare.isPending || sign.busy} onClick={() => void go()}>
-              {sign.step === "signing" ? "Confirm in your wallet…" : sign.step === "confirming" ? "Confirming on Stellar…" : q?.mode === "gift" ? `Send ${asset.code} as a gift` : `Send ${asset.code}`}
+            {(prepare.error ?? sign.error) && (
+              <p className="tone-danger rounded-lg px-3 py-2 text-sm">
+                {prepare.error?.message ?? sign.error}
+              </p>
+            )}
+            <Button
+              className="h-11 w-full rounded-xl font-bold"
+              disabled={!q?.ok || quote.isFetching || prepare.isPending || sign.busy}
+              onClick={() => void go()}
+            >
+              {sign.step === "signing"
+                ? "Confirm in your wallet…"
+                : sign.step === "confirming"
+                  ? "Confirming on Stellar…"
+                  : q?.mode === "gift"
+                    ? `Send ${asset.code} as a gift`
+                    : `Send ${asset.code}`}
             </Button>
           </div>
         )}

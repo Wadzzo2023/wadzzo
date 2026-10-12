@@ -38,14 +38,14 @@ export function DiscussionPanel({
   }
   if (comments.isError) {
     return (
-      <p className="rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5 text-[12px] text-ar-danger">
+      <p className="rounded-ar border-ar-danger/40 bg-ar-danger/10 text-ar-danger border px-3.5 py-2.5 text-[12px]">
         Couldn&rsquo;t load the discussion.
       </p>
     );
   }
   if (comments.data.length === 0) {
     return (
-      <p className="py-10 text-center text-[12.5px] text-ar-faint">
+      <p className="text-ar-faint py-10 text-center text-[12.5px]">
         No comments yet. Start the conversation.
       </p>
     );
@@ -56,16 +56,16 @@ export function DiscussionPanel({
       {comments.data.map((c) => (
         <li key={c.id}>
           <CommentRow comment={c} bountyId={bountyId} />
-          <div className="ml-10 mt-1.5">
+          <div className="mt-1.5 ml-10">
             <button
               onClick={() => onReply({ id: c.id, name: c.author.name ?? "them" })}
-              className="font-hud flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-faint hover:text-ar-text"
+              className="font-hud text-ar-faint hover:text-ar-text flex items-center gap-1 text-[10px] font-semibold tracking-[0.12em] uppercase"
             >
               <CornerDownRight size={11} strokeWidth={2.5} />
               Reply
             </button>
             {c.replies.length > 0 && (
-              <ol className="mt-2.5 space-y-3 border-l border-ar-line pl-3">
+              <ol className="border-ar-line mt-2.5 space-y-3 border-l pl-3">
                 {c.replies.map((r) => (
                   <li key={r.id}>
                     <CommentRow comment={r} bountyId={bountyId} small />
@@ -101,14 +101,17 @@ function CommentRow({
       <img
         src={comment.author.image ?? AVATAR_FALLBACK}
         alt=""
-        className={cn("shrink-0 rounded-full object-cover", small ? "h-6 w-6" : "h-[30px] w-[30px]")}
+        className={cn(
+          "shrink-0 rounded-full object-cover",
+          small ? "h-6 w-6" : "h-[30px] w-[30px]",
+        )}
       />
       <div className="min-w-0 flex-1">
         <p className="flex items-baseline gap-2">
-          <span className="truncate text-[12.5px] font-semibold text-ar-text">
+          <span className="text-ar-text truncate text-[12.5px] font-semibold">
             {comment.author.name ?? "Anonymous"}
           </span>
-          <span className="font-hud shrink-0 text-[10px] text-ar-faint">
+          <span className="font-hud text-ar-faint shrink-0 text-[10px]">
             {formatDistanceToNowStrict(new Date(comment.createdAt))}
           </span>
           {comment.mine && (
@@ -120,7 +123,7 @@ function CommentRow({
               disabled={remove.isPending}
               aria-label={confirming ? "Confirm delete" : "Delete comment"}
               className={cn(
-                "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em]",
+                "font-hud ml-auto flex shrink-0 items-center gap-1 text-[10px] font-semibold tracking-[0.1em] uppercase",
                 confirming ? "text-ar-danger" : "text-ar-faint hover:text-ar-text",
               )}
             >
@@ -129,7 +132,7 @@ function CommentRow({
             </button>
           )}
         </p>
-        <p className="mt-0.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ar-dim">
+        <p className="text-ar-dim mt-0.5 text-[13px] leading-relaxed break-words whitespace-pre-wrap">
           {comment.content}
         </p>
       </div>

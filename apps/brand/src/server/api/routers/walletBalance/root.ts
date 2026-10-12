@@ -7,7 +7,7 @@ import { WBalanceRouter } from "./acc";
  * All routers added in /api/routers should be manually added here.
  */
 export const wallateBalanceRouter = createTRPCRouter({
-  wallBalance : WBalanceRouter,
+  wallBalance: WBalanceRouter,
 });
 
 // export type definition of API

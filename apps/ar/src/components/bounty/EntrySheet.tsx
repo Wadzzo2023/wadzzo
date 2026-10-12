@@ -1,22 +1,10 @@
-import {
-  FileText,
-  Film,
-  Image as ImageIcon,
-  Music,
-  Paperclip,
-  Send,
-  X,
-} from "lucide-react";
+import { FileText, Film, Image as ImageIcon, Music, Paperclip, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { htmlToText } from "~/components/bounty/RichText";
 import { ArButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
-import {
-  ENTRY_FILE_TYPES,
-  entryFileProblem,
-  MAX_ENTRY_FILES,
-} from "~/lib/ar/entryFiles";
+import { ENTRY_FILE_TYPES, entryFileProblem, MAX_ENTRY_FILES } from "~/lib/ar/entryFiles";
 import { type UploadedMedia, useEntryUpload } from "~/lib/ar/useEntryUpload";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -76,8 +64,12 @@ export function EntrySheet({
     if (!open) return;
     setText(editing ? htmlToText(editing.content) : "");
     setKept(
-      editing?.medias.map(({ url, name, size, type }) => ({ url, name, size, type })) ??
-        [],
+      editing?.medias.map(({ url, name, size, type }) => ({
+        url,
+        name,
+        size,
+        type,
+      })) ?? [],
     );
     setError(null);
     resetUpload();
@@ -113,7 +105,11 @@ export function EntrySheet({
       const uploaded = await upload.uploadAll(upload.files);
       const medias = [...kept, ...uploaded];
       if (editing) {
-        await update.mutateAsync({ entryId: editing.id, content: text, medias });
+        await update.mutateAsync({
+          entryId: editing.id,
+          content: text,
+          medias,
+        });
       } else {
         await create.mutateAsync({ bountyId, content: text, medias });
       }
@@ -138,11 +134,8 @@ export function EntrySheet({
       labelledBy="entry-sheet-title"
       className="flex max-h-[92%] flex-col"
     >
-      <div className="flex items-center justify-between px-5 pb-3 pt-2">
-        <h2
-          id="entry-sheet-title"
-          className="font-hud text-[17px] font-bold text-ar-text"
-        >
+      <div className="flex items-center justify-between px-5 pt-2 pb-3">
+        <h2 id="entry-sheet-title" className="font-hud text-ar-text text-[17px] font-bold">
           {editing ? "Edit entry" : "Send an entry"}
         </h2>
         <button
@@ -167,7 +160,7 @@ export function EntrySheet({
           rows={6}
           maxLength={5000}
           placeholder="What did you do? Links, context, anything the brand should know."
-          className="ar-bevel w-full resize-none rounded-ar p-3.5 text-[14px] leading-relaxed text-ar-text outline-hidden placeholder:text-ar-faint focus:border-ar-green/50"
+          className="ar-bevel rounded-ar text-ar-text placeholder:text-ar-faint focus:border-ar-green/50 w-full resize-none p-3.5 text-[14px] leading-relaxed outline-hidden"
         />
 
         {/* ── Attachments ─────────────────────────────────────────── */}
@@ -210,7 +203,7 @@ export function EntrySheet({
           <button
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-ar border border-dashed border-ar-line-bright text-[12.5px] font-semibold text-ar-dim hover:text-ar-text disabled:opacity-40"
+            className="rounded-ar border-ar-line-bright text-ar-dim hover:text-ar-text mt-2 flex h-11 w-full items-center justify-center gap-2 border border-dashed text-[12.5px] font-semibold disabled:opacity-40"
           >
             <Paperclip size={15} strokeWidth={2.3} />
             Add photos, video or files
@@ -221,7 +214,7 @@ export function EntrySheet({
         )}
 
         {error && (
-          <p className="mt-3 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5 text-[12px] leading-relaxed text-ar-danger">
+          <p className="rounded-ar border-ar-danger/40 bg-ar-danger/10 text-ar-danger mt-3 border px-3.5 py-2.5 text-[12px] leading-relaxed">
             {error}
           </p>
         )}
@@ -271,20 +264,20 @@ function FileRow({
   return (
     <div
       className={cn(
-        "relative flex items-center gap-3 overflow-hidden rounded-ar border bg-white/[0.03] px-3 py-2.5",
+        "rounded-ar relative flex items-center gap-3 overflow-hidden border bg-white/[0.03] px-3 py-2.5",
         error ? "border-ar-danger/50" : "border-ar-line",
       )}
     >
       {progress != null && (
         <span
           aria-hidden
-          className="absolute inset-y-0 left-0 bg-ar-green/10 transition-[width]"
+          className="bg-ar-green/10 absolute inset-y-0 left-0 transition-[width]"
           style={{ width: `${progress}%` }}
         />
       )}
-      <Icon size={16} strokeWidth={2.2} className="relative shrink-0 text-ar-dim" />
+      <Icon size={16} strokeWidth={2.2} className="text-ar-dim relative shrink-0" />
       <span className="relative min-w-0 flex-1">
-        <span className="block truncate text-[12.5px] text-ar-text">{name}</span>
+        <span className="text-ar-text block truncate text-[12.5px]">{name}</span>
         <span
           className={cn(
             "font-hud block text-[10px] tabular-nums",
@@ -303,7 +296,7 @@ function FileRow({
         <button
           onClick={onRemove}
           aria-label={`Remove ${name}`}
-          className="relative shrink-0 text-ar-faint hover:text-ar-text"
+          className="text-ar-faint hover:text-ar-text relative shrink-0"
         >
           <X size={15} strokeWidth={2.4} />
         </button>

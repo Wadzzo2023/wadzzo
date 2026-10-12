@@ -2,10 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { EnableCors } from "~/server/api-cors";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   try {
     const decodedData = await getToken({ req });
@@ -21,8 +18,6 @@ export default async function handler(
     }
   } catch (e) {
     console.error(e);
-    return res
-      .status(500)
-      .json({ error: "An error occurred while processing your request" });
+    return res.status(500).json({ error: "An error occurred while processing your request" });
   }
 }

@@ -27,7 +27,7 @@ export function BountyCard({ bounty }: { bounty: BountyCardData }) {
   return (
     <Link
       href={`/bounty/${bounty.id}`}
-      className="ar-bevel group relative block overflow-hidden rounded-ar-lg"
+      className="ar-bevel group rounded-ar-lg relative block overflow-hidden"
     >
       <div className="relative h-[112px] overflow-hidden">
         {bounty.imageUrl ? (
@@ -39,13 +39,13 @@ export function BountyCard({ bounty }: { bounty: BountyCardData }) {
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/20 via-ar-surface to-ar-surface" />
+          <div className="ar-grid from-ar-green/20 via-ar-surface to-ar-surface h-full w-full bg-linear-to-br" />
         )}
-        <div className="absolute inset-0 bg-linear-to-t from-ar-surface via-ar-surface/30 to-transparent" />
+        <div className="from-ar-surface via-ar-surface/30 absolute inset-0 bg-linear-to-t to-transparent" />
 
         <span
           className={cn(
-            "font-hud absolute right-2.5 top-2.5 inline-flex h-[22px] items-center rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] backdrop-blur-xs",
+            "font-hud absolute top-2.5 right-2.5 inline-flex h-[22px] items-center rounded-full border px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase backdrop-blur-xs",
             TONE_CLASS[badge.tone],
           )}
         >
@@ -57,28 +57,28 @@ export function BountyCard({ bounty }: { bounty: BountyCardData }) {
         <div className="flex items-end gap-2">
           <BrandAvatar
             src={bounty.brand.avatarUrl}
-            className="h-9 w-9 rounded-[11px] ring-2 ring-ar-surface"
+            className="ring-ar-surface h-9 w-9 rounded-[11px] ring-2"
           />
-          <span className="font-hud mb-0.5 truncate text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ar-dim">
+          <span className="font-hud text-ar-dim mb-0.5 truncate text-[10.5px] font-semibold tracking-[0.12em] uppercase">
             {bounty.brand.name}
           </span>
         </div>
 
-        <p className="mt-2 line-clamp-2 text-[15px] font-semibold leading-snug text-ar-text">
+        <p className="text-ar-text mt-2 line-clamp-2 text-[15px] leading-snug font-semibold">
           {bounty.title}
         </p>
 
         <div className="mt-2.5 flex items-end justify-between gap-3">
           <div>
-            <p className="font-hud text-glow-soft text-[20px] font-bold leading-none tabular-nums text-ar-green-hot">
+            <p className="font-hud text-glow-soft text-ar-green-hot text-[20px] leading-none font-bold tabular-nums">
               {formatUsd(bounty.rewardUsd)}
             </p>
-            <p className="font-hud mt-1 text-[10px] font-semibold tabular-nums text-ar-faint">
+            <p className="font-hud text-ar-faint mt-1 text-[10px] font-semibold tabular-nums">
               {formatAmount(bounty.rewardAsset)} {bounty.assetCode} per winner
             </p>
           </div>
 
-          <div className="font-hud flex flex-col items-end gap-1 text-[10px] font-semibold tabular-nums text-ar-dim">
+          <div className="font-hud text-ar-dim flex flex-col items-end gap-1 text-[10px] font-semibold tabular-nums">
             <span className="flex items-center gap-1">
               <Trophy size={10} strokeWidth={2.6} />
               {bounty.open
@@ -112,9 +112,9 @@ export function BountyCard({ bounty }: { bounty: BountyCardData }) {
 /** Same footprint as `BountyCard`, so the list doesn't jump when data lands. */
 export function BountyCardSkeleton() {
   return (
-    <div className="ar-bevel overflow-hidden rounded-ar-lg">
+    <div className="ar-bevel rounded-ar-lg overflow-hidden">
       <Skeleton className="h-[112px] w-full" rounded="rounded-none" />
-      <div className="px-3.5 pb-3.5 pt-2">
+      <div className="px-3.5 pt-2 pb-3.5">
         <Skeleton rounded="rounded-full" className="h-2.5 w-1/3" />
         <Skeleton rounded="rounded-full" className="mt-3 h-3.5 w-4/5" />
         <div className="mt-3 flex items-end justify-between">

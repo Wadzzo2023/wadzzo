@@ -10,10 +10,7 @@ import { avaterIconUrl as abaterIconUrl } from "../brands";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
 
@@ -115,7 +112,7 @@ export default async function handler(
         locations: {
           some: {
             hidden: false,
-          }
+          },
         },
       },
       include: {
@@ -144,7 +141,6 @@ export default async function handler(
       },
     });
 
-
     const pins = locationGroup
       .flatMap((group) => {
         const { latitude, longitude, ...groupWithoutCoords } = group;
@@ -158,10 +154,7 @@ export default async function handler(
           const subscription = group.Subscription;
 
           if (creatorPageAsset && subscription && userAcc) {
-            const bal = userAcc.tokenBalance(
-              creatorPageAsset.code,
-              creatorPageAsset.issuer,
-            );
+            const bal = userAcc.tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer);
             if (bal >= subscription.price) {
               if (multiPin) {
                 return group.locations.map((location) => ({

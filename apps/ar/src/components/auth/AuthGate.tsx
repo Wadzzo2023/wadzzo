@@ -56,22 +56,18 @@ export function AuthGate() {
   const copy = gate ? GATE_COPY[gate] : null;
 
   return (
-    <BottomSheet
-      open={Boolean(gate)}
-      onClose={closeGate}
-      labelledBy="auth-gate-title"
-    >
+    <BottomSheet open={Boolean(gate)} onClose={closeGate} labelledBy="auth-gate-title">
       {copy && (
-        <div className="px-6 pb-2 pt-4">
+        <div className="px-6 pt-4 pb-2">
           {/* Emblem */}
           <div className="relative mx-auto mb-5 flex h-[72px] w-[72px] items-center justify-center">
             <motion.span
               aria-hidden
-              className="absolute inset-0 rounded-full border border-ar-green/50"
+              className="border-ar-green/50 absolute inset-0 rounded-full border"
               animate={{ scale: [1, 1.28, 1], opacity: [0.7, 0, 0.7] }}
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
             />
-            <span className="ar-key flex h-[62px] w-[62px] items-center justify-center rounded-full !border-ar-green/50">
+            <span className="ar-key !border-ar-green/50 flex h-[62px] w-[62px] items-center justify-center rounded-full">
               <Wallet
                 size={26}
                 strokeWidth={2}
@@ -82,11 +78,11 @@ export function AuthGate() {
 
           <h2
             id="auth-gate-title"
-            className="font-hud text-center text-[21px] font-bold leading-tight text-ar-text"
+            className="font-hud text-ar-text text-center text-[21px] leading-tight font-bold"
           >
             {copy.title}
           </h2>
-          <p className="mx-auto mt-2 max-w-[19rem] text-center text-[13px] leading-relaxed text-ar-dim">
+          <p className="text-ar-dim mx-auto mt-2 max-w-[19rem] text-center text-[13px] leading-relaxed">
             {copy.body}
           </p>
 
@@ -101,15 +97,15 @@ export function AuthGate() {
 
           {/* What "connect" actually covers — a wallet-only prompt reads as
               crypto-gated to people who just want a free coffee. */}
-          <div className="mt-5 border-t border-ar-line pt-4">
-            <p className="font-hud mb-2.5 text-center text-[9px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+          <div className="border-ar-line mt-5 border-t pt-4">
+            <p className="font-hud text-ar-faint mb-2.5 text-center text-[9px] font-semibold tracking-[0.24em] uppercase">
               Sign in with
             </p>
             <div className="flex flex-wrap justify-center gap-1.5">
               {METHODS.map((m) => (
                 <span
                   key={m}
-                  className="font-hud rounded-full border border-ar-line bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.1em] text-ar-faint"
+                  className="font-hud border-ar-line text-ar-faint rounded-full border bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium tracking-[0.1em] uppercase"
                 >
                   {m}
                 </span>

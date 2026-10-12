@@ -18,17 +18,13 @@ export function detectPlatform(): Platform {
   // iPadOS 13+ reports itself as a Mac, so the touch-point check is what
   // actually catches modern iPads.
   const isIOS =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (ua.includes("Macintosh") && navigator.maxTouchPoints > 1);
+    /iPad|iPhone|iPod/.test(ua) || (ua.includes("Macintosh") && navigator.maxTouchPoints > 1);
   if (isIOS) return "ios";
-  if (ua.includes('Android')) return "android";
+  if (ua.includes("Android")) return "android";
   return "desktop";
 }
 
-export const LOCATION_STEPS: Record<
-  Platform,
-  { title: string; steps: string[] }
-> = {
+export const LOCATION_STEPS: Record<Platform, { title: string; steps: string[] }> = {
   ios: {
     title: "On iPhone & iPad",
     steps: [

@@ -7,7 +7,14 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import {
+  networkPassphrase,
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+} from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
@@ -34,9 +41,7 @@ export async function sendNft2StorageXDR({
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
   const storageAcc = Keypair.fromSecret(storageSec);
 
-  const transactionInitializer = await server.loadAccount(
-    motherAcc.publicKey(),
-  );
+  const transactionInitializer = await server.loadAccount(motherAcc.publicKey());
 
   const acc = await StellarAccount.loadOrThrow(storageAcc.publicKey());
   const hasTrust = acc.hasTrustline(asset.code, asset.issuer);

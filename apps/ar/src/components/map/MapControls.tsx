@@ -49,7 +49,7 @@ export function MapControls({
   onToggleMapMode?: () => void;
 }) {
   return (
-    <div className="pointer-events-none absolute right-3.5 top-1/2 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
+    <div className="pointer-events-none absolute top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
       {/* ── Recenter + refetch, one capsule ─────────────────────────── */}
       <div className="ar-glass pointer-events-auto flex flex-col overflow-hidden rounded-full">
         <motion.button
@@ -67,21 +67,19 @@ export function MapControls({
           <Crosshair size={19} strokeWidth={2.1} />
         </motion.button>
 
-        <span aria-hidden className="mx-2.5 h-px bg-ar-line" />
+        <span aria-hidden className="bg-ar-line mx-2.5 h-px" />
 
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onRefetch}
           aria-label="Refresh pins"
           disabled={refetching}
-          className="flex h-11 w-11 items-center justify-center text-ar-dim transition-colors hover:text-ar-text disabled:opacity-60"
+          className="text-ar-dim hover:text-ar-text flex h-11 w-11 items-center justify-center transition-colors disabled:opacity-60"
         >
           <motion.span
             animate={refetching ? { rotate: 360 } : { rotate: 0 }}
             transition={
-              refetching
-                ? { duration: 0.9, repeat: Infinity, ease: "linear" }
-                : { duration: 0.2 }
+              refetching ? { duration: 0.9, repeat: Infinity, ease: "linear" } : { duration: 0.2 }
             }
           >
             <RotateCw size={18} strokeWidth={2.1} />
@@ -105,14 +103,10 @@ export function MapControls({
         {autoCollect && (
           <span
             aria-hidden
-            className="animate-pulse-ring absolute inset-0 rounded-full border border-ar-green-hot"
+            className="animate-pulse-ring border-ar-green-hot absolute inset-0 rounded-full border"
           />
         )}
-        <Zap
-          size={18}
-          strokeWidth={2.2}
-          className={cn(autoCollect && "fill-ar-green-hot/30")}
-        />
+        <Zap size={18} strokeWidth={2.2} className={cn(autoCollect && "fill-ar-green-hot/30")} />
       </motion.button>
 
       {/* ── Compass map ─────────────────────────────────────────────────
@@ -125,7 +119,9 @@ export function MapControls({
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={onToggleCompass}
-        aria-label={compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"}
+        aria-label={
+          compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"
+        }
         aria-pressed={compassMode}
         className={cn(
           "ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full transition-colors",
@@ -148,7 +144,11 @@ export function MapControls({
           whileTap={{ scale: 0.9 }}
           onClick={onCycleMuralLayer}
           aria-label={
-            muralLayer === "off" ? "Murals hidden — show them" : muralLayer === "verified" ? "Showing verified murals — hide murals" : "Showing all murals — verified only"
+            muralLayer === "off"
+              ? "Murals hidden — show them"
+              : muralLayer === "verified"
+                ? "Showing verified murals — hide murals"
+                : "Showing all murals — verified only"
           }
           className={cn(
             "ar-glass pointer-events-auto relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
@@ -157,7 +157,10 @@ export function MapControls({
         >
           <Frame size={18} strokeWidth={2.1} className={cn(muralLayer === "off" && "opacity-50")} />
           {muralLayer === "verified" && (
-            <span aria-hidden className="absolute bottom-1.5 right-1.5 h-2 w-2 rounded-full bg-ar-green-hot" />
+            <span
+              aria-hidden
+              className="bg-ar-green-hot absolute right-1.5 bottom-1.5 h-2 w-2 rounded-full"
+            />
           )}
         </motion.button>
       )}

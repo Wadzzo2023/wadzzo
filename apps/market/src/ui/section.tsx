@@ -25,11 +25,14 @@ export function Section({
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-hud text-lg font-bold tracking-tight sm:text-xl">{title}</h2>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <p className="text-muted-foreground text-sm">{description}</p>}
         </div>
         {action ??
           (href && (
-            <Link href={href} className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline">
+            <Link
+              href={href}
+              className="text-primary inline-flex shrink-0 items-center gap-1 text-sm font-medium hover:underline"
+            >
               See all <ArrowRight className="size-3.5" />
             </Link>
           ))}

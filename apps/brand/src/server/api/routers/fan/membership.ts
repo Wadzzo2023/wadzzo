@@ -16,7 +16,9 @@ export const TierSchema = z.object({
     .trim()
     .min(2, { message: "At least 2 characters" })
     .max(24, { message: "At most 24 characters" })
-    .refine((v) => !BADWORDS.some((w) => v.toLowerCase().includes(w)), { message: "That name isn't allowed" }),
+    .refine((v) => !BADWORDS.some((w) => v.toLowerCase().includes(w)), {
+      message: "That name isn't allowed",
+    }),
   description: z.string().trim().max(160, { message: "Keep it under 160 characters" }).default(""),
   features: z
     .array(z.string().trim().min(1).max(80, { message: "Keep each perk under 80 characters" }))
@@ -26,17 +28,19 @@ export const TierSchema = z.object({
   popular: z.boolean().default(false),
   isActive: z.boolean().default(true),
   price: z
-    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Price must be entered as a number"
+          : "Price must be entered as a number",
+    })
     .min(1, { message: "Price must be at least 1" }),
 });
 
 export const EditTierSchema = TierSchema.extend({ id: z.number() });
 
 export const CreatorAboutShema = z.object({
-  description: z
-    .string()
-    .max(100, { message: "Bio must be lass than 101 character" })
-    .nullable(),
+  description: z.string().max(100, { message: "Bio must be lass than 101 character" }).nullable(),
   name: z
     .string()
     .min(3, { message: "Name must be between 3 to 98 characters" })
@@ -58,21 +62,39 @@ export const CreatorPageAssetSchema = z.object({
       },
     ),
   limit: z
-    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Limit must be entered as a number"
+          : "Limit must be entered as a number",
+    })
     .min(1, { message: "Limit must be greater than 0" })
     .max(MAX_ASSET_LIMIT, {
       message: `Limit must be less than ${MAX_ASSET_LIMIT} `,
     })
     .nonnegative(),
   price: z
-    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
-    .nonnegative().min(.01, {
-      message: "Price must be greater than 0"
-    }).default(2),
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Price must be entered as a number"
+          : "Price must be entered as a number",
+    })
+    .nonnegative()
+    .min(0.01, {
+      message: "Price must be greater than 0",
+    })
+    .default(2),
   priceUSD: z
-    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
-    .nonnegative().min(.01, {
-      message: "Price must be greater than 0"
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Price must be entered as a number"
+          : "Price must be entered as a number",
+    })
+    .nonnegative()
+    .min(0.01, {
+      message: "Price must be greater than 0",
     })
     .default(1),
 
@@ -97,21 +119,25 @@ const selectedColumn = {
         },
       },
       customPageAssetCodeIssuer: true,
-    }
-  }
+    },
+  },
 };
 
 export const membershipRouter = createTRPCRouter({
-  createMembership: protectedProcedure
-    .input(TierSchema)
-    .mutation(async ({ ctx, input }) => {
-      const creatorId = ctx.session.user.id;
-      await ctx.db.$transaction(async (tx) => {
-        // only one tier is highlighted as "most popular"
-        if (input.popular) await tx.subscription.updateMany({ where: { creatorId }, data: { popular: false } });
-        await tx.subscription.create({ data: { ...input, creatorId, platformId: ctx.platform.id } });
+  createMembership: protectedProcedure.input(TierSchema).mutation(async ({ ctx, input }) => {
+    const creatorId = ctx.session.user.id;
+    await ctx.db.$transaction(async (tx) => {
+      // only one tier is highlighted as "most popular"
+      if (input.popular)
+        await tx.subscription.updateMany({
+          where: { creatorId },
+          data: { popular: false },
+        });
+      await tx.subscription.create({
+        data: { ...input, creatorId, platformId: ctx.platform.id },
       });
-    }),
+    });
+  }),
 
   createCreatePageAsset: protectedProcedure
     .input(CreatorPageAssetSchema.extend({ issuer: AccountSchema }))
@@ -149,7 +175,14 @@ export const membershipRouter = createTRPCRouter({
     }),
 
   createCustomPageAsset: protectedProcedure
-    .input(z.object({ code: z.string(), issuer: z.string(), price: z.number(), priceUSD: z.number() }))
+    .input(
+      z.object({
+        code: z.string(),
+        issuer: z.string(),
+        price: z.number(),
+        priceUSD: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.session.user.id;
       const { code, issuer, price, priceUSD } = input;
@@ -163,17 +196,19 @@ export const membershipRouter = createTRPCRouter({
       return creator;
     }),
 
-  editTierModal: protectedProcedure
-    .input(EditTierSchema)
-    .mutation(async ({ ctx, input }) => {
-      const creatorId = ctx.session.user.id;
-      const { id, ...data } = input;
-      await ctx.db.$transaction(async (tx) => {
-        if (data.popular) await tx.subscription.updateMany({ where: { creatorId, NOT: { id } }, data: { popular: false } });
-        // Only the brand's own tier.
-        await tx.subscription.update({ data, where: { id, creatorId } });
-      });
-    }),
+  editTierModal: protectedProcedure.input(EditTierSchema).mutation(async ({ ctx, input }) => {
+    const creatorId = ctx.session.user.id;
+    const { id, ...data } = input;
+    await ctx.db.$transaction(async (tx) => {
+      if (data.popular)
+        await tx.subscription.updateMany({
+          where: { creatorId, NOT: { id } },
+          data: { popular: false },
+        });
+      // Only the brand's own tier.
+      await tx.subscription.update({ data, where: { id, creatorId } });
+    });
+  }),
 
   deleteTier: protectedProcedure
     .input(z.object({ id: z.number() }))
@@ -197,14 +232,12 @@ export const membershipRouter = createTRPCRouter({
       });
     }),
 
-  getCreatorMembership: protectedProcedure
-    .input(z.string())
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.subscription.findMany({
-        where: { creatorId: input },
-        select: selectedColumn,
-      });
-    }),
+  getCreatorMembership: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return await ctx.db.subscription.findMany({
+      where: { creatorId: input },
+      select: selectedColumn,
+    });
+  }),
 
   // aCraatorSubscribedToken: protectedProcedure
   //   .input(z.object({ creatorId: z.string() }))
@@ -219,16 +252,18 @@ export const membershipRouter = createTRPCRouter({
   //       include: { subscription: true },
   //     });
   //   }),
-  getAllMembership: protectedProcedure.input(z.object(
-    {
-      creatorId: z.string().optional(),
-    }
-  )).query(async ({ ctx, input }) => {
-    return await ctx.db.subscription.findMany({
-      where: { creatorId: input.creatorId ?? ctx.session.user.id },
-      select: selectedColumn,
-    });
-  }),
+  getAllMembership: protectedProcedure
+    .input(
+      z.object({
+        creatorId: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.subscription.findMany({
+        where: { creatorId: input.creatorId ?? ctx.session.user.id },
+        select: selectedColumn,
+      });
+    }),
 
   // getUserSubcribed: protectedProcedure.query(async ({ ctx }) => {
   //   return await ctx.db.user_Subscription.findMany({
@@ -305,7 +340,9 @@ export const membershipRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.creatorId) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't follow yourself" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You can't follow yourself",
+        });
       }
       const fol = await ctx.db.follow.create({
         data: { creatorId: input.creatorId, userId },
@@ -334,14 +371,18 @@ export const membershipRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.creatorId) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't unfollow yourself" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You can't unfollow yourself",
+        });
       }
       const fol = await ctx.db.follow.findFirst({
         where: { creatorId: input.creatorId, userId },
       });
 
       if (!fol) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not following this creator" });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You are not following this creator",
+        });
       }
 
       // delete his follow

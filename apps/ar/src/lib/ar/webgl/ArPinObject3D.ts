@@ -139,11 +139,7 @@ export class ArPinObject3D {
 
     // [edge, front, back] — the order CylinderGeometry's material groups
     // expect.
-    const mesh = new THREE.Mesh(geometry, [
-      edgeMaterial,
-      faceMaterial,
-      faceMaterial,
-    ]);
+    const mesh = new THREE.Mesh(geometry, [edgeMaterial, faceMaterial, faceMaterial]);
     mesh.userData.pinId = this.pin.id;
     this.addFloatingAnimation(mesh);
     return mesh;
@@ -463,9 +459,7 @@ export class ArPinObject3D {
     // there is truly no room left, not just when the layout ran long.
     if (note && y < CARD_H - 40) {
       ctx.font = "500 27px ui-sans-serif, system-ui, sans-serif";
-      ctx.fillStyle = locked
-        ? "rgba(255, 196, 128, 0.9)"
-        : "rgba(198, 224, 208, 0.6)";
+      ctx.fillStyle = locked ? "rgba(255, 196, 128, 0.9)" : "rgba(198, 224, 208, 0.6)";
       wrapTop(ctx, note, padX, y, width, 34, 2);
     }
 
@@ -544,9 +538,7 @@ export class ArPinObject3D {
   dispose() {
     if (this.raf != null) cancelAnimationFrame(this.raf);
     this.mesh.geometry.dispose();
-    const materials = Array.isArray(this.mesh.material)
-      ? this.mesh.material
-      : [this.mesh.material];
+    const materials = Array.isArray(this.mesh.material) ? this.mesh.material : [this.mesh.material];
     for (const m of materials) m.dispose();
 
     if (this.shadow) {
@@ -666,11 +658,7 @@ function pill(
 }
 
 /** Shorten with an ellipsis until it fits `maxWidth`. */
-function truncate(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string {
+function truncate(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
   if (ctx.measureText(text).width <= maxWidth) return text;
   let out = text;
   while (out.length > 1 && ctx.measureText(`${out}…`).width > maxWidth) {

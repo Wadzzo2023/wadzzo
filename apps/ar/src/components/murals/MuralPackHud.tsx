@@ -60,21 +60,25 @@ export function MuralPackHud() {
             initial={{ opacity: 0, y: -16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -16 }}
-            className="ar-glass absolute left-3 right-3 z-[70] flex items-center gap-3 rounded-2xl !border-ar-green/50 p-2.5"
+            className="ar-glass !border-ar-green/50 absolute right-3 left-3 z-[70] flex items-center gap-3 rounded-2xl p-2.5"
             style={{ top: "calc(var(--ar-top-inset) + 54px)" }}
             role="status"
           >
             <PackArt size={40} done />
             <div className="min-w-0 flex-1">
-              <p className="font-hud text-[12px] font-bold uppercase tracking-[0.12em] text-ar-text">Mural pack ready</p>
-              <p className="truncate text-[11px] text-ar-dim">Find street art and earn {platformBranding.coinName}.</p>
+              <p className="font-hud text-ar-text text-[12px] font-bold tracking-[0.12em] uppercase">
+                Mural pack ready
+              </p>
+              <p className="text-ar-dim truncate text-[11px]">
+                Find street art and earn {platformBranding.coinName}.
+              </p>
             </div>
             <button
               onClick={() => {
                 setToast(false);
                 void router.push("/murals");
               }}
-              className="ar-key ar-key-primary font-hud flex h-8 items-center gap-1 rounded-full px-3 text-[10.5px] font-bold uppercase tracking-[0.1em]"
+              className="ar-key ar-key-primary font-hud flex h-8 items-center gap-1 rounded-full px-3 text-[10.5px] font-bold tracking-[0.1em] uppercase"
             >
               <Frame size={12} /> Try it
             </button>

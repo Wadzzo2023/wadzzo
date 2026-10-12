@@ -1,6 +1,16 @@
 "use client";
 
-import { Camera, Check, Copy, LogOut, Monitor, Moon, Settings, Sun, type LucideIcon } from "lucide-react";
+import {
+  Camera,
+  Check,
+  Copy,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRef, useState, type FormEvent } from "react";
@@ -42,7 +52,7 @@ function SettingsView() {
   if (me.isLoading || !me.data) {
     return (
       <div>
-        <Skeleton className="h-[34svh] min-h-[220px] max-h-[380px] rounded-none" />
+        <Skeleton className="h-[34svh] max-h-[380px] min-h-[220px] rounded-none" />
         <PageBody wide className="space-y-4">
           <Skeleton className="h-24 w-72 rounded-2xl" />
           <Skeleton className="h-64 rounded-2xl" />
@@ -95,14 +105,22 @@ function ProfileHeader({ me }: { me: Me }) {
   const coverUp = useImageUpload();
   const avatarInput = useRef<HTMLInputElement>(null);
   const coverInput = useRef<HTMLInputElement>(null);
-  const update = api.user.update.useMutation({ onSuccess: () => void utils.user.me.invalidate() });
+  const update = api.user.update.useMutation({
+    onSuccess: () => void utils.user.me.invalidate(),
+  });
   const busy = update.isPending || avatarUp.progress !== null || coverUp.progress !== null;
 
   const pick = async (file: File | undefined, which: "image" | "coverImage") => {
     if (!file) return;
     try {
       const url = await (which === "image" ? avatarUp : coverUp).upload(file);
-      await update.mutateAsync({ name: me.name ?? "Fan", bio: me.bio ?? undefined, image: me.image ?? undefined, coverImage: me.coverImage ?? undefined, [which]: url });
+      await update.mutateAsync({
+        name: me.name ?? "Fan",
+        bio: me.bio ?? undefined,
+        image: me.image ?? undefined,
+        coverImage: me.coverImage ?? undefined,
+        [which]: url,
+      });
       toast.success(which === "image" ? "Profile picture updated" : "Cover updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -112,17 +130,21 @@ function ProfileHeader({ me }: { me: Me }) {
 
   return (
     <>
-      <div className="relative h-[34svh] min-h-[220px] max-h-[380px] overflow-hidden bg-black">
+      <div className="relative h-[34svh] max-h-[380px] min-h-[220px] overflow-hidden bg-black">
         {me.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={me.coverImage} alt="" className="size-full object-cover" />
         ) : me.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={me.image} alt="" className="size-full scale-125 object-cover opacity-60 blur-3xl" />
+          <img
+            src={me.image}
+            alt=""
+            className="size-full scale-125 object-cover opacity-60 blur-3xl"
+          />
         ) : (
           <div className="size-full bg-[radial-gradient(circle_at_20%_30%,hsl(var(--primary)/0.45),transparent_55%),radial-gradient(circle_at_80%_70%,hsl(190_90%_50%/0.3),transparent_55%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-background" />
+        <div className="to-background absolute inset-0 bg-gradient-to-b from-black/10 via-transparent" />
         <div className="absolute inset-x-0 top-0 mx-auto flex max-w-7xl justify-end px-4 pt-4 sm:px-6">
           <button
             type="button"
@@ -130,34 +152,71 @@ function ProfileHeader({ me }: { me: Me }) {
             disabled={busy}
             className="inline-flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/70"
           >
-            <Camera className="size-3.5" /> {coverUp.progress !== null ? `Uploading ${coverUp.progress}%` : me.coverImage ? "Change cover" : "Add cover"}
+            <Camera className="size-3.5" />{" "}
+            {coverUp.progress !== null
+              ? `Uploading ${coverUp.progress}%`
+              : me.coverImage
+                ? "Change cover"
+                : "Add cover"}
           </button>
         </div>
-        <input ref={coverInput} type="file" accept={accept} hidden onChange={(e) => void pick(e.target.files?.[0], "coverImage")} />
+        <input
+          ref={coverInput}
+          type="file"
+          accept={accept}
+          hidden
+          onChange={(e) => void pick(e.target.files?.[0], "coverImage")}
+        />
       </div>
 
-      <PageBody wide className="pb-0 pt-0">
+      <PageBody wide className="pt-0 pb-0">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <button
             type="button"
             onClick={() => avatarInput.current?.click()}
             disabled={busy}
             aria-label="Change profile picture"
-            className="group relative -mt-14 w-fit shrink-0 rounded-full bg-gradient-to-tr from-primary via-green-hot to-cyan-400 p-[3px] shadow-[0_0_40px_-8px_hsl(var(--primary)/0.8)] sm:-mt-20"
+            className="group from-primary via-green-hot relative -mt-14 w-fit shrink-0 rounded-full bg-gradient-to-tr to-cyan-400 p-[3px] shadow-[0_0_40px_-8px_hsl(var(--primary)/0.8)] sm:-mt-20"
           >
-            <Avatar src={me.image} name={me.name} className="size-24 border-4 border-background text-3xl sm:size-36" />
+            <Avatar
+              src={me.image}
+              name={me.name}
+              className="border-background size-24 border-4 text-3xl sm:size-36"
+            />
             <span className="absolute inset-[3px] flex items-center justify-center rounded-full bg-black/45 text-sm font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
               {avatarUp.progress !== null ? `${avatarUp.progress}%` : <Camera className="size-6" />}
             </span>
-            <span className="absolute bottom-1 right-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background sm:bottom-2 sm:right-2">
+            <span className="bg-primary text-primary-foreground ring-background absolute right-1 bottom-1 flex size-8 items-center justify-center rounded-full ring-4 sm:right-2 sm:bottom-2">
               <Camera className="size-4" />
             </span>
           </button>
-          <input ref={avatarInput} type="file" accept={accept} hidden onChange={(e) => void pick(e.target.files?.[0], "image")} />
+          <input
+            ref={avatarInput}
+            type="file"
+            accept={accept}
+            hidden
+            onChange={(e) => void pick(e.target.files?.[0], "image")}
+          />
           <div className="min-w-0 space-y-1 pb-1">
-            <p className="truncate font-hud text-3xl font-bold tracking-tight sm:text-4xl">{me.name ?? "Your profile"}</p>
-            {me.bio ? <p className="max-w-2xl whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">{me.bio}</p> : <p className="text-sm text-muted-foreground">Add a bio so people know who you are.</p>}
-            {me.joinedAt && <p className="text-xs text-muted-foreground">Joined {new Date(me.joinedAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p>}
+            <p className="font-hud truncate text-3xl font-bold tracking-tight sm:text-4xl">
+              {me.name ?? "Your profile"}
+            </p>
+            {me.bio ? (
+              <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed break-words whitespace-pre-line">
+                {me.bio}
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm">Add a bio so people know who you are.</p>
+            )}
+            {me.joinedAt && (
+              <p className="text-muted-foreground text-xs">
+                Joined{" "}
+                {new Date(me.joinedAt).toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            )}
           </div>
         </header>
       </PageBody>
@@ -180,7 +239,12 @@ function ProfileForm({ me }: { me: Me }) {
 
   const save = (e: FormEvent) => {
     e.preventDefault();
-    update.mutate({ name: name.trim(), bio: bio.trim() || undefined, image: me.image ?? undefined, coverImage: me.coverImage ?? undefined });
+    update.mutate({
+      name: name.trim(),
+      bio: bio.trim() || undefined,
+      image: me.image ?? undefined,
+      coverImage: me.coverImage ?? undefined,
+    });
   };
 
   return (
@@ -188,17 +252,39 @@ function ProfileForm({ me }: { me: Me }) {
       <h2 className="font-hud font-bold">Profile</h2>
       <label className="block space-y-1.5">
         <span className="text-sm font-semibold">Display name</span>
-        <Input value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={100} required className="h-11 rounded-xl" />
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          minLength={2}
+          maxLength={100}
+          required
+          className="h-11 rounded-xl"
+        />
       </label>
       <label className="block space-y-1.5">
         <span className="flex justify-between text-sm font-semibold">
-          Bio <span className="font-normal tabular-nums text-muted-foreground">{bio.length}/{BIO_MAX}</span>
+          Bio{" "}
+          <span className="text-muted-foreground font-normal tabular-nums">
+            {bio.length}/{BIO_MAX}
+          </span>
         </span>
-        <Textarea value={bio} onChange={(e) => setBio(e.target.value.slice(0, BIO_MAX))} rows={3} placeholder="A line about you" className="resize-none rounded-xl" />
+        <Textarea
+          value={bio}
+          onChange={(e) => setBio(e.target.value.slice(0, BIO_MAX))}
+          rows={3}
+          placeholder="A line about you"
+          className="resize-none rounded-xl"
+        />
       </label>
-      {update.error && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{update.error.message}</p>}
+      {update.error && (
+        <p className="tone-danger rounded-lg px-3 py-2 text-sm">{update.error.message}</p>
+      )}
       <div className="flex justify-end">
-        <Button type="submit" className="rounded-xl px-6" disabled={!dirty || update.isPending || name.trim().length < 2}>
+        <Button
+          type="submit"
+          className="rounded-xl px-6"
+          disabled={!dirty || update.isPending || name.trim().length < 2}
+        >
           {update.isPending ? "Saving…" : "Save changes"}
         </Button>
       </div>
@@ -221,7 +307,9 @@ function AppearanceCard() {
             onClick={() => setTheme(t.id)}
             className={cn(
               "flex flex-col items-center gap-1.5 rounded-xl p-3 text-sm font-semibold ring-1 transition-all",
-              theme === t.id ? "bg-primary/10 text-primary ring-2 ring-primary" : "bg-foreground/[0.03] text-muted-foreground ring-foreground/[0.08] hover:text-foreground",
+              theme === t.id
+                ? "bg-primary/10 text-primary ring-primary ring-2"
+                : "bg-foreground/[0.03] text-muted-foreground ring-foreground/[0.08] hover:text-foreground",
             )}
           >
             <t.icon className="size-5" /> {t.label}
@@ -265,7 +353,9 @@ function AccountCard({ me }: { me: Me }) {
           <dt className="text-muted-foreground">Signed in with</dt>
           <dd className="font-semibold">
             {(walletType && SIGN_IN_LABEL[walletType]) ?? "Wallet"}
-            <span className="ml-2 rounded-full bg-foreground/10 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{isCustodial(walletType) ? "Managed by Wadzzo" : "Your own wallet"}</span>
+            <span className="bg-foreground/10 text-muted-foreground ml-2 rounded-full px-2 py-0.5 text-[11px] font-medium">
+              {isCustodial(walletType) ? "Managed by Wadzzo" : "Your own wallet"}
+            </span>
           </dd>
         </div>
         {me.email && (
@@ -277,8 +367,17 @@ function AccountCard({ me }: { me: Me }) {
         <div className="space-y-1.5">
           <dt className="text-muted-foreground">Stellar address</dt>
           <dd className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 break-all rounded-xl bg-foreground/[0.04] px-3 py-2 font-mono text-xs ring-1 ring-foreground/[0.06]">{me.id}</span>
-            <Button type="button" variant="outline" size="icon" className="shrink-0 rounded-xl" onClick={copy} aria-label="Copy address">
+            <span className="bg-foreground/[0.04] ring-foreground/[0.06] min-w-0 flex-1 rounded-xl px-3 py-2 font-mono text-xs break-all ring-1">
+              {me.id}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="shrink-0 rounded-xl"
+              onClick={copy}
+              aria-label="Copy address"
+            >
               {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
             </Button>
           </dd>
@@ -286,11 +385,21 @@ function AccountCard({ me }: { me: Me }) {
         {me.joinedAt && (
           <div className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">Member since</dt>
-            <dd className="font-semibold">{new Date(me.joinedAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</dd>
+            <dd className="font-semibold">
+              {new Date(me.joinedAt).toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}
+            </dd>
           </div>
         )}
       </dl>
-      <Button type="button" variant="outline" className="w-full rounded-xl text-destructive hover:text-destructive" onClick={() => void signOut({ callbackUrl: "/" })}>
+      <Button
+        type="button"
+        variant="outline"
+        className="text-destructive hover:text-destructive w-full rounded-xl"
+        onClick={() => void signOut({ callbackUrl: "/" })}
+      >
         <LogOut className="size-4" /> Sign out
       </Button>
     </section>

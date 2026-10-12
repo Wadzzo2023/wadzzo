@@ -44,7 +44,9 @@ export default function EventsScreen() {
   const setQuery = (patch: Record<string, string | undefined>) => {
     const next = { ...urlQuery, ...patch };
     for (const k of Object.keys(next)) if (next[k] === undefined) delete next[k];
-    void router.replace({ pathname: router.pathname, query: next }, undefined, { shallow: true });
+    void router.replace({ pathname: router.pathname, query: next }, undefined, {
+      shallow: true,
+    });
   };
 
   const toggleFollowing = () => {
@@ -106,11 +108,15 @@ export default function EventsScreen() {
                 <Chip active={when === "past"} onClick={() => setQuery({ when: "past" })}>
                   Past
                 </Chip>
-                <span className="mx-1 w-px shrink-0 self-stretch bg-ar-line" />
+                <span className="bg-ar-line mx-1 w-px shrink-0 self-stretch" />
               </>
             )}
             <Chip active={following} onClick={toggleFollowing}>
-              <Heart size={11} strokeWidth={2.6} className={following ? "fill-current" : undefined} />
+              <Heart
+                size={11}
+                strokeWidth={2.6}
+                className={following ? "fill-current" : undefined}
+              />
               Following
             </Chip>
           </div>
@@ -118,7 +124,11 @@ export default function EventsScreen() {
           <div className="mt-3.5 space-y-3 px-5">
             {active.isLoading &&
               Array.from({ length: 3 }).map((_, i) =>
-                segment === "events" ? <EventCardSkeleton key={i} /> : <AnnouncementCardSkeleton key={i} />,
+                segment === "events" ? (
+                  <EventCardSkeleton key={i} />
+                ) : (
+                  <AnnouncementCardSkeleton key={i} />
+                ),
               )}
 
             {segment === "events"
@@ -126,11 +136,13 @@ export default function EventsScreen() {
               : postItems.map((a) => <AnnouncementCard key={a.id} announcement={a} />)}
 
             {active.isError && (
-              <div className="flex items-center justify-between gap-3 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5">
-                <p className="text-[12px] text-ar-danger">Couldn&rsquo;t load {segment === "events" ? "events" : "news"}.</p>
+              <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 flex items-center justify-between gap-3 border px-3.5 py-2.5">
+                <p className="text-ar-danger text-[12px]">
+                  Couldn&rsquo;t load {segment === "events" ? "events" : "news"}.
+                </p>
                 <button
                   onClick={() => void active.refetch()}
-                  className="font-hud text-[11px] font-semibold uppercase tracking-[0.1em] text-ar-text"
+                  className="font-hud text-ar-text text-[11px] font-semibold tracking-[0.1em] uppercase"
                 >
                   Retry
                 </button>
@@ -166,14 +178,26 @@ function Empty({ segment, when, following }: { segment: Segment; when: When; fol
         ? ["Nothing from your brands", "Brands you follow haven't posted any news yet."]
         : ["No news yet", "When brands post announcements, they'll show up here."]
       : when === "past"
-        ? ["No past events", following ? "Brands you follow haven't held any events yet." : "Nothing has happened here yet."]
+        ? [
+            "No past events",
+            following
+              ? "Brands you follow haven't held any events yet."
+              : "Nothing has happened here yet.",
+          ]
         : following
-          ? ["Nothing coming up", "Brands you follow have no upcoming events. Turn off Following to see everything."]
+          ? [
+              "Nothing coming up",
+              "Brands you follow have no upcoming events. Turn off Following to see everything.",
+            ]
           : ["Nothing coming up", "Brands post events here — check back soon."];
   return (
     <div className="py-14 text-center">
-      <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">{title}</p>
-      <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">{body}</p>
+      <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
+        {title}
+      </p>
+      <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
+        {body}
+      </p>
     </div>
   );
 }

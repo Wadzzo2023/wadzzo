@@ -69,7 +69,10 @@ export function useMuralSweep({
     }
     const d = angleDelta(origin.current, heading);
     setDelta(d);
-    span.current = { min: Math.min(span.current.min, d), max: Math.max(span.current.max, d) };
+    span.current = {
+      min: Math.min(span.current.min, d),
+      max: Math.max(span.current.max, d),
+    };
 
     if (last.current) {
       const dt = (now - last.current.t) / 1000;
@@ -89,7 +92,8 @@ export function useMuralSweep({
     };
     if (stepRef.current === "left" && d <= -SWEEP_SIDE_DEG) advance("right", 0);
     else if (stepRef.current === "right" && d >= SWEEP_SIDE_DEG) advance("centre", 2);
-    else if (stepRef.current === "centre" && Math.abs(d) <= CENTRE_TOLERANCE_DEG) advance("done", 1);
+    else if (stepRef.current === "centre" && Math.abs(d) <= CENTRE_TOLERANCE_DEG)
+      advance("done", 1);
   }, [active, heading, reset]);
 
   return {

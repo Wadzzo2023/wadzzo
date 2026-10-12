@@ -21,31 +21,30 @@ app.set("trust proxy", 1);
 const helmetMw = helmet() as RequestHandler;
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 // Only the brand app's server calls us, so browsers get no CORS access unless
 // ALLOWED_ORIGINS names them explicitly.
 const corsMw = cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
-    credentials: true,
-    methods: ["GET", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+  origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+  credentials: true,
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }) as RequestHandler;
 
 const morganMw = morgan("combined", {
-    stream: { write: (msg: string) => logger.http(msg.trim()) },
-    skip: (req: express.Request) =>
-        req.url === "/health" || req.url === "/health/ready",
+  stream: { write: (msg: string) => logger.http(msg.trim()) },
+  skip: (req: express.Request) => req.url === "/health" || req.url === "/health/ready",
 }) as RequestHandler;
 
 const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "60000", 10),
-    limit: parseInt(process.env.RATE_LIMIT_MAX ?? "200", 10),
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: "Too many requests, please slow down" },
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "60000", 10),
+  limit: parseInt(process.env.RATE_LIMIT_MAX ?? "200", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please slow down" },
 }) as RequestHandler;
 /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
 
@@ -63,43 +62,36 @@ app.use("/hotspots", requireTaskSecret, hotspotsRouter); // creatorId comes from
 
 // 404
 app.use((_req, res) => {
-    res.status(404).json({ error: "Not found" });
+  res.status(404).json({ error: "Not found" });
 });
 
 // Global error handler
-app.use(
-    (
-        err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-    ) => {
-        logger.error("[express] Unhandled error:", err.message, err.stack);
-        res.status(500).json({ error: "Internal server error" });
-    }
-);
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error("[express] Unhandled error:", err.message, err.stack);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 // ── Graceful error handling ───────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
-    logger.error(`[process] Uncaught exception: ${err.message}\n${err.stack ?? ""}`);
+  logger.error(`[process] Uncaught exception: ${err.message}\n${err.stack ?? ""}`);
 });
 
 process.on("unhandledRejection", (reason) => {
-    const msg = reason instanceof Error ? reason.message : String(reason);
-    logger.error(`[process] Unhandled rejection: ${msg}`);
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  logger.error(`[process] Unhandled rejection: ${msg}`);
 });
 
 // ── Graceful shutdown ────────────────────────────────────────────────────────
 function shutdown(signal: string) {
-    logger.info(`[process] ${signal} received — shutting down gracefully`);
-    server?.close(() => {
-        logger.info("[process] Server closed");
-        process.exit(0);
-    });
-    setTimeout(() => {
-        logger.warn("[process] Forceful shutdown after 10s timeout");
-        process.exit(1);
-    }, 10_000);
+  logger.info(`[process] ${signal} received — shutting down gracefully`);
+  server?.close(() => {
+    logger.info("[process] Server closed");
+    process.exit(0);
+  });
+  setTimeout(() => {
+    logger.warn("[process] Forceful shutdown after 10s timeout");
+    process.exit(1);
+  }, 10_000);
 }
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
@@ -110,21 +102,17 @@ setInterval(() => pruneOldJobs(), 30 * 60 * 1000);
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const server = app.listen(PORT, () => {
-    logger.info(
-        `✓ Task server running on port ${PORT} (${process.env.NODE_ENV ?? "development"})`
-    );
-    logger.info(`  Health:     http://localhost:${PORT}/health`);
-    logger.info(`  Jobs API:   http://localhost:${PORT}/jobs`);
-    logger.info(`  SSE:        http://localhost:${PORT}/jobs/:id/stream`);
-    logger.info(`  Hotspots:   http://localhost:${PORT}/hotspots`);
+  logger.info(`✓ Task server running on port ${PORT} (${process.env.NODE_ENV ?? "development"})`);
+  logger.info(`  Health:     http://localhost:${PORT}/health`);
+  logger.info(`  Jobs API:   http://localhost:${PORT}/jobs`);
+  logger.info(`  SSE:        http://localhost:${PORT}/jobs/:id/stream`);
+  logger.info(`  Hotspots:   http://localhost:${PORT}/hotspots`);
 
-
-    // ── Restore all active hotspot schedules from DB ────────────────────────
-    // Must run after listen() so the event loop is ready for cron ticks.
-    hotspotScheduler.restoreAll().catch((err: unknown) => {
-        logger.error("[startup] Failed to restore hotspot schedules:", err);
-    });
+  // ── Restore all active hotspot schedules from DB ────────────────────────
+  // Must run after listen() so the event loop is ready for cron ticks.
+  hotspotScheduler.restoreAll().catch((err: unknown) => {
+    logger.error("[startup] Failed to restore hotspot schedules:", err);
+  });
 });
-
 
 export default app;

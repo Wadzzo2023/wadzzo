@@ -5,19 +5,34 @@ import { Layer, Source, useMap } from "react-map-gl/mapbox";
 
 import { toMapboxFeature } from "./geo";
 
-export type HotspotShape = { id: string; geoJson: unknown; isActive: boolean; autoCollect: boolean };
+export type HotspotShape = {
+  id: string;
+  geoJson: unknown;
+  isActive: boolean;
+  autoCollect: boolean;
+};
 
 /**
  * Saved hotspot areas: green fill, border colour by collection mode (green
  * auto / blue manual), faded when paused. Clicking one reports its id.
  */
-export function HotspotLayer({ hotspots, onSelect }: { hotspots: HotspotShape[]; onSelect?: (id: string) => void }) {
+export function HotspotLayer({
+  hotspots,
+  onSelect,
+}: {
+  hotspots: HotspotShape[];
+  onSelect?: (id: string) => void;
+}) {
   const { current: map } = useMap();
   const data = useMemo(
     () => ({
       type: "FeatureCollection" as const,
       features: hotspots.flatMap((h) => {
-        const f = toMapboxFeature(h.geoJson as Parameters<typeof toMapboxFeature>[0], { id: h.id, active: h.isActive, auto: h.autoCollect });
+        const f = toMapboxFeature(h.geoJson as Parameters<typeof toMapboxFeature>[0], {
+          id: h.id,
+          active: h.isActive,
+          auto: h.autoCollect,
+        });
         return f ? [f] : [];
       }),
     }),
@@ -44,7 +59,14 @@ export function HotspotLayer({ hotspots, onSelect }: { hotspots: HotspotShape[];
 
   return (
     <Source id="hotspots" type="geojson" data={data}>
-      <Layer id="hotspot-fill" type="fill" paint={{ "fill-color": "#22c55e", "fill-opacity": ["case", ["get", "active"], 0.2, 0.06] }} />
+      <Layer
+        id="hotspot-fill"
+        type="fill"
+        paint={{
+          "fill-color": "#22c55e",
+          "fill-opacity": ["case", ["get", "active"], 0.2, 0.06],
+        }}
+      />
       <Layer
         id="hotspot-line"
         type="line"

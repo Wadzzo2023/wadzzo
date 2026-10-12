@@ -43,18 +43,35 @@ export function Price({
   const usdFirst = currency === "USD" && hasUsd;
 
   const main = usdFirst ? (
-    <span className={cn("font-hud font-bold tabular-nums", s.main, gradient && "text-gradient")}>{formatUsdAmount(usd)}</span>
+    <span className={cn("font-hud font-bold tabular-nums", s.main, gradient && "text-gradient")}>
+      {formatUsdAmount(usd)}
+    </span>
   ) : (
     <span className={cn("font-hud font-bold tabular-nums", s.main)}>
-      <span className={cn(gradient && "text-gradient")}>{formatTokenNumber(tokens)}</span> <span className={cn("font-semibold text-primary", s.unit)}>{code}</span>
+      <span className={cn(gradient && "text-gradient")}>{formatTokenNumber(tokens)}</span>{" "}
+      <span className={cn("text-primary font-semibold", s.unit)}>{code}</span>
     </span>
   );
-  const sub = !secondary ? null : usdFirst ? `${formatTokenNumber(tokens)} ${code}` : hasUsd ? `≈ ${formatUsdAmount(usd)}` : null;
+  const sub = !secondary
+    ? null
+    : usdFirst
+      ? `${formatTokenNumber(tokens)} ${code}`
+      : hasUsd
+        ? `≈ ${formatUsdAmount(usd)}`
+        : null;
 
   return (
-    <span className={cn(inline ? "inline-flex flex-wrap items-baseline gap-x-1.5" : "flex flex-col", "min-w-0", className)}>
+    <span
+      className={cn(
+        inline ? "inline-flex flex-wrap items-baseline gap-x-1.5" : "flex flex-col",
+        "min-w-0",
+        className,
+      )}
+    >
       <span className="truncate leading-tight">{main}</span>
-      {sub && <span className={cn("truncate tabular-nums text-muted-foreground", s.sub)}>{sub}</span>}
+      {sub && (
+        <span className={cn("text-muted-foreground truncate tabular-nums", s.sub)}>{sub}</span>
+      )}
     </span>
   );
 }
@@ -63,5 +80,7 @@ export function Price({
 export function usePriceText() {
   const { currency } = useCurrency();
   return (tokens: number, usd: number | null | undefined, code = PLATFORM_ASSET.code) =>
-    currency === "USD" && usd != null ? formatUsdAmount(usd) : `${formatTokenNumber(tokens)} ${code}`;
+    currency === "USD" && usd != null
+      ? formatUsdAmount(usd)
+      : `${formatTokenNumber(tokens)} ${code}`;
 }

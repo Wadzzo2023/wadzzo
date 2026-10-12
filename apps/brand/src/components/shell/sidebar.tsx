@@ -5,7 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@wadzzo/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@wadzzo/ui/components/tooltip";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { getPortalLandingRoute, getVisibleNavGroups } from "./access-rules";
@@ -39,7 +44,13 @@ export function Sidebar({
   brandEntry?: BrandEntry | null;
 }) {
   const pathname = usePathname() ?? "";
-  const groups = getVisibleNavGroups({ isAdmin, isApprovedCreator, navPermission, isSuperAdmin, brandEntry });
+  const groups = getVisibleNavGroups({
+    isAdmin,
+    isApprovedCreator,
+    navPermission,
+    isSuperAdmin,
+    brandEntry,
+  });
   const homeHref = getPortalLandingRoute({ isAdmin, isApprovedCreator });
   const isPureAdmin = isAdmin && !isApprovedCreator;
 
@@ -47,21 +58,38 @@ export function Sidebar({
     <TooltipProvider delayDuration={200}>
       <aside
         className={cn(
-          "sticky top-0 z-40 hidden h-dvh shrink-0 flex-col border-r bg-card transition-[width] duration-200 lg:flex",
+          "bg-card sticky top-0 z-40 hidden h-dvh shrink-0 flex-col border-r transition-[width] duration-200 lg:flex",
           collapsed ? "w-[72px]" : "w-64",
         )}
         aria-label="Portal navigation"
       >
         {/* Brand and Toggle */}
-        <div className={cn("flex items-center border-b", collapsed ? "h-16 justify-center px-0" : "h-16 justify-between px-4")}>
-          <Link href={homeHref} className="flex items-center gap-2.5" aria-label={`${platformBranding.name} portal home`}>
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
-              <Image src={platformBranding.assets.loading} alt="" width={22} height={22} className="object-contain" />
+        <div
+          className={cn(
+            "flex items-center border-b",
+            collapsed ? "h-16 justify-center px-0" : "h-16 justify-between px-4",
+          )}
+        >
+          <Link
+            href={homeHref}
+            className="flex items-center gap-2.5"
+            aria-label={`${platformBranding.name} portal home`}
+          >
+            <span className="bg-primary/10 flex size-9 items-center justify-center rounded-lg">
+              <Image
+                src={platformBranding.assets.loading}
+                alt=""
+                width={22}
+                height={22}
+                className="object-contain"
+              />
             </span>
             {!collapsed && (
               <span className="leading-tight">
-                <span className="block font-hud text-base font-bold tracking-tight">{platformBranding.name}</span>
-                <span className="block font-hud text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="font-hud block text-base font-bold tracking-tight">
+                  {platformBranding.name}
+                </span>
+                <span className="font-hud text-muted-foreground block text-[10px] font-semibold tracking-[0.18em] uppercase">
                   {isPureAdmin ? "Admin portal" : "Brand portal"}
                 </span>
               </span>
@@ -82,13 +110,18 @@ export function Sidebar({
         </div>
 
         {/* Groups */}
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4 scrollbar-thin" aria-label="Sections">
+        <nav
+          className="flex-1 scrollbar-thin space-y-5 overflow-y-auto px-3 pb-4"
+          aria-label="Sections"
+        >
           {groups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className="mb-1.5 px-2 font-hud text-[10px] font-semibold uppercase tracking-[0.18em] text-faint">{group.label}</p>
+                <p className="font-hud text-faint mb-1.5 px-2 text-[10px] font-semibold tracking-[0.18em] uppercase">
+                  {group.label}
+                </p>
               )}
-              {collapsed && <div className="mx-auto mb-2 h-px w-6 bg-border" aria-hidden />}
+              {collapsed && <div className="bg-border mx-auto mb-2 h-px w-6" aria-hidden />}
               <ul className="space-y-0.5">
                 {group.items.map((item) => (
                   <li key={item.href}>
@@ -112,7 +145,7 @@ export function Sidebar({
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
-          className="absolute -right-3 top-5 z-50 flex size-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-foreground"
+          className="bg-card text-muted-foreground hover:bg-accent hover:text-foreground absolute top-5 -right-3 z-50 flex size-6 items-center justify-center rounded-full border shadow-sm transition-colors"
         >
           {collapsed ? <ChevronRight className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
         </button>
@@ -121,7 +154,15 @@ export function Sidebar({
   );
 }
 
-function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; collapsed: boolean }) {
+function NavLink({
+  item,
+  active,
+  collapsed,
+}: {
+  item: NavItem;
+  active: boolean;
+  collapsed: boolean;
+}) {
   const Icon = item.icon;
   const link = (
     <Link
@@ -130,7 +171,9 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
       className={cn(
         "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors",
         collapsed && "justify-center px-0",
-        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        active
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
       <Icon className="size-[18px] shrink-0" />
@@ -145,4 +188,3 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
     </Tooltip>
   );
 }
-

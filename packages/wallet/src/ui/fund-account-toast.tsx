@@ -29,8 +29,8 @@ export function showFundAccountToast(pubkey: string) {
             Fund your account
           </p>
           <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-            Your Stellar account isn&apos;t activated yet. Send at least 1 XLM to
-            the address below to activate it.
+            Your Stellar account isn&apos;t activated yet. Send at least 1 XLM to the address below
+            to activate it.
           </p>
 
           <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-zinc-100 px-2.5 py-1.5 dark:bg-zinc-800">

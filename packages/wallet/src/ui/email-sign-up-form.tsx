@@ -29,24 +29,24 @@ const formSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
-  })
+  });
 
-type FormInputs = z.infer<typeof formSchema>
+type FormInputs = z.infer<typeof formSchema>;
 
 interface EmailSignUpFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [emailSent, setEmailSent] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      setCurrentUser(user)
-    })
-    return unsubscribe
-  }, [])
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
 
   const {
     register,
@@ -55,44 +55,44 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
     reset,
   } = useForm<FormInputs>({
     resolver: zodResolver(formSchema),
-  })
+  });
 
   const registerMutation = useMutation({
     mutationFn: async (data: FormInputs) => {
-      const cred = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password)
-      const user = cred.user
+      const cred = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password);
+      const user = cred.user;
       if (!user.emailVerified) {
-        await sendEmailVerification(user)
+        await sendEmailVerification(user);
       }
-      return user
+      return user;
     },
     onSuccess: (user) => {
-      toast.success("Account created! Please check your email to verify.")
-      setEmailSent(true)
-      reset()
+      toast.success("Account created! Please check your email to verify.");
+      setEmailSent(true);
+      reset();
       // Optionally navigate back to login after successful signup
       setTimeout(() => {
-        onSuccess?.()
-      }, 2000)
+        onSuccess?.();
+      }, 2000);
     },
     onError: (error: AuthError) => {
       if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
-        toast.error("An account with this email already exists")
+        toast.error("An account with this email already exists");
       } else {
-        toast.error(error.message)
+        toast.error(error.message);
       }
     },
-  })
+  });
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    registerMutation.mutate(data)
-  }
+    registerMutation.mutate(data);
+  };
 
   return (
     <form className="flex w-full flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-1">
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="email"
             disabled={registerMutation.isPending}
@@ -102,12 +102,12 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
             className="pl-9"
           />
         </div>
-        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+        {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-1">
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="password"
             disabled={registerMutation.isPending}
@@ -117,12 +117,12 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
             className="pl-9"
           />
         </div>
-        {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+        {errors.password && <p className="text-destructive text-xs">{errors.password.message}</p>}
       </div>
 
       <div className="space-y-1">
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="password"
             disabled={registerMutation.isPending}
@@ -132,7 +132,9 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
             className="pl-9"
           />
         </div>
-        {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+        {errors.confirmPassword && (
+          <p className="text-destructive text-xs">{errors.confirmPassword.message}</p>
+        )}
       </div>
 
       {emailSent && (
@@ -141,10 +143,14 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
         </p>
       )}
 
-      <Button disabled={registerMutation.isPending} type="submit" className="w-full rounded-xl py-2.5">
+      <Button
+        disabled={registerMutation.isPending}
+        type="submit"
+        className="w-full rounded-xl py-2.5"
+      >
         {registerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Create Account
       </Button>
     </form>
-  )
+  );
 }

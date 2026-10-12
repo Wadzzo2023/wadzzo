@@ -12,9 +12,18 @@ const MODES = [
 
 /** Murals wear the launcher tile's epic purple; the other two stay green. */
 const ACTIVE = {
-  ar: { pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]", icon: "text-ar-green-hot" },
-  qr: { pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]", icon: "text-ar-green-hot" },
-  murals: { pill: "border-rarity-epic/60 bg-rarity-epic/25 shadow-[0_0_14px_-4px_hsl(var(--rarity-epic)/0.8)]", icon: "text-rarity-epic" },
+  ar: {
+    pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]",
+    icon: "text-ar-green-hot",
+  },
+  qr: {
+    pill: "border-ar-green/50 bg-ar-green/20 shadow-[0_0_14px_-4px_hsl(var(--ar-green)/0.8)]",
+    icon: "text-ar-green-hot",
+  },
+  murals: {
+    pill: "border-rarity-epic/60 bg-rarity-epic/25 shadow-[0_0_14px_-4px_hsl(var(--rarity-epic)/0.8)]",
+    icon: "text-rarity-epic",
+  },
 } as const;
 
 export type CameraMode = (typeof MODES)[number]["id"];
@@ -35,13 +44,7 @@ export type CameraMode = (typeof MODES)[number]["id"];
  * Sits over live video, so it's glass like the rest of the camera chrome
  * rather than the bevelled `SegmentedTabs` used on flat screens.
  */
-export function CameraModeSwitch({
-  mode,
-  className,
-}: {
-  mode: CameraMode;
-  className?: string;
-}) {
+export function CameraModeSwitch({ mode, className }: { mode: CameraMode; className?: string }) {
   const router = useRouter();
 
   return (
@@ -70,16 +73,18 @@ export function CameraModeSwitch({
               <motion.span
                 layoutId="camera-mode"
                 className={cn("absolute inset-0 rounded-full border", ACTIVE[m.id].pill)}
-                transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.7 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 460,
+                  damping: 34,
+                  mass: 0.7,
+                }}
               />
             )}
             <Icon
               size={12}
               strokeWidth={2.5}
-              className={cn(
-                "relative z-10",
-                active ? ACTIVE[m.id].icon : "text-ar-faint",
-              )}
+              className={cn("relative z-10", active ? ACTIVE[m.id].icon : "text-ar-faint")}
             />
             <span
               className={cn(

@@ -6,14 +6,14 @@ import { WalletType } from "@wadzzo/wallet/shared";
 import { isRechargeAbleClient } from "~/utils/recharge/is-rechargeable-client";
 
 export default function RechargeLink() {
-    const session = useSession();
-    const walletType = session.data?.user.walletType ?? WalletType.none;
+  const session = useSession();
+  const walletType = session.data?.user.walletType ?? WalletType.none;
 
-    const isFBorGoogle = isRechargeAbleClient(walletType);
-    if (isFBorGoogle)
-        return (
-            <Link className="  w-full" href={isFBorGoogle ? "/recharge" : "/"}>
-                <Button className="shadow-xs shadow-black  w-full">Recharge</Button>
-            </Link>
-        );
+  const isFBorGoogle = isRechargeAbleClient(walletType);
+  if (isFBorGoogle)
+    return (
+      <Link className="w-full" href={isFBorGoogle ? "/recharge" : "/"}>
+        <Button className="w-full shadow-xs shadow-black">Recharge</Button>
+      </Link>
+    );
 }

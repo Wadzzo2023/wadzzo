@@ -14,157 +14,158 @@
 import { taskServerHeaders, taskServerUrl } from "./server-url";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-
-
 // ─── Response types ───────────────────────────────────────────────────────────
 
 export interface HotspotSummary {
-    id: string;
-    isActive: boolean;
-    dropEveryDays: number;
-    pinDurationDays: number;
-    hotspotStartDate: string;
-    hotspotEndDate: string;
-    shape: string;
-    autoCollect: boolean;
-    totalDrops: number;
-    hasSchedule: boolean;
-    nextRunTime?: string | null;
-    createdAt: string;
+  id: string;
+  isActive: boolean;
+  dropEveryDays: number;
+  pinDurationDays: number;
+  hotspotStartDate: string;
+  hotspotEndDate: string;
+  shape: string;
+  autoCollect: boolean;
+  totalDrops: number;
+  hasSchedule: boolean;
+  nextRunTime?: string | null;
+  createdAt: string;
 }
 
 export interface HotspotDetail extends HotspotSummary {
-    locationGroups: unknown[];
+  locationGroups: unknown[];
 }
 
 export interface HotspotActionResult {
-    ok: boolean;
-    hotspotId: string;
-    isActive?: boolean;
-    error?: string;
+  ok: boolean;
+  hotspotId: string;
+  isActive?: boolean;
+  error?: string;
 }
 
 export interface UpdateHotspotInput {
-    hotspotStartDate?: string;
-    hotspotEndDate?: string;
-    dropEveryDays?: number;
-    pinDurationDays?: number;
-    autoCollect?: boolean;
-    multiPin?: boolean;
-    scope?: "future_drops" | "all_drops";
+  hotspotStartDate?: string;
+  hotspotEndDate?: string;
+  dropEveryDays?: number;
+  pinDurationDays?: number;
+  autoCollect?: boolean;
+  multiPin?: boolean;
+  scope?: "future_drops" | "all_drops";
 }
 
 export interface CreateHotspotInput {
-    title: string;
-    description?: string;
-    image?: string;
-    url?: string;
-    type?: string;
-    dropEveryDays: number;
-    pinDurationDays: number;
-    hotspotStartDate: string;   // ISO datetime
-    hotspotEndDate: string;     // ISO datetime
-    pinNumber: number;
-    pinCollectionLimit: number;
-    autoCollect: boolean;
-    multiPin?: boolean;
-    hotspotShape: "circle" | "rectangle" | "polygon";
-    geoJson?: unknown;
-    token?: number;
-    tier?: string;
-    creatorId: string
+  title: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  type?: string;
+  dropEveryDays: number;
+  pinDurationDays: number;
+  hotspotStartDate: string; // ISO datetime
+  hotspotEndDate: string; // ISO datetime
+  pinNumber: number;
+  pinCollectionLimit: number;
+  autoCollect: boolean;
+  multiPin?: boolean;
+  hotspotShape: "circle" | "rectangle" | "polygon";
+  geoJson?: unknown;
+  token?: number;
+  tier?: string;
+  creatorId: string;
 }
 
 // ─── Shared response handler ──────────────────────────────────────────────────
 
 async function handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-        const text = await res.text().catch(() => `HTTP ${res.status}`);
-        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Hotspot API error (${res.status}): ${text.slice(0, 300)}` });
-    }
-    return res.json() as Promise<T>;
+  if (!res.ok) {
+    const text = await res.text().catch(() => `HTTP ${res.status}`);
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+      message: `Hotspot API error (${res.status}): ${text.slice(0, 300)}`,
+    });
+  }
+  return res.json() as Promise<T>;
 }
 
 // ─── Client ───────────────────────────────────────────────────────────────────
 
 export const hotspotClient = {
-    // ── Create ────────────────────────────────────────────────────────────────
+  // ── Create ────────────────────────────────────────────────────────────────
 
-    async create(
-        creatorId: string,
-        input: CreateHotspotInput
-    ): Promise<{ hotspotId: string }> {
-        const res = await fetch(`${taskServerUrl()}/hotspots`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ ...input, creatorId }),  // creatorId in body — ownership scoping
-        });
-        return handleResponse<{ hotspotId: string }>(res);
-    },
+  async create(creatorId: string, input: CreateHotspotInput): Promise<{ hotspotId: string }> {
+    const res = await fetch(`${taskServerUrl()}/hotspots`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ ...input, creatorId }), // creatorId in body — ownership scoping
+    });
+    return handleResponse<{ hotspotId: string }>(res);
+  },
 
-    // ── Read (creatorId as query param — no body on GET) ──────────────────────
+  // ── Read (creatorId as query param — no body on GET) ──────────────────────
 
-    async list(creatorId: string): Promise<{ hotspots: HotspotSummary[] }> {
-        const url = `${taskServerUrl()}/hotspots?creatorId=${encodeURIComponent(creatorId)}`;
-        const res = await fetch(url, { headers: taskServerHeaders() });
-        return handleResponse<{ hotspots: HotspotSummary[] }>(res);
-    },
+  async list(creatorId: string): Promise<{ hotspots: HotspotSummary[] }> {
+    const url = `${taskServerUrl()}/hotspots?creatorId=${encodeURIComponent(creatorId)}`;
+    const res = await fetch(url, { headers: taskServerHeaders() });
+    return handleResponse<{ hotspots: HotspotSummary[] }>(res);
+  },
 
-    async get(creatorId: string, hotspotId: string): Promise<HotspotDetail> {
-        const url = `${taskServerUrl()}/hotspots/${hotspotId}?creatorId=${encodeURIComponent(creatorId)}`;
-        const res = await fetch(url, { headers: taskServerHeaders() });
-        return handleResponse<HotspotDetail>(res);
-    },
+  async get(creatorId: string, hotspotId: string): Promise<HotspotDetail> {
+    const url = `${taskServerUrl()}/hotspots/${hotspotId}?creatorId=${encodeURIComponent(creatorId)}`;
+    const res = await fetch(url, { headers: taskServerHeaders() });
+    return handleResponse<HotspotDetail>(res);
+  },
 
-    // ── Schedule control (creatorId in body) ──────────────────────────────────
+  // ── Schedule control (creatorId in body) ──────────────────────────────────
 
-    async pause(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
-        const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/pause`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ creatorId }),
-        });
-        return handleResponse<HotspotActionResult>(res);
-    },
+  async pause(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
+    const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/pause`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ creatorId }),
+    });
+    return handleResponse<HotspotActionResult>(res);
+  },
 
-    async resume(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
-        const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/resume`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ creatorId }),
-        });
-        return handleResponse<HotspotActionResult>(res);
-    },
+  async resume(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
+    const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/resume`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ creatorId }),
+    });
+    return handleResponse<HotspotActionResult>(res);
+  },
 
-    /** Change schedule / collection settings; the task server reschedules if the timing changed. */
-    async update(creatorId: string, hotspotId: string, input: UpdateHotspotInput): Promise<HotspotActionResult & { rescheduled: boolean }> {
-        const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}`, {
-            method: "PATCH",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ creatorId, ...input }),
-        });
-        return handleResponse<HotspotActionResult & { rescheduled: boolean }>(res);
-    },
+  /** Change schedule / collection settings; the task server reschedules if the timing changed. */
+  async update(
+    creatorId: string,
+    hotspotId: string,
+    input: UpdateHotspotInput,
+  ): Promise<HotspotActionResult & { rescheduled: boolean }> {
+    const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}`, {
+      method: "PATCH",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ creatorId, ...input }),
+    });
+    return handleResponse<HotspotActionResult & { rescheduled: boolean }>(res);
+  },
 
-    async delete(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
-        const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}`, {
-            method: "DELETE",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ creatorId }),
-        });
-        return handleResponse<HotspotActionResult>(res);
-    },
+  async delete(creatorId: string, hotspotId: string): Promise<HotspotActionResult> {
+    const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}`, {
+      method: "DELETE",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ creatorId }),
+    });
+    return handleResponse<HotspotActionResult>(res);
+  },
 
-    /** Manually trigger one drop — for admin/debug use. */
-    async triggerDrop(
-        creatorId: string,
-        hotspotId: string
-    ): Promise<{ ok: boolean; result?: unknown; reason?: string }> {
-        const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/drop`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ creatorId }),
-        });
-        return handleResponse<{ ok: boolean; result?: unknown; reason?: string }>(res);
-    },
+  /** Manually trigger one drop — for admin/debug use. */
+  async triggerDrop(
+    creatorId: string,
+    hotspotId: string,
+  ): Promise<{ ok: boolean; result?: unknown; reason?: string }> {
+    const res = await fetch(`${taskServerUrl()}/hotspots/${hotspotId}/drop`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ creatorId }),
+    });
+    return handleResponse<{ ok: boolean; result?: unknown; reason?: string }>(res);
+  },
 };

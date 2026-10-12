@@ -27,7 +27,10 @@ function readUsage(extraFields: unknown): Usage {
 /** An admin of this deployment's platform (root-platform admins count everywhere). */
 async function isAdmin(userId: string) {
   const [admin, platform] = await Promise.all([
-    db.admin.findUnique({ where: { id: userId }, select: { platformId: true, platform: { select: { isRoot: true } } } }),
+    db.admin.findUnique({
+      where: { id: userId },
+      select: { platformId: true, platform: { select: { isRoot: true } } },
+    }),
     getCurrentPlatform(),
   ]);
   return Boolean(admin && canAdminPlatform(admin, platform));
@@ -35,8 +38,17 @@ async function isAdmin(userId: string) {
 
 /** What's left today for this brand (null = unlimited). */
 export async function aiRemaining(userId: string) {
-  if (await isAdmin(userId)) return { text: null, image: null, limit: AI_DAILY_LIMIT, unlimited: true as const };
-  const creator = await db.creator.findUnique({ where: { id: userId }, select: { extraFields: true } });
+  if (await isAdmin(userId))
+    return {
+      text: null,
+      image: null,
+      limit: AI_DAILY_LIMIT,
+      unlimited: true as const,
+    };
+  const creator = await db.creator.findUnique({
+    where: { id: userId },
+    select: { extraFields: true },
+  });
   const u = readUsage(creator?.extraFields);
   return {
     text: Math.max(0, AI_DAILY_LIMIT.text - u.text),
@@ -50,10 +62,17 @@ export async function aiRemaining(userId: string) {
  * Run `work` if the brand has quota left, and count it only if it succeeds.
  * Usage lives in Creator.extraFields.aiUsage (no schema change; other keys kept).
  */
-export async function withAiQuota<T>(userId: string, kind: AiKind, work: () => Promise<T>): Promise<T> {
+export async function withAiQuota<T>(
+  userId: string,
+  kind: AiKind,
+  work: () => Promise<T>,
+): Promise<T> {
   const admin = await isAdmin(userId);
   if (!admin) {
-    const creator = await db.creator.findUnique({ where: { id: userId }, select: { extraFields: true } });
+    const creator = await db.creator.findUnique({
+      where: { id: userId },
+      select: { extraFields: true },
+    });
     const u = readUsage(creator?.extraFields);
     if (u[kind] >= AI_DAILY_LIMIT[kind])
       throw new TRPCError({
@@ -68,21 +87,36 @@ export async function withAiQuota<T>(userId: string, kind: AiKind, work: () => P
   } catch (e) {
     if (e instanceof TRPCError) throw e;
     console.error("[ai]", e);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: e instanceof OpenAI.APIError ? friendlyOpenAiError(e) : "The AI couldn't finish that. Try again." });
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message:
+        e instanceof OpenAI.APIError
+          ? friendlyOpenAiError(e)
+          : "The AI couldn't finish that. Try again.",
+    });
   }
 
   if (!admin) {
     // Re-read so a concurrent request's count isn't lost, and keep other keys.
-    const creator = await db.creator.findUnique({ where: { id: userId }, select: { extraFields: true } });
+    const creator = await db.creator.findUnique({
+      where: { id: userId },
+      select: { extraFields: true },
+    });
     const current = (creator?.extraFields as Record<string, unknown> | null) ?? {};
     const u = readUsage(current);
-    await db.creator.update({ where: { id: userId }, data: { extraFields: { ...current, aiUsage: { ...u, [kind]: u[kind] + 1 } } } });
+    await db.creator.update({
+      where: { id: userId },
+      data: {
+        extraFields: { ...current, aiUsage: { ...u, [kind]: u[kind] + 1 } },
+      },
+    });
   }
   return result;
 }
 
 function friendlyOpenAiError(e: { status?: number; message: string }) {
-  if (e.status === 400 && /safety|moderation|policy/i.test(e.message)) return "That was blocked by the AI's safety filter. Try wording it differently.";
+  if (e.status === 400 && /safety|moderation|policy/i.test(e.message))
+    return "That was blocked by the AI's safety filter. Try wording it differently.";
   if (e.status === 429) return "The AI is busy right now. Try again in a moment.";
   return "The AI couldn't finish that. Try again.";
 }

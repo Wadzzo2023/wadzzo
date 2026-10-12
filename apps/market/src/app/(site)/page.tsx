@@ -29,7 +29,9 @@ export default async function HomePage() {
               <ListingCard key={l.id} listing={l} />
             ))}
           </ListingGrid>
-          {all.nextCursor && <LoadMoreListings input={{ kind: "all", limit: 24 }} cursor={all.nextCursor} />}
+          {all.nextCursor && (
+            <LoadMoreListings input={{ kind: "all", limit: 24 }} cursor={all.nextCursor} />
+          )}
         </Section>
       </PageBody>
     </>

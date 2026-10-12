@@ -23,22 +23,37 @@ export const NftFormSchema = z.object({
   coverImgUrl: z.string().min(1, { message: "Thumbnail is required" }),
   mediaType: z.enum(MediaType),
   price: z
-    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Price must be entered as a number"
+          : "Price must be entered as a number",
+    })
     .nonnegative()
     .default(2),
   priceUSD: z
-    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Limit must be entered as a number"
+          : "Limit must be entered as a number",
+    })
     .nonnegative()
     .default(1),
   limit: z
-    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Limit must be entered as a number"
+          : "Limit must be entered as a number",
+    })
     .nonnegative(),
   //code can't contain any spaces
   code: z
     .string()
     .min(4, { message: "Must be a minimum of 4 characters" })
-    .max(12, { message: "Must be a maximum of 12 characters" }).
-    regex(/^[a-zA-Z]*$/, { message: "Asset Name can only contain letters" }),
+    .max(12, { message: "Must be a maximum of 12 characters" })
+    .regex(/^[a-zA-Z]*$/, { message: "Asset Name can only contain letters" }),
   issuer: AccountSchema.optional(),
   songInfo: ExtraSongInfo.optional(),
   isAdmin: z.boolean().optional(),

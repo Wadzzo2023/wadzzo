@@ -9,7 +9,13 @@ import {
 import { networkPassphrase } from "./create_song_token";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+} from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
@@ -45,13 +51,9 @@ export async function XDR4BuyAsset({
   const buyerAcc = await StellarAccount.loadOrThrow(buyer);
   const hasTrust = buyerAcc.hasTrustline(code, issuerPub);
 
-  const requiredAsset2refundXlm = hasTrust
-    ? 0
-    : await getplatformAssetNumberForXLM(0.5);
+  const requiredAsset2refundXlm = hasTrust ? 0 : await getplatformAssetNumberForXLM(0.5);
   const totalPlatformFee =
-    requiredAsset2refundXlm +
-    Number(PLATFORM_FEE) +
-    Number(TrxBaseFeeInPlatformAsset);
+    requiredAsset2refundXlm + Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset);
 
   const Tx2 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,
@@ -150,10 +152,7 @@ export async function XDR4BuyAssetWithXLM({
 
   const balances = transactionInializer.balances;
   const trust = balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum12" ||
-      balance.asset_type === "credit_alphanum4"
-    ) {
+    if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
       if (balance.asset_code === code && balance.asset_issuer === issuerPub) {
         return true;
       }

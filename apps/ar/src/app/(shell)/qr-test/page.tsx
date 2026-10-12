@@ -35,9 +35,7 @@ export default function QrTestScreen() {
   const [onlyClaimable, setOnlyClaimable] = useState(true);
 
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const shown = onlyClaimable
-    ? pins.filter((p) => pinStatus(p) === "collectible")
-    : pins;
+  const shown = onlyClaimable ? pins.filter((p) => pinStatus(p) === "collectible") : pins;
 
   return (
     <AppShell>
@@ -45,36 +43,28 @@ export default function QrTestScreen() {
         <ScreenHeader eyebrow="Developer bench" title="QR test" />
 
         <div className="px-5">
-          <p className="text-[12.5px] leading-relaxed text-ar-dim">
+          <p className="text-ar-dim text-[12.5px] leading-relaxed">
             Scan any code below with another device. Each one encodes{" "}
-            <code className="rounded-base bg-white/[0.06] px-1 text-ar-text">
+            <code className="rounded-base text-ar-text bg-white/[0.06] px-1">
               /scan?pin=&lt;id&gt;
             </code>{" "}
             — the same string a creator shares.
           </p>
 
           <div className="mt-3 flex gap-1.5">
-            <Chip
-              active={onlyClaimable}
-              onClick={() => setOnlyClaimable(true)}
-            >
+            <Chip active={onlyClaimable} onClick={() => setOnlyClaimable(true)}>
               Claimable {shown.length > 0 && `· ${shown.length}`}
             </Chip>
-            <Chip
-              active={!onlyClaimable}
-              onClick={() => setOnlyClaimable(false)}
-            >
+            <Chip active={!onlyClaimable} onClick={() => setOnlyClaimable(false)}>
               All · {pins.length}
             </Chip>
           </div>
         </div>
 
         {isLoading ? (
-          <p className="px-5 py-10 text-center text-[12.5px] text-ar-faint">
-            Loading pins…
-          </p>
+          <p className="text-ar-faint px-5 py-10 text-center text-[12.5px]">Loading pins…</p>
         ) : shown.length === 0 ? (
-          <p className="px-5 py-10 text-center text-[12.5px] text-ar-faint">
+          <p className="text-ar-faint px-5 py-10 text-center text-[12.5px]">
             No pins match. Try “All”.
           </p>
         ) : (
@@ -84,43 +74,33 @@ export default function QrTestScreen() {
               const url = `${origin}/scan?pin=${pin.id}`;
               return (
                 <div key={pin.id} className="ar-bevel rounded-ar-lg p-3.5">
-                  <div className="mx-auto w-fit rounded-ar bg-white p-2.5">
-                    <QRCode
-                      value={url}
-                      size={150}
-                      bgColor="#ffffff"
-                      fgColor="#07120c"
-                      level="H"
-                    />
+                  <div className="rounded-ar mx-auto w-fit bg-white p-2.5">
+                    <QRCode value={url} size={150} bgColor="#ffffff" fgColor="#07120c" level="H" />
                   </div>
 
-                  <p className="font-hud mt-2.5 truncate text-[12px] font-bold text-ar-text">
+                  <p className="font-hud text-ar-text mt-2.5 truncate text-[12px] font-bold">
                     {pin.title}
                   </p>
-                  <p className="mt-0.5 truncate text-[11px] text-ar-faint">
-                    {pin.brandName}
-                  </p>
+                  <p className="text-ar-faint mt-0.5 truncate text-[11px]">{pin.brandName}</p>
 
                   <div className="mt-1.5 flex items-center gap-1.5">
                     <span
                       className={
                         status === "collectible"
-                          ? "font-hud text-[10px] font-bold uppercase tracking-[0.1em] text-ar-green-hot"
-                          : "font-hud text-[10px] font-bold uppercase tracking-[0.1em] text-ar-faint"
+                          ? "font-hud text-ar-green-hot text-[10px] font-bold tracking-[0.1em] uppercase"
+                          : "font-hud text-ar-faint text-[10px] font-bold tracking-[0.1em] uppercase"
                       }
                     >
                       {status}
                     </span>
                     {pin.locked && pin.lockReason && (
-                      <span className="truncate text-[10px] text-ar-faint">
-                        · {pin.lockReason}
-                      </span>
+                      <span className="text-ar-faint truncate text-[10px]">· {pin.lockReason}</span>
                     )}
                   </div>
 
                   {/* The id in full, so a failing scan can be reproduced by
                       hand against the endpoint without reading it off a QR. */}
-                  <p className="mt-2 break-all font-mono text-[9.5px] leading-snug text-ar-faint">
+                  <p className="text-ar-faint mt-2 font-mono text-[9.5px] leading-snug break-all">
                     {pin.id}
                   </p>
                 </div>

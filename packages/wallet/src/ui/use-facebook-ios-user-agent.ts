@@ -20,7 +20,6 @@ export function useFacebookIosUserAgent(): boolean | null {
   return isFacebookiOS;
 }
 
-
 function isFacebookAppiOS(userAgent: string): boolean {
   return (
     userAgent.includes("FBIOS") &&

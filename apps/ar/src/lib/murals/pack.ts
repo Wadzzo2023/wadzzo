@@ -30,7 +30,12 @@ const READY_KEY = "wadzzo.muralPack.ready";
 /** Seconds between automatic retries after a network failure. */
 const RETRY_S = 8;
 
-export type PackFile = { url: string; bytes: number; sha256: string; cacheKey: string };
+export type PackFile = {
+  url: string;
+  bytes: number;
+  sha256: string;
+  cacheKey: string;
+};
 type Manifest = { name: string; version: number; web: PackFile };
 
 export type PackStatus = "idle" | "checking" | "downloading" | "verifying" | "ready" | "error";
@@ -77,7 +82,11 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-function tx<T>(db: IDBDatabase, mode: IDBTransactionMode, run: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+function tx<T>(
+  db: IDBDatabase,
+  mode: IDBTransactionMode,
+  run: (s: IDBObjectStore) => IDBRequest<T>,
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const r = run(db.transaction(STORE, mode).objectStore(STORE));
     r.onsuccess = () => resolve(r.result);
@@ -122,7 +131,10 @@ function writeReadyFlag(v: { version: number; sha256: string } | null) {
 
 async function fetchManifest(): Promise<Manifest> {
   const res = await fetch(MANIFEST_URL, { cache: "no-store" });
-  if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `manifest ${res.status}` });
+  if (!res.ok)
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+      message: `manifest ${res.status}`,
+    });
   return (await res.json()) as Manifest;
 }
 
@@ -133,7 +145,10 @@ let retryTimer: ReturnType<typeof setInterval> | null = null;
 let manifestCache: Manifest | null = null;
 
 const supported = () =>
-  typeof window !== "undefined" && "caches" in window && "indexedDB" in window && Boolean(globalThis.crypto?.subtle);
+  typeof window !== "undefined" &&
+  "caches" in window &&
+  "indexedDB" in window &&
+  Boolean(globalThis.crypto?.subtle);
 
 function scheduleRetry() {
   if (retryTimer) clearInterval(retryTimer);
@@ -174,7 +189,12 @@ async function run() {
       set({ status: "ready", version: flag.version });
       return;
     }
-    fail(navigator.onLine === false ? "offline" : "network", navigator.onLine === false ? "You're offline — the download continues when you're back online." : `Couldn't reach ${platformBranding.name} to check the mural pack.`);
+    fail(
+      navigator.onLine === false ? "offline" : "network",
+      navigator.onLine === false
+        ? "You're offline — the download continues when you're back online."
+        : `Couldn't reach ${platformBranding.name} to check the mural pack.`,
+    );
     return;
   }
   const file = manifest.web;
@@ -193,7 +213,11 @@ async function run() {
   try {
     db = await openDb();
   } catch {
-    fail("storage", "Your browser blocked storage for this site, so the pack can't be saved.", false);
+    fail(
+      "storage",
+      "Your browser blocked storage for this site, so the pack can't be saved.",
+      false,
+    );
     return;
   }
   const count = Math.ceil(file.bytes / CHUNK);
@@ -208,8 +232,14 @@ async function run() {
     const to = Math.min(file.bytes, from + CHUNK) - 1;
     let buf: ArrayBuffer;
     try {
-      const res = await fetch(file.url, { headers: { Range: `bytes=${from}-${to}` }, cache: "no-store" });
-      if (res.status !== 206 && res.status !== 200) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `HTTP ${res.status}` });
+      const res = await fetch(file.url, {
+        headers: { Range: `bytes=${from}-${to}` },
+        cache: "no-store",
+      });
+      if (res.status !== 206 && res.status !== 200)
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+          message: `HTTP ${res.status}`,
+        });
       if (res.status === 200 || !res.body) {
         // A server that ignored Range sent the whole file — take our slice.
         buf = await res.arrayBuffer();
@@ -244,9 +274,17 @@ async function run() {
         }
         buf = joined.buffer;
       }
-      if (buf.byteLength !== to - from + 1) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "short read" });
+      if (buf.byteLength !== to - from + 1)
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+          message: "short read",
+        });
     } catch {
-      fail(navigator.onLine === false ? "offline" : "network", navigator.onLine === false ? "You're offline — the download continues when you're back online." : "The connection dropped. Retrying…");
+      fail(
+        navigator.onLine === false ? "offline" : "network",
+        navigator.onLine === false
+          ? "You're offline — the download continues when you're back online."
+          : "The connection dropped. Retrying…",
+      );
       return;
     }
     try {
@@ -263,7 +301,8 @@ async function run() {
   set({ status: "verifying", speed: 0 });
   const parts: ArrayBuffer[] = [];
   for (let i = 0; i < count; i++) {
-    const part = (await tx(db, "readonly", (s) => s.get(chunkKey(file.sha256, i)))) as ArrayBuffer | undefined;
+    const part = (await tx(db, "readonly", (s) => s.get(chunkKey(file.sha256, i)))) as
+      ArrayBuffer | undefined;
     if (!part) {
       fail("damaged", "Part of the pack went missing. Downloading it again…");
       return;
@@ -281,14 +320,27 @@ async function run() {
 
   // 5. Install where Transformers.js looks, then drop the chunks.
   try {
-    await cache.put(file.cacheKey, new Response(blob, { headers: { "Content-Type": "application/octet-stream", "Content-Length": String(file.bytes) } }));
+    await cache.put(
+      file.cacheKey,
+      new Response(blob, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Length": String(file.bytes),
+        },
+      }),
+    );
   } catch {
     fail("storage", "Not enough storage space for the mural pack (≈23 MB).", false);
     return;
   }
   writeReadyFlag({ version: manifest.version, sha256: file.sha256 });
   await clearChunks(db);
-  set({ status: "ready", receivedBytes: file.bytes, speed: 0, justFinished: Date.now() });
+  set({
+    status: "ready",
+    receivedBytes: file.bytes,
+    speed: 0,
+    justFinished: Date.now(),
+  });
 }
 
 /** Fallback cache key when the manifest can't be fetched (offline). */
@@ -343,7 +395,9 @@ export async function deleteMuralPack() {
   const cache = await caches.open(TJS_CACHE);
   await cache.delete(manifestCache?.web.cacheKey ?? flagKeyFallback());
   writeReadyFlag(null);
-  await openDb().then(clearChunks).catch(() => undefined);
+  await openDb()
+    .then(clearChunks)
+    .catch(() => undefined);
   set({ status: "idle", receivedBytes: 0, speed: 0, error: null });
 }
 
@@ -352,7 +406,10 @@ export function formatBytes(n: number) {
 }
 
 /** Whether the game-style pack panel is open (opened from the AR-button ring). */
-export const usePackSheet = create<{ open: boolean; setOpen: (open: boolean) => void }>()((setState) => ({
+export const usePackSheet = create<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}>()((setState) => ({
   open: false,
   setOpen: (open) => setState({ open }),
 }));

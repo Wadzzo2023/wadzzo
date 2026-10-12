@@ -48,9 +48,11 @@ export function MuralMarker({
     >
       <span
         className={cn(
-          "relative block h-[52px] w-[42px] overflow-hidden rounded-[9px] border-[2.5px] bg-ar-surface transition-transform duration-200",
-          verified ? "border-rarity-epic" : "border-dashed border-rarity-epic/90",
-          selected ? "-translate-y-1 scale-110 shadow-[0_0_18px_hsl(var(--rarity-epic)/0.75)]" : "group-hover:-translate-y-0.5",
+          "bg-ar-surface relative block h-[52px] w-[42px] overflow-hidden rounded-[9px] border-[2.5px] transition-transform duration-200",
+          verified ? "border-rarity-epic" : "border-rarity-epic/90 border-dashed",
+          selected
+            ? "-translate-y-1 scale-110 shadow-[0_0_18px_hsl(var(--rarity-epic)/0.75)]"
+            : "group-hover:-translate-y-0.5",
         )}
       >
         {!failed && (
@@ -66,18 +68,21 @@ export function MuralMarker({
       </span>
 
       {!verified && (
-        <span className="font-hud absolute -right-1 -top-1 flex h-[16px] w-[16px] items-center justify-center rounded-full border border-white/70 bg-rarity-epic text-[10px] font-bold text-white">
+        <span className="font-hud bg-rarity-epic absolute -top-1 -right-1 flex h-[16px] w-[16px] items-center justify-center rounded-full border border-white/70 text-[10px] font-bold text-white">
           ?
         </span>
       )}
       {done && (
-        <span className="absolute -left-1 -top-1 flex h-[16px] w-[16px] items-center justify-center rounded-full border border-white/70 bg-gold text-ar-void">
+        <span className="bg-gold text-ar-void absolute -top-1 -left-1 flex h-[16px] w-[16px] items-center justify-center rounded-full border border-white/70">
           <Check size={10} strokeWidth={3.5} />
         </span>
       )}
 
       {/* Ground shadow, like the pin medallions. */}
-      <span aria-hidden className="mt-[3px] h-[5px] w-[26px] rounded-[50%] bg-black/35 blur-[2px]" />
+      <span
+        aria-hidden
+        className="mt-[3px] h-[5px] w-[26px] rounded-[50%] bg-black/35 blur-[2px]"
+      />
     </button>
   );
 }

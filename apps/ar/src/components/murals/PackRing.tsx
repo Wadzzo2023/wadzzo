@@ -27,7 +27,11 @@ export function PackRing() {
     return () => clearTimeout(t);
   }, [s.justFinished]);
 
-  const busy = s.status === "checking" || s.status === "downloading" || s.status === "verifying" || s.status === "error";
+  const busy =
+    s.status === "checking" ||
+    s.status === "downloading" ||
+    s.status === "verifying" ||
+    s.status === "error";
   const show = busy || flash;
   const p = flash ? 1 : packProgress(s);
   const R = 36;
@@ -53,18 +57,34 @@ export function PackRing() {
                 <stop offset="1" stopColor="hsl(var(--rarity-epic))" />
               </linearGradient>
             </defs>
-            <circle cx="38" cy="38" r={R} fill="none" stroke="hsl(var(--rarity-epic) / 0.22)" strokeWidth="4" />
             <circle
               cx="38"
               cy="38"
               r={R}
               fill="none"
-              stroke={flash ? "hsl(var(--ar-green-hot))" : failed ? "hsl(var(--ar-danger))" : `url(#pr-${id})`}
+              stroke="hsl(var(--rarity-epic) / 0.22)"
+              strokeWidth="4"
+            />
+            <circle
+              cx="38"
+              cy="38"
+              r={R}
+              fill="none"
+              stroke={
+                flash
+                  ? "hsl(var(--ar-green-hot))"
+                  : failed
+                    ? "hsl(var(--ar-danger))"
+                    : `url(#pr-${id})`
+              }
               strokeWidth="4"
               strokeLinecap="round"
               strokeDasharray={C}
               strokeDashoffset={C * (1 - p)}
-              style={{ transition: "stroke-dashoffset 300ms ease-out", filter: `drop-shadow(0 0 5px ${flash ? "hsl(var(--ar-green-hot))" : "hsl(var(--rarity-epic))"})` }}
+              style={{
+                transition: "stroke-dashoffset 300ms ease-out",
+                filter: `drop-shadow(0 0 5px ${flash ? "hsl(var(--ar-green-hot))" : "hsl(var(--rarity-epic))"})`,
+              }}
             />
             {spinning && (
               <circle
@@ -89,10 +109,16 @@ export function PackRing() {
                 e.stopPropagation();
                 open(true);
               }}
-              aria-label={failed ? "Mural pack paused — show details" : `Mural pack ${Math.floor(p * 100)}% — show details`}
+              aria-label={
+                failed
+                  ? "Mural pack paused — show details"
+                  : `Mural pack ${Math.floor(p * 100)}% — show details`
+              }
               className={
-                "font-hud pointer-events-auto absolute -top-[13px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-1.5 py-[1px] text-[9.5px] font-bold tabular-nums tracking-[0.06em] " +
-                (failed ? "border-ar-danger/70 bg-ar-void text-ar-danger" : "border-rarity-epic/70 bg-ar-void text-rarity-epic shadow-[0_0_10px_-2px_hsl(var(--rarity-epic))]")
+                "font-hud pointer-events-auto absolute -top-[13px] left-1/2 -translate-x-1/2 rounded-full border px-1.5 py-[1px] text-[9.5px] font-bold tracking-[0.06em] whitespace-nowrap tabular-nums " +
+                (failed
+                  ? "border-ar-danger/70 bg-ar-void text-ar-danger"
+                  : "border-rarity-epic/70 bg-ar-void text-rarity-epic shadow-[0_0_10px_-2px_hsl(var(--rarity-epic))]")
               }
             >
               {failed ? "PAUSED" : s.status === "verifying" ? "CHECK" : `${Math.floor(p * 100)}%`}

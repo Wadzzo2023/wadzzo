@@ -1,9 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 
 // Web list lookups (package/express-wadzzo/src/agent/web.ts) with the model and Google stubbed.
-vi.mock("../../express-wadzzo/src/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
-const findPlace = vi.fn(async (name: string) => ({ id: `g_${name}`, title: name, lat: 1, lng: 2 }));
-vi.mock("../../express-wadzzo/src/agent/google", () => ({ findPlace, geocode: vi.fn(async () => null) }));
+vi.mock("../../express-wadzzo/src/lib/logger", () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+const findPlace = vi.fn(async (name: string) => ({
+  id: `g_${name}`,
+  title: name,
+  lat: 1,
+  lng: 2,
+}));
+vi.mock("../../express-wadzzo/src/agent/google", () => ({
+  findPlace,
+  geocode: vi.fn(async () => null),
+}));
 const prompts: string[] = [];
 vi.mock("@langchain/openai", () => ({
   ChatOpenAI: class {
@@ -15,7 +25,12 @@ vi.mock("@langchain/openai", () => ({
       prompts.push(prompt);
       // Every region returns its own troll plus one that's listed everywhere.
       const region = /in (.+?)\.\n/.exec(prompt)?.[1] ?? "?";
-      return { content: JSON.stringify([{ name: `Troll in ${region}`, city: region }, { name: "Famous troll", city: "Copenhagen" }]) };
+      return {
+        content: JSON.stringify([
+          { name: `Troll in ${region}`, city: region },
+          { name: "Famous troll", city: "Copenhagen" },
+        ]),
+      };
     }
   },
 }));

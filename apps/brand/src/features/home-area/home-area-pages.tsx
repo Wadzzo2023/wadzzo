@@ -3,7 +3,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@wadzzo/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "~/ui/page-header";
@@ -26,18 +32,28 @@ export function HomeAreaTab() {
   });
 
   if (layers.isPending) return <CenteredSpinner />;
-  if (layers.isError) return <ErrorState message={layers.error.message} onRetry={() => void layers.refetch()} />;
+  if (layers.isError)
+    return <ErrorState message={layers.error.message} onRetry={() => void layers.refetch()} />;
   const { own, platform, platformName } = layers.data;
 
   return (
     <div className="max-w-3xl space-y-3">
       <div>
         <h2 className="font-hud text-lg font-semibold">Home area</h2>
-        <p className="text-sm text-muted-foreground">Where you operate. The map assistant searches here unless you name another place.</p>
+        <p className="text-muted-foreground text-sm">
+          Where you operate. The map assistant searches here unless you name another place.
+        </p>
       </div>
       <HomeAreaEditor
         current={own}
-        fallback={platform ? { area: platform, label: `${platformName}'s default area · set your own to use a different one` } : null}
+        fallback={
+          platform
+            ? {
+                area: platform,
+                label: `${platformName}'s default area · set your own to use a different one`,
+              }
+            : null
+        }
         onSave={(area: Area | null) => save.mutateAsync({ area })}
         removeLabel={platform ? `Remove and use ${platformName}'s default` : "Remove area"}
         emptyText="Not set — the assistant will ask where to search"
@@ -50,7 +66,10 @@ export function HomeAreaTab() {
 export function HomeAreaAdminPage() {
   const { isSuperAdmin } = usePortalAccess();
   const [platformId, setPlatformId] = useState<string | undefined>(undefined);
-  const options = api.admin.platforms.options.useQuery(undefined, { enabled: isSuperAdmin, refetchOnWindowFocus: false });
+  const options = api.admin.platforms.options.useQuery(undefined, {
+    enabled: isSuperAdmin,
+    refetchOnWindowFocus: false,
+  });
   const utils = api.useUtils();
   const platform = api.homeArea.platform.useQuery({ platformId });
   const save = api.homeArea.savePlatform.useMutation({

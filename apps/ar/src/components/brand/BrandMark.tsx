@@ -20,16 +20,11 @@ export function BrandMark({
   glow?: boolean;
 } & MotionProps) {
   return (
-     
     <motion.img
       src={platformBranding.assets.mark}
       alt={platformBranding.name}
       className={className}
-      style={
-        glow
-          ? { filter: "drop-shadow(0 0 16px hsl(var(--ar-green) / 0.75))" }
-          : undefined
-      }
+      style={glow ? { filter: "drop-shadow(0 0 16px hsl(var(--ar-green) / 0.75))" } : undefined}
       {...motionProps}
     />
   );

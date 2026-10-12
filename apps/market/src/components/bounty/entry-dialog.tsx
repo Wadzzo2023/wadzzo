@@ -4,7 +4,13 @@ import { FileText, Film, Image as ImageIcon, Music, Paperclip, X } from "lucide-
 import { useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useEntryUpload, type UploadedMedia } from "~/hooks/use-entry-upload";
 import { MAX_ENTRY_FILES, entryFileProblem } from "~/lib/upload-files";
@@ -20,7 +26,10 @@ export function MediaTypeIcon({ type, className }: { type: string; className?: s
   return <FileText className={className} />;
 }
 
-export const formatBytes = (n: number) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / (1024 * 1024)).toFixed(1)} MB`);
+export const formatBytes = (n: number) =>
+  n < 1024 * 1024
+    ? `${Math.max(1, Math.round(n / 1024))} KB`
+    : `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
 /** Entry HTML (from the editor) → plain text for editing. */
 const htmlToText = (html: string) =>
@@ -36,9 +45,24 @@ const htmlToText = (html: string) =>
  * Submit or edit an entry: a message for the brand plus up to five files.
  * Nothing uploads until "Send", so picking and dropping files costs nothing.
  */
-export function EntryDialog({ bountyId, editing, onClose }: { bountyId: number; editing: Entry | null; onClose: () => void }) {
+export function EntryDialog({
+  bountyId,
+  editing,
+  onClose,
+}: {
+  bountyId: number;
+  editing: Entry | null;
+  onClose: () => void;
+}) {
   const [text, setText] = useState(editing ? htmlToText(editing.content) : "");
-  const [kept, setKept] = useState<UploadedMedia[]>(editing?.medias.map(({ url, name, size, type }) => ({ url, name, size, type })) ?? []);
+  const [kept, setKept] = useState<UploadedMedia[]>(
+    editing?.medias.map(({ url, name, size, type }) => ({
+      url,
+      name,
+      size,
+      type,
+    })) ?? [],
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -53,7 +77,8 @@ export function EntryDialog({ bountyId, editing, onClose }: { bountyId: number; 
     const files = Array.from(list);
     const bad = files.map(entryFileProblem).find(Boolean);
     if (bad) return setError(bad);
-    if (total + files.length > MAX_ENTRY_FILES) return setError(`Up to ${MAX_ENTRY_FILES} files per entry.`);
+    if (total + files.length > MAX_ENTRY_FILES)
+      return setError(`Up to ${MAX_ENTRY_FILES} files per entry.`);
     setError(null);
     upload.add(files);
   };
@@ -65,9 +90,17 @@ export function EntryDialog({ bountyId, editing, onClose }: { bountyId: number; 
     try {
       const uploaded = await upload.uploadAll(upload.files);
       const medias = [...kept, ...uploaded];
-      if (editing) await update.mutateAsync({ entryId: editing.id, content: text.trim(), medias });
+      if (editing)
+        await update.mutateAsync({
+          entryId: editing.id,
+          content: text.trim(),
+          medias,
+        });
       else await create.mutateAsync({ bountyId, content: text.trim(), medias });
-      await Promise.all([utils.bounty.entries.invalidate({ bountyId }), utils.bounty.byId.invalidate({ id: bountyId })]);
+      await Promise.all([
+        utils.bounty.entries.invalidate({ bountyId }),
+        utils.bounty.byId.invalidate({ id: bountyId }),
+      ]);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't send your entry.");
@@ -80,28 +113,71 @@ export function EntryDialog({ bountyId, editing, onClose }: { bountyId: number; 
     <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-hud">{editing ? "Edit your entry" : "Submit an entry"}</DialogTitle>
-          <DialogDescription>Tell the brand about your entry and attach your work (images, video, audio, PDF).</DialogDescription>
+          <DialogTitle className="font-hud">
+            {editing ? "Edit your entry" : "Submit an entry"}
+          </DialogTitle>
+          <DialogDescription>
+            Tell the brand about your entry and attach your work (images, video, audio, PDF).
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={(e) => void submit(e)} className="space-y-4">
-          <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} maxLength={5000} placeholder="What did you make? Add links if it's hosted elsewhere." className="resize-none rounded-xl" autoFocus />
+          <Textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={5}
+            maxLength={5000}
+            placeholder="What did you make? Add links if it's hosted elsewhere."
+            className="resize-none rounded-xl"
+            autoFocus
+          />
           {(kept.length > 0 || upload.files.length > 0) && (
             <ul className="space-y-2">
               {kept.map((m) => (
-                <FileRow busy={busy} key={m.url} name={m.name} size={m.size} type={m.type} onRemove={() => setKept((k) => k.filter((x) => x.url !== m.url))} />
+                <FileRow
+                  busy={busy}
+                  key={m.url}
+                  name={m.name}
+                  size={m.size}
+                  type={m.type}
+                  onRemove={() => setKept((k) => k.filter((x) => x.url !== m.url))}
+                />
               ))}
               {upload.files.map((f) => (
-                <FileRow busy={busy} key={f.key} name={f.file.name} size={f.file.size} type={f.file.type} progress={f.progress} onRemove={() => upload.remove(f.key)} />
+                <FileRow
+                  busy={busy}
+                  key={f.key}
+                  name={f.file.name}
+                  size={f.file.size}
+                  type={f.file.type}
+                  progress={f.progress}
+                  onRemove={() => upload.remove(f.key)}
+                />
               ))}
             </ul>
           )}
-          {error && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{error}</p>}
+          {error && <p className="tone-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
           <div className="flex items-center justify-between gap-2">
-            <input ref={input} type="file" multiple hidden onChange={(e) => (addFiles(e.target.files), (e.target.value = ""))} />
-            <Button type="button" variant="outline" className="rounded-xl" onClick={() => input.current?.click()} disabled={busy || total >= MAX_ENTRY_FILES}>
+            <input
+              ref={input}
+              type="file"
+              multiple
+              hidden
+              onChange={(e) => (addFiles(e.target.files), (e.target.value = ""))}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => input.current?.click()}
+              disabled={busy || total >= MAX_ENTRY_FILES}
+            >
               <Paperclip className="size-4" /> Attach ({total}/{MAX_ENTRY_FILES})
             </Button>
-            <Button type="submit" className="rounded-xl px-6 font-bold" disabled={busy || text.trim().length < 2}>
+            <Button
+              type="submit"
+              className="rounded-xl px-6 font-bold"
+              disabled={busy || text.trim().length < 2}
+            >
               {busy ? "Sending…" : editing ? "Save changes" : "Send entry"}
             </Button>
           </div>
@@ -111,17 +187,44 @@ export function EntryDialog({ bountyId, editing, onClose }: { bountyId: number; 
   );
 }
 
-function FileRow({ name, size, type, progress, busy, onRemove }: { name: string; size: number; type: string; progress?: number; busy: boolean; onRemove?: () => void }) {
+function FileRow({
+  name,
+  size,
+  type,
+  progress,
+  busy,
+  onRemove,
+}: {
+  name: string;
+  size: number;
+  type: string;
+  progress?: number;
+  busy: boolean;
+  onRemove?: () => void;
+}) {
   return (
-    <li className="relative flex items-center gap-3 overflow-hidden rounded-xl bg-foreground/[0.04] px-3 py-2.5 ring-1 ring-foreground/[0.06]">
-      {progress != null && progress > 0 && <span aria-hidden className="absolute inset-y-0 left-0 bg-primary/12 transition-[width]" style={{ width: `${progress}%` }} />}
-      <MediaTypeIcon type={type} className="relative size-4 shrink-0 text-muted-foreground" />
+    <li className="bg-foreground/[0.04] ring-foreground/[0.06] relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 ring-1">
+      {progress != null && progress > 0 && (
+        <span
+          aria-hidden
+          className="bg-primary/12 absolute inset-y-0 left-0 transition-[width]"
+          style={{ width: `${progress}%` }}
+        />
+      )}
+      <MediaTypeIcon type={type} className="text-muted-foreground relative size-4 shrink-0" />
       <span className="relative min-w-0 flex-1">
         <span className="block truncate text-sm">{name}</span>
-        <span className="block text-[11px] tabular-nums text-muted-foreground">{progress != null && progress > 0 && progress < 100 ? `${progress}%` : formatBytes(size)}</span>
+        <span className="text-muted-foreground block text-[11px] tabular-nums">
+          {progress != null && progress > 0 && progress < 100 ? `${progress}%` : formatBytes(size)}
+        </span>
       </span>
       {onRemove && !busy && (
-        <button type="button" onClick={onRemove} aria-label={`Remove ${name}`} className="relative text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${name}`}
+          className="text-muted-foreground hover:text-foreground relative"
+        >
           <X className="size-4" />
         </button>
       )}

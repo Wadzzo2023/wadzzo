@@ -53,8 +53,7 @@ const RIGHT: Tab[] = [
  */
 export function BottomTabBar() {
   const { pathname } = useRouter();
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   // QR is a mode of the same camera screen, reached from the AR tab.
   const arActive = isActive("/ar") || isActive("/scan");
   const { count: bountyAlerts } = useBountyAttention();
@@ -80,7 +79,7 @@ export function BottomTabBar() {
               {arActive && (
                 <span
                   aria-hidden
-                  className="animate-pulse-ring absolute inset-0 rounded-full border border-ar-green-hot"
+                  className="animate-pulse-ring border-ar-green-hot absolute inset-0 rounded-full border"
                 />
               )}
               <span
@@ -95,9 +94,7 @@ export function BottomTabBar() {
                   aria-hidden
                   className={cn(
                     "ar-conic-ring ar-conic-ring-inner pointer-events-none absolute inset-[1.5px] rounded-full transition-opacity duration-300",
-                    arActive
-                      ? "opacity-100"
-                      : "opacity-[0.85] group-hover:opacity-100",
+                    arActive ? "opacity-100" : "opacity-[0.85] group-hover:opacity-100",
                   )}
                 />
                 <ArGlyph active={arActive} />
@@ -124,16 +121,12 @@ export function BottomTabBar() {
             don't drift toward whatever the safe-area measures on a given
             phone. */}
           <div
-            className="ar-tabbar-surface pointer-events-auto relative rounded-t-ar-xl"
+            className="ar-tabbar-surface rounded-t-ar-xl pointer-events-auto relative"
             style={{ paddingBottom: "max(12px, var(--ar-safe-bottom))" }}
           >
             <div className="flex h-[64px] items-stretch px-1.5">
               {LEFT.map((tab) => (
-                <TabButton
-                  key={tab.href}
-                  tab={tab}
-                  active={isActive(tab.href)}
-                />
+                <TabButton key={tab.href} tab={tab} active={isActive(tab.href)} />
               ))}
 
               {/* Reserved footprint under the raised AR launcher. */}
@@ -151,10 +144,7 @@ export function BottomTabBar() {
           </div>
         </div>
       </nav>
-      <CameraLauncher
-        open={launcherOpen}
-        onClose={() => setLauncherOpen(false)}
-      />
+      <CameraLauncher open={launcherOpen} onClose={() => setLauncherOpen(false)} />
     </>
   );
 }
@@ -175,13 +165,13 @@ function TabButton({
     <Link
       href={tab.href}
       aria-current={active ? "page" : undefined}
-      className="group relative flex flex-1 select-none flex-col items-center justify-center gap-[3px] rounded-ar"
+      className="group rounded-ar relative flex flex-1 flex-col items-center justify-center gap-[3px] select-none"
     >
       {active && (
         <motion.span
           layoutId="tab-plate"
           aria-hidden
-          className="bg-ar-green/12 absolute inset-x-1 inset-y-[7px] rounded-[13px] border border-ar-green/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_18px_-4px_hsl(var(--ar-green)/0.5)]"
+          className="bg-ar-green/12 border-ar-green/35 absolute inset-x-1 inset-y-[7px] rounded-[13px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_18px_-4px_hsl(var(--ar-green)/0.5)]"
           transition={{
             type: "spring",
             stiffness: 520,
@@ -208,14 +198,14 @@ function TabButton({
         {dot && (
           <span
             aria-hidden
-            className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+            className="bg-ar-green-hot absolute -top-0.5 -right-1 h-2 w-2 rounded-full shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
           />
         )}
       </motion.span>
 
       <span
         className={cn(
-          "font-hud relative z-10 text-[9.5px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200",
+          "font-hud relative z-10 text-[9.5px] font-semibold tracking-[0.14em] uppercase transition-colors duration-200",
           active ? "text-ar-text" : "text-ar-faint group-hover:text-ar-dim",
         )}
       >
@@ -261,7 +251,7 @@ function ArGlyph({ active }: { active: boolean }) {
           ))}
         </motion.svg>
       </AnimatePresence>
-      <span className="font-hud text-[13px] font-bold leading-none tracking-tight text-ar-text drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]">
+      <span className="font-hud text-ar-text text-[13px] leading-none font-bold tracking-tight drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]">
         AR
       </span>
     </span>

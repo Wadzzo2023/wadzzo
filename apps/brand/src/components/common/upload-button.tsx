@@ -37,7 +37,17 @@ type UploadProps = {
 };
 
 export function UploadS3Button(props: UploadProps) {
-  const { variant = "button", endpoint, label, className, disabled, onBeforeUploadBegin, onClientUploadComplete, shape, type } = props;
+  const {
+    variant = "button",
+    endpoint,
+    label,
+    className,
+    disabled,
+    onBeforeUploadBegin,
+    onClientUploadComplete,
+    shape,
+    type,
+  } = props;
   if (variant === "input" || variant === "hidden") return <IconUpload {...props} />;
   return (
     <Dropzone
@@ -55,7 +65,18 @@ export function UploadS3Button(props: UploadProps) {
 }
 
 /** Small icon button (tight toolbars) or an invisible input driven by a <label htmlFor>. */
-function IconUpload({ id, endpoint, variant, className, disabled, onBeforeUploadBegin, onClientUploadComplete, onUploadError, onUploadProgress, label }: UploadProps) {
+function IconUpload({
+  id,
+  endpoint,
+  variant,
+  className,
+  disabled,
+  onBeforeUploadBegin,
+  onClientUploadComplete,
+  onUploadError,
+  onUploadProgress,
+  label,
+}: UploadProps) {
   const input = useRef<HTMLInputElement>(null);
   const { upload, status, busy, progress } = useS3Upload(endpoint);
   if (onUploadProgress && busy) onUploadProgress(progress);
@@ -84,13 +105,26 @@ function IconUpload({ id, endpoint, variant, className, disabled, onBeforeUpload
           aria-label={label ?? "Upload"}
           title={busy ? `Uploading ${progress}%` : (label ?? "Upload")}
           className={cn(
-            "relative flex size-10 items-center justify-center overflow-hidden rounded-lg border bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-60",
+            "bg-card text-muted-foreground hover:bg-accent hover:text-foreground relative flex size-10 items-center justify-center overflow-hidden rounded-lg border transition-colors disabled:opacity-60",
             status === "error" && "border-destructive/50 text-destructive",
             className,
           )}
         >
-          {busy ? <Loader2 className="size-4 animate-spin" /> : status === "success" ? <Check className="size-4 text-primary" /> : status === "error" ? <AlertCircle className="size-4" /> : <Camera className="size-4" />}
-          {busy && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary" style={{ width: `${progress}%` }} />}
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : status === "success" ? (
+            <Check className="text-primary size-4" />
+          ) : status === "error" ? (
+            <AlertCircle className="size-4" />
+          ) : (
+            <Camera className="size-4" />
+          )}
+          {busy && (
+            <span
+              className="bg-primary absolute inset-x-0 bottom-0 h-0.5"
+              style={{ width: `${progress}%` }}
+            />
+          )}
         </button>
       )}
       <input
@@ -122,7 +156,9 @@ export function MultiUploadS3Button({
 }: {
   endpoint?: EndPointType;
   onUploadProgress?: (p: number) => void;
-  onClientUploadComplete?: (files: { url: string; name: string; size: number; type: string }[]) => void;
+  onClientUploadComplete?: (
+    files: { url: string; name: string; size: number; type: string }[],
+  ) => void;
   onBeforeUploadBegin?: (files: File[]) => Promise<File[]> | File[];
   onUploadError?: (error: Error) => void;
   variant?: "button" | "input";

@@ -85,7 +85,12 @@ interface MapboxStep {
   distance: number;
   duration: number;
   name: string;
-  maneuver: { instruction: string; type: string; modifier?: string; location: [number, number] };
+  maneuver: {
+    instruction: string;
+    type: string;
+    modifier?: string;
+    location: [number, number];
+  };
   voiceInstructions?: { distanceAlongGeometry: number; announcement: string }[];
   bannerInstructions?: { primary?: { text?: string } }[];
 }
@@ -119,7 +124,9 @@ async function fetchProfile(
     // 422 is Mapbox's "no route" (an island, a pedestrian-only lane for a
     // car). That's an answer, not a failure — the caller falls back.
     if (res.status === 422) return [];
-    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Mapbox Directions failed (${res.status})` });
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+      message: `Mapbox Directions failed (${res.status})`,
+    });
   }
 
   const json = (await res.json()) as { routes?: MapboxRoute[] };
@@ -129,7 +136,10 @@ async function fetchProfile(
     duration: r.duration,
     coordinates: r.geometry.coordinates,
     profile,
-    summary: (r.legs ?? []).map((l) => l.summary).filter(Boolean).join(", "),
+    summary: (r.legs ?? [])
+      .map((l) => l.summary)
+      .filter(Boolean)
+      .join(", "),
     steps: (r.legs ?? []).flatMap((leg) =>
       leg.steps.map((s) => ({
         instruction: s.maneuver.instruction,
@@ -140,7 +150,10 @@ async function fetchProfile(
         duration: s.duration,
         name: s.name,
         location: s.maneuver.location,
-        voice: (s.voiceInstructions ?? []).map((v) => ({ distanceAlong: v.distanceAlongGeometry, text: v.announcement })),
+        voice: (s.voiceInstructions ?? []).map((v) => ({
+          distanceAlong: v.distanceAlongGeometry,
+          text: v.announcement,
+        })),
       })),
     ),
   }));
@@ -171,7 +184,10 @@ export function useDirections({
   // Results remember which request they answer: loading is "the newest
   // answer is for an older key", and the previous routes stay on screen
   // (e.g. during a reroute) until the new ones land.
-  const [result, setResult] = useState<{ key: string; byProfile: Record<MapboxProfile, Route[]> } | null>(null);
+  const [result, setResult] = useState<{
+    key: string;
+    byProfile: Record<MapboxProfile, Route[]>;
+  } | null>(null);
   const [picked, setPicked] = useState<{ key: string; id: string } | null>(null);
 
   useEffect(() => {
@@ -179,11 +195,21 @@ export function useDirections({
     const controller = new AbortController();
     const start = { lat: from.lat, lng: from.lng };
     const end = { lat: to.lat, lng: to.lng };
-    void Promise.all(PROFILES.map((p) => fetchProfile(p, start, end, token, controller.signal).catch(() => [] as Route[]))).then(
-      ([walking, cycling, driving]) => {
-        if (!controller.signal.aborted) setResult({ key, byProfile: { walking: walking!, cycling: cycling!, driving: driving! } });
-      },
-    );
+    void Promise.all(
+      PROFILES.map((p) =>
+        fetchProfile(p, start, end, token, controller.signal).catch(() => [] as Route[]),
+      ),
+    ).then(([walking, cycling, driving]) => {
+      if (!controller.signal.aborted)
+        setResult({
+          key,
+          byProfile: {
+            walking: walking!,
+            cycling: cycling!,
+            driving: driving!,
+          },
+        });
+    });
     return () => controller.abort();
     // `key` encodes from/to.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -191,24 +217,39 @@ export function useDirections({
 
   const byProfile = result?.byProfile ?? null;
   const isLoading = Boolean(key && token && result?.key !== key);
-  const select = useCallback((id: string) => setPicked(result ? { key: result.key, id } : null), [result]);
+  const select = useCallback(
+    (id: string) => setPicked(result ? { key: result.key, id } : null),
+    [result],
+  );
 
   const routes = useMemo<Route[]>(() => {
     if (!byProfile) return [];
     if (mode !== "transit") return byProfile[PROFILE_FOR[mode]];
     // Fastest real profile wins; its alternatives come with it.
-    const best = PROFILES.map((p) => byProfile[p]).filter((r) => r.length).sort((a, b) => a[0]!.duration - b[0]!.duration)[0];
+    const best = PROFILES.map((p) => byProfile[p])
+      .filter((r) => r.length)
+      .sort((a, b) => a[0]!.duration - b[0]!.duration)[0];
     return best ?? [];
   }, [byProfile, mode]);
 
   const modeTimes = useMemo<ModeTimes>(() => {
     const t = (p: MapboxProfile) => byProfile?.[p][0]?.duration ?? null;
     const all = PROFILES.map(t).filter((x): x is number => x != null);
-    return { walk: t("walking"), cycle: t("cycling"), drive: t("driving"), transit: all.length ? Math.min(...all) : null };
+    return {
+      walk: t("walking"),
+      cycle: t("cycling"),
+      drive: t("driving"),
+      transit: all.length ? Math.min(...all) : null,
+    };
   }, [byProfile]);
 
-  const route = routes.find((r) => picked?.key === result?.key && r.id === picked?.id) ?? routes[0] ?? null;
-  const nothing = byProfile && !byProfile.walking.length && !byProfile.cycling.length && !byProfile.driving.length;
+  const route =
+    routes.find((r) => picked?.key === result?.key && r.id === picked?.id) ?? routes[0] ?? null;
+  const nothing =
+    byProfile &&
+    !byProfile.walking.length &&
+    !byProfile.cycling.length &&
+    !byProfile.driving.length;
 
   return {
     routes,
@@ -216,6 +257,12 @@ export function useDirections({
     select,
     modeTimes,
     isLoading,
-    error: !token ? "No Mapbox token configured." : nothing ? "No route to this place." : byProfile && !routes.length ? "No route for that mode." : null,
+    error: !token
+      ? "No Mapbox token configured."
+      : nothing
+        ? "No route to this place."
+        : byProfile && !routes.length
+          ? "No route for that mode."
+          : null,
   };
 }

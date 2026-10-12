@@ -24,20 +24,42 @@ export function useCreatorActions() {
   };
   const [signing, setSigning] = useState(false);
 
-  const action = api.admin.creator.creatorAction.useMutation({ onSuccess: refresh });
+  const action = api.admin.creator.creatorAction.useMutation({
+    onSuccess: refresh,
+  });
   const xdr = api.admin.creator.creatorRequestXdr.useMutation();
-  const del = api.admin.creator.deleteCreator.useMutation({ onSuccess: refresh });
+  const del = api.admin.creator.deleteCreator.useMutation({
+    onSuccess: refresh,
+  });
 
   const approve = async (c: CreatorRef) => {
     const id = toast.loading(`Setting up ${c.name} on Stellar…`);
     setSigning(true);
     try {
       const data = await xdr.mutateAsync({ creatorId: c.id });
-      if (!data) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "This brand has no page asset to issue yet" });
-      const ok = await signAndSubmitTransaction({ xdr: data.xdr, publicKey: "admin", walletType: WalletType.isAdmin });
-      if (!ok) throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, { message: "The Stellar transaction didn't go through" });
-      await action.mutateAsync({ creatorId: c.id, action: "approve", escrow: data.escrow, storage: data.storage });
-      toast.success(c.approved === true ? `Page asset issued for ${c.name}` : `${c.name} approved`, { id });
+      if (!data)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "This brand has no page asset to issue yet",
+        });
+      const ok = await signAndSubmitTransaction({
+        xdr: data.xdr,
+        publicKey: "admin",
+        walletType: WalletType.isAdmin,
+      });
+      if (!ok)
+        throw new AppError(ErrorCodes.STELLAR_TX_REJECTED, {
+          message: "The Stellar transaction didn't go through",
+        });
+      await action.mutateAsync({
+        creatorId: c.id,
+        action: "approve",
+        escrow: data.escrow,
+        storage: data.storage,
+      });
+      toast.success(
+        c.approved === true ? `Page asset issued for ${c.name}` : `${c.name} approved`,
+        { id },
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Approval failed", { id });
     } finally {
@@ -66,6 +88,10 @@ export function useCreatorActions() {
       onError: (e) => toast.error(e.message),
     });
 
-  return { approve: (c: CreatorRef) => void approve(c), setBan, remove, busy: signing || action.isPending || xdr.isPending || del.isPending };
+  return {
+    approve: (c: CreatorRef) => void approve(c),
+    setBan,
+    remove,
+    busy: signing || action.isPending || xdr.isPending || del.isPending,
+  };
 }
-

@@ -12,7 +12,10 @@ export interface SubmittedTransaction {
 
 /** Parses a base64 XDR envelope against this deployment's network. */
 export const parseTransactionXdr = (envelopeXdr: string): Transaction =>
-  new Transaction(xdr.TransactionEnvelope.fromXDR(envelopeXdr, "base64"), stellarNetwork.passphrase);
+  new Transaction(
+    xdr.TransactionEnvelope.fromXDR(envelopeXdr, "base64"),
+    stellarNetwork.passphrase,
+  );
 
 /**
  * Submits an already-signed transaction to Horizon.

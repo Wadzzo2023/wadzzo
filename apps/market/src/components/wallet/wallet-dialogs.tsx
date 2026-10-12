@@ -6,7 +6,13 @@ import toast from "react-hot-toast";
 
 import { CardForm } from "~/components/payment/card-form";
 import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@wadzzo/ui/components/dialog";
 import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -18,7 +24,7 @@ const num = (n: number, max = 2) => n.toLocaleString("en-US", { maximumFractionD
 function Done({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div className="space-y-3 py-4 text-center">
-      <CheckCircle2 className="mx-auto size-10 text-primary" />
+      <CheckCircle2 className="text-primary mx-auto size-10" />
       <p className="font-hud font-semibold">{title}</p>
       <Button variant="outline" className="rounded-xl" onClick={onClose}>
         Done
@@ -32,7 +38,9 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
   const packs = api.wallet.packs.useQuery();
   const [usd, setUsd] = useState<number | null>(null);
   const utils = api.useUtils();
-  const buy = api.wallet.buyPack.useMutation({ onSuccess: () => void utils.wallet.balances.invalidate() });
+  const buy = api.wallet.buyPack.useMutation({
+    onSuccess: () => void utils.wallet.balances.invalidate(),
+  });
   const chosen = packs.data?.packs.find((p) => p.usd === usd) ?? null;
   const code = packs.data?.code ?? "tokens";
 
@@ -54,9 +62,15 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
             ) : !packs.data?.packs.length ? (
-              <p className="rounded-xl bg-foreground/[0.04] p-4 text-center text-sm text-muted-foreground">Token packs are sold out right now. Please check back soon.</p>
+              <p className="bg-foreground/[0.04] text-muted-foreground rounded-xl p-4 text-center text-sm">
+                Token packs are sold out right now. Please check back soon.
+              </p>
             ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Token pack">
+              <div
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+                role="radiogroup"
+                aria-label="Token pack"
+              >
                 {packs.data.packs.map((p) => (
                   <button
                     key={p.usd}
@@ -67,20 +81,36 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
                     onClick={() => setUsd(p.usd)}
                     className={cn(
                       "rounded-xl p-3 text-left ring-1 transition-all",
-                      usd === p.usd ? "bg-primary/10 ring-2 ring-primary shadow-[0_0_20px_-8px_hsl(var(--primary)/0.8)]" : "bg-foreground/[0.03] ring-foreground/[0.08] hover:ring-primary/40",
+                      usd === p.usd
+                        ? "bg-primary/10 ring-primary shadow-[0_0_20px_-8px_hsl(var(--primary)/0.8)] ring-2"
+                        : "bg-foreground/[0.03] ring-foreground/[0.08] hover:ring-primary/40",
                     )}
                   >
                     <p className="font-hud text-lg font-bold tabular-nums">{num(p.tokens, 0)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {code} · <span className="font-semibold text-foreground">${p.usd.toFixed(2)}</span>
+                    <p className="text-muted-foreground text-xs">
+                      {code} ·{" "}
+                      <span className="text-foreground font-semibold">${p.usd.toFixed(2)}</span>
                     </p>
                   </button>
                 ))}
               </div>
             )}
-            {chosen && <CardForm key={chosen.usd} usd={chosen.usd} disabled={buy.isPending} onToken={(t) => buy.mutate({ usd: chosen.usd, ...t })} />}
-            {buy.isPending && <p className="text-center text-sm text-muted-foreground">Charging your card and sending tokens…</p>}
-            {buy.error && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{buy.error.message}</p>}
+            {chosen && (
+              <CardForm
+                key={chosen.usd}
+                usd={chosen.usd}
+                disabled={buy.isPending}
+                onToken={(t) => buy.mutate({ usd: chosen.usd, ...t })}
+              />
+            )}
+            {buy.isPending && (
+              <p className="text-muted-foreground text-center text-sm">
+                Charging your card and sending tokens…
+              </p>
+            )}
+            {buy.error && (
+              <p className="tone-danger rounded-lg px-3 py-2 text-sm">{buy.error.message}</p>
+            )}
           </div>
         )}
       </DialogContent>
@@ -89,7 +119,15 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
 }
 
 /** Swap platform tokens for XLM at the current rate. */
-export function SwapDialog({ balance, code, onClose }: { balance: number; code: string; onClose: () => void }) {
+export function SwapDialog({
+  balance,
+  code,
+  onClose,
+}: {
+  balance: number;
+  code: string;
+  onClose: () => void;
+}) {
   const [amount, setAmount] = useState("");
   const tokens = Number(amount);
   const valid = Number.isFinite(tokens) && tokens > 0;
@@ -113,25 +151,58 @@ export function SwapDialog({ balance, code, onClose }: { balance: number; code: 
           </DialogDescription>
         </DialogHeader>
         {sign.step === "done" ? (
-          <Done title={`Swapped ${num(tokens)} ${code} for ${num(quote.data?.xlm ?? 0, 7)} XLM`} onClose={onClose} />
+          <Done
+            title={`Swapped ${num(tokens)} ${code} for ${num(quote.data?.xlm ?? 0, 7)} XLM`}
+            onClose={onClose}
+          />
         ) : (
           <div className="space-y-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" aria-label={`Amount of ${code}`} className="h-12 rounded-xl font-hud text-lg" />
-                <Button type="button" variant="outline" className="h-12 rounded-xl" onClick={() => setAmount(String(balance))}>
+                <Input
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                  placeholder="0"
+                  aria-label={`Amount of ${code}`}
+                  className="font-hud h-12 rounded-xl text-lg"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 rounded-xl"
+                  onClick={() => setAmount(String(balance))}
+                >
                   Max
                 </Button>
               </div>
             </div>
-            <div className="flex items-center justify-between rounded-xl bg-foreground/[0.04] px-4 py-3 ring-1 ring-foreground/[0.06]">
-              <span className="text-sm text-muted-foreground">You receive</span>
-              <span className="font-hud text-lg font-bold tabular-nums">{valid && quote.data ? `${num(quote.data.xlm, 7)} XLM` : "—"}</span>
+            <div className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center justify-between rounded-xl px-4 py-3 ring-1">
+              <span className="text-muted-foreground text-sm">You receive</span>
+              <span className="font-hud text-lg font-bold tabular-nums">
+                {valid && quote.data ? `${num(quote.data.xlm, 7)} XLM` : "—"}
+              </span>
             </div>
-            {valid && quote.data && !quote.data.ok && <p className="rounded-lg tone-danger px-3 py-2 text-sm">You only have {num(quote.data.balance)} {code}.</p>}
-            {(prepare.error ?? sign.error) && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{prepare.error?.message ?? sign.error}</p>}
-            <Button className="h-11 w-full rounded-xl font-bold" disabled={!quote.data?.ok || prepare.isPending || sign.busy} onClick={() => void go()}>
-              {sign.step === "signing" ? "Confirm in your wallet…" : sign.step === "confirming" ? "Confirming on Stellar…" : "Swap"}
+            {valid && quote.data && !quote.data.ok && (
+              <p className="tone-danger rounded-lg px-3 py-2 text-sm">
+                You only have {num(quote.data.balance)} {code}.
+              </p>
+            )}
+            {(prepare.error ?? sign.error) && (
+              <p className="tone-danger rounded-lg px-3 py-2 text-sm">
+                {prepare.error?.message ?? sign.error}
+              </p>
+            )}
+            <Button
+              className="h-11 w-full rounded-xl font-bold"
+              disabled={!quote.data?.ok || prepare.isPending || sign.busy}
+              onClick={() => void go()}
+            >
+              {sign.step === "signing"
+                ? "Confirm in your wallet…"
+                : sign.step === "confirming"
+                  ? "Confirming on Stellar…"
+                  : "Swap"}
             </Button>
           </div>
         )}
@@ -152,10 +223,15 @@ export function ReceiveDialog({ address, onClose }: { address: string; onClose: 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-hud">Receive</DialogTitle>
-          <DialogDescription>Share this Stellar address to receive XLM, tokens or items. To receive a token you don&apos;t hold yet, the sender can send it as a gift — it waits under Pending gifts.</DialogDescription>
+          <DialogDescription>
+            Share this Stellar address to receive XLM, tokens or items. To receive a token you
+            don&apos;t hold yet, the sender can send it as a gift — it waits under Pending gifts.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <p className="break-all rounded-xl bg-foreground/[0.04] p-4 font-mono text-sm ring-1 ring-foreground/[0.06]">{address}</p>
+          <p className="bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-4 font-mono text-sm break-all ring-1">
+            {address}
+          </p>
           <Button className="w-full rounded-xl" onClick={copy}>
             <Copy className="size-4" /> Copy address
           </Button>

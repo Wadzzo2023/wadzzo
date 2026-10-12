@@ -37,7 +37,12 @@ const LOCATE_MS = 550;
 /** Lose the outline after this many misses in a row. */
 const OUTLINE_MISSES = 3;
 
-const kindOf = (label: string): ArtKind => (label.includes("graffiti") ? "Graffiti" : label.includes("mural") || label.includes("wall painting") || label.includes("facade") ? "Mural" : "Street art");
+const kindOf = (label: string): ArtKind =>
+  label.includes("graffiti")
+    ? "Graffiti"
+    : label.includes("mural") || label.includes("wall painting") || label.includes("facade")
+      ? "Mural"
+      : "Street art";
 export type FrameQuality = "ok" | "dark" | "blurry";
 
 type Vision = {
@@ -70,12 +75,19 @@ function loadModel(): Promise<Vision> {
     const progress_callback = (p: { status: string; file?: string; loaded?: number }) => {
       if (p.status !== "progress" || !p.file) return;
       bytes[p.file] = p.loaded ?? 0;
-      const pct = Math.min(99, Math.round((Object.values(bytes).reduce((a, b) => a + b, 0) / MODEL_BYTES) * 100));
+      const pct = Math.min(
+        99,
+        Math.round((Object.values(bytes).reduce((a, b) => a + b, 0) / MODEL_BYTES) * 100),
+      );
       listeners.forEach((l) => l(pct));
     };
     const [processor, model] = await Promise.all([
       tjs.AutoProcessor.from_pretrained(MODEL, { progress_callback }),
-      tjs.CLIPVisionModelWithProjection.from_pretrained(MODEL, { dtype: "fp16", device: backend, progress_callback }),
+      tjs.CLIPVisionModelWithProjection.from_pretrained(MODEL, {
+        dtype: "fp16",
+        device: backend,
+        progress_callback,
+      }),
     ]);
     listeners.forEach((l) => l(100));
     return {
@@ -120,7 +132,13 @@ function measureQuality(ctx: CanvasRenderingContext2D, size: number): FrameQuali
   return variance < 60 ? "blurry" : "ok";
 }
 
-export function useMuralDetector({ video, enabled }: { video: HTMLVideoElement | null; enabled: boolean }) {
+export function useMuralDetector({
+  video,
+  enabled,
+}: {
+  video: HTMLVideoElement | null;
+  enabled: boolean;
+}) {
   const [state, setState] = useState<DetectorState>("idle");
   const [progress, setProgress] = useState(0);
   const [backend, setBackend] = useState<Vision["backend"] | null>(null);
@@ -179,12 +197,24 @@ export function useMuralDetector({ video, enabled }: { video: HTMLVideoElement |
     if (!enabled || state !== "ready" || !video) return;
     let stop = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
-    encodeCanvas.current ??= Object.assign(document.createElement("canvas"), { width: 256, height: 256 });
-    qualityCanvas.current ??= Object.assign(document.createElement("canvas"), { width: 64, height: 64 });
-    const ectx = encodeCanvas.current.getContext("2d", { willReadFrequently: true })!;
-    const qctx = qualityCanvas.current.getContext("2d", { willReadFrequently: true })!;
+    encodeCanvas.current ??= Object.assign(document.createElement("canvas"), {
+      width: 256,
+      height: 256,
+    });
+    qualityCanvas.current ??= Object.assign(document.createElement("canvas"), {
+      width: 64,
+      height: 64,
+    });
+    const ectx = encodeCanvas.current.getContext("2d", {
+      willReadFrequently: true,
+    })!;
+    const qctx = qualityCanvas.current.getContext("2d", {
+      willReadFrequently: true,
+    })!;
     sampleCanvas.current ??= document.createElement("canvas");
-    const sctx = sampleCanvas.current.getContext("2d", { willReadFrequently: true })!;
+    const sctx = sampleCanvas.current.getContext("2d", {
+      willReadFrequently: true,
+    })!;
 
     /** Score the crop grid, fit an outline. ~5–9 extra encodes, ~2×/s. */
     const locate = async (v: Vision) => {
@@ -194,7 +224,9 @@ export function useMuralDetector({ video, enabled }: { video: HTMLVideoElement |
       const scores: number[] = [];
       for (const c of crops) {
         ectx.drawImage(video, c.x * vw, c.y * vh, c.w * vw, c.h * vh, 0, 0, 256, 256);
-        const { image_embeds } = await v.model(await v.processor(v.RawImage.fromCanvas(encodeCanvas.current!)));
+        const { image_embeds } = await v.model(
+          await v.processor(v.RawImage.fromCanvas(encodeCanvas.current!)),
+        );
         scores.push(muralScore((image_embeds.normalize().tolist() as number[][])[0]!).score);
         if (stop) return;
       }
@@ -235,7 +267,9 @@ export function useMuralDetector({ video, enabled }: { video: HTMLVideoElement |
         setQuality(measureQuality(qctx, 64));
 
         try {
-          const { image_embeds } = await v.model(await v.processor(v.RawImage.fromCanvas(encodeCanvas.current!)));
+          const { image_embeds } = await v.model(
+            await v.processor(v.RawImage.fromCanvas(encodeCanvas.current!)),
+          );
           const vec = (image_embeds.normalize().tolist() as number[][])[0]!;
           if (stop) return;
           lastVector.current = vec;
@@ -306,6 +340,10 @@ export async function captureKeyframe(video: HTMLVideoElement): Promise<Blob> {
   });
   canvas.getContext("2d")!.drawImage(video, 0, 0, canvas.width, canvas.height);
   return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Couldn't capture frame"))), "image/jpeg", 0.8),
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Couldn't capture frame"))),
+      "image/jpeg",
+      0.8,
+    ),
   );
 }

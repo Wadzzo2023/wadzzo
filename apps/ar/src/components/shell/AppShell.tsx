@@ -30,7 +30,7 @@ export function AppShell({
         className={cn(
           "relative flex-1 overflow-hidden",
           // Leave room for the console plus the raised AR launcher above it.
-          tabs && "pb-[80px] ",
+          tabs && "pb-[80px]",
         )}
       >
         {children}
@@ -66,20 +66,17 @@ export function ScreenHeader({
 }) {
   return (
     <header
-      className={cn(
-        "relative z-20 flex items-end justify-between gap-3 px-5 pb-4",
-        className,
-      )}
+      className={cn("relative z-20 flex items-end justify-between gap-3 px-5 pb-4", className)}
       style={{ paddingTop: "calc(var(--ar-top-inset) + 16px)" }}
     >
       {back && <BackButton className="mb-0.5 self-end" />}
       <div className="min-w-0 flex-1">
         {eyebrow && (
-          <p className="font-hud mb-1 text-[10px] font-semibold uppercase tracking-[0.32em] text-ar-green">
+          <p className="font-hud text-ar-green mb-1 text-[10px] font-semibold tracking-[0.32em] uppercase">
             {eyebrow}
           </p>
         )}
-        <h1 className="font-hud truncate text-[26px] font-bold leading-none tracking-tight text-ar-text">
+        <h1 className="font-hud text-ar-text truncate text-[26px] leading-none font-bold tracking-tight">
           {title}
         </h1>
       </div>
@@ -107,7 +104,7 @@ export function BackButton({ className }: { className?: string }) {
       }}
       aria-label="Back"
       className={cn(
-        "ar-glass flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ar-text",
+        "ar-glass text-ar-text flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
         className,
       )}
     >

@@ -31,9 +31,13 @@ export function BuyPanel({ item, listing }: { item: Item; listing: Listing | nul
   if (!listing) {
     return (
       <div className="rounded-xl border border-dashed p-6 text-center">
-        <ShoppingBag className="mx-auto mb-2 size-6 text-muted-foreground" />
+        <ShoppingBag className="text-muted-foreground mx-auto mb-2 size-6" />
         <p className="font-hud font-semibold">Not for sale from the creator right now</p>
-        <p className="mt-1 text-sm text-muted-foreground">{item.resales.length ? "Fans are reselling it — see the resale listings below." : "Nobody is selling this item at the moment."}</p>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {item.resales.length
+            ? "Fans are reselling it — see the resale listings below."
+            : "Nobody is selling this item at the moment."}
+        </p>
       </div>
     );
   }
@@ -43,15 +47,25 @@ export function BuyPanel({ item, listing }: { item: Item; listing: Listing | nul
 function Checkout({ item, listing }: { item: Item; listing: Listing }) {
   const { signedIn, requireAuth, openSignIn, session } = useRequireAuth();
   // card payment is for custodial (email/social) accounts only
-  const methods: PayMethod[] = isCustodial(session?.user.walletType) ? ["PLATFORM_ASSET", "XLM", "CARD"] : ["PLATFORM_ASSET", "XLM"];
+  const methods: PayMethod[] = isCustodial(session?.user.walletType)
+    ? ["PLATFORM_ASSET", "XLM", "CARD"]
+    : ["PLATFORM_ASSET", "XLM"];
   const [method, setMethod] = useState<PayMethod>("PLATFORM_ASSET");
   const [quantity, setQuantity] = useState(1);
   // Keep showing the last quote while a new quantity/method is priced.
   const quote = api.purchase.quote.useQuery(
     { listingId: listing.id, method, quantity },
-    { enabled: signedIn, refetchOnWindowFocus: true, staleTime: 20_000, placeholderData: (prev) => prev },
+    {
+      enabled: signedIn,
+      refetchOnWindowFocus: true,
+      staleTime: 20_000,
+      placeholderData: (prev) => prev,
+    },
   );
-  const maxQty = Math.max(1, Math.min(MAX_PER_PURCHASE, quote.data?.copiesLeft ?? MAX_PER_PURCHASE));
+  const maxQty = Math.max(
+    1,
+    Math.min(MAX_PER_PURCHASE, quote.data?.copiesLeft ?? MAX_PER_PURCHASE),
+  );
   const prepare = api.purchase.prepare.useMutation();
   const payByCard = api.purchase.payByCard.useMutation();
   const follow = api.creator.follow.useMutation();
@@ -59,23 +73,41 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
   const utils = api.useUtils();
   const [done, setDone] = useState(false);
   const isResale = listing.placerId !== item.creatorId;
-  const creatorHref = item.creator ? `/creator/${item.creator.vanityURL ?? item.creator.id}` : undefined;
+  const creatorHref = item.creator
+    ? `/creator/${item.creator.vanityURL ?? item.creator.id}`
+    : undefined;
 
   const finish = async (ok: boolean) => {
     if (!ok) return;
     setDone(true);
-    await Promise.all([utils.content.access.invalidate({ assetId: item.id }), utils.market.item.invalidate({ assetId: item.id }), utils.wallet.balances.invalidate()]);
+    await Promise.all([
+      utils.content.access.invalidate({ assetId: item.id }),
+      utils.market.item.invalidate({ assetId: item.id }),
+      utils.wallet.balances.invalidate(),
+    ]);
   };
 
   const buy = requireAuth(async () => {
-    const res = await prepare.mutateAsync({ listingId: listing.id, method: method === "XLM" ? "XLM" : "PLATFORM_ASSET", quantity }).catch(() => null);
+    const res = await prepare
+      .mutateAsync({
+        listingId: listing.id,
+        method: method === "XLM" ? "XLM" : "PLATFORM_ASSET",
+        quantity,
+      })
+      .catch(() => null);
     if (!res) return;
-    if (!res.ok) return void utils.purchase.quote.setData({ listingId: listing.id, method, quantity }, res.quote);
+    if (!res.ok)
+      return void utils.purchase.quote.setData(
+        { listingId: listing.id, method, quantity },
+        res.quote,
+      );
     await finish(await sign.run({ txId: res.txId, xdr: res.xdr }));
   });
 
   const payCard = async (t: { sourceId: string; verificationToken?: string }) => {
-    const res = await payByCard.mutateAsync({ listingId: listing.id, quantity, ...t }).catch(() => null);
+    const res = await payByCard
+      .mutateAsync({ listingId: listing.id, quantity, ...t })
+      .catch(() => null);
     if (!res) return;
     if (res.status === "sign") await finish(await sign.run({ txId: res.txId, xdr: res.xdr }));
     else await finish(true);
@@ -90,10 +122,14 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
 
   if (done) {
     return (
-      <div className="space-y-3 rounded-xl border border-primary/40 bg-primary/5 p-5 text-center">
-        <CheckCircle2 className="mx-auto size-8 text-primary" />
-        <p className="font-hud text-lg font-bold">{quantity > 1 ? `${quantity} copies are yours!` : "It's yours!"}</p>
-        <p className="text-sm text-muted-foreground">They&apos;re in your wallet, and the full content is unlocked.</p>
+      <div className="border-primary/40 bg-primary/5 space-y-3 rounded-xl border p-5 text-center">
+        <CheckCircle2 className="text-primary mx-auto size-8" />
+        <p className="font-hud text-lg font-bold">
+          {quantity > 1 ? `${quantity} copies are yours!` : "It's yours!"}
+        </p>
+        <p className="text-muted-foreground text-sm">
+          They&apos;re in your wallet, and the full content is unlocked.
+        </p>
         <div className="flex justify-center gap-2">
           <Button asChild variant="outline">
             <Link href="/collection">
@@ -116,14 +152,26 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="label-caps">{isResale ? "Resale price" : "Price"}{quantity > 1 && " · each"}</p>
-          <Price tokens={listing.price} usd={listing.priceUSD} size="xl" gradient className="mt-0.5" />
+          <p className="label-caps">
+            {isResale ? "Resale price" : "Price"}
+            {quantity > 1 && " · each"}
+          </p>
+          <Price
+            tokens={listing.price}
+            usd={listing.priceUSD}
+            size="xl"
+            gradient
+            className="mt-0.5"
+          />
         </div>
         {q &&
           (q.copiesLeft === 0 ? (
             <StatusPill tone="danger">Sold out</StatusPill>
           ) : (
-            <StatusPill tone={q.source === "stock" ? "neutral" : "info"} icon={q.source === "stock" ? undefined : Sparkles}>
+            <StatusPill
+              tone={q.source === "stock" ? "neutral" : "info"}
+              icon={q.source === "stock" ? undefined : Sparkles}
+            >
               {q.source === "stock" ? "In stock" : "Minted for you"}
               {q.copiesLeft != null && ` · ${q.copiesLeft} left`}
             </StatusPill>
@@ -131,7 +179,11 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
       </div>
 
       {!signedIn ? (
-        <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)]" onClick={openSignIn}>
+        <Button
+          size="lg"
+          className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)]"
+          onClick={openSignIn}
+        >
           Sign in to buy
         </Button>
       ) : (
@@ -139,7 +191,13 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="label-caps">Quantity</p>
-              <p className="text-xs text-muted-foreground">{!q ? "Checking availability…" : q.copiesLeft != null ? `${q.copiesLeft} available` : "Unlimited"}</p>
+              <p className="text-muted-foreground text-xs">
+                {!q
+                  ? "Checking availability…"
+                  : q.copiesLeft != null
+                    ? `${q.copiesLeft} available`
+                    : "Unlimited"}
+              </p>
             </div>
             <QuantityStepper value={quantity} onChange={setQuantity} max={maxQty} disabled={busy} />
           </div>
@@ -151,17 +209,35 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
             </div>
           ) : (
             <>
-              <CostBreakdown lines={q.lines} total={q.total} currency={q.currency} balance={q.balance} collapsible />
+              <CostBreakdown
+                lines={q.lines}
+                total={q.total}
+                currency={q.currency}
+                balance={q.balance}
+                collapsible
+              />
               {q.payout.royalty > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  The seller receives {formatAmount(q.payout.seller, q.payout.currency)}; the creator earns {formatAmount(q.payout.royalty, q.payout.currency)} royalty.
+                <p className="text-muted-foreground text-xs">
+                  The seller receives {formatAmount(q.payout.seller, q.payout.currency)}; the
+                  creator earns {formatAmount(q.payout.royalty, q.payout.currency)} royalty.
                 </p>
               )}
-              {q.problems.length > 0 && <ProblemList problems={q.problems} creatorHref={creatorHref} onFollow={followCreator} />}
+              {q.problems.length > 0 && (
+                <ProblemList
+                  problems={q.problems}
+                  creatorHref={creatorHref}
+                  onFollow={followCreator}
+                />
+              )}
               {method === "CARD" ? (
                 q.ok && <CardForm usd={q.total} disabled={busy} onToken={(t) => void payCard(t)} />
               ) : (
-                <Button size="lg" className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)] disabled:shadow-none" disabled={!q.ok || busy} onClick={buy}>
+                <Button
+                  size="lg"
+                  className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)] disabled:shadow-none"
+                  disabled={!q.ok || busy}
+                  onClick={buy}
+                >
                   {sign.step === "signing"
                     ? "Confirm in your wallet…"
                     : sign.step === "confirming"
@@ -172,13 +248,17 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
                 </Button>
               )}
               {item.privacy !== "PUBLIC" && !isResale && (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Lock className="size-3.5" /> {item.privacy === "TIER" ? `For ${item.tier?.name ?? "tier"} members` : "For followers"} of {item.creator?.name}
+                <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <Lock className="size-3.5" />{" "}
+                  {item.privacy === "TIER"
+                    ? `For ${item.tier?.name ?? "tier"} members`
+                    : "For followers"}{" "}
+                  of {item.creator?.name}
                 </p>
               )}
             </>
           )}
-          {error && <p className="rounded-lg tone-danger px-3 py-2 text-sm">{error}</p>}
+          {error && <p className="tone-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
         </>
       )}
     </div>

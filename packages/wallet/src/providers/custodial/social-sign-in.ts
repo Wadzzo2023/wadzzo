@@ -24,10 +24,7 @@ async function startSessionAndProvisionAccount(
   options: { provisionAccount: boolean },
 ): Promise<void> {
   const { user } = credential;
-  const result = await toast.promise(
-    user.getIdToken().then(signIn),
-    LOGIN_PENDING,
-  );
+  const result = await toast.promise(user.getIdToken().then(signIn), LOGIN_PENDING);
 
   if (result?.error) toast.error(result.error);
   if (!result?.ok) return;

@@ -81,10 +81,7 @@ export function buildSheetHtml(codes: SheetCode[], options: SheetOptions): strin
   // printing one wants something they can cut up and stick on a wall rather
   // than a sheet filled edge to edge.
   const printableMm = 210 - PAGE_MARGIN_MM * 2;
-  const stickerMm = Math.min(
-    MAX_STICKER_MM,
-    (printableMm - (columns - 1) * GAP_MM) / columns,
-  );
+  const stickerMm = Math.min(MAX_STICKER_MM, (printableMm - (columns - 1) * GAP_MM) / columns);
 
   return `<!doctype html>
 <html lang="en">
@@ -207,7 +204,8 @@ export function printHtml(html: string): boolean {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.setAttribute("title", "Print preview");
-  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+  frame.style.cssText =
+    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
   document.body.appendChild(frame);
 
   const doc = frame.contentDocument;
@@ -257,11 +255,7 @@ export function printHtml(html: string): boolean {
 }
 
 /** Save a base64 payload as a file. */
-export function downloadBase64(
-  base64: string,
-  filename: string,
-  contentType: string,
-): void {
+export function downloadBase64(base64: string, filename: string, contentType: string): void {
   saveBlob(base64ToBytes(base64), filename, contentType);
 }
 

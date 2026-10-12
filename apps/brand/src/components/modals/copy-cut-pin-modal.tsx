@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { BadgeMinus, ClipboardCheck } from "lucide-react"
-import { useSession } from "next-auth/react"
-import toast from "react-hot-toast"
+import { BadgeMinus, ClipboardCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
-import { api } from "~/utils/api"
+import { api } from "~/utils/api";
 import { Button } from "@wadzzo/ui/components/button";
-import { useMapInteractionStore } from "~/store/map-stores"
-import { useCopyCutModalStore } from "~/store/copy-cut-modal-store"
+import { useMapInteractionStore } from "~/store/map-stores";
+import { useCopyCutModalStore } from "~/store/copy-cut-modal-store";
 
 const CopyCutPinModal = () => {
   const {
@@ -22,30 +22,30 @@ const CopyCutPinModal = () => {
     setManual,
     setDuplicate,
     setPrevData,
-  } = useMapInteractionStore()
-  const { setIsOpen, isOpen } = useCopyCutModalStore()
-  const utils = api.useUtils()
-  const session = useSession()
-  console.log("Cut", isPinCut)
-  console.log("data", data)
+  } = useMapInteractionStore();
+  const { setIsOpen, isOpen } = useCopyCutModalStore();
+  const utils = api.useUtils();
+  const session = useSession();
+  console.log("Cut", isPinCut);
+  console.log("data", data);
   const PastePin = api.maps.pin.paste.useMutation({
     onSuccess: async (data) => {
       if (data.id) {
-        await utils.maps.pin.getCreatorPins.refetch()
+        await utils.maps.pin.getCreatorPins.refetch();
 
-        toast.success("Pin pasted successfully")
-        setPinCopied(false)
-        setPinCut(false)
-        handleClose()
-        handleCloseModal()
+        toast.success("Pin pasted successfully");
+        setPinCopied(false);
+        setPinCut(false);
+        handleClose();
+        handleCloseModal();
       } else {
-        toast.error("Something went wrong")
+        toast.error("Something went wrong");
       }
     },
     onError: (error) => {
-      toast.error(error.message)
+      toast.error(error.message);
     },
-  })
+  });
 
   const handlePastePin = () => {
     // console.log("handlePastePin", data?.pinId, data?.long, data?.lat);
@@ -56,22 +56,21 @@ const CopyCutPinModal = () => {
         long: position?.lng,
         lat: position?.lat,
         isCut: isPinCut,
-      })
+      });
     } else {
-      toast.error("Pin Id not found")
+      toast.error("Pin Id not found");
     }
-  }
+  };
 
   const handleCloseModal = () => {
-    setIsOpen(false)
-    setPinCopied(false)
-    setPinCut(false)
-    handleClose()
-
-  }
+    setIsOpen(false);
+    setPinCopied(false);
+    setPinCut(false);
+    handleClose();
+  };
 
   if (!session?.data?.user?.id) {
-    return <div>Public Key not found</div>
+    return <div>Public Key not found</div>;
   }
 
   return (
@@ -79,25 +78,33 @@ const CopyCutPinModal = () => {
       <DialogContent className="max-w-md">
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center text-xl font-semibold">Pin Action</DialogTitle>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             {isPinCut ? "Move" : "Copy"} your pin to the selected location
           </p>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <Button onClick={handlePastePin} className="w-full h-12 text-base font-medium" disabled={PastePin.isPending}>
+          <Button
+            onClick={handlePastePin}
+            className="h-12 w-full text-base font-medium"
+            disabled={PastePin.isPending}
+          >
             <ClipboardCheck size={18} className="mr-2" />
             {PastePin.isPending ? "Pasting..." : `Paste Pin Here`}
           </Button>
 
-          <Button onClick={() => handleCloseModal()} variant="outline" className="w-full h-12 text-base font-medium bg-transparent">
+          <Button
+            onClick={() => handleCloseModal()}
+            variant="outline"
+            className="h-12 w-full bg-transparent text-base font-medium"
+          >
             <BadgeMinus size={18} className="mr-2" />
             Cancel
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default CopyCutPinModal
+export default CopyCutPinModal;

@@ -54,13 +54,20 @@ export const ClusterBillboard = memo(function ClusterBillboard({
       <span className="absolute bottom-0 h-[5px] w-[26px] rounded-full bg-black/45" />
       <span
         className="absolute bottom-[2px] h-[18px] w-[3px] rounded-full"
-        style={{ background: `linear-gradient(hsl(${accent} / 0.9), hsl(${accent} / 0.25))` }}
+        style={{
+          background: `linear-gradient(hsl(${accent} / 0.9), hsl(${accent} / 0.25))`,
+        }}
       />
 
       {/* The board. */}
       <span
-        className="relative overflow-hidden rounded-[12px] border-2 bg-ar-surface transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95"
-        style={{ width: W, height: H, padding: PAD, borderColor: `hsl(${accent} / 0.75)` }}
+        className="bg-ar-surface relative overflow-hidden rounded-[12px] border-2 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95"
+        style={{
+          width: W,
+          height: H,
+          padding: PAD,
+          borderColor: `hsl(${accent} / 0.75)`,
+        }}
       >
         <Bento images={images.slice(0, 4)} />
       </span>
@@ -68,10 +75,12 @@ export const ClusterBillboard = memo(function ClusterBillboard({
       {/* Count badge on the board's top-right corner. */}
       <span
         className={cn(
-          "font-hud absolute -top-1.5 right-[1px] flex h-5 min-w-6 items-center justify-center rounded-full border-2 border-ar-void px-1.5 text-[10.5px] font-bold tabular-nums",
+          "font-hud border-ar-void absolute -top-1.5 right-[1px] flex h-5 min-w-6 items-center justify-center rounded-full border-2 px-1.5 text-[10.5px] font-bold tabular-nums",
           mural ? "text-white" : "text-ar-void",
         )}
-        style={{ background: mural ? "hsl(var(--rarity-epic))" : "hsl(var(--ar-green-hot))" }}
+        style={{
+          background: mural ? "hsl(var(--rarity-epic))" : "hsl(var(--ar-green-hot))",
+        }}
       >
         {count > 999 ? `${Math.floor(count / 1000)}k` : count}
       </span>
@@ -120,7 +129,10 @@ function Bento({ images }: { images: string[] }) {
 function Tile({ uri, w, h }: { uri?: string; w: number; h: number }) {
   const [original, setOriginal] = useState(false);
   return (
-    <span className="block overflow-hidden rounded-[6px] bg-ar-surface-3" style={{ width: w, height: h }}>
+    <span
+      className="bg-ar-surface-3 block overflow-hidden rounded-[6px]"
+      style={{ width: w, height: h }}
+    >
       {uri ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

@@ -27,10 +27,7 @@ export function UserPuck({
 }) {
   // Clamped so a 2 km cold fix doesn't paint the entire screen green, and a
   // perfect one is still visible.
-  const accuracyPx = Math.max(
-    26,
-    Math.min(fix.accuracy / metersPerPixel, 190),
-  );
+  const accuracyPx = Math.max(26, Math.min(fix.accuracy / metersPerPixel, 190));
 
   const hasHeading = fix.heading != null && Number.isFinite(fix.heading);
   const moving = (fix.speed ?? 0) > 0.6;
@@ -40,7 +37,7 @@ export function UserPuck({
       {/* Accuracy disc */}
       <motion.span
         aria-hidden
-        className="absolute rounded-full border border-ar-green/35 bg-ar-green/12"
+        className="border-ar-green/35 bg-ar-green/12 absolute rounded-full border"
         animate={{ width: accuracyPx, height: accuracyPx }}
         transition={{ type: "spring", stiffness: 120, damping: 22 }}
       />
@@ -48,7 +45,7 @@ export function UserPuck({
       {/* Outward sonar, faster while you're actually moving. */}
       <span
         aria-hidden
-        className="animate-pulse-ring absolute h-9 w-9 rounded-full border border-ar-green-hot"
+        className="animate-pulse-ring border-ar-green-hot absolute h-9 w-9 rounded-full border"
         style={{ animationDuration: moving ? "1.5s" : "2.6s" }}
       />
 
@@ -63,16 +60,14 @@ export function UserPuck({
             background:
               "conic-gradient(from -26deg, hsl(var(--ar-green-hot)/0.55), transparent 52deg)",
             maskImage: "radial-gradient(circle, black 30%, transparent 72%)",
-            WebkitMaskImage:
-              "radial-gradient(circle, black 30%, transparent 72%)",
+            WebkitMaskImage: "radial-gradient(circle, black 30%, transparent 72%)",
             borderRadius: "9999px",
           }}
         />
       )}
 
       {/* The puck itself */}
-      <span className="relative h-[17px] w-[17px] rounded-full bg-ar-green-hot shadow-[0_0_0_3px_rgba(255,255,255,0.92),0_0_20px_4px_hsl(var(--ar-green)/0.85)]" />
-
+      <span className="bg-ar-green-hot relative h-[17px] w-[17px] rounded-full shadow-[0_0_0_3px_rgba(255,255,255,0.92),0_0_20px_4px_hsl(var(--ar-green)/0.85)]" />
     </div>
   );
 }
@@ -83,7 +78,5 @@ export function UserPuck({
  * cos(lat) corrects for the projection's stretch toward the poles.
  */
 export function metersPerPixel(latitude: number, zoom: number): number {
-  return (
-    (156_543.03392 * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom)
-  );
+  return (156_543.03392 * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom);
 }

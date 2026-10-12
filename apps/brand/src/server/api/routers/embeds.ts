@@ -60,7 +60,10 @@ export const EmbedInput = z.object({
         if (!raw.trim()) continue;
         const d = normalizeDomain(raw);
         if (!d) {
-          ctx.addIssue({ code: "custom", message: `"${raw}" isn't a website address` });
+          ctx.addIssue({
+            code: "custom",
+            message: `"${raw}" isn't a website address`,
+          });
           return z.NEVER;
         }
         if (!out.includes(d)) out.push(d);
@@ -70,8 +73,15 @@ export const EmbedInput = z.object({
 });
 
 async function creatorIdOf(db: Db, userId: string) {
-  const c = await db.creator.findUnique({ where: { id: userId }, select: { id: true } });
-  if (!c) throw new TRPCError({ code: "FORBIDDEN", message: "Only brands can create map embeds" });
+  const c = await db.creator.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  if (!c)
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Only brands can create map embeds",
+    });
   return c.id;
 }
 
@@ -86,8 +96,20 @@ const utcDay = (daysAgo: number) => {
   return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() - daysAgo));
 };
 
-type Totals = { views: number; pinTaps: number; openClicks: number; eventsClicks: number; bountiesClicks: number };
-const ZERO: Totals = { views: 0, pinTaps: 0, openClicks: 0, eventsClicks: 0, bountiesClicks: 0 };
+type Totals = {
+  views: number;
+  pinTaps: number;
+  openClicks: number;
+  eventsClicks: number;
+  bountiesClicks: number;
+};
+const ZERO: Totals = {
+  views: 0,
+  pinTaps: 0,
+  openClicks: 0,
+  eventsClicks: 0,
+  bountiesClicks: 0,
+};
 
 export const embedsRouter = createTRPCRouter({
   list: creatorProcedure.query(async ({ ctx }) => {
@@ -125,7 +147,12 @@ export const embedsRouter = createTRPCRouter({
 
   /** Daily counters for the last `days` days, oldest first, gaps filled with zeros. */
   stats: creatorProcedure
-    .input(z.object({ id: z.string(), days: z.number().int().min(7).max(90).default(30) }))
+    .input(
+      z.object({
+        id: z.string(),
+        days: z.number().int().min(7).max(90).default(30),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
       await own(ctx.db, creatorId, input.id);
@@ -134,15 +161,31 @@ export const embedsRouter = createTRPCRouter({
       });
       const byDay = new Map(rows.map((r) => [r.day.toISOString().slice(0, 10), r]));
       return Array.from({ length: input.days }, (_, i) => {
-        const day = utcDay(input.days - 1 - i).toISOString().slice(0, 10);
+        const day = utcDay(input.days - 1 - i)
+          .toISOString()
+          .slice(0, 10);
         const r = byDay.get(day);
-        return { day, ...(r ? { views: r.views, pinTaps: r.pinTaps, openClicks: r.openClicks, eventsClicks: r.eventsClicks, bountiesClicks: r.bountiesClicks } : ZERO) };
+        return {
+          day,
+          ...(r
+            ? {
+                views: r.views,
+                pinTaps: r.pinTaps,
+                openClicks: r.openClicks,
+                eventsClicks: r.eventsClicks,
+                bountiesClicks: r.bountiesClicks,
+              }
+            : ZERO),
+        };
       });
     }),
 
   create: creatorProcedure.input(EmbedInput).mutation(async ({ ctx, input }) => {
     const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
-    return ctx.db.mapEmbed.create({ data: { ...input, creatorId, platformId: ctx.platform.id }, select: { id: true } });
+    return ctx.db.mapEmbed.create({
+      data: { ...input, creatorId, platformId: ctx.platform.id },
+      select: { id: true },
+    });
   }),
 
   update: creatorProcedure
@@ -150,7 +193,11 @@ export const embedsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
       await own(ctx.db, creatorId, input.id);
-      return ctx.db.mapEmbed.update({ where: { id: input.id }, data: input.data, select: { id: true } });
+      return ctx.db.mapEmbed.update({
+        where: { id: input.id },
+        data: input.data,
+        select: { id: true },
+      });
     }),
 
   setEnabled: creatorProcedure
@@ -158,17 +205,28 @@ export const embedsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
       await own(ctx.db, creatorId, input.id);
-      return ctx.db.mapEmbed.update({ where: { id: input.id }, data: { enabled: input.enabled }, select: { id: true, enabled: true } });
+      return ctx.db.mapEmbed.update({
+        where: { id: input.id },
+        data: { enabled: input.enabled },
+        select: { id: true, enabled: true },
+      });
     }),
 
-  duplicate: creatorProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
-    const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
-    const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = await own(ctx.db, creatorId, input.id);
-    return ctx.db.mapEmbed.create({
-      data: { ...rest, name: `${rest.name} (copy)`.slice(0, 80) },
-      select: { id: true },
-    });
-  }),
+  duplicate: creatorProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);
+      const {
+        id: _id,
+        createdAt: _c,
+        updatedAt: _u,
+        ...rest
+      } = await own(ctx.db, creatorId, input.id);
+      return ctx.db.mapEmbed.create({
+        data: { ...rest, name: `${rest.name} (copy)`.slice(0, 80) },
+        select: { id: true },
+      });
+    }),
 
   delete: creatorProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
     const creatorId = await creatorIdOf(ctx.db, ctx.session.user.id);

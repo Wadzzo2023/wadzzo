@@ -31,7 +31,9 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
       links: [
         loggerLink({
           enabled: (op) =>
-            process.env.NODE_ENV === "development" && op.direction === "down" && op.result instanceof Error,
+            process.env.NODE_ENV === "development" &&
+            op.direction === "down" &&
+            op.result instanceof Error,
         }),
         // Stellar balance lookups (wallate.acc.*) call Horizon and can take
         // seconds; they go on their own so access checks and page data never
@@ -39,7 +41,10 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
         splitLink({
           condition: (op) => op.path.startsWith("wallate.acc."),
           true: httpLink({ url: "/api/trpc", transformer: superjson }),
-          false: httpBatchStreamLink({ url: "/api/trpc", transformer: superjson }),
+          false: httpBatchStreamLink({
+            url: "/api/trpc",
+            transformer: superjson,
+          }),
         }),
       ],
     }),

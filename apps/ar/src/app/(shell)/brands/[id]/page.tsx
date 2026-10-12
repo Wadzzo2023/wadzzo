@@ -8,21 +8,12 @@ import { useMemo, useState } from "react";
 import { BrandAvatar } from "~/components/brand/BrandAvatar";
 import { HoloCard } from "~/components/cards/HoloCard";
 import { AppShell } from "~/components/shell/AppShell";
-import {
-  CardSkeleton,
-  Skeleton,
-  SkeletonText,
-  StatRowSkeleton,
-} from "~/components/ui/Skeleton";
+import { CardSkeleton, Skeleton, SkeletonText, StatRowSkeleton } from "~/components/ui/Skeleton";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { StatBlock } from "~/components/ui/Badges";
 import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { useAuth } from "~/lib/ar/store";
-import {
-  useBrandPinsQuery,
-  useBrandsQuery,
-  useToggleFollow,
-} from "~/lib/ar/usePins";
+import { useBrandPinsQuery, useBrandsQuery, useToggleFollow } from "~/lib/ar/usePins";
 
 const compact = (n: number) =>
   n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
@@ -69,10 +60,7 @@ export default function BrandDetail() {
 
   const [tab, setTab] = useState<Tab>("live");
 
-  const brand = useMemo(
-    () => brands.find((b) => b.id === id) ?? null,
-    [brands, id],
-  );
+  const brand = useMemo(() => brands.find((b) => b.id === id) ?? null, [brands, id]);
 
   // Counts for the tab labels. These come from the two paginated queries'
   // `total`, not from a client-side filter over every pin on the map — see
@@ -95,17 +83,10 @@ export default function BrandDetail() {
   if (brandsLoading) {
     return (
       <AppShell>
-        <div
-          className="ar-scroll h-full"
-          role="status"
-          aria-label="Loading brand"
-        >
+        <div className="ar-scroll h-full" role="status" aria-label="Loading brand">
           <Skeleton className="h-[188px] w-full" rounded="rounded-none" />
           <div className="px-5">
-            <Skeleton
-              className="-mt-10 h-[76px] w-[76px]"
-              rounded="rounded-[20px]"
-            />
+            <Skeleton className="-mt-10 h-[76px] w-[76px]" rounded="rounded-[20px]" />
             <Skeleton rounded="rounded-full" className="mt-3 h-5 w-2/3" />
             <Skeleton rounded="rounded-full" className="mt-2 h-3 w-1/3" />
             <SkeletonText lines={2} className="mt-3.5" />
@@ -121,7 +102,7 @@ export default function BrandDetail() {
     return (
       <AppShell>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
             Brand not found
           </p>
           <ArLinkButton href="/brands" variant="primary" size="md">
@@ -140,18 +121,14 @@ export default function BrandDetail() {
       <div className="ar-scroll h-full">
         {/* ── Cover ────────────────────────────────────────────────── */}
         <div className="relative h-[188px]">
-          { }
+          {}
           {/* Not every creator has uploaded a cover; the gradient below
               carries the header on its own when they haven't. */}
           {brand.coverUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={brand.coverUrl}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <img src={brand.coverUrl} alt="" className="h-full w-full object-cover" />
           )}
-          <div className="absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
+          <div className="from-ar-void/70 to-ar-bg absolute inset-0 bg-linear-to-b via-transparent" />
           <div className="ar-grid absolute inset-0 opacity-25" />
 
           <div
@@ -161,7 +138,7 @@ export default function BrandDetail() {
             <button
               onClick={() => router.back()}
               aria-label="Back"
-              className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+              className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
             >
               <ChevronLeft size={17} strokeWidth={2.4} />
             </button>
@@ -175,7 +152,7 @@ export default function BrandDetail() {
                   })
                   .catch(() => undefined);
               }}
-              className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+              className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
             >
               <Share2 size={15} strokeWidth={2.2} />
             </button>
@@ -193,22 +170,22 @@ export default function BrandDetail() {
             <BrandAvatar
               src={brand.avatarUrl}
               loading="eager"
-              className="h-[84px] w-[84px] rounded-[22px] ring-[3px] ring-ar-bg"
+              className="ring-ar-bg h-[84px] w-[84px] rounded-[22px] ring-[3px]"
             />
           </motion.div>
 
-          <h1 className="mt-3 flex items-center gap-1.5 text-[21px] font-semibold leading-tight text-ar-text">
+          <h1 className="text-ar-text mt-3 flex items-center gap-1.5 text-[21px] leading-tight font-semibold">
             <span className="min-w-0 truncate">{brand.name}</span>
             {brand.verified && (
               <BadgeCheck
                 size={17}
                 strokeWidth={2.4}
-                className="shrink-0 text-ar-green-hot"
+                className="text-ar-green-hot shrink-0"
                 aria-label="Verified"
               />
             )}
           </h1>
-          <p className="font-hud mt-0.5 text-[11px] uppercase tracking-[0.14em] text-ar-faint">
+          <p className="font-hud text-ar-faint mt-0.5 text-[11px] tracking-[0.14em] uppercase">
             {/* No column names a brand's place, so the separator only earns
                 its space when there's actually something after it. */}
             @{brand.handle}
@@ -216,28 +193,24 @@ export default function BrandDetail() {
           </p>
           {/* The tagline only: the bio is shown once, under About. */}
           {brand.tagline && (
-            <p className="mt-2.5 text-[13px] leading-relaxed text-ar-dim">
-              {brand.tagline}
-            </p>
+            <p className="text-ar-dim mt-2.5 text-[13px] leading-relaxed">{brand.tagline}</p>
           )}
         </div>
 
         {/* ── Stats + follow ───────────────────────────────────────── */}
-        <div className="mx-5 mt-4 flex items-center justify-around rounded-ar border border-ar-line bg-white/[0.03] py-3">
+        <div className="rounded-ar border-ar-line mx-5 mt-4 flex items-center justify-around border bg-white/[0.03] py-3">
           <StatBlock label="Followers" value={compact(brand.followers)} />
-          <span className="h-8 w-px bg-ar-line" />
+          <span className="bg-ar-line h-8 w-px" />
           <StatBlock label="Live now" value={liveQuery.total} accent />
-          <span className="h-8 w-px bg-ar-line" />
+          <span className="bg-ar-line h-8 w-px" />
           <StatBlock label="You hold" value={yoursQuery.total} />
         </div>
 
         {/* A failed follow is otherwise silent — the button just returns to
             "Follow" and the user is left guessing whether they mis-tapped. */}
         {followError && (
-          <div className="mx-5 mt-3 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5">
-            <p className="text-[12px] leading-relaxed text-ar-danger">
-              {followError}
-            </p>
+          <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 mx-5 mt-3 border px-3.5 py-2.5">
+            <p className="text-ar-danger text-[12px] leading-relaxed">{followError}</p>
           </div>
         )}
 
@@ -254,18 +227,13 @@ export default function BrandDetail() {
           >
             {followLabel(brand)}
           </ArButton>
-          <ArLinkButton
-            href="/map"
-            size="md"
-            variant="outline"
-            className="shrink-0"
-          >
+          <ArLinkButton href="/map" size="md" variant="outline" className="shrink-0">
             On map
           </ArLinkButton>
         </div>
 
         {brand.followed && (
-          <p className="mt-2 px-5 text-[11px] leading-relaxed text-ar-faint">
+          <p className="text-ar-faint mt-2 px-5 text-[11px] leading-relaxed">
             Their private and members-only drops now show on your map.
           </p>
         )}
@@ -273,10 +241,10 @@ export default function BrandDetail() {
         {/* ── Bio ──────────────────────────────────────────────────── */}
         {brand.bio && (
           <section className="mt-6 px-5">
-            <h2 className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+            <h2 className="font-hud text-ar-faint mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
               About
             </h2>
-            <p className="text-[13px] leading-relaxed text-ar-dim">{brand.bio}</p>
+            <p className="text-ar-dim text-[13px] leading-relaxed">{brand.bio}</p>
           </section>
         )}
 
@@ -289,7 +257,11 @@ export default function BrandDetail() {
             className="mx-5"
             tabs={[
               { id: "live", label: "Live drops", count: liveQuery.total },
-              { id: "yours", label: "Your collectibles", count: yoursQuery.total },
+              {
+                id: "yours",
+                label: "Your collectibles",
+                count: yoursQuery.total,
+              },
             ]}
           />
 
@@ -299,11 +271,7 @@ export default function BrandDetail() {
                 visit before the cards land, which reads as a brand with no
                 drops rather than as loading. */}
             {active.isLoading ? (
-              <div
-                className="grid grid-cols-2 gap-3.5"
-                role="status"
-                aria-label="Loading drops"
-              >
+              <div className="grid grid-cols-2 gap-3.5" role="status" aria-label="Loading drops">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <CardSkeleton key={i} />
                 ))}
@@ -339,19 +307,17 @@ export default function BrandDetail() {
                       onClick={() => void active.fetchNextPage()}
                     >
                       Show {Math.min(remaining, PAGE_SIZE)} more
-                      <span className="ml-1 text-ar-faint">
-                        &middot; {remaining} left
-                      </span>
+                      <span className="text-ar-faint ml-1">&middot; {remaining} left</span>
                     </ArButton>
                   </div>
                 )}
               </>
             ) : (
               <div className="py-12 text-center">
-                <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+                <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
                   {tab === "live" ? "Nothing live right now" : "None yet"}
                 </p>
-                <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+                <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
                   {tab === "live"
                     ? `Follow ${brand.name} and you'll see their next drop the moment it lands.`
                     : `Capture one of ${brand.name}'s pins and it'll show up here.`}

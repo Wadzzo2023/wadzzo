@@ -56,7 +56,7 @@ export function ScanVerifying({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="ar-glass mx-auto w-full max-w-[19rem] rounded-ar-lg p-5"
+      className="ar-glass rounded-ar-lg mx-auto w-full max-w-[19rem] p-5"
       role="status"
       aria-live="polite"
     >
@@ -77,7 +77,7 @@ export function ScanVerifying({
         ))}
       </div>
 
-      <p className="font-hud mt-4 text-center text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+      <p className="font-hud text-ar-text mt-4 text-center text-[12.5px] font-bold tracking-[0.12em] uppercase">
         Checking your scan
       </p>
 
@@ -98,7 +98,11 @@ export function ScanVerifying({
                 {st === "fail" && <X size={12} strokeWidth={3} />}
                 {st === "spin" && <Loader2 size={12} strokeWidth={2.6} className="animate-spin" />}
               </span>
-              <span className={cn("text-[12.5px]", st === "wait" ? "text-ar-faint" : "text-ar-text")}>{label}</span>
+              <span
+                className={cn("text-[12.5px]", st === "wait" ? "text-ar-faint" : "text-ar-text")}
+              >
+                {label}
+              </span>
             </li>
           );
         })}

@@ -9,11 +9,7 @@ import type { ArPin, Rarity } from "~/lib/ar/types";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { notifyBrand } from "@wadzzo/platform/server";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
@@ -135,9 +131,7 @@ function lockReasonFor(
 
     case ItemPrivacy.PRIVATE: {
       if (!signedIn) return "Sign in and follow this brand to unlock";
-      return followedCreatorIds.has(group.creatorId)
-        ? null
-        : "Follow this brand to unlock";
+      return followedCreatorIds.has(group.creatorId) ? null : "Follow this brand to unlock";
     }
 
     case ItemPrivacy.TIER: {
@@ -149,8 +143,7 @@ function lockReasonFor(
       if (!asset || !subscription) return "Not available";
       const needed = `${subscription.price} ${asset.code}`;
       if (!signedIn || !account) return `Sign in holding ${needed} to unlock`;
-      return account.tokenBalance(asset.code, asset.issuer) >=
-        subscription.price
+      return account.tokenBalance(asset.code, asset.issuer) >= subscription.price
         ? null
         : `Hold ${needed} to unlock`;
     }
@@ -204,7 +197,10 @@ function boundingBox({ lat, lng, radiusKm }: { lat: number; lng: number; radiusK
   const dLng = radiusKm / (111.32 * Math.max(Math.cos((lat * Math.PI) / 180), 0.01));
   return {
     latitude: { gte: Math.max(lat - dLat, -90), lte: Math.min(lat + dLat, 90) },
-    longitude: { gte: Math.max(lng - dLng, -180), lte: Math.min(lng + dLng, 180) },
+    longitude: {
+      gte: Math.max(lng - dLng, -180),
+      lte: Math.min(lng + dLng, 180),
+    },
   };
 }
 
@@ -243,11 +239,7 @@ function groupFacts(group: GroupWithLocations) {
   return {
     rarity: rarityOfGroup(group),
     supply: supplyOf(group.limit),
-    image:
-      group.optimizedImage ??
-      group.image ??
-      group.creator.profileUrl ??
-      WADZZO_ICON,
+    image: group.optimizedImage ?? group.image ?? group.creator.profileUrl ?? WADZZO_ICON,
     // Deduped and sorted so the same drop reads the same way every render —
     // the join can legitimately carry the same label twice via different rows.
     tags: [...new Set(group.locationGroupTags.map((t) => t.tag.label))].sort(),
@@ -298,8 +290,7 @@ function toPin(
     endsAt: group.endDate.toISOString(),
 
     collected: claim != null,
-    collectedAt:
-      claim?.claimedAt?.toISOString() ?? claim?.createdAt.toISOString() ?? null,
+    collectedAt: claim?.claimedAt?.toISOString() ?? claim?.createdAt.toISOString() ?? null,
     redeemCode: claim?.redeemCode ?? null,
     isRedeemed: claim?.isRedeemed ?? null,
     // A drop already collected is never locked — whatever gate it sat behind
@@ -322,15 +313,11 @@ function pinsOfGroup(
   // For a single-collectible group, one claim anywhere in it collects every
   // point in it for this user.
   const groupClaim = userId
-    ? group.locations
-        .flatMap((l) => l.consumers)
-        .find((c) => c.userId === userId)
+    ? group.locations.flatMap((l) => l.consumers).find((c) => c.userId === userId)
     : undefined;
 
   return group.locations.map((location) => {
-    const ownClaim = userId
-      ? location.consumers.find((c) => c.userId === userId)
-      : undefined;
+    const ownClaim = userId ? location.consumers.find((c) => c.userId === userId) : undefined;
     const claim = group.multiPin ? ownClaim : (ownClaim ?? groupClaim);
     return toPin(group, location, claim, lockReason, facts);
   });
@@ -404,9 +391,20 @@ async function writeClaim(
 ) {
   const claim = await writeClaimRow(db, userId, location, group, platformId);
   // Tell the brand (best effort; never fails the collect).
-  const info = await db.locationGroup.findUnique({ where: { id: group.id }, select: { title: true, creatorId: true } }).catch(() => null);
+  const info = await db.locationGroup
+    .findUnique({
+      where: { id: group.id },
+      select: { title: true, creatorId: true },
+    })
+    .catch(() => null);
   if (info?.creatorId) {
-    await notifyBrand(db, { actorId: userId, type: "PIN_COLLECTED", entityId: 0, creatorId: info.creatorId, meta: { pin: info.title, groupId: group.id } });
+    await notifyBrand(db, {
+      actorId: userId,
+      type: "PIN_COLLECTED",
+      entityId: 0,
+      creatorId: info.creatorId,
+      meta: { pin: info.title, groupId: group.id },
+    });
   }
   return claim;
 }
@@ -477,7 +475,12 @@ async function writeClaimRow(
       const isCodeCollision =
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === "P2002" &&
-        (Array.isArray(err.meta?.target) ? err.meta.target.join(",") : typeof err.meta?.target === "string" ? err.meta.target : "").includes("redeemCode");
+        (Array.isArray(err.meta?.target)
+          ? err.meta.target.join(",")
+          : typeof err.meta?.target === "string"
+            ? err.meta.target
+            : ""
+        ).includes("redeemCode");
       if (isCodeCollision) continue;
       throw err;
     }
@@ -495,7 +498,11 @@ async function writeClaimRow(
  * well*: a hit at the start of the title beats one buried in a description.
  */
 function searchScore(
-  group: { title: string; description: string | null; creator: { name: string | null } },
+  group: {
+    title: string;
+    description: string | null;
+    creator: { name: string | null };
+  },
   tags: string[],
   terms: string[],
   phrase: string,
@@ -504,7 +511,8 @@ function searchScore(
   const brand = (group.creator.name ?? "").toLowerCase();
   const desc = (group.description ?? "").toLowerCase();
   const tagText = tags.map((t) => t.toLowerCase());
-  const wordStart = (hay: string, t: string) => new RegExp(`(^|[^\\p{L}\\p{N}])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(hay);
+  const wordStart = (hay: string, t: string) =>
+    new RegExp(`(^|[^\\p{L}\\p{N}])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(hay);
 
   let score = 0;
   if (title === phrase) score += 40;
@@ -555,7 +563,10 @@ export const pinsRouter = createTRPCRouter({
       // Optional area (mobile): only pins within `radiusKm` of lat/lng. All
       // three or none — the web (and older app builds) send none and still
       // get every live pin.
-      const area = input?.lat != null && input.lng != null && input.radiusKm != null ? { lat: input.lat, lng: input.lng, radiusKm: input.radiusKm } : null;
+      const area =
+        input?.lat != null && input.lng != null && input.radiusKm != null
+          ? { lat: input.lat, lng: input.lng, radiusKm: input.radiusKm }
+          : null;
       const box = area ? boundingBox(area) : null;
 
       const [followedCreatorIds, account] = await Promise.all([
@@ -570,7 +581,10 @@ export const pinsRouter = createTRPCRouter({
       // The box narrows it in the database (both which drops, and which of
       // their locations are loaded — with their consumers); the exact circle
       // is applied after.
-      const locationWhere = { hidden: false, ...(box ?? {}) } satisfies Prisma.LocationWhereInput;
+      const locationWhere = {
+        hidden: false,
+        ...(box ?? {}),
+      } satisfies Prisma.LocationWhereInput;
       const groups = await ctx.db.locationGroup.findMany({
         where: {
           ...liveGroupWhere(ctx),
@@ -579,7 +593,13 @@ export const pinsRouter = createTRPCRouter({
           locations: { some: locationWhere },
         },
         include: box
-          ? { ...groupWithLocationsInclude, locations: { ...groupWithLocationsInclude.locations, where: locationWhere } }
+          ? {
+              ...groupWithLocationsInclude,
+              locations: {
+                ...groupWithLocationsInclude.locations,
+                where: locationWhere,
+              },
+            }
           : groupWithLocationsInclude,
       });
 
@@ -590,9 +610,7 @@ export const pinsRouter = createTRPCRouter({
           lockReasonFor(group, followedCreatorIds, account, userId != null),
         ),
       );
-      return area
-        ? pins.filter((p) => distanceMeters(area, p) <= area.radiusKm * 1000)
-        : pins;
+      return area ? pins.filter((p) => distanceMeters(area, p) <= area.radiusKm * 1000) : pins;
     }),
 
   /**
@@ -631,7 +649,10 @@ export const pinsRouter = createTRPCRouter({
       const userId = ctx.session?.user.id ?? null;
       const phrase = input.q.toLowerCase().replace(/\s+/g, " ");
       const terms = [...new Set(phrase.split(" ").filter((t) => t.length > 0))].slice(0, 6);
-      const contains = (t: string) => ({ contains: t, mode: "insensitive" as const });
+      const contains = (t: string) => ({
+        contains: t,
+        mode: "insensitive" as const,
+      });
 
       const groups = await ctx.db.locationGroup.findMany({
         where: {
@@ -654,7 +675,10 @@ export const pinsRouter = createTRPCRouter({
       });
 
       const ranked = groups
-        .map((g) => ({ g, score: searchScore(g, groupFacts(g).tags, terms, phrase) }))
+        .map((g) => ({
+          g,
+          score: searchScore(g, groupFacts(g).tags, terms, phrase),
+        }))
         .sort((a, b) => b.score - a.score || a.g.title.localeCompare(b.g.title))
         .slice(0, input.limit);
       if (ranked.length === 0) return [];
@@ -670,9 +694,14 @@ export const pinsRouter = createTRPCRouter({
         needsAccount ? StellarAccount.load(userId) : Promise.resolve(null),
       ]);
 
-      const from = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null;
+      const from =
+        input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null;
       return ranked.flatMap(({ g }) => {
-        const pins = pinsOfGroup(g, userId, lockReasonFor(g, followedCreatorIds, account, userId != null));
+        const pins = pinsOfGroup(
+          g,
+          userId,
+          lockReasonFor(g, followedCreatorIds, account, userId != null),
+        );
         if (pins.length === 0) return [];
         const best = from
           ? pins.reduce((a, b) => (distanceMeters(from, b) < distanceMeters(from, a) ? b : a))
@@ -805,9 +834,7 @@ export const pinsRouter = createTRPCRouter({
         );
 
         const matching = all.filter((pin) =>
-          input.tab === "yours"
-            ? pin.collected
-            : pinStatus(pin) === "collectible",
+          input.tab === "yours" ? pin.collected : pinStatus(pin) === "collectible",
         );
 
         const pins = matching.slice(offset, offset + input.limit);
@@ -869,9 +896,7 @@ export const pinsRouter = createTRPCRouter({
       z.object({
         limit: z.number().int().min(1).max(48).default(24),
         cursor: z.number().int().min(0).nullish(),
-        rarity: z
-          .enum(["all", "common", "rare", "epic", "legendary", "mythic"])
-          .default("all"),
+        rarity: z.enum(["all", "common", "rare", "epic", "legendary", "mythic"]).default("all"),
         query: z.string().max(120).default(""),
         sort: z.enum(["newest", "rarest", "brand"]).default("newest"),
       }),
@@ -886,7 +911,12 @@ export const pinsRouter = createTRPCRouter({
         // nothing to render as a card, so it is excluded here rather than
         // silently becoming an "Unknown brand" blank in someone's binder.
         // Only this platform's cards (every platform's on web.wadzzo.com).
-        where: { userId, location: { locationGroup: ctx.platform.isRoot ? { isNot: null } : { is: platformScope(ctx) } } },
+        where: {
+          userId,
+          location: {
+            locationGroup: ctx.platform.isRoot ? { isNot: null } : { is: platformScope(ctx) },
+          },
+        },
         include: {
           location: {
             include: { locationGroup: { include: groupWithLocationsInclude } },
@@ -926,10 +956,7 @@ export const pinsRouter = createTRPCRouter({
         total: all.length,
         brands: new Set(all.map((p) => p.brandId)).size,
         best: all.reduce<Rarity>(
-          (acc, p) =>
-            RARITY_ORDER.indexOf(p.rarity) > RARITY_ORDER.indexOf(acc)
-              ? p.rarity
-              : acc,
+          (acc, p) => (RARITY_ORDER.indexOf(p.rarity) > RARITY_ORDER.indexOf(acc) ? p.rarity : acc),
           "common",
         ),
         counts,
@@ -950,17 +977,12 @@ export const pinsRouter = createTRPCRouter({
         })
         .sort((a, b) => {
           if (input.sort === "rarest") {
-            return (
-              RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity)
-            );
+            return RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity);
           }
           if (input.sort === "brand") {
             return a.brandName.localeCompare(b.brandName);
           }
-          return (
-            new Date(b.collectedAt ?? 0).getTime() -
-            new Date(a.collectedAt ?? 0).getTime()
-          );
+          return new Date(b.collectedAt ?? 0).getTime() - new Date(a.collectedAt ?? 0).getTime();
         });
 
       const pins = matching.slice(offset, offset + input.limit);
@@ -984,12 +1006,7 @@ export const pinsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { location, group } = await assertClaimable(
-        ctx.db,
-        userId,
-        input.locationId,
-        ctx,
-      );
+      const { location, group } = await assertClaimable(ctx.db, userId, input.locationId, ctx);
 
       // ── Geofence ──────────────────────────────────────────────────────────
       // The client already hides the button out of range; this is what makes
@@ -1036,12 +1053,7 @@ export const pinsRouter = createTRPCRouter({
     .input(z.object({ locationId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const { location, group } = await assertClaimable(
-        ctx.db,
-        userId,
-        input.locationId,
-        ctx,
-      );
+      const { location, group } = await assertClaimable(ctx.db, userId, input.locationId, ctx);
       return writeClaim(ctx.db, userId, location, group, ctx.platform.id);
     }),
 });

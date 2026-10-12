@@ -34,14 +34,27 @@ export default function AuditPage() {
       id: "when",
       header: "When",
       skeleton: "short",
-      cell: (e) => <span className="whitespace-nowrap text-muted-foreground">{format(new Date(e.createdAt), "MMM d, yyyy HH:mm")}</span>,
+      cell: (e) => (
+        <span className="text-muted-foreground whitespace-nowrap">
+          {format(new Date(e.createdAt), "MMM d, yyyy HH:mm")}
+        </span>
+      ),
     },
     {
       id: "who",
       header: "Who",
       skeleton: "person",
       cell: (e) =>
-        e.actorId ? <Person name={e.actor?.name ?? null} image={e.actor?.image ?? null} id={e.actorId} sub={<span className="font-mono">{abbreviateAddress(e.actorId, 6)}</span>} /> : <span className="text-muted-foreground">System</span>,
+        e.actorId ? (
+          <Person
+            name={e.actor?.name ?? null}
+            image={e.actor?.image ?? null}
+            id={e.actorId}
+            sub={<span className="font-mono">{abbreviateAddress(e.actorId, 6)}</span>}
+          />
+        ) : (
+          <span className="text-muted-foreground">System</span>
+        ),
     },
     {
       id: "action",
@@ -50,7 +63,7 @@ export default function AuditPage() {
       cell: (e) => (
         <div>
           <p className="font-mono text-xs">{e.action}</p>
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-muted-foreground font-mono text-xs">
             {e.entityType} {e.entityId.length > 40 ? `${e.entityId.slice(0, 40)}…` : e.entityId}
           </p>
         </div>
@@ -71,7 +84,11 @@ export default function AuditPage() {
 
   return (
     <PageBody wide>
-      <PageHeader eyebrow="Admin" title="Audit log" description="Sign-ups, platform joins and every admin action, with the platform it came from." />
+      <PageHeader
+        eyebrow="Admin"
+        title="Audit log"
+        description="Sign-ups, platform joins and every admin action, with the platform it came from."
+      />
 
       <Toolbar className="mt-6">
         <SearchInput onSearch={onSearch} placeholder="Action, e.g. brand. or user.signup" />
@@ -91,7 +108,11 @@ export default function AuditPage() {
         footer={
           log.hasNextPage && (
             <div className="flex justify-center">
-              <Button variant="outline" onClick={() => void log.fetchNextPage()} disabled={log.isFetchingNextPage}>
+              <Button
+                variant="outline"
+                onClick={() => void log.fetchNextPage()}
+                disabled={log.isFetchingNextPage}
+              >
                 {log.isFetchingNextPage && <Spinner className="size-4" />}
                 {log.isFetchingNextPage ? "Loading…" : "Load more"}
               </Button>

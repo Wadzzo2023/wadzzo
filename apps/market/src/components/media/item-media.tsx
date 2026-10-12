@@ -30,12 +30,31 @@ export function ItemMedia({
   const { signedIn } = useRequireAuth();
   const access = api.content.access.useQuery({ assetId }, { enabled: signedIn });
   const owner = access.data?.owner === true;
-  const content = api.content.unlock.useQuery({ assetId }, { enabled: owner, staleTime: 5 * 60_000 });
+  const content = api.content.unlock.useQuery(
+    { assetId },
+    { enabled: owner, staleTime: 5 * 60_000 },
+  );
 
   if (owner && content.data) {
-    return <MediaPlayer type={content.data.mediaType} url={content.data.mediaUrl} poster={content.data.thumbnail} title={content.data.name} className={className} />;
+    return (
+      <MediaPlayer
+        type={content.data.mediaType}
+        url={content.data.mediaUrl}
+        poster={content.data.thumbnail}
+        title={content.data.name}
+        className={className}
+      />
+    );
   }
-  return <LockedPreview name={name} thumbnail={thumbnail} mediaType={mediaType} checking={signedIn && (access.isLoading || (owner && content.isLoading))} className={className} />;
+  return (
+    <LockedPreview
+      name={name}
+      thumbnail={thumbnail}
+      mediaType={mediaType}
+      checking={signedIn && (access.isLoading || (owner && content.isLoading))}
+      className={className}
+    />
+  );
 }
 
 export function LockedPreview({
@@ -53,7 +72,7 @@ export function LockedPreview({
 }) {
   const meta = MEDIA_META[mediaType];
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl bg-surface-2", className)}>
+    <div className={cn("bg-surface-2 relative overflow-hidden rounded-2xl", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={thumbnail} alt={name} className="aspect-square w-full object-cover" />
       <div className="absolute inset-x-3 bottom-3 flex items-center gap-2.5 rounded-xl bg-black/55 p-2.5 text-white ring-1 ring-white/10 backdrop-blur-md">
@@ -61,8 +80,12 @@ export function LockedPreview({
           {checking ? <span className="loading-spinner loading-sm" /> : <Lock className="size-4" />}
         </span>
         <span className="text-sm leading-tight">
-          <span className="block font-semibold">{checking ? "Checking ownership…" : `${meta.label} unlocks for owners`}</span>
-          {!checking && <span className="block text-xs text-white/75">Own a copy to play the full content</span>}
+          <span className="block font-semibold">
+            {checking ? "Checking ownership…" : `${meta.label} unlocks for owners`}
+          </span>
+          {!checking && (
+            <span className="block text-xs text-white/75">Own a copy to play the full content</span>
+          )}
         </span>
       </div>
     </div>

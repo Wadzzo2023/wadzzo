@@ -31,7 +31,10 @@ export default function AnnouncementScreen() {
 
   const detail = api.events.announcement.useQuery(
     { id },
-    { enabled: Boolean(id), retry: (n, e) => e.data?.code !== "NOT_FOUND" && n < 2 },
+    {
+      enabled: Boolean(id),
+      retry: (n, e) => e.data?.code !== "NOT_FOUND" && n < 2,
+    },
   );
   const a = detail.data;
 
@@ -44,7 +47,12 @@ export default function AnnouncementScreen() {
   if (!id || detail.isLoading) {
     return (
       <AppShell tabs={false}>
-        <div className="px-5" role="status" aria-label="Loading announcement" style={{ paddingTop: "calc(var(--ar-top-inset) + 70px)" }}>
+        <div
+          className="px-5"
+          role="status"
+          aria-label="Loading announcement"
+          style={{ paddingTop: "calc(var(--ar-top-inset) + 70px)" }}
+        >
           <Skeleton rounded="rounded-full" className="h-3 w-1/3" />
           <Skeleton rounded="rounded-full" className="mt-4 h-5 w-4/5" />
           <SkeletonText lines={5} className="mt-4" />
@@ -58,8 +66,10 @@ export default function AnnouncementScreen() {
     return (
       <AppShell tabs={false}>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
-            {detail.error?.data?.code === "NOT_FOUND" ? "This post is no longer available" : "Couldn't load this post"}
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
+            {detail.error?.data?.code === "NOT_FOUND"
+              ? "This post is no longer available"
+              : "Couldn't load this post"}
           </p>
           <ArLinkButton href="/events?tab=announcements" variant="primary">
             All news
@@ -82,20 +92,22 @@ export default function AnnouncementScreen() {
               else void router.push("/events?tab=announcements");
             }}
             aria-label="Back"
-            className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+            className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
           >
             <ChevronLeft size={17} strokeWidth={2.4} />
           </button>
           <div className="flex items-center gap-2">
             {copied && (
-              <span className="font-hud ar-glass rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-green-hot">
+              <span className="font-hud ar-glass text-ar-green-hot rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-[0.12em] uppercase">
                 Link copied
               </span>
             )}
             <button
               aria-label="Share this post"
-              onClick={() => void shareLink(a.title, window.location.href).then((r) => setCopied(r === "copied"))}
-              className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+              onClick={() =>
+                void shareLink(a.title, window.location.href).then((r) => setCopied(r === "copied"))
+              }
+              className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
             >
               <Share2 size={15} strokeWidth={2.2} />
             </button>
@@ -106,25 +118,27 @@ export default function AnnouncementScreen() {
           <Link href={`/brands/${a.brand.id}`} className="mt-2 flex w-fit items-center gap-2.5">
             <BrandAvatar src={a.brand.imageUrl} className="h-10 w-10 rounded-[12px]" />
             <span>
-              <span className="block text-[13.5px] font-semibold text-ar-text">{a.brand.name}</span>
-              <span className="font-hud block text-[10.5px] text-ar-faint">
+              <span className="text-ar-text block text-[13.5px] font-semibold">{a.brand.name}</span>
+              <span className="font-hud text-ar-faint block text-[10.5px]">
                 {format(new Date(a.createdAt), "d MMM yyyy · h:mm a")}
               </span>
             </span>
           </Link>
 
           {a.pinned && (
-            <span className="font-hud mt-3 inline-flex h-[22px] items-center gap-1 rounded-full border border-ar-green/50 bg-ar-green/10 px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-green-hot">
+            <span className="font-hud border-ar-green/50 bg-ar-green/10 text-ar-green-hot mt-3 inline-flex h-[22px] items-center gap-1 rounded-full border px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase">
               <Pin size={10} strokeWidth={2.6} />
               Pinned
             </span>
           )}
 
-          <h1 className="mt-3 text-[21px] font-semibold leading-tight text-ar-text">{a.title}</h1>
-          <p className="mt-2.5 whitespace-pre-line break-words text-[14px] leading-relaxed text-ar-dim">{a.body}</p>
+          <h1 className="text-ar-text mt-3 text-[21px] leading-tight font-semibold">{a.title}</h1>
+          <p className="text-ar-dim mt-2.5 text-[14px] leading-relaxed break-words whitespace-pre-line">
+            {a.body}
+          </p>
 
           {a.images.length > 0 && (
-            <div className="relative mt-4 overflow-hidden rounded-ar-lg">
+            <div className="rounded-ar-lg relative mt-4 overflow-hidden">
               <div
                 className="ar-scroll-x flex snap-x snap-mandatory"
                 onScroll={(e) => {
@@ -148,7 +162,10 @@ export default function AnnouncementScreen() {
                   {a.images.map((src, i) => (
                     <span
                       key={src}
-                      className={cn("h-1.5 rounded-full transition-all", i === index ? "w-4 bg-white" : "w-1.5 bg-white/50")}
+                      className={cn(
+                        "h-1.5 rounded-full transition-all",
+                        i === index ? "w-4 bg-white" : "w-1.5 bg-white/50",
+                      )}
                     />
                   ))}
                 </div>
@@ -161,7 +178,7 @@ export default function AnnouncementScreen() {
               href={a.ctaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="ar-key ar-key-primary font-hud mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-ar text-[13px] font-bold uppercase tracking-[0.1em]"
+              className="ar-key ar-key-primary font-hud rounded-ar mt-5 flex h-12 w-full items-center justify-center gap-2 text-[13px] font-bold tracking-[0.1em] uppercase"
             >
               {a.ctaLabel ?? "Learn more"}
               <ExternalLink size={15} strokeWidth={2.4} />

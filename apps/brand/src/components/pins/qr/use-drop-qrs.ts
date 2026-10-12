@@ -40,7 +40,13 @@ type Drop = {
  * one request rather than looping per pin — a 40-pin drop is one round trip
  * instead of forty, and one spinner instead of forty.
  */
-export function useDropQRs({ locationGroupId, format = "svg" }: { locationGroupId: string; format?: "svg" | "png" }) {
+export function useDropQRs({
+  locationGroupId,
+  format = "svg",
+}: {
+  locationGroupId: string;
+  format?: "svg" | "png";
+}) {
   const bulk = api.maps.pin.generateDropQRs.useMutation({
     onError: (e) => toast.error(e.message),
   });
@@ -63,7 +69,10 @@ export function useDropQRs({ locationGroupId, format = "svg" }: { locationGroupI
 
     saveBlob(zip, `${slugify(drop.title, 40)}-qr-codes.zip`, "application/zip");
     toast.success(`${drop.items.length} QR codes downloaded`);
-    if (drop.truncated) toast("That drop has more than 100 pins — the rest weren't included", { icon: "⚠️" });
+    if (drop.truncated)
+      toast("That drop has more than 100 pins — the rest weren't included", {
+        icon: "⚠️",
+      });
   }, [bulk, locationGroupId, format]);
 
   /** The print sheet: one page, N stickers, cut lines included. */
@@ -73,7 +82,9 @@ export function useDropQRs({ locationGroupId, format = "svg" }: { locationGroupI
     const codes: SheetCode[] = drop.items.map((item) => ({
       src: `data:${item.contentType};base64,${item.base64}`,
       caption:
-        item.pinNumber != null ? `${drop.title} · Pin ${item.pinNumber} of ${item.pinCount}` : drop.title,
+        item.pinNumber != null
+          ? `${drop.title} · Pin ${item.pinNumber} of ${item.pinCount}`
+          : drop.title,
       brand: drop.brandName,
       brandImageUrl: drop.brandImageUrl,
     }));

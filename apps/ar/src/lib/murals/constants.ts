@@ -60,15 +60,36 @@ export type RejectCode = (typeof REJECT_CODES)[number];
 /** User-facing copy for each reject (plan §6.7). `retryable` drives the CTA. */
 export const REJECT_COPY: Record<RejectCode, { message: string; retryable: boolean }> = {
   NOT_ART: { message: "That doesn't look like street art", retryable: true },
-  SCREEN: { message: "Looks like a screen or photo — scan the real wall", retryable: true },
-  WEB_COPY: { message: "This image matches a photo online — scan it in person", retryable: true },
-  GPS_WEAK: { message: "Your location is too rough — step outside and wait a moment", retryable: true },
-  NO_SWEEP: { message: "Turn the phone a bit further left and right", retryable: true },
-  DAILY_LIMIT: { message: "You've hit today's limit for this mural — come back after midnight", retryable: false },
+  SCREEN: {
+    message: "Looks like a screen or photo — scan the real wall",
+    retryable: true,
+  },
+  WEB_COPY: {
+    message: "This image matches a photo online — scan it in person",
+    retryable: true,
+  },
+  GPS_WEAK: {
+    message: "Your location is too rough — step outside and wait a moment",
+    retryable: true,
+  },
+  NO_SWEEP: {
+    message: "Turn the phone a bit further left and right",
+    retryable: true,
+  },
+  DAILY_LIMIT: {
+    message: "You've hit today's limit for this mural — come back after midnight",
+    retryable: false,
+  },
   MURAL_REJECTED: { message: "This one isn't collectable", retryable: false },
   UNSAFE: { message: "We can't accept this image", retryable: false },
-  RATE_LIMIT: { message: "Too many scans — take a short break", retryable: false },
-  SESSION_EXPIRED: { message: "That took too long — try the scan again", retryable: true },
+  RATE_LIMIT: {
+    message: "Too many scans — take a short break",
+    retryable: false,
+  },
+  SESSION_EXPIRED: {
+    message: "That took too long — try the scan again",
+    retryable: true,
+  },
 };
 
 /** What a mural looks like everywhere outside the admin. */

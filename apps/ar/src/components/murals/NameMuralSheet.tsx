@@ -43,23 +43,26 @@ export function NameMuralSheet({
   return (
     <BottomSheet open={open} onClose={onClose} labelledBy="name-mural-title">
       <div className="px-5 pt-4">
-        <h2 id="name-mural-title" className="font-hud flex items-center gap-2 text-[16px] font-bold text-ar-text">
+        <h2
+          id="name-mural-title"
+          className="font-hud text-ar-text flex items-center gap-2 text-[16px] font-bold"
+        >
           <PencilLine size={17} strokeWidth={2.4} className="text-rarity-epic" />
           Name this mural
         </h2>
-        <p className="mt-1 text-[12px] leading-relaxed text-ar-dim">
-          You&apos;re one of its first finders. Give it a name people will see on the map — or skip and it stays
-          &ldquo;{autoTitle}&rdquo;.
+        <p className="text-ar-dim mt-1 text-[12px] leading-relaxed">
+          You&apos;re one of its first finders. Give it a name people will see on the map — or skip
+          and it stays &ldquo;{autoTitle}&rdquo;.
         </p>
 
         {answered ? (
-          <div className="mt-5 rounded-ar border border-ar-line p-4 text-center">
-            <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-ar-green/60 bg-ar-green/15 text-ar-green-hot">
+          <div className="rounded-ar border-ar-line mt-5 border p-4 text-center">
+            <span className="border-ar-green/60 bg-ar-green/15 text-ar-green-hot mx-auto flex h-10 w-10 items-center justify-center rounded-full border">
               <Check size={18} strokeWidth={3} />
             </span>
-            <p className="font-hud mt-2 text-[14px] font-bold text-ar-text">{name.data?.title}</p>
-            {name.data?.artist && <p className="text-[12px] text-ar-dim">by {name.data.artist}</p>}
-            <p className="mt-2 text-[11.5px] text-ar-faint">
+            <p className="font-hud text-ar-text mt-2 text-[14px] font-bold">{name.data?.title}</p>
+            {name.data?.artist && <p className="text-ar-dim text-[12px]">by {name.data.artist}</p>}
+            <p className="text-ar-faint mt-2 text-[11.5px]">
               {saved ? "Saved — that's its name now." : "Another finder named it first."}
             </p>
             <ArButton variant="primary" size="md" block className="mt-4" onClick={onClose}>
@@ -72,35 +75,47 @@ export function NameMuralSheet({
             onSubmit={(e) => {
               e.preventDefault();
               if (title.trim().length < 2) return;
-              name.mutate({ muralId, title: title.trim(), artist: artist.trim() ? artist.trim() : undefined });
+              name.mutate({
+                muralId,
+                title: title.trim(),
+                artist: artist.trim() ? artist.trim() : undefined,
+              });
             }}
           >
             <label className="block">
-              <span className="font-hud text-[10.5px] font-bold uppercase tracking-[0.12em] text-ar-faint">Title</span>
+              <span className="font-hud text-ar-faint text-[10.5px] font-bold tracking-[0.12em] uppercase">
+                Title
+              </span>
               <input
                 autoFocus
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={80}
                 placeholder="e.g. Blue Heron"
-                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-hidden placeholder:text-ar-faint focus:border-rarity-epic/70"
+                className="rounded-ar border-ar-line text-ar-text placeholder:text-ar-faint focus:border-rarity-epic/70 mt-1 w-full border bg-white/[0.04] px-3 py-2.5 text-[14px] outline-hidden"
               />
             </label>
             <label className="block">
-              <span className="font-hud text-[10.5px] font-bold uppercase tracking-[0.12em] text-ar-faint">
-                Artist <span className="normal-case tracking-normal">(if you know)</span>
+              <span className="font-hud text-ar-faint text-[10.5px] font-bold tracking-[0.12em] uppercase">
+                Artist <span className="tracking-normal normal-case">(if you know)</span>
               </span>
               <input
                 value={artist}
                 onChange={(e) => setArtist(e.target.value)}
                 maxLength={80}
                 placeholder="Artist or crew"
-                className="mt-1 w-full rounded-ar border border-ar-line bg-white/[0.04] px-3 py-2.5 text-[14px] text-ar-text outline-hidden placeholder:text-ar-faint focus:border-rarity-epic/70"
+                className="rounded-ar border-ar-line text-ar-text placeholder:text-ar-faint focus:border-rarity-epic/70 mt-1 w-full border bg-white/[0.04] px-3 py-2.5 text-[14px] outline-hidden"
               />
             </label>
-            {name.error && <p className="text-[12px] text-ar-danger">{name.error.message}</p>}
+            {name.error && <p className="text-ar-danger text-[12px]">{name.error.message}</p>}
             <div className="space-y-2 pt-1">
-              <ArButton variant="primary" size="md" block type="submit" disabled={title.trim().length < 2 || name.isPending}>
+              <ArButton
+                variant="primary"
+                size="md"
+                block
+                type="submit"
+                disabled={title.trim().length < 2 || name.isPending}
+              >
                 {name.isPending ? "Saving…" : "Save name"}
               </ArButton>
               <ArButton variant="ghost" size="md" block type="button" onClick={onClose}>

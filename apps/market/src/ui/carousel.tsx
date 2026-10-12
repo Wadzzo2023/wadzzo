@@ -31,7 +31,10 @@ export function Carousel({
   const update = useCallback(() => {
     const el = track.current;
     if (!el) return;
-    setEdge({ start: el.scrollLeft <= 4, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4 });
+    setEdge({
+      start: el.scrollLeft <= 4,
+      end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4,
+    });
   }, []);
 
   useEffect(() => {
@@ -45,18 +48,25 @@ export function Carousel({
     };
   }, [update]);
 
-  const page = (dir: 1 | -1) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.9, behavior: "smooth" });
+  const page = (dir: 1 | -1) =>
+    track.current?.scrollBy({
+      left: dir * track.current.clientWidth * 0.9,
+      behavior: "smooth",
+    });
 
   return (
     <section className={cn("space-y-3", className)} aria-label={title}>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-hud text-lg font-bold tracking-tight sm:text-xl">{title}</h2>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <p className="text-muted-foreground text-sm">{description}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           {href && (
-            <Link href={href} className="mr-1 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            <Link
+              href={href}
+              className="text-primary mr-1 inline-flex items-center gap-1 text-sm font-medium hover:underline"
+            >
               See all <ArrowRight className="size-3.5" />
             </Link>
           )}
@@ -68,7 +78,10 @@ export function Carousel({
           </ArrowButton>
         </div>
       </div>
-      <div ref={track} className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:scroll-px-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={track}
+        className="-mx-4 flex snap-x snap-mandatory scroll-px-4 [scrollbar-width:none] gap-3 overflow-x-auto scroll-smooth px-4 pb-2 sm:mx-0 sm:scroll-px-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden"
+      >
         {children.map((child, i) => (
           <div key={i} className={cn("shrink-0 snap-start", itemClassName)}>
             {child}
@@ -79,14 +92,24 @@ export function Carousel({
   );
 }
 
-function ArrowButton({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: ReactNode }) {
+function ArrowButton({
+  label,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="hidden size-8 items-center justify-center rounded-full border bg-card text-foreground transition-colors hover:border-line-bright disabled:opacity-35 sm:flex"
+      className="bg-card text-foreground hover:border-line-bright hidden size-8 items-center justify-center rounded-full border transition-colors disabled:opacity-35 sm:flex"
     >
       {children}
     </button>

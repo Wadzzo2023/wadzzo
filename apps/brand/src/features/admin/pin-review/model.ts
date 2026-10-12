@@ -14,7 +14,8 @@ export const TYPE_LABEL: Record<string, string> = {
   LAUNCH: "Launch",
 };
 
-export const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
+export const plural = (n: number, one: string, many = `${one}s`) =>
+  `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
 // ── Sorting ─────────────────────────────────────────────────────────────────
 
@@ -97,7 +98,10 @@ function submittedRange(f: Filters, now: number): [number, number] | null {
     case "older":
       return [-Infinity, subDays(today, 29).getTime() - 1];
     case "custom":
-      return [f.submittedFrom ? day(f.submittedFrom).getTime() : -Infinity, f.submittedTo ? endOfDay(day(f.submittedTo)).getTime() : Infinity];
+      return [
+        f.submittedFrom ? day(f.submittedFrom).getTime() : -Infinity,
+        f.submittedTo ? endOfDay(day(f.submittedTo)).getTime() : Infinity,
+      ];
   }
 }
 
@@ -128,17 +132,46 @@ export function sortGroups(rows: Group[], sort: Sort) {
 }
 
 /** Active filters as removable chips. */
-export function activeChips(f: Filters, brandName: (id: string) => string): { key: string; label: string; clear: Partial<Filters> }[] {
+export function activeChips(
+  f: Filters,
+  brandName: (id: string) => string,
+): { key: string; label: string; clear: Partial<Filters> }[] {
   const chips: { key: string; label: string; clear: Partial<Filters> }[] = [];
   if (f.submitted !== "any") {
     const label =
-      f.submitted === "custom" ? `Submitted ${f.submittedFrom || "…"} → ${f.submittedTo || "…"}` : `Submitted: ${SUBMITTED[f.submitted].toLowerCase()}`;
-    chips.push({ key: "submitted", label, clear: { submitted: "any", submittedFrom: "", submittedTo: "" } });
+      f.submitted === "custom"
+        ? `Submitted ${f.submittedFrom || "…"} → ${f.submittedTo || "…"}`
+        : `Submitted: ${SUBMITTED[f.submitted].toLowerCase()}`;
+    chips.push({
+      key: "submitted",
+      label,
+      clear: { submitted: "any", submittedFrom: "", submittedTo: "" },
+    });
   }
-  if (f.liveFrom || f.liveTo) chips.push({ key: "live", label: `Live ${f.liveFrom || "…"} → ${f.liveTo || "…"}`, clear: { liveFrom: "", liveTo: "" } });
-  if (f.locs !== "any") chips.push({ key: "locs", label: `${LOCS[f.locs]} location${f.locs === "one" ? "" : "s"}`, clear: { locs: "any" } });
-  if (f.types.length) chips.push({ key: "types", label: f.types.map((t) => TYPE_LABEL[t] ?? t).join(", "), clear: { types: [] } });
-  if (f.brand) chips.push({ key: "brand", label: brandName(f.brand), clear: { brand: null } });
+  if (f.liveFrom || f.liveTo)
+    chips.push({
+      key: "live",
+      label: `Live ${f.liveFrom || "…"} → ${f.liveTo || "…"}`,
+      clear: { liveFrom: "", liveTo: "" },
+    });
+  if (f.locs !== "any")
+    chips.push({
+      key: "locs",
+      label: `${LOCS[f.locs]} location${f.locs === "one" ? "" : "s"}`,
+      clear: { locs: "any" },
+    });
+  if (f.types.length)
+    chips.push({
+      key: "types",
+      label: f.types.map((t) => TYPE_LABEL[t] ?? t).join(", "),
+      clear: { types: [] },
+    });
+  if (f.brand)
+    chips.push({
+      key: "brand",
+      label: brandName(f.brand),
+      clear: { brand: null },
+    });
   if (f.area) chips.push({ key: "area", label: "In map area", clear: { area: null } });
   return chips;
 }

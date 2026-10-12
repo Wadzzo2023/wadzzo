@@ -8,7 +8,14 @@ import {
   Transaction,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
+import {
+  networkPassphrase,
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+} from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
@@ -38,8 +45,7 @@ export async function SendBountyBalanceToMotherAccount({
     networkPassphrase,
   });
 
-  const totalAmount =
-    prize + (2 * Number(TrxBaseFeeInPlatformAsset) + Number(PLATFORM_FEE));
+  const totalAmount = prize + (2 * Number(TrxBaseFeeInPlatformAsset) + Number(PLATFORM_FEE));
 
   transaction.addOperation(
     Operation.payment({
@@ -70,13 +76,11 @@ export async function SendBountyBalanceToMotherAccountViaXLM({
   signWith,
   userPubKey,
   secretKey,
-
 }: {
   prizeInXLM: number;
   signWith: CustodialSigner;
   userPubKey: string;
   secretKey?: string | undefined;
-
 }) {
   const server = new Horizon.Server(STELLAR_URL);
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
@@ -126,27 +130,27 @@ export async function SendBountyBalanceToUserAccount({
   const account = await server.loadAccount(motherAcc.publicKey());
 
   const platformAssetBalance = account.balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum4" ||
-      balance.asset_type === "credit_alphanum12"
-    ) {
-      return balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
+      return (
+        balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer
+      );
     }
     return false;
   });
   //console.log("platformAssetBalance.............", platformAssetBalance);
 
-  if (
-    !platformAssetBalance ||
-    parseFloat(platformAssetBalance.balance) < prize
-  ) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Balance is not enough to send the asset." });
+  if (!platformAssetBalance || parseFloat(platformAssetBalance.balance) < prize) {
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Balance is not enough to send the asset.",
+    });
   }
 
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Please make sure you have at least 1 XLM in your account.",
+    });
   }
 
   const transaction = new TransactionBuilder(account, {
@@ -213,33 +217,32 @@ export async function SendBountyBalanceToWinner({
   const receiverAcc = await server.loadAccount(recipientID);
 
   const platformAssetBalance = account.balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum4" ||
-      balance.asset_type === "credit_alphanum12"
-    ) {
-      return balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer;
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
+      return (
+        balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer
+      );
     }
     return false;
   });
-  if (
-    !platformAssetBalance ||
-    parseFloat(platformAssetBalance.balance) < prize
-  ) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Balance is not enough to send the asset." });
+  if (!platformAssetBalance || parseFloat(platformAssetBalance.balance) < prize) {
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Balance is not enough to send the asset.",
+    });
   }
 
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Please make sure you have at least 1 XLM in your account.",
+    });
   }
   //console.log("XLMBalance", XLMBalance);
 
   const hasTrust = receiverAcc.balances.some((balance) => {
     //console.log(balance);
     return (
-      (balance.asset_type === "credit_alphanum4" ||
-        balance.asset_type === "credit_alphanum12") &&
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
       balance.asset_code === PLATFORM_ASSET.getCode() &&
       balance.asset_issuer === PLATFORM_ASSET.getIssuer()
     );
@@ -251,10 +254,10 @@ export async function SendBountyBalanceToWinner({
   });
 
   if (!hasTrust) {
-    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: `User Doesn't have trust, Please trust the ${PLATFORM_ASSET.code} first.` });
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, {
+      message: `User Doesn't have trust, Please trust the ${PLATFORM_ASSET.code} first.`,
+    });
   }
-
-
 
   transaction.addOperation(
     Operation.payment({
@@ -285,7 +288,9 @@ export async function SendBountyBalanceToWinnerViaXLM({
   const XLMBalance = await NativeBalance({ userPub: motherAcc.publicKey() });
 
   if (!XLMBalance?.balance || parseFloat(XLMBalance.balance) < 1.0) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: "Please make sure you have at least 1 XLM in your account.", });
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Please make sure you have at least 1 XLM in your account.",
+    });
   }
 
   const transaction = new TransactionBuilder(account, {
@@ -345,11 +350,10 @@ export async function SwapUserAssetToMotherUSDC({
   });
 
   const platformAssetBalance = senderAcc.balances.find((balance) => {
-    if (
-      balance.asset_type === "credit_alphanum4" ||
-      balance.asset_type === "credit_alphanum12"
-    ) {
-      return balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer;
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
+      return (
+        balance.asset_code === PLATFORM_ASSET.code && balance.asset_issuer === PLATFORM_ASSET.issuer
+      );
     }
     return false;
   });
@@ -359,8 +363,7 @@ export async function SwapUserAssetToMotherUSDC({
   const senderHasTrustOnUSDC = senderAcc.balances.some((balance) => {
     //console.log(balance);
     return (
-      (balance.asset_type === "credit_alphanum4" ||
-        balance.asset_type === "credit_alphanum12") &&
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
       balance.asset_code === assetCode &&
       balance.asset_issuer === assetIssuer
     );
@@ -369,23 +372,23 @@ export async function SwapUserAssetToMotherUSDC({
   const receiverHasTrustOnUSDC = account.balances.some((balance) => {
     //console.log(balance);
     return (
-      (balance.asset_type === "credit_alphanum4" ||
-        balance.asset_type === "credit_alphanum12") &&
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
       balance.asset_code === assetCode &&
       balance.asset_issuer === assetIssuer
     );
   });
 
   if (!receiverHasTrustOnUSDC) {
-    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, { message: "Please Contact Admin to add USDC trustline" });
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, {
+      message: "Please Contact Admin to add USDC trustline",
+    });
   }
 
   if (!senderHasTrustOnUSDC) {
-    if (
-      !platformAssetBalance ||
-      parseFloat(platformAssetBalance.balance) < priceInBand
-    ) {
-      throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`, });
+    if (!platformAssetBalance || parseFloat(platformAssetBalance.balance) < priceInBand) {
+      throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+        message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`,
+      });
     }
     transaction.addOperation(
       Operation.changeTrust({
@@ -394,11 +397,10 @@ export async function SwapUserAssetToMotherUSDC({
       }),
     );
   }
-  if (
-    !platformAssetBalance ||
-    parseFloat(platformAssetBalance.balance) < priceInBand
-  ) {
-    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, { message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`, });
+  if (!platformAssetBalance || parseFloat(platformAssetBalance.balance) < priceInBand) {
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: `You don't have total amount of ${priceInBand} ${PLATFORM_ASSET.code} to send.`,
+    });
   }
   transaction
     .addOperation(
@@ -441,8 +443,7 @@ export async function getHasMotherTrustOnUSDC() {
   const motherHasTrust = account.balances.some((balance) => {
     //console.log(balance);
     return (
-      (balance.asset_type === "credit_alphanum4" ||
-        balance.asset_type === "credit_alphanum12") &&
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
       balance.asset_code === assetCode &&
       balance.asset_issuer === assetIssuer
     );
@@ -459,8 +460,7 @@ export async function getHasUserHasTrustOnUSDC(userPubKey: string) {
   const userHasTrust = account.balances.some((balance) => {
     //console.log(balance);
     return (
-      (balance.asset_type === "credit_alphanum4" ||
-        balance.asset_type === "credit_alphanum12") &&
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
       balance.asset_code === assetCode &&
       balance.asset_issuer === assetIssuer
     );
@@ -476,10 +476,7 @@ export async function checkXDRSubmitted(xdr: string) {
     const txHash = getTransactionHashHex(transaction);
 
     try {
-      const transactionResult = await server
-        .transactions()
-        .transaction(txHash)
-        .call();
+      const transactionResult = await server.transactions().transaction(txHash).call();
       //console.log("Transaction already submitted:", transactionResult);
       return true;
     } catch (error) {

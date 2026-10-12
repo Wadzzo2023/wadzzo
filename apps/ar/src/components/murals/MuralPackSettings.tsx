@@ -2,7 +2,14 @@ import { CheckCircle2, Download, Loader2, ShieldCheck, Trash2, TriangleAlert } f
 import { useState } from "react";
 
 import { ArButton } from "~/components/ui/ArButton";
-import { deleteMuralPack, formatBytes, packProgress, startMuralPack, useMuralPack, verifyMuralPack } from "~/lib/murals/pack";
+import {
+  deleteMuralPack,
+  formatBytes,
+  packProgress,
+  startMuralPack,
+  useMuralPack,
+  verifyMuralPack,
+} from "~/lib/murals/pack";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PackArt } from "./PackArt";
@@ -38,21 +45,38 @@ export function MuralPackSettings() {
               : "Not downloaded";
 
   return (
-    <div className="rounded-ar border border-ar-line bg-white/[0.03] p-3.5">
+    <div className="rounded-ar border-ar-line border bg-white/[0.03] p-3.5">
       <div className="flex items-center gap-3">
-        <PackArt size={52} progress={p} done={s.status === "ready"} spinning={s.status === "checking" || s.status === "verifying"} />
+        <PackArt
+          size={52}
+          progress={p}
+          done={s.status === "ready"}
+          spinning={s.status === "checking" || s.status === "verifying"}
+        />
         <div className="min-w-0 flex-1">
-          <p className="font-hud text-[12.5px] font-bold uppercase tracking-[0.1em] text-ar-text">Mural pack</p>
+          <p className="font-hud text-ar-text text-[12.5px] font-bold tracking-[0.1em] uppercase">
+            Mural pack
+          </p>
           <p
             className={cn(
               "mt-0.5 flex items-center gap-1 text-[11.5px]",
-              s.status === "ready" ? "text-ar-green-hot" : s.status === "error" ? "text-ar-danger" : "text-ar-dim",
+              s.status === "ready"
+                ? "text-ar-green-hot"
+                : s.status === "error"
+                  ? "text-ar-danger"
+                  : "text-ar-dim",
             )}
           >
-            {s.status === "ready" ? <CheckCircle2 size={12} /> : s.status === "error" ? <TriangleAlert size={12} /> : working ? <Loader2 size={12} className="animate-spin" /> : null}
+            {s.status === "ready" ? (
+              <CheckCircle2 size={12} />
+            ) : s.status === "error" ? (
+              <TriangleAlert size={12} />
+            ) : working ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : null}
             {label}
           </p>
-          <p className="mt-0.5 text-[10.5px] text-ar-faint">
+          <p className="text-ar-faint mt-0.5 text-[10.5px]">
             {s.version ? `v${s.version} · ` : ""}
             {s.totalBytes ? formatBytes(s.totalBytes) : "≈23 MB"} · needed for the Murals camera
           </p>
@@ -64,11 +88,19 @@ export function MuralPackSettings() {
           <PackBar progress={p} active />
         </div>
       )}
-      {s.status === "error" && s.error && <p className="mt-2 text-[11.5px] text-ar-danger">{s.error.message}</p>}
-      {note && <p className="mt-2 text-[11.5px] text-ar-dim">{note}</p>}
+      {s.status === "error" && s.error && (
+        <p className="text-ar-danger mt-2 text-[11.5px]">{s.error.message}</p>
+      )}
+      {note && <p className="text-ar-dim mt-2 text-[11.5px]">{note}</p>}
 
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <ArButton size="sm" variant={s.status === "ready" ? "outline" : "primary"} icon={Download} disabled={working} onClick={() => void startMuralPack()}>
+        <ArButton
+          size="sm"
+          variant={s.status === "ready" ? "outline" : "primary"}
+          icon={Download}
+          disabled={working}
+          onClick={() => void startMuralPack()}
+        >
           {s.status === "ready" ? "Re-check" : s.status === "error" ? "Repair" : "Download"}
         </ArButton>
         <ArButton
@@ -80,7 +112,15 @@ export function MuralPackSettings() {
             setBusy("verify");
             setNote(null);
             void verifyMuralPack()
-              .then((r) => setNote(r === "ok" ? "Verified — every byte matches." : r === "damaged" ? "It was damaged; a fresh copy is downloading." : "It was missing; downloading it now."))
+              .then((r) =>
+                setNote(
+                  r === "ok"
+                    ? "Verified — every byte matches."
+                    : r === "damaged"
+                      ? "It was damaged; a fresh copy is downloading."
+                      : "It was missing; downloading it now.",
+                ),
+              )
               .finally(() => setBusy(null));
           }}
         >

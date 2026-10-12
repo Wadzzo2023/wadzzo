@@ -1,3 +1,4 @@
+// @ts-nocheck: config module (JS); consumed by eslint only
 // One lint setup for every package and app.
 //   baseConfig(...)  libraries and services (TypeScript only)
 //   nextConfig(...)  Next.js apps (adds the Next + React rules)
@@ -5,7 +6,17 @@ import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 import tseslint from "typescript-eslint";
 
-const IGNORES = [".next/**", ".turbo/**", "dist/**", "node_modules/**", "public/**", "next-env.d.ts", "e2e/**", "tests/**", "script.ts"];
+const IGNORES = [
+  ".next/**",
+  ".turbo/**",
+  "dist/**",
+  "node_modules/**",
+  "public/**",
+  "next-env.d.ts",
+  "e2e/**",
+  "tests/**",
+  "script.ts",
+];
 
 /** Rules that keep the code typed and its errors coded. */
 const typedRules = {
@@ -13,8 +24,14 @@ const typedRules = {
   "@typescript-eslint/consistent-type-definitions": "off",
   "@typescript-eslint/no-explicit-any": "warn",
   "@typescript-eslint/no-floating-promises": "warn",
-  "@typescript-eslint/consistent-type-imports": ["warn", { prefer: "type-imports", fixStyle: "inline-type-imports" }],
-  "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+  "@typescript-eslint/consistent-type-imports": [
+    "warn",
+    { prefer: "type-imports", fixStyle: "inline-type-imports" },
+  ],
+  "@typescript-eslint/no-unused-vars": [
+    "warn",
+    { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+  ],
   "@typescript-eslint/require-await": "off",
   "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: { attributes: false } }],
   // Style rules report, they don't fail the build.
@@ -40,7 +57,21 @@ const typedRules = {
  * refactor per screen, so they report until that happens.
  */
 const reactCompilerRules = Object.fromEntries(
-  ["refs", "set-state-in-effect", "static-components", "use-memo", "immutability", "preserve-manual-memoization", "purity", "globals", "error-boundaries", "unsupported-syntax", "incompatible-library", "gating", "config"].map((rule) => [`react-hooks/${rule}`, "warn"]),
+  [
+    "refs",
+    "set-state-in-effect",
+    "static-components",
+    "use-memo",
+    "immutability",
+    "preserve-manual-memoization",
+    "purity",
+    "globals",
+    "error-boundaries",
+    "unsupported-syntax",
+    "incompatible-library",
+    "gating",
+    "config",
+  ].map((rule) => [`react-hooks/${rule}`, "warn"]),
 );
 
 const typeChecked = (tsconfigRootDir) => ({

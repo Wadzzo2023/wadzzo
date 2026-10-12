@@ -18,12 +18,19 @@ const site = env.NEXT_PUBLIC_SITE;
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_URL),
-  title: { default: `${site} — Collect drops from the brands you love`, template: `%s · ${site}` },
+  title: {
+    default: `${site} — Collect drops from the brands you love`,
+    template: `%s · ${site}`,
+  },
   description: env.NEXT_PUBLIC_DESC,
   applicationName: site,
   icons: { icon: platformBranding.assets.favicon },
   alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: site, images: [platformBranding.assets.logo] },
+  openGraph: {
+    type: "website",
+    siteName: site,
+    images: [platformBranding.assets.logo],
+  },
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
 };

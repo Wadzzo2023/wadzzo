@@ -66,6 +66,9 @@ export type Quote = {
 /** Format an amount for display: up to 7 decimals for XLM, 2 otherwise. */
 export function formatAmount(amount: number, currency: string) {
   const dp = currency === "XLM" ? 7 : 2;
-  const s = amount.toLocaleString("en-US", { maximumFractionDigits: dp, minimumFractionDigits: currency === "USD" ? 2 : 0 });
+  const s = amount.toLocaleString("en-US", {
+    maximumFractionDigits: dp,
+    minimumFractionDigits: currency === "USD" ? 2 : 0,
+  });
   return currency === "USD" ? `$${s}` : `${s} ${currency}`;
 }

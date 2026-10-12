@@ -12,7 +12,16 @@ const withBundleAnalyzer = analyzer({
 const config = {
   // Browser bundles read the platform from here (see @wadzzo/platform/branding).
   env: { NEXT_PUBLIC_PLATFORM_SLUG: process.env.PLATFORM_SLUG ?? "wadzzo" },
-  transpilePackages: ["three", "@wadzzo/db", "@wadzzo/errors", "@wadzzo/platform", "@wadzzo/stellar", "@wadzzo/ui", "@wadzzo/utils", "@wadzzo/wallet"],
+  transpilePackages: [
+    "three",
+    "@wadzzo/db",
+    "@wadzzo/errors",
+    "@wadzzo/platform",
+    "@wadzzo/stellar",
+    "@wadzzo/ui",
+    "@wadzzo/utils",
+    "@wadzzo/wallet",
+  ],
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -35,8 +44,16 @@ const config = {
       { source: "/report", destination: "/reports", permanent: true },
       { source: "/report/:id", destination: "/reports/:id", permanent: true },
       { source: "/create", destination: "/onboarding", permanent: true },
-      { source: "/admin/collection-report", destination: "/admin/reports", permanent: true },
-      { source: "/admin/collection-report/:id", destination: "/admin/reports/:id", permanent: true },
+      {
+        source: "/admin/collection-report",
+        destination: "/admin/reports",
+        permanent: true,
+      },
+      {
+        source: "/admin/collection-report/:id",
+        destination: "/admin/reports/:id",
+        permanent: true,
+      },
       { source: "/admin", destination: "/admin/creators", permanent: false },
     ];
   },
@@ -74,7 +91,6 @@ const config = {
       },
     ];
   },
-
 };
 
 export default withBundleAnalyzer(config);

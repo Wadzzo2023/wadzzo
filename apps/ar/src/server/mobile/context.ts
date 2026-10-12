@@ -44,7 +44,9 @@ export async function mobileSession(req: Request): Promise<Session | null> {
 }
 
 export async function callerFor(session: Session | null) {
-  return appRouter.createCaller(createInnerTRPCContext({ session, platform: await getCurrentPlatform() }));
+  return appRouter.createCaller(
+    createInnerTRPCContext({ session, platform: await getCurrentPlatform() }),
+  );
 }
 
 export type Caller = Awaited<ReturnType<typeof callerFor>>;

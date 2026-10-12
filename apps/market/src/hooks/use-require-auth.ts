@@ -22,5 +22,11 @@ export function useRequireAuth() {
     [signedIn, openSignIn],
   );
 
-  return { signedIn, loading: session.status === "loading", session: session.data, requireAuth, openSignIn: () => openSignIn(true) };
+  return {
+    signedIn,
+    loading: session.status === "loading",
+    session: session.data,
+    requireAuth,
+    openSignIn: () => openSignIn(true),
+  };
 }

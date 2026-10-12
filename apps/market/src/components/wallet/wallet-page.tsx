@@ -1,6 +1,16 @@
 "use client";
 
-import { ArrowDownToLine, ArrowLeftRight, Check, Coins, Copy, Gift, Plus, Send, Wallet } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowLeftRight,
+  Check,
+  Coins,
+  Copy,
+  Gift,
+  Plus,
+  Send,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -33,7 +43,11 @@ export const shortAddr = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 
 export function WalletPage() {
   return (
-    <SignedIn icon={Wallet} title="Your wallet" description="Sign in to see your balances, get tokens and accept gifts.">
+    <SignedIn
+      icon={Wallet}
+      title="Your wallet"
+      description="Sign in to see your balances, get tokens and accept gifts."
+    >
       <WalletView />
     </SignedIn>
   );
@@ -45,10 +59,38 @@ type DialogKind = "get" | "swap" | "receive" | "send" | null;
 function sendableAssets(b: Balances): SendableAsset[] {
   if (!b.active) return [];
   return [
-    { code: "XLM", issuer: null, balance: b.xlm.spendable, label: "Stellar Lumens", thumbnail: null },
-    ...(b.platform.trusted ? [{ code: b.platform.code, issuer: PLATFORM_ASSET.issuer, balance: b.platform.balance, label: "Platform token", thumbnail: null }] : []),
-    ...b.pageTokens.map((t) => ({ code: t.code, issuer: t.issuer, balance: t.balance, label: `${t.creator.name} page token`, thumbnail: t.thumbnail })),
-    ...b.tokens.map((t) => ({ code: t.code, issuer: t.issuer, balance: t.balance, label: t.name ?? "Token", thumbnail: t.thumbnail })),
+    {
+      code: "XLM",
+      issuer: null,
+      balance: b.xlm.spendable,
+      label: "Stellar Lumens",
+      thumbnail: null,
+    },
+    ...(b.platform.trusted
+      ? [
+          {
+            code: b.platform.code,
+            issuer: PLATFORM_ASSET.issuer,
+            balance: b.platform.balance,
+            label: "Platform token",
+            thumbnail: null,
+          },
+        ]
+      : []),
+    ...b.pageTokens.map((t) => ({
+      code: t.code,
+      issuer: t.issuer,
+      balance: t.balance,
+      label: `${t.creator.name} page token`,
+      thumbnail: t.thumbnail,
+    })),
+    ...b.tokens.map((t) => ({
+      code: t.code,
+      issuer: t.issuer,
+      balance: t.balance,
+      label: t.name ?? "Token",
+      thumbnail: t.thumbnail,
+    })),
   ];
 }
 
@@ -92,9 +134,19 @@ function WalletView() {
       ) : null}
 
       {open === "get" && <GetTokensDialog onClose={() => setOpen(null)} />}
-      {open === "swap" && balances.data?.active && <SwapDialog balance={balances.data.platform.balance} code={balances.data.platform.code} onClose={() => setOpen(null)} />}
-      {open === "send" && assets.length > 0 && <SendDialog assets={assets} initial={sendAsset} onClose={() => setOpen(null)} />}
-      {open === "receive" && balances.data && <ReceiveDialog address={balances.data.address} onClose={() => setOpen(null)} />}
+      {open === "swap" && balances.data?.active && (
+        <SwapDialog
+          balance={balances.data.platform.balance}
+          code={balances.data.platform.code}
+          onClose={() => setOpen(null)}
+        />
+      )}
+      {open === "send" && assets.length > 0 && (
+        <SendDialog assets={assets} initial={sendAsset} onClose={() => setOpen(null)} />
+      )}
+      {open === "receive" && balances.data && (
+        <ReceiveDialog address={balances.data.address} onClose={() => setOpen(null)} />
+      )}
     </PageBody>
   );
 }
@@ -111,7 +163,15 @@ function CopyAddress({ address, className }: { address: string; className?: stri
       () => toast.error("Couldn't copy the address"),
     );
   return (
-    <button type="button" onClick={copy} title={address} className={cn("inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-mono text-xs ring-1 ring-white/15 backdrop-blur-md transition-colors hover:bg-white/20", className)}>
+    <button
+      type="button"
+      onClick={copy}
+      title={address}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-mono text-xs ring-1 ring-white/15 backdrop-blur-md transition-colors hover:bg-white/20",
+        className,
+      )}
+    >
       {shortAddr(address)} {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
     </button>
   );
@@ -124,46 +184,105 @@ function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) =
   const custodial = isCustodial(session?.user.walletType);
   const actions = [
     ...(custodial ? [{ id: "get" as const, label: "Get tokens", icon: Plus, primary: true }] : []),
-    ...(b.active ? [{ id: "send" as const, label: "Send", icon: Send, primary: !custodial }] : []),
-    ...(b.active ? [{ id: "swap" as const, label: "Swap", icon: ArrowLeftRight, primary: false }] : []),
-    { id: "receive" as const, label: "Receive", icon: ArrowDownToLine, primary: false },
+    ...(b.active
+      ? [
+          {
+            id: "send" as const,
+            label: "Send",
+            icon: Send,
+            primary: !custodial,
+          },
+        ]
+      : []),
+    ...(b.active
+      ? [
+          {
+            id: "swap" as const,
+            label: "Swap",
+            icon: ArrowLeftRight,
+            primary: false,
+          },
+        ]
+      : []),
+    {
+      id: "receive" as const,
+      label: "Receive",
+      icon: ArrowDownToLine,
+      primary: false,
+    },
   ];
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl bg-black p-6 text-white ring-1 ring-foreground/10 sm:p-8">
-      <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,hsl(var(--primary)/0.45),transparent_55%),radial-gradient(circle_at_90%_85%,hsl(190_90%_50%/0.3),transparent_55%),radial-gradient(circle_at_60%_0%,hsl(270_80%_60%/0.2),transparent_50%)]" />
-      <div aria-hidden className="absolute -right-16 -top-16 -z-10 size-64 rounded-full bg-primary/20 blur-3xl" />
+    <section className="ring-foreground/10 relative isolate overflow-hidden rounded-3xl bg-black p-6 text-white ring-1 sm:p-8">
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,hsl(var(--primary)/0.45),transparent_55%),radial-gradient(circle_at_90%_85%,hsl(190_90%_50%/0.3),transparent_55%),radial-gradient(circle_at_60%_0%,hsl(270_80%_60%/0.2),transparent_50%)]"
+      />
+      <div
+        aria-hidden
+        className="bg-primary/20 absolute -top-16 -right-16 -z-10 size-64 rounded-full blur-3xl"
+      />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="label-caps text-[hsl(112_85%_62%)]">{b.active ? `${b.platform.code} balance` : "Wallet"}</p>
+            <p className="label-caps text-[hsl(112_85%_62%)]">
+              {b.active ? `${b.platform.code} balance` : "Wallet"}
+            </p>
             <CopyAddress address={b.address} />
           </div>
           {b.active ? (
             <>
               {currency === "USD" && b.platform.usd != null ? (
                 <>
-                  <p className="break-all font-hud text-4xl font-bold leading-none tracking-tight tabular-nums sm:text-6xl">{b.platform.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
+                  <p className="font-hud text-4xl leading-none font-bold tracking-tight break-all tabular-nums sm:text-6xl">
+                    {b.platform.usd.toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })}
+                  </p>
                   <p className="text-sm text-white/70">
                     {num(b.platform.balance)} {b.platform.code}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="break-all font-hud text-4xl font-bold leading-none tracking-tight tabular-nums sm:text-6xl">
-                    {num(b.platform.balance)} <span className="text-lg font-semibold text-white/60 sm:text-2xl">{b.platform.code}</span>
+                  <p className="font-hud text-4xl leading-none font-bold tracking-tight break-all tabular-nums sm:text-6xl">
+                    {num(b.platform.balance)}{" "}
+                    <span className="text-lg font-semibold text-white/60 sm:text-2xl">
+                      {b.platform.code}
+                    </span>
                   </p>
-                  {b.platform.usd != null && <p className="text-sm text-white/70">≈ {b.platform.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>}
+                  {b.platform.usd != null && (
+                    <p className="text-sm text-white/70">
+                      ≈{" "}
+                      {b.platform.usd.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </p>
+                  )}
                 </>
               )}
             </>
           ) : (
             <p className="max-w-md text-white/75">
-              Your Stellar account isn&apos;t active yet. {custodial ? "Getting tokens activates it for you." : "Send at least 1 XLM to this address from your wallet to activate it."}
+              Your Stellar account isn&apos;t active yet.{" "}
+              {custodial
+                ? "Getting tokens activates it for you."
+                : "Send at least 1 XLM to this address from your wallet to activate it."}
             </p>
           )}
         </div>
-        <div className={cn("grid gap-2 sm:flex", actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
+        <div
+          className={cn(
+            "grid gap-2 sm:flex",
+            actions.length >= 4
+              ? "grid-cols-4"
+              : actions.length === 3
+                ? "grid-cols-3"
+                : "grid-cols-2",
+          )}
+        >
           {actions.map((a) => (
             <button
               key={a.id}
@@ -187,31 +306,48 @@ function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) =
 
 function XlmCard({ xlm }: { xlm: Extract<Balances, { active: true }>["xlm"] }) {
   const rows = [
-    { label: "Spendable", value: xlm.spendable, hint: "Available for fees and purchases" },
-    { label: "Reserved", value: xlm.reserved, hint: "Locked by Stellar for your account and trustlines" },
+    {
+      label: "Spendable",
+      value: xlm.spendable,
+      hint: "Available for fees and purchases",
+    },
+    {
+      label: "Reserved",
+      value: xlm.reserved,
+      hint: "Locked by Stellar for your account and trustlines",
+    },
   ];
   return (
     <section className="glass space-y-4 rounded-2xl p-5">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-hud font-bold">XLM</h2>
         <p className="font-hud text-2xl font-bold tabular-nums">
-          {num(xlm.total, 4)} <span className="text-sm font-medium text-muted-foreground">total</span>
+          {num(xlm.total, 4)}{" "}
+          <span className="text-muted-foreground text-sm font-medium">total</span>
         </p>
       </div>
       <ul className="space-y-2">
         {rows.map((r) => (
-          <li key={r.label} className="flex items-center justify-between gap-3 rounded-xl bg-foreground/[0.04] px-3.5 py-3 ring-1 ring-foreground/[0.06]">
+          <li
+            key={r.label}
+            className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center justify-between gap-3 rounded-xl px-3.5 py-3 ring-1"
+          >
             <span className="min-w-0">
               <span className="block text-sm font-semibold">{r.label}</span>
-              <span className="block truncate text-xs text-muted-foreground">{r.hint}</span>
+              <span className="text-muted-foreground block truncate text-xs">{r.hint}</span>
             </span>
             <span className="font-hud font-bold tabular-nums">{num(r.value, 4)}</span>
           </li>
         ))}
       </ul>
       {xlm.total > 0 && (
-        <div className="h-2 overflow-hidden rounded-full bg-foreground/[0.08]" aria-hidden>
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-400" style={{ width: `${Math.max(2, Math.min(100, (xlm.spendable / xlm.total) * 100))}%` }} />
+        <div className="bg-foreground/[0.08] h-2 overflow-hidden rounded-full" aria-hidden>
+          <div
+            className="from-primary h-full rounded-full bg-gradient-to-r to-cyan-400"
+            style={{
+              width: `${Math.max(2, Math.min(100, (xlm.spendable / xlm.total) * 100))}%`,
+            }}
+          />
         </div>
       )}
     </section>
@@ -222,13 +358,23 @@ function InactiveCard() {
   return (
     <section className="glass space-y-2 rounded-2xl p-5">
       <h2 className="font-hud font-bold">XLM</h2>
-      <p className="text-sm text-muted-foreground">Stellar accounts need a small XLM reserve before they can hold anything.</p>
+      <p className="text-muted-foreground text-sm">
+        Stellar accounts need a small XLM reserve before they can hold anything.
+      </p>
     </section>
   );
 }
 
 /** Every asset in the wallet, each with Send. Items link to their page, page tokens to the brand's membership. */
-function AssetsCard({ assets, balances, onSend }: { assets: SendableAsset[]; balances: Balances; onSend: (a: SendableAsset) => void }) {
+function AssetsCard({
+  assets,
+  balances,
+  onSend,
+}: {
+  assets: SendableAsset[];
+  balances: Balances;
+  onSend: (a: SendableAsset) => void;
+}) {
   const hrefFor = (a: SendableAsset) => {
     if (!balances.active || !a.issuer) return null;
     const page = balances.pageTokens.find((t) => t.code === a.code && t.issuer === a.issuer);
@@ -240,39 +386,63 @@ function AssetsCard({ assets, balances, onSend }: { assets: SendableAsset[]; bal
     <section className="glass space-y-3 rounded-2xl p-5">
       <div className="flex items-center justify-between">
         <h2 className="font-hud font-bold">Assets</h2>
-        <span className="text-xs text-muted-foreground">{assets.length} in your wallet</span>
+        <span className="text-muted-foreground text-xs">{assets.length} in your wallet</span>
       </div>
       {assets.length === 0 ? (
-        <EmptyState icon={Coins} title="Nothing here yet" description="Your XLM, tokens and items will show up here." className="border-0 py-6" />
+        <EmptyState
+          icon={Coins}
+          title="Nothing here yet"
+          description="Your XLM, tokens and items will show up here."
+          className="border-0 py-6"
+        />
       ) : (
-        <ul className="divide-y divide-foreground/[0.06]">
+        <ul className="divide-foreground/[0.06] divide-y">
           {assets.map((a) => {
             const href = hrefFor(a);
             const body = (
               <>
                 {a.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={a.thumbnail} alt="" className="size-10 shrink-0 rounded-xl object-cover" />
+                  <img
+                    src={a.thumbnail}
+                    alt=""
+                    className="size-10 shrink-0 rounded-xl object-cover"
+                  />
                 ) : (
                   <Avatar name={a.code} className="size-10 shrink-0" />
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{a.code}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{a.label}</span>
+                  <span className="text-muted-foreground block truncate text-xs">{a.label}</span>
                 </span>
               </>
             );
             return (
-              <li key={`${a.code}:${a.issuer ?? "native"}`} className="flex items-center gap-3 py-2.5">
+              <li
+                key={`${a.code}:${a.issuer ?? "native"}`}
+                className="flex items-center gap-3 py-2.5"
+              >
                 {href ? (
-                  <Link href={href} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg hover:opacity-80">
+                  <Link
+                    href={href}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-lg hover:opacity-80"
+                  >
                     {body}
                   </Link>
                 ) : (
                   <span className="flex min-w-0 flex-1 items-center gap-3">{body}</span>
                 )}
-                <span className="font-hud font-bold tabular-nums">{num(a.balance, a.code === "XLM" ? 4 : 2)}</span>
-                <Button size="sm" variant="ghost" className="rounded-lg" disabled={a.balance <= 0} onClick={() => onSend(a)} aria-label={`Send ${a.code}`}>
+                <span className="font-hud font-bold tabular-nums">
+                  {num(a.balance, a.code === "XLM" ? 4 : 2)}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="rounded-lg"
+                  disabled={a.balance <= 0}
+                  onClick={() => onSend(a)}
+                  aria-label={`Send ${a.code}`}
+                >
                   <Send className="size-3.5" /> <span className="hidden sm:inline">Send</span>
                 </Button>
               </li>
@@ -289,15 +459,24 @@ function GiftsCard() {
   return (
     <section className="glass space-y-3 rounded-2xl p-5">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-hud font-bold">
+        <h2 className="font-hud flex items-center gap-2 font-bold">
           Pending gifts
-          {!!gifts.data?.length && <span className="rounded-full bg-primary px-1.5 text-[11px] text-primary-foreground tabular-nums">{gifts.data.length}</span>}
+          {!!gifts.data?.length && (
+            <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px] tabular-nums">
+              {gifts.data.length}
+            </span>
+          )}
         </h2>
       </div>
       {gifts.isLoading ? (
         <Skeleton className="h-14 rounded-xl" />
       ) : !gifts.data?.length ? (
-        <EmptyState icon={Gift} title="No gifts waiting" description="Tokens and items sent to you appear here to accept." className="border-0 py-4" />
+        <EmptyState
+          icon={Gift}
+          title="No gifts waiting"
+          description="Tokens and items sent to you appear here to accept."
+          className="border-0 py-4"
+        />
       ) : (
         <ul className="space-y-2">
           {gifts.data.map((g) => (
@@ -310,7 +489,9 @@ function GiftsCard() {
 }
 
 function GiftRow({ gift }: { gift: Gift }) {
-  const claim = api.wallet.claimGift.useMutation({ onError: (e) => toast.error(e.message) });
+  const claim = api.wallet.claimGift.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
   const accept = async () => {
@@ -321,19 +502,32 @@ function GiftRow({ gift }: { gift: Gift }) {
     }
   };
   return (
-    <li className="flex items-center gap-3 rounded-xl bg-foreground/[0.04] p-3 ring-1 ring-foreground/[0.06]">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+    <li className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center gap-3 rounded-xl p-3 ring-1">
+      <span className="bg-primary/15 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl">
         <Gift className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">
           {num(gift.amount)} {gift.code}
         </span>
-        {gift.sponsor && <span className="block truncate text-xs text-muted-foreground">from {shortAddr(gift.sponsor)}</span>}
-        {sign.error && <span className="block text-xs text-destructive">{sign.error}</span>}
+        {gift.sponsor && (
+          <span className="text-muted-foreground block truncate text-xs">
+            from {shortAddr(gift.sponsor)}
+          </span>
+        )}
+        {sign.error && <span className="text-destructive block text-xs">{sign.error}</span>}
       </span>
-      <Button size="sm" className="rounded-lg" disabled={claim.isPending || sign.busy} onClick={() => void accept()}>
-        {sign.step === "signing" ? "Confirm…" : sign.step === "confirming" ? "Confirming…" : "Accept"}
+      <Button
+        size="sm"
+        className="rounded-lg"
+        disabled={claim.isPending || sign.busy}
+        onClick={() => void accept()}
+      >
+        {sign.step === "signing"
+          ? "Confirm…"
+          : sign.step === "confirming"
+            ? "Confirming…"
+            : "Accept"}
       </Button>
     </li>
   );

@@ -3,12 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Coords, GeoFix } from "./types";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-export type GeoStatus =
-  | "idle"
-  | "prompting"
-  | "tracking"
-  | "denied"
-  | "unavailable";
+export type GeoStatus = "idle" | "prompting" | "tracking" | "denied" | "unavailable";
 
 /**
  * Why there's no fix. Kept separate from `status` because the two failures
@@ -19,10 +14,8 @@ export type GeoStatus =
 export type GeoReason = "denied" | "unavailable" | "timeout";
 
 export const GEO_REASON_TEXT: Record<GeoReason, string> = {
-  denied:
-    `Location is blocked for this site. Allow it and ${platformBranding.name} can show the drops around you.`,
-  unavailable:
-    "Your device couldn't get a location fix. Check that Location Services are on.",
+  denied: `Location is blocked for this site. Allow it and ${platformBranding.name} can show the drops around you.`,
+  unavailable: "Your device couldn't get a location fix. Check that Location Services are on.",
   timeout:
     "Location is taking a long time to arrive. Move somewhere with a clearer view of the sky and try again.",
 };
@@ -82,7 +75,7 @@ export function useGeolocation({ enabled = true }: { enabled?: boolean } = {}) {
     // identifiers. `navigator` is genuinely absent as a global during Next.js
     // SSR, where `navigator?.x` still throws a ReferenceError. The `typeof`
     // check is the only safe form, so the rule is suppressed rather than obeyed.
-     
+
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setStatus("unavailable");
       setReason("unavailable");
@@ -150,7 +143,7 @@ export function useGeolocation({ enabled = true }: { enabled?: boolean } = {}) {
   return {
     fix,
     /** Null until there's a real fix — callers must handle its absence. */
-    center: fix ? ({ lat: fix.lat, lng: fix.lng }) : null,
+    center: fix ? { lat: fix.lat, lng: fix.lng } : null,
     status,
     reason,
     retry,

@@ -26,11 +26,7 @@ import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "~/lib/ar/types";
-import {
-  GEO_REASON_TEXT,
-  useGeolocation,
-  type GeoReason,
-} from "~/lib/ar/useGeolocation";
+import { GEO_REASON_TEXT, useGeolocation, type GeoReason } from "~/lib/ar/useGeolocation";
 import {
   filterPins,
   PIN_FILTERS,
@@ -63,20 +59,10 @@ import { api } from "~/utils/api";
  */
 export default function MapScreen() {
   const router = useRouter();
-  const {
-    fix,
-    center,
-    status,
-    reason: geoReason,
-    retry: retryLocation,
-  } = useGeolocation();
+  const { fix, center, status, reason: geoReason, retry: retryLocation } = useGeolocation();
 
   // Discovery surface: respects the viewer's "Following only" preference.
-  const {
-    pins,
-    isLoading: pinsLoading,
-    refetch: refetchPins,
-  } = useDiscoveryPinsQuery();
+  const { pins, isLoading: pinsLoading, refetch: refetchPins } = useDiscoveryPinsQuery();
   const brands = useBrands();
   const collectPin = useCollectPin();
 
@@ -95,8 +81,7 @@ export default function MapScreen() {
    * measurement.
    */
   const compass = useDeviceHeading();
-  const headingUp =
-    settings.compassMode && compass.source === "sensor" ? compass.heading : null;
+  const headingUp = settings.compassMode && compass.source === "sensor" ? compass.heading : null;
 
   // Attach on load when the browser needs no permission (Android, desktop)
   // and the setting is already on from a previous session. Where a permission
@@ -107,7 +92,6 @@ export default function MapScreen() {
       void compass.request();
     }
   }, [settings.compassMode, compass]);
-
 
   const requireAuth = useAuth((s) => s.requireAuth);
   const signedIn = useAuth((s) => Boolean(s.user));
@@ -166,10 +150,7 @@ export default function MapScreen() {
    * source, so they remain meaningful within the followed set.
    */
   const filters = useMemo(
-    () =>
-      settings.followingOnly
-        ? PIN_FILTERS.filter((f) => f.id !== "all")
-        : PIN_FILTERS,
+    () => (settings.followingOnly ? PIN_FILTERS.filter((f) => f.id !== "all") : PIN_FILTERS),
     [settings.followingOnly],
   );
 
@@ -182,15 +163,9 @@ export default function MapScreen() {
     [brands],
   );
 
-  const visible = useMemo(
-    () => filterPins(pins, filter, followedIds),
-    [pins, filter, followedIds],
-  );
+  const visible = useMemo(() => filterPins(pins, filter, followedIds), [pins, filter, followedIds]);
 
-  const nearby = useMemo(
-    () => sortByDistance(visible, fix).slice(0, 12),
-    [visible, fix],
-  );
+  const nearby = useMemo(() => sortByDistance(visible, fix).slice(0, 12), [visible, fix]);
 
   // A drop picked from search may not be in the loaded list yet (or at all,
   // under the viewer's Following-only preference) — its sheet falls back to
@@ -199,8 +174,7 @@ export default function MapScreen() {
   const [searchPin, setSearchPin] = useState<ArPin | null>(null);
   const selected = useMemo(
     () =>
-      pins.find((p) => p.id === selectedId) ??
-      (searchPin?.id === selectedId ? searchPin : null),
+      pins.find((p) => p.id === selectedId) ?? (searchPin?.id === selectedId ? searchPin : null),
     [pins, selectedId, searchPin],
   );
 
@@ -217,9 +191,7 @@ export default function MapScreen() {
     const inRange = new Set(
       pins
         .filter(
-          (p) =>
-            pinStatus(p) === "collectible" &&
-            distanceMeters(fix, p) <= AR_CAPTURE_RADIUS,
+          (p) => pinStatus(p) === "collectible" && distanceMeters(fix, p) <= AR_CAPTURE_RADIUS,
         )
         .map((p) => p.id),
     );
@@ -297,7 +269,12 @@ export default function MapScreen() {
   // ── Murals layer (docs/murals/plan.md §7) ────────────────────────────────
   const [muralLayer, setMuralLayer] = useState<"all" | "verified" | "off">("all");
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
-  const [bounds, setBounds] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
+  const [bounds, setBounds] = useState<{
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  } | null>(null);
   // Rounded so a nudge of the map doesn't refetch; ~1 km grid.
   const muralArea = bounds && {
     north: Math.ceil(bounds.north * 100) / 100,
@@ -306,15 +283,29 @@ export default function MapScreen() {
     west: Math.floor(bounds.west * 100) / 100,
   };
   const muralsQuery = api.murals.inArea.useQuery(
-    { ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }), includeUnverified: muralLayer === "all" },
-    { enabled: Boolean(muralArea) && muralLayer !== "off", placeholderData: keepPreviousData, staleTime: 60_000, refetchOnWindowFocus: false },
+    {
+      ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }),
+      includeUnverified: muralLayer === "all",
+    },
+    {
+      enabled: Boolean(muralArea) && muralLayer !== "off",
+      placeholderData: keepPreviousData,
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
   );
   const murals = muralLayer === "off" ? [] : (muralsQuery.data?.murals ?? []);
   const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;
   const cycleMuralLayer = useCallback(() => {
     const next = muralLayer === "all" ? "verified" : muralLayer === "verified" ? "off" : "all";
     setMuralLayer(next);
-    setToast(next === "all" ? "Murals: all, incl. unverified" : next === "verified" ? "Murals: verified only" : "Murals hidden");
+    setToast(
+      next === "all"
+        ? "Murals: all, incl. unverified"
+        : next === "verified"
+          ? "Murals: verified only"
+          : "Murals hidden",
+    );
     setSelectedMuralId(null);
   }, [muralLayer]);
 
@@ -395,13 +386,7 @@ export default function MapScreen() {
         {/* No fix, no game: the map behind is centred on nothing meaningful,
             so the gate covers it rather than letting someone browse pins that
             aren't near them. */}
-        {!fix && (
-          <LocationGate
-            status={status}
-            reason={geoReason}
-            onRetry={retryLocation}
-          />
-        )}
+        {!fix && <LocationGate status={status} reason={geoReason} onRetry={retryLocation} />}
 
         {/* ── Top HUD ──────────────────────────────────────────────────
             GPS status and the filter chips share one row rather than the
@@ -416,16 +401,9 @@ export default function MapScreen() {
           className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-2 px-4"
           style={{ paddingTop: "calc(var(--ar-top-inset) + 14px)" }}
         >
-          <GpsPill
-            status={status}
-            reason={geoReason}
-            onExplain={setToast}
-          />
+          <GpsPill status={status} reason={geoReason} onExplain={setToast} />
 
-          <MapSearchButton
-            onClick={() => setSearchOpen(true)}
-            className="pointer-events-auto"
-          />
+          <MapSearchButton onClick={() => setSearchOpen(true)} className="pointer-events-auto" />
 
           <FilterMenu
             filters={filters}
@@ -441,7 +419,7 @@ export default function MapScreen() {
               icon={CalendarDays}
               label="Events"
               onClick={() => void router.push("/events")}
-              className="pointer-events-auto absolute right-0 top-[calc(100%+8px)] h-9 w-9"
+              className="pointer-events-auto absolute top-[calc(100%+8px)] right-0 h-9 w-9"
             />
           </div>
         </div>
@@ -463,9 +441,7 @@ export default function MapScreen() {
             const turningOn = !settings.autoCollect;
             settings.toggle("autoCollect");
             setToast(
-              turningOn
-                ? "Auto-collect on — nearby drops claim themselves"
-                : "Auto-collect off",
+              turningOn ? "Auto-collect on — nearby drops claim themselves" : "Auto-collect off",
             );
           }}
         />
@@ -498,16 +474,16 @@ export default function MapScreen() {
               // explanation has to wrap instead of running off both edges of
               // the phone, and reads badly as wide-tracked uppercase.
               className={cn(
-                "ar-glass absolute left-1/2 top-[108px] z-40 max-w-[min(86%,23rem)] px-4 py-2",
+                "ar-glass absolute top-[108px] left-1/2 z-40 max-w-[min(86%,23rem)] px-4 py-2",
                 toast.length > 42 ? "rounded-2xl" : "rounded-full",
               )}
             >
               <p
                 className={cn(
-                  "font-hud text-[11px] font-semibold text-ar-green-hot",
+                  "font-hud text-ar-green-hot text-[11px] font-semibold",
                   toast.length > 42
                     ? "text-center leading-relaxed tracking-[0.03em]"
-                    : "whitespace-nowrap uppercase tracking-[0.12em]",
+                    : "tracking-[0.12em] whitespace-nowrap uppercase",
                 )}
               >
                 {toast}
@@ -523,10 +499,7 @@ export default function MapScreen() {
         fix={fix}
         onPickPin={(pin) => {
           // A match the current filter hides would open a sheet with no marker.
-          if (
-            filterPins([pin], filter, followedIds).length === 0 &&
-            !settings.followingOnly
-          ) {
+          if (filterPins([pin], filter, followedIds).length === 0 && !settings.followingOnly) {
             setFilter("all");
           }
           setSearchPin(pin);
@@ -607,15 +580,13 @@ function GpsPill({
         className={live ? "text-ar-green-hot" : "text-ar-faint"}
       />
       <span
-        className={`font-hud text-[9.5px] font-semibold uppercase tracking-[0.14em] ${
+        className={`font-hud text-[9.5px] font-semibold tracking-[0.14em] uppercase ${
           live ? "text-ar-text" : "text-ar-dim"
         }`}
       >
         {label}
       </span>
-      {explanation && (
-        <HelpCircle size={10} strokeWidth={2.6} className="text-ar-faint" />
-      )}
+      {explanation && <HelpCircle size={10} strokeWidth={2.6} className="text-ar-faint" />}
     </>
   );
 

@@ -75,7 +75,7 @@ export default function BountyScreen() {
           {/* ── Needs you ──────────────────────────────────────────── */}
           {unseen.length > 0 && (
             <section className="px-5 pb-4">
-              <h2 className="font-hud mb-2 text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-green">
+              <h2 className="font-hud text-ar-green mb-2 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
                 Needs you
               </h2>
               <div className="space-y-2">
@@ -83,13 +83,13 @@ export default function BountyScreen() {
                   <Link
                     key={`${item.kind}-${item.bountyId}`}
                     href={`/bounty/${item.bountyId}${item.kind === "reply" ? "?section=chat" : ""}`}
-                    className="ar-glass flex items-center gap-3 rounded-ar p-3"
+                    className="ar-glass rounded-ar flex items-center gap-3 p-3"
                   >
                     <span
                       className={
                         item.kind === "won"
-                          ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] border border-rarity-legendary/50 bg-rarity-legendary/15 text-rarity-legendary"
-                          : "flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] border border-ar-green/40 bg-ar-green/10 text-ar-green-hot"
+                          ? "border-rarity-legendary/50 bg-rarity-legendary/15 text-rarity-legendary flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] border"
+                          : "border-ar-green/40 bg-ar-green/10 text-ar-green-hot flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] border"
                       }
                     >
                       {item.kind === "won" ? (
@@ -99,16 +99,14 @@ export default function BountyScreen() {
                       )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-semibold text-ar-text">
-                        {item.kind === "won"
-                          ? "You won a bounty"
-                          : "The brand replied"}
+                      <span className="text-ar-text block text-[13px] font-semibold">
+                        {item.kind === "won" ? "You won a bounty" : "The brand replied"}
                       </span>
-                      <span className="block truncate text-[11.5px] text-ar-faint">
+                      <span className="text-ar-faint block truncate text-[11.5px]">
                         {item.title}
                       </span>
                     </span>
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-ar-green-hot shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]" />
+                    <span className="bg-ar-green-hot h-2 w-2 shrink-0 rounded-full shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]" />
                   </Link>
                 ))}
               </div>
@@ -134,24 +132,20 @@ export default function BountyScreen() {
             <>
               {/* ── Search + sort ──────────────────────────────────── */}
               <div className="mx-5 mt-3">
-                <div className="ar-bevel flex h-11 items-center gap-2.5 rounded-ar px-3.5">
-                  <Search
-                    size={15}
-                    strokeWidth={2.2}
-                    className="shrink-0 text-ar-faint"
-                  />
+                <div className="ar-bevel rounded-ar flex h-11 items-center gap-2.5 px-3.5">
+                  <Search size={15} strokeWidth={2.2} className="text-ar-faint shrink-0" />
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search bounties or brands"
                     aria-label="Search bounties"
-                    className="min-w-0 flex-1 bg-transparent text-[13px] text-ar-text outline-hidden placeholder:text-ar-faint"
+                    className="text-ar-text placeholder:text-ar-faint min-w-0 flex-1 bg-transparent text-[13px] outline-hidden"
                   />
                   {query && (
                     <button
                       onClick={() => setQuery("")}
                       aria-label="Clear search"
-                      className="shrink-0 text-ar-faint hover:text-ar-text"
+                      className="text-ar-faint hover:text-ar-text shrink-0"
                     >
                       <X size={15} strokeWidth={2.4} />
                     </button>
@@ -161,11 +155,7 @@ export default function BountyScreen() {
 
               <div className="ar-scroll-x mt-3 flex gap-1.5 px-5">
                 {FILTERS.map((f) => (
-                  <Chip
-                    key={f.id}
-                    active={filter === f.id}
-                    onClick={() => setFilter(f.id)}
-                  >
+                  <Chip key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
                     {f.label}
                   </Chip>
                 ))}
@@ -173,30 +163,24 @@ export default function BountyScreen() {
 
               <div className="mt-3.5 space-y-3 px-5">
                 {explore.isLoading &&
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <BountyCardSkeleton key={i} />
-                  ))}
+                  Array.from({ length: 3 }).map((_, i) => <BountyCardSkeleton key={i} />)}
 
                 {exploreItems.map((b) => (
                   <BountyCard key={b.id} bounty={b} />
                 ))}
 
-                {explore.isError && (
-                  <ErrorNote onRetry={() => void explore.refetch()} />
-                )}
+                {explore.isError && <ErrorNote onRetry={() => void explore.refetch()} />}
 
-                {!explore.isLoading &&
-                  !explore.isError &&
-                  exploreItems.length === 0 && (
-                    <Empty
-                      title={search ? "No matches" : "No open bounties"}
-                      body={
-                        search
-                          ? "Nothing open matches that search."
-                          : "Brands post bounties here — check back soon."
-                      }
-                    />
-                  )}
+                {!explore.isLoading && !explore.isError && exploreItems.length === 0 && (
+                  <Empty
+                    title={search ? "No matches" : "No open bounties"}
+                    body={
+                      search
+                        ? "Nothing open matches that search."
+                        : "Brands post bounties here — check back soon."
+                    }
+                  />
+                )}
 
                 {explore.hasNextPage && (
                   <div className="flex justify-center pt-2">
@@ -213,12 +197,11 @@ export default function BountyScreen() {
             </>
           ) : !user ? (
             <div className="px-7 py-14 text-center">
-              <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+              <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
                 Your bounties live here
               </p>
-              <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
-                Sign in to join bounties, send entries and track how they&rsquo;re
-                doing.
+              <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
+                Sign in to join bounties, send entries and track how they&rsquo;re doing.
               </p>
               <ArButton
                 variant="primary"
@@ -232,10 +215,10 @@ export default function BountyScreen() {
           ) : (
             <div className="mt-3.5 space-y-3 px-5">
               {mine.isLoading &&
-                Array.from({ length: 2 }).map((_, i) => (
-                  <BountyCardSkeleton key={i} />
-                ))}
-              {mine.data?.map((b) => <BountyCard key={b.id} bounty={b} />)}
+                Array.from({ length: 2 }).map((_, i) => <BountyCardSkeleton key={i} />)}
+              {mine.data?.map((b) => (
+                <BountyCard key={b.id} bounty={b} />
+              ))}
               {mine.isError && <ErrorNote onRetry={() => void mine.refetch()} />}
               {mine.data?.length === 0 && (
                 <Empty
@@ -260,21 +243,13 @@ export default function BountyScreen() {
   );
 }
 
-function Empty({
-  title,
-  body,
-  action,
-}: {
-  title: string;
-  body: string;
-  action?: React.ReactNode;
-}) {
+function Empty({ title, body, action }: { title: string; body: string; action?: React.ReactNode }) {
   return (
     <div className="py-14 text-center">
-      <p className="font-hud text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+      <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
         {title}
       </p>
-      <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+      <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
         {body}
       </p>
       {action}
@@ -284,11 +259,11 @@ function Empty({
 
 function ErrorNote({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-ar border border-ar-danger/40 bg-ar-danger/10 px-3.5 py-2.5">
-      <p className="text-[12px] text-ar-danger">Couldn&rsquo;t load bounties.</p>
+    <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 flex items-center justify-between gap-3 border px-3.5 py-2.5">
+      <p className="text-ar-danger text-[12px]">Couldn&rsquo;t load bounties.</p>
       <button
         onClick={onRetry}
-        className="font-hud text-[11px] font-semibold uppercase tracking-[0.1em] text-ar-text"
+        className="font-hud text-ar-text text-[11px] font-semibold tracking-[0.1em] uppercase"
       >
         Retry
       </button>

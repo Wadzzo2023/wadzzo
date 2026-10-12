@@ -22,7 +22,7 @@ export function MuralViewfinder({
 }) {
   const locked = state === "locked" || state === "sweeping";
   return (
-    <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2">
+    <div className="pointer-events-none absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2">
       <div
         className={cn(
           "relative h-[248px] w-[248px] transition-transform duration-300 ease-out",
@@ -59,7 +59,7 @@ export function MuralViewfinder({
         )}
       >
         <div
-          className="h-full rounded-full bg-rarity-epic transition-[width] duration-200"
+          className="bg-rarity-epic h-full rounded-full transition-[width] duration-200"
           style={{ width: `${Math.round(Math.min(1, score) * 100)}%` }}
         />
       </div>

@@ -5,7 +5,14 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@wadzzo/ui/components/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@wadzzo/ui/components/dropdown-menu";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { api } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
@@ -23,7 +30,10 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full ring-offset-background transition-shadow hover:ring-2 hover:ring-primary/40" aria-label="Menu">
+      <DropdownMenuTrigger
+        className="ring-offset-background hover:ring-primary/40 rounded-full transition-shadow hover:ring-2"
+        aria-label="Menu"
+      >
         <Avatar className="size-9">
           {signedIn && <AvatarImage src={image} alt="" />}
           <AvatarFallback className="bg-primary/10 text-primary">
@@ -36,7 +46,11 @@ export function UserMenu() {
           <>
             <DropdownMenuLabel className="font-normal">
               <span className="block truncate text-sm font-semibold">{name}</span>
-              {id && <span className="block truncate font-mono text-[11px] text-muted-foreground">{abbreviateAddress(id, 6)}</span>}
+              {id && (
+                <span className="text-muted-foreground block truncate font-mono text-[11px]">
+                  {abbreviateAddress(id, 6)}
+                </span>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="gap-2">
@@ -45,12 +59,18 @@ export function UserMenu() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void signOut({ callbackUrl: "/" })} className="gap-2 text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onSelect={() => void signOut({ callbackUrl: "/" })}
+              className="text-destructive focus:text-destructive gap-2"
+            >
               <LogOut className="size-4" /> Sign out
             </DropdownMenuItem>
           </>
         ) : (
-          <DropdownMenuItem onSelect={openSignIn} className="gap-2 font-semibold text-primary focus:text-primary">
+          <DropdownMenuItem
+            onSelect={openSignIn}
+            className="text-primary focus:text-primary gap-2 font-semibold"
+          >
             <LogIn className="size-4" /> Sign in / Sign up
           </DropdownMenuItem>
         )}

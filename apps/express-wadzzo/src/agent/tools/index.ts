@@ -6,4 +6,10 @@ import { proposeTools } from "./propose";
 import { searchTools } from "./search";
 import { uiTools } from "./ui";
 
-export const AGENT_TOOLS: AgentTool[] = [...searchTools, ...brandTools, ...analyticsTools, ...uiTools, ...proposeTools];
+export const AGENT_TOOLS: AgentTool[] = [
+  ...searchTools,
+  ...brandTools,
+  ...analyticsTools,
+  ...uiTools,
+  ...proposeTools,
+];

@@ -17,7 +17,10 @@ export const dynamic = "force-dynamic";
 
 export default async function BountiesPage() {
   const api = await serverApi();
-  const [first, stats] = await Promise.all([api.bounty.list({ filter: "open", limit: 18 }), api.bounty.stats()]);
+  const [first, stats] = await Promise.all([
+    api.bounty.list({ filter: "open", limit: 18 }),
+    api.bounty.stats(),
+  ]);
 
   const cover = first.items.find((b) => b.imageUrl)?.imageUrl ?? null;
 
@@ -33,8 +36,16 @@ export default async function BountiesPage() {
         description="Brands post challenges. Join one, submit your entry, and get paid straight to your wallet if you win."
         image={cover}
         stats={[
-          { icon: Target, label: "Open bounties", value: stats.open.toLocaleString("en-US") },
-          { icon: Coins, label: "Reward pool", value: formatUsd(stats.poolUsd) },
+          {
+            icon: Target,
+            label: "Open bounties",
+            value: stats.open.toLocaleString("en-US"),
+          },
+          {
+            icon: Coins,
+            label: "Reward pool",
+            value: formatUsd(stats.poolUsd),
+          },
           { icon: Trophy, label: "Paid instantly", value: "On-chain" },
         ]}
       />

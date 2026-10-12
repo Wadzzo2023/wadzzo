@@ -2,10 +2,7 @@ export function hashPassword(password: string) {
   return sha256(`${password}-ih`);
 }
 
-export async function comparePassword(
-  password: string,
-  hashedPassword: string,
-) {
+export async function comparePassword(password: string, hashedPassword: string) {
   return (await sha256(`${password}-ih`)) == hashedPassword;
 }
 
@@ -19,9 +16,7 @@ async function sha256(message: string) {
 
   // Convert the hash buffer to a hex string
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  const hashHex = hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
 
   return hashHex;
 }

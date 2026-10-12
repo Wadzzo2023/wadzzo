@@ -1,11 +1,4 @@
-import {
-  Coins,
-  Frame,
-  HelpCircle,
-  Navigation,
-  ScanLine,
-  Sparkles,
-} from "lucide-react";
+import { Coins, Frame, HelpCircle, Navigation, ScanLine, Sparkles } from "lucide-react";
 
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
@@ -45,19 +38,13 @@ export function MuralSheet({
   const mine = detail.data?.mine;
 
   const distance =
-    mural && fix
-      ? distanceMeters(fix, { lat: mural.latitude, lng: mural.longitude })
-      : null;
+    mural && fix ? distanceMeters(fix, { lat: mural.latitude, lng: mural.longitude }) : null;
   const near = distance != null && distance <= SCAN_FROM_M;
   const verified = mural?.status === "APPROVED";
   const atLimit = mural ? mural.scansToday >= dailyLimit : false;
 
   return (
-    <BottomSheet
-      open={Boolean(mural)}
-      onClose={onClose}
-      labelledBy="mural-sheet-title"
-    >
+    <BottomSheet open={Boolean(mural)} onClose={onClose} labelledBy="mural-sheet-title">
       {mural && (
         <div className="ar-scroll max-h-[80vh] overflow-y-auto">
           <div className="flex gap-4 px-5 pt-4">
@@ -67,15 +54,13 @@ export function MuralSheet({
               alt=""
               className={cn(
                 "h-[118px] w-[94px] shrink-0 rounded-[12px] border-2 object-cover",
-                verified
-                  ? "border-rarity-epic"
-                  : "border-dashed border-rarity-epic/80",
+                verified ? "border-rarity-epic" : "border-rarity-epic/80 border-dashed",
               )}
             />
             <div className="min-w-0 flex-1">
               <span
                 className={cn(
-                  "font-hud inline-flex items-center gap-1 rounded-full border px-2 py-[2px] text-[9.5px] font-bold uppercase tracking-[0.14em]",
+                  "font-hud inline-flex items-center gap-1 rounded-full border px-2 py-[2px] text-[9.5px] font-bold tracking-[0.14em] uppercase",
                   verified
                     ? "border-ar-green/50 text-ar-green-hot"
                     : "border-rarity-epic/50 text-rarity-epic",
@@ -90,18 +75,18 @@ export function MuralSheet({
               </span>
               <h2
                 id="mural-sheet-title"
-                className="font-hud mt-1.5 text-[17px] font-bold leading-tight text-ar-text"
+                className="font-hud text-ar-text mt-1.5 text-[17px] leading-tight font-bold"
               >
                 {mural.title}
               </h2>
-              <p className="mt-0.5 truncate text-[12px] text-ar-dim">
+              <p className="text-ar-dim mt-0.5 truncate text-[12px]">
                 {mural.artist
                   ? `by ${mural.artist}`
                   : mural.autoTitled
                     ? "Not named yet"
                     : "Artist unknown"}
               </p>
-              <p className="mt-2 text-[11.5px] text-ar-faint">
+              <p className="text-ar-faint mt-2 text-[11.5px]">
                 {distance != null ? `${formatDistance(distance)} away · ` : ""}
                 {mural.scanCount.toLocaleString()} scan
                 {mural.scanCount === 1 ? "" : "s"}
@@ -110,24 +95,16 @@ export function MuralSheet({
           </div>
 
           {!verified && (
-            <div className="mx-5 mt-4 flex items-center gap-3 rounded-ar border border-rarity-epic/35 bg-rarity-epic/10 px-3.5 py-2.5">
-              <Sparkles
-                size={16}
-                strokeWidth={2.3}
-                className="shrink-0 text-rarity-epic"
-              />
-              <p className="text-[12px] leading-snug text-ar-text">
+            <div className="rounded-ar border-rarity-epic/35 bg-rarity-epic/10 mx-5 mt-4 flex items-center gap-3 border px-3.5 py-2.5">
+              <Sparkles size={16} strokeWidth={2.3} className="text-rarity-epic shrink-0" />
+              <p className="text-ar-text text-[12px] leading-snug">
                 {mural.distinctScanners < mural.confirmationsNeeded ? (
                   <>
-                    <b>Help verify it</b> — {mural.distinctScanners} of{" "}
-                    {mural.confirmationsNeeded} finders so far. Early finders
-                    earn a discovery bonus.
+                    <b>Help verify it</b> — {mural.distinctScanners} of {mural.confirmationsNeeded}{" "}
+                    finders so far. Early finders earn a discovery bonus.
                   </>
                 ) : (
-                  <>
-                    Found by enough people — waiting for review. You can still
-                    collect it.
-                  </>
+                  <>Found by enough people — waiting for review. You can still collect it.</>
                 )}
               </p>
             </div>
@@ -135,24 +112,16 @@ export function MuralSheet({
 
           {mine && (
             <div className="mx-5 mt-3 grid grid-cols-3 gap-2 text-center">
-              <Stat
-                label="Today"
-                value={`${mine.scansToday}/${mine.dailyLimit}`}
-              />
+              <Stat label="Today" value={`${mine.scansToday}/${mine.dailyLimit}`} />
               <Stat label="Your scans" value={String(mine.totalScans)} />
-              <Stat
-                label="Coins here"
-                value={mine.coinsEarned.toLocaleString()}
-                icon
-              />
+              <Stat label="Coins here" value={mine.coinsEarned.toLocaleString()} icon />
             </div>
           )}
 
-          <div className="space-y-2 px-5 pb-1 pt-4">
+          <div className="space-y-2 px-5 pt-4 pb-1">
             {atLimit ? (
-              <p className="rounded-ar border border-ar-line px-3 py-2.5 text-center text-[12px] text-ar-dim">
-                You&apos;ve scanned this {dailyLimit}× today — back after
-                midnight.
+              <p className="rounded-ar border-ar-line text-ar-dim border px-3 py-2.5 text-center text-[12px]">
+                You&apos;ve scanned this {dailyLimit}× today — back after midnight.
               </p>
             ) : near ? (
               <ArLinkButton
@@ -189,17 +158,9 @@ export function MuralSheet({
   );
 }
 
-function Stat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: boolean;
-}) {
+function Stat({ label, value, icon }: { label: string; value: string; icon?: boolean }) {
   return (
-    <div className="rounded-ar border border-ar-line bg-white/[0.03] px-2 py-2">
+    <div className="rounded-ar border-ar-line border bg-white/[0.03] px-2 py-2">
       <p
         className={cn(
           "font-hud flex items-center justify-center gap-1 text-[15px] font-bold",
@@ -209,9 +170,7 @@ function Stat({
         {icon && <Coins size={13} strokeWidth={2.5} />}
         {value}
       </p>
-      <p className="mt-0.5 text-[9.5px] uppercase tracking-[0.12em] text-ar-faint">
-        {label}
-      </p>
+      <p className="text-ar-faint mt-0.5 text-[9.5px] tracking-[0.12em] uppercase">{label}</p>
     </div>
   );
 }

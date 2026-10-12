@@ -8,8 +8,7 @@ import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/utils";
 import { WalletType } from "../../wallet-type";
 import type { WalletProvider } from "../wallet-provider";
 
-const LOGIN_RETRY_MESSAGE =
-  "Login failed. Please try to login again after refreshing the page.";
+const LOGIN_RETRY_MESSAGE = "Login failed. Please try to login again after refreshing the page.";
 
 /**
  * Albedo signs in by signing a one-time token, and signs *and submits*
@@ -48,7 +47,12 @@ export const albedoProvider: WalletProvider = {
 
   async signAndSubmit(xdr, publicKey) {
     try {
-      await albedo.tx({ xdr, pubkey: publicKey, network: stellarNetwork.albedoNetwork, submit: true });
+      await albedo.tx({
+        xdr,
+        pubkey: publicKey,
+        network: stellarNetwork.albedoNetwork,
+        submit: true,
+      });
       return true;
     } catch (error) {
       throw new StellarTransactionError(error);

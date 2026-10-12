@@ -43,10 +43,12 @@ export function NearbyStrip({
 
   useEffect(() => {
     if (!selectedId) return;
-    const el = railRef.current?.querySelector<HTMLElement>(
-      `[data-pin="${selectedId}"]`,
-    );
-    el?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const el = railRef.current?.querySelector<HTMLElement>(`[data-pin="${selectedId}"]`);
+    el?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
   }, [selectedId]);
 
   // A cold fetch must not read as "nothing here" — that's a different answer,
@@ -68,11 +70,11 @@ export function NearbyStrip({
 
   if (items.length === 0) {
     return (
-      <div className="ar-glass mx-4 rounded-ar px-4 py-3 text-center">
-        <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.16em] text-ar-dim">
+      <div className="ar-glass rounded-ar mx-4 px-4 py-3 text-center">
+        <p className="font-hud text-ar-dim text-[11px] font-semibold tracking-[0.16em] uppercase">
           Nothing nearby
         </p>
-        <p className="mt-1 text-[11.5px] text-ar-faint">
+        <p className="text-ar-faint mt-1 text-[11.5px]">
           Try widening the filter, or head toward the city centre.
         </p>
       </div>
@@ -101,14 +103,10 @@ export function NearbyStrip({
             whileTap={{ scale: 0.96 }}
             onClick={() => onSelect(pin.id)}
             className={cn(
-              "ar-glass relative flex w-[168px] shrink-0 items-center gap-2.5 rounded-ar p-2 text-left transition-colors",
+              "ar-glass rounded-ar relative flex w-[168px] shrink-0 items-center gap-2.5 p-2 text-left transition-colors",
               active && "!border-ar-green/60",
             )}
-            style={
-              active
-                ? { boxShadow: `0 0 22px -6px hsl(${meta.hsl} / 0.9)` }
-                : undefined
-            }
+            style={active ? { boxShadow: `0 0 22px -6px hsl(${meta.hsl} / 0.9)` } : undefined}
           >
             <div
               className="relative h-[46px] w-[34px] shrink-0 overflow-hidden rounded-[8px] border"
@@ -121,22 +119,20 @@ export function NearbyStrip({
                 loading="lazy"
                 className={cn(
                   "h-full w-full object-cover",
-                  status !== "collectible" && "saturate-0 brightness-[0.6]",
+                  status !== "collectible" && "brightness-[0.6] saturate-0",
                 )}
               />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="font-hud truncate text-[11.5px] font-bold leading-tight text-ar-text">
+              <p className="font-hud text-ar-text truncate text-[11.5px] leading-tight font-bold">
                 {pin.title}
               </p>
-              <p className="truncate text-[10px] text-ar-faint">{pin.brandName}</p>
+              <p className="text-ar-faint truncate text-[10px]">{pin.brandName}</p>
               <p
                 className={cn(
-                  "font-hud mt-1 flex items-center gap-1 text-[10px] font-bold tabular-nums leading-none",
-                  inRange && status === "collectible"
-                    ? "text-ar-green-hot"
-                    : "text-ar-dim",
+                  "font-hud mt-1 flex items-center gap-1 text-[10px] leading-none font-bold tabular-nums",
+                  inRange && status === "collectible" ? "text-ar-green-hot" : "text-ar-dim",
                 )}
               >
                 {pin.autoCollect && status === "collectible" && (
@@ -144,9 +140,7 @@ export function NearbyStrip({
                 )}
                 {formatDistance(distance)}
                 {inRange && status === "collectible" && (
-                  <span className="text-[8px] uppercase tracking-[0.14em]">
-                    &middot; in range
-                  </span>
+                  <span className="text-[8px] tracking-[0.14em] uppercase">&middot; in range</span>
                 )}
               </p>
             </div>

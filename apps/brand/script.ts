@@ -6,9 +6,7 @@ import crypto from "crypto";
 import axios from "axios";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-async function downloadImage(
-  url: string,
-): Promise<{ buffer: Buffer; contentType: string }> {
+async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string }> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download: ${response.statusText}`);
@@ -41,9 +39,7 @@ async function uploadToS3WithProgress(
     },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
-        const percentage = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total,
-        );
+        const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         onProgress?.(percentage);
       }
     },

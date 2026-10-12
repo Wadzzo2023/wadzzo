@@ -8,7 +8,13 @@ import { useSettings } from "~/lib/ar/store";
  * audio files to load. Every call respects Settings › Sound / Haptics.
  */
 
-type Note = { hz: number; at: number; dur: number; gain?: number; type?: OscillatorType };
+type Note = {
+  hz: number;
+  at: number;
+  dur: number;
+  gain?: number;
+  type?: OscillatorType;
+};
 
 function play(notes: Note[]) {
   if (!useSettings.getState().sound) return;

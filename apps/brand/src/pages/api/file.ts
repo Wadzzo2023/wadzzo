@@ -22,14 +22,18 @@ export interface PinataResponse {
 
 async function saveFile(file: formidable.File): Promise<PinataResponse> {
   const stream = fs.createReadStream(file.filepath);
-  const response = await pinata.pinFileToIPFS(stream, { pinataMetadata: { name: file.originalFilename ?? "upload" } });
+  const response = await pinata.pinFileToIPFS(stream, {
+    pinataMetadata: { name: file.originalFilename ?? "upload" },
+  });
   fs.unlinkSync(file.filepath);
   return response;
 }
 
 function parse(req: NextApiRequest) {
   return new Promise<formidable.Files>((resolve, reject) => {
-    new formidable.IncomingForm().parse(req, (err, _fields, files) => (err ? reject(err instanceof Error ? err : new Error(String(err))) : resolve(files)));
+    new formidable.IncomingForm().parse(req, (err, _fields, files) =>
+      err ? reject(err instanceof Error ? err : new Error(String(err))) : resolve(files),
+    );
   });
 }
 

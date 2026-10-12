@@ -1,17 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  ChevronLeft,
-  Clock,
-  Lock,
-  Send,
-  Share2,
-  Trophy,
-  Users,
-  Wallet,
-  X,
-} from "lucide-react";
+import { ChevronLeft, Clock, Lock, Send, Share2, Trophy, Users, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -37,10 +27,7 @@ import {
   viewerBadge,
 } from "~/lib/ar/bounty";
 import { useAuth } from "~/lib/ar/store";
-import {
-  useBountyAttention,
-  useBountySeen,
-} from "~/lib/ar/useBountyAttention";
+import { useBountyAttention, useBountySeen } from "~/lib/ar/useBountyAttention";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";
@@ -77,9 +64,7 @@ export default function BountyDetailScreen() {
     editing: null,
   });
   // The discussion composer is either a new comment or a reply to one.
-  const [replyTo, setReplyTo] = useState<{ id: number; name: string } | null>(
-    null,
-  );
+  const [replyTo, setReplyTo] = useState<{ id: number; name: string } | null>(null);
 
   // Deep links from "Needs you" land straight on the chat.
   useEffect(() => {
@@ -131,7 +116,7 @@ export default function BountyDetailScreen() {
     return (
       <AppShell tabs={false}>
         <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
-          <p className="font-hud text-[15px] font-bold uppercase tracking-[0.12em] text-ar-dim">
+          <p className="font-hud text-ar-dim text-[15px] font-bold tracking-[0.12em] uppercase">
             {detail.error?.data?.code === "NOT_FOUND"
               ? "Bounty not found"
               : "Couldn't load this bounty"}
@@ -156,28 +141,25 @@ export default function BountyDetailScreen() {
 
           {/* ── Identity ─────────────────────────────────────────── */}
           <div className="relative -mt-8 px-5">
-            <Link
-              href={`/brands/${bounty.brand.id}`}
-              className="flex w-fit items-end gap-2.5"
-            >
+            <Link href={`/brands/${bounty.brand.id}`} className="flex w-fit items-end gap-2.5">
               <BrandAvatar
                 src={bounty.brand.avatarUrl}
                 loading="eager"
-                className="h-[56px] w-[56px] rounded-[16px] ring-[3px] ring-ar-bg"
+                className="ring-ar-bg h-[56px] w-[56px] rounded-[16px] ring-[3px]"
               />
-              <span className="font-hud mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-dim">
+              <span className="font-hud text-ar-dim mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase">
                 {bounty.brand.name}
               </span>
             </Link>
 
-            <h1 className="mt-3 text-[21px] font-semibold leading-tight text-ar-text">
+            <h1 className="text-ar-text mt-3 text-[21px] leading-tight font-semibold">
               {bounty.title}
             </h1>
 
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
               <span
                 className={cn(
-                  "font-hud inline-flex h-[22px] items-center rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+                  "font-hud inline-flex h-[22px] items-center rounded-full border px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
                   TONE_CLASS[badge.tone],
                 )}
               >
@@ -186,7 +168,7 @@ export default function BountyDetailScreen() {
               {deadline && (
                 <span
                   className={cn(
-                    "font-hud inline-flex h-[22px] items-center gap-1 rounded-full border border-ar-line-bright bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+                    "font-hud border-ar-line-bright inline-flex h-[22px] items-center gap-1 rounded-full border bg-white/[0.05] px-2.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
                     deadline.urgent ? "text-rarity-legendary" : "text-ar-dim",
                   )}
                 >
@@ -198,29 +180,29 @@ export default function BountyDetailScreen() {
           </div>
 
           {/* ── Reward ───────────────────────────────────────────── */}
-          <div className="mx-5 mt-4 overflow-hidden rounded-ar-lg border border-ar-green/30 bg-linear-to-br from-ar-green/15 via-ar-surface to-ar-surface">
-            <div className="flex items-end justify-between px-4 pb-3 pt-3.5">
+          <div className="rounded-ar-lg border-ar-green/30 from-ar-green/15 via-ar-surface to-ar-surface mx-5 mt-4 overflow-hidden border bg-linear-to-br">
+            <div className="flex items-end justify-between px-4 pt-3.5 pb-3">
               <div>
-                <p className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ar-faint">
+                <p className="font-hud text-ar-faint text-[9.5px] font-semibold tracking-[0.22em] uppercase">
                   Reward per winner
                 </p>
-                <p className="font-hud text-glow-soft mt-1 text-[30px] font-bold leading-none tabular-nums text-ar-green-hot">
+                <p className="font-hud text-glow-soft text-ar-green-hot mt-1 text-[30px] leading-none font-bold tabular-nums">
                   {formatUsd(bounty.rewardUsd)}
                 </p>
               </div>
-              <p className="font-hud mb-0.5 text-[11px] font-semibold tabular-nums text-ar-dim">
+              <p className="font-hud text-ar-dim mb-0.5 text-[11px] font-semibold tabular-nums">
                 {formatAmount(bounty.rewardAsset)} {bounty.assetCode}
               </p>
             </div>
-            <div className="flex items-center justify-around border-t border-ar-line py-2.5">
+            <div className="border-ar-line flex items-center justify-around border-t py-2.5">
               <StatBlock
                 label="Spots left"
                 value={`${bounty.spotsLeft}/${bounty.totalWinners}`}
                 accent={bounty.open}
               />
-              <span className="h-7 w-px bg-ar-line" />
+              <span className="bg-ar-line h-7 w-px" />
               <StatBlock label="Joined" value={bounty.participants} />
-              <span className="h-7 w-px bg-ar-line" />
+              <span className="bg-ar-line h-7 w-px" />
               <StatBlock label="Entries" value={bounty.totalEntries} />
             </div>
           </div>
@@ -250,7 +232,7 @@ export default function BountyDetailScreen() {
             ]}
           />
 
-          <div className="px-5 pb-6 pt-4">
+          <div className="px-5 pt-4 pb-6">
             {locked ? (
               <LockedNote section={section} />
             ) : section === "brief" ? (
@@ -262,11 +244,7 @@ export default function BountyDetailScreen() {
                 onEdit={(entry) => setSheet({ open: true, editing: entry })}
               />
             ) : section === "chat" ? (
-              <ChatPanel
-                messages={thread.data}
-                loading={thread.isLoading}
-                brand={bounty.brand}
-              />
+              <ChatPanel messages={thread.data} loading={thread.isLoading} brand={bounty.brand} />
             ) : (
               <DiscussionPanel
                 bountyId={bounty.id}
@@ -350,9 +328,9 @@ function Hero({ bounty }: { bounty: BountyDetail }) {
           ))}
         </div>
       ) : (
-        <div className="ar-grid h-full w-full bg-linear-to-br from-ar-green/25 via-ar-surface to-ar-bg" />
+        <div className="ar-grid from-ar-green/25 via-ar-surface to-ar-bg h-full w-full bg-linear-to-br" />
       )}
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-ar-void/70 via-transparent to-ar-bg" />
+      <div className="from-ar-void/70 to-ar-bg pointer-events-none absolute inset-0 bg-linear-to-b via-transparent" />
 
       {images.length > 1 && (
         <div className="absolute bottom-11 left-1/2 flex -translate-x-1/2 gap-1.5">
@@ -361,7 +339,7 @@ function Hero({ bounty }: { bounty: BountyDetail }) {
               key={src}
               className={cn(
                 "h-1.5 rounded-full transition-all",
-                i === index ? "w-4 bg-ar-text" : "w-1.5 bg-ar-text/40",
+                i === index ? "bg-ar-text w-4" : "bg-ar-text/40 w-1.5",
               )}
             />
           ))}
@@ -380,7 +358,7 @@ function Hero({ bounty }: { bounty: BountyDetail }) {
               .share?.({ title: bounty.title, url: window.location.href })
               .catch(() => undefined);
           }}
-          className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+          className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
         >
           <Share2 size={15} strokeWidth={2.2} />
         </button>
@@ -398,7 +376,7 @@ function BackToBounties() {
         else void router.push("/bounty");
       }}
       aria-label="Back"
-      className="ar-glass flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+      className="ar-glass text-ar-text flex h-9 w-9 items-center justify-center rounded-full"
     >
       <ChevronLeft size={17} strokeWidth={2.4} />
     </button>
@@ -410,10 +388,10 @@ function Brief({ bounty }: { bounty: BountyDetail }) {
     <div>
       <RichText html={bounty.description} />
       {bounty.requiredBalance > 0 && (
-        <p className="mt-4 flex items-start gap-2 rounded-ar border border-ar-line bg-white/[0.03] px-3.5 py-2.5 text-[12px] leading-relaxed text-ar-dim">
-          <Wallet size={14} strokeWidth={2.3} className="mt-0.5 shrink-0 text-ar-green-hot" />
-          To join you need to hold at least{" "}
-          {formatAmount(bounty.requiredBalance)} {bounty.assetCode} in your wallet.
+        <p className="rounded-ar border-ar-line text-ar-dim mt-4 flex items-start gap-2 border bg-white/[0.03] px-3.5 py-2.5 text-[12px] leading-relaxed">
+          <Wallet size={14} strokeWidth={2.3} className="text-ar-green-hot mt-0.5 shrink-0" />
+          To join you need to hold at least {formatAmount(bounty.requiredBalance)}{" "}
+          {bounty.assetCode} in your wallet.
         </p>
       )}
     </div>
@@ -423,13 +401,13 @@ function Brief({ bounty }: { bounty: BountyDetail }) {
 function LockedNote({ section }: { section: Section }) {
   return (
     <div className="py-10 text-center">
-      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-ar-line-bright bg-white/[0.04] text-ar-faint">
+      <span className="border-ar-line-bright text-ar-faint mx-auto flex h-11 w-11 items-center justify-center rounded-full border bg-white/[0.04]">
         <Lock size={17} strokeWidth={2.3} />
       </span>
-      <p className="font-hud mt-3 text-[13px] font-bold uppercase tracking-[0.14em] text-ar-dim">
+      <p className="font-hud text-ar-dim mt-3 text-[13px] font-bold tracking-[0.14em] uppercase">
         Join to unlock
       </p>
-      <p className="mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+      <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
         {section === "chat"
           ? "Once you've joined you can message the brand privately about this bounty."
           : "Once you've joined, the entries you send and how they're doing in review show up here."}
@@ -443,16 +421,15 @@ function WinnerBanner({ bounty }: { bounty: BountyDetail }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-5 mt-3 flex items-center gap-3 rounded-ar-lg border border-rarity-legendary/50 bg-rarity-legendary/10 p-3.5"
+      className="rounded-ar-lg border-rarity-legendary/50 bg-rarity-legendary/10 mx-5 mt-3 flex items-center gap-3 border p-3.5"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-rarity-legendary/20 text-rarity-legendary">
+      <span className="bg-rarity-legendary/20 text-rarity-legendary flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]">
         <Trophy size={19} strokeWidth={2.3} />
       </span>
       <div className="min-w-0">
-        <p className="text-[14px] font-semibold text-ar-text">You won this bounty</p>
-        <p className="mt-0.5 text-[12px] leading-snug text-ar-dim">
-          {formatAmount(bounty.rewardAsset)} {bounty.assetCode} has been sent to
-          your wallet.
+        <p className="text-ar-text text-[14px] font-semibold">You won this bounty</p>
+        <p className="text-ar-dim mt-0.5 text-[12px] leading-snug">
+          {formatAmount(bounty.rewardAsset)} {bounty.assetCode} has been sent to your wallet.
         </p>
       </div>
     </motion.div>
@@ -462,7 +439,7 @@ function WinnerBanner({ bounty }: { bounty: BountyDetail }) {
 function BottomBar({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="ar-tabbar-surface relative z-30 rounded-t-ar-xl px-4 pt-3"
+      className="ar-tabbar-surface rounded-t-ar-xl relative z-30 px-4 pt-3"
       style={{ paddingBottom: "max(12px, var(--ar-safe-bottom))" }}
     >
       {children}
@@ -504,7 +481,7 @@ function PrimaryAction({
   });
 
   const note = (text: string) => (
-    <p className="font-hud mb-2 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-ar-faint">
+    <p className="font-hud text-ar-faint mb-2 text-center text-[10px] font-semibold tracking-[0.12em] uppercase">
       {text}
     </p>
   );
@@ -561,10 +538,7 @@ function PrimaryAction({
         </ArButton>
       );
     }
-    const short =
-      needsBalance && balance.data
-        ? bounty.requiredBalance - balance.data.balance
-        : 0;
+    const short = needsBalance && balance.data ? bounty.requiredBalance - balance.data.balance : 0;
     if (short > 0) {
       return (
         <>
@@ -578,7 +552,7 @@ function PrimaryAction({
     return (
       <>
         {join.error && (
-          <p className="mb-2 text-center text-[12px] text-ar-danger">{join.error.message}</p>
+          <p className="text-ar-danger mb-2 text-center text-[12px]">{join.error.message}</p>
         )}
         <ArButton
           block
@@ -643,7 +617,11 @@ function Composer({
     if (kind === "chat") {
       await sendMessage.mutateAsync({ bountyId, content });
     } else {
-      await addComment.mutateAsync({ bountyId, content, parentId: replyTo?.id });
+      await addComment.mutateAsync({
+        bountyId,
+        content,
+        parentId: replyTo?.id,
+      });
     }
     setText("");
     onSent?.();
@@ -653,7 +631,7 @@ function Composer({
     <div>
       {replyTo && (
         <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.05] px-3 py-1.5">
-          <span className="truncate text-[11.5px] text-ar-dim">
+          <span className="text-ar-dim truncate text-[11.5px]">
             Replying to <span className="text-ar-text">{replyTo.name}</span>
           </span>
           <button onClick={onCancelReply} aria-label="Cancel reply" className="text-ar-faint">
@@ -661,7 +639,7 @@ function Composer({
           </button>
         </div>
       )}
-      {error && <p className="mb-2 text-[12px] text-ar-danger">{error.message}</p>}
+      {error && <p className="text-ar-danger mb-2 text-[12px]">{error.message}</p>}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -686,7 +664,7 @@ function Composer({
           rows={1}
           maxLength={kind === "chat" ? 2000 : 1000}
           placeholder={placeholder}
-          className="ar-bevel max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug text-ar-text outline-hidden placeholder:text-ar-faint"
+          className="ar-bevel text-ar-text placeholder:text-ar-faint max-h-28 min-h-[44px] flex-1 resize-none rounded-[22px] px-4 py-3 text-[14px] leading-snug outline-hidden"
         />
         <button
           type="submit"

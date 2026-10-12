@@ -6,28 +6,14 @@ import * as THREE from "three";
 
 import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
 import { CollectButton } from "~/components/ar/CollectButton";
-import {
-  ArRadar,
-  CompassStrip,
-  EdgeArrow,
-  Reticle,
-  type Placed,
-} from "~/components/ar/ArScene";
+import { ArRadar, CompassStrip, EdgeArrow, Reticle, type Placed } from "~/components/ar/ArScene";
 import { ArButton } from "~/components/ui/ArButton";
-import {
-  AR_CAPTURE_RADIUS,
-  bearingDegrees,
-  distanceMeters,
-  offsetBy,
-} from "~/lib/ar/geo";
+import { AR_CAPTURE_RADIUS, bearingDegrees, distanceMeters, offsetBy } from "~/lib/ar/geo";
 import { angleDelta } from "~/lib/ar/heading";
 import { cameraFrustum } from "~/lib/ar/projection";
 import { pinStatus } from "~/lib/ar/rarity";
 import type { ArPin, GeoFix } from "~/lib/ar/types";
-import {
-  ArPinObject3D,
-  PIN_FLOAT_HEIGHT_M,
-} from "~/lib/ar/webgl/ArPinObject3D";
+import { ArPinObject3D, PIN_FLOAT_HEIGHT_M } from "~/lib/ar/webgl/ArPinObject3D";
 import {
   ClickHandler,
   DeviceOrientationControls,
@@ -342,7 +328,7 @@ export function ArSceneWebGL({
           const over = Math.max(0, range - TRUE_SCALE_UNTIL_M);
           const scale = Math.min(
             MAX_DISTANCE_SCALE,
-            1 + over / (AR_CAPTURE_RADIUS - TRUE_SCALE_UNTIL_M) * (MAX_DISTANCE_SCALE - 1),
+            1 + (over / (AR_CAPTURE_RADIUS - TRUE_SCALE_UNTIL_M)) * (MAX_DISTANCE_SCALE - 1),
           );
           mesh.scale.setScalar(scale);
         }
@@ -353,9 +339,7 @@ export function ArSceneWebGL({
         // old scene's own doc comment used, now driven by a real camera
         // instead of an angle threshold against a hand-tracked heading.
         raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-        const meshes = [...pinObjectsRef.current.values()].map((o) =>
-          o.getMesh(),
-        );
+        const meshes = [...pinObjectsRef.current.values()].map((o) => o.getMesh());
         const centreHit = raycaster.intersectObjects(meshes)[0];
         const centrePinId = findPinId(centreHit?.object);
 
@@ -397,9 +381,7 @@ export function ArSceneWebGL({
         // `lib/ar/heading.ts` derives it from raw device angles, just from
         // the quaternion the engine already has rather than a second copy of
         // the sensor pipeline.
-        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
-          camera.quaternion,
-        );
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
         const h = (Math.atan2(forward.x, -forward.z) * 180) / Math.PI;
         setHeading(((h % 360) + 360) % 360);
       });
@@ -575,7 +557,7 @@ export function ArSceneWebGL({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full touch-none select-none overflow-hidden bg-black"
+      className="relative h-full w-full touch-none overflow-hidden bg-black select-none"
     >
       {/* The camera feed. Layer 0 — the WebGL canvas is appended above it at
           z-10, and every HUD element sits above that again. */}
@@ -601,20 +583,17 @@ export function ArSceneWebGL({
         <button
           onClick={() => router.back()}
           aria-label="Leave AR"
-          className="ar-glass pointer-events-auto flex h-9 items-center gap-1 rounded-full pl-1.5 pr-3 text-ar-dim"
+          className="ar-glass text-ar-dim pointer-events-auto flex h-9 items-center gap-1 rounded-full pr-3 pl-1.5"
         >
           <ChevronLeft size={17} strokeWidth={2.4} />
-          <span className="font-hud text-[10px] font-semibold uppercase tracking-[0.14em]">
+          <span className="font-hud text-[10px] font-semibold tracking-[0.14em] uppercase">
             Exit
           </span>
         </button>
 
         {/* Centred on the screen, not between its neighbours — Exit and
             the radar are different widths. */}
-        <CameraModeSwitch
-          mode="ar"
-          className="absolute left-1/2 -translate-x-1/2"
-        />
+        <CameraModeSwitch mode="ar" className="absolute left-1/2 -translate-x-1/2" />
 
         <ArRadar placed={placedForHud} heading={heading} />
       </div>
@@ -667,14 +646,14 @@ export function ArSceneWebGL({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
-              className="ar-glass mx-auto max-w-[19rem] rounded-ar px-4 py-3 text-center"
+              className="ar-glass rounded-ar mx-auto max-w-[19rem] px-4 py-3 text-center"
             >
-              <p className="font-hud text-[11px] font-semibold uppercase tracking-[0.14em] text-ar-green">
+              <p className="font-hud text-ar-green text-[11px] font-semibold tracking-[0.14em] uppercase">
                 {pinObjectsRef.current.size === 0
                   ? "Nothing in range"
                   : `${pinObjectsRef.current.size} drop${pinObjectsRef.current.size === 1 ? "" : "s"} around you`}
               </p>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-ar-dim">
+              <p className="text-ar-dim mt-1 text-[11.5px] leading-relaxed">
                 {pinObjectsRef.current.size === 0
                   ? `Walk within ${AR_CAPTURE_RADIUS} m of a pin and it'll appear here.`
                   : "Turn until a pin sits in the crosshair."}
@@ -687,7 +666,9 @@ export function ArSceneWebGL({
       {/* Keeps `viewport` a real dependency rather than an unused warning —
           reserved for any HUD element that ends up needing the canvas's own
           measured size rather than the window's. */}
-      <span className="sr-only">{viewport.w}×{viewport.h}</span>
+      <span className="sr-only">
+        {viewport.w}×{viewport.h}
+      </span>
     </div>
   );
 }

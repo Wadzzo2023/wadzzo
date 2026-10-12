@@ -38,11 +38,17 @@ export const auditRouter = createTRPCRouter({
 
       // actorId has no FK (the log outlives accounts), so names are looked up.
       const actorIds = [...new Set(items.flatMap((r) => (r.actorId ? [r.actorId] : [])))];
-      const actors = await ctx.db.user.findMany({ where: { id: { in: actorIds } }, select: { id: true, name: true, image: true } });
+      const actors = await ctx.db.user.findMany({
+        where: { id: { in: actorIds } },
+        select: { id: true, name: true, image: true },
+      });
       const byId = new Map(actors.map((a) => [a.id, a]));
 
       return {
-        items: items.map((r) => ({ ...r, actor: r.actorId ? (byId.get(r.actorId) ?? null) : null })),
+        items: items.map((r) => ({
+          ...r,
+          actor: r.actorId ? (byId.get(r.actorId) ?? null) : null,
+        })),
         nextCursor: more ? items[items.length - 1]!.id : undefined,
       };
     }),

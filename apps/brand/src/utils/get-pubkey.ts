@@ -1,13 +1,13 @@
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 export async function fetchPubkeyfromEmail(email: string): Promise<string> {
-  const response = await fetch(
-    `https://accounts.action-tokens.com/api/pub?email=${email}`,
-  );
+  const response = await fetch(`https://accounts.action-tokens.com/api/pub?email=${email}`);
   if (response.ok) {
     const data = (await response.json()) as { publicKey: string };
     return data.publicKey;
   } else {
-    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Email don't have a pubkey" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Email don't have a pubkey",
+    });
   }
 }
 

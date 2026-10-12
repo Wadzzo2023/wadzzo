@@ -5,57 +5,64 @@
 import { taskServerHeaders, taskServerUrl } from "./server-url";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-
 export type JobType = "agent_run" | "create_pins" | "generic";
 export type JobStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
 
 export interface PollResult {
-    jobId: string;
-    /** The brand the job runs for — check the caller may see it before returning anything. */
-    creatorId: string;
-    status: JobStatus;
-    result: unknown;
-    error?: string;
-    progress: number;
-    /** agent_run: what the agent is doing (AgentStep[]). */
-    steps?: unknown[];
+  jobId: string;
+  /** The brand the job runs for — check the caller may see it before returning anything. */
+  creatorId: string;
+  status: JobStatus;
+  result: unknown;
+  error?: string;
+  progress: number;
+  /** agent_run: what the agent is doing (AgentStep[]). */
+  steps?: unknown[];
 }
 
 export const taskClient = {
-    /** Enqueue a job — returns { jobId } immediately (no waiting). */
-    async enqueue(
-        type: JobType,
-        creatorId: string,
-        payload: Record<string, unknown>,
-        maxAttempts = 3,
-    ): Promise<{ jobId: string }> {
-        const res = await fetch(`${taskServerUrl()}/jobs/enqueue`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-            body: JSON.stringify({ type, creatorId, payload, maxAttempts }),
-        });
-        if (!res.ok) {
-            const text = await res.text();
-            throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Task server error (${res.status}): ${text.slice(0, 200)}` });
-        }
-        return res.json() as Promise<{ jobId: string }>;
-    },
+  /** Enqueue a job — returns { jobId } immediately (no waiting). */
+  async enqueue(
+    type: JobType,
+    creatorId: string,
+    payload: Record<string, unknown>,
+    maxAttempts = 3,
+  ): Promise<{ jobId: string }> {
+    const res = await fetch(`${taskServerUrl()}/jobs/enqueue`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+      body: JSON.stringify({ type, creatorId, payload, maxAttempts }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+        message: `Task server error (${res.status}): ${text.slice(0, 200)}`,
+      });
+    }
+    return res.json() as Promise<{ jobId: string }>;
+  },
 
-    /** Poll once — compatible with your existing pollJobResult tRPC shape. */
-    async poll(jobId: string): Promise<PollResult> {
-        const res = await fetch(`${taskServerUrl()}/jobs/${jobId}`, {
-            headers: taskServerHeaders(),
-        });
-        if (res.status === 404) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Job not found" });
-        if (!res.ok) throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: `Poll error: ${res.status}` });
-        return res.json() as Promise<PollResult>;
-    },
+  /** Poll once — compatible with your existing pollJobResult tRPC shape. */
+  async poll(jobId: string): Promise<PollResult> {
+    const res = await fetch(`${taskServerUrl()}/jobs/${jobId}`, {
+      headers: taskServerHeaders(),
+    });
+    if (res.status === 404)
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+        message: "Job not found",
+      });
+    if (!res.ok)
+      throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+        message: `Poll error: ${res.status}`,
+      });
+    return res.json() as Promise<PollResult>;
+  },
 
-    /** Cancel a job. */
-    async cancel(jobId: string): Promise<void> {
-        await fetch(`${taskServerUrl()}/jobs/${jobId}/cancel`, {
-            method: "POST",
-            headers: taskServerHeaders(),
-        });
-    },
+  /** Cancel a job. */
+  async cancel(jobId: string): Promise<void> {
+    await fetch(`${taskServerUrl()}/jobs/${jobId}/cancel`, {
+      method: "POST",
+      headers: taskServerHeaders(),
+    });
+  },
 };

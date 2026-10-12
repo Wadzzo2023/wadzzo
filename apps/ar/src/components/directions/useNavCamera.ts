@@ -70,7 +70,11 @@ export function useNavCamera({
       const t = tgt.current;
       if (!map || !t) return;
 
-      const c = (cur.current ??= { lng: t.pos[0], lat: t.pos[1], heading: t.heading });
+      const c = (cur.current ??= {
+        lng: t.pos[0],
+        lat: t.pos[1],
+        heading: t.heading,
+      });
       const ap = 1 - Math.exp(-dt / POS_TAU);
       const ab = 1 - Math.exp(-dt / BEARING_TAU);
       c.lng += (t.pos[0] - c.lng) * ap;
@@ -81,13 +85,19 @@ export function useNavCamera({
       // Don't fight the start/re-centre fly-in. (Any user gesture stops following altogether.)
       if (f && !map.isEasing() && !map.isMoving()) {
         // Compass off ("north"): leave the bearing wherever the user / the compass button put it.
-        map.jumpTo(o === "heading" ? { center: [c.lng, c.lat], bearing: c.heading } : { center: [c.lng, c.lat] });
+        map.jumpTo(
+          o === "heading"
+            ? { center: [c.lng, c.lat], bearing: c.heading }
+            : { center: [c.lng, c.lat] },
+        );
       }
 
       const mb = map.getBearing();
       const p = map.project([c.lng, c.lat]);
-      if (arrowRef.current) arrowRef.current.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${c.heading - mb}deg)`;
-      if (dialRef?.current) dialRef.current.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${-mb}deg)`;
+      if (arrowRef.current)
+        arrowRef.current.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${c.heading - mb}deg)`;
+      if (dialRef?.current)
+        dialRef.current.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${-mb}deg)`;
       if (needleRef?.current) needleRef.current.style.transform = `rotate(${-mb}deg)`;
     };
     raf = requestAnimationFrame(frame);

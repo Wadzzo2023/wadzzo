@@ -27,7 +27,10 @@ export type MobileTokenClaims = {
 
 function secret() {
   const s = env.MOBILE_JWT_SECRET ?? env.NEXTAUTH_SECRET;
-  if (!s) throw new AppError(ErrorCodes.CONFIG_MISSING, { message: "MOBILE_JWT_SECRET (or NEXTAUTH_SECRET) is not set" });
+  if (!s)
+    throw new AppError(ErrorCodes.CONFIG_MISSING, {
+      message: "MOBILE_JWT_SECRET (or NEXTAUTH_SECRET) is not set",
+    });
   return s;
 }
 

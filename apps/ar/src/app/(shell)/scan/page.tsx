@@ -37,8 +37,7 @@ type Phase = "scanning" | "claiming" | "done" | "failed";
 export default function ScanScreen() {
   const router = useRouter();
   const { query: urlQuery, ready: urlReady } = useQueryParams();
-  const deepLinkPin =
-    typeof urlQuery.pin === "string" ? urlQuery.pin : null;
+  const deepLinkPin = typeof urlQuery.pin === "string" ? urlQuery.pin : null;
 
   // A deep link carries its own pin, so the camera would be a permission
   // prompt for nothing.
@@ -130,14 +129,12 @@ export default function ScanScreen() {
           style={{ opacity: camera.isPlaying ? 1 : 0 }}
         />
 
-        {!camera.isPlaying && (
-          <div className="ar-grid absolute inset-0 bg-ar-void" />
-        )}
+        {!camera.isPlaying && <div className="ar-grid bg-ar-void absolute inset-0" />}
 
         {/* Dim everything except the target square. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-ar-void/72"
+          className="bg-ar-void/72 absolute inset-0"
           style={{
             maskImage:
               "radial-gradient(circle at 50% 44%, transparent 0, transparent 120px, black 168px)",
@@ -147,7 +144,7 @@ export default function ScanScreen() {
         />
 
         {/* ── Viewfinder ────────────────────────────────────────────── */}
-        <div className="absolute left-1/2 top-[44%] h-[228px] w-[228px] -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute top-[44%] left-1/2 h-[228px] w-[228px] -translate-x-1/2 -translate-y-1/2">
           <svg viewBox="0 0 228 228" fill="none" className="absolute inset-0">
             {[
               "M3 62V21a18 18 0 0 1 18-18h41",
@@ -173,7 +170,7 @@ export default function ScanScreen() {
           {camera.isPlaying && phase === "scanning" && (
             <div
               aria-hidden
-              className="ar-scan-sweep absolute inset-x-4 top-0 h-[2px] rounded-full bg-ar-green-hot shadow-[0_0_12px_2px_hsl(var(--ar-green)/0.7)]"
+              className="ar-scan-sweep bg-ar-green-hot absolute inset-x-4 top-0 h-[2px] rounded-full shadow-[0_0_12px_2px_hsl(var(--ar-green)/0.7)]"
             />
           )}
         </div>
@@ -192,7 +189,7 @@ export default function ScanScreen() {
         <button
           onClick={() => router.back()}
           aria-label="Close scanner"
-          className="ar-glass absolute right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full text-ar-text"
+          className="ar-glass text-ar-text absolute right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full"
           style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
         >
           <X size={17} strokeWidth={2.4} />
@@ -205,18 +202,18 @@ export default function ScanScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-30 flex items-center justify-center bg-ar-void/80 px-8"
+              className="bg-ar-void/80 absolute inset-0 z-30 flex items-center justify-center px-8"
               role="status"
             >
-              <div className="ar-glass w-full max-w-[19rem] rounded-ar-lg p-6 text-center">
+              <div className="ar-glass rounded-ar-lg w-full max-w-[19rem] p-6 text-center">
                 {phase === "claiming" && (
                   <>
                     <Loader2
                       size={26}
                       strokeWidth={2.4}
-                      className="mx-auto animate-spin text-ar-green-hot"
+                      className="text-ar-green-hot mx-auto animate-spin"
                     />
-                    <p className="font-hud mt-3 text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+                    <p className="font-hud text-ar-text mt-3 text-[12.5px] font-bold tracking-[0.12em] uppercase">
                       Claiming
                     </p>
                   </>
@@ -227,35 +224,35 @@ export default function ScanScreen() {
                     <motion.span
                       initial={{ scale: 0.6 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 18 }}
-                      className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-ar-green/60 bg-ar-green/18 text-ar-green-hot"
+                      transition={{
+                        type: "spring",
+                        stiffness: 320,
+                        damping: 18,
+                      }}
+                      className="border-ar-green/60 bg-ar-green/18 text-ar-green-hot mx-auto flex h-12 w-12 items-center justify-center rounded-full border"
                     >
                       <Check size={24} strokeWidth={3} />
                     </motion.span>
-                    <p className="font-hud mt-3 text-[13px] font-bold uppercase tracking-[0.12em] text-ar-green-hot">
+                    <p className="font-hud text-ar-green-hot mt-3 text-[13px] font-bold tracking-[0.12em] uppercase">
                       Collected
                     </p>
-                    <p className="mt-1.5 text-[11.5px] text-ar-dim">
-                      Opening your collectible…
-                    </p>
+                    <p className="text-ar-dim mt-1.5 text-[11.5px]">Opening your collectible…</p>
                   </>
                 )}
 
                 {phase === "failed" && (
                   <>
-                    <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-ar-danger/60 bg-ar-danger/15 text-ar-danger">
+                    <span className="border-ar-danger/60 bg-ar-danger/15 text-ar-danger mx-auto flex h-12 w-12 items-center justify-center rounded-full border">
                       <TriangleAlert size={22} strokeWidth={2.4} />
                     </span>
-                    <p className="font-hud mt-3 text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+                    <p className="font-hud text-ar-text mt-3 text-[12.5px] font-bold tracking-[0.12em] uppercase">
                       Couldn&apos;t collect
                     </p>
                     {/* Server messages are written to be shown as-is —
                         "Follow this brand to unlock", "Every one of these has
                         been claimed" — so they are, rather than being
                         flattened into a generic failure. */}
-                    <p className="mt-1.5 text-[11.5px] leading-relaxed text-ar-dim">
-                      {message}
-                    </p>
+                    <p className="text-ar-dim mt-1.5 text-[11.5px] leading-relaxed">{message}</p>
                     {deepLinkPin && (
                       <ArLinkButton
                         href={`/collection/${deepLinkPin}`}
@@ -278,19 +275,19 @@ export default function ScanScreen() {
           className="absolute inset-x-0 bottom-0 z-20 px-6"
           style={{ paddingBottom: "max(24px, var(--ar-safe-bottom))" }}
         >
-          <div className="ar-glass mx-auto max-w-[21rem] rounded-ar-lg p-4 text-center">
-            <span className="mx-auto mb-2.5 flex h-9 w-9 items-center justify-center rounded-full border border-ar-green/50 bg-ar-green/14 text-ar-green-hot">
+          <div className="ar-glass rounded-ar-lg mx-auto max-w-[21rem] p-4 text-center">
+            <span className="border-ar-green/50 bg-ar-green/14 text-ar-green-hot mx-auto mb-2.5 flex h-9 w-9 items-center justify-center rounded-full border">
               <QrCode size={17} strokeWidth={2.3} />
             </span>
 
-            <p className="font-hud text-[12.5px] font-bold uppercase tracking-[0.12em] text-ar-text">
+            <p className="font-hud text-ar-text text-[12.5px] font-bold tracking-[0.12em] uppercase">
               {camera.isPlaying
                 ? `Point at a ${platformBranding.name} code`
                 : camera.state === "denied"
                   ? "Camera blocked"
                   : "Starting camera…"}
             </p>
-            <p className="mx-auto mt-1.5 max-w-[17rem] text-[11.5px] leading-relaxed text-ar-dim">
+            <p className="text-ar-dim mx-auto mt-1.5 max-w-[17rem] text-[11.5px] leading-relaxed">
               {message && phase === "scanning"
                 ? message
                 : camera.isPlaying
@@ -313,13 +310,7 @@ export default function ScanScreen() {
               </ArButton>
             )}
 
-            <ArLinkButton
-              href="/map"
-              variant="ghost"
-              size="sm"
-              block
-              className="mt-2"
-            >
+            <ArLinkButton href="/map" variant="ghost" size="sm" block className="mt-2">
               Back to the map
             </ArLinkButton>
           </div>

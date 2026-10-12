@@ -1,12 +1,13 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
@@ -24,9 +25,7 @@ export async function createRedeemXDRAsset({
 
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
 
-  const transactionInializer = await server.loadAccount(
-    motherAccount.publicKey(),
-  );
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,
@@ -74,9 +73,7 @@ export async function createRedeemXDRNative({
   const xlmPlatformFee = 2;
   const amount = Number(trustPrice + TrxBaseFee) * maxRedeems + xlmPlatformFee;
 
-  const transactionInializer = await server.loadAccount(
-    motherAccount.publicKey(),
-  );
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,
     networkPassphrase,
@@ -125,9 +122,7 @@ export async function claimRedeemXDR({
 
   const assetStorage = Keypair.fromSecret(storageSecret);
 
-  const transactionInializer = await server.loadAccount(
-    motherAccount.publicKey(),
-  );
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,

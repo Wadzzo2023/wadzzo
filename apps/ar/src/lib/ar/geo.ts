@@ -17,9 +17,7 @@ export function distanceMeters(a: Coords, b: Coords): number {
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
 
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
 
   return 2 * R * Math.asin(Math.sqrt(h));
 }
@@ -34,9 +32,7 @@ export function bearingDegrees(a: Coords, b: Coords): number {
   const dLng = toRad(b.lng - a.lng);
 
   const y = Math.sin(dLng) * Math.cos(lat2);
-  const x =
-    Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
 
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
@@ -46,11 +42,7 @@ export function bearingDegrees(a: Coords, b: Coords): number {
  * around wherever the viewer actually is, so the map is never a dead sea of
  * empty tiles in a city the demo data didn't anticipate.
  */
-export function offsetBy(
-  from: Coords,
-  meters: number,
-  bearingDeg: number,
-): Coords {
+export function offsetBy(from: Coords, meters: number, bearingDeg: number): Coords {
   const d = meters / R;
   const brng = toRad(bearingDeg);
   const lat1 = toRad(from.lat);
@@ -85,7 +77,7 @@ export function formatDistance(meters: number): string {
 /** Compass point for a bearing — "NE", "SSW". Eight points is plenty. */
 export function compassPoint(bearingDeg: number): string {
   const points = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
-  return points[Math.round(((bearingDeg % 360) + 360) % 360 / 45) % 8]!;
+  return points[Math.round((((bearingDeg % 360) + 360) % 360) / 45) % 8]!;
 }
 
 /**
@@ -100,9 +92,6 @@ export const TRAVEL_SPEEDS_MPS = {
   drive: 9.0,
 } as const;
 
-export function travelMinutes(
-  meters: number,
-  mode: keyof typeof TRAVEL_SPEEDS_MPS,
-): number {
+export function travelMinutes(meters: number, mode: keyof typeof TRAVEL_SPEEDS_MPS): number {
   return Math.max(1, Math.round(meters / TRAVEL_SPEEDS_MPS[mode] / 60));
 }

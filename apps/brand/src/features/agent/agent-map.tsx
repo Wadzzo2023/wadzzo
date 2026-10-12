@@ -70,32 +70,77 @@ export function AgentMapLayer() {
         [Math.max(...lngs), Math.max(...lats)],
       ],
       // Leave room for the chat window on wide screens.
-      { padding: { top: 90, bottom: 60, left: 60, right: window.innerWidth >= 1024 ? 480 : 60 }, maxZoom: 15, duration: 900 },
+      {
+        padding: {
+          top: 90,
+          bottom: 60,
+          left: 60,
+          right: window.innerWidth >= 1024 ? 480 : 60,
+        },
+        maxZoom: 15,
+        duration: 900,
+      },
     );
     // Only when a different card's results arrive, not on every re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, sourceId]);
 
   useEffect(() => {
-    if (map && focus) map.flyTo({ center: [focus.lng, focus.lat], zoom: Math.max(map.getZoom(), 16), duration: 700 });
+    if (map && focus)
+      map.flyTo({
+        center: [focus.lng, focus.lat],
+        zoom: Math.max(map.getZoom(), 16),
+        duration: 700,
+      });
   }, [map, focus]);
 
   return (
     <>
       {area && (
         <Source id="agent-home-area" type="geojson" data={area}>
-          <Layer id="agent-home-area-fill" type="fill" paint={{ "fill-color": "#6366f1", "fill-opacity": 0.04 }} />
-          <Layer id="agent-home-area-line" type="line" paint={{ "line-color": "#6366f1", "line-width": 1.5, "line-opacity": 0.6, "line-dasharray": [2, 2] }} />
+          <Layer
+            id="agent-home-area-fill"
+            type="fill"
+            paint={{ "fill-color": "#6366f1", "fill-opacity": 0.04 }}
+          />
+          <Layer
+            id="agent-home-area-line"
+            type="line"
+            paint={{
+              "line-color": "#6366f1",
+              "line-width": 1.5,
+              "line-opacity": 0.6,
+              "line-dasharray": [2, 2],
+            }}
+          />
         </Source>
       )}
       {markers.map((m) => {
         const k = KIND[m.kind];
         const focused = focus?.id === m.id;
         return (
-          <Marker key={`${m.kind}-${m.id}`} latitude={m.lat} longitude={m.lng} anchor="bottom" style={{ zIndex: focused ? 2 : 1 }}>
-            <span title={m.title} className={cn("flex flex-col items-center transition-transform", m.muted && "opacity-50", focused && "scale-125")}>
-              <span className={cn("flex size-7 items-center justify-center rounded-full border-2 bg-card shadow-md", k.ring)}>
-                <k.icon className="size-3.5 text-foreground" />
+          <Marker
+            key={`${m.kind}-${m.id}`}
+            latitude={m.lat}
+            longitude={m.lng}
+            anchor="bottom"
+            style={{ zIndex: focused ? 2 : 1 }}
+          >
+            <span
+              title={m.title}
+              className={cn(
+                "flex flex-col items-center transition-transform",
+                m.muted && "opacity-50",
+                focused && "scale-125",
+              )}
+            >
+              <span
+                className={cn(
+                  "bg-card flex size-7 items-center justify-center rounded-full border-2 shadow-md",
+                  k.ring,
+                )}
+              >
+                <k.icon className="text-foreground size-3.5" />
               </span>
               <span className={cn("-mt-0.5 size-2 rotate-45 rounded-[1px]", k.fill)} aria-hidden />
             </span>

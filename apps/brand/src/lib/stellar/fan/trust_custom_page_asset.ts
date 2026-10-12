@@ -1,14 +1,14 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 
 export async function trustCustomPageAsset({
   creator,
@@ -42,10 +42,12 @@ export async function trustCustomPageAsset({
 
   Tx1.addOperation(
     Operation.payment({
-      amount: (Number(requiredPlatformAsset) + Number(TrxBaseFeeInPlatformAsset)).toFixed(7).toString(),
+      amount: (Number(requiredPlatformAsset) + Number(TrxBaseFeeInPlatformAsset))
+        .toFixed(7)
+        .toString(),
       destination: motherAcc.publicKey(),
       asset: PLATFORM_ASSET,
-      source: creator
+      source: creator,
     }),
   )
     .addOperation(

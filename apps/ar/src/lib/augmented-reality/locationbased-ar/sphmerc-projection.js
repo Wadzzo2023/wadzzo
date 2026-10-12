@@ -29,9 +29,7 @@ class SphMercProjection {
 
   sphMercToLat(y) {
     var lat = (y / this.HALF_EARTH) * 180.0;
-    lat =
-      (180 / Math.PI) *
-      (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
+    lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
     return lat;
   }
 

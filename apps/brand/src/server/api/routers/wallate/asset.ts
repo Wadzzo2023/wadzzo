@@ -69,74 +69,61 @@ export const assetRouter = createTRPCRouter({
         nextCursor,
       };
     }),
-  addAsset: protectedProcedure
-    .input(AdminAssetFormSchema)
-    .mutation(async ({ ctx, input }) => {
-      const {
+  addAsset: protectedProcedure.input(AdminAssetFormSchema).mutation(async ({ ctx, input }) => {
+    const { code, tags, description, link, logoUrl, issuer, litemint, stellarterm, stellarx } =
+      input;
+
+    const tagsArr = tags.split(",");
+    const color = "red";
+    const blurData = await getBlurData(logoUrl);
+
+    // adding all the tags
+    await Promise.all(
+      tagsArr.map(async (tagItem) => {
+        const existingRecord = await ctx.db.tag.findUnique({
+          where: { name: tagItem },
+        });
+
+        if (!existingRecord) {
+          await ctx.db.tag.create({
+            data: {
+              name: tagItem,
+            },
+          });
+        }
+      }),
+    );
+
+    await ctx.db.adminAsset.create({
+      data: {
         code,
-        tags,
+        color,
+        logoBlueData: blurData,
+        tags: {
+          createMany: {
+            data: tagsArr.map((el) => ({ tagName: el })),
+            skipDuplicates: true,
+          },
+        },
+
+        codeIssuer: issuer,
+        adminId: ctx.session.user.id,
         description,
         link,
         logoUrl,
-        issuer,
-        litemint,
-        stellarterm,
-        stellarx,
-      } = input;
-
-      const tagsArr = tags.split(",");
-      const color = "red";
-      const blurData = await getBlurData(logoUrl);
-
-      // adding all the tags
-      await Promise.all(
-        tagsArr.map(async (tagItem) => {
-          const existingRecord = await ctx.db.tag.findUnique({
-            where: { name: tagItem },
-          });
-
-          if (!existingRecord) {
-            await ctx.db.tag.create({
-              data: {
-                name: tagItem,
-              },
-            });
-          }
-        }),
-      );
-
-      await ctx.db.adminAsset.create({
-        data: {
-          code,
-          color,
-          logoBlueData: blurData,
-          tags: {
-            createMany: {
-              data: tagsArr.map((el) => ({ tagName: el })),
-              skipDuplicates: true,
-            },
-          },
-
-          codeIssuer: issuer,
-          adminId: ctx.session.user.id,
-          description,
-          link,
-          logoUrl,
-          Litemint: litemint,
-          StellarX: stellarx,
-          StellarTerm: stellarterm,
-        },
-      });
-    }),
+        Litemint: litemint,
+        StellarX: stellarx,
+        StellarTerm: stellarterm,
+      },
+    });
+  }),
 
   // The wallet asset list is shared by every platform: Wadzzo admins manage it.
-  deleteAsset: superAdminProcedure
-    .input(z.number())
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.adminAsset.delete({
-        where: {
-          id: input,
-        },
-      });
-    }),
+  deleteAsset: superAdminProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
+    await ctx.db.adminAsset.delete({
+      where: {
+        id: input,
+      },
+    });
+  }),
 });

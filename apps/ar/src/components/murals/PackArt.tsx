@@ -11,12 +11,28 @@ import { platformBranding } from "@wadzzo/platform/branding";
  *
  * `progress` 0–1 fills the ring; `done` swaps the ring for a solid glow.
  */
-export function PackArt({ size = 96, progress = 0, done = false, spinning = false }: { size?: number; progress?: number; done?: boolean; spinning?: boolean }) {
+export function PackArt({
+  size = 96,
+  progress = 0,
+  done = false,
+  spinning = false,
+}: {
+  size?: number;
+  progress?: number;
+  done?: boolean;
+  spinning?: boolean;
+}) {
   const id = useId().replace(/:/g, "");
   const R = 46;
   const C = 2 * Math.PI * R;
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden className="shrink-0 overflow-visible">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      aria-hidden
+      className="shrink-0 overflow-visible"
+    >
       <defs>
         <linearGradient id={`plate-${id}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="hsl(272 82% 62%)" />
@@ -48,16 +64,53 @@ export function PackArt({ size = 96, progress = 0, done = false, spinning = fals
         style={{ transition: "stroke-dashoffset 300ms ease-out" }}
       />
       {spinning && !done && (
-        <circle cx="50" cy="50" r={R} fill="none" stroke="hsl(272 90% 75%)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${C * 0.12} ${C}`} className="origin-center animate-spin" style={{ animationDuration: "1.6s" }} />
+        <circle
+          cx="50"
+          cy="50"
+          r={R}
+          fill="none"
+          stroke="hsl(272 90% 75%)"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${C * 0.12} ${C}`}
+          className="origin-center animate-spin"
+          style={{ animationDuration: "1.6s" }}
+        />
       )}
 
       {/* Hex plate */}
-      <path d="M50 13 L81 31 L81 69 L50 87 L19 69 L19 31 Z" fill={`url(#plate-${id})`} stroke="hsl(272 90% 80% / 0.6)" strokeWidth="1.5" />
-      <path d="M50 18 L77 33.5 L77 66.5 L50 82 L23 66.5 L23 33.5 Z" fill="none" stroke="#fff" strokeOpacity="0.18" strokeWidth="1" />
+      <path
+        d="M50 13 L81 31 L81 69 L50 87 L19 69 L19 31 Z"
+        fill={`url(#plate-${id})`}
+        stroke="hsl(272 90% 80% / 0.6)"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M50 18 L77 33.5 L77 66.5 L50 82 L23 66.5 L23 33.5 Z"
+        fill="none"
+        stroke="#fff"
+        strokeOpacity="0.18"
+        strokeWidth="1"
+      />
 
       {/* Frame with a painted stroke + drip */}
-      <rect x="32" y="33" width="28" height="22" rx="2.5" fill="hsl(272 60% 20% / 0.55)" stroke="#fff" strokeWidth="2" />
-      <path d="M35 49 C40 41, 45 47, 49 40 S 56 38, 57 44" fill="none" stroke="hsl(190 95% 65%)" strokeWidth="2.6" strokeLinecap="round" />
+      <rect
+        x="32"
+        y="33"
+        width="28"
+        height="22"
+        rx="2.5"
+        fill="hsl(272 60% 20% / 0.55)"
+        stroke="#fff"
+        strokeWidth="2"
+      />
+      <path
+        d="M35 49 C40 41, 45 47, 49 40 S 56 38, 57 44"
+        fill="none"
+        stroke="hsl(190 95% 65%)"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
       <path d="M44 55 v5 a1.6 1.6 0 0 0 3.2 0 v-3" fill="hsl(190 95% 65%)" />
 
       {/* Spray can */}
@@ -68,10 +121,27 @@ export function PackArt({ size = 96, progress = 0, done = false, spinning = fals
       <circle cx="54" cy="46.5" r="0.6" fill="#fff" opacity="0.6" />
 
       {/* Sparkles */}
-      <path d="M28 64 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4z" fill="#fff" opacity="0.9" />
-      <path d="M71 28 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1z" fill="#fff" opacity="0.75" />
+      <path
+        d="M28 64 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4z"
+        fill="#fff"
+        opacity="0.9"
+      />
+      <path
+        d="M71 28 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1z"
+        fill="#fff"
+        opacity="0.75"
+      />
 
-      {done && <circle cx="50" cy="50" r="40" fill="none" stroke={platformBranding.colors.packDoneGlow} strokeWidth="6" />}
+      {done && (
+        <circle
+          cx="50"
+          cy="50"
+          r="40"
+          fill="none"
+          stroke={platformBranding.colors.packDoneGlow}
+          strokeWidth="6"
+        />
+      )}
     </svg>
   );
 }

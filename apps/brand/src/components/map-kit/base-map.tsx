@@ -5,12 +5,25 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useTheme } from "next-themes";
 import type { IControl } from "mapbox-gl";
 import { forwardRef, useEffect, useRef, type ReactNode } from "react";
-import MapGL, { NavigationControl, useControl, useMap, type MapProps, type MapRef } from "react-map-gl/mapbox";
+import MapGL, {
+  NavigationControl,
+  useControl,
+  useMap,
+  type MapProps,
+  type MapRef,
+} from "react-map-gl/mapbox";
 
 import { env } from "~/env";
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import { mapStyleFor, readMapMode, setMapMode, useIsClient, useMapMode, type MapMode } from "./map-mode";
+import {
+  mapStyleFor,
+  readMapMode,
+  setMapMode,
+  useIsClient,
+  useMapMode,
+  type MapMode,
+} from "./map-mode";
 
 export { MAP_STYLE_2D, MAP_STYLE_3D } from "./map-mode";
 
@@ -81,8 +94,16 @@ class MapModeControl implements IControl {
   }
 }
 
-function MapModeToggle({ mode, position }: { mode: MapMode; position: "top-left" | "top-right" | "bottom-left" | "bottom-right" }) {
-  const control = useControl<MapModeControl>(() => new MapModeControl(), { position });
+function MapModeToggle({
+  mode,
+  position,
+}: {
+  mode: MapMode;
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+}) {
+  const control = useControl<MapModeControl>(() => new MapModeControl(), {
+    position,
+  });
   useEffect(() => control.show(mode), [control, mode]);
   return null;
 }
@@ -101,7 +122,10 @@ export const BaseMap = forwardRef<
     controls?: boolean;
     controlsPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   }
->(function BaseMap({ children, className, controls = true, controlsPosition = "bottom-right", ...props }, ref) {
+>(function BaseMap(
+  { children, className, controls = true, controlsPosition = "bottom-right", ...props },
+  ref,
+) {
   const { resolvedTheme } = useTheme();
   const mode = useMapMode();
   // Wait for the browser so the map is created with the real theme and mode;
@@ -121,7 +145,9 @@ export const BaseMap = forwardRef<
         attributionControl={false}
         minZoom={1.5}
         maxZoom={20}
-        initialViewState={initialViewState && !is3d ? { ...initialViewState, pitch: 0 } : initialViewState}
+        initialViewState={
+          initialViewState && !is3d ? { ...initialViewState, pitch: 0 } : initialViewState
+        }
         maxPitch={is3d ? maxPitch : 0}
         {...rest}
       >

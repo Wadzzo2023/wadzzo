@@ -17,29 +17,37 @@ type Entry<T> = { value: T; cachedAt: number };
  * characters the readable part drops (Bangla, accents…) never share an entry.
  */
 export function cacheKey(...parts: (string | number)[]): string {
-    const text = parts.map((p) => String(p).toLowerCase().trim().replace(/\s+/g, " ")).join(":");
-    const readable = text.replace(/ /g, "_").replace(/[^a-z0-9_.,:-]/g, "").slice(0, 150);
-    return `${readable}#${createHash("sha256").update(text).digest("hex").slice(0, 16)}`;
+  const text = parts.map((p) => String(p).toLowerCase().trim().replace(/\s+/g, " ")).join(":");
+  const readable = text
+    .replace(/ /g, "_")
+    .replace(/[^a-z0-9_.,:-]/g, "")
+    .slice(0, 150);
+  return `${readable}#${createHash("sha256").update(text).digest("hex").slice(0, 16)}`;
 }
 
 /** Cached value for `key`, loading (and storing) it when missing or older than `ttlMs`. */
-export async function cached<T>(key: string, load: () => Promise<T | null>, ttlMs = MONTH_MS): Promise<T | null> {
-    try {
-        const row = await db.geoCache.findUnique({ where: { key } });
-        if (row) {
-            const entry = JSON.parse(row.value) as Entry<T>;
-            if (entry && typeof entry.cachedAt === "number" && Date.now() - entry.cachedAt < ttlMs) return entry.value;
-        }
-    } catch {
-        // unreadable or legacy entry — reload below
+export async function cached<T>(
+  key: string,
+  load: () => Promise<T | null>,
+  ttlMs = MONTH_MS,
+): Promise<T | null> {
+  try {
+    const row = await db.geoCache.findUnique({ where: { key } });
+    if (row) {
+      const entry = JSON.parse(row.value) as Entry<T>;
+      if (entry && typeof entry.cachedAt === "number" && Date.now() - entry.cachedAt < ttlMs)
+        return entry.value;
     }
+  } catch {
+    // unreadable or legacy entry — reload below
+  }
 
-    const value = await load();
-    if (value !== null) {
-        const json = JSON.stringify({ value, cachedAt: Date.now() } satisfies Entry<T>);
-        await db.geoCache
-            .upsert({ where: { key }, create: { key, value: json }, update: { value: json } })
-            .catch((err: unknown) => console.warn("[geo-cache] write failed:", err));
-    }
-    return value;
+  const value = await load();
+  if (value !== null) {
+    const json = JSON.stringify({ value, cachedAt: Date.now() } satisfies Entry<T>);
+    await db.geoCache
+      .upsert({ where: { key }, create: { key, value: json }, update: { value: json } })
+      .catch((err: unknown) => console.warn("[geo-cache] write failed:", err));
+  }
+  return value;
 }

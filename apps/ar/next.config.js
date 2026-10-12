@@ -12,7 +12,16 @@ const withBundleAnalyzer = analyzer({
 const config = {
   // Browser bundles read the platform from here (see @wadzzo/platform/branding).
   env: { NEXT_PUBLIC_PLATFORM_SLUG: process.env.PLATFORM_SLUG ?? "wadzzo" },
-  transpilePackages: ["three", "@wadzzo/db", "@wadzzo/errors", "@wadzzo/platform", "@wadzzo/stellar", "@wadzzo/ui", "@wadzzo/utils", "@wadzzo/wallet"],
+  transpilePackages: [
+    "three",
+    "@wadzzo/db",
+    "@wadzzo/errors",
+    "@wadzzo/platform",
+    "@wadzzo/stellar",
+    "@wadzzo/ui",
+    "@wadzzo/utils",
+    "@wadzzo/wallet",
+  ],
 
   /**
    * Murals: server-side MobileCLIP (src/server/murals/clip.ts). Native
@@ -23,7 +32,9 @@ const config = {
   webpack(config, { isServer }) {
     if (isServer) {
       config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
+        ...(Array.isArray(config.externals)
+          ? config.externals
+          : [config.externals].filter(Boolean)),
         {
           "@huggingface/transformers": "commonjs @huggingface/transformers",
           "onnxruntime-node": "commonjs onnxruntime-node",
@@ -33,20 +44,31 @@ const config = {
     } else {
       // The browser build of transformers never touches these; keep webpack
       // from trying to resolve their native bits for the client bundle.
-      config.resolve.alias = { ...config.resolve.alias, sharp$: false, "onnxruntime-node$": false };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        sharp$: false,
+        "onnxruntime-node$": false,
+      };
       // onnxruntime-web has `new URL("./ort.webgpu.bundle.min.mjs", import.meta.url)`,
       // so webpack copies that ESM file into static/media as a plain asset and
       // the minifier then fails on its `import.meta` (production builds only).
       // The copy is never used: transformers.js points ONNX at the jsDelivr
       // CDN for its .mjs/.wasm at runtime. So don't turn those URLs into assets.
-      config.module.rules.push({ test: /[\\/]onnxruntime-web[\\/]/, parser: { url: false } });
+      config.module.rules.push({
+        test: /[\\/]onnxruntime-web[\\/]/,
+        parser: { url: false },
+      });
     }
     return config;
   },
   // onnxruntime loads its .so by a computed path the tracer can't follow.
   outputFileTracingIncludes: {
-    "/api/trpc/[trpc]": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
-    "/api/mobile/**": ["node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**"],
+    "/api/trpc/[trpc]": [
+      "node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**",
+    ],
+    "/api/mobile/**": [
+      "node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/**",
+    ],
   },
   outputFileTracingExcludes: {
     "*": [

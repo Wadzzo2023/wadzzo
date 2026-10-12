@@ -29,7 +29,11 @@ function findMetaMaskProvider(): EthereumProvider {
 const connectSnap = (provider: EthereumProvider) =>
   provider.request({ method: "wallet_requestSnaps", params: { [STELLAR_SNAP_ID]: {} } });
 
-const invokeSnap = <T>(provider: EthereumProvider, method: string, params?: Record<string, unknown>) =>
+const invokeSnap = <T>(
+  provider: EthereumProvider,
+  method: string,
+  params?: Record<string, unknown>,
+) =>
   provider.request({
     method: "wallet_invokeSnap",
     params: { snapId: STELLAR_SNAP_ID, request: { method, params } },

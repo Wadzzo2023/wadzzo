@@ -36,20 +36,34 @@ export function MediaPlayer({
   className?: string;
 }) {
   const frame = useRef<HTMLDivElement>(null);
-  const fullscreen = () => void (document.fullscreenElement ? document.exitFullscreen() : frame.current?.requestFullscreen());
+  const fullscreen = () =>
+    void (document.fullscreenElement
+      ? document.exitFullscreen()
+      : frame.current?.requestFullscreen());
 
   return (
-    <div ref={frame} className={cn("group relative overflow-hidden rounded-2xl bg-surface-2", className)}>
-      <div className="aspect-square w-full [:fullscreen_&]:h-full [:fullscreen_&]:aspect-auto">
+    <div
+      ref={frame}
+      className={cn("group bg-surface-2 relative overflow-hidden rounded-2xl", className)}
+    >
+      <div className="aspect-square w-full [:fullscreen_&]:aspect-auto [:fullscreen_&]:h-full">
         {type === "IMAGE" && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={title} className="size-full object-contain" />
         )}
-        {type === "VIDEO" && <video src={url} poster={poster ?? undefined} controls playsInline className="size-full bg-black object-contain" />}
+        {type === "VIDEO" && (
+          <video
+            src={url}
+            poster={poster ?? undefined}
+            controls
+            playsInline
+            className="size-full bg-black object-contain"
+          />
+        )}
         {type === "MUSIC" && <AudioPlayer url={url} poster={poster} title={title} />}
         {type === "THREE_D" && <ModelViewer url={url} />}
       </div>
-      <div className="absolute right-2 top-2 flex gap-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+      <div className="absolute top-2 right-2 flex gap-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
         {type === "THREE_D" && (
           <Chip label="Drag to rotate">
             <Box className="size-4" />
@@ -66,7 +80,15 @@ export function MediaPlayer({
   );
 }
 
-function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function IconButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -89,10 +111,21 @@ function Chip({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const time = (s: number) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}` : "0:00");
+const time = (s: number) =>
+  Number.isFinite(s)
+    ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`
+    : "0:00";
 
 /** Cover art with play/pause, a seek bar and volume — sized like the other media. */
-function AudioPlayer({ url, poster, title }: { url: string; poster?: string | null; title: string }) {
+function AudioPlayer({
+  url,
+  poster,
+  title,
+}: {
+  url: string;
+  poster?: string | null;
+  title: string;
+}) {
   const audio = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -121,13 +154,23 @@ function AudioPlayer({ url, poster, title }: { url: string; poster?: string | nu
     <div className="relative flex size-full flex-col items-center justify-center gap-5 overflow-hidden bg-black p-6 text-white">
       {poster && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt="" aria-hidden className="absolute inset-0 size-full scale-125 object-cover opacity-50 blur-3xl" />
+        <img
+          src={poster}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 size-full scale-125 object-cover opacity-50 blur-3xl"
+        />
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
       <audio ref={audio} src={url} preload="metadata" muted={muted} />
 
       {/* cover art, gently pulsing while it plays */}
-      <div className={cn("relative aspect-square w-[52%] overflow-hidden rounded-2xl bg-white/5 shadow-2xl ring-1 ring-white/15 transition-transform duration-500", playing && "scale-[1.03]")}>
+      <div
+        className={cn(
+          "relative aspect-square w-[52%] overflow-hidden rounded-2xl bg-white/5 shadow-2xl ring-1 ring-white/15 transition-transform duration-500",
+          playing && "scale-[1.03]",
+        )}
+      >
         {poster ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={poster} alt="" className="size-full object-cover" />
@@ -139,7 +182,7 @@ function AudioPlayer({ url, poster, title }: { url: string; poster?: string | nu
       </div>
 
       <div className="relative w-full max-w-sm space-y-3">
-        <p className="truncate text-center font-hud text-lg font-semibold">{title}</p>
+        <p className="font-hud truncate text-center text-lg font-semibold">{title}</p>
         <input
           type="range"
           min={0}
@@ -150,7 +193,7 @@ function AudioPlayer({ url, poster, title }: { url: string; poster?: string | nu
           aria-label="Seek"
           className="w-full accent-[hsl(var(--primary))]"
         />
-        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums text-white/70">
+        <div className="flex items-center justify-between font-mono text-[11px] text-white/70 tabular-nums">
           <span>{time(pos)}</span>
           <span>{time(dur)}</span>
         </div>
@@ -160,11 +203,16 @@ function AudioPlayer({ url, poster, title }: { url: string; poster?: string | nu
             type="button"
             onClick={toggle}
             aria-label={playing ? "Pause" : "Play"}
-            className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_-4px_hsl(var(--primary)/0.8)] transition-transform hover:scale-105 active:scale-95"
+            className="bg-primary text-primary-foreground flex size-14 items-center justify-center rounded-full shadow-[0_0_30px_-4px_hsl(var(--primary)/0.8)] transition-transform hover:scale-105 active:scale-95"
           >
             {playing ? <Pause className="size-6" /> : <Play className="ml-0.5 size-6" />}
           </button>
-          <button type="button" onClick={() => setMuted((m) => !m)} aria-label={muted ? "Unmute" : "Mute"} className="text-white/80 hover:text-white">
+          <button
+            type="button"
+            onClick={() => setMuted((m) => !m)}
+            aria-label={muted ? "Unmute" : "Mute"}
+            className="text-white/80 hover:text-white"
+          >
             {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
           </button>
         </div>

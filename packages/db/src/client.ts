@@ -11,7 +11,8 @@ const CONNECTION_TIMEOUT_MS = 30_000;
  * survives hot reloads on globalThis.
  */
 function createDbClient() {
-  const isBuildWithoutEnv = process.env.SKIP_ENV_VALIDATION === "1" || process.env.SKIP_ENV_VALIDATION === "true";
+  const isBuildWithoutEnv =
+    process.env.SKIP_ENV_VALIDATION === "1" || process.env.SKIP_ENV_VALIDATION === "true";
   const connectionString = isBuildWithoutEnv
     ? process.env.DATABASE_URL
     : requireEnv("DATABASE_URL", process.env.DATABASE_URL);

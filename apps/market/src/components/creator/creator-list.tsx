@@ -16,14 +16,26 @@ export function CreatorSearch({ value }: { value?: string }) {
     <SearchInput
       value={value}
       placeholder="Search creators"
-      onSearch={(q) => q !== (value ?? "") && router.push(q ? `${pathname}?q=${encodeURIComponent(q)}` : pathname, { scroll: false })}
+      onSearch={(q) =>
+        q !== (value ?? "") &&
+        router.push(q ? `${pathname}?q=${encodeURIComponent(q)}` : pathname, {
+          scroll: false,
+        })
+      }
     />
   );
 }
 
 /** Pages after the first (the first renders on the server). */
 export function LoadMoreCreators({ search, cursor }: { search?: string; cursor: string }) {
-  const q = api.creator.list.useInfiniteQuery({ search, limit: 24 }, { initialCursor: cursor, getNextPageParam: (p) => p.nextCursor, enabled: false });
+  const q = api.creator.list.useInfiniteQuery(
+    { search, limit: 24 },
+    {
+      initialCursor: cursor,
+      getNextPageParam: (p) => p.nextCursor,
+      enabled: false,
+    },
+  );
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   const hasMore = q.data ? q.hasNextPage : true;
   return (
@@ -37,7 +49,12 @@ export function LoadMoreCreators({ search, cursor }: { search?: string; cursor: 
       )}
       {hasMore && (
         <div className="flex justify-center">
-          <Button variant="outline" className="rounded-xl" disabled={q.isFetching} onClick={() => void (q.data ? q.fetchNextPage() : q.refetch())}>
+          <Button
+            variant="outline"
+            className="rounded-xl"
+            disabled={q.isFetching}
+            onClick={() => void (q.data ? q.fetchNextPage() : q.refetch())}
+          >
             {q.isFetching ? "Loading…" : "Load more"}
           </Button>
         </div>

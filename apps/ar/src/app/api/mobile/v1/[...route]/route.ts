@@ -54,7 +54,9 @@ async function handler(req: Request, ctx: RouteContext<"/api/mobile/v1/[...route
       caller: await callerFor(session),
       session,
     });
-    return Response.json(data ?? null, { headers: { "Cache-Control": "no-store" } });
+    return Response.json(data ?? null, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (e) {
     return errorResponse(e);
   }

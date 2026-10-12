@@ -6,7 +6,16 @@
 const config = {
   // Browser bundles read the platform from here (see @wadzzo/platform/branding).
   env: { NEXT_PUBLIC_PLATFORM_SLUG: process.env.PLATFORM_SLUG ?? "wadzzo" },
-  transpilePackages: ["three", "@wadzzo/db", "@wadzzo/errors", "@wadzzo/platform", "@wadzzo/stellar", "@wadzzo/ui", "@wadzzo/utils", "@wadzzo/wallet"],
+  transpilePackages: [
+    "three",
+    "@wadzzo/db",
+    "@wadzzo/errors",
+    "@wadzzo/platform",
+    "@wadzzo/stellar",
+    "@wadzzo/ui",
+    "@wadzzo/utils",
+    "@wadzzo/wallet",
+  ],
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -25,7 +34,11 @@ const config = {
       { source: "/bounty/:id", destination: "/bounties/:id", permanent: true },
       { source: "/walletBalance", destination: "/wallet", permanent: true },
       { source: "/recharge", destination: "/wallet", permanent: true },
-      { source: "/notification", destination: "/notifications", permanent: true },
+      {
+        source: "/notification",
+        destination: "/notifications",
+        permanent: true,
+      },
       { source: "/me", destination: "/settings", permanent: true },
       { source: "/music/:path*", destination: "/marketplace", permanent: true },
     ];
@@ -42,8 +55,14 @@ const config = {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "https://main.d20qrrwbkiopzh.amplifyapp.com" },
-          { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "https://main.d20qrrwbkiopzh.amplifyapp.com",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,DELETE,PATCH,POST,PUT,OPTIONS",
+          },
           {
             key: "Access-Control-Allow-Headers",
             value:

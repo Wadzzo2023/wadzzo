@@ -14,7 +14,15 @@ type Choices = Extract<AgentBlock, { kind: "choices" }>;
  * single-choice question; with `multiple`, tick several then Continue. The
  * answer goes back as the person's next message.
  */
-export function ChoicesCard({ block, disabled, onAnswer }: { block: Choices; disabled: boolean; onAnswer: (labels: string[]) => void }) {
+export function ChoicesCard({
+  block,
+  disabled,
+  onAnswer,
+}: {
+  block: Choices;
+  disabled: boolean;
+  onAnswer: (labels: string[]) => void;
+}) {
   const [picked, setPicked] = useState<string[]>([]);
   const [other, setOther] = useState("");
   const answered = block.answered;
@@ -31,9 +39,9 @@ export function ChoicesCard({ block, disabled, onAnswer }: { block: Choices; dis
   };
 
   return (
-    <section className="rounded-xl border border-primary/30 bg-linear-to-br from-primary/10 via-card to-card p-3">
+    <section className="border-primary/30 from-primary/10 via-card to-card rounded-xl border bg-linear-to-br p-3">
       <p className="mb-2 flex items-start gap-2 text-sm font-medium">
-        <MessageCircleQuestion className="mt-0.5 size-4 shrink-0 text-primary" />
+        <MessageCircleQuestion className="text-primary mt-0.5 size-4 shrink-0" />
         {block.question}
       </p>
       <div className="flex flex-wrap gap-1.5">
@@ -49,7 +57,9 @@ export function ChoicesCard({ block, disabled, onAnswer }: { block: Choices; dis
               aria-pressed={on}
               className={cn(
                 "inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1.5 text-left text-xs font-medium transition-colors",
-                on ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/60 hover:bg-primary/5",
+                on
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-card hover:border-primary/60 hover:bg-primary/5",
                 locked && !on && "opacity-50",
                 locked && "cursor-default",
               )}
@@ -61,12 +71,12 @@ export function ChoicesCard({ block, disabled, onAnswer }: { block: Choices; dis
         })}
       </div>
       {block.options.some((o) => o.description) && !locked && (
-        <ul className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
+        <ul className="text-muted-foreground mt-2 space-y-0.5 text-[11px]">
           {block.options
             .filter((o) => o.description)
             .map((o) => (
               <li key={o.id}>
-                <b className="font-medium text-foreground">{o.label}</b> — {o.description}
+                <b className="text-foreground font-medium">{o.label}</b> — {o.description}
               </li>
             ))}
         </ul>
@@ -80,21 +90,27 @@ export function ChoicesCard({ block, disabled, onAnswer }: { block: Choices; dis
                 onChange={(e) => setOther(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submitOther())}
                 placeholder="Something else…"
-                className="h-8 w-full rounded-md border bg-card pl-2.5 pr-7 text-xs outline-none focus:border-primary"
+                className="bg-card focus:border-primary h-8 w-full rounded-md border pr-7 pl-2.5 text-xs outline-none"
                 maxLength={200}
               />
-              <CornerDownLeft className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-faint" />
+              <CornerDownLeft className="text-faint pointer-events-none absolute top-1/2 right-2 size-3 -translate-y-1/2" />
             </div>
           )}
           {block.multiple && (
-            <Button size="sm" disabled={picked.length === 0 && !other.trim()} onClick={() => (other.trim() ? submitOther() : onAnswer(picked))}>
+            <Button
+              size="sm"
+              disabled={picked.length === 0 && !other.trim()}
+              onClick={() => (other.trim() ? submitOther() : onAnswer(picked))}
+            >
               Continue{picked.length > 0 && ` (${picked.length})`}
             </Button>
           )}
         </div>
       )}
       {answered && answered.some((a) => !block.options.some((o) => o.label === a)) && (
-        <p className="mt-2 text-xs text-muted-foreground">You said: {answered.filter((a) => !block.options.some((o) => o.label === a)).join(", ")}</p>
+        <p className="text-muted-foreground mt-2 text-xs">
+          You said: {answered.filter((a) => !block.options.some((o) => o.label === a)).join(", ")}
+        </p>
       )}
     </section>
   );

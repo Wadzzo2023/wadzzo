@@ -1,6 +1,15 @@
 "use client";
 
-import { File as FileIcon, ImageIcon, Loader2, Music, Paperclip, UploadCloud, Video, X } from "lucide-react";
+import {
+  File as FileIcon,
+  ImageIcon,
+  Loader2,
+  Music,
+  Paperclip,
+  UploadCloud,
+  Video,
+  X,
+} from "lucide-react";
 import { useId, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -11,7 +20,13 @@ import { ENDPOINT_ACCEPT, fileMatchesAccept, formatBytes } from "./accept";
 import { useS3Upload, type UploadedFile } from "./use-s3-upload";
 
 const iconFor = (type: string) =>
-  type.startsWith("image/") ? ImageIcon : type.startsWith("video/") ? Video : type.startsWith("audio/") ? Music : FileIcon;
+  type.startsWith("image/")
+    ? ImageIcon
+    : type.startsWith("video/")
+      ? Video
+      : type.startsWith("audio/")
+        ? Music
+        : FileIcon;
 
 /**
  * Drag-and-drop for several files at once. `panel` is a drop area with the
@@ -90,7 +105,10 @@ export function MultiDropzone({
           type="button"
           onClick={() => input.current?.click()}
           disabled={Boolean(disabled) || busy}
-          className={cn("relative flex size-10 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-60", className)}
+          className={cn(
+            "bg-card text-muted-foreground hover:bg-accent hover:text-foreground relative flex size-10 items-center justify-center rounded-lg border disabled:opacity-60",
+            className,
+          )}
           aria-label={label ?? "Attach files"}
           title={busy ? `Uploading ${progress}%` : (label ?? "Attach files")}
         >
@@ -107,29 +125,40 @@ export function MultiDropzone({
         role="button"
         tabIndex={disabled ? -1 : 0}
         onClick={() => !busy && input.current?.click()}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), input.current?.click())}
+        onKeyDown={(e) =>
+          (e.key === "Enter" || e.key === " ") && (e.preventDefault(), input.current?.click())
+        }
         onDragEnter={(e) => (e.preventDefault(), setDragging(true))}
         onDragOver={(e) => e.preventDefault()}
-        onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setDragging(false)}
+        onDragLeave={(e) =>
+          !e.currentTarget.contains(e.relatedTarget as Node) && setDragging(false)
+        }
         onDrop={(e) => {
           e.preventDefault();
           setDragging(false);
           void start(e.dataTransfer.files);
         }}
         className={cn(
-          "relative flex cursor-pointer flex-col items-center gap-2 overflow-hidden rounded-xl border-2 border-dashed bg-surface-2 px-4 py-6 text-center transition-colors hover:border-line-bright",
+          "bg-surface-2 hover:border-line-bright relative flex cursor-pointer flex-col items-center gap-2 overflow-hidden rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors",
           dragging && "border-primary bg-primary/5",
           (Boolean(disabled) || busy) && "cursor-default opacity-70",
         )}
       >
-        <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
           {busy ? <Loader2 className="size-5 animate-spin" /> : <UploadCloud className="size-5" />}
         </span>
-        <span className="font-hud text-sm font-semibold">{busy ? `Uploading… ${progress}%` : (label ?? "Drop files here")}</span>
-        <span className="text-xs text-muted-foreground">
-          or <span className="font-medium text-primary">browse</span> · up to {maxFiles} · {hint}
+        <span className="font-hud text-sm font-semibold">
+          {busy ? `Uploading… ${progress}%` : (label ?? "Drop files here")}
         </span>
-        {busy && <span className="absolute inset-x-0 bottom-0 h-1 bg-primary transition-[width]" style={{ width: `${progress}%` }} />}
+        <span className="text-muted-foreground text-xs">
+          or <span className="text-primary font-medium">browse</span> · up to {maxFiles} · {hint}
+        </span>
+        {busy && (
+          <span
+            className="bg-primary absolute inset-x-0 bottom-0 h-1 transition-[width]"
+            style={{ width: `${progress}%` }}
+          />
+        )}
         {hidden}
       </div>
 
@@ -138,14 +167,19 @@ export function MultiDropzone({
           {done.map((f, i) => {
             const I = iconFor(f.type);
             return (
-              <li key={`${f.url}-${i}`} className="flex items-center gap-2.5 rounded-lg border bg-card px-2.5 py-2 text-sm">
-                <I className="size-4 shrink-0 text-muted-foreground" />
+              <li
+                key={`${f.url}-${i}`}
+                className="bg-card flex items-center gap-2.5 rounded-lg border px-2.5 py-2 text-sm"
+              >
+                <I className="text-muted-foreground size-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{f.name}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{formatBytes(f.size)}</span>
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {formatBytes(f.size)}
+                </span>
                 <button
                   type="button"
                   onClick={() => setDone((d) => d.filter((_, j) => j !== i))}
-                  className="rounded p-0.5 text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive rounded p-0.5"
                   aria-label={`Remove ${f.name} from the list`}
                 >
                   <X className="size-3.5" />

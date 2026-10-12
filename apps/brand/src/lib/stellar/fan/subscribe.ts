@@ -1,12 +1,12 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, STROOP, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  STROOP,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";

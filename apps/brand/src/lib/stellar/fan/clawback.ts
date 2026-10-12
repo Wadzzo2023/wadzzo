@@ -1,14 +1,15 @@
-import {
-  Asset,
-  Keypair,
-  Horizon,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Keypair, Horizon, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  STELLAR_URL,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 import { type AccountType } from "./utils";
 
@@ -32,10 +33,7 @@ export async function creatorPageAccCreate({
   const server = new Horizon.Server(STELLAR_URL);
 
   const requiredAsset2refundXlm = await getplatformAssetNumberForXLM(2);
-  const total =
-    requiredAsset2refundXlm +
-    Number(PLATFORM_FEE) +
-    Number(TrxBaseFeeInPlatformAsset);
+  const total = requiredAsset2refundXlm + Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset);
 
   const storageAcc = Keypair.fromSecret(storageSecret);
   const PLATFORM_MOTHER_ACC = Keypair.fromSecret(env.MOTHER_SECRET);
@@ -43,9 +41,7 @@ export async function creatorPageAccCreate({
   const issuerAcc = Keypair.random();
   const asset = new Asset(assetCode, issuerAcc.publicKey());
 
-  const transactionInializer = await server.loadAccount(
-    PLATFORM_MOTHER_ACC.publicKey(),
-  );
+  const transactionInializer = await server.loadAccount(PLATFORM_MOTHER_ACC.publicKey());
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
     fee: TrxBaseFee,

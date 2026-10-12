@@ -29,7 +29,10 @@ export function ChatPanel({
   const count = messages?.length ?? 0;
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: count > 0 ? "smooth" : "auto", block: "end" });
+    endRef.current?.scrollIntoView({
+      behavior: count > 0 ? "smooth" : "auto",
+      block: "end",
+    });
   }, [count]);
 
   if (loading) {
@@ -43,7 +46,7 @@ export function ChatPanel({
 
   return (
     <div>
-      <p className="font-hud mb-4 flex items-center justify-center gap-1.5 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ar-faint">
+      <p className="font-hud text-ar-faint mb-4 flex items-center justify-center gap-1.5 text-[9.5px] font-semibold tracking-[0.16em] uppercase">
         <Lock size={10} strokeWidth={2.6} />
         Only you and {brand.name} can see this
       </p>
@@ -54,7 +57,7 @@ export function ChatPanel({
             src={brand.avatarUrl}
             className="mx-auto h-12 w-12 rounded-[14px] ring-1 ring-white/15"
           />
-          <p className="mx-auto mt-3 max-w-[17rem] text-[12.5px] leading-relaxed text-ar-faint">
+          <p className="text-ar-faint mx-auto mt-3 max-w-[17rem] text-[12.5px] leading-relaxed">
             Not sure what counts? Ask {brand.name} directly before you send your entry.
           </p>
         </div>
@@ -67,7 +70,7 @@ export function ChatPanel({
             return (
               <li key={m.id}>
                 {newDay && (
-                  <p className="font-hud my-3 text-center text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ar-faint">
+                  <p className="font-hud text-ar-faint my-3 text-center text-[9.5px] font-semibold tracking-[0.16em] uppercase">
                     {format(new Date(m.createdAt), "d MMM yyyy")}
                   </p>
                 )}
@@ -87,14 +90,14 @@ export function ChatPanel({
                   )}
                   <div
                     className={cn(
-                      "max-w-[78%] whitespace-pre-wrap break-words rounded-[16px] px-3.5 py-2 text-[13.5px] leading-snug",
+                      "max-w-[78%] rounded-[16px] px-3.5 py-2 text-[13.5px] leading-snug break-words whitespace-pre-wrap",
                       m.fromBrand
-                        ? "rounded-bl-[6px] border border-ar-line bg-white/[0.05] text-ar-text"
-                        : "rounded-br-[6px] bg-ar-green/20 text-ar-text ring-1 ring-ar-green/40",
+                        ? "border-ar-line text-ar-text rounded-bl-[6px] border bg-white/[0.05]"
+                        : "bg-ar-green/20 text-ar-text ring-ar-green/40 rounded-br-[6px] ring-1",
                     )}
                   >
                     {m.content}
-                    <span className="font-hud ml-2 inline-block translate-y-[2px] text-[9px] text-ar-faint">
+                    <span className="font-hud text-ar-faint ml-2 inline-block translate-y-[2px] text-[9px]">
                       {format(new Date(m.createdAt), "HH:mm")}
                     </span>
                   </div>

@@ -35,7 +35,8 @@ const DEFAULT_WALLET_CONNECT_PROJECT_ID = "f1aeccdd62aff60ec7f578ec3661321f";
 const SESSION_TIMEOUT_MS = 180_000;
 const ALL_STELLAR_CHAINS = ["stellar:pubnet", "stellar:testnet"];
 
-const projectId = () => process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? DEFAULT_WALLET_CONNECT_PROJECT_ID;
+const projectId = () =>
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? DEFAULT_WALLET_CONNECT_PROJECT_ID;
 
 const requiredNamespaces = {
   stellar: { methods: Object.values(STELLAR_METHODS), chains: ALL_STELLAR_CHAINS, events: [] },
@@ -91,9 +92,7 @@ async function login(): Promise<void> {
 
     const publicKey = publicKeyOfSession(session);
     if (isInvalidPublicKey(publicKey)) {
-      return void toast.error(
-        "Login failed. Please try to login again after refreshing the page.",
-      );
+      return void toast.error("Login failed. Please try to login again after refreshing the page.");
     }
 
     const toastId = toast.loading("Please wait");
@@ -142,7 +141,10 @@ async function login(): Promise<void> {
  * Opens the WalletConnect modal, lets the user approve a session and runs
  * `method` for `xdr`. Resolves the signed XDR (sign) or `true` (sign + submit).
  */
-async function requestSignature(xdr: string, method: StellarMethod): Promise<string | boolean | undefined> {
+async function requestSignature(
+  xdr: string,
+  method: StellarMethod,
+): Promise<string | boolean | undefined> {
   const modal = new Web3Modal({
     walletConnectVersion: 2,
     projectId: projectId(),

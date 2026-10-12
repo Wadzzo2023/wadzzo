@@ -19,7 +19,9 @@ export const payRouter = createTRPCRouter({
       if (user.email) {
         return await sendSiteAsset2pub(user.id, input.tokenNum);
       } else {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Account does not have an associated email" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Account does not have an associated email",
+        });
       }
     }),
   payment: protectedProcedure
@@ -48,12 +50,16 @@ export const payRouter = createTRPCRouter({
         if (data.status === "COMPLETED") {
           return true;
         } else {
-          throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Payment was not successful" });
+          throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+            message: "Payment was not successful",
+          });
         }
       }
 
       if (result.status === 400) {
-        throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Something went wrong with the payment" });
+        throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+          message: "Something went wrong with the payment",
+        });
       }
 
       return false;
@@ -109,27 +115,29 @@ export const payRouter = createTRPCRouter({
         if (data.status === "COMPLETED") {
           return true;
         } else {
-          throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Payment was not successful" });
+          throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+            message: "Payment was not successful",
+          });
         }
       }
 
       if (result.status === 400) {
-        throw new AppError(ErrorCodes.PAYMENT_FAILED, { message: "Something went wrong with the payment" });
+        throw new AppError(ErrorCodes.PAYMENT_FAILED, {
+          message: "Something went wrong with the payment",
+        });
       }
     }),
 
   getOffers: protectedProcedure.query(async ({ ctx }) => {
     // const tokenNumber = await getPlatfromAssetPrice();
 
-    const offers = [1.99, 4.99, 9.99, 19.99, 24.99, 49.99, 99.99].map(
-      (price) => {
-        const num = Number((price * 100 + 1).toFixed(1));
-        return {
-          price,
-          num,
-        };
-      },
-    );
+    const offers = [1.99, 4.99, 9.99, 19.99, 24.99, 49.99, 99.99].map((price) => {
+      const num = Number((price * 100 + 1).toFixed(1));
+      return {
+        price,
+        num,
+      };
+    });
     return offers;
   }),
 });

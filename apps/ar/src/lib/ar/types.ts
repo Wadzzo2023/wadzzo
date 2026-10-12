@@ -29,12 +29,7 @@ export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic";
  * precedence: a collected pin reads "collected" even if it has also expired,
  * because that's the fact the collector cares about.
  */
-export type PinStatus =
-  | "collected"
-  | "expired"
-  | "depleted"
-  | "locked"
-  | "collectible";
+export type PinStatus = "collected" | "expired" | "depleted" | "locked" | "collectible";
 
 /** `LocationGroup.type` — what kind of stop the brand says this is. */
 export type ArPinType = "EVENT" | "BOUNTY" | "EXPERIENCE" | "LAUNCH" | "OTHER" | "LANDMARK";

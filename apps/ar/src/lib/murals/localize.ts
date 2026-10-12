@@ -35,7 +35,8 @@ export function cropGrid(fast: boolean): Rect[] {
     ];
   }
   const out: Rect[] = [];
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) out.push({ x: c * 0.25, y: r * 0.25, w: 0.5, h: 0.5 });
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++) out.push({ x: c * 0.25, y: r * 0.25, w: 0.5, h: 0.5 });
   return out;
 }
 
@@ -79,11 +80,16 @@ export function boxFromScores(crops: Rect[], scores: number[], floor = 0.35): Re
 }
 
 /** Small RGB image (0–255, interleaved) of the full frame, e.g. 160×120. */
-export type Rgb = { data: Uint8Array | Uint8ClampedArray; w: number; h: number };
+export type Rgb = {
+  data: Uint8Array | Uint8ClampedArray;
+  w: number;
+  h: number;
+};
 
 function luma(img: Rgb): Float32Array {
   const out = new Float32Array(img.w * img.h);
-  for (let i = 0, j = 0; i < out.length; i++, j += 3) out[i] = 0.299 * img.data[j]! + 0.587 * img.data[j + 1]! + 0.114 * img.data[j + 2]!;
+  for (let i = 0, j = 0; i < out.length; i++, j += 3)
+    out[i] = 0.299 * img.data[j]! + 0.587 * img.data[j + 1]! + 0.114 * img.data[j + 2]!;
   return out;
 }
 
@@ -93,7 +99,14 @@ type Line = { theta: number; rho: number; votes: number };
  * Strongest line in a band of the edge map, restricted to angles near
  * `around` (0 = vertical edge, π/2 = horizontal edge) ± `spread`.
  */
-function bandLine(mag: Float32Array, gw: number, band: { x0: number; y0: number; x1: number; y1: number }, around: number, spread: number, thresh: number): Line | null {
+function bandLine(
+  mag: Float32Array,
+  gw: number,
+  band: { x0: number; y0: number; x1: number; y1: number },
+  around: number,
+  spread: number,
+  thresh: number,
+): Line | null {
   const STEPS = 21;
   const thetas: number[] = [];
   for (let i = 0; i < STEPS; i++) thetas.push(around - spread + (2 * spread * i) / (STEPS - 1));
@@ -181,8 +194,20 @@ export function quadInBox(img: Rgb, box: Rect): [Pt, Pt, Pt, Pt] | null {
   for (let y = ry0; y < ry1; y++) {
     for (let x = rx0; x < rx1; x++) {
       const i = y * gw + x;
-      const gx = -data[i - gw - 1]! - 2 * data[i - 1]! - data[i + gw - 1]! + data[i - gw + 1]! + 2 * data[i + 1]! + data[i + gw + 1]!;
-      const gy = -data[i - gw - 1]! - 2 * data[i - gw]! - data[i - gw + 1]! + data[i + gw - 1]! + 2 * data[i + gw]! + data[i + gw + 1]!;
+      const gx =
+        -data[i - gw - 1]! -
+        2 * data[i - 1]! -
+        data[i + gw - 1]! +
+        data[i - gw + 1]! +
+        2 * data[i + 1]! +
+        data[i + gw + 1]!;
+      const gy =
+        -data[i - gw - 1]! -
+        2 * data[i - gw]! -
+        data[i - gw + 1]! +
+        data[i + gw - 1]! +
+        2 * data[i + gw]! +
+        data[i + gw + 1]!;
       const m = Math.hypot(gx, gy);
       mag[i] = m;
       sum += m;
@@ -195,15 +220,49 @@ export function quadInBox(img: Rgb, box: Rect): [Pt, Pt, Pt, Pt] | null {
   const bh = ry1 - ry0;
   const H = Math.PI / 2; // normal points vertically → a horizontal edge
   const S = (25 * Math.PI) / 180;
-  const top = bandLine(mag, gw, { x0: rx0, y0: ry0, x1: rx1, y1: ry0 + Math.round(bh * 0.4) }, H, S, thresh);
-  const bottom = bandLine(mag, gw, { x0: rx0, y0: ry1 - Math.round(bh * 0.4), x1: rx1, y1: ry1 }, H, S, thresh);
-  const left = bandLine(mag, gw, { x0: rx0, y0: ry0, x1: rx0 + Math.round(bw * 0.4), y1: ry1 }, 0, S, thresh);
-  const right = bandLine(mag, gw, { x0: rx1 - Math.round(bw * 0.4), y0: ry0, x1: rx1, y1: ry1 }, 0, S, thresh);
+  const top = bandLine(
+    mag,
+    gw,
+    { x0: rx0, y0: ry0, x1: rx1, y1: ry0 + Math.round(bh * 0.4) },
+    H,
+    S,
+    thresh,
+  );
+  const bottom = bandLine(
+    mag,
+    gw,
+    { x0: rx0, y0: ry1 - Math.round(bh * 0.4), x1: rx1, y1: ry1 },
+    H,
+    S,
+    thresh,
+  );
+  const left = bandLine(
+    mag,
+    gw,
+    { x0: rx0, y0: ry0, x1: rx0 + Math.round(bw * 0.4), y1: ry1 },
+    0,
+    S,
+    thresh,
+  );
+  const right = bandLine(
+    mag,
+    gw,
+    { x0: rx1 - Math.round(bw * 0.4), y0: ry0, x1: rx1, y1: ry1 },
+    0,
+    S,
+    thresh,
+  );
   if (!top || !bottom || !left || !right) return null;
 
   // A line needs real support: at least ~45% of its band's length in edges.
   const minVotes = (len: number) => len * thresh * 0.45;
-  if (top.votes < minVotes(bw) || bottom.votes < minVotes(bw) || left.votes < minVotes(bh) || right.votes < minVotes(bh)) return null;
+  if (
+    top.votes < minVotes(bw) ||
+    bottom.votes < minVotes(bw) ||
+    left.votes < minVotes(bh) ||
+    right.votes < minVotes(bh)
+  )
+    return null;
 
   const tl = intersect(top, left);
   const tr = intersect(top, right);
@@ -214,7 +273,13 @@ export function quadInBox(img: Rgb, box: Rect): [Pt, Pt, Pt, Pt] | null {
 
   // Believable: convex, inside the search region, 45–140% of the box area.
   if (!convex(pts)) return null;
-  const inside = pts.every((p) => p.x >= box.x - mx * 1.2 && p.x <= box.x + box.w + mx * 1.2 && p.y >= box.y - my * 1.2 && p.y <= box.y + box.h + my * 1.2);
+  const inside = pts.every(
+    (p) =>
+      p.x >= box.x - mx * 1.2 &&
+      p.x <= box.x + box.w + mx * 1.2 &&
+      p.y >= box.y - my * 1.2 &&
+      p.y <= box.y + box.h + my * 1.2,
+  );
   if (!inside) return null;
   const ratio = polyArea(pts) / Math.max(1e-6, box.w * box.h);
   if (ratio < 0.45 || ratio > 1.4) return null;
@@ -258,7 +323,9 @@ export function tightenBox(img: Rgb, box: Rect): Rect {
   // Tightening assumes art on a plain wall. If the border itself isn't one
   // colour (the art or other buildings reach the edge), there's no "wall"
   // to subtract — keep the box.
-  const borderDist = rs.map((r, i) => Math.hypot(r - wr, gs[i]! - wg, bs[i]! - wb)).sort((a, b) => a - b);
+  const borderDist = rs
+    .map((r, i) => Math.hypot(r - wr, gs[i]! - wg, bs[i]! - wb))
+    .sort((a, b) => a - b);
   if (borderDist[Math.floor(borderDist.length * 0.75)]! > 30) return box;
 
   const dist = new Float32Array((x1 - x0) * (y1 - y0));
@@ -326,7 +393,12 @@ export function tightenBox(img: Rgb, box: Rect): Rect {
   const py = nh * 0.06;
   const nx = Math.max(0, (x0 + sx[0] - px) / gw);
   const ny = Math.max(0, (y0 + sy[0] - py) / gh);
-  return { x: nx, y: ny, w: Math.min(1 - nx, (nw + 2 * px) / gw), h: Math.min(1 - ny, (nh + 2 * py) / gh) };
+  return {
+    x: nx,
+    y: ny,
+    w: Math.min(1 - nx, (nw + 2 * px) / gw),
+    h: Math.min(1 - ny, (nh + 2 * py) / gh),
+  };
 }
 
 /** Box → tightened → quad when the edges agree, else the tightened box. */

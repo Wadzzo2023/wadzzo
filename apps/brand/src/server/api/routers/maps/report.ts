@@ -27,15 +27,29 @@ type Scope = { creatorId: string | null; platformId: string | null };
 
 async function resolveScope(ctx: Ctx, creatorId: string | undefined): Promise<Scope> {
   if (creatorId === "all") {
-    if (!(await isAdmin(ctx))) throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can see every brand" });
-    return { creatorId: null, platformId: platformScope(ctx).platformId ?? null };
+    if (!(await isAdmin(ctx)))
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Only admins can see every brand",
+      });
+    return {
+      creatorId: null,
+      platformId: platformScope(ctx).platformId ?? null,
+    };
   }
   if (creatorId) {
     await assertOwnerOrAdmin(ctx, creatorId);
     return { creatorId, platformId: null };
   }
-  const creator = await ctx.db.creator.findUnique({ where: { id: ctx.session.user.id }, select: { id: true } });
-  if (!creator) throw new TRPCError({ code: "FORBIDDEN", message: "Only brands have collection reports" });
+  const creator = await ctx.db.creator.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { id: true },
+  });
+  if (!creator)
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Only brands have collection reports",
+    });
   return { creatorId: creator.id, platformId: null };
 }
 
@@ -69,7 +83,9 @@ export const reportRouter = createTRPCRouter({
 
     // Same-length window right before this one, for "vs previous period".
     const prevTo = from ? new Date(from.getTime() - 1) : undefined;
-    const prevFrom = from ? new Date(from.getTime() - ((to ?? new Date()).getTime() - from.getTime())) : undefined;
+    const prevFrom = from
+      ? new Date(from.getTime() - ((to ?? new Date()).getTime() - from.getTime()))
+      : undefined;
 
     const [now, previous, daily, perPin, collectors, pins] = await Promise.all([
       totals(ctx, scope, from, to),
@@ -80,7 +96,15 @@ export const reportRouter = createTRPCRouter({
       ctx.db.$queryRaw<{ gid: string; n: number; users: number; last: Date }[]>`
         SELECT g.id AS gid, COUNT(*)::int AS n, COUNT(DISTINCT c."userId")::int AS users, MAX(c."createdAt") AS last
         FROM ${FROM} WHERE ${where} GROUP BY g.id`,
-      ctx.db.$queryRaw<{ id: string; name: string | null; image: string | null; n: number; last: Date }[]>`
+      ctx.db.$queryRaw<
+        {
+          id: string;
+          name: string | null;
+          image: string | null;
+          n: number;
+          last: Date;
+        }[]
+      >`
         SELECT u.id, u.name, u.image, COUNT(*)::int AS n, MAX(c."createdAt") AS last
         FROM ${FROM} JOIN "User" u ON u.id = c."userId"
         WHERE ${where} GROUP BY u.id, u.name, u.image ORDER BY n DESC, last DESC LIMIT 10`,
@@ -116,7 +140,13 @@ export const reportRouter = createTRPCRouter({
       collectors,
       pins: pins.map((g) => {
         const s = byPin.get(g.id);
-        return { ...g, locations: g._count.locations, collected: s?.n ?? 0, collectors: s?.users ?? 0, lastCollected: s?.last ?? null };
+        return {
+          ...g,
+          locations: g._count.locations,
+          collected: s?.n ?? 0,
+          collectors: s?.users ?? 0,
+          lastCollected: s?.last ?? null,
+        };
       }),
     };
   }),
@@ -142,7 +172,13 @@ export const reportRouter = createTRPCRouter({
         creator: { select: { id: true, name: true, profileUrl: true } },
         locations: {
           where: { hidden: false },
-          select: { id: true, latitude: true, longitude: true, autoCollect: true, _count: { select: { consumers: { where: { hidden: false } } } } },
+          select: {
+            id: true,
+            latitude: true,
+            longitude: true,
+            autoCollect: true,
+            _count: { select: { consumers: { where: { hidden: false } } } },
+          },
           orderBy: { id: "asc" },
         },
       },
@@ -157,7 +193,10 @@ export const reportRouter = createTRPCRouter({
         WHERE l."locationGroupId" = ${group.id} AND c.hidden = false AND l.hidden = false
         GROUP BY 1 ORDER BY 1`,
       ctx.db.locationConsumer.findMany({
-        where: { hidden: false, location: { locationGroupId: group.id, hidden: false } },
+        where: {
+          hidden: false,
+          location: { locationGroupId: group.id, hidden: false },
+        },
         select: {
           id: true,
           createdAt: true,
@@ -174,27 +213,53 @@ export const reportRouter = createTRPCRouter({
 
     // Wallet sign-ins have no email here; the accounts service knows them.
     const missing = [...new Set(consumers.filter((c) => !c.user.email).map((c) => c.user.id))];
-    const emails = missing.length ? new Map((await fetchUsersByPublicKeys(missing).catch(() => [])).map((u) => [u.publicKey, u.email])) : new Map<string, string>();
+    const emails = missing.length
+      ? new Map(
+          (await fetchUsersByPublicKeys(missing).catch(() => [])).map((u) => [
+            u.publicKey,
+            u.email,
+          ]),
+        )
+      : new Map<string, string>();
 
     return {
       ...group,
       daily,
-      consumers: consumers.map((c) => ({ ...c, email: c.user.email ?? emails.get(c.user.id) ?? null })),
+      consumers: consumers.map((c) => ({
+        ...c,
+        email: c.user.email ?? emails.get(c.user.id) ?? null,
+      })),
     };
   }),
 
   /** Every collection in the scope and period, one row each, for a CSV download. */
-  export: protectedProcedure.input(scopeInput.extend({ pinId: z.string().optional() })).mutation(async ({ ctx, input }) => {
-    let scope = await resolveScope(ctx, input.creatorId);
-    if (input.pinId) {
-      const g = await ctx.db.locationGroup.findUnique({ where: { id: input.pinId }, select: { creatorId: true } });
-      if (!g) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
-      await assertOwnerOrAdmin(ctx, g.creatorId);
-      scope = { creatorId: g.creatorId, platformId: null };
-    }
-    const rows = await ctx.db.$queryRaw<
-      { brand: string; pin: string; pinId: string; lat: number; lng: number; wallet: string; name: string | null; email: string | null; collectedAt: Date; redeemed: boolean }[]
-    >`
+  export: protectedProcedure
+    .input(scopeInput.extend({ pinId: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      let scope = await resolveScope(ctx, input.creatorId);
+      if (input.pinId) {
+        const g = await ctx.db.locationGroup.findUnique({
+          where: { id: input.pinId },
+          select: { creatorId: true },
+        });
+        if (!g) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+        await assertOwnerOrAdmin(ctx, g.creatorId);
+        scope = { creatorId: g.creatorId, platformId: null };
+      }
+      const rows = await ctx.db.$queryRaw<
+        {
+          brand: string;
+          pin: string;
+          pinId: string;
+          lat: number;
+          lng: number;
+          wallet: string;
+          name: string | null;
+          email: string | null;
+          collectedAt: Date;
+          redeemed: boolean;
+        }[]
+      >`
       SELECT cr.name AS brand, g.title AS pin, g.id AS "pinId", l.latitude AS lat, l.longitude AS lng,
              u.id AS wallet, u.name, u.email, c."createdAt" AS "collectedAt", c."isRedeemed" AS redeemed
       FROM ${FROM} JOIN "User" u ON u.id = c."userId" JOIN "Creator" cr ON cr.id = g."creatorId"
@@ -202,8 +267,18 @@ export const reportRouter = createTRPCRouter({
         ${input.pinId ? Prisma.sql`AND g.id = ${input.pinId}` : Prisma.empty}
       ORDER BY c."createdAt" DESC LIMIT 50000`;
 
-    const missing = [...new Set(rows.filter((r) => !r.email).map((r) => r.wallet))];
-    const emails = missing.length ? new Map((await fetchUsersByPublicKeys(missing).catch(() => [])).map((u) => [u.publicKey, u.email])) : new Map<string, string>();
-    return rows.map((r) => ({ ...r, email: r.email ?? emails.get(r.wallet) ?? "" }));
-  }),
+      const missing = [...new Set(rows.filter((r) => !r.email).map((r) => r.wallet))];
+      const emails = missing.length
+        ? new Map(
+            (await fetchUsersByPublicKeys(missing).catch(() => [])).map((u) => [
+              u.publicKey,
+              u.email,
+            ]),
+          )
+        : new Map<string, string>();
+      return rows.map((r) => ({
+        ...r,
+        email: r.email ?? emails.get(r.wallet) ?? "",
+      }));
+    }),
 });

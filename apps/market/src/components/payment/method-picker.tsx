@@ -14,9 +14,24 @@ const META: Record<PayMethod, { label: string; icon: typeof Coins }> = {
 };
 
 /** Segmented choice of how to pay. */
-export function MethodPicker({ value, onChange, methods }: { value: PayMethod; onChange: (m: PayMethod) => void; methods: PayMethod[] }) {
+export function MethodPicker({
+  value,
+  onChange,
+  methods,
+}: {
+  value: PayMethod;
+  onChange: (m: PayMethod) => void;
+  methods: PayMethod[];
+}) {
   return (
-    <div className={cn("grid gap-1 rounded-lg bg-surface-2 p-1", methods.length === 3 ? "grid-cols-3" : "grid-cols-2")} role="radiogroup" aria-label="Payment method">
+    <div
+      className={cn(
+        "bg-surface-2 grid gap-1 rounded-lg p-1",
+        methods.length === 3 ? "grid-cols-3" : "grid-cols-2",
+      )}
+      role="radiogroup"
+      aria-label="Payment method"
+    >
       {methods.map((m) => {
         const Icon = META[m].icon;
         const active = m === value;
@@ -29,7 +44,9 @@ export function MethodPicker({ value, onChange, methods }: { value: PayMethod; o
             onClick={() => onChange(m)}
             className={cn(
               "flex h-9 items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-colors",
-              active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              active
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <Icon className="size-4" /> {META[m].label}

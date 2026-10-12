@@ -8,7 +8,11 @@ import { CollectionView } from "./collection-view";
 
 export function CollectionPage() {
   return (
-    <SignedIn icon={Layers} title="Your collection" description="Sign in to see the items you own and resell them.">
+    <SignedIn
+      icon={Layers}
+      title="Your collection"
+      description="Sign in to see the items you own and resell them."
+    >
       <CollectionView />
     </SignedIn>
   );

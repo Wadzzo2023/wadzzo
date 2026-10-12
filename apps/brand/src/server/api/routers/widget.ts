@@ -4,11 +4,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { env } from "~/env";
 import { WADZZO_AR_URL } from "~/lib/embed";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";
 import { Location } from "~/types/game/location";
 import { findNearestLocation } from "~/utils/geo";
@@ -35,7 +31,9 @@ export const widgetRouter = createTRPCRouter({
       });
 
       if (!location) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Location not found",
+        });
       }
 
       // Check if user is authorized to generate descriptions for this pin
@@ -51,14 +49,18 @@ export const widgetRouter = createTRPCRouter({
       });
 
       if (!locationGroup) {
-        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You are not authorized to generate descriptions for this location", });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+          message: "You are not authorized to generate descriptions for this location",
+        });
       }
 
       // Get the URL from the location group or create a Google Maps URL if not available
       const locationUrl = locationGroup.link;
 
       if (!locationUrl) {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location URL not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "Location URL not found",
+        });
       }
 
       try {
@@ -96,15 +98,10 @@ export const widgetRouter = createTRPCRouter({
         });
 
         const content = response.choices[0]?.message?.content;
-        const parsedContent = content
-          ? JSON.parse(content)
-          : { summary: "", descriptions: [] };
+        const parsedContent = content ? JSON.parse(content) : { summary: "", descriptions: [] };
 
         // Store the AI-generated descriptions and summary in the database
-        if (
-          parsedContent.descriptions &&
-          parsedContent.descriptions.length > 0
-        ) {
+        if (parsedContent.descriptions && parsedContent.descriptions.length > 0) {
           await ctx.db.locationGroup.update({
             where: { id: locationGroup.id },
             data: {
@@ -121,7 +118,9 @@ export const widgetRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error generating descriptions:", error);
-        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to generate descriptions" });
+        throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+          message: "Failed to generate descriptions",
+        });
       }
     }),
 
@@ -205,13 +204,13 @@ export const widgetRouter = createTRPCRouter({
           description: location.description ?? "No description provided",
           brand_name: location.creator.name,
           url: location.link ?? WADZZO_AR_URL,
-          image_url:
-            location.image ?? location.creator.profileUrl ?? WadzzoIconURL,
+          image_url: location.image ?? location.creator.profileUrl ?? WadzzoIconURL,
           collected: false,
           collection_limit_remaining: location.remaining,
           auto_collect: location.autoCollect,
           brand_image_url: location.creator.profileUrl ?? WadzzoIconURL,
-          circular_image_url: location.creator.circularProfileUrl ?? location.creator.profileUrl ?? WadzzoIconURL,
+          circular_image_url:
+            location.creator.circularProfileUrl ?? location.creator.profileUrl ?? WadzzoIconURL,
           // Embed pins are never collected from the widget.
           redeemCode: null,
           isRedeemed: null,
@@ -248,11 +247,7 @@ export const widgetRouter = createTRPCRouter({
           ...(input.creatorIds && input.creatorIds.length > 0
             ? {
                 privacy: {
-                  in: [
-                    ItemPrivacy.PUBLIC,
-                    ItemPrivacy.PRIVATE,
-                    ItemPrivacy.TIER,
-                  ],
+                  in: [ItemPrivacy.PUBLIC, ItemPrivacy.PRIVATE, ItemPrivacy.TIER],
                 },
                 creatorId: { in: input.creatorIds },
               }
@@ -360,9 +355,7 @@ Keep your answers helpful, friendly, and concise.
         });
 
         return {
-          answer:
-            response.choices[0]?.message?.content ??
-            "Sorry, I couldn't generate a response.",
+          answer: response.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.",
         };
       } catch (error) {
         console.error("OpenAI API error:", error);

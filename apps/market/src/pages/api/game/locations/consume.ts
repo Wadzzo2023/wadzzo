@@ -6,10 +6,7 @@ import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
 
@@ -51,11 +48,15 @@ export default async function handler(
   const getUniqueRedeemCode = async (): Promise<string> => {
     for (let i = 0; i < 10; i++) {
       const code = generateRedeemCode();
-      const exists = await db.locationConsumer.findUnique({ where: { redeemCode: code } });
+      const exists = await db.locationConsumer.findUnique({
+        where: { redeemCode: code },
+      });
       if (!exists) return code;
     }
     // Extremely unlikely — 32^6 = ~1 billion combinations
-    throw new AppError(ErrorCodes.INTERNAL, { message: "Could not generate a unique redeem code" });
+    throw new AppError(ErrorCodes.INTERNAL, {
+      message: "Could not generate a unique redeem code",
+    });
   };
 
   if (location.locationGroup.multiPin) {

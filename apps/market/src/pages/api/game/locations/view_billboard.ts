@@ -7,10 +7,7 @@ import { db } from "@wadzzo/db/server";
 
 // import { getSession } from "next-auth/react";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
   const token = await getToken({ req });
 

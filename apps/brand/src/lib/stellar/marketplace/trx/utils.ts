@@ -3,10 +3,7 @@ import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "@wadzzo/wallet/config";
 
 export function checkSiteAssetBalance(accRes: Horizon.AccountResponse) {
   for (const balance of accRes.balances) {
-    if (
-      balance.asset_type === "credit_alphanum12" ||
-      balance.asset_type === "credit_alphanum4"
-    ) {
+    if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
       if (
         balance.asset_code == PLATFORM_ASSET.code &&
         balance.asset_issuer == PLATFORM_ASSET.issuer
@@ -46,15 +43,8 @@ export async function alreadyHaveTrustOnNft({
   const transactionInializer = accRes ?? (await server.loadAccount(pubkey));
 
   for (const item of transactionInializer.balances) {
-    if (
-      item.asset_type == "credit_alphanum12" ||
-      item.asset_type == "credit_alphanum4"
-    ) {
-      if (
-        item.asset_code == asset.code &&
-        item.asset_issuer == asset.issuer &&
-        item.is_authorized
-      )
+    if (item.asset_type == "credit_alphanum12" || item.asset_type == "credit_alphanum4") {
+      if (item.asset_code == asset.code && item.asset_issuer == asset.issuer && item.is_authorized)
         return true;
     }
   }

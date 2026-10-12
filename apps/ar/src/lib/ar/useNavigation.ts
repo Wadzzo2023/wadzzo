@@ -49,7 +49,10 @@ export function useNavigation({
     if (!snap) return null;
     const progress = progressAt(index, route, snap.along);
     const end = index.coords[index.coords.length - 1]!;
-    const toEnd = Math.hypot((end[0] - fix.lng) * Math.cos((fix.lat * Math.PI) / 180) * 111_320, (end[1] - fix.lat) * 110_540);
+    const toEnd = Math.hypot(
+      (end[0] - fix.lng) * Math.cos((fix.lat * Math.PI) / 180) * 111_320,
+      (end[1] - fix.lat) * 110_540,
+    );
     return {
       snap,
       progress,
@@ -96,7 +99,10 @@ export function useNavigation({
   useEffect(() => {
     if (!state || !fix || state.arrived) return;
     offCount.current = state.offRoute ? offCount.current + 1 : 0;
-    if (offCount.current >= OFF_ROUTE_FIXES && Date.now() - lastReroute.current > REROUTE_COOLDOWN_MS) {
+    if (
+      offCount.current >= OFF_ROUTE_FIXES &&
+      Date.now() - lastReroute.current > REROUTE_COOLDOWN_MS
+    ) {
       offCount.current = 0;
       lastReroute.current = Date.now();
       onReroute({ lat: fix.lat, lng: fix.lng });

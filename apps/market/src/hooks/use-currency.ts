@@ -45,6 +45,12 @@ export function useCurrency() {
   return { currency, setCurrency: setDisplayCurrency };
 }
 
-export const formatTokenNumber = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: n > 0 && n < 1 ? 4 : 2 });
+export const formatTokenNumber = (n: number) =>
+  n.toLocaleString("en-US", { maximumFractionDigits: n > 0 && n < 1 ? 4 : 2 });
 export const formatUsdAmount = (n: number) =>
-  n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: n > 0 && n < 0.01 ? 4 : 2 });
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: n > 0 && n < 0.01 ? 4 : 2,
+  });

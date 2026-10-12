@@ -29,7 +29,10 @@ type Scope = (typeof SCOPES)[number]["id"];
 export function FeedView({ suggested }: { suggested: Creator[] }) {
   const { signedIn, openSignIn } = useRequireAuth();
   const [scope, setScope] = useState<Scope>("all");
-  const q = api.post.feed.useInfiniteQuery({ scope, limit: 10 }, { getNextPageParam: (p) => p.nextCursor });
+  const q = api.post.feed.useInfiniteQuery(
+    { scope, limit: 10 },
+    { getNextPageParam: (p) => p.nextCursor },
+  );
   const posts = q.data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
@@ -47,7 +50,9 @@ export function FeedView({ suggested }: { suggested: Creator[] }) {
               onClick={() => (s.id === "following" && !signedIn ? openSignIn() : setScope(s.id))}
               className={cn(
                 "flex h-9 items-center rounded-lg px-4 text-sm font-semibold transition-colors",
-                scope === s.id ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]" : "text-muted-foreground hover:text-foreground",
+                scope === s.id
+                  ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {s.label}
@@ -79,7 +84,12 @@ export function FeedView({ suggested }: { suggested: Creator[] }) {
             ))}
             {q.hasNextPage && (
               <div className="flex justify-center">
-                <Button variant="outline" className="rounded-xl" disabled={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()}>
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  disabled={q.isFetchingNextPage}
+                  onClick={() => void q.fetchNextPage()}
+                >
                   {q.isFetchingNextPage ? "Loading…" : "Load more"}
                 </Button>
               </div>
@@ -100,7 +110,9 @@ export function FeedView({ suggested }: { suggested: Creator[] }) {
 /** Top brands with a Follow button; ones the viewer already follows show as Following. */
 function BrandsToFollow({ creators }: { creators: Creator[] }) {
   const { signedIn, session } = useRequireAuth();
-  const following = api.creator.following.useQuery(undefined, { enabled: signedIn });
+  const following = api.creator.following.useQuery(undefined, {
+    enabled: signedIn,
+  });
   const followed = new Set(following.data?.map((f) => f.creator.id));
   const list = creators.filter((c) => c.id !== session?.user.id);
   if (!list.length) return null;
@@ -109,24 +121,36 @@ function BrandsToFollow({ creators }: { creators: Creator[] }) {
     <section className="glass sticky top-24 space-y-3 rounded-2xl p-4">
       <div className="flex items-center justify-between">
         <h2 className="font-hud font-bold">Brands to follow</h2>
-        <Link href="/creators" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+        <Link
+          href="/creators"
+          className="text-primary inline-flex items-center gap-1 text-xs font-medium hover:underline"
+        >
           See all <ArrowRight className="size-3" />
         </Link>
       </div>
       <ul className="space-y-1">
         {list.map((c) => (
-          <li key={c.id} className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/[0.04]">
+          <li
+            key={c.id}
+            className="hover:bg-foreground/[0.04] flex items-center gap-3 rounded-xl p-2 transition-colors"
+          >
             <Link href={creatorHref(c)} className="flex min-w-0 flex-1 items-center gap-3">
               <Avatar src={c.profileUrl} name={c.name} className="size-10" />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold">{c.name}</span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {c._count.followers.toLocaleString("en-US")} followers · {c._count.posts.toLocaleString("en-US")} posts
+                <span className="text-muted-foreground block truncate text-xs">
+                  {c._count.followers.toLocaleString("en-US")} followers ·{" "}
+                  {c._count.posts.toLocaleString("en-US")} posts
                 </span>
               </span>
             </Link>
             {(!signedIn || following.data) && (
-              <FollowButton key={`${c.id}-${followed.has(c.id)}`} creatorId={c.id} initial={followed.has(c.id)} className="h-8 shrink-0 px-3 text-xs shadow-none" />
+              <FollowButton
+                key={`${c.id}-${followed.has(c.id)}`}
+                creatorId={c.id}
+                initial={followed.has(c.id)}
+                className="h-8 shrink-0 px-3 text-xs shadow-none"
+              />
             )}
           </li>
         ))}

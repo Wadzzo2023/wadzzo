@@ -7,13 +7,25 @@ export function MintProgress({ minted, limit }: { minted: number; limit: number 
         <span className="text-muted-foreground">{limit ? "Minted" : "Open edition"}</span>
         <span className="font-hud font-bold tabular-nums">
           {minted.toLocaleString("en-US")}
-          {limit != null && <span className="text-muted-foreground"> / {limit.toLocaleString("en-US")}</span>}
-          {pct != null && <span className="ml-2 text-xs font-semibold text-primary">{pct}%</span>}
+          {limit != null && (
+            <span className="text-muted-foreground"> / {limit.toLocaleString("en-US")}</span>
+          )}
+          {pct != null && <span className="text-primary ml-2 text-xs font-semibold">{pct}%</span>}
         </span>
       </div>
       {pct != null && (
-        <div className="h-2 overflow-hidden rounded-full bg-foreground/[0.08]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Minted">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary via-green-hot to-cyan-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]" style={{ width: `${Math.max(pct, 2)}%` }} />
+        <div
+          className="bg-foreground/[0.08] h-2 overflow-hidden rounded-full"
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Minted"
+        >
+          <div
+            className="from-primary via-green-hot h-full rounded-full bg-gradient-to-r to-cyan-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
+            style={{ width: `${Math.max(pct, 2)}%` }}
+          />
         </div>
       )}
     </div>

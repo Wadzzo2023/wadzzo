@@ -4,7 +4,12 @@ import { useMemo, useRef } from "react";
 import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
-import { featureCenter, haversineMetres, toMapboxFeature, type StoredFeature } from "~/components/map-kit/geo";
+import {
+  featureCenter,
+  haversineMetres,
+  toMapboxFeature,
+  type StoredFeature,
+} from "~/components/map-kit/geo";
 
 /** Shared by the new and edit hotspot pages. */
 
@@ -55,11 +60,25 @@ export function AreaPreview({ feature }: { feature: StoredFeature }) {
 
   return (
     <div className="h-56 overflow-hidden rounded-xl border">
-      <BaseMap ref={map} initialViewState={{ latitude: c.lat, longitude: c.lng, zoom: 14 }} onLoad={fit} interactive={false} controls={false}>
+      <BaseMap
+        ref={map}
+        initialViewState={{ latitude: c.lat, longitude: c.lng, zoom: 14 }}
+        onLoad={fit}
+        interactive={false}
+        controls={false}
+      >
         {shape && (
           <Source id="hotspot-preview" type="geojson" data={shape}>
-            <Layer id="hotspot-preview-fill" type="fill" paint={{ "fill-color": "#22c55e", "fill-opacity": 0.2 }} />
-            <Layer id="hotspot-preview-line" type="line" paint={{ "line-color": "#16a34a", "line-width": 2 }} />
+            <Layer
+              id="hotspot-preview-fill"
+              type="fill"
+              paint={{ "fill-color": "#22c55e", "fill-opacity": 0.2 }}
+            />
+            <Layer
+              id="hotspot-preview-line"
+              type="line"
+              paint={{ "line-color": "#16a34a", "line-width": 2 }}
+            />
           </Source>
         )}
       </BaseMap>
@@ -67,17 +86,27 @@ export function AreaPreview({ feature }: { feature: StoredFeature }) {
   );
 }
 
-export function AreaSize({ feature, shape }: { feature: StoredFeature; shape: "circle" | "rectangle" | "polygon" }) {
+export function AreaSize({
+  feature,
+  shape,
+}: {
+  feature: StoredFeature;
+  shape: "circle" | "rectangle" | "polygon";
+}) {
   const r = feature.properties?.radiusMetres;
-  if (shape === "circle" && r) return <>Circle · {r >= 1000 ? `${(r / 1000).toFixed(2)} km` : `${Math.round(r)} m`} radius</>;
+  if (shape === "circle" && r)
+    return <>Circle · {r >= 1000 ? `${(r / 1000).toFixed(2)} km` : `${Math.round(r)} m`} radius</>;
   // Rough extent: the ring's widest span.
   const ring = feature.geometry.coordinates[0] ?? [];
   let max = 0;
-  for (const a of ring) for (const b of ring) max = Math.max(max, haversineMetres({ lat: a[0]!, lng: a[1]! }, { lat: b[0]!, lng: b[1]! }));
+  for (const a of ring)
+    for (const b of ring)
+      max = Math.max(max, haversineMetres({ lat: a[0]!, lng: a[1]! }, { lat: b[0]!, lng: b[1]! }));
   const label = shape === "rectangle" ? "Rectangle" : "Polygon";
   return (
     <>
-      {label} · about {max >= 1000 ? `${(max / 1000).toFixed(2)} km` : `${Math.round(max)} m`} across
+      {label} · about {max >= 1000 ? `${(max / 1000).toFixed(2)} km` : `${Math.round(max)} m`}{" "}
+      across
     </>
   );
 }

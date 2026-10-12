@@ -41,15 +41,21 @@ export function SweepGauge({
         const done = captured[s.slot];
         const next = s.step === step;
         return (
-          <div key={s.slot} className="absolute top-0 -translate-x-1/2 text-center" style={{ left: `${pos(s.at)}%` }}>
-            <span className="font-hud block text-[9px] font-bold uppercase tracking-[0.14em] text-ar-faint">{s.label}</span>
+          <div
+            key={s.slot}
+            className="absolute top-0 -translate-x-1/2 text-center"
+            style={{ left: `${pos(s.at)}%` }}
+          >
+            <span className="font-hud text-ar-faint block text-[9px] font-bold tracking-[0.14em] uppercase">
+              {s.label}
+            </span>
             <span
               className={cn(
                 "mx-auto mt-[9px] block h-3 w-3 rounded-full border-2 transition-colors duration-200",
                 done
                   ? "border-rarity-epic bg-rarity-epic shadow-[0_0_10px_hsl(var(--rarity-epic)/0.9)]"
                   : next
-                    ? "animate-pulse border-rarity-epic bg-transparent"
+                    ? "border-rarity-epic animate-pulse bg-transparent"
                     : "border-white/40 bg-transparent",
               )}
             />
@@ -61,7 +67,7 @@ export function SweepGauge({
         className="absolute top-[18px] -translate-x-1/2 transition-[left] duration-100 ease-linear"
         style={{ left: `${pos(delta)}%` }}
       >
-        <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-white text-ar-void shadow-[0_2px_10px_rgba(0,0,0,.45)]">
+        <span className="text-ar-void flex h-[22px] w-[22px] items-center justify-center rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,.45)]">
           <Smartphone size={13} strokeWidth={2.6} />
         </span>
       </div>

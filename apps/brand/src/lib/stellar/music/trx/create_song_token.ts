@@ -136,10 +136,7 @@ export const getAccBalance = async (accPub: string) => {
   const balances: BalanceType[] = [];
 
   for (const balance of account.balances) {
-    if (
-      balance.asset_type == "credit_alphanum12" ||
-      balance.asset_type == "credit_alphanum4"
-    ) {
+    if (balance.asset_type == "credit_alphanum12" || balance.asset_type == "credit_alphanum4") {
       const item: BalanceType = {
         asset: `${balance.asset_code}-${balance.asset_issuer}`,
         balance: balance.balance,
@@ -162,15 +159,9 @@ export const checkAssetBalance = async ({
   const account = await server.loadAccount(storagePub);
 
   for (const balance of account.balances) {
-    if (
-      balance.asset_type === "credit_alphanum4" ||
-      balance.asset_type === "credit_alphanum12"
-    ) {
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
       // log.info(balance.asset_code);
-      if (
-        balance.asset_code == assset.code &&
-        balance.asset_issuer == assset.issuer
-      ) {
+      if (balance.asset_code == assset.code && balance.asset_issuer == assset.issuer) {
         return balance.balance;
       }
     }

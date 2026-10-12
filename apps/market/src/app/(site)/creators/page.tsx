@@ -9,7 +9,8 @@ import { PageBody, PageHeader } from "~/ui/page-header";
 
 export const metadata: Metadata = {
   title: "Creators",
-  description: "Discover brands and creators on Wadzzo — follow them, collect their drops and join their memberships.",
+  description:
+    "Discover brands and creators on Wadzzo — follow them, collect their drops and join their memberships.",
   alternates: { canonical: "/creators" },
 };
 
@@ -20,7 +21,12 @@ export default async function CreatorsPage({ searchParams }: PageProps<"/creator
 
   return (
     <PageBody wide className="space-y-5">
-      <PageHeader eyebrow="Discover" title="Creators" description="Brands and creators on Wadzzo." actions={<CreatorSearch value={q} />} />
+      <PageHeader
+        eyebrow="Discover"
+        title="Creators"
+        description="Brands and creators on Wadzzo."
+        actions={<CreatorSearch value={q} />}
+      />
       {first.items.length === 0 ? (
         <EmptyState icon={Users} title="No creators found" description="Try a different name." />
       ) : (
@@ -30,7 +36,9 @@ export default async function CreatorsPage({ searchParams }: PageProps<"/creator
               <CreatorCard key={c.id} creator={c} />
             ))}
           </div>
-          {first.nextCursor && <LoadMoreCreators key={q ?? ""} search={q} cursor={first.nextCursor} />}
+          {first.nextCursor && (
+            <LoadMoreCreators key={q ?? ""} search={q} cursor={first.nextCursor} />
+          )}
         </>
       )}
     </PageBody>

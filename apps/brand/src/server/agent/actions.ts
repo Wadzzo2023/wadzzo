@@ -12,8 +12,18 @@ import { z } from "zod";
 import { circleAround } from "~/components/map-kit/geo";
 import { hotspotClient } from "~/lib/express/hotspotClient-sdk";
 import { taskClient } from "~/lib/express/taskClient-sdk";
-import { UNLIMITED_COLLECTIONS, type ActionEdits, type PinDefaults, type ProposedAction } from "~/lib/agent/contract";
-import { AnnouncementInput, EventInput, announcementData, eventData } from "~/server/api/routers/events";
+import {
+  UNLIMITED_COLLECTIONS,
+  type ActionEdits,
+  type PinDefaults,
+  type ProposedAction,
+} from "~/lib/agent/contract";
+import {
+  AnnouncementInput,
+  EventInput,
+  announcementData,
+  eventData,
+} from "~/server/api/routers/events";
 import type { Db } from "@wadzzo/db";
 import { createOptimizedImage } from "~/server/image-optimizer";
 import { BADWORDS } from "~/utils/banned-word";
@@ -22,7 +32,8 @@ export type ActingBrand = { creatorId: string; platformId: string };
 export type ActionResult = { message: string; pinJobId?: string; id?: string };
 
 const DAY = 86_400_000;
-const bad = (text: string) => (BADWORDS.some((w) => text.toLowerCase().includes(w.toLowerCase())) ? text : null);
+const bad = (text: string) =>
+  BADWORDS.some((w) => text.toLowerCase().includes(w.toLowerCase())) ? text : null;
 const badRequest = (message: string) => new TRPCError({ code: "BAD_REQUEST", message });
 const day = z.string().refine((s) => !Number.isNaN(new Date(s).getTime()), "Not a date");
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
@@ -49,14 +60,36 @@ export const ActionEditsInput = z.object({
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
-export async function executeAction(db: Db, brand: ActingBrand, action: ProposedAction, edits: ActionEdits = {}): Promise<ActionResult> {
+export async function executeAction(
+  db: Db,
+  brand: ActingBrand,
+  action: ProposedAction,
+  edits: ActionEdits = {},
+): Promise<ActionResult> {
   switch (action.type) {
     case "create_pins":
-      return createPins(db, brand, action.items, { ...action.defaults, ...edits.defaults }, edits.keep);
+      return createPins(
+        db,
+        brand,
+        action.items,
+        { ...action.defaults, ...edits.defaults },
+        edits.keep,
+      );
     case "update_pins":
-      return updatePins(db, brand, action.pins.map((p) => p.id), action.changes);
+      return updatePins(
+        db,
+        brand,
+        action.pins.map((p) => p.id),
+        action.changes,
+      );
     case "hide_pins": {
-      const { count } = await db.locationGroup.updateMany({ where: { id: { in: action.pins.map((p) => p.id) }, creatorId: brand.creatorId }, data: { hidden: true } });
+      const { count } = await db.locationGroup.updateMany({
+        where: {
+          id: { in: action.pins.map((p) => p.id) },
+          creatorId: brand.creatorId,
+        },
+        data: { hidden: true },
+      });
       return { message: `Deleted ${plural(count, "pin")}.` };
     }
     case "hotspot_state":
@@ -75,24 +108,47 @@ export async function executeAction(db: Db, brand: ActingBrand, action: Proposed
       return { message: `Updated hotspot “${action.hotspot.title}”.` };
     }
     case "create_hotspot":
-      return createHotspot(brand, { ...action.hotspot, ...(edits.draft as object) });
+      return createHotspot(brand, {
+        ...action.hotspot,
+        ...(edits.draft as object),
+      });
     case "create_event":
-      return createEvent(db, brand, { ...action.event, ...(edits.draft as object) });
+      return createEvent(db, brand, {
+        ...action.event,
+        ...(edits.draft as object),
+      });
     case "update_event":
       return updateEvent(db, brand, action.event.id, action.changes);
     case "delete_event": {
-      const { count } = await db.creatorEvent.deleteMany({ where: { id: action.event.id, creatorId: brand.creatorId } });
-      if (!count) throw new TRPCError({ code: "NOT_FOUND", message: "That event no longer exists" });
+      const { count } = await db.creatorEvent.deleteMany({
+        where: { id: action.event.id, creatorId: brand.creatorId },
+      });
+      if (!count)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "That event no longer exists",
+        });
       return { message: `Deleted event “${action.event.title}”.` };
     }
     case "create_announcement":
-      return createAnnouncement(db, brand, { ...action.announcement, ...(edits.draft as object) });
+      return createAnnouncement(db, brand, {
+        ...action.announcement,
+        ...(edits.draft as object),
+      });
     case "update_announcement":
       return updateAnnouncement(db, brand, action.announcement.id, action.changes);
     case "delete_announcement": {
-      const { count } = await db.creatorAnnouncement.deleteMany({ where: { id: action.announcement.id, creatorId: brand.creatorId } });
-      if (!count) throw new TRPCError({ code: "NOT_FOUND", message: "That announcement no longer exists" });
-      return { message: `Deleted announcement “${action.announcement.title}”.` };
+      const { count } = await db.creatorAnnouncement.deleteMany({
+        where: { id: action.announcement.id, creatorId: brand.creatorId },
+      });
+      if (!count)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "That announcement no longer exists",
+        });
+      return {
+        message: `Deleted announcement “${action.announcement.title}”.`,
+      };
     }
   }
 }
@@ -135,7 +191,11 @@ async function createPins(
       gPlaceId: i.gPlaceId,
     };
   });
-  const pinOptions = { autoCollect: defaults.autoCollect, groupingMode: defaults.grouping, pinNumber: defaults.pinNumber };
+  const pinOptions = {
+    autoCollect: defaults.autoCollect,
+    groupingMode: defaults.grouping,
+    pinNumber: defaults.pinNumber,
+  };
 
   const job = await db.locationGroupJob.create({
     data: {
@@ -148,25 +208,60 @@ async function createPins(
     select: { id: true },
   });
   // One attempt: a retry after a partial run would create duplicate pins.
-  await taskClient.enqueue("create_pins", brand.creatorId, { locationGroupJobId: job.id, creatorId: brand.creatorId, pins, pinOptions }, 1);
-  return { message: `Creating ${plural(pins.length, "pin")}…`, pinJobId: job.id };
+  await taskClient.enqueue(
+    "create_pins",
+    brand.creatorId,
+    {
+      locationGroupJobId: job.id,
+      creatorId: brand.creatorId,
+      pins,
+      pinOptions,
+    },
+    1,
+  );
+  return {
+    message: `Creating ${plural(pins.length, "pin")}…`,
+    pinJobId: job.id,
+  };
 }
 
-async function updatePins(db: Db, brand: ActingBrand, ids: string[], changes: Extract<ProposedAction, { type: "update_pins" }>["changes"]): Promise<ActionResult> {
+async function updatePins(
+  db: Db,
+  brand: ActingBrand,
+  ids: string[],
+  changes: Extract<ProposedAction, { type: "update_pins" }>["changes"],
+): Promise<ActionResult> {
   const pins = await db.locationGroup.findMany({
     where: { id: { in: ids }, creatorId: brand.creatorId, hidden: false },
-    select: { id: true, image: true, startDate: true, endDate: true, limit: true, remaining: true },
+    select: {
+      id: true,
+      image: true,
+      startDate: true,
+      endDate: true,
+      limit: true,
+      remaining: true,
+    },
   });
-  if (pins.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Those pins no longer exist" });
-  if (changes.title && (changes.title.trim().length < 3 || bad(changes.title))) throw badRequest("That title isn't allowed");
-  for (const url of [changes.link, changes.image]) if (url && !/^https?:\/\//i.test(url)) throw badRequest("Links must start with http(s)://");
+  if (pins.length === 0)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Those pins no longer exist",
+    });
+  if (changes.title && (changes.title.trim().length < 3 || bad(changes.title)))
+    throw badRequest("That title isn't allowed");
+  for (const url of [changes.link, changes.image])
+    if (url && !/^https?:\/\//i.test(url)) throw badRequest("Links must start with http(s)://");
 
-  const optimizedImage = changes.image ? await createOptimizedImage(changes.image).catch(() => null) : undefined;
+  const optimizedImage = changes.image
+    ? await createOptimizedImage(changes.image).catch(() => null)
+    : undefined;
 
   await db.$transaction(async (tx) => {
     for (const p of pins) {
       const start = changes.startDate ? new Date(changes.startDate) : p.startDate;
-      const end = changes.endDate ? new Date(new Date(changes.endDate).getTime() + DAY - 1) : p.endDate;
+      const end = changes.endDate
+        ? new Date(new Date(changes.endDate).getTime() + DAY - 1)
+        : p.endDate;
       if (end <= start) throw badRequest("A pin would end before it starts");
       const collected = p.limit - p.remaining;
       await tx.locationGroup.update({
@@ -178,12 +273,18 @@ async function updatePins(db: Db, brand: ActingBrand, ids: string[], changes: Ex
           ...(changes.image && { image: changes.image, optimizedImage }),
           startDate: changes.startDate ? start : undefined,
           endDate: changes.endDate ? end : undefined,
-          ...(changes.collectionLimit && { limit: changes.collectionLimit, remaining: Math.max(0, changes.collectionLimit - collected) }),
+          ...(changes.collectionLimit && {
+            limit: changes.collectionLimit,
+            remaining: Math.max(0, changes.collectionLimit - collected),
+          }),
         },
       });
     }
     if (changes.autoCollect !== undefined) {
-      await tx.location.updateMany({ where: { locationGroupId: { in: pins.map((p) => p.id) } }, data: { autoCollect: changes.autoCollect } });
+      await tx.location.updateMany({
+        where: { locationGroupId: { in: pins.map((p) => p.id) } },
+        data: { autoCollect: changes.autoCollect },
+      });
     }
   });
   return { message: `Updated ${plural(pins.length, "pin")}.` };
@@ -192,17 +293,35 @@ async function updatePins(db: Db, brand: ActingBrand, ids: string[], changes: Ex
 // ─── Hotspots ────────────────────────────────────────────────────────────────
 
 async function ownHotspot(db: Db, brand: ActingBrand, id: string) {
-  const h = await db.hotspot.findFirst({ where: { id, creatorId: brand.creatorId, hidden: false }, select: { id: true } });
-  if (!h) throw new TRPCError({ code: "NOT_FOUND", message: "That hotspot no longer exists" });
+  const h = await db.hotspot.findFirst({
+    where: { id, creatorId: brand.creatorId, hidden: false },
+    select: { id: true },
+  });
+  if (!h)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "That hotspot no longer exists",
+    });
   return h;
 }
 
-async function hotspotState(db: Db, brand: ActingBrand, id: string, op: "pause" | "resume" | "delete"): Promise<ActionResult> {
+async function hotspotState(
+  db: Db,
+  brand: ActingBrand,
+  id: string,
+  op: "pause" | "resume" | "delete",
+): Promise<ActionResult> {
   await ownHotspot(db, brand, id);
   if (op === "pause") await hotspotClient.pause(brand.creatorId, id);
   else if (op === "resume") await hotspotClient.resume(brand.creatorId, id);
   else await hotspotClient.delete(brand.creatorId, id);
-  return { message: { pause: "Hotspot paused.", resume: "Hotspot resumed.", delete: "Hotspot deleted." }[op] };
+  return {
+    message: {
+      pause: "Hotspot paused.",
+      resume: "Hotspot resumed.",
+      delete: "Hotspot deleted.",
+    }[op],
+  };
 }
 
 const HotspotDraftInput = z
@@ -221,7 +340,9 @@ const HotspotDraftInput = z
     collectionLimit: z.number().int().min(1).max(UNLIMITED_COLLECTIONS),
     autoCollect: z.boolean(),
   })
-  .refine((h) => new Date(h.endDate) > new Date(h.startDate), { message: "The hotspot must end after it starts" })
+  .refine((h) => new Date(h.endDate) > new Date(h.startDate), {
+    message: "The hotspot must end after it starts",
+  })
   .refine((h) => !bad(h.title), { message: "That title isn't allowed" });
 
 async function createHotspot(brand: ActingBrand, raw: unknown): Promise<ActionResult> {
@@ -264,15 +385,37 @@ const toEventInput = (e: Record<string, unknown>) =>
     bountyIds: [],
   });
 
-async function createEvent(db: Db, brand: ActingBrand, draft: Record<string, unknown>): Promise<ActionResult> {
+async function createEvent(
+  db: Db,
+  brand: ActingBrand,
+  draft: Record<string, unknown>,
+): Promise<ActionResult> {
   const input = toEventInput(draft);
-  const row = await db.creatorEvent.create({ data: { ...eventData(input), creatorId: brand.creatorId, platformId: brand.platformId }, select: { id: true } });
+  const row = await db.creatorEvent.create({
+    data: {
+      ...eventData(input),
+      creatorId: brand.creatorId,
+      platformId: brand.platformId,
+    },
+    select: { id: true },
+  });
   return { message: `Event “${input.title}” created.`, id: row.id };
 }
 
-async function updateEvent(db: Db, brand: ActingBrand, id: string, changes: Record<string, unknown>): Promise<ActionResult> {
-  const current = await db.creatorEvent.findFirst({ where: { id, creatorId: brand.creatorId } });
-  if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "That event no longer exists" });
+async function updateEvent(
+  db: Db,
+  brand: ActingBrand,
+  id: string,
+  changes: Record<string, unknown>,
+): Promise<ActionResult> {
+  const current = await db.creatorEvent.findFirst({
+    where: { id, creatorId: brand.creatorId },
+  });
+  if (!current)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "That event no longer exists",
+    });
   const input = toEventInput({ ...current, ...changes });
   // Linked pins and bounties are left as they are.
   await db.creatorEvent.update({ where: { id }, data: eventData(input) });
@@ -290,17 +433,42 @@ const toAnnouncementInput = (a: Record<string, unknown>) =>
     expiresAt: a.expiresAt ? new Date(a.expiresAt as string) : null,
   });
 
-async function createAnnouncement(db: Db, brand: ActingBrand, draft: Record<string, unknown>): Promise<ActionResult> {
+async function createAnnouncement(
+  db: Db,
+  brand: ActingBrand,
+  draft: Record<string, unknown>,
+): Promise<ActionResult> {
   const input = toAnnouncementInput(draft);
-  const row = await db.creatorAnnouncement.create({ data: { ...announcementData(input), creatorId: brand.creatorId, platformId: brand.platformId }, select: { id: true } });
+  const row = await db.creatorAnnouncement.create({
+    data: {
+      ...announcementData(input),
+      creatorId: brand.creatorId,
+      platformId: brand.platformId,
+    },
+    select: { id: true },
+  });
   return { message: `Announcement “${input.title}” posted.`, id: row.id };
 }
 
-async function updateAnnouncement(db: Db, brand: ActingBrand, id: string, changes: Record<string, unknown>): Promise<ActionResult> {
-  const current = await db.creatorAnnouncement.findFirst({ where: { id, creatorId: brand.creatorId } });
-  if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "That announcement no longer exists" });
+async function updateAnnouncement(
+  db: Db,
+  brand: ActingBrand,
+  id: string,
+  changes: Record<string, unknown>,
+): Promise<ActionResult> {
+  const current = await db.creatorAnnouncement.findFirst({
+    where: { id, creatorId: brand.creatorId },
+  });
+  if (!current)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "That announcement no longer exists",
+    });
   const input = toAnnouncementInput({ ...current, ...changes });
-  await db.creatorAnnouncement.update({ where: { id }, data: announcementData(input) });
+  await db.creatorAnnouncement.update({
+    where: { id },
+    data: announcementData(input),
+  });
   return { message: `Updated announcement “${input.title}”.`, id };
 }
 
@@ -309,7 +477,9 @@ function parse<T extends z.ZodTypeAny>(schema: T, value: unknown): z.infer<T> {
   const r = schema.safeParse(value);
   if (!r.success) {
     const issue = r.error.issues[0];
-    throw badRequest(issue ? `${issue.path.join(".") || "Input"}: ${issue.message}` : "Invalid input");
+    throw badRequest(
+      issue ? `${issue.path.join(".") || "Input"}: ${issue.message}` : "Invalid input",
+    );
   }
   return r.data as z.infer<T>;
 }

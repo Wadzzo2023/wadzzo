@@ -1,27 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowUpRight,
-  Camera,
-  Check,
-  MapPin,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowUpRight, Camera, Check, MapPin, X, type LucideIcon } from "lucide-react";
 import { useRouter } from "~/lib/navigation";
 import { useEffect, useState } from "react";
 
 import { packProgress, useMuralPack } from "~/lib/murals/pack";
-import {
-  readCameraPermissions,
-  type PermAnswers,
-} from "~/lib/ar/cameraPermissions";
+import { readCameraPermissions, type PermAnswers } from "~/lib/ar/cameraPermissions";
 
-import {
-  CAMERA_MODES,
-  tone,
-  type CameraModeDef,
-  type CameraPerm,
-} from "./modes";
+import { CAMERA_MODES, tone, type CameraModeDef, type CameraPerm } from "./modes";
 
 const PERM_ICONS: Record<CameraPerm, LucideIcon> = {
   camera: Camera,
@@ -43,13 +28,7 @@ const PERM_TITLES: Record<CameraPerm, string> = {
  * straight to its page, whose own gate asks (see lib/ar/cameraPermissions.ts
  * for why the browser can't ask from here).
  */
-export function CameraLauncher({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function CameraLauncher({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const [perms, setPerms] = useState<PermAnswers>({});
 
@@ -80,11 +59,7 @@ export function CameraLauncher({
     void router.push(mode.href);
   };
 
-  const [ar, qr, murals] = CAMERA_MODES as [
-    CameraModeDef,
-    CameraModeDef,
-    CameraModeDef,
-  ];
+  const [ar, qr, murals] = CAMERA_MODES as [CameraModeDef, CameraModeDef, CameraModeDef];
 
   return (
     <AnimatePresence>
@@ -93,7 +68,7 @@ export function CameraLauncher({
           <motion.div
             aria-hidden
             onClick={onClose}
-            className="absolute inset-0 bg-ar-void/80"
+            className="bg-ar-void/80 absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -103,7 +78,7 @@ export function CameraLauncher({
             role="dialog"
             aria-modal="true"
             aria-labelledby="camera-launcher-title"
-            className="relative w-full max-w-[400px] overflow-hidden rounded-[28px] border border-ar-line bg-ar-surface py-4"
+            className="border-ar-line bg-ar-surface relative w-full max-w-[400px] overflow-hidden rounded-[28px] border py-4"
             // Same pop as the mobile Dialog: scale 0.92 → 1, fade, small rise.
             initial={{ opacity: 0, scale: 0.92, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -118,12 +93,12 @@ export function CameraLauncher({
             <div className="px-4">
               <div className="flex items-start gap-3 px-1 pb-4">
                 <div className="flex-1">
-                  <p className="font-hud text-[9.5px] font-semibold uppercase tracking-[0.24em] text-ar-faint">
+                  <p className="font-hud text-ar-faint text-[9.5px] font-semibold tracking-[0.24em] uppercase">
                     Camera
                   </p>
                   <h2
                     id="camera-launcher-title"
-                    className="font-hud mt-1 text-[21px] font-bold leading-7 text-ar-text"
+                    className="font-hud text-ar-text mt-1 text-[21px] leading-7 font-bold"
                   >
                     How do you want to collect?
                   </h2>
@@ -132,27 +107,16 @@ export function CameraLauncher({
                   type="button"
                   onClick={onClose}
                   aria-label="Close"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-ar-line bg-ar-surface-2 text-ar-dim"
+                  className="border-ar-line bg-ar-surface-2 text-ar-dim flex h-9 w-9 items-center justify-center rounded-full border"
                 >
                   <X className="h-4 w-4" strokeWidth={2.4} />
                 </button>
               </div>
               <div className="flex flex-col gap-3">
-                <BentoCard
-                  mode={ar}
-                  perms={perms}
-                  hero
-                  index={0}
-                  onPick={pick}
-                />
+                <BentoCard mode={ar} perms={perms} hero index={0} onPick={pick} />
                 <div className="flex gap-3">
                   <BentoCard mode={qr} perms={perms} index={1} onPick={pick} />
-                  <BentoCard
-                    mode={murals}
-                    perms={perms}
-                    index={2}
-                    onPick={pick}
-                  />
+                  <BentoCard mode={murals} perms={perms} index={2} onPick={pick} />
                 </div>
               </div>
             </div>
@@ -184,9 +148,7 @@ function BentoCard({
       type="button"
       disabled={soon}
       onClick={() => onPick(mode)}
-      aria-label={
-        soon ? `${mode.title}, coming soon` : `${mode.title}. ${mode.blurb}`
-      }
+      aria-label={soon ? `${mode.title}, coming soon` : `${mode.title}. ${mode.blurb}`}
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -196,21 +158,18 @@ function BentoCard({
         delay: 0.06 + index * 0.06,
       }}
       whileTap={soon ? undefined : { scale: 0.97 }}
-      className={`relative flex flex-col overflow-hidden rounded-[22px] border bg-ar-surface-2 text-left ${hero ? "min-h-[178px] w-full p-[18px]" : "min-h-[176px] flex-1 p-3.5"} ${soon ? "cursor-default" : ""}`}
+      className={`bg-ar-surface-2 relative flex flex-col overflow-hidden rounded-[22px] border text-left ${hero ? "min-h-[178px] w-full p-[18px]" : "min-h-[176px] flex-1 p-3.5"} ${soon ? "cursor-default" : ""}`}
       style={{
         borderColor: tone(mode.accent, soon ? 0.2 : 0.38),
         backgroundImage: `linear-gradient(135deg, ${tone(mode.accent, soon ? 0.08 : 0.2)}, ${tone(mode.accent, 0.02)})`,
       }}
     >
-      <span
-        aria-hidden
-        className="ar-grid pointer-events-none absolute inset-0 opacity-[0.06]"
-      />
+      <span aria-hidden className="ar-grid pointer-events-none absolute inset-0 opacity-[0.06]" />
       {/* Oversized mark bleeding off the corner — the card's texture. */}
       <Icon
         aria-hidden
         strokeWidth={1.2}
-        className={`pointer-events-none absolute -rotate-[10deg] ${hero ? "-bottom-[22px] -right-[18px] h-[132px] w-[132px]" : "-bottom-4 -right-3.5 h-[92px] w-[92px]"}`}
+        className={`pointer-events-none absolute -rotate-[10deg] ${hero ? "-right-[18px] -bottom-[22px] h-[132px] w-[132px]" : "-right-3.5 -bottom-4 h-[92px] w-[92px]"}`}
         style={{ color: tone(mode.accent, soon ? 0.07 : 0.13) }}
       />
 
@@ -230,7 +189,7 @@ function BentoCard({
         </span>
         {soon ? (
           <span
-            className="font-hud rounded-full border px-2 py-[3px] text-[9px] font-bold uppercase tracking-[0.16em]"
+            className="font-hud rounded-full border px-2 py-[3px] text-[9px] font-bold tracking-[0.16em] uppercase"
             style={{
               borderColor: tone(mode.accent, 0.4),
               backgroundColor: tone(mode.accent, 0.14),
@@ -244,7 +203,7 @@ function BentoCard({
             className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
             style={{ backgroundColor: tone(mode.accentHot) }}
           >
-            <ArrowUpRight className="h-4 w-4 text-ar-void" strokeWidth={2.6} />
+            <ArrowUpRight className="text-ar-void h-4 w-4" strokeWidth={2.6} />
           </span>
         )}
       </div>
@@ -253,12 +212,12 @@ function BentoCard({
         className={`relative flex flex-1 flex-col justify-end ${hero ? "mt-[18px]" : "mt-3.5"} ${soon ? "opacity-60" : ""}`}
       >
         <p
-          className={`font-hud truncate font-bold text-ar-text ${hero ? "text-[20px]" : "text-[15px]"}`}
+          className={`font-hud text-ar-text truncate font-bold ${hero ? "text-[20px]" : "text-[15px]"}`}
         >
           {mode.title}
         </p>
         <p
-          className={`mt-1 text-ar-dim ${hero ? "line-clamp-2 max-w-[16rem] text-[12.5px] leading-5" : "line-clamp-3 text-[11.5px] leading-[17px]"}`}
+          className={`text-ar-dim mt-1 ${hero ? "line-clamp-2 max-w-[16rem] text-[12.5px] leading-5" : "line-clamp-3 text-[11.5px] leading-[17px]"}`}
         >
           {mode.blurb}
         </p>
@@ -274,7 +233,7 @@ function PackChip() {
   const s = useMuralPack();
   if (s.status === "ready") {
     return (
-      <p className="font-hud mt-2 flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ar-green-hot">
+      <p className="font-hud text-ar-green-hot mt-2 flex items-center gap-1 text-[9.5px] font-bold tracking-[0.14em] uppercase">
         <Check className="h-3 w-3" strokeWidth={3} /> Mural pack ready
       </p>
     );
@@ -283,25 +242,28 @@ function PackChip() {
   const pct = Math.floor(packProgress(s) * 100);
   return (
     <div className="mt-2">
-      <p className="font-hud flex items-center justify-between text-[9.5px] font-bold uppercase tracking-[0.14em] text-rarity-epic">
-        <span>{s.status === "error" ? "Pack paused" : s.status === "verifying" ? "Verifying pack" : "Downloading pack"}</span>
+      <p className="font-hud text-rarity-epic flex items-center justify-between text-[9.5px] font-bold tracking-[0.14em] uppercase">
+        <span>
+          {s.status === "error"
+            ? "Pack paused"
+            : s.status === "verifying"
+              ? "Verifying pack"
+              : "Downloading pack"}
+        </span>
         <span className="tabular-nums">{s.status === "error" ? "" : `${pct}%`}</span>
       </p>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ar-void/60">
-        <div className="h-full rounded-full bg-linear-to-r from-cyan-400 to-rarity-epic transition-[width] duration-300" style={{ width: `${Math.max(3, pct)}%` }} />
+      <div className="bg-ar-void/60 mt-1 h-1.5 overflow-hidden rounded-full">
+        <div
+          className="to-rarity-epic h-full rounded-full bg-linear-to-r from-cyan-400 transition-[width] duration-300"
+          style={{ width: `${Math.max(3, pct)}%` }}
+        />
       </div>
     </div>
   );
 }
 
 /** Which permissions this mode uses, each ticked once allowed, plus a verdict. */
-function Readiness({
-  mode,
-  perms,
-}: {
-  mode: CameraModeDef;
-  perms: PermAnswers;
-}) {
+function Readiness({ mode, perms }: { mode: CameraModeDef; perms: PermAnswers }) {
   const known = mode.needs.every((k) => perms[k] != null);
   const ready = mode.needs.every((k) => perms[k] === "granted");
   return (
@@ -317,8 +279,8 @@ function Readiness({
           >
             <I className="h-3 w-3" strokeWidth={2.3} />
             {granted && (
-              <span className="absolute -bottom-[3px] -right-[3px] flex h-3 w-3 items-center justify-center rounded-full bg-ar-green-hot">
-                <Check className="h-2 w-2 text-ar-void" strokeWidth={4} />
+              <span className="bg-ar-green-hot absolute -right-[3px] -bottom-[3px] flex h-3 w-3 items-center justify-center rounded-full">
+                <Check className="text-ar-void h-2 w-2" strokeWidth={4} />
               </span>
             )}
           </span>
@@ -326,7 +288,7 @@ function Readiness({
       })}
       {known && (
         <span
-          className={`font-hud ml-1 text-[9.5px] font-semibold uppercase tracking-[0.14em] ${ready ? "text-ar-green-hot" : "text-ar-faint"}`}
+          className={`font-hud ml-1 text-[9.5px] font-semibold tracking-[0.14em] uppercase ${ready ? "text-ar-green-hot" : "text-ar-faint"}`}
         >
           {ready ? "Ready" : "Needs access"}
         </span>

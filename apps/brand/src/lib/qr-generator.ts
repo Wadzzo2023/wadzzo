@@ -74,7 +74,11 @@ export async function generatePinQRBuffer(
   locationId: string,
   options: QRCodeOptions = {},
 ): Promise<Buffer> {
-  return QRCode.toBuffer(buildPinScanUrl(locationId), { ...DEFAULTS, ...options, type: "png" });
+  return QRCode.toBuffer(buildPinScanUrl(locationId), {
+    ...DEFAULTS,
+    ...options,
+    type: "png",
+  });
 }
 
 /** `data:` URL, for an `<img src>` where a blob round-trip isn't worth it. */
@@ -82,7 +86,10 @@ export async function generatePinQRDataUrl(
   locationId: string,
   options: QRCodeOptions = {},
 ): Promise<string> {
-  return QRCode.toDataURL(buildPinScanUrl(locationId), { ...DEFAULTS, ...options });
+  return QRCode.toDataURL(buildPinScanUrl(locationId), {
+    ...DEFAULTS,
+    ...options,
+  });
 }
 
 /** Rendered bytes plus the metadata a download needs to become a real file. */
@@ -100,5 +107,9 @@ export async function renderPinQR(
     };
   }
   const png = await generatePinQRBuffer(locationId, options);
-  return { base64: png.toString("base64"), contentType: "image/png", extension: "png" };
+  return {
+    base64: png.toString("base64"),
+    contentType: "image/png",
+    extension: "png",
+  };
 }

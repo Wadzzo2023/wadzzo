@@ -53,7 +53,13 @@ export function DragSheet({
 
   const max = snaps[snaps.length - 1] ?? 0;
   const [drag, setDrag] = useState<number | null>(null); // visible height while dragging
-  const start = useRef<{ y: number; h: number; t: number; lastY: number; lastT: number } | null>(null);
+  const start = useRef<{
+    y: number;
+    h: number;
+    t: number;
+    lastY: number;
+    lastT: number;
+  } | null>(null);
   const scroller = useRef<HTMLDivElement | null>(null);
   const visible = drag ?? snaps[index] ?? 0;
   const atFull = index === snaps.length - 1 && drag == null;
@@ -64,7 +70,13 @@ export function DragSheet({
     if (fromContent && atFull) return;
     // Let buttons/links inside take their tap.
     if ((e.target as HTMLElement).closest("button, a, input") && fromContent) return;
-    start.current = { y: e.clientY, h: visible, t: performance.now(), lastY: e.clientY, lastT: performance.now() };
+    start.current = {
+      y: e.clientY,
+      h: visible,
+      t: performance.now(),
+      lastY: e.clientY,
+      lastT: performance.now(),
+    };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onMove = (e: React.PointerEvent) => {
@@ -86,8 +98,15 @@ export function DragSheet({
     }
     const v = (s.y - e.clientY) / Math.max(1, performance.now() - s.t); // px/ms, + = up
     const h = drag ?? s.h;
-    let next = snaps.reduce((best, sh, i) => (Math.abs(sh - h) < Math.abs(snaps[best]! - h) ? i : best), 0);
-    if (Math.abs(v) > 0.5) next = v > 0 ? Math.min(snaps.length - 1, Math.max(next, index + 1)) : Math.max(0, Math.min(next, index - 1));
+    let next = snaps.reduce(
+      (best, sh, i) => (Math.abs(sh - h) < Math.abs(snaps[best]! - h) ? i : best),
+      0,
+    );
+    if (Math.abs(v) > 0.5)
+      next =
+        v > 0
+          ? Math.min(snaps.length - 1, Math.max(next, index + 1))
+          : Math.max(0, Math.min(next, index - 1));
     setDrag(null);
     setIndex(next);
   };
@@ -100,7 +119,7 @@ export function DragSheet({
   return (
     <div
       className={cn(
-        "absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-[24px] border-t border-ar-line bg-ar-bg shadow-[0_-12px_32px_-14px_rgba(0,0,0,0.55)]",
+        "border-ar-line bg-ar-bg absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-[24px] border-t shadow-[0_-12px_32px_-14px_rgba(0,0,0,0.55)]",
         drag == null && "transition-[height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
         className,
       )}
@@ -112,13 +131,13 @@ export function DragSheet({
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}
-        className="shrink-0 cursor-grab select-none px-4 pt-2.5 active:cursor-grabbing"
+        className="shrink-0 cursor-grab px-4 pt-2.5 select-none active:cursor-grabbing"
       >
         <button
           type="button"
           aria-label={atFull ? "Collapse" : "Expand"}
           onClick={() => setIndex(index === snaps.length - 1 ? 0 : index + 1)}
-          className="mx-auto mb-2.5 block h-1.5 w-11 rounded-full bg-ar-line-bright/70"
+          className="bg-ar-line-bright/70 mx-auto mb-2.5 block h-1.5 w-11 rounded-full"
         />
         {header}
       </div>
@@ -128,7 +147,10 @@ export function DragSheet({
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}
-        className={cn("min-h-0 flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]", atFull ? "overflow-y-auto" : "overflow-hidden")}
+        className={cn(
+          "min-h-0 flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]",
+          atFull ? "overflow-y-auto" : "overflow-hidden",
+        )}
         style={{ touchAction: atFull ? "pan-y" : "none" }}
       >
         {children}

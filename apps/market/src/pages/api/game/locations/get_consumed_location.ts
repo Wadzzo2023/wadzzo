@@ -8,10 +8,7 @@ import { WadzzoCircularIconURL, WadzzoIconURL } from "./index";
 
 // import { getSession } from "next-auth/react";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
 
   const session = await getToken({ req });
@@ -101,27 +98,23 @@ export default async function handler(
       lat: location.latitude,
       lng: location.longitude,
       title: location.locationGroup.title,
-      description:
-        location.locationGroup?.description ?? "No description provided",
+      description: location.locationGroup?.description ?? "No description provided",
       viewed: location.consumers.some((el) => el.viewedAt != null),
       auto_collect: location.autoCollect,
-      brand_image_url:
-        location.locationGroup?.creator.profileUrl ?? avaterIconUrl,
-      circular_image_url: location.locationGroup.creator.circularProfileUrl ?? WadzzoCircularIconURL,
+      brand_image_url: location.locationGroup?.creator.profileUrl ?? avaterIconUrl,
+      circular_image_url:
+        location.locationGroup.creator.circularProfileUrl ?? WadzzoCircularIconURL,
       brand_id: location.locationGroup?.creator.id,
       modal_url: "https://vong.cong/",
       collected: true,
       collection_limit_remaining: remaining,
       brand_name: location.locationGroup.creator.name,
       image_url:
-        location.locationGroup.image ??
-        location.locationGroup.creator.profileUrl ??
-        WadzzoIconURL,
+        location.locationGroup.image ?? location.locationGroup.creator.profileUrl ?? WadzzoIconURL,
       url: location.locationGroup.link ?? "https://app.wadzzo.com/",
       redeemCode: location.consumers.find((c) => c.userId === userId)?.redeemCode ?? null,
       isRedeemed: location.consumers.find((c) => c.userId === userId)?.isRedeemed ?? null,
       claimedAt: location.consumers.find((c) => c.userId === userId)?.claimedAt ?? null,
-
     };
     return loc;
   });

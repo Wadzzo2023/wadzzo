@@ -15,7 +15,11 @@ import { brandEntryFor } from "./access-rules";
  *
  * (Query 5 has no per-query onSuccess, so the store syncing lives in effects.)
  */
-type Remembered = { isAdmin: boolean; approved: boolean; navPermission: boolean };
+type Remembered = {
+  isAdmin: boolean;
+  approved: boolean;
+  navPermission: boolean;
+};
 const ACCESS_KEY = "wadzzo.access";
 
 /** Last access we saw for this user — shown while the fresh check runs. */
@@ -43,14 +47,30 @@ export function usePortalAccess() {
   const signedIn = session.status === "authenticated";
   const userId = session.data?.user?.id;
 
-  const admin = api.wallate.admin.checkAdmin.useQuery(undefined, { enabled: signedIn, retry: false });
-  const creator = api.fan.creator.meCreator.useQuery(undefined, { enabled: signedIn });
+  const admin = api.wallate.admin.checkAdmin.useQuery(undefined, {
+    enabled: signedIn,
+    retry: false,
+  });
+  const creator = api.fan.creator.meCreator.useQuery(undefined, {
+    enabled: signedIn,
+  });
   // A brand only works on the platform it belongs to.
-  const approved = Boolean(creator.data?.aprovalSend && creator.data?.approved === true && creator.data?.onThisPlatform);
-  const permission = api.fan.creator.getPermissionData.useQuery(undefined, { enabled: signedIn && approved, retry: false });
+  const approved = Boolean(
+    creator.data?.aprovalSend && creator.data?.approved === true && creator.data?.onThisPlatform,
+  );
+  const permission = api.fan.creator.getPermissionData.useQuery(undefined, {
+    enabled: signedIn && approved,
+    retry: false,
+  });
 
-  const account = api.wallate.acc.getAccountBalance.useQuery(undefined, { enabled: signedIn, retry: false });
-  const storage = api.wallate.acc.getCreatorStorageBallances.useQuery(undefined, { enabled: signedIn && approved, retry: false });
+  const account = api.wallate.acc.getAccountBalance.useQuery(undefined, {
+    enabled: signedIn,
+    retry: false,
+  });
+  const storage = api.wallate.acc.getCreatorStorageBallances.useQuery(undefined, {
+    enabled: signedIn && approved,
+    retry: false,
+  });
 
   const setUserBalance = useUserStellarAcc((s) => s.setBalance);
   const setUserActive = useUserStellarAcc((s) => s.setActive);
@@ -77,7 +97,11 @@ export function usePortalAccess() {
   const cached = useMemo(() => readRemembered(userId), [userId]);
 
   const settled = admin.isFetched && creator.isFetched && (!approved || permission.isFetched);
-  const fresh: Remembered = { isAdmin: Boolean(admin.data), approved, navPermission: Boolean(permission.data) };
+  const fresh: Remembered = {
+    isAdmin: Boolean(admin.data),
+    approved,
+    navPermission: Boolean(permission.data),
+  };
   useEffect(() => {
     if (settled && userId) remember(userId, fresh);
     // eslint-disable-next-line react-hooks/exhaustive-deps

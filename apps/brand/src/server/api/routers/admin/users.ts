@@ -61,7 +61,17 @@ export const userRouter = createTRPCRouter({
             creator: { select: { id: true, name: true, approved: true } },
             Admin: { select: { id: true }, take: 1 },
             // collections of this platform's pins (all platforms on Wadzzo)
-            _count: { select: { LocationConsumer: { where: { location: { locationGroup: relationScope(ctx, input?.platformId) } } } } },
+            _count: {
+              select: {
+                LocationConsumer: {
+                  where: {
+                    location: {
+                      locationGroup: relationScope(ctx, input?.platformId),
+                    },
+                  },
+                },
+              },
+            },
           },
         }),
       ]);
@@ -90,13 +100,23 @@ export const userRouter = createTRPCRouter({
         platforms: {
           where: scope,
           orderBy: { firstSeenAt: "asc" },
-          select: { platformId: true, firstSeenAt: true, lastSeenAt: true, signUpMethod: true, platform: { select: { name: true } } },
+          select: {
+            platformId: true,
+            firstSeenAt: true,
+            lastSeenAt: true,
+            signUpMethod: true,
+            platform: { select: { name: true } },
+          },
         },
         Admin: { select: { id: true }, take: 1 },
-        creator: { select: { id: true, name: true, approved: true, profileUrl: true } },
+        creator: {
+          select: { id: true, name: true, approved: true, profileUrl: true },
+        },
         _count: {
           select: {
-            LocationConsumer: { where: { location: { locationGroup: relationScope(ctx) } } },
+            LocationConsumer: {
+              where: { location: { locationGroup: relationScope(ctx) } },
+            },
             RedeemConsumer: { where: { redeemCode: scope } },
             assets: { where: { asset: scope } },
             followings: { where: { creator: scope } },
@@ -116,18 +136,41 @@ export const userRouter = createTRPCRouter({
             location: {
               select: {
                 locationGroup: {
-                  select: { id: true, title: true, image: true, type: true, creator: { select: { id: true, name: true } } },
+                  select: {
+                    id: true,
+                    title: true,
+                    image: true,
+                    type: true,
+                    creator: { select: { id: true, name: true } },
+                  },
                 },
               },
             },
           },
         },
-        RedeemConsumer: { where: { redeemCode: scope }, orderBy: { redeemedAt: "desc" }, take: 50, select: { id: true, code: true, redeemedAt: true } },
+        RedeemConsumer: {
+          where: { redeemCode: scope },
+          orderBy: { redeemedAt: "desc" },
+          take: 50,
+          select: { id: true, code: true, redeemedAt: true },
+        },
         assets: {
           where: { asset: scope },
           orderBy: { buyAt: "desc" },
           take: 50,
-          select: { id: true, buyAt: true, asset: { select: { id: true, name: true, code: true, issuer: true, thumbnail: true } } },
+          select: {
+            id: true,
+            buyAt: true,
+            asset: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                issuer: true,
+                thumbnail: true,
+              },
+            },
+          },
         },
       },
     });
@@ -139,15 +182,28 @@ export const userRouter = createTRPCRouter({
   // Accounts are shared by every platform, so only Wadzzo admins can delete one.
   deleteUser: superAdminProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     const deleted = await ctx.db.user.delete({ where: { id: input } });
-    await logAudit(ctx, { action: "user.delete", entityType: "User", entityId: input });
+    await logAudit(ctx, {
+      action: "user.delete",
+      entityType: "User",
+      entityId: input,
+    });
     return deleted;
   }),
 
   deleteAPost: adminProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
-    const post = await ctx.db.post.findUnique({ where: { id: input }, select: { platformId: true } });
-    if (!post || !isInPlatformScope(ctx, post.platformId)) throw new TRPCError({ code: "NOT_FOUND" });
+    const post = await ctx.db.post.findUnique({
+      where: { id: input },
+      select: { platformId: true },
+    });
+    if (!post || !isInPlatformScope(ctx, post.platformId))
+      throw new TRPCError({ code: "NOT_FOUND" });
     const deleted = await ctx.db.post.delete({ where: { id: input } });
-    await logAudit(ctx, { action: "post.delete", entityType: "Post", entityId: input, targetPlatformId: post.platformId });
+    await logAudit(ctx, {
+      action: "post.delete",
+      entityType: "Post",
+      entityId: input,
+      targetPlatformId: post.platformId,
+    });
     return deleted;
   }),
   sendEmail: adminProcedure
@@ -181,11 +237,7 @@ const transporter: Transporter = createTransport({
   },
 });
 
-const sendEmail = async (
-  userEmail: string,
-  name: string,
-  message: string,
-): Promise<void> => {
+const sendEmail = async (userEmail: string, name: string, message: string): Promise<void> => {
   try {
     const mailOptions = {
       from: userEmail,
@@ -195,9 +247,10 @@ const sendEmail = async (
     };
 
     const result = transporter.sendMail(mailOptions);
-
   } catch (error) {
     console.error("Error sending email: ", error);
-    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, { message: "Failed to send email" });
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
+      message: "Failed to send email",
+    });
   }
 };

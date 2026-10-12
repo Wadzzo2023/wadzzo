@@ -18,7 +18,11 @@ import { z, ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "@wadzzo/db/server";
-import { brandWorksOnPlatform, canAdminPlatform, getCurrentPlatform } from "@wadzzo/platform/server";
+import {
+  brandWorksOnPlatform,
+  canAdminPlatform,
+  getCurrentPlatform,
+} from "@wadzzo/platform/server";
 
 /**
  * 1. CONTEXT
@@ -89,8 +93,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       data: {
         ...shape.data,
         appCode: isAppError(error.cause) ? error.cause.code : null,
-        zodError:
-          error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
+        zodError: error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
       },
     };
   },
@@ -155,7 +158,10 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
   // An admin manages their own platform's panel; root-platform (wadzzo) admins manage every panel.
   if (!admin || !canAdminPlatform(admin, ctx.platform)) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Admin access required",
+    });
   }
 
   return next({
@@ -170,7 +176,10 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
 /** Wadzzo (root-platform) admins, on any platform's site: platform management, audit log, cross-platform admin. */
 export const superAdminProcedure = adminProcedure.use(({ ctx, next }) => {
   if (!ctx.isSuperAdmin) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Wadzzo admin access required" });
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Wadzzo admin access required",
+    });
   }
   return next();
 });

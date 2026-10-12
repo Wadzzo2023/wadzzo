@@ -1,9 +1,8 @@
-
 interface Location {
   latitude: number;
   longitude: number;
 }
-const EARTH_RADIUS_M = 6_371_000
+const EARTH_RADIUS_M = 6_371_000;
 const EarthRadius = 6371; // Earth's radius in kilometers
 const OneDegree = ((EarthRadius * 2 * Math.PI) / 360) * 1000; // One degree in meters
 
@@ -13,11 +12,7 @@ function randomPointInDisk(radius: number): [number, number] {
   return [r * Math.cos(theta), r * Math.sin(theta)];
 }
 
-export function randomLocation(
-  lat: number,
-  lng: number,
-  radius: number,
-): Location {
+export function randomLocation(lat: number, lng: number, radius: number): Location {
   if (radius <= 0) return { latitude: lat, longitude: lng };
   const [dx, dy] = randomPointInDisk(radius);
 
@@ -63,9 +58,7 @@ function generateInCircle(
     const angle = Math.random() * 2 * Math.PI;
 
     const dLat = (r * Math.cos(angle)) / R;
-    const dLng =
-      (r * Math.sin(angle)) /
-      (R * Math.cos((centerLat * Math.PI) / 180));
+    const dLng = (r * Math.sin(angle)) / (R * Math.cos((centerLat * Math.PI) / 180));
 
     results.push({
       latitude: centerLat + (dLat * 180) / Math.PI,
@@ -115,10 +108,7 @@ function generateInPolygon(
  * Ray-casting point-in-polygon.
  * coords are [lat, lng] pairs — consistent with your app's convention.
  */
-function pointInPolygon(
-  point: [number, number],
-  ring: [number, number][],
-): boolean {
+function pointInPolygon(point: [number, number], ring: [number, number][]): boolean {
   const [px, py] = point;
   let inside = false;
 
@@ -126,9 +116,7 @@ function pointInPolygon(
     const [xi, yi] = ring[i]!;
     const [xj, yj] = ring[j]!;
 
-    const intersects =
-      yi > py !== yj > py &&
-      px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+    const intersects = yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
 
     if (intersects) inside = !inside;
   }
@@ -145,6 +133,6 @@ export function dropIntervalToCron(days: number): string {
     7: "0 9 * * 1",
     14: "0 9 1,15 * *",
     30: "0 9 1 * *",
-  }
-  return map[days] ?? "0 9 * * *"
+  };
+  return map[days] ?? "0 9 * * *";
 }

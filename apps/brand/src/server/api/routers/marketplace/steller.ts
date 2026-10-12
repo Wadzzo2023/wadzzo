@@ -14,11 +14,7 @@ import {
   XDR4BuyAssetWithXLM,
 } from "~/lib/stellar/music/trx/payment_xdr";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { api } from "~/utils/api";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
@@ -49,14 +45,20 @@ export const stellarRouter = createTRPCRouter({
         select: { creatorId: true, id: true },
       });
 
-      if (!dbAsset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset not found" });
+      if (!dbAsset)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "asset not found",
+        });
 
       const marketAsset = await ctx.db.marketAsset.findFirst({
         where: { AND: [{ assetId: dbAsset.id }, { placerId: placerId }] },
         select: { price: true, priceUSD: true },
       });
 
-      if (!marketAsset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "asset is not in market" });
+      if (!marketAsset)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "asset is not in market",
+        });
 
       console.log("marketAsset", marketAsset);
       // validate and transform input
@@ -72,7 +74,9 @@ export const stellarRouter = createTRPCRouter({
           select: { storageSecret: true },
         });
         if (!storage?.storageSecret) {
-          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "storage does not exist" });
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+            message: "storage does not exist",
+          });
         }
         sellerStorageSec = storage.storageSecret;
       } else {
@@ -83,7 +87,7 @@ export const stellarRouter = createTRPCRouter({
 
       switch (input.method) {
         case "xlm": {
-          const priceInNative = await getXLMPriceByPlatformAsset(marketAsset.price)
+          const priceInNative = await getXLMPriceByPlatformAsset(marketAsset.price);
           return await XDR4BuyAssetWithXLM({
             seller: seller,
             storageSecret: sellerStorageSec,
@@ -141,7 +145,9 @@ export const stellarRouter = createTRPCRouter({
         });
         return xdr;
       } else {
-        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "No email attached to the account" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+          message: "No email attached to the account",
+        });
       }
     }),
 
@@ -168,15 +174,15 @@ export const stellarRouter = createTRPCRouter({
   getPlatformAssetToXLM: protectedProcedure
     .input(
       z.object({
-
         price: z.number().optional().nullable(),
         cost: z.number().optional().nullable(),
-
-      })
+      }),
     )
     .query(async ({ input }) => {
       if (!input.price && !input.cost) {
-        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "price or cost is required" });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+          message: "price or cost is required",
+        });
       }
       if (input.price && input.cost) {
         const priceInXLM = await getXLMPriceByPlatformAsset(input.price);
@@ -191,7 +197,5 @@ export const stellarRouter = createTRPCRouter({
         const costInXLM = await getXLMPriceByPlatformAsset(input.cost);
         return { costInXLM };
       }
-
-
     }),
 });

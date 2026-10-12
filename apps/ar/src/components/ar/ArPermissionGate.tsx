@@ -9,19 +9,12 @@ import { ArButton } from "~/components/ui/ArButton";
 import { detectPlatform, LOCATION_STEPS } from "~/lib/ar/locationHelp";
 import { cn } from "@wadzzo/ui/lib/cn";
 
-export type PermState =
-  | "pending"
-  | "granted"
-  | "denied"
-  | "unsupported"
-  | "insecure";
+export type PermState = "pending" | "granted" | "denied" | "unsupported" | "insecure";
 
 /** Copy shown in place of the explainer once a permission has resolved badly. */
 const FALLBACK_COPY: Partial<Record<PermState, string>> = {
-  denied:
-    "Blocked. Re-enable it in your browser's site settings for this page.",
-  unsupported:
-    "Not available on this device — you'll be able to drag to look around instead.",
+  denied: "Blocked. Re-enable it in your browser's site settings for this page.",
+  unsupported: "Not available on this device — you'll be able to drag to look around instead.",
   // Browsers refuse motion sensors outside HTTPS with no prompt and no
   // error — this is the one state on this screen with a real fix rather
   // than a shrug, so it gets to say what that fix is.
@@ -97,20 +90,18 @@ export function ArPermissionGate({
   copy?: GateCopy;
 }) {
   const router = useRouter();
-  const anyDenied = Object.values(states).some(
-    (s) => s === "denied" || s === "insecure",
-  );
+  const anyDenied = Object.values(states).some((s) => s === "denied" || s === "insecure");
   const platform = useMemo(detectPlatform, []);
   const locationSteps = LOCATION_STEPS[platform];
 
   return (
-    <div className="ar-grid relative flex h-full flex-col overflow-hidden bg-ar-void">
-      <div className="absolute left-1/2 top-[26%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.2),transparent_64%)] blur-[60px]" />
+    <div className="ar-grid bg-ar-void relative flex h-full flex-col overflow-hidden">
+      <div className="absolute top-[26%] left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--ar-green)/0.2),transparent_64%)] blur-[60px]" />
 
       <button
         onClick={() => router.back()}
         aria-label="Close"
-        className="ar-glass absolute right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full text-ar-dim"
+        className="ar-glass text-ar-dim absolute right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full"
         style={{ top: "calc(var(--ar-top-inset) + 14px)" }}
       >
         <X size={17} strokeWidth={2.4} />
@@ -134,7 +125,7 @@ export function ArPermissionGate({
             centre the column when it fits — and, unlike `justify-center`,
             let it scroll from the top when it doesn't instead of pushing
             the heading off-screen. */}
-        <div className="relative mx-auto mb-7 mt-auto h-[88px] w-[88px] shrink-0">
+        <div className="relative mx-auto mt-auto mb-7 h-[88px] w-[88px] shrink-0">
           <motion.svg
             viewBox="0 0 88 88"
             fill="none"
@@ -166,10 +157,10 @@ export function ArPermissionGate({
           </div>
         </div>
 
-        <h1 className="font-hud text-center text-[24px] font-bold leading-tight text-ar-text">
+        <h1 className="font-hud text-ar-text text-center text-[24px] leading-tight font-bold">
           {copy.title}
         </h1>
-        <p className="mx-auto mt-2 max-w-[19rem] text-center text-[13px] leading-relaxed text-ar-dim">
+        <p className="text-ar-dim mx-auto mt-2 max-w-[19rem] text-center text-[13px] leading-relaxed">
           {copy.body}
         </p>
 
@@ -180,10 +171,9 @@ export function ArPermissionGate({
               <li
                 key={key}
                 className={cn(
-                  "ar-bevel flex items-start gap-3 rounded-ar p-3.5",
+                  "ar-bevel rounded-ar flex items-start gap-3 p-3.5",
                   state === "granted" && "!border-ar-green/45",
-                  (state === "denied" || state === "insecure") &&
-                    "!border-ar-danger/45",
+                  (state === "denied" || state === "insecure") && "!border-ar-danger/45",
                 )}
               >
                 <span
@@ -193,7 +183,7 @@ export function ArPermissionGate({
                       ? "border-ar-green/50 bg-ar-green/14 text-ar-green-hot"
                       : state === "denied" || state === "insecure"
                         ? "border-ar-danger/50 bg-ar-danger/14 text-ar-danger"
-                        : "border-ar-line bg-white/[0.04] text-ar-faint",
+                        : "border-ar-line text-ar-faint bg-white/[0.04]",
                   )}
                 >
                   {state === "granted" ? (
@@ -208,10 +198,10 @@ export function ArPermissionGate({
                 </span>
 
                 <div className="min-w-0">
-                  <p className="font-hud text-[12.5px] font-bold uppercase tracking-[0.1em] text-ar-text">
+                  <p className="font-hud text-ar-text text-[12.5px] font-bold tracking-[0.1em] uppercase">
                     {title}
                   </p>
-                  <p className="mt-1 text-[11.5px] leading-relaxed text-ar-faint">
+                  <p className="text-ar-faint mt-1 text-[11.5px] leading-relaxed">
                     {(state === "unsupported" ? copy.unsupported?.[key] : undefined) ??
                       FALLBACK_COPY[state] ??
                       copy.why?.[key] ??
@@ -223,15 +213,13 @@ export function ArPermissionGate({
                       re-prompting, and "re-enable it in site settings" is not
                       where the actual control lives on a phone. */}
                   {key === "location" && state === "denied" && (
-                    <ol className="mt-2.5 space-y-1.5 border-t border-ar-line pt-2.5">
+                    <ol className="border-ar-line mt-2.5 space-y-1.5 border-t pt-2.5">
                       {locationSteps.steps.map((step, i) => (
                         <li key={i} className="flex gap-2">
-                          <span className="font-hud mt-[1px] w-3.5 shrink-0 text-[9.5px] font-bold tabular-nums text-ar-green">
+                          <span className="font-hud text-ar-green mt-[1px] w-3.5 shrink-0 text-[9.5px] font-bold tabular-nums">
                             {i + 1}
                           </span>
-                          <span className="text-[11px] leading-relaxed text-ar-faint">
-                            {step}
-                          </span>
+                          <span className="text-ar-faint text-[11px] leading-relaxed">{step}</span>
                         </li>
                       ))}
                     </ol>
@@ -243,9 +231,7 @@ export function ArPermissionGate({
         </ul>
 
         {error && (
-          <p className="mt-4 text-center text-[12px] leading-relaxed text-ar-danger">
-            {error}
-          </p>
+          <p className="text-ar-danger mt-4 text-center text-[12px] leading-relaxed">{error}</p>
         )}
 
         <div className="mt-7 space-y-2">
@@ -257,23 +243,14 @@ export function ArPermissionGate({
             onClick={onRequest}
             disabled={requesting}
           >
-            {requesting
-              ? "Asking…"
-              : anyDenied
-                ? "Try again"
-                : copy.cta}
+            {requesting ? "Asking…" : anyDenied ? "Try again" : copy.cta}
           </ArButton>
-          <ArButton
-            variant="ghost"
-            size="md"
-            block
-            onClick={() => void router.push("/map")}
-          >
+          <ArButton variant="ghost" size="md" block onClick={() => void router.push("/map")}>
             Back to the map
           </ArButton>
         </div>
 
-        <p className="mb-auto mt-5 text-center text-[10.5px] leading-relaxed text-ar-faint">
+        <p className="text-ar-faint mt-5 mb-auto text-center text-[10.5px] leading-relaxed">
           {copy.footnote}
         </p>
       </div>

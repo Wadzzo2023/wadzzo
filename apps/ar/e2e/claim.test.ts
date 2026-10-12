@@ -26,25 +26,66 @@ describe("claim to wallet (testnet)", () => {
     }
 
     const suffix = Math.random().toString(36).slice(2, 8);
-    await db.user.create({ data: { id: kp.publicKey(), name: `e2e-${suffix}`, email: `e2e-${suffix}@example.test` } });
+    await db.user.create({
+      data: {
+        id: kp.publicKey(),
+        name: `e2e-${suffix}`,
+        email: `e2e-${suffix}@example.test`,
+      },
+    });
     const group = await db.locationGroup.create({
       data: {
-        creatorId: BRAND, platformId: "wadzzo", assetId: ASSET_ID, title: `E2E claim ${suffix}`, startDate: new Date(Date.now() - 86_400_000), endDate: new Date(Date.now() + 86_400_000),
-        latitude: 0, longitude: 0, radius: 50, limit: 1, remaining: 0, approved: true,
-        locations: { create: { latitude: 0, longitude: 0, autoCollect: false } },
+        creatorId: BRAND,
+        platformId: "wadzzo",
+        assetId: ASSET_ID,
+        title: `E2E claim ${suffix}`,
+        startDate: new Date(Date.now() - 86_400_000),
+        endDate: new Date(Date.now() + 86_400_000),
+        latitude: 0,
+        longitude: 0,
+        radius: 50,
+        limit: 1,
+        remaining: 0,
+        approved: true,
+        locations: {
+          create: { latitude: 0, longitude: 0, autoCollect: false },
+        },
       },
       include: { locations: true },
     });
     const loc = group.locations[0]!;
-    const consumer = await db.locationConsumer.create({ data: { userId: kp.publicKey(), locationId: loc.id, redeemCode: `E2E${suffix}`.toUpperCase(), claimedAt: new Date(), platformId: "wadzzo" } });
+    const consumer = await db.locationConsumer.create({
+      data: {
+        userId: kp.publicKey(),
+        locationId: loc.id,
+        redeemCode: `E2E${suffix}`.toUpperCase(),
+        claimedAt: new Date(),
+        platformId: "wadzzo",
+      },
+    });
     const ctx = { db, platform: { id: "wadzzo", isRoot: true } };
 
     try {
       const q = await quoteClaim(ctx, kp.publicKey(), consumer.id, "XLM");
-      console.log("QUOTE", JSON.stringify({ ok: q.ok, source: q.source, total: q.total, currency: q.currency, lines: q.lines.map((l) => `${l.label}=${l.amount}`), problems: q.problems.map((p) => p.message) }));
+      console.log(
+        "QUOTE",
+        JSON.stringify({
+          ok: q.ok,
+          source: q.source,
+          total: q.total,
+          currency: q.currency,
+          lines: q.lines.map((l) => `${l.label}=${l.amount}`),
+          problems: q.problems.map((p) => p.message),
+        }),
+      );
       expect(q.ok).toBe(true);
 
-      const prep = await prepareClaim(ctx, { userId: kp.publicKey(), consumerId: consumer.id, method: "XLM", signWith: undefined });
+      const prep = await prepareClaim(ctx, {
+        userId: kp.publicKey(),
+        consumerId: consumer.id,
+        method: "XLM",
+        signWith: undefined,
+      });
       expect(prep.ok).toBe(true);
       if (!prep.ok) return;
       const tx = TransactionBuilder.fromXDR(prep.xdr, Networks.TESTNET);
@@ -56,21 +97,40 @@ describe("claim to wallet (testnet)", () => {
       console.log("SETTLED", settled?.status, settled?.error);
       expect(settled?.status).toBe("SUCCESS");
 
-      const asset = await db.asset.findUniqueOrThrow({ where: { id: ASSET_ID } });
+      const asset = await db.asset.findUniqueOrThrow({
+        where: { id: ASSET_ID },
+      });
       const acc = await server.loadAccount(kp.publicKey());
-      const held = acc.balances.find((b) => b.asset_type !== "native" && "asset_code" in b && b.asset_code === asset.code && b.asset_issuer === asset.issuer);
+      const held = acc.balances.find(
+        (b) =>
+          b.asset_type !== "native" &&
+          "asset_code" in b &&
+          b.asset_code === asset.code &&
+          b.asset_issuer === asset.issuer,
+      );
       console.log("HELD", held && "balance" in held ? held.balance : null);
       expect(Number(held && "balance" in held ? held.balance : 0)).toBe(1);
 
       const after = await quoteClaim(ctx, kp.publicKey(), consumer.id, "XLM");
-      console.log("AFTER", after.state, after.problems.map((p) => p.message));
+      console.log(
+        "AFTER",
+        after.state,
+        after.problems.map((p) => p.message),
+      );
       expect(after.state).toBe("delivered");
-      const owned = await db.user_Asset.count({ where: { userId: kp.publicKey(), assetId: ASSET_ID } });
+      const owned = await db.user_Asset.count({
+        where: { userId: kp.publicKey(), assetId: ASSET_ID },
+      });
       expect(owned).toBe(1);
     } finally {
       // clean up the test rows (the on-chain copy stays, it's testnet)
-      await db.locationConsumer.updateMany({ where: { id: consumer.id }, data: { claimTxId: null } });
-      await db.assetTransaction.deleteMany({ where: { buyerId: kp.publicKey() } });
+      await db.locationConsumer.updateMany({
+        where: { id: consumer.id },
+        data: { claimTxId: null },
+      });
+      await db.assetTransaction.deleteMany({
+        where: { buyerId: kp.publicKey() },
+      });
       await db.user_Asset.deleteMany({ where: { userId: kp.publicKey() } });
       await db.locationConsumer.deleteMany({ where: { id: consumer.id } });
       await db.locationGroup.delete({ where: { id: group.id } });
