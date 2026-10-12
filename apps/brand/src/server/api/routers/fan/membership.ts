@@ -1,6 +1,6 @@
 import { NotificationType } from "@wadzzo/db";
 import { z } from "zod";
-import { AccountSchema } from "~/lib/stellar/fan/utils";
+import { AccountSchema } from "~/lib/stellar/fan/stellar-schemas";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { MAX_ASSET_LIMIT } from "../admin/creator";

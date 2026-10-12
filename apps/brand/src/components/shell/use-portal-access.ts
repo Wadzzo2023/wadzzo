@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo } from "react";
 
-import { useCreatorStorageAcc, useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
+import { useCreatorStorageAcc, useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import { api } from "~/utils/api";
 
 import { brandEntryFor } from "./access-rules";

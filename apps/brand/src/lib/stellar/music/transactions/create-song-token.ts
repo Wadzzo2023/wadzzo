@@ -8,7 +8,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { STELLAR_URL, stellarNetwork } from "@wadzzo/wallet/config";
-import { type AccountType } from "../../fan/utils";
+import { type AccountType } from "../../fan/stellar-schemas";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const log = console;

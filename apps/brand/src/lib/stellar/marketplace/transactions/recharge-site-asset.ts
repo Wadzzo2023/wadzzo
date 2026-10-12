@@ -1,5 +1,5 @@
 import { BASE_FEE, Keypair, Operation, Horizon, TransactionBuilder } from "@stellar/stellar-sdk";
-import { MOTHER_SECRET, STORAGE_SECRET } from "../SECRET";
+import { MOTHER_SECRET, STORAGE_SECRET } from "../../platform-secrets";
 import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

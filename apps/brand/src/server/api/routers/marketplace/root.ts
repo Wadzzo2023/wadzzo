@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { marketRouter } from "./marketplace";
-import { stellarRouter } from "./steller";
+import { stellarRouter } from "./stellar";
 import { payRouter } from "./pay";
 import { tradeRouter } from "./trade";
 

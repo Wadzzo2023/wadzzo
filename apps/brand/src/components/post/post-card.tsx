@@ -20,7 +20,7 @@ import {
   LockOpen,
 } from "lucide-react";
 import { cn } from "@wadzzo/ui/lib/cn";
-import MediaGallery from "./media-gallary";
+import MediaGallery from "./media-gallery";
 import type { Media, Post } from "@wadzzo/db";
 import { api } from "~/utils/api";
 import CustomAvatar from "../common/custom-avatar";

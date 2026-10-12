@@ -15,7 +15,7 @@ import {
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
 } from "@wadzzo/wallet/config";
-import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
+import { getplatformAssetNumberForXLM } from "../../fan/get-token-price";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { StellarAccount } from "@wadzzo/stellar/account";

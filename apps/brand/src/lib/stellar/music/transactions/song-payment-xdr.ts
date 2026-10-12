@@ -6,7 +6,7 @@ import {
   Operation,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { networkPassphrase } from "./create_song_token";
+import { networkPassphrase } from "./create-song-token";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
+import { getplatformAssetNumberForXLM } from "../../fan/get-token-price";
 
 const log = console;
 

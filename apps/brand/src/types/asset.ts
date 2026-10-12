@@ -1,7 +1,7 @@
 import { MediaType } from "@wadzzo/db";
 import { z } from "zod";
 
-import { AccountSchema } from "~/lib/stellar/fan/utils";
+import { AccountSchema } from "~/lib/stellar/fan/stellar-schemas";
 import { BADWORDS } from "~/utils/banned-word";
 
 export const ExtraSongInfo = z.object({

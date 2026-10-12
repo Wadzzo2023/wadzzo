@@ -11,7 +11,7 @@ import CustomAvatar from "~/components/common/custom-avatar";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { useCustodialSigner } from "@wadzzo/wallet";
-import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
+import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";

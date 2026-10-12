@@ -4,7 +4,7 @@ import {
   accountDetailsWithHomeDomain,
   getAccountInfos,
   getCreatorPageAssetBalance,
-} from "~/lib/stellar/marketplace/test/acc";
+} from "~/lib/stellar/account-balances";
 
 import {
   createTRPCRouter,

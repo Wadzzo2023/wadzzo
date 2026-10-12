@@ -6,7 +6,7 @@ import {
   Operation,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { STORAGE_SECRET } from "../SECRET";
+import { STORAGE_SECRET } from "../../platform-secrets";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";

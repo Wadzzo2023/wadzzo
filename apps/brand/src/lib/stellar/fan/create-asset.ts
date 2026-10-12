@@ -6,7 +6,7 @@ import {
   networkPassphrase,
 } from "@wadzzo/wallet/config";
 import { env } from "~/env";
-import { AccountSchema, type AccountType } from "./utils";
+import { AccountSchema, type AccountType } from "./stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 

@@ -2,7 +2,7 @@ import { Keypair } from "@stellar/stellar-sdk";
 import { z } from "zod";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import { sendNft2StorageXDR, sendNftback } from "~/lib/stellar/marketplace/trx/nft_2_storage";
+import { sendNft2StorageXDR, sendNftback } from "~/lib/stellar/marketplace/transactions/move-nft-to-storage";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import { ItemPrivacy, MarketAsset } from "@wadzzo/db";

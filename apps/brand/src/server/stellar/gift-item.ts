@@ -6,7 +6,7 @@ import type { Platform } from "@wadzzo/db";
 import type { Session } from "next-auth";
 
 import { env } from "~/env";
-import { getplatformAssetNumberForXLM } from "~/lib/stellar/fan/get_token_price";
+import { getplatformAssetNumberForXLM } from "~/lib/stellar/fan/get-token-price";
 import {
   PLATFORM_ASSET,
   TrxBaseFee,

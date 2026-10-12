@@ -8,8 +8,8 @@ import {
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
-import { getplatformAssetNumberForXLM } from "./fan/get_token_price";
-import { type AccountType } from "./fan/utils";
+import { getplatformAssetNumberForXLM } from "./fan/get-token-price";
+import { type AccountType } from "./fan/stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 

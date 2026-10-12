@@ -30,7 +30,7 @@ import {
   getplatformAssetNumberForXLM,
   getPlatformAssetPrice,
   getXLMPriceByPlatformAsset,
-} from "~/lib/stellar/fan/get_token_price";
+} from "~/lib/stellar/fan/get-token-price";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";

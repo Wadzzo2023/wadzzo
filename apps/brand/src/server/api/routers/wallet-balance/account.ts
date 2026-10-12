@@ -13,7 +13,7 @@ import {
   DeclineClaimableBalance,
   CheckHasTrustLineOnPlatformAsset,
   PlatformAssetBalance,
-} from "~/lib/stellar/walletBalance/acc";
+} from "~/lib/stellar/wallet-balance/wallet-balance";
 import { User } from "firebase/auth";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";

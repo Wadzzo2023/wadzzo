@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { creatorAprovalTrx } from "~/lib/stellar/fan/creator-aproval";
-import { AccountSchema, type AccountType } from "~/lib/stellar/fan/utils";
+import { creatorAprovalTrx } from "~/lib/stellar/fan/creator-approval";
+import { AccountSchema, type AccountType } from "~/lib/stellar/fan/stellar-schemas";
 import { assertCreatorInScope } from "~/server/api/access";
 import {
   adminProcedure,

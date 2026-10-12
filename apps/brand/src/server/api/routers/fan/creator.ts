@@ -5,15 +5,15 @@ import {
   getCreatorShopAssetBalance,
   sendAssetXDRForAsset,
   sendAssetXDRForNative,
-} from "~/lib/stellar/fan/creator_pageasset_buy";
+} from "~/lib/stellar/fan/buy-creator-page-asset";
 import {
   getAssetPriceByCoddenIssuer,
   getPlatformAssetPrice,
   getXLMPrice,
   getXlmUsdPrice,
-} from "~/lib/stellar/fan/get_token_price";
+} from "~/lib/stellar/fan/get-token-price";
 import { createRedeemXDRAsset, createRedeemXDRNative } from "~/lib/stellar/fan/redeem";
-import { AccountSchema } from "~/lib/stellar/fan/utils";
+import { AccountSchema } from "~/lib/stellar/fan/stellar-schemas";
 import {
   createOrRenewVanitySubscription,
   getVanitySubscriptionXDR,
@@ -21,7 +21,7 @@ import {
   vanityState,
   verifyVanityPayment,
 } from "~/lib/stellar/fan/vanity-url";
-import { getAssetBalance } from "~/lib/stellar/marketplace/test/acc";
+import { getAssetBalance } from "~/lib/stellar/account-balances";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { BLANK_KEYWORD } from "~/lib/utils";

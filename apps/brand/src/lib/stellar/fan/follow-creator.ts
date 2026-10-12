@@ -3,7 +3,7 @@ import { env } from "~/env";
 import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { type MyAssetType } from "./utils";
+import { type MyAssetType } from "./stellar-schemas";
 
 /**
  * Following a creator don't need fee from user.

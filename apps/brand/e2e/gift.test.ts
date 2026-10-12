@@ -264,7 +264,7 @@ describe("gift an item (testnet)", () => {
       expect(await bal(storage.publicKey(), code, issuer.publicKey())).toBe(1);
 
       // E. a platform-token gift (signed in the browser): confirming it records it and tells the fan once
-      const { sendGitfAsPlatformAsset } = await import("~/lib/stellar/fan/send_gift");
+      const { sendGitfAsPlatformAsset } = await import("~/lib/stellar/fan/send-gift");
       const { confirmTokenGift } = await import("~/server/stellar/token-gift");
       await send(fan, (t) => t.addOperation(Operation.changeTrust({ asset: PLATFORM_ASSET })));
       const giftXdr = await sendGitfAsPlatformAsset({

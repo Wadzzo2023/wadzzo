@@ -4,7 +4,7 @@ import { Wallet } from "lucide-react";
 import Link from "next/link";
 
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
+import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 const fmt = new Intl.NumberFormat("en-US", {

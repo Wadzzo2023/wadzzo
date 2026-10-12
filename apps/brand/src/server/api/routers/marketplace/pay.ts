@@ -2,8 +2,8 @@ import { z } from "zod";
 import {
   getPlatformAssetNumberForUSD,
   getPlatformTokenNumberForUSD,
-} from "~/lib/stellar/fan/get_token_price";
-import { sendSiteAsset2pub } from "~/lib/stellar/marketplace/trx/site_asset_recharge";
+} from "~/lib/stellar/fan/get-token-price";
+import { sendSiteAsset2pub } from "~/lib/stellar/marketplace/transactions/recharge-site-asset";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

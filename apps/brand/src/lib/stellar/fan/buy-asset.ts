@@ -6,7 +6,7 @@ import {
   STELLAR_URL,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
-import { type MyAssetType } from "./utils";
+import { type MyAssetType } from "./stellar-schemas";
 
 const log = console;
 

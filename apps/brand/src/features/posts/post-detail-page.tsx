@@ -22,7 +22,7 @@ import CustomAvatar from "~/components/common/custom-avatar";
 import { Preview } from "~/components/common/quill-preview";
 import { AddPostComment } from "~/components/post/comment/add-post-comment";
 import { SinglePostCommentSection } from "~/components/post/comment/single-post-comment-section";
-import MediaGallery from "~/components/post/media-gallary";
+import MediaGallery from "~/components/post/media-gallery";
 import { Badge } from "@wadzzo/ui/components/badge";
 import { Button } from "@wadzzo/ui/components/button";
 import {

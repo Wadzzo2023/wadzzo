@@ -11,8 +11,8 @@ import {
 } from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { getplatformAssetNumberForXLM as getPlatformAssetNumberForXLM } from "./get_token_price";
-import { type AccountType } from "./utils";
+import { getplatformAssetNumberForXLM as getPlatformAssetNumberForXLM } from "./get-token-price";
+import { type AccountType } from "./stellar-schemas";
 
 const log = console;
 

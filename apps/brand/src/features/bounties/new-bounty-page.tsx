@@ -16,7 +16,7 @@ import { PaymentChoose, usePaymentMethodStore } from "~/components/common/paymen
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { useCustodialSigner } from "@wadzzo/wallet";
-import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
+import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,

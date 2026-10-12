@@ -4,7 +4,7 @@ import { creatorRouter } from "./creator";
 import { membershipRouter } from "./membership";
 import { shopRouter } from "./asset";
 import { itemRouter } from "./item";
-import { trxRouter } from "./trx";
+import { trxRouter } from "./transactions";
 import { notificationRouter } from "./notification";
 import { userRouter } from "./user";
 import { storageRouter } from "./storage";

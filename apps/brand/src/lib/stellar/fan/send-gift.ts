@@ -14,11 +14,11 @@ import {
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
-import { type MyAssetType } from "./utils";
+import { type MyAssetType } from "./stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import { getplatformAssetNumberForXLM } from "./get_token_price";
+import { getplatformAssetNumberForXLM } from "./get-token-price";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const log = console;

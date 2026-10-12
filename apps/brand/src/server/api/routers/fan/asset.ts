@@ -5,12 +5,12 @@ import { z } from "zod";
 import { ExtraSongInfo, NftFormSchema } from "~/types/asset";
 export { ExtraSongInfo, NftFormSchema };
 import { STELLAR_URL } from "@wadzzo/wallet/config";
-import { AccountSchema } from "~/lib/stellar/fan/utils";
+import { AccountSchema } from "~/lib/stellar/fan/stellar-schemas";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import {
   GetPageAssetBuyXDRInPlatform,
   GetPageAssetBuyXDRInXLM,
-} from "~/lib/stellar/marketplace/trx/page-asset-sell";
+} from "~/lib/stellar/marketplace/transactions/page-asset-sell";
 
 import {
   createTRPCRouter,

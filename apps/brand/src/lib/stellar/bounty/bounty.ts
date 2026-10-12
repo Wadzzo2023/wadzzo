@@ -16,7 +16,7 @@ import {
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
 } from "@wadzzo/wallet/config";
-import { MOTHER_SECRET } from "../marketplace/SECRET";
+import { MOTHER_SECRET } from "../platform-secrets";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

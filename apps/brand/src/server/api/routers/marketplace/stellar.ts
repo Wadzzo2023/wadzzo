@@ -3,16 +3,16 @@ import { AwardIcon } from "lucide-react";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { z } from "zod";
 import { env } from "~/env";
-import { getXLMPriceByPlatformAsset } from "~/lib/stellar/fan/get_token_price";
+import { getXLMPriceByPlatformAsset } from "~/lib/stellar/fan/get-token-price";
 
 // import { getUserSecret } from "~/components/recharge/utils";
-import { covertSiteAsset2XLM } from "~/lib/stellar/marketplace/trx/convert_site_asset";
-import { alreadyHaveTrustOnNft } from "~/lib/stellar/marketplace/trx/utils";
+import { covertSiteAsset2XLM } from "~/lib/stellar/marketplace/transactions/convert-site-asset";
+import { alreadyHaveTrustOnNft } from "~/lib/stellar/marketplace/transactions/balance-checks";
 import {
   XDR4BuyAsset,
   XDR4BuyAssetWithSquire,
   XDR4BuyAssetWithXLM,
-} from "~/lib/stellar/music/trx/payment_xdr";
+} from "~/lib/stellar/music/transactions/song-payment-xdr";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { api } from "~/utils/api";

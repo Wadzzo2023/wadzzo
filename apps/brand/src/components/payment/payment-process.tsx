@@ -9,14 +9,14 @@ import { Dialog, DialogClose, DialogContent, DialogFooter } from "@wadzzo/ui/com
 import { Loader } from "lucide-react";
 import { Alert } from "@wadzzo/ui/components/alert";
 import { useCustodialSigner } from "@wadzzo/wallet";
-import { useUserStellarAcc } from "~/lib/state/wallete/stellar-balances";
+import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import { PLATFORM_ASSET, PLATFORM_FEE, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 import { z } from "zod";
 import clsx from "clsx";
 import { type AssetType } from "~/lib/state/play/use-modal-store";
 import { Card, CardContent } from "@wadzzo/ui/components/card";
-import BuyWithSquire from "./buy-with-squire";
+import BuyWithSquire from "./buy-with-square";
 import RechargeLink from "./recharge-link";
 import { Badge } from "@wadzzo/ui/components/badge";
 

@@ -27,7 +27,7 @@ import { Input } from "@wadzzo/ui/components/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { Button } from "@wadzzo/ui/components/button";
-import { useCreatorStorageAcc } from "~/lib/state/wallete/stellar-balances";
+import { useCreatorStorageAcc } from "~/lib/state/wallet/stellar-balances";
 import { api } from "~/utils/api";
 import { BADWORDS } from "~/utils/banned-word";
 import { PinType } from "@wadzzo/db";

@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { trxRouter } from "./trx";
+import { trxRouter } from "./transactions";
 
 /**
  * This is the primary router for your server.

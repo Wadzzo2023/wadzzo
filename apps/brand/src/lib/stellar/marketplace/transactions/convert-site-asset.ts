@@ -6,7 +6,7 @@ import {
   Operation,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { STORAGE_SECRET } from "../SECRET";
+import { STORAGE_SECRET } from "../../platform-secrets";
 import {
   STROOP,
   STELLAR_URL,

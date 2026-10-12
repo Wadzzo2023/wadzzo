@@ -61,7 +61,7 @@ let makeAdmin: (
 beforeAll(async () => {
   const { createCallerFactory, createTRPCRouter, adminProcedure, superAdminProcedure } =
     await import("~/server/api/trpc");
-  const { adminRouter } = await import("~/server/api/routers/wallate/admin");
+  const { adminRouter } = await import("~/server/api/routers/wallet/admin");
   const probe = createCallerFactory(
     createTRPCRouter({
       panel: adminProcedure.query(() => "ok"),

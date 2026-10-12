@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { assetRouter } from "./asset";
-import { accRouter } from "./acc";
+import { accRouter } from "./account";
 import { adminRouter } from "./admin";
 import { tagRouter } from "./tag";
 import { pinataUploadRouter } from "./upload";

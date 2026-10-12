@@ -4,7 +4,7 @@ import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
-import { MOTHER_SECRET } from "../marketplace/SECRET";
+import { MOTHER_SECRET } from "../platform-secrets";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export async function getVanitySubscriptionXDR({

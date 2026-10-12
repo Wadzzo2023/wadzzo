@@ -10,7 +10,7 @@ import {
 } from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { getplatformAssetNumberForXLM } from "./get_token_price";
+import { getplatformAssetNumberForXLM } from "./get-token-price";
 
 export async function createRedeemXDRAsset({
   creatorId,

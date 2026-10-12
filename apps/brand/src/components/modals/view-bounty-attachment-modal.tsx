@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@wadzzo/ui/components/dialog";
-import AttachmentSection from "../bounty/attahment-section";
+import AttachmentSection from "../bounty/attachment-section";
 import { type SubmissionAttachment } from "@wadzzo/db";
 
 type ViewBountyAttachmentModalProps = {

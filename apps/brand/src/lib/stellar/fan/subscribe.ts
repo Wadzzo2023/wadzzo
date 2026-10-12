@@ -10,7 +10,7 @@ import {
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { type MyAssetType } from "./utils";
+import { type MyAssetType } from "./stellar-schemas";
 
 const log = console;
 // transection variables

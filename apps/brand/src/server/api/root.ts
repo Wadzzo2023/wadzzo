@@ -1,11 +1,11 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { fanRouter } from "./routers/fan/root";
 import { marketplaceRouter } from "./routers/marketplace/root";
-import { wallateRouter } from "./routers/wallate/root";
+import { wallateRouter } from "./routers/wallet/root";
 import { authRouter } from "./routers/auth/root";
 import { mapsRouter } from "./routers/maps/root";
 import { gameRouter } from "./routers/game";
-import { wallateBalanceRouter } from "./routers/walletBalance/root";
+import { wallateBalanceRouter } from "./routers/wallet-balance/root";
 import { adminRouter } from "./routers/admin/root";
 import { BountyRouters } from "./routers/bounty/root";
 import { s3Router } from "./routers/s3";

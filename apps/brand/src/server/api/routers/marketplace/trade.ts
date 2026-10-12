@@ -1,7 +1,7 @@
 import { Asset, Horizon } from "@stellar/stellar-sdk";
 import { z } from "zod";
 import { STELLAR_URL } from "@wadzzo/wallet/config";
-import { buyOfferXDR, tradeAssetXDR } from "~/lib/stellar/marketplace/trx/trade";
+import { buyOfferXDR, tradeAssetXDR } from "~/lib/stellar/marketplace/transactions/trade";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";

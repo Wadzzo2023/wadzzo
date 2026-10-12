@@ -1,5 +1,5 @@
 import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import { type MyAssetType } from "../fan/utils";
+import { type MyAssetType } from "../fan/stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";

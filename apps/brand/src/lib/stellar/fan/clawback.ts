@@ -10,8 +10,8 @@ import {
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
-import { getplatformAssetNumberForXLM } from "./get_token_price";
-import { type AccountType } from "./utils";
+import { getplatformAssetNumberForXLM } from "./get-token-price";
+import { type AccountType } from "./stellar-schemas";
 
 // transaction variables
 

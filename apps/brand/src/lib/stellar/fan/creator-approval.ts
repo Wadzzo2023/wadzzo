@@ -3,7 +3,7 @@ import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar
 import { env } from "~/env";
 import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { CustodialSigner } from "@wadzzo/wallet/shared";
-import { type AccountType } from "./utils";
+import { type AccountType } from "./stellar-schemas";
 import { Key } from "lucide-react";
 
 const log = console;
