@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useCallback, useRef, useState } from "react";
 
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 import { api } from "~/utils/api";
 
 import { uploadFileType } from "./accept";
@@ -27,7 +27,7 @@ async function sha256(file: File) {
  * with progress, report the public URL. Every upload UI (dropzones, the
  * compat buttons) is built on this.
  */
-export function useS3Upload(endpoint: EndPointType) {
+export function useS3Upload(endpoint: UploadEndpoint) {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);

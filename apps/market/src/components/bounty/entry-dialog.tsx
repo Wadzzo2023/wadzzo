@@ -13,7 +13,7 @@ import {
 } from "@wadzzo/ui/components/dialog";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { useEntryUpload, type UploadedMedia } from "~/hooks/use-entry-upload";
-import { MAX_ENTRY_FILES, entryFileProblem } from "~/lib/upload-files";
+import { MAX_ENTRY_FILES, entryFileProblem } from "@wadzzo/storage/upload-rules";
 import { api, type RouterOutputs } from "~/utils/api";
 
 export type Entry = RouterOutputs["bounty"]["entries"][number];

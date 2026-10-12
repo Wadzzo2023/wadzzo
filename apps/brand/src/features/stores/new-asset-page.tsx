@@ -36,7 +36,7 @@ import {
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api } from "~/utils/api";
@@ -47,7 +47,7 @@ const KINDS: {
   type: MediaType;
   label: string;
   icon: typeof ImageIcon;
-  endpoint: EndPointType;
+  endpoint: UploadEndpoint;
   hint?: string;
 }[] = [
   {

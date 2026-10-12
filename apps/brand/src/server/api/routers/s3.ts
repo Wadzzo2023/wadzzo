@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { endPoints, getSignedURL } from "~/server/s3";
+import { signUploadForEndpoint, uploadEndpoints } from "@wadzzo/storage";
 
 const fileUploadSchema = z.object({
   fileSize: z.number(),
   fileType: z.string(),
   checksum: z.string(),
-  endPoint: z.enum(endPoints),
+  endPoint: z.enum(uploadEndpoints),
   fileName: z.string(),
 });
 
@@ -16,19 +16,19 @@ export const s3Router = createTRPCRouter({
   }),
 
   getSignedURL: protectedProcedure.input(fileUploadSchema).mutation(({ ctx, input }) => {
-    return getSignedURL(input);
+    return signUploadForEndpoint({ ...input, endpoint: input.endPoint });
   }),
 
   getSignedMultiURLs: protectedProcedure
     .input(
       z.object({
         files: z.array(fileUploadSchema),
-        endPoint: z.enum(endPoints).default("multiBlobUploader"),
+        endPoint: z.enum(uploadEndpoints).default("multiBlobUploader"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { files } = input;
-      const urls = await Promise.all(files.map((file) => getSignedURL(file)));
+      const urls = await Promise.all(files.map((file) => signUploadForEndpoint({ ...file, endpoint: file.endPoint })));
       return urls;
     }),
 });

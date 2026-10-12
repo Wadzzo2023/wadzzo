@@ -6,7 +6,7 @@ import { z } from "zod";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { isOwnS3Url } from "~/server/s3";
+import { isOwnS3Url } from "@wadzzo/storage";
 
 /**
  * ── User ───────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ import { env } from "~/env";
 import { FILL_FORMS, FILL_SCHEMAS, FORM_BRIEF } from "~/server/ai/forms";
 import { aiRemaining, IMAGE_MODEL, openai, TEXT_MODEL, withAiQuota } from "~/server/ai/openai";
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
-import { uploadBufferToS3 } from "~/server/s3";
+import { uploadBufferToS3 } from "@wadzzo/storage";
 import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 import { platformBranding } from "@wadzzo/platform/branding";
 

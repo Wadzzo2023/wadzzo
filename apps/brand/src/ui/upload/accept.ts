@@ -1,7 +1,7 @@
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 
 /** What each S3 endpoint accepts: the `accept` string and a human hint. */
-export const ENDPOINT_ACCEPT: Record<EndPointType, { accept: string; hint: string }> = {
+export const ENDPOINT_ACCEPT: Record<UploadEndpoint, { accept: string; hint: string }> = {
   imageUploader: {
     accept: "image/jpeg,image/png,image/webp,image/gif",
     hint: "PNG, JPG, WEBP or GIF",

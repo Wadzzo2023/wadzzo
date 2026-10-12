@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { htmlToText } from "~/components/bounty/RichText";
 import { ArButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
-import { ENTRY_FILE_TYPES, entryFileProblem, MAX_ENTRY_FILES } from "~/lib/ar/entryFiles";
+import { ENTRY_FILE_TYPES, entryFileProblem, MAX_ENTRY_FILES } from "@wadzzo/storage/upload-rules";
 import { type UploadedMedia, useEntryUpload } from "~/lib/ar/useEntryUpload";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api, type RouterOutputs } from "~/utils/api";

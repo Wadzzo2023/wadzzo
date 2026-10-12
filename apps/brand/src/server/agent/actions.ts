@@ -25,7 +25,7 @@ import {
   eventData,
 } from "~/server/api/routers/events";
 import type { Db } from "@wadzzo/db";
-import { createOptimizedImage } from "~/server/image-optimizer";
+import { createOptimizedImage } from "@wadzzo/storage";
 import { BADWORDS } from "~/utils/banned-word";
 
 export type ActingBrand = { creatorId: string; platformId: string };

@@ -13,7 +13,7 @@ import {
 import { useId, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { ENDPOINT_ACCEPT, fileMatchesAccept, formatBytes } from "./accept";
@@ -43,7 +43,7 @@ export function MultiDropzone({
   disabled,
   className,
 }: {
-  endpoint?: EndPointType;
+  endpoint?: UploadEndpoint;
   onUploaded?: (files: UploadedFile[]) => void;
   onBeforeUpload?: (files: File[]) => Promise<File[]> | File[];
   maxFiles?: number;

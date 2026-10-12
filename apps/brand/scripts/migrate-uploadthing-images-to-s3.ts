@@ -1,5 +1,6 @@
+/** One-off: re-host user and creator images that still live on uploadthing (utfs.io) in our S3 bucket. */
 import { db } from "@wadzzo/db/server";
-import { s3Client } from "~/server/s3";
+import { getS3Client } from "@wadzzo/storage";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import crypto from "crypto";
@@ -31,7 +32,7 @@ async function uploadToS3WithProgress(
     ContentType: contentType,
   });
 
-  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 1000 });
+  const uploadUrl = await getSignedUrl(getS3Client(), command, { expiresIn: 1000 });
 
   const response = await axios.put(uploadUrl, fileBuffer, {
     headers: {

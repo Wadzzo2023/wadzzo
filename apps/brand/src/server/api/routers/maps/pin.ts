@@ -21,7 +21,7 @@ import {
 } from "~/server/api/access";
 import { logAudit } from "@wadzzo/platform/server";
 import { assertInPlatformScope, platformScope, relationScope } from "@wadzzo/platform/server";
-import { createOptimizedImage } from "~/server/image-optimizer";
+import { createOptimizedImage } from "@wadzzo/storage";
 import { createHotspotFormSchema } from "~/types/hotspot";
 import { updateMapFormSchema } from "~/types/pin-edit";
 import { hotspotClient } from "~/lib/express/hotspotClient-sdk";

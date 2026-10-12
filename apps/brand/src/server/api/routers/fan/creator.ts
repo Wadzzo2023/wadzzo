@@ -25,7 +25,7 @@ import { getAssetBalance } from "~/lib/stellar/marketplace/test/acc";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { BLANK_KEYWORD } from "~/lib/utils";
-import { createCircularImage } from "~/server/circular-image";
+import { createCircularImage } from "@wadzzo/storage";
 import {
   adminProcedure,
   createTRPCRouter,

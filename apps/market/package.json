@@ -41,6 +41,7 @@
     "@wadzzo/errors": "workspace:*",
     "@wadzzo/platform": "workspace:*",
     "@wadzzo/stellar": "workspace:*",
+    "@wadzzo/storage": "workspace:*",
     "@wadzzo/ui": "workspace:*",
     "@wadzzo/utils": "workspace:*",
     "@wadzzo/wallet": "workspace:*",

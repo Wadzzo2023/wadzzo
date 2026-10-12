@@ -2,7 +2,7 @@ import type { Session } from "next-auth";
 import { z } from "zod";
 
 import { authorizeCredentials } from "@wadzzo/auth";
-import { signEntryUpload } from "~/server/s3";
+import { signEntryUpload } from "@wadzzo/storage";
 import { authCredentialSchema } from "@wadzzo/wallet/shared";
 
 import type { Caller } from "./context";

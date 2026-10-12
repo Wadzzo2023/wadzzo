@@ -23,7 +23,7 @@ import {
   type ScanResult,
 } from "~/lib/murals/constants";
 import { getCurrentPlatform, platformScope } from "@wadzzo/platform/server";
-import { getObjectBytes, publicS3Url, signMuralFrames } from "~/server/s3";
+import { getObjectBytes, publicS3Url, signMuralFrames } from "@wadzzo/storage";
 
 import { dot, embedImage, muralScore } from "./clip";
 import { autoTitleFor, localDay, timeZoneAt } from "./geo";

@@ -7,7 +7,7 @@ import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { isOwnS3Url, MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES, signEntryUpload } from "~/server/s3";
+import { isOwnS3Url, MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES, signEntryUpload } from "@wadzzo/storage";
 
 /**
  * ── Bounty ─────────────────────────────────────────────────────────────────

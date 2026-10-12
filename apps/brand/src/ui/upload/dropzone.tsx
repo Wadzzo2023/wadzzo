@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import toast from "react-hot-toast";
 
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { ENDPOINT_ACCEPT, fileMatchesAccept } from "./accept";
@@ -24,7 +24,7 @@ import { useS3Upload } from "./use-s3-upload";
 export type DropzoneShape = "square" | "wide" | "circle" | "compact" | "button";
 
 export type DropzoneProps = {
-  endpoint: EndPointType;
+  endpoint: UploadEndpoint;
   /** Current file URL (controlled). */
   value?: string | null;
   /** Optional preview URL / data URL override (e.g. for IPFS CIDs or fast local preview). */
@@ -49,7 +49,7 @@ export type DropzoneProps = {
 };
 
 type Kind = "image" | "video" | "audio" | "file";
-const kindOf = (typeOrUrl: string, endpoint?: EndPointType, accept?: string): Kind => {
+const kindOf = (typeOrUrl: string, endpoint?: UploadEndpoint, accept?: string): Kind => {
   const s = typeOrUrl.toLowerCase();
   if (
     s.startsWith("image/") ||

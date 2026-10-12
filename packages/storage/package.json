@@ -1,0 +1,28 @@
+{
+  "name": "@wadzzo/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The shared S3 bucket: public URLs, presigned uploads and the rules for what may be uploaded.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./upload-rules": "./src/upload-rules.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/s3-request-presigner": "catalog:",
+    "@wadzzo/errors": "workspace:*",
+    "sharp": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

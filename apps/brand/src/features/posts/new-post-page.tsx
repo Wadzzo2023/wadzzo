@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@wadzzo/ui/components/select";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { EndPointType } from "~/server/s3";
+import type { UploadEndpoint } from "@wadzzo/storage";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api } from "~/utils/api";
@@ -51,7 +51,7 @@ const MEDIA_KINDS: {
   type: MediaType;
   label: string;
   icon: typeof ImageIcon;
-  endpoint: EndPointType;
+  endpoint: UploadEndpoint;
 }[] = [
   {
     type: MediaType.IMAGE,

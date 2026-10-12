@@ -7,7 +7,7 @@ import { db } from "@wadzzo/db/server";
 import crypto from "crypto";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "~/server/s3";
+import { getS3Client } from "@wadzzo/storage";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ContentType: file.contentType,
   });
   console.log(putObjectCommand);
-  const uploadUrl = await getSignedUrl(s3Client, putObjectCommand, {
+  const uploadUrl = await getSignedUrl(getS3Client(), putObjectCommand, {
     expiresIn: 3600,
   });
 

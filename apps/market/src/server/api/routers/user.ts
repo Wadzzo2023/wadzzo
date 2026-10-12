@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { isOwnS3Url, signImageUpload } from "~/server/s3";
+import { isOwnS3Url, signImageUpload } from "@wadzzo/storage";
 
 const imageUrl = z.url().refine(isOwnS3Url, "Upload the image first");
 
