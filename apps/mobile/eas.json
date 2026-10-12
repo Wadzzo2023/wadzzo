@@ -1,0 +1,40 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "ios": { "resourceClass": "m-medium" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "env": { "EXPO_PUBLIC_API_URL": "https://web.wadzzo.com" }
+    },
+    "production": {
+      "autoIncrement": true,
+      "environment": "production",
+      "env": { "EXPO_PUBLIC_API_URL": "https://web.wadzzo.com" }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "billboardcollector@gmail.com",
+        "ascAppId": "1639649037",
+        "appleTeamId": "L5747V2LKA"
+      }
+    },
+    "development": {
+      "ios": {
+        "appleId": "billboardcollector@gmail.com",
+        "ascAppId": "1639649037",
+        "appleTeamId": "L5747V2LKA"
+      }
+    }
+  }
+}
