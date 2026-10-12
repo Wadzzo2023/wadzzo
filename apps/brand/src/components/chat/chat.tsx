@@ -20,7 +20,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@wadzzo/ui/components/dialog";
 import CustomAvatar from "../common/custom-avatar"
 import { motion } from "framer-motion"
-import { toast } from "@wadzzo/ui/components/use-toast";
+import toast from "react-hot-toast";
 type BountyDoubtListItem = {
     id: number
     bountyId: number
@@ -222,11 +222,7 @@ const ChatItem = ({ item }: { item: BountyDoubtListItem }) => {
             setMedia([])
         } catch (error) {
             console.error("Error sending message with media:", error)
-            toast({
-                title: "Error sending message",
-                description: "An error occurred while sending your message. Please try again.",
-
-            })
+            toast.error("An error occurred while sending your message. Please try again.")
         }
     }
 
@@ -335,10 +331,7 @@ const ChatItem = ({ item }: { item: BountyDoubtListItem }) => {
                         endpoint="multiBlobUploader"
                         onUploadProgress={(progress) => setProgress(progress)}
                         onClientUploadComplete={(res) => {
-                            toast({
-                                title: "Upload complete",
-                                description: "File uploaded successfully",
-                            })
+                            toast.success("File uploaded successfully")
                             setUploadingFile(null)
                             const data = res[0]
                             if (data?.url) {
@@ -348,10 +341,7 @@ const ChatItem = ({ item }: { item: BountyDoubtListItem }) => {
                         }}
                         onUploadError={(error: Error) => {
                             setLoading(false)
-                            toast({
-                                title: "Upload failed",
-                                description: "An error occurred while uploading the file",
-                            })
+                            toast.error("An error occurred while uploading the file")
                         }}
                     />
 

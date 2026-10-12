@@ -18,9 +18,9 @@ import { ForgotPasswordForm } from "./forgot-password-form";
 import { EmailLoginForm } from "./email-login-form";
 import { EmailSignUpForm } from "./email-sign-up-form";
 import { AR_APP_FRAME_SELECTOR } from "./host-frame";
-import { Button } from "./primitives/button";
-import { Dialog, DialogContent, DialogTitle } from "./primitives/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./primitives/tabs";
+import { Button } from "@wadzzo/ui/components/button";
+import { Dialog, DialogContent, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
 import { useFacebookIosUserAgent } from "./use-facebook-ios-user-agent";
 import { HanaIcon, MetaMaskIcon } from "./wallet-icons";
 import { NON_CUSTODIAL_PROVIDERS } from "../providers/registry";
@@ -115,9 +115,10 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
   // AR_APP_FRAME_SELECTOR) — everywhere else this package is used, including
   // any other project sharing this same submodule, `isFramedHost` stays
   // false and the dialog keeps its original wide two-column layout below.
-  const [isFramedHost, setIsFramedHost] = useState(false);
+  const [frameContainer, setFrameContainer] = useState<HTMLElement | null>(null);
+  const isFramedHost = frameContainer !== null;
   useEffect(() => {
-    setIsFramedHost(!!document.querySelector(AR_APP_FRAME_SELECTOR));
+    setFrameContainer(document.querySelector<HTMLElement>(AR_APP_FRAME_SELECTOR));
   }, []);
 
   const checkAccountActivity = useCallback(async (publicKey: string) => {
@@ -417,7 +418,7 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
         session.data?.user.emailVerified &&
         !isAccountActivateLoading &&
         !isAccountActivate ? (
-        <DialogContent className="max-w-sm rounded-2xl p-6">
+        <DialogContent portalContainer={frameContainer} className="max-w-sm rounded-2xl p-6">
           <DialogTitle className="sr-only">Account Status</DialogTitle>
           <NotActivatedUser />
           <div className="mt-4">
@@ -434,6 +435,7 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
            alone the two-column grid would still activate on any wide screen
            and cram a 280px side panel into a ~400px box. */
         <DialogContent
+          portalContainer={frameContainer}
           className={
             isFramedHost
               ? clsx(

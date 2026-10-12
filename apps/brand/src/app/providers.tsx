@@ -5,7 +5,6 @@ import { ThemeProvider } from "next-themes";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
-import { Toaster } from "@wadzzo/ui/components/toaster";
 import { TRPCReactProvider } from "~/trpc/provider";
 
 // The wallet package's global dialogs (connect wallet, toasts). Browser-only.
@@ -17,7 +16,6 @@ export function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <TRPCReactProvider>
           {children}
-          <Toaster />
           <WalletPopups className="font-sans" />
         </TRPCReactProvider>
       </ThemeProvider>

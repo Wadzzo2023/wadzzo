@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useConnectWalletDialogStore } from "../state/connect-dialog-store";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
-import { Button } from "./primitives/button";
+import { Button } from "@wadzzo/ui/components/button";
 
 export function ConnectWalletButton({ text }: { text?: string }) {
   const session = useSession();

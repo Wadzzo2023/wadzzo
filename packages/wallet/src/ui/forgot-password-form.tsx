@@ -11,8 +11,8 @@ import { type AuthError, sendPasswordResetEmail } from "firebase/auth"
 
 import { firebaseAuth } from "../firebase/client";
 import { useResetPasswordStore } from "../state/reset-password-store";
-import { Button } from "./primitives/button";
-import { Input } from "./primitives/input";
+import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/components/input";
 
 const formSchema = z.object({
     email: z.string().email("Please enter a valid email"),

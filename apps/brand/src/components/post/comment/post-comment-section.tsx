@@ -15,7 +15,7 @@ import { AddReplyComment } from "../reply/add-post-reply"
 import ReplyCommentView from "../reply/post-reply-section"
 import { AddPostComment } from "./add-post-comment"
 import ContextMenu from "~/components/common/context-menu"
-import { Arrow } from "@radix-ui/react-select"
+import { Select as SelectPrimitive } from "radix-ui"
 
 interface CommentSectionProps {
     postId: number
