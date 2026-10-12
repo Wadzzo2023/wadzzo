@@ -31,12 +31,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-# do not commit any .env files to git, except for the .env.example file. https://create.t3.gg/en/usage/env-variables#using-environment-variables
-.env
-.env*
-.env*.local
-.env.*
 
 # vercel
 .vercel
@@ -46,8 +40,6 @@ yarn-error.log*
 
 
 public/mov_bbb.mp4
-.env.development
-.env.production
 
 analyze
 
@@ -57,3 +49,7 @@ package-lock.json
 
 .vscode
 
+# env files hold secrets: only .env.example is committed
+.env
+.env.*
+!.env.example

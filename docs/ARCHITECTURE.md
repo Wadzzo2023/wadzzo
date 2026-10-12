@@ -64,6 +64,18 @@ See [PLATFORMS.md](PLATFORMS.md). `PLATFORM_SLUG` selects branding, theme and as
 
 Every shared package with logic has its own `vitest` suite (`pnpm test` runs them all through turbo): `errors` (codes and tRPC mapping), `wallet` (signer guard, login challenge, network config, Stellar error mapping, Apple sign-in), `auth`, `api` (guard through a real tRPC caller, bounty visibility), `storage` (URL guard, upload rules), `stellar` (account maths, prices), `platform` (scoping, stellar.toml escaping, Clinton assets present for every app), `geo`, `utils`.
 
+## Environment files
+
+Each app reads its own folder (`apps/<app>/`), in Next.js order: `.env.development` or `.env.production` over the shared `.env`.
+
+| File                                                  | Committed | What it is                                                                                                                                                                   |
+| ----------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env.example`                                        | yes       | Every variable the app reads, grouped, with what it is for and whether it is required                                                                                        |
+| `.env`, `.env.development`, `.env.production`         | no        | Real values, same sections as the example                                                                                                                                    |
+| `.env.clintoncounty`, `.env.clintoncounty.production` | no        | Only what differs for Clinton County (brand and AR): `cp .env.clintoncounty .env.development.local` to run it locally; on the host set these on top of the production values |
+
+The S3 settings are read as `AWS_*` and, if those are unset, as the web apps' older `NEXT_AWS_*`. Names in the real files were made canonical when they were moved here.
+
 ## Deploying
 
 - Web apps: one deployment per app per platform, same repo, different env (`PLATFORM_SLUG`, `NEXT_PUBLIC_STELLAR_NETWORK`, ...). Each app runs `sync:platform` before `dev`/`build`.
