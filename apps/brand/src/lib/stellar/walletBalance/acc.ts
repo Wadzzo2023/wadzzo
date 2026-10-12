@@ -12,7 +12,7 @@ import {
 } from "@stellar/stellar-sdk";
 
 import { Horizon } from "@stellar/stellar-sdk";
-import { StellarAccount } from "../marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";

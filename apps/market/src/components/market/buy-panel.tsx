@@ -12,7 +12,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { isCustodial } from "~/lib/custodial";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { MAX_PER_PURCHASE, formatAmount } from "~/lib/stellar/quote";
+import { MAX_PER_PURCHASE, formatAmount } from "@wadzzo/stellar/quote";
 import { QuantityStepper } from "~/ui/quantity-stepper";
 import { Skeleton } from "~/ui/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";

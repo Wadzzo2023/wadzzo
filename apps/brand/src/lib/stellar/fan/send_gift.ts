@@ -11,7 +11,7 @@ import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, net
 import { type MyAssetType } from "./utils";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { StellarAccount } from "../marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 
 const log = console;
@@ -39,7 +39,7 @@ export async function sendGift({
   const transactionInializer = await server.loadAccount(motherAccount.publicKey());
   console.log("Secrate", creatorStorageSec)
   console.log("Storage", assetStorage)
-  const tokens = (await StellarAccount.create(assetStorage.publicKey())).getTokenBalance(creatorPageAsset.code, creatorPageAsset.issuer);
+  const tokens = (await StellarAccount.loadOrThrow(assetStorage.publicKey())).tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer);
   const accountDetails = await server.loadAccount(assetStorage.publicKey());
   console.log("Balances:", accountDetails.balances);
 
@@ -68,7 +68,7 @@ export async function sendGift({
     }),
   )
   if (creatorPageAsset.code !== PLATFORM_ASSET.code && creatorPageAsset.issuer !== PLATFORM_ASSET.issuer) {
-    const checkReciverHasTrust = (await StellarAccount.create(customerPubkey)).hasTrustline(creatorPageAsset.code, creatorPageAsset.issuer);
+    const checkReciverHasTrust = (await StellarAccount.loadOrThrow(customerPubkey)).hasTrustline(creatorPageAsset.code, creatorPageAsset.issuer);
     if (!checkReciverHasTrust) {
       const claimants: Claimant[] = [
         new Claimant(customerPubkey, Claimant.predicateUnconditional(),
@@ -140,9 +140,9 @@ export const sendGitfAsPlatformAsset = async ({
   const server = new Horizon.Server(STELLAR_URL);
   const asset = new Asset(assetCode, assetIssuer);
   const transactionInializer = await server.loadAccount(creatorId);
-  const receiverAcc = await StellarAccount.create(reciver);
-  const senderAdcc = await StellarAccount.create(creatorId);
-  const token = senderAdcc.getTokenBalance(assetCode, assetIssuer);
+  const receiverAcc = await StellarAccount.loadOrThrow(reciver);
+  const senderAdcc = await StellarAccount.loadOrThrow(creatorId);
+  const token = senderAdcc.tokenBalance(assetCode, assetIssuer);
   if (!token) {
     throw new Error("Asset not found");
   }

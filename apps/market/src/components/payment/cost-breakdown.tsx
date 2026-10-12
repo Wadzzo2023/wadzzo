@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Button } from "@wadzzo/ui/components/button";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { formatAmount, type CostLine, type Problem } from "~/lib/stellar/quote";
+import { formatAmount, type CostLine, type Problem } from "@wadzzo/stellar/quote";
 
 /**
  * Every line of what an action costs, the total, and the payer's balance.

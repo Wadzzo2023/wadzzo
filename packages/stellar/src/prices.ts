@@ -2,8 +2,7 @@ import "server-only";
 
 import axios from "axios";
 
-import { env } from "~/env";
-import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, stellarNetwork } from "@wadzzo/wallet/config";
 
 /**
  * Exchange rates for quotes. Cached for a minute so a quote and the
@@ -36,7 +35,7 @@ export function xlmUsd() {
 
 /** USD per platform token. Wadzzo is pegged at one cent (as the old flow assumed). */
 export function platformUsd() {
-  if (PLATFORM_ASSET.code.toLowerCase() === "wadzzo" || !env.NEXT_PUBLIC_STELLAR_PUBNET) return Promise.resolve(0.01);
+  if (PLATFORM_ASSET.code.toLowerCase() === "wadzzo" || !stellarNetwork.isMainnet) return Promise.resolve(0.01);
   return cached("platform", async () => {
     const { data } = await axios.get<{ price?: number }>(
       `https://api.stellar.expert/explorer/public/asset/${PLATFORM_ASSET.code}-${PLATFORM_ASSET.issuer}`,

@@ -3,7 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { EnableCors } from "~/server/api-cors";
 
 export default async function handler(

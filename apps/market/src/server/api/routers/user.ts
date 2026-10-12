@@ -2,7 +2,7 @@ import { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { isOwnS3Url, signImageUpload } from "~/server/s3";
 

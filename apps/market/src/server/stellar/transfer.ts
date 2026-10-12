@@ -5,9 +5,9 @@ import { Asset, Claimant, Operation, StrKey, TransactionBuilder } from "@stellar
 import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { BASE_RESERVE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
-import type { CostLine } from "~/lib/stellar/quote";
+import type { CostLine } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
 
 import { signForUser, type Signer } from "./keys";

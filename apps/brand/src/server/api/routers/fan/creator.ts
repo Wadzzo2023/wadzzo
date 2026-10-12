@@ -25,7 +25,7 @@ import {
   verifyVanityPayment,
 } from "~/lib/stellar/fan/vanity-url";
 import { getAssetBalance } from "~/lib/stellar/marketplace/test/acc";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 import { BLANK_KEYWORD } from "~/lib/utils";
 import { createCircularImage } from "~/server/circular-image";
@@ -527,10 +527,10 @@ export const creatorRouter = createTRPCRouter({
       const creatorStoragePub = creator.storagePub;
       const creatorPageAsset = creator.pageAsset;
 
-      const storageAcc = await StellarAccount.create(creatorStoragePub);
+      const storageAcc = await StellarAccount.loadOrThrow(creatorStoragePub);
 
       if (creatorPageAsset) {
-        const bal = storageAcc.getTokenBalance(
+        const bal = storageAcc.tokenBalance(
           creatorPageAsset.code,
           creatorPageAsset.issuer,
         );
@@ -558,7 +558,7 @@ export const creatorRouter = createTRPCRouter({
 
           console.log("storage Acc", storageAcc);
 
-          const bal = storageAcc.getTokenBalance(assetCode, assetIssuer.data);
+          const bal = storageAcc.tokenBalance(assetCode, assetIssuer.data);
 
           if (bal >= 0) {
             return {
@@ -630,11 +630,11 @@ export const creatorRouter = createTRPCRouter({
         },
       });
 
-      const acc = await StellarAccount.create(storagePubKey);
+      const acc = await StellarAccount.loadOrThrow(storagePubKey);
 
       const assetsWithRemaining = Asset.map((asset) => ({
         ...asset,
-        limit: acc.getTokenBalance(asset.code, asset.issuer),
+        limit: acc.tokenBalance(asset.code, asset.issuer),
         Redeem: asset.Redeem.map((redeem) => ({
           ...redeem,
           remaining: redeem.totalRedeemable - redeem.redeemConsumers.length, // Calculate remaining redemptions
@@ -1003,9 +1003,9 @@ export const creatorRouter = createTRPCRouter({
         throw new Error("Creator not found");
       }
 
-      const acc = await StellarAccount.create(creator.storagePub);
+      const acc = await StellarAccount.loadOrThrow(creator.storagePub);
 
-      const getTotalToken = acc.getTokenBalance(code, issuer);
+      const getTotalToken = acc.tokenBalance(code, issuer);
 
       if (method === "xlm") {
         return await sendAssetXDRForNative({

@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 
-import { formatAmount } from "~/lib/stellar/quote";
+import { formatAmount } from "@wadzzo/stellar/quote";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
 

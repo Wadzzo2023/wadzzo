@@ -11,7 +11,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { formatAmount } from "~/lib/stellar/quote";
+import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Skeleton } from "~/ui/skeleton";

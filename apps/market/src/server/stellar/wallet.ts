@@ -6,14 +6,14 @@ import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 
-import { StellarAccount, horizon } from "~/lib/stellar/account";
+import { StellarAccount, horizon } from "@wadzzo/stellar/account";
 import { BASE_RESERVE_XLM, PLATFORM_ASSET, TX_TIMEOUT_SECONDS, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import type { Db } from "@wadzzo/db";
 import { chargeCard, refundCard } from "~/server/square";
 
 import { motherKeypair, platformStorageKeypair, signForUser, type Signer } from "./keys";
 import { settle, submitXdr } from "./ledger";
-import { platformToXlm } from "./prices";
+import { platformToXlm } from "@wadzzo/stellar/prices";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);

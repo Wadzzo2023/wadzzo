@@ -4,17 +4,17 @@ import { Asset, Operation, TransactionBuilder, type Keypair, type Transaction } 
 import type { AssetTransaction, Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
-import { StellarAccount, toAsset, transactionSucceeded } from "~/lib/stellar/account";
+import { StellarAccount, toAsset, transactionSucceeded } from "@wadzzo/stellar/account";
 import { BASE_RESERVE_XLM, PLATFORM_ASSET, PLATFORM_FEE, PLATFORM_FEE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { creatorAsset } from "~/lib/stellar/follow-creator";
-import type { CostLine, Problem } from "~/lib/stellar/quote";
+import type { CostLine, Problem } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
 import { isInPlatformScope } from "@wadzzo/platform/scope";
 
 import { issuerKeypairFor, motherKeypair, platformStorageKeypair, storageKeypairFor } from "./keys";
-import { xlmToPlatform } from "./prices";
+import { xlmToPlatform } from "@wadzzo/stellar/prices";
 
 /**
  * Claiming a collected pin's item into the collector's wallet.

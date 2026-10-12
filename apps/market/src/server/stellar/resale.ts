@@ -5,14 +5,14 @@ import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-
 import type { Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
-import { StellarAccount, toAsset } from "~/lib/stellar/account";
+import { StellarAccount, toAsset } from "@wadzzo/stellar/account";
 import { BASE_RESERVE_XLM, NEW_ACCOUNT_XLM, PLATFORM_ASSET, PLATFORM_FEE, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
-import type { CostLine, Problem } from "~/lib/stellar/quote";
+import type { CostLine, Problem } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
 import { truncateString } from "@wadzzo/utils/string";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
-import { xlmToPlatform } from "./prices";
+import { xlmToPlatform } from "@wadzzo/stellar/prices";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 export type PayIn = "PLATFORM_ASSET" | "XLM";

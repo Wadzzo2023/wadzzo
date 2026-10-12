@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { isCustodial } from "~/lib/custodial";
-import { BUY_METHODS, MAX_PER_PURCHASE } from "~/lib/stellar/quote";
+import { BUY_METHODS, MAX_PER_PURCHASE } from "@wadzzo/stellar/quote";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { purchaseWithCard, resumeCardPurchase } from "~/server/stellar/card";
 import { preparePurchase, quotePurchase } from "~/server/stellar/purchase";

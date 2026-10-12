@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { MediaInfo, PostSchema } from "~/types/post";
 export { MediaInfo, PostSchema };
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 
 import {
   createTRPCRouter,
@@ -228,10 +228,10 @@ export const postRouter = createTRPCRouter({
             }
           }
 
-          const acc = await StellarAccount.create(userId);
+          const acc = await StellarAccount.loadOrThrow(userId);
 
           if (
-            acc.getTokenBalance(pageAssetCode ?? "", pageAssetIssuer ?? "") >=
+            acc.tokenBalance(pageAssetCode ?? "", pageAssetIssuer ?? "") >=
             post.subscription.price
           ) {
             return post;

@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { isCustodial } from "~/lib/custodial";
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { platformToUsd, platformToXlm } from "~/server/stellar/prices";
+import { platformToUsd, platformToXlm } from "@wadzzo/stellar/prices";
 import { signerFor } from "~/server/stellar/session-signer";
 import { prepareSend, quoteSend } from "~/server/stellar/transfer";
 import { buyTokenPack, pendingGifts, prepareGiftClaim, prepareSwap, quoteSwap, tokenPacks } from "~/server/stellar/wallet";

@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { platformToUsd } from "~/server/stellar/prices";
+import { platformToUsd } from "@wadzzo/stellar/prices";
 import {
   getStorage,
   prepareListing,

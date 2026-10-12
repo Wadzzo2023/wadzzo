@@ -1,7 +1,7 @@
 import { Keypair } from "@stellar/stellar-sdk";
 import { z } from "zod";
 import { env } from "~/env";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import {
   sendNft2StorageXDR,
   sendNftback,
@@ -227,7 +227,7 @@ export const marketRouter = createTRPCRouter({
           where: { placerId: { not: null }, type: { equals: "FAN" }, ...platformScope(ctx) },
         })
 
-        const stellarAcc = await StellarAccount.create(currentUserId)
+        const stellarAcc = await StellarAccount.loadOrThrow(currentUserId)
 
         const filteredItems = items.filter((item) => {
           const creatorPageAsset = item.asset.creator?.pageAsset
@@ -257,7 +257,7 @@ export const marketRouter = createTRPCRouter({
           }
 
           if (item.asset.privacy === ItemPrivacy.TIER) {
-            return item.asset.tier && item.asset.tier.price <= stellarAcc.getTokenBalance(code, issuer)
+            return item.asset.tier && item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
           }
 
           return false
@@ -377,7 +377,7 @@ export const marketRouter = createTRPCRouter({
         where: { type: "ADMIN", ...platformScope(ctx) },
       });
 
-      const stellarAcc = await StellarAccount.create(currentUserId);
+      const stellarAcc = await StellarAccount.loadOrThrow(currentUserId);
       const array = items.filter((item) => {
         if (item.asset.privacy === ItemPrivacy.PUBLIC) {
           return true;
@@ -397,7 +397,7 @@ export const marketRouter = createTRPCRouter({
           if (
             creatorPageAsset &&
             item.asset.tier &&
-            item.asset.tier.price <= stellarAcc.getTokenBalance(creatorPageAsset.code, creatorPageAsset.issuer)
+            item.asset.tier.price <= stellarAcc.tokenBalance(creatorPageAsset.code, creatorPageAsset.issuer)
           ) {
             return true;
           }
@@ -469,7 +469,7 @@ export const marketRouter = createTRPCRouter({
           where: { asset: { creatorId: creatorId }, ...platformScope(ctx) },
         });
 
-        const stellarAcc = await StellarAccount.create(currentUserId);
+        const stellarAcc = await StellarAccount.loadOrThrow(currentUserId);
 
         const filteredItems = items.filter((item) => {
           const creatorPageAsset = item.asset.creator?.pageAsset;
@@ -501,7 +501,7 @@ export const marketRouter = createTRPCRouter({
           if (item.asset.privacy === ItemPrivacy.TIER) {
             return (
               item.asset.tier &&
-              item.asset.tier.price <= stellarAcc.getTokenBalance(code, issuer)
+              item.asset.tier.price <= stellarAcc.tokenBalance(code, issuer)
             );
           }
 
@@ -581,8 +581,8 @@ export const marketRouter = createTRPCRouter({
         env.STORAGE_SECRET,
       ).publicKey();
 
-      const bal = await StellarAccount.create(adminStoragePub);
-      const copy = bal.getTokenBalance(code, issuer);
+      const bal = await StellarAccount.loadOrThrow(adminStoragePub);
+      const copy = bal.tokenBalance(code, issuer);
       return copy;
     }),
 
@@ -617,8 +617,8 @@ export const marketRouter = createTRPCRouter({
 
         const placerStorage = placer.storagePub;
 
-        const bal = await StellarAccount.create(placerStorage);
-        const copy = bal.getTokenBalance(
+        const bal = await StellarAccount.loadOrThrow(placerStorage);
+        const copy = bal.tokenBalance(
           marketItem.asset.code,
           marketItem.asset.issuer,
         );
@@ -628,8 +628,8 @@ export const marketRouter = createTRPCRouter({
         // admin or original item
         const adminStorage = Keypair.fromSecret(env.STORAGE_SECRET).publicKey();
 
-        const bal = await StellarAccount.create(adminStorage);
-        const copy = bal.getTokenBalance(
+        const bal = await StellarAccount.loadOrThrow(adminStorage);
+        const copy = bal.tokenBalance(
           marketItem.asset.code,
           marketItem.asset.issuer,
         );
@@ -683,7 +683,7 @@ export const marketRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const pubkey = ctx.session.user.id;
 
-      const stellarAcc = await StellarAccount.create(pubkey);
+      const stellarAcc = await StellarAccount.loadOrThrow(pubkey);
 
       // check
       const marketAsset = await ctx.db.marketAsset.findUnique({
@@ -726,7 +726,7 @@ export const marketRouter = createTRPCRouter({
         if (pageAsset) {
           if (marketAsset.privacy === ItemPrivacy.TIER) {
             const { code, issuer } = pageAsset;
-            const bal = stellarAcc.getTokenBalance(code, issuer);
+            const bal = stellarAcc.tokenBalance(code, issuer);
             if (bal >= tier.price) {
               return true;
             }

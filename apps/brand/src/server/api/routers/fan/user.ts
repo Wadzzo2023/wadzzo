@@ -3,7 +3,7 @@ import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { z } from "zod";
 import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { claimRedeemXDR } from "~/lib/stellar/fan/redeem";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import {
@@ -145,8 +145,8 @@ export const userRouter = createTRPCRouter({
         throw new Error("Creator does not have a storage account");
       }
 
-      const stroageACC = await StellarAccount.create(getStorageAcc.storagePub);
-      const tokenNumber = stroageACC.getTokenBalance(
+      const stroageACC = await StellarAccount.loadOrThrow(getStorageAcc.storagePub);
+      const tokenNumber = stroageACC.tokenBalance(
         getRedeem.assetRedeem.code,
         getRedeem.assetRedeem.issuer,
       );
@@ -155,7 +155,7 @@ export const userRouter = createTRPCRouter({
         throw new Error("Insufficient token balance");
       }
 
-      const UserAcc = await StellarAccount.create(user);
+      const UserAcc = await StellarAccount.loadOrThrow(user);
       const trust = UserAcc.hasTrustline(
         getRedeem.assetRedeem.code,
         getRedeem.assetRedeem.issuer,

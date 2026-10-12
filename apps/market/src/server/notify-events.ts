@@ -2,7 +2,7 @@ import "server-only";
 
 import type { AssetTransaction } from "@wadzzo/db";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import type { Db } from "@wadzzo/db";
 import { notify, notifyBrand, notifyFan } from "@wadzzo/platform/server";
 

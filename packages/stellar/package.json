@@ -1,0 +1,25 @@
+{
+  "name": "@wadzzo/stellar",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Stellar account reads, quotes and price lookups shared by the web apps.",
+  "exports": {
+    "./account": "./src/account.ts",
+    "./quote": "./src/quote.ts",
+    "./prices": "./src/prices.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "dependencies": {
+    "@stellar/stellar-sdk": "catalog:",
+    "@wadzzo/errors": "workspace:*",
+    "@wadzzo/wallet": "workspace:*",
+    "axios": "catalog:",
+    "server-only": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@wadzzo/tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

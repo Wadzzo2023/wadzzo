@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ArButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { env } from "~/env";
-import { formatAmount } from "~/lib/stellar/quote";
+import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 

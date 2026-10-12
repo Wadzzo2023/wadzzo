@@ -8,7 +8,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { formatAmount } from "~/lib/stellar/quote";
+import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";

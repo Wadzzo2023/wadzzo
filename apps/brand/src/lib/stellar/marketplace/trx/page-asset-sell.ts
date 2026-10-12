@@ -7,7 +7,7 @@ import {
     Transaction,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 
 // Shared helper for building and signing transaction
@@ -35,17 +35,17 @@ async function buildAssetBuyTransaction({
         const motherAccount = await server.loadAccount(motherKeypair.publicKey());
 
         const storageKeypair = Keypair.fromSecret(storageSecret);
-        const storageAccount = await StellarAccount.create(storageKeypair.publicKey());
-        const userAccount = await StellarAccount.create(userId);
+        const storageAccount = await StellarAccount.loadOrThrow(storageKeypair.publicKey());
+        const userAccount = await StellarAccount.loadOrThrow(userId);
         console.log("Storage account:", storageAccount);
         // Validate trustline
         const hasTrust = userAccount.hasTrustline(assetToBuy.code, assetToBuy.issuer);
         // Validate balances
         let storageBalance;
         if (assetToBuy.isNative()) {
-            storageBalance = Number(storageAccount.getNativeBalance());
+            storageBalance = storageAccount.nativeBalance();
         } else {
-            storageBalance = storageAccount.getTokenBalance(assetToBuy.code, assetToBuy.issuer);
+            storageBalance = storageAccount.tokenBalance(assetToBuy.code, assetToBuy.issuer);
         }
         console.log("Storage balance:", storageBalance, storageSecret, assetToBuy.code, assetToBuy.issuer);
         if (storageBalance < amountToSell) {
@@ -54,9 +54,9 @@ async function buildAssetBuyTransaction({
 
         let userBalance;
         if (paymentAsset.isNative()) {
-            userBalance = Number(userAccount.getNativeBalance());
+            userBalance = userAccount.nativeBalance();
         } else {
-            userBalance = userAccount.getTokenBalance(paymentAsset.code, paymentAsset.issuer);
+            userBalance = userAccount.tokenBalance(paymentAsset.code, paymentAsset.issuer);
         }
 
         if (userBalance < price) {

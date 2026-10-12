@@ -7,7 +7,7 @@ import { ExtraSongInfo, NftFormSchema } from "~/types/asset";
 export { ExtraSongInfo, NftFormSchema };
 import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { AccountSchema } from "~/lib/stellar/fan/utils";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { GetPageAssetBuyXDRInPlatform, GetPageAssetBuyXDRInXLM } from "~/lib/stellar/marketplace/trx/page-asset-sell";
 
 import {
@@ -392,7 +392,7 @@ export const shopRouter = createTRPCRouter({
       const server = new Horizon.Server(STELLAR_URL);
       const account = await server.loadAccount(creator.storagePub);
       console.log("Code, issuer", code, issuer);
-      const tokens = (await StellarAccount.create(creator.storagePub)).getTokenBalance(code, issuer);
+      const tokens = (await StellarAccount.loadOrThrow(creator.storagePub)).tokenBalance(code, issuer);
       console.log("Balances.............:", tokens);
 
       if (tokens) {

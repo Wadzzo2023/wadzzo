@@ -3,7 +3,7 @@ import type { Db } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import {
@@ -369,9 +369,9 @@ export const bountyRouter = createTRPCRouter({
       }
 
       if (bounty.requiredBalance > 0) {
-        const account = await StellarAccount.createOrNull(userId);
+        const account = await StellarAccount.load(userId);
         const balance =
-          account?.getTokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ??
+          account?.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ??
           0;
         if (balance < bounty.requiredBalance) {
           throw new TRPCError({

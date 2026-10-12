@@ -6,7 +6,7 @@ import { z } from "zod";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArPin, Rarity } from "~/lib/ar/types";
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { notifyBrand } from "@wadzzo/platform/server";
 import {
@@ -148,7 +148,7 @@ function lockReasonFor(
       if (!asset || !subscription) return "Not available";
       const needed = `${subscription.price} ${asset.code}`;
       if (!signedIn || !account) return `Sign in holding ${needed} to unlock`;
-      return account.getTokenBalance(asset.code, asset.issuer) >=
+      return account.tokenBalance(asset.code, asset.issuer) >=
         subscription.price
         ? null
         : `Hold ${needed} to unlock`;
@@ -378,7 +378,7 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
     db.follow
       .findMany({ where: { userId }, select: { creatorId: true } })
       .then((rows) => new Set(rows.map((r) => r.creatorId))),
-    StellarAccount.createOrNull(userId),
+    StellarAccount.load(userId),
   ]);
 
   const lockReason = lockReasonFor(group, followedCreatorIds, account, true);
@@ -563,7 +563,7 @@ export const pinsRouter = createTRPCRouter({
               .findMany({ where: { userId }, select: { creatorId: true } })
               .then((rows) => new Set(rows.map((r) => r.creatorId)))
           : Promise.resolve(new Set<string>()),
-        userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+        userId ? StellarAccount.load(userId) : Promise.resolve(null),
       ]);
 
       // The box narrows it in the database (both which drops, and which of
@@ -666,7 +666,7 @@ export const pinsRouter = createTRPCRouter({
               .findMany({ where: { userId }, select: { creatorId: true } })
               .then((rows) => new Set(rows.map((r) => r.creatorId)))
           : Promise.resolve(new Set<string>()),
-        needsAccount ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+        needsAccount ? StellarAccount.load(userId) : Promise.resolve(null),
       ]);
 
       const from = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null;
@@ -704,7 +704,7 @@ export const pinsRouter = createTRPCRouter({
               .findMany({ where: { userId }, select: { creatorId: true } })
               .then((rows) => new Set(rows.map((r) => r.creatorId)))
           : Promise.resolve(new Set<string>()),
-        userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+        userId ? StellarAccount.load(userId) : Promise.resolve(null),
       ]);
 
       const pin = pinsOfGroup(
@@ -775,7 +775,7 @@ export const pinsRouter = createTRPCRouter({
                 .findMany({ where: { userId }, select: { creatorId: true } })
                 .then((rows) => new Set(rows.map((r) => r.creatorId)))
             : Promise.resolve(new Set<string>()),
-          userId ? StellarAccount.createOrNull(userId) : Promise.resolve(null),
+          userId ? StellarAccount.load(userId) : Promise.resolve(null),
         ]);
 
         const groups = await ctx.db.locationGroup.findMany({

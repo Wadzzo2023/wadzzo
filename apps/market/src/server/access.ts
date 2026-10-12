@@ -1,6 +1,6 @@
 import "server-only";
 
-import { StellarAccount, type AssetRef } from "~/lib/stellar/account";
+import { StellarAccount, type AssetRef } from "@wadzzo/stellar/account";
 import type { Db } from "@wadzzo/db";
 
 /**

@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { ArBrand } from "~/lib/ar/types";
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { platformScope } from "@wadzzo/platform/scope";
 import {
   buildFollowTrustlineXdr,
@@ -282,7 +282,7 @@ export const brandsRouter = createTRPCRouter({
         });
       }
 
-      const account = await StellarAccount.createOrNull(userId);
+      const account = await StellarAccount.load(userId);
       if (account?.hasTrustline(asset.code, asset.issuer)) {
         return { alreadyTrusted: true as const, xdr: null };
       }
@@ -341,7 +341,7 @@ export const brandsRouter = createTRPCRouter({
 
       const asset = creatorAsset(creator);
       if (asset) {
-        const account = await StellarAccount.createOrNull(userId);
+        const account = await StellarAccount.load(userId);
         if (account && !account.hasTrustline(asset.code, asset.issuer)) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",

@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Button } from "@wadzzo/ui/components/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
 import { env } from "~/env";
-import { formatAmount } from "~/lib/stellar/quote";
+import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "~/ui/page-header";

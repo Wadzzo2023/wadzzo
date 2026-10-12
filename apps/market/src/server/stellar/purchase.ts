@@ -5,14 +5,14 @@ import { Asset, Keypair, Operation, TransactionBuilder, type Transaction } from 
 import { ItemPrivacy, type Platform } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 
-import { StellarAccount, toAsset, type AssetRef } from "~/lib/stellar/account";
+import { StellarAccount, toAsset, type AssetRef } from "@wadzzo/stellar/account";
 import { BASE_RESERVE_XLM, PLATFORM_ASSET, PLATFORM_FEE, PLATFORM_FEE_XLM, TX_TIMEOUT_SECONDS, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
-import type { BuyMethod, CostLine, Problem, Quote } from "~/lib/stellar/quote";
+import type { BuyMethod, CostLine, Problem, Quote } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
 import { isInPlatformScope } from "@wadzzo/platform/scope";
 
 import { issuerKeypairFor, motherKeypair, platformStorageKeypair, signForUser, type Signer } from "./keys";
-import { platformToUsd, platformToXlm, xlmToPlatform } from "./prices";
+import { platformToUsd, platformToXlm, xlmToPlatform } from "@wadzzo/stellar/prices";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 

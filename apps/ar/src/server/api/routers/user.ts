@@ -4,7 +4,7 @@ import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 import { z } from "zod";
 
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isOwnS3Url } from "~/server/s3";
 
@@ -30,14 +30,14 @@ export const userRouter = createTRPCRouter({
    * balance this is.
    */
   platformBalance: protectedProcedure.query(async ({ ctx }) => {
-    const account = await StellarAccount.createOrNull(ctx.session.user.id);
+    const account = await StellarAccount.load(ctx.session.user.id);
     return {
       assetCode: PLATFORM_ASSET.code,
       // An account Horizon has never seen — or one that's never opened a
       // trustline to this specific asset — genuinely holds none of it. Not
       // an error case; `createOrNull`/`getTokenBalance` already resolve both
       // to the same honest zero.
-      balance: account?.getTokenBalance(
+      balance: account?.tokenBalance(
         PLATFORM_ASSET.code,
         PLATFORM_ASSET.issuer,
       ) ?? 0,

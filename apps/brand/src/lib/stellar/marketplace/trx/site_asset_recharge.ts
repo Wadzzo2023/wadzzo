@@ -7,7 +7,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { MOTHER_SECRET, STORAGE_SECRET } from "../SECRET";
 import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
-import { StellarAccount } from "../test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 
 async function checkSiteAssetTrustLine(accPub: string) {
   const server = new Horizon.Server(STELLAR_URL);
@@ -47,7 +47,7 @@ export async function sendSiteAsset2pub(
     motherAcc.publicKey(),
   );
 
-  const userAcc = await StellarAccount.create(pubkey);
+  const userAcc = await StellarAccount.loadOrThrow(pubkey);
   const hasTrust = userAcc.hasTrustline(
     PLATFORM_ASSET.code,
     PLATFORM_ASSET.issuer,

@@ -2,7 +2,7 @@ import { NotificationType, Prisma, UserRole } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { StellarAccount } from "~/lib/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import type { Db } from "@wadzzo/db";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";

@@ -25,7 +25,7 @@ import {
 import { follow_creator } from "~/lib/stellar/fan/follow_creator";
 import { sendGift, sendGitfAsPlatformAsset } from "~/lib/stellar/fan/send_gift";
 import { trustCustomPageAsset } from "~/lib/stellar/fan/trust_custom_page_asset";
-import { StellarAccount } from "~/lib/stellar/marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import {
   createUniAsset,
   createUniAssetWithXLM,
@@ -260,7 +260,7 @@ export const trxRouter = createTRPCRouter({
         include: { pageAsset: true },
       });
 
-      const userAcc = await StellarAccount.create(userId);
+      const userAcc = await StellarAccount.loadOrThrow(userId);
 
       if (creator.pageAsset) {
         const { code, issuer } = creator.pageAsset;
@@ -428,7 +428,7 @@ export const trxRouter = createTRPCRouter({
       });
 
       const requiredPlatformAsset = await getplatformAssetNumberForXLM(0.5);
-      const creatorAcc = await StellarAccount.create(creator.storagePub);
+      const creatorAcc = await StellarAccount.loadOrThrow(creator.storagePub);
       const hasTrust = creatorAcc.hasTrustline(code, issuer);
 
       if (hasTrust) {

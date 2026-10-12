@@ -11,7 +11,7 @@ import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { env } from "~/env";
-import { StellarAccount } from "../../marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "../../fan/get_token_price";
 
 const log = console;
@@ -42,7 +42,7 @@ export async function XDR4BuyAsset({
 
   const transactionInializer = await server.loadAccount(motherAcc.publicKey());
 
-  const buyerAcc = await StellarAccount.create(buyer);
+  const buyerAcc = await StellarAccount.loadOrThrow(buyer);
   const hasTrust = buyerAcc.hasTrustline(code, issuerPub);
 
   const requiredAsset2refundXlm = hasTrust
@@ -242,7 +242,7 @@ export async function XDR4BuyAssetWithSquire({
 
   const transactionInializer = await server.loadAccount(mother.publicKey());
 
-  const buyerAcc = await StellarAccount.create(buyer);
+  const buyerAcc = await StellarAccount.loadOrThrow(buyer);
   const hasTrust = buyerAcc.hasTrustline(code, issuerPub);
 
   const Tx2 = new TransactionBuilder(transactionInializer, {

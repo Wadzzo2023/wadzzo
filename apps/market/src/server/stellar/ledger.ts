@@ -3,13 +3,13 @@ import "server-only";
 import type { AssetTransaction } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 
-import { StellarAccount, horizon, transactionSucceeded } from "~/lib/stellar/account";
+import { StellarAccount, horizon, transactionSucceeded } from "@wadzzo/stellar/account";
 import { networkPassphrase } from "@wadzzo/wallet/config";
 import type { Db } from "@wadzzo/db";
 
 import { announceSettled } from "~/server/notify-events";
 
-import { platformToUsd } from "./prices";
+import { platformToUsd } from "@wadzzo/stellar/prices";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

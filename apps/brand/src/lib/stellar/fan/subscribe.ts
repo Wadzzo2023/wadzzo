@@ -7,7 +7,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, STROOP, networkPassphrase } from "@wadzzo/wallet/config";
-import { StellarAccount } from "../marketplace/test/Account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type MyAssetType } from "./utils";
@@ -41,7 +41,7 @@ export async function getClawbackAsPayment({
 
   // For a Tier User can have already trustline
   // So first have to sure that trusline exist and then send 0.5 xlm to storage.
-  const creatorStorageBal = await StellarAccount.create(userPubkey);
+  const creatorStorageBal = await StellarAccount.loadOrThrow(userPubkey);
   const hasTrust = creatorStorageBal.hasTrustline(asset.code, asset.issuer);
 
   const Tx1 = new TransactionBuilder(transactionInializer, {
