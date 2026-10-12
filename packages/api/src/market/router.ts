@@ -1,7 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "..";
 
 import { activityRouter } from "./routers/activity";
-import { fanBountyRouter } from "../routers/fan-bounty";
+import { fanBountyRouter } from "../shared/bounty";
 import { collectionRouter } from "./routers/collection";
 import { contentRouter } from "./routers/content";
 import { creatorRouter } from "./routers/creator";

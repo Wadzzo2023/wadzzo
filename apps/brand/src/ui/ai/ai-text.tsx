@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@wadzzo/ui/components/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { FillForm } from "~/server/ai/forms";
+import type { FillForm } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";
 
 import { AiQuota, htmlToText } from "./shared";

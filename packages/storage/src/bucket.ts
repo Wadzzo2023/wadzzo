@@ -9,14 +9,36 @@ interface BucketConfig {
   secretAccessKey: string;
 }
 
+/**
+ * The web apps' env files have always named these `NEXT_AWS_*` (the task
+ * server uses plain `AWS_*`); both spellings are read so neither breaks.
+ */
 function readBucketConfig(): BucketConfig {
   return {
-    name: requireEnv("AWS_BUCKET_NAME", process.env.AWS_BUCKET_NAME),
-    region: requireEnv("AWS_BUCKET_REGION", process.env.AWS_BUCKET_REGION),
-    accessKeyId: requireEnv("AWS_ACCESS_KEY", process.env.AWS_ACCESS_KEY),
-    secretAccessKey: requireEnv("AWS_SECRET_ACCESS_KEY", process.env.AWS_SECRET_ACCESS_KEY),
+    name: bucketName(),
+    region: requireEnv(
+      "AWS_BUCKET_REGION",
+      firstSet(process.env.AWS_BUCKET_REGION, process.env.NEXT_AWS_BUCKET_REGION),
+    ),
+    accessKeyId: requireEnv(
+      "AWS_ACCESS_KEY",
+      firstSet(process.env.AWS_ACCESS_KEY, process.env.NEXT_AWS_ACCESS_KEY),
+    ),
+    secretAccessKey: requireEnv(
+      "AWS_SECRET_ACCESS_KEY",
+      firstSet(process.env.AWS_SECRET_ACCESS_KEY, process.env.NEXT_AWS_SECRET_ACCESS_KEY),
+    ),
   };
 }
+
+/** The first value that is actually set (an empty variable counts as unset). */
+const firstSet = (...values: (string | undefined)[]) => values.find(Boolean);
+
+const bucketName = (): string =>
+  requireEnv(
+    "AWS_BUCKET_NAME",
+    firstSet(process.env.AWS_BUCKET_NAME, process.env.NEXT_AWS_BUCKET_NAME),
+  );
 
 let client: S3Client | undefined;
 
@@ -32,8 +54,7 @@ export function getS3Client(): S3Client {
   return client;
 }
 
-export const getBucketName = (): string =>
-  requireEnv("AWS_BUCKET_NAME", process.env.AWS_BUCKET_NAME);
+export const getBucketName = (): string => bucketName();
 
 /** Public URL of an object in the bucket. */
 export const publicS3Url = (key: string): string =>

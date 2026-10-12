@@ -1,0 +1,29 @@
+{
+  "name": "@wadzzo/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "What the apps send to the API: Zod schemas and shared types used by both the forms and the procedures, so the two can't drift apart. No server imports.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@wadzzo/db": "workspace:*",
+    "@wadzzo/platform": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/geojson": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "@wadzzo/vitest-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

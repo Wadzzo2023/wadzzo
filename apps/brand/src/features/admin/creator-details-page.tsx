@@ -25,9 +25,9 @@ import toast from "react-hot-toast";
 
 import { Button } from "@wadzzo/ui/components/button";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { WADZZO_AR_URL } from "~/lib/embed";
+import { WADZZO_AR_URL } from "@wadzzo/schemas/embed";
 import { BLANK_KEYWORD } from "@wadzzo/utils/blank";
-import type { CreatorExtraFields } from "~/types/creator";
+import type { CreatorExtraFields } from "@wadzzo/schemas/creator";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";

@@ -1,5 +1,5 @@
 {
-  "extends": "@wadzzo/tsconfig/base.json",
-  "compilerOptions": { "lib": ["ES2022"] },
+  "extends": "@wadzzo/tsconfig/library.json",
+  "compilerOptions": { "types": ["node"] },
   "include": ["src"]
 }

@@ -1,0 +1,165 @@
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { env } from "../../../../env";
+import {
+  PLATFORM_ASSET,
+  PLATFORM_FEE,
+  TrxBaseFee,
+  TrxBaseFeeInPlatformAsset,
+  networkPassphrase,
+} from "@wadzzo/wallet/config";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { getplatformAssetNumberForXLM } from "./get-token-price";
+import { horizonServer } from "@wadzzo/wallet/stellar";
+
+export async function createRedeemXDRAsset({
+  creatorId,
+  signWith,
+  maxRedeems,
+}: {
+  creatorId: string;
+  maxRedeems: number;
+  signWith: CustodialSigner;
+}) {
+  const server = horizonServer();
+
+  const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
+
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
+
+  const Tx1 = new TransactionBuilder(transactionInializer, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  });
+
+  // (0.5 xlm + trxBaseFee + platformFee ) * maxRedeems
+  const trustPrice = await getplatformAssetNumberForXLM(0.5);
+  const totalAmount =
+    Number(trustPrice + Number(TrxBaseFeeInPlatformAsset) + Number(PLATFORM_FEE)) * maxRedeems;
+
+  Tx1.addOperation(
+    Operation.payment({
+      destination: motherAccount.publicKey(),
+      asset: PLATFORM_ASSET,
+      amount: totalAmount.toFixed(7),
+      source: creatorId,
+    }),
+  );
+  Tx1.setTimeout(0);
+
+  const buildTrx = Tx1.build();
+  buildTrx.sign(motherAccount);
+  const xdr = buildTrx.toXDR();
+
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
+
+  return singedXdr;
+}
+
+export async function createRedeemXDRNative({
+  creatorId,
+  signWith,
+  maxRedeems,
+}: {
+  creatorId: string;
+  maxRedeems: number;
+  signWith: CustodialSigner;
+}) {
+  const server = horizonServer();
+
+  const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
+
+  const trustPrice = 0.5;
+  const xlmPlatformFee = 2;
+  const amount = Number(trustPrice + TrxBaseFee) * maxRedeems + xlmPlatformFee;
+
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
+  const Tx1 = new TransactionBuilder(transactionInializer, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  });
+
+  Tx1.addOperation(
+    Operation.payment({
+      destination: motherAccount.publicKey(),
+      asset: Asset.native(),
+      amount: amount.toFixed(7),
+      source: creatorId,
+    }),
+  );
+
+  Tx1.setTimeout(0);
+  const buildTrx = Tx1.build();
+
+  buildTrx.sign(motherAccount);
+  const xdr = buildTrx.toXDR();
+
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
+
+  return singedXdr;
+}
+
+export async function claimRedeemXDR({
+  creatorId,
+  signWith,
+  assetCode,
+  assetIssuer,
+  userPub,
+  storageSecret,
+}: {
+  creatorId: string;
+  assetIssuer: string;
+  assetCode: string;
+  signWith: CustodialSigner;
+  userPub: string;
+  storageSecret: string;
+}) {
+  const server = horizonServer();
+
+  const asset = new Asset(assetCode, assetIssuer);
+
+  const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
+
+  const assetStorage = Keypair.fromSecret(storageSecret);
+
+  const transactionInializer = await server.loadAccount(motherAccount.publicKey());
+
+  const Tx1 = new TransactionBuilder(transactionInializer, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  });
+
+  // here total cost = 0.5 xlm + trxBaseFee
+
+  Tx1.addOperation(
+    Operation.payment({
+      destination: userPub,
+      asset: Asset.native(),
+      amount: "0.5",
+    }),
+  )
+    .addOperation(
+      Operation.changeTrust({
+        asset: asset,
+        source: userPub,
+      }),
+    )
+    .addOperation(
+      Operation.payment({
+        destination: userPub,
+        asset: asset,
+        amount: "1",
+        source: assetStorage.publicKey(),
+      }),
+    );
+
+  Tx1.setTimeout(0);
+  const buildTrx = Tx1.build();
+
+  buildTrx.sign(motherAccount, assetStorage);
+
+  const xdr = buildTrx.toXDR();
+  const singedXdr = signXdrForCustodialUser({ xdr, signWith });
+
+  return singedXdr;
+}

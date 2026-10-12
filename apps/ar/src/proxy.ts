@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { brandOrigins } from "~/lib/embed/config";
+import { brandOrigins } from "@wadzzo/ar-core/embed/config";
 
 /**
  * Sets the iframe allowlist (CSP `frame-ancestors`) on `/embed/[id]` before the

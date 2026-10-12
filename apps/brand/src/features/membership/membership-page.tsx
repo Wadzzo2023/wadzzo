@@ -19,7 +19,7 @@ import { Input } from "@wadzzo/ui/components/input";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { BADWORDS } from "~/utils/banned-word";
+import { BADWORDS } from "@wadzzo/schemas/banned-word";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";

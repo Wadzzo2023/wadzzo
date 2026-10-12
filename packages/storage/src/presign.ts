@@ -81,6 +81,28 @@ export async function signImageUpload(file: DeclaredFile) {
 }
 
 /**
+ * A presigned PUT for `key` with no size or checksum pinned, for the old game
+ * client's signed-URL endpoint. New code should use `presignUpload`, which
+ * pins the file.
+ */
+export async function presignUnpinnedUpload({
+  key,
+  contentType,
+  expiresInSeconds,
+}: {
+  key: string;
+  contentType: string;
+  expiresInSeconds: number;
+}) {
+  const uploadUrl = await getSignedUrl(
+    getS3Client(),
+    new PutObjectCommand({ Bucket: getBucketName(), Key: key, ContentType: contentType }),
+    { expiresIn: expiresInSeconds },
+  );
+  return { uploadUrl, fileUrl: publicS3Url(key) };
+}
+
+/**
  * Murals: one presigned PUT per keyframe under `murals/<sessionId>/`, so the
  * server knows which keys belong to which scan session and can fetch them back
  * without trusting a URL from the client.

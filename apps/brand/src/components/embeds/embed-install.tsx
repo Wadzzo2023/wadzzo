@@ -9,7 +9,7 @@ import {
   heroSnippet,
   iframeSnippet,
   scriptSnippet,
-} from "~/lib/embed";
+} from "@wadzzo/schemas/embed";
 
 /**
  * The "Add to website" tab: the snippets, where to paste them on common site

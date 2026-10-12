@@ -76,9 +76,11 @@ describe("fan app money flows (testnet)", () => {
     const { db } = await import("@wadzzo/db/server");
     const { PLATFORM_ASSET } = await import("@wadzzo/wallet/config");
     const { preparePurchase } = await import("@wadzzo/api/market/server/stellar/purchase");
-    const { prepareStorageSetup, prepareListing } = await import("@wadzzo/api/market/server/stellar/resale");
+    const { prepareStorageSetup, prepareListing } =
+      await import("@wadzzo/api/market/server/stellar/resale");
     const { prepareSend } = await import("@wadzzo/api/market/server/stellar/transfer");
-    const { pendingGifts, prepareGiftClaim } = await import("@wadzzo/api/market/server/stellar/wallet");
+    const { pendingGifts, prepareGiftClaim } =
+      await import("@wadzzo/api/market/server/stellar/wallet");
     const { settle } = await import("@wadzzo/api/market/server/stellar/ledger");
 
     const brand = Keypair.random(),

@@ -1,5 +1,5 @@
 import { type Horizon } from "@stellar/stellar-sdk";
-import { accountBalances } from "~/lib/stellar/account-balances";
+import { accountBalances } from "@wadzzo/api/brand/lib/stellar/account-balances";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { create } from "zustand";
 

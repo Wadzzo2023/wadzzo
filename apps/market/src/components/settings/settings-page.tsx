@@ -355,7 +355,9 @@ function AccountCard({ me }: { me: Me }) {
           <dd className="font-semibold">
             {(walletType && SIGN_IN_LABEL[walletType]) ?? "Wallet"}
             <span className="bg-foreground/10 text-muted-foreground ml-2 rounded-full px-2 py-0.5 text-[11px] font-medium">
-              {isCustodialWallet(walletType) ? `Managed by ${platformBranding.name}` : "Your own wallet"}
+              {isCustodialWallet(walletType)
+                ? `Managed by ${platformBranding.name}`
+                : "Your own wallet"}
             </span>
           </dd>
         </div>

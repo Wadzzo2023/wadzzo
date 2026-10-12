@@ -6,15 +6,12 @@
 // app has already checked the user and which brand they act for, so a request
 // that passes here is trusted to carry the right creatorId.
 
-import { createHmac, timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "crypto";
+
+import { taskServerKey } from "@wadzzo/agent-contract/task-server-key";
 import type { Request, Response, NextFunction } from "express";
 import { logger } from "../lib/logger";
 import { env } from "../lib/env";
-
-/** Must match taskServerKey in the brand app's src/lib/express/server-url.ts. */
-export function taskServerKey(secret: string): string {
-  return createHmac("sha256", secret).update("wadzzo-task-server").digest("hex");
-}
 
 const SECRET = env.NEXTAUTH_SECRET;
 const KEY = SECRET ? taskServerKey(SECRET) : undefined;

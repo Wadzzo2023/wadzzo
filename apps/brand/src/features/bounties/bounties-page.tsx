@@ -16,7 +16,7 @@ import {
 } from "@wadzzo/ui/components/select";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { sortOptionEnum } from "~/types/bounty/bounty-type";
+import { sortOptionEnum } from "@wadzzo/schemas/bounty-type";
 import { htmlToText } from "~/ui/ai/shared";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";

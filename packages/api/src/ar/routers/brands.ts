@@ -5,7 +5,11 @@ import { z } from "zod";
 import type { ArBrand } from "@wadzzo/ar-core/ar/types";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { platformScope } from "@wadzzo/platform/scope";
-import { buildFollowTrustlineXdr, creatorAsset, signWithFor } from "../server/stellar/follow-creator";
+import {
+  buildFollowTrustlineXdr,
+  creatorAsset,
+  signWithFor,
+} from "../server/stellar/follow-creator";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../..";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

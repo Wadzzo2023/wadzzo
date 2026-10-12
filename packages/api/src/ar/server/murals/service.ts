@@ -56,17 +56,12 @@ export async function creditCoins(
     note?: string;
   },
 ): Promise<number> {
-  await tx.coinLedger.create({ data: entry });
+  const { platformId, ...fields } = entry;
+  await tx.coinLedger.create({ data: { ...fields, platformId } });
   const { balance } = await tx.coinBalance.upsert({
-    where: {
-      userId_platformId: { userId: entry.userId, platformId: entry.platformId },
-    },
+    where: { userId_platformId: { userId: entry.userId, platformId } },
     update: { balance: { increment: entry.amount } },
-    create: {
-      userId: entry.userId,
-      platformId: entry.platformId,
-      balance: entry.amount,
-    },
+    create: { userId: entry.userId, platformId, balance: entry.amount },
   });
   return balance;
 }

@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { Button } from "@wadzzo/ui/components/button";
 import { Textarea } from "@wadzzo/ui/components/textarea";
-import type { FillForm, FillResult } from "~/server/ai/forms";
+import type { FillForm, FillResult } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";
 
 import { localNow, AiQuota } from "./shared";

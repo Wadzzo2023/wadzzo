@@ -1,4 +1,4 @@
-import { fanBountyRouter } from "../routers/fan-bounty";
+import { fanBountyRouter } from "../shared/bounty";
 import { brandsRouter } from "./routers/brands";
 import { coinsRouter } from "./routers/coins";
 import { eventsRouter } from "./routers/events";

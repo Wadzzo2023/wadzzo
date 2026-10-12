@@ -26,10 +26,10 @@ import {
   eventWhen,
   icsPath,
   liveState,
-  shareLink,
   spotsLabel,
   venueMapImage,
-} from "~/lib/ar/events";
+} from "@wadzzo/ar-core/ar/events";
+import { shareLink } from "~/lib/ar/share-link";
 import { useAuth } from "~/lib/ar/store";
 import { useResolvedTheme } from "~/lib/ar/theme";
 import type { ArEventDetail } from "@wadzzo/ar-core/ar/types";

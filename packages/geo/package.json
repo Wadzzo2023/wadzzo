@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Small geographic helpers shared by the brand portal and the task server.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

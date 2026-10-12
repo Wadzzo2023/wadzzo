@@ -1,0 +1,106 @@
+import { Prisma } from "@wadzzo/db";
+import { z } from "zod";
+
+import { areaOutline, findAreas } from "../server/area-lookup";
+import { resolveActingBrand } from "../access";
+import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
+import { logAudit } from "@wadzzo/platform/server";
+import { getHomeAreaLayers, HomeAreaInput, readHomeArea } from "../server/home-area";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+
+const BrandInput = z.object({ creatorId: z.string().optional() });
+
+/**
+ * Home areas (see src/server/home-area.ts). A brand (or an admin acting for it)
+ * sets the brand's own; a platform's admins set their platform's default, and
+ * Wadzzo admins can set any platform's.
+ */
+export const homeAreaRouter = createTRPCRouter({
+  /** Places with a real outline matching a name, from OpenStreetMap (public data). */
+  findPlaces: protectedProcedure
+    .input(z.object({ query: z.string().trim().min(2).max(120) }))
+    .query(({ input }) => findAreas(input.query)),
+
+  /** The outline of a place from findPlaces, every part kept. */
+  outline: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().regex(/^[RW]\d{1,12}$/),
+        spanDeg: z.number().min(0).max(360),
+      }),
+    )
+    .query(({ input }) => areaOutline(input.id, input.spanDeg)),
+
+  brand: protectedProcedure.input(BrandInput).query(async ({ ctx, input }) => {
+    const { creatorId } = await resolveActingBrand(ctx, input.creatorId);
+    const layers = await getHomeAreaLayers(ctx.db, creatorId);
+    if (!layers) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
+    return layers;
+  }),
+
+  /** Saves the brand's own area, or clears it (back to the platform default) with `area: null`. */
+  saveBrand: protectedProcedure
+    .input(BrandInput.extend({ area: HomeAreaInput.nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const { creatorId } = await resolveActingBrand(ctx, input.creatorId);
+      await ctx.db.creator.update({
+        where: { id: creatorId },
+        data: input.area
+          ? { homeArea: input.area.feature, homeAreaName: input.area.name }
+          : { homeArea: Prisma.DbNull, homeAreaName: null },
+      });
+      return { ok: true };
+    }),
+
+  /** A platform's default area: this deployment's platform, or (Wadzzo admins) any. */
+  platform: adminProcedure
+    .input(z.object({ platformId: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      const platformId = platformFor(ctx, input.platformId);
+      const p = await ctx.db.platform.findUnique({
+        where: { id: platformId },
+        select: { id: true, name: true, homeArea: true, homeAreaName: true },
+      });
+      if (!p) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Platform not found" });
+      return {
+        id: p.id,
+        name: p.name,
+        area: readHomeArea(p.homeArea, p.homeAreaName, p.name),
+      };
+    }),
+
+  savePlatform: adminProcedure
+    .input(
+      z.object({
+        platformId: z.string().optional(),
+        area: HomeAreaInput.nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const platformId = platformFor(ctx, input.platformId);
+      await ctx.db.platform.update({
+        where: { id: platformId },
+        data: input.area
+          ? { homeArea: input.area.feature, homeAreaName: input.area.name }
+          : { homeArea: Prisma.DbNull, homeAreaName: null },
+      });
+      await logAudit(ctx, {
+        action: "platform.homeArea",
+        entityType: "Platform",
+        entityId: platformId,
+        targetPlatformId: platformId,
+        meta: { name: input.area?.name ?? null, cleared: !input.area },
+      });
+      return { ok: true };
+    }),
+});
+
+/** A partner admin may only change their own platform; Wadzzo admins any. */
+function platformFor(ctx: { platform: { id: string }; isSuperAdmin: boolean }, requested?: string) {
+  const platformId = requested ?? ctx.platform.id;
+  if (platformId !== ctx.platform.id && !ctx.isSuperAdmin)
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+      message: "You can only set your own platform's home area",
+    });
+  return platformId;
+}

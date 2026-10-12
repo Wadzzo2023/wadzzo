@@ -18,7 +18,7 @@ import {
   type DrawShape,
   type LatLng,
   type StoredFeature,
-} from "./geo";
+} from "@wadzzo/geo/map-geometry";
 
 /** Smaller than this is almost certainly a mis-click, not a hotspot. */
 const MIN_SPAN_M = 10;

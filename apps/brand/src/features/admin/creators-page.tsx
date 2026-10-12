@@ -28,7 +28,7 @@ import { Switch } from "@wadzzo/ui/components/switch";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { BLANK_KEYWORD } from "@wadzzo/utils/blank";
-import type { CreatorExtraFields } from "~/types/creator";
+import type { CreatorExtraFields } from "@wadzzo/schemas/creator";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column, type RowAction } from "~/ui/data-table";
 import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";

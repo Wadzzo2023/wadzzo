@@ -10,7 +10,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import type { z } from "zod";
 
-import { featureCenter, type StoredFeature } from "~/components/map-kit/geo";
+import { featureCenter, type StoredFeature } from "@wadzzo/geo/map-geometry";
 import {
   CollectionInputs,
   ImageUploadField,
@@ -31,7 +31,7 @@ import {
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useHotspotDraft } from "~/store/hotspot-draft";
-import { createHotspotFormSchema } from "~/types/hotspot";
+import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { AiFillCard } from "~/ui/ai/ai-fill";

@@ -71,7 +71,7 @@ describe("gift an item (testnet)", () => {
     const { db } = await import("@wadzzo/db/server");
     const { PLATFORM_ASSET } = await import("@wadzzo/wallet/config");
     const { quoteGiftItem, prepareGiftItem, confirmGiftItem, giftableItems } =
-      await import("~/server/stellar/gift-item");
+      await import("@wadzzo/api/brand/server/stellar/gift-item");
 
     const brand = Keypair.random(),
       storage = Keypair.random(),
@@ -264,8 +264,9 @@ describe("gift an item (testnet)", () => {
       expect(await bal(storage.publicKey(), code, issuer.publicKey())).toBe(1);
 
       // E. a platform-token gift (signed in the browser): confirming it records it and tells the fan once
-      const { sendGitfAsPlatformAsset } = await import("~/lib/stellar/fan/send-gift");
-      const { confirmTokenGift } = await import("~/server/stellar/token-gift");
+      const { sendGitfAsPlatformAsset } =
+        await import("@wadzzo/api/brand/lib/stellar/fan/send-gift");
+      const { confirmTokenGift } = await import("@wadzzo/api/brand/server/stellar/token-gift");
       await send(fan, (t) => t.addOperation(Operation.changeTrust({ asset: PLATFORM_ASSET })));
       const giftXdr = await sendGitfAsPlatformAsset({
         reciver: fan.publicKey(),

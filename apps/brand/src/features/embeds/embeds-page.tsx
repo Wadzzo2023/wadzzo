@@ -26,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@wadzzo/ui/components/dropdown-menu";
-import { scriptSnippet } from "~/lib/embed";
+import { scriptSnippet } from "@wadzzo/schemas/embed";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";

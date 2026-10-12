@@ -8,7 +8,12 @@ import { CameraModeSwitch } from "~/components/ar/CameraModeSwitch";
 import { CollectButton } from "~/components/ar/CollectButton";
 import { ArRadar, CompassStrip, EdgeArrow, Reticle, type Placed } from "~/components/ar/ArScene";
 import { ArButton } from "~/components/ui/ArButton";
-import { AR_CAPTURE_RADIUS, bearingDegrees, distanceMeters, offsetBy } from "@wadzzo/ar-core/ar/geo";
+import {
+  AR_CAPTURE_RADIUS,
+  bearingDegrees,
+  distanceMeters,
+  offsetBy,
+} from "@wadzzo/ar-core/ar/geo";
 import { angleDelta } from "~/lib/ar/heading";
 import { cameraFrustum } from "~/lib/ar/projection";
 import { pinStatus } from "@wadzzo/ar-core/ar/rarity";

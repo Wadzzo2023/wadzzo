@@ -13,9 +13,14 @@
     "lint": "eslint src"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
     "eslint": "catalog:",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@wadzzo/platform": "workspace:*",
+    "date-fns": "catalog:"
   }
 }

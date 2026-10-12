@@ -8,7 +8,7 @@ import type { MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
-import { toMapboxFeature, type DrawShape, type StoredFeature } from "~/components/map-kit/geo";
+import { toMapboxFeature, type DrawShape, type StoredFeature } from "@wadzzo/geo/map-geometry";
 import { HotspotLayer } from "~/components/map-kit/hotspot-layer";
 import { PinLegend, PinMarker } from "~/components/map-kit/pin-marker";
 import { PlaceSearch } from "~/components/map-kit/place-search";

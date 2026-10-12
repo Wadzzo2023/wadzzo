@@ -30,7 +30,7 @@ import {
   type EmbedEvent,
   normalizeConfig,
   PIN_TYPE_LABEL,
-} from "~/lib/embed/config";
+} from "@wadzzo/ar-core/embed/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";

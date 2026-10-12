@@ -28,7 +28,7 @@ import { AiTextButton } from "~/ui/ai/ai-text";
 import { htmlToText } from "~/ui/ai/shared";
 import CustomAvatar from "~/components/common/custom-avatar";
 import { Editor } from "~/components/common/quill-editor";
-import { PostSchema } from "~/types/post";
+import { PostSchema } from "@wadzzo/schemas/post";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import {

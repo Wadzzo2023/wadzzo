@@ -18,7 +18,7 @@ import { NameMuralSheet } from "~/components/murals/NameMuralSheet";
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { venueMapImage } from "~/lib/ar/events";
+import { venueMapImage } from "@wadzzo/ar-core/ar/events";
 import { useResolvedTheme } from "~/lib/ar/theme";
 import type { MuralStatus } from "@wadzzo/ar-core/murals/constants";
 import { cn } from "@wadzzo/ui/lib/cn";

@@ -3,7 +3,11 @@ import { useCallback, useMemo, useRef } from "react";
 import type { GeoFix } from "@wadzzo/ar-core/ar/types";
 import { api } from "~/utils/api";
 
-import { MATCH_SIMILARITY, type ScanResult, type ScanPlatform } from "@wadzzo/ar-core/murals/constants";
+import {
+  MATCH_SIMILARITY,
+  type ScanResult,
+  type ScanPlatform,
+} from "@wadzzo/ar-core/murals/constants";
 import { bestSimilarity } from "@wadzzo/ar-core/murals/score";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 

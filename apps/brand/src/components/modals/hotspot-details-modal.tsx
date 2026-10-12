@@ -19,7 +19,7 @@ import toast from "react-hot-toast";
 import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
-import { featureCenter, toMapboxFeature, type StoredFeature } from "~/components/map-kit/geo";
+import { featureCenter, toMapboxFeature, type StoredFeature } from "@wadzzo/geo/map-geometry";
 import { Button } from "@wadzzo/ui/components/button";
 import {
   Dialog,

@@ -5,13 +5,15 @@
   "type": "module",
   "description": "The contract between the brand portal's map agent UI and the task server's agent worker: block, step and action shapes.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./task-server-key": "./src/task-server-key.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
     "eslint": "catalog:",

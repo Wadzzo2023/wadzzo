@@ -2,6 +2,7 @@ export { getBucketName, getS3Client, isOwnS3Url, publicS3Url } from "./bucket";
 export { signCreatorUpload, uploadEndpoints, type UploadEndpoint } from "./endpoint-uploads";
 export {
   getObjectBytes,
+  presignUnpinnedUpload,
   presignUpload,
   signEntryUpload,
   signImageUpload,

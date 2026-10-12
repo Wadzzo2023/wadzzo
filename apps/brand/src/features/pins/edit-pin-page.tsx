@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import type { z } from "zod";
 
 import { MapPicker } from "~/components/map-kit/map-picker";
-import { updateMapFormSchema } from "~/types/pin-edit";
+import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";

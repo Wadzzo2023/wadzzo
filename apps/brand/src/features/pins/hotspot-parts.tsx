@@ -9,7 +9,7 @@ import {
   haversineMetres,
   toMapboxFeature,
   type StoredFeature,
-} from "~/components/map-kit/geo";
+} from "@wadzzo/geo/map-geometry";
 
 /** Shared by the new and edit hotspot pages. */
 

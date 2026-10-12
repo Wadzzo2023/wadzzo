@@ -1,23 +1,18 @@
 import { create } from "zustand";
 import {
   type AdminAsset,
-  type Asset,
   type ItemPrivacy,
   type LocationGroup,
-  type MarketAsset,
   type SubmissionAttachment,
   type Location,
   type LocationConsumer,
 } from "@wadzzo/db";
 
 import { type Horizon } from "@stellar/stellar-sdk";
+import type { AssetType, MarketAssetType } from "@wadzzo/schemas/market-asset";
 export type AssetRightType = AssetType & { copies: number };
 
-export type AssetType = Omit<Asset, "issuerPrivate" | "platformId">;
-
-export type MarketAssetType = Omit<MarketAsset, "platformId"> & {
-  asset: AssetType;
-};
+export type { AssetType, MarketAssetType };
 export type AdminAssetWithTag = AdminAsset & {
   tags: {
     tagName: string;

@@ -1,0 +1,55 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
+import { z } from "zod";
+import { EnableCors } from "./cors";
+import { db } from "@wadzzo/db/server";
+import crypto from "crypto";
+import { presignUnpinnedUpload } from "@wadzzo/storage";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await EnableCors(req, res);
+  const token = await getToken({ req });
+
+  // Check if the user is authenticated
+  if (!token) {
+    return res.status(401).json({
+      error: "User is not authenticated",
+    });
+  }
+
+  const pubkey = token.sub;
+
+  if (!pubkey) {
+    return res.status(404).json({
+      error: "pubkey not found",
+    });
+  }
+
+  const data = z
+    .object({
+      contentType: z.string(),
+      fileName: z.string(),
+    })
+    .safeParse(req.body);
+
+  if (!data.success) {
+    return res.status(400).json({
+      error: data.error,
+    });
+  }
+
+  const file = data.data;
+
+  const genFileName = generateFileName(32, file.fileName);
+
+  const { uploadUrl, fileUrl } = await presignUnpinnedUpload({
+    key: genFileName,
+    contentType: file.contentType,
+    expiresInSeconds: 3600,
+  });
+
+  res.status(200).json({ uploadUrl, fileUrl });
+}
+const generateFileName = (bytes = 32, fileName: string) => {
+  return `${crypto.randomBytes(bytes).toString("hex")}-${fileName}`;
+};

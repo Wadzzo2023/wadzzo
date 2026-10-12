@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { env } from "~/env";
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import { parseCoordinates, type LatLng } from "./geo";
+import { parseCoordinates, type LatLng } from "@wadzzo/geo/map-geometry";
 
 export type Place = LatLng & { name: string; address?: string };
 

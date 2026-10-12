@@ -9,7 +9,7 @@ import { Label } from "@wadzzo/ui/components/label";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { BaseMap, WORLD_VIEW } from "./base-map";
-import { circleFeature, toMapboxFeature, type LatLng } from "./geo";
+import { circleFeature, toMapboxFeature, type LatLng } from "@wadzzo/geo/map-geometry";
 import { PlaceSearch, type Place } from "./place-search";
 
 /**

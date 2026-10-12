@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import { create } from "zustand";
 
-import { toMapboxArea, type AreaFeature } from "~/components/map-kit/geo";
+import { toMapboxArea, type AreaFeature } from "@wadzzo/geo/map-geometry";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 export type AgentMarker = {

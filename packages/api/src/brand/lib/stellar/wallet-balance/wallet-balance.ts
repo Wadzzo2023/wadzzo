@@ -1,0 +1,573 @@
+/* eslint-disable */
+
+import {
+  Asset,
+  BASE_FEE,
+  Claimant,
+  Keypair,
+  Networks,
+  Operation,
+  Transaction,
+  TransactionBuilder,
+} from "@stellar/stellar-sdk";
+
+import { Horizon } from "@stellar/stellar-sdk";
+import { StellarAccount } from "@wadzzo/stellar/account";
+import { CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
+import { networkPassphrase, PLATFORM_ASSET, TrxBaseFee } from "@wadzzo/wallet/config";
+import { db } from "@wadzzo/db/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
+
+export type Balances = (
+  | Horizon.HorizonApi.BalanceLineNative
+  | Horizon.HorizonApi.BalanceLineAsset<"credit_alphanum4">
+  | Horizon.HorizonApi.BalanceLineAsset<"credit_alphanum12">
+  | Horizon.HorizonApi.BalanceLineLiquidityPool
+)[];
+export type ParsedTransaction = {
+  type?: string;
+  amount?: string;
+  asset?: string;
+  destination?: string;
+  source?: string;
+  startingBalance?: string;
+  claimants?: unknown[];
+  issuer?: string;
+  createdAt?: string;
+  balanceId?: string;
+  code?: string;
+};
+interface Predicate {
+  and?: Predicate[];
+  or?: Predicate[];
+  not?: Predicate;
+  abs_before?: string;
+  rel_before?: string;
+}
+interface PendingClaimableBalance {
+  id: string;
+  asset: string;
+  amount: string;
+  sponsor: string;
+  claimants: Array<{
+    destination: string;
+    predicate: Predicate;
+  }>;
+}
+export async function NativeBalance({ userPub }: { userPub: string }) {
+  const server = horizonServer();
+
+  const account = await server.loadAccount(userPub);
+
+  const nativeBalance = account.balances.find((balance) => {
+    if (balance.asset_type === "native") {
+      return balance;
+    }
+  });
+
+  return nativeBalance;
+}
+
+export async function BalanceWithHomeDomain({ userPub }: { userPub: string }) {
+  const server = horizonServer();
+
+  const account = await server.loadAccount(userPub);
+  const balances = await Promise.all(
+    account.balances.map(async (balance) => {
+      if (balance.asset_type === "credit_alphanum12" || balance.asset_type === "credit_alphanum4") {
+        if (balance.is_authorized) {
+          const issuerAccount = await server.loadAccount(balance.asset_issuer);
+          if (issuerAccount.home_domain) {
+            return {
+              ...balance,
+              amount: balance.balance < "0.0000001" ? "0" : balance.balance,
+              home_domain: issuerAccount.home_domain,
+              asset_code: balance.asset_code,
+              asset_issuer: balance.asset_issuer,
+            };
+          } else {
+            return {
+              ...balance,
+              amount: balance.balance < "0.0000001" ? "0" : balance.balance,
+              home_domain: null,
+              asset_code: balance.asset_code,
+              asset_issuer: balance.asset_issuer,
+            };
+          }
+        } else {
+          return {
+            ...balance,
+            home_domain: null,
+            amount: balance.balance < "0.0000001" ? "0" : balance.balance,
+            asset_code: balance.asset_code,
+            asset_issuer: balance.asset_issuer,
+          };
+        }
+      } else if (balance.asset_type === "native") {
+        return {
+          ...balance,
+          home_domain: null,
+          amount: balance.balance < "0.0000001" ? "0" : balance.balance,
+          asset_code: "XLM",
+          asset_issuer: "native",
+        };
+      }
+    }),
+  );
+  // console.log(balances);
+  return balances;
+}
+
+export async function SendAssets({
+  userPubKey,
+  recipientId,
+  amount,
+  asset_code,
+  asset_type,
+  asset_issuer,
+  signWith,
+  secretKey,
+}: {
+  userPubKey: string;
+
+  recipientId: string;
+  amount: number;
+  asset_code: string;
+  asset_type: string;
+  asset_issuer: string;
+  signWith: CustodialSigner;
+  secretKey?: string | undefined;
+}) {
+  const server = horizonServer();
+  const account = await server.loadAccount(userPubKey);
+
+  if (userPubKey === recipientId) {
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
+      message: "You can't send asset to yourself",
+    });
+  }
+  const accBalance = account.balances.find((balance) => {
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
+      return balance.asset_code === asset_code && balance.asset_issuer === asset_issuer;
+    } else if (balance.asset_type === "native") {
+      return balance.asset_type === asset_type;
+    }
+    return false;
+  });
+
+  if (!accBalance || parseFloat(accBalance.balance) < amount) {
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Balance is not enough to send the asset.",
+    });
+  }
+
+  const receiverAccount = await server.loadAccount(recipientId);
+  const hasTrust = receiverAccount.balances.some((balance) => {
+    return (
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
+      balance.asset_code === asset_code &&
+      balance.asset_issuer === asset_issuer
+    );
+  });
+
+  const asset = asset_type === "native" ? Asset.native() : new Asset(asset_code, asset_issuer);
+
+  const transaction = new TransactionBuilder(account, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  });
+
+  if (!hasTrust && asset_type !== "native") {
+    const claimants: Claimant[] = [new Claimant(recipientId, Claimant.predicateUnconditional())];
+
+    transaction.addOperation(
+      Operation.createClaimableBalance({
+        amount: amount.toString(),
+        asset: asset,
+        claimants: claimants,
+      }),
+    );
+  } else {
+    transaction.addOperation(
+      Operation.payment({
+        destination: recipientId,
+        asset: asset,
+        amount: amount.toString(),
+        source: userPubKey,
+      }),
+    );
+  }
+
+  transaction.setTimeout(0);
+
+  const buildTrx = transaction.build();
+
+  if (signWith && "email" in signWith && secretKey) {
+    const xdr = buildTrx.toXDR();
+    const signedXDr = await signXdrForCustodialUser({
+      xdr: xdr,
+      signWith: signWith,
+    });
+    return { xdr: signedXDr, pubKey: userPubKey };
+  }
+  return { xdr: buildTrx.toXDR(), pubKey: userPubKey };
+}
+
+export async function AddAssetTrustLine({
+  userPubKey,
+  asset_code,
+  asset_issuer,
+  signWith,
+  secretKey,
+}: {
+  userPubKey: string;
+  asset_code: string;
+  asset_issuer: string;
+  signWith: CustodialSigner;
+  secretKey?: string | undefined;
+}) {
+  const server = horizonServer();
+  const account = await server.loadAccount(userPubKey);
+  if (asset_code.toUpperCase() === "XLM") {
+    throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, {
+      message: "TrustLine can't be added on XML",
+    });
+  }
+
+  const findAsset = account.balances.find((balance) => {
+    if (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") {
+      return balance.asset_code === asset_code && balance.asset_issuer === asset_issuer;
+    }
+    return false;
+  });
+
+  if (findAsset) {
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
+      message: "TrustLine already exists.",
+    });
+  }
+  const asset = new Asset(asset_code, asset_issuer);
+  const transaction = new TransactionBuilder(account, {
+    fee: TrxBaseFee,
+    networkPassphrase,
+  })
+    .addOperation(
+      Operation.changeTrust({
+        asset: asset,
+      }),
+    )
+    .setTimeout(0);
+  const buildTrx = transaction.build();
+  if (signWith && "email" in signWith && secretKey) {
+    const xdr = buildTrx.toXDR();
+
+    const signedXDr = await signXdrForCustodialUser({
+      xdr: xdr,
+      signWith: signWith,
+    });
+    return { xdr: signedXDr, pubKey: userPubKey };
+  }
+
+  return { xdr: buildTrx.toXDR(), pubKey: userPubKey };
+}
+
+export async function RecentTransactionHistory({
+  userPubKey,
+  input,
+}: {
+  userPubKey: string;
+  input: {
+    limit?: number | null;
+    cursor?: string | null;
+  };
+}) {
+  const server = horizonServer();
+  const limit = input.limit ?? 10;
+  const cursor = input.cursor ?? undefined;
+
+  let transactionCall = server.transactions().forAccount(userPubKey).limit(limit).order("desc");
+
+  if (cursor) {
+    transactionCall = transactionCall.cursor(cursor);
+  }
+
+  const items = await transactionCall.call();
+
+  if (!items.records) {
+    return {
+      items: [],
+      nextCursor: null,
+    };
+  }
+
+  // creating set of string pubkey
+  const PubKey: Set<string> = new Set();
+
+  const newItems = await Promise.all(
+    items.records.map(async (record: Horizon.ServerApi.TransactionRecord) => {
+      const ops = await record.operations();
+      ops.records.forEach((op) => {
+        if (
+          op.type === "payment" ||
+          op.type === "path_payment_strict_receive" ||
+          op.type === "path_payment_strict_send"
+        ) {
+          op.from = op.from ?? record.source_account;
+          op.to = op.to ?? record.source_account;
+          PubKey.add(op.from);
+          PubKey.add(op.to);
+        } else {
+          PubKey.add(op.source_account);
+        }
+      });
+
+      const users = await db.user.findMany({
+        where: {
+          id: {
+            in: Array.from(PubKey),
+          },
+        },
+      });
+
+      const creators = await db.creator.findMany({
+        where: {
+          storagePub: {
+            in: Array.from(PubKey),
+          },
+        },
+      });
+
+      return {
+        source: record.source_account,
+        sequence: record.source_account_sequence,
+        ledger_attr: record.ledger_attr,
+        successful: record.successful,
+        createdAt: record.created_at,
+        maxFee: record.max_fee,
+        memo: record.memo,
+        id: record.id,
+        signatures: record.signatures,
+        pagingToken: record.paging_token,
+        envelopeXdr: record.envelope_xdr,
+        resultXdr: record.result_xdr,
+        resultMetaXdr: record.result_meta_xdr,
+        fee_charged: record.fee_charged,
+
+        operations: ops.records.map((op) => {
+          if (
+            op.type === "payment" ||
+            op.type === "path_payment_strict_receive" ||
+            op.type === "path_payment_strict_send"
+          ) {
+            let userFrom = users.find((user) => user.id === op.from);
+            let creatorFrom = creators.find((creator) => creator.storagePub === op.from);
+            let userTo = users.find((user) => user.id === op.to);
+            let creatorTo = creators.find((creator) => creator.storagePub === op.to);
+            return {
+              ...op,
+              from: userFrom?.name
+                ? `${userFrom.name} :: ${op.from}`
+                : creatorFrom?.name
+                  ? `${creatorFrom.name}'s storage :: ${op.from}`
+                  : op.from,
+              to: userTo?.name
+                ? `${userTo.name} :: ${op.to}`
+                : creatorTo?.name
+                  ? `${creatorTo.name}'s storage :: ${op.to}`
+                  : op.to,
+            };
+          }
+          return {
+            ...op,
+            source_account: users.find((user) => user.id === op.source_account)?.name
+              ? `${users.find((user) => user.id === op.source_account)?.name} :: ${op.source_account}`
+              : creators.find((creator) => creator.storagePub === op.source_account)?.name
+                ? `${creators.find((creator) => creator.storagePub === op.source_account)?.name} :: ${op.source_account}`
+                : op.source_account,
+          };
+        }),
+      };
+    }),
+  );
+
+  return {
+    items: newItems,
+    nextCursor:
+      items.records.length > 0 ? items.records[items.records.length - 1]?.paging_token : null,
+  };
+}
+
+export async function PendingAssetList({
+  userPubKey,
+}: {
+  userPubKey: string;
+}): Promise<PendingClaimableBalance[]> {
+  const server = horizonServer();
+
+  const pendingItems = await server
+    .claimableBalances()
+    .claimant(userPubKey)
+    .limit(20)
+    .order("desc")
+    .call();
+
+  const parsedItems = pendingItems.records.map((record) => {
+    return {
+      id: record.id,
+      asset: record.asset,
+      amount: record.amount,
+      sponsor: record.sponsor ?? "",
+      claimants: record.claimants,
+    };
+  });
+
+  return parsedItems;
+}
+
+export async function AcceptClaimableBalance({
+  userPubKey,
+  balanceId,
+  signWith,
+}: {
+  userPubKey: string;
+  balanceId: string;
+  signWith: CustodialSigner;
+}) {
+  const server = horizonServer();
+  const account = await server.loadAccount(userPubKey);
+  // finding balance using balance id
+  console.log("balanceId", balanceId);
+  const balance = await server
+    .claimableBalances()
+    .claimant(userPubKey)
+    .claimableBalance(balanceId)
+    .call();
+  if (!balance) {
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Balance not found",
+    });
+  }
+  const assetCode = balance.asset.split(":")[0];
+  const assetIssuer = balance.asset.split(":")[1];
+  if (!assetCode || !assetIssuer) {
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
+      message: "Asset code or issuer not found",
+    });
+  }
+  //checking if  trustline exists
+  const hasTrust = account.balances.some((balance) => {
+    return (
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
+      balance.asset_code === assetCode &&
+      balance.asset_issuer === assetIssuer
+    );
+  });
+
+  try {
+    const Tx1 = new TransactionBuilder(account, {
+      fee: TrxBaseFee,
+      networkPassphrase,
+    });
+    console.log(hasTrust);
+    if (!hasTrust) {
+      Tx1.addOperation(
+        Operation.changeTrust({
+          asset: new Asset(assetCode, assetIssuer),
+        }),
+      );
+    }
+
+    Tx1.addOperation(
+      Operation.claimClaimableBalance({
+        balanceId: balanceId,
+      }),
+    ).setTimeout(0);
+    const buildTrx = Tx1.build();
+    buildTrx.sign();
+    const xdr = buildTrx.toXDR();
+    const singedXdr = signXdrForCustodialUser({ xdr, signWith });
+    console.log(singedXdr);
+    return singedXdr;
+  } catch (error) {
+    throw new AppError(ErrorCodes.STELLAR_INSUFFICIENT_BALANCE, {
+      message: "Error in accepting claimable balance",
+    });
+  }
+}
+
+export async function DeclineClaimableBalance({
+  pubKey,
+  balanceId,
+  signWith,
+  secretKey,
+}: {
+  pubKey: string;
+  balanceId: string;
+  signWith: CustodialSigner;
+  secretKey?: string | undefined;
+}) {
+  const server = horizonServer();
+  const account = await server.loadAccount(pubKey);
+
+  const transaction = new TransactionBuilder(account, {
+    fee: TrxBaseFee, // Adjust fee as needed
+    networkPassphrase, // Adjust for mainnet if necessary
+  })
+    .addOperation(
+      Operation.clawbackClaimableBalance({
+        balanceId: balanceId,
+      }),
+    )
+    .setTimeout(0);
+  const buildTrx = transaction.build();
+
+  if (signWith && "email" in signWith && secretKey) {
+    const xdr = buildTrx.toXDR();
+    const signedXDr = await signXdrForCustodialUser({
+      xdr: xdr,
+      signWith: signWith,
+    });
+    return { xdr: signedXDr, pubKey: pubKey };
+  }
+  return { xdr: buildTrx.toXDR(), pubKey: pubKey };
+}
+export async function CheckHasTrustLineOnPlatformAsset({ userPubKey }: { userPubKey: string }) {
+  const server = horizonServer();
+
+  const account = await server.loadAccount(userPubKey);
+  const findAsset = account.balances.some((balance) => {
+    if (
+      (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
+      balance.asset_code === PLATFORM_ASSET.code &&
+      balance.asset_issuer === PLATFORM_ASSET.issuer
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  return findAsset;
+}
+
+export async function PlatformAssetBalance({ userPubKey }: { userPubKey: string }) {
+  const server = horizonServer();
+  try {
+    const account = await server.loadAccount(userPubKey);
+    const findAsset = account.balances.find((balance) => {
+      if (
+        (balance.asset_type === "credit_alphanum4" || balance.asset_type === "credit_alphanum12") &&
+        balance.asset_code === PLATFORM_ASSET.code &&
+        balance.asset_issuer === PLATFORM_ASSET.issuer
+      ) {
+        return balance.balance;
+      }
+      return false;
+    });
+    return findAsset ? findAsset.balance : 0;
+  } catch (e) {
+    return -1;
+  }
+}

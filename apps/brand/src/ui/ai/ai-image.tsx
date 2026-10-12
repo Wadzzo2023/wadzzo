@@ -15,7 +15,7 @@ import {
 } from "@wadzzo/ui/components/dialog";
 import { Textarea } from "@wadzzo/ui/components/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { FillForm } from "~/server/ai/forms";
+import type { FillForm } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";
 
 import { AiQuota } from "./shared";

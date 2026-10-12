@@ -17,7 +17,7 @@ import {
   haversineMetres,
   toMapboxFeature,
   type StoredFeature,
-} from "~/components/map-kit/geo";
+} from "@wadzzo/geo/map-geometry";
 import {
   CollectionInputs,
   ImageUploadField,
@@ -39,7 +39,7 @@ import { Textarea } from "@wadzzo/ui/components/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useHotspotDraft } from "~/store/hotspot-draft";
 import { useSelectCreatorStore } from "~/components/store/creator-selection-store";
-import { createHotspotFormSchema } from "~/types/hotspot";
+import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { AiFillCard } from "~/ui/ai/ai-fill";

@@ -7,7 +7,7 @@ import type { MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
-import { areaBounds, toMapboxArea, type AreaFeature } from "~/components/map-kit/geo";
+import { areaBounds, toMapboxArea, type AreaFeature } from "@wadzzo/geo/map-geometry";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { cn } from "@wadzzo/ui/lib/cn";

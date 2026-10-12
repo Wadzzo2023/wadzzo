@@ -1,7 +1,7 @@
 import { createNextApiHandler } from "@trpc/server/adapters/next";
 
 import { env } from "~/env";
-import { appRouter } from "~/server/api/root";
+import { appRouter } from "@wadzzo/api/brand/router";
 import { createTRPCContext } from "~/server/api/trpc";
 
 // export API handler

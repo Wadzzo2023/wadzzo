@@ -27,7 +27,7 @@ import {
   PIN_TYPE_LABEL,
   previewUrl,
   WADZZO_AR_URL,
-} from "~/lib/embed";
+} from "@wadzzo/schemas/embed";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";

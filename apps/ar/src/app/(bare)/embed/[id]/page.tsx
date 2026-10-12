@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 
-import { decodePreview, normalizeConfig, brandOrigins, type EmbedConfig } from "~/lib/embed/config";
+import {
+  decodePreview,
+  normalizeConfig,
+  brandOrigins,
+  type EmbedConfig,
+} from "@wadzzo/ar-core/embed/config";
 import { db } from "@wadzzo/db/server";
 
 import { EmbedClient } from "./EmbedClient";

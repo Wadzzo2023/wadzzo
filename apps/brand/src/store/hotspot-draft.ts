@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { DrawShape, StoredFeature } from "~/components/map-kit/geo";
+import type { DrawShape, StoredFeature } from "@wadzzo/geo/map-geometry";
 
 /**
  * The area just drawn on the Pins map, handed to /pins/hotspots/new. Kept in

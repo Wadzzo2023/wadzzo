@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { Layer, Source, useMap } from "react-map-gl/mapbox";
 
-import { toMapboxFeature } from "./geo";
+import { toMapboxFeature } from "@wadzzo/geo/map-geometry";
 
 export type HotspotShape = {
   id: string;
