@@ -1585,6 +1585,12 @@ importers:
       '@wadzzo/errors':
         specifier: workspace:*
         version: link:../errors
+      '@wadzzo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@wadzzo/wallet':
+        specifier: workspace:*
+        version: link:../wallet
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

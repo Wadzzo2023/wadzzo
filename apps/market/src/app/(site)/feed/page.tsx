@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { FeedView } from "~/components/post/feed-view";
 import { serverApi } from "~/server/api/server";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "Feed",
-  description:
-    "Latest posts from creators on Wadzzo — drops, behind-the-scenes and members-only updates.",
+  description: `Latest posts from creators on ${platformBranding.name} — drops, behind-the-scenes and members-only updates.`,
   alternates: { canonical: "/feed" },
 };
 

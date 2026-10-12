@@ -16,6 +16,7 @@ import type { Db } from "@wadzzo/db";
 
 import { signForUser, type Signer } from "./keys";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);

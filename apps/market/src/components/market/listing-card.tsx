@@ -7,6 +7,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard as ListingCardData } from "~/server/api/routers/market";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const num = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 
@@ -78,7 +79,7 @@ export function ListingCard({
             name={a.creator?.name}
             className="size-5 text-[9px]"
           />
-          <span className="truncate">{a.creator?.name ?? "Wadzzo"}</span>
+          <span className="truncate">{a.creator?.name ?? platformBranding.name}</span>
           {a.creator && (
             <BadgeCheck className="text-primary size-3.5 shrink-0" aria-label="Creator" />
           )}

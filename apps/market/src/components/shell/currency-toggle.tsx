@@ -4,6 +4,7 @@ import { DollarSign } from "lucide-react";
 
 import { useCurrency, type DisplayCurrency } from "~/hooks/use-currency";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /** Header switch between showing prices in Wadzzo or USD first. */
 export function CurrencyToggle({ className }: { className?: string }) {
@@ -16,7 +17,7 @@ export function CurrencyToggle({ className }: { className?: string }) {
     {
       id: "TOKEN",
       label: <span className="font-hud text-[13px] leading-none font-bold">W</span>,
-      title: "Show prices in Wadzzo",
+      title: `Show prices in ${platformBranding.name}`,
     },
     {
       id: "USD",

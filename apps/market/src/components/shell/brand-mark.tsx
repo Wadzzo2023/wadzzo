@@ -13,7 +13,11 @@ export function BrandMark({
   className?: string;
 }) {
   return (
-    <Link href="/" className={cn("flex items-center gap-2.5", className)} aria-label="Wadzzo home">
+    <Link
+      href="/"
+      className={cn("flex items-center gap-2.5", className)}
+      aria-label={`${platformBranding.name} home`}
+    >
       <span className="bg-primary/10 flex size-9 shrink-0 items-center justify-center rounded-lg">
         <Image
           src={platformBranding.assets.loading}
@@ -26,7 +30,9 @@ export function BrandMark({
       </span>
       {!compact && (
         <span className="leading-tight">
-          <span className="font-hud block text-base font-bold tracking-tight">Wadzzo</span>
+          <span className="font-hud block text-base font-bold tracking-tight">
+            {platformBranding.name}
+          </span>
           <span className="font-hud text-muted-foreground block text-[10px] font-semibold tracking-[0.18em] uppercase">
             Collect · Trade · Play
           </span>

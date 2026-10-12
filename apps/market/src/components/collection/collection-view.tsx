@@ -32,6 +32,7 @@ import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { ListDialog, StorageSetupDialog } from "./resale-dialogs";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Owned = RouterOutputs["collection"]["owned"][number];
 type Created = RouterOutputs["collection"]["created"][number];
@@ -287,7 +288,7 @@ function OwnedCard({ x, onResell }: { x: Owned; onResell: () => void }) {
       <div className="flex flex-1 flex-col gap-1 px-1.5 pt-2.5 pb-1">
         <p className="font-hud truncate text-[15px] font-semibold">{x.asset.name}</p>
         <p className="text-muted-foreground truncate text-xs">
-          {x.asset.creator?.name ?? "Wadzzo"}
+          {x.asset.creator?.name ?? platformBranding.name}
         </p>
         {x.listed > 0 && (
           <p className="text-primary text-xs font-medium">{x.listed} listed for resale</p>

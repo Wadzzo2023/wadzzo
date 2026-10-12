@@ -39,6 +39,7 @@ import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
 import { randomLocation as getLocationInLatLngRad } from "@wadzzo/geo";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { isKnownError } from "@wadzzo/errors/trpc";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export type LocationWithConsumers = {
   title: string;
@@ -2447,7 +2448,7 @@ export const pinRouter = createTRPCRouter({
         locationId: location.id,
         locationGroupId: group.id,
         title: group.title,
-        brandName: group.creator.name ?? "Wadzzo",
+        brandName: group.creator.name ?? platformBranding.name,
         brandImageUrl: group.creator.profileUrl,
         scanUrl: buildPinScanUrl(location.id),
         collectable,
@@ -2528,7 +2529,7 @@ export const pinRouter = createTRPCRouter({
       return {
         locationGroupId: group.id,
         title: group.title,
-        brandName: group.creator.name ?? "Wadzzo",
+        brandName: group.creator.name ?? platformBranding.name,
         brandImageUrl: group.creator.profileUrl,
         isMultiPin: group.multiPin,
         truncated: locations.length === MAX_QR_CODES_PER_DROP,

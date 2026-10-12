@@ -11,6 +11,7 @@ import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const getProfile = cache(async (key: string) => {
   try {
@@ -25,7 +26,8 @@ export async function generateMetadata({ params }: PageProps<"/creator/[key]">):
   const p = await getProfile((await params).key);
   if (!p) return { title: "Creator not found", robots: { index: false } };
   const description = (
-    p.bio ?? `${p.name} on Wadzzo — collect their drops and join their membership.`
+    p.bio ??
+    `${p.name} on ${platformBranding.name} — collect their drops and join their membership.`
   ).slice(0, 180);
   const images = [p.coverUrl ?? p.profileUrl].filter((x): x is string => Boolean(x));
   return {

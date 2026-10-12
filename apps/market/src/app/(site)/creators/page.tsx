@@ -6,11 +6,11 @@ import { CreatorSearch, LoadMoreCreators } from "~/components/creator/creator-li
 import { serverApi } from "~/server/api/server";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "Creators",
-  description:
-    "Discover brands and creators on Wadzzo — follow them, collect their drops and join their memberships.",
+  description: `Discover brands and creators on ${platformBranding.name} — follow them, collect their drops and join their memberships.`,
   alternates: { canonical: "/creators" },
 };
 

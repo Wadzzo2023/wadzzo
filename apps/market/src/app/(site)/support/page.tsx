@@ -5,10 +5,11 @@ import Link from "next/link";
 import { StaticHeader } from "~/components/static/static-header";
 import { SupportForm } from "~/components/static/support-form";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "Support",
-  description: "Get help with your Wadzzo account, wallet, purchases, memberships or bounties.",
+  description: `Get help with your ${platformBranding.name} account, wallet, purchases, memberships or bounties.`,
   alternates: { canonical: "/support" },
 };
 

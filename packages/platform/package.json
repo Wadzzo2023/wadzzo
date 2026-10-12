@@ -9,7 +9,8 @@
     "./scope": "./src/scope.ts",
     "./server": "./src/server.ts",
     "./branding": "./src/branding/index.ts",
-    "./notifications": "./src/notifications/index.ts"
+    "./notifications": "./src/notifications/index.ts",
+    "./stellar-toml": "./src/stellar-toml.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -17,7 +18,9 @@
   },
   "dependencies": {
     "@wadzzo/db": "workspace:*",
-    "@wadzzo/errors": "workspace:*"
+    "@wadzzo/errors": "workspace:*",
+    "@wadzzo/utils": "workspace:*",
+    "@wadzzo/wallet": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

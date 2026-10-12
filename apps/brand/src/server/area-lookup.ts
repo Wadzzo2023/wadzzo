@@ -8,10 +8,11 @@
  */
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { isKnownError } from "@wadzzo/errors/trpc";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org";
 const HEADERS = {
-  "User-Agent": "Wadzzo brand portal (home area lookup)",
+  "User-Agent": `${platformBranding.name} brand portal (home area lookup)`,
   "Accept-Language": "en",
 };
 const GAP_MS = 1100;

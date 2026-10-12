@@ -22,6 +22,7 @@ import { api } from "~/utils/api";
 import { BrandMark } from "./brand-mark";
 import { CurrencyToggle } from "./currency-toggle";
 import { ACCOUNT, INFO_LINKS, MAIN, isActive, type NavItem } from "./nav";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const THEMES = [
   { id: "light", label: "Light", icon: Sun },
@@ -347,7 +348,9 @@ function SidebarBody({
                   </a>
                 ))}
               </span>
-              <span>© {new Date().getFullYear()} Wadzzo</span>
+              <span>
+                © {new Date().getFullYear()} {platformBranding.name}
+              </span>
             </div>
           </>
         )}
@@ -395,7 +398,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="flex w-72 max-w-[85vw] flex-col gap-0 p-0 sm:max-w-72">
         <SheetTitle className="sr-only">Menu</SheetTitle>
-        <SheetDescription className="sr-only">Browse Wadzzo</SheetDescription>
+        <SheetDescription className="sr-only">Browse {platformBranding.name}</SheetDescription>
         <SidebarBody collapsed={false} showCurrency onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>

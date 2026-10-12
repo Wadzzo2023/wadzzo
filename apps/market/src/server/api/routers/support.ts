@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { mailer, SUPPORT_EMAIL } from "~/server/mail";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const SUPPORT_TOPICS = [
   "Account & sign-in",
@@ -46,7 +47,7 @@ export const supportRouter = createTRPCRouter({
       const { transporter, from } = mailer();
       const account = ctx.session?.user.id;
       await transporter.sendMail({
-        from: `Wadzzo Support Form <${from}>`,
+        from: `${platformBranding.name} Support Form <${from}>`,
         to: SUPPORT_EMAIL,
         replyTo: `${input.name} <${input.email}>`,
         subject: `[${input.topic}] ${input.name}`,

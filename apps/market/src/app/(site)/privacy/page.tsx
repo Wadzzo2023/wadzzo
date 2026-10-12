@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 
 import { StaticHeader } from "~/components/static/static-header";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description:
-    "What information Wadzzo collects, how it is used, and the rights you have as a user.",
+  description: `What information ${platformBranding.name} collects, how it is used, and the rights you have as a user.`,
   alternates: { canonical: "/privacy" },
 };
 
@@ -44,9 +44,10 @@ export default function PrivacyPage() {
           <>
             <span className="block text-sm">Effective Date: March 12, 2024</span>
             <span className="mt-2 block">
-              At Wadzzo, your privacy is our priority. This policy explains what information we
-              collect, how it is used, and the rights you have as a user. By using Wadzzo&apos;s
-              services, you agree to the collection and use of your data as outlined here.
+              At {platformBranding.name}, your privacy is our priority. This policy explains what
+              information we collect, how it is used, and the rights you have as a user. By using{" "}
+              {platformBranding.name}&apos;s services, you agree to the collection and use of your
+              data as outlined here.
             </span>
           </>
         }
@@ -73,13 +74,13 @@ export default function PrivacyPage() {
         <article className="glass text-foreground/90 space-y-10 rounded-2xl p-6 leading-relaxed sm:p-8">
           <Section id="introduction" title="Introduction">
             <p>
-              Wadzzo is an innovative platform designed to transform the way people engage with
-              brands through gamified experiences. Our mission is to bridge the digital and physical
-              worlds by enabling users to explore their surroundings, discover rewards, and connect
-              with brands in a fun, interactive way. This <strong>Privacy Policy</strong> governs
-              how we collect, use, and protect the information you provide when using our services.
-              Unless otherwise defined, the terms used in this Privacy Policy have the same meanings
-              as in our Terms and Conditions.
+              {platformBranding.name} is an innovative platform designed to transform the way people
+              engage with brands through gamified experiences. Our mission is to bridge the digital
+              and physical worlds by enabling users to explore their surroundings, discover rewards,
+              and connect with brands in a fun, interactive way. This{" "}
+              <strong>Privacy Policy</strong> governs how we collect, use, and protect the
+              information you provide when using our services. Unless otherwise defined, the terms
+              used in this Privacy Policy have the same meanings as in our Terms and Conditions.
             </p>
           </Section>
 
@@ -105,10 +106,10 @@ export default function PrivacyPage() {
             <h3 className={h3}>2. Cookies</h3>
             <p>
               Cookies are small files stored on your device, often used to identify users
-              anonymously. While Wadzzo does not use cookies directly, third-party tools integrated
-              into our services may use cookies to collect and improve data. You can manage cookie
-              preferences through your browser settings. Note that refusing cookies may limit
-              certain functionalities of our platform.
+              anonymously. While {platformBranding.name} does not use cookies directly, third-party
+              tools integrated into our services may use cookies to collect and improve data. You
+              can manage cookie preferences through your browser settings. Note that refusing
+              cookies may limit certain functionalities of our platform.
             </p>
 
             <h3 className={h3}>3. Device Information</h3>
@@ -132,7 +133,7 @@ export default function PrivacyPage() {
           </Section>
 
           <Section id="third-party-services" title="Third-Party Services">
-            <p>Wadzzo may engage trusted third-party providers to:</p>
+            <p>{platformBranding.name} may engage trusted third-party providers to:</p>
             <ul className={list}>
               <li>Facilitate our services</li>
               <li>Analyze usage data</li>
@@ -154,18 +155,18 @@ export default function PrivacyPage() {
 
           <Section id="childrens-privacy" title="Children's Privacy">
             <p>
-              Wadzzo does not target or knowingly collect personal information from users under the
-              age of 13. If we learn that we have inadvertently collected such data, we will delete
-              it promptly. Parents or guardians aware of any such cases should contact us
-              immediately.
+              {platformBranding.name} does not target or knowingly collect personal information from
+              users under the age of 13. If we learn that we have inadvertently collected such data,
+              we will delete it promptly. Parents or guardians aware of any such cases should
+              contact us immediately.
             </p>
           </Section>
 
           <Section id="changes" title="Changes to This Privacy Policy">
             <p>
-              Wadzzo may update this policy periodically. Changes will be communicated via updates
-              to this document. Continued use of our services after such updates constitutes
-              acceptance of the revised policy.
+              {platformBranding.name} may update this policy periodically. Changes will be
+              communicated via updates to this document. Continued use of our services after such
+              updates constitutes acceptance of the revised policy.
             </p>
           </Section>
 

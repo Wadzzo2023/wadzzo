@@ -4,11 +4,11 @@ import Link from "next/link";
 
 import { StaticHeader } from "~/components/static/static-header";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description:
-    "How Wadzzo works: collecting items, paying, memberships, bounties, resale and your wallet.",
+  description: `How ${platformBranding.name} works: collecting items, paying, memberships, bounties, resale and your wallet.`,
   alternates: { canonical: "/faq" },
 };
 
@@ -17,12 +17,12 @@ const FAQ: { topic: string; items: { q: string; a: string }[] }[] = [
     topic: "Getting started",
     items: [
       {
-        q: "What is Wadzzo?",
-        a: "Wadzzo is where you collect digital items from your favourite creators and brands, join their memberships, and win rewards by completing bounties. Everything you own lives in your own wallet on the Stellar network.",
+        q: `What is ${platformBranding.name}?`,
+        a: `${platformBranding.name} is where you collect digital items from your favourite creators and brands, join their memberships, and win rewards by completing bounties. Everything you own lives in your own wallet on the Stellar network.`,
       },
       {
         q: "How do I sign in?",
-        a: "Sign in with email, Google, Facebook or Apple and Wadzzo manages a wallet for you — nothing to install. If you already use a Stellar wallet (like Freighter, xBull or Albedo), you can sign in with it instead and approve each transaction yourself.",
+        a: `Sign in with email, Google, Facebook or Apple and ${platformBranding.name} manages a wallet for you — nothing to install. If you already use a Stellar wallet (like Freighter, xBull or Albedo), you can sign in with it instead and approve each transaction yourself.`,
       },
       {
         q: "Is it on a blockchain?",
@@ -39,7 +39,7 @@ const FAQ: { topic: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "How can I pay?",
-        a: "With Wadzzo tokens, with XLM, or by card where it's offered. Before you confirm, you see the full price breakdown and whether the purchase will go through.",
+        a: `With ${platformBranding.name} tokens, with XLM, or by card where it's offered. Before you confirm, you see the full price breakdown and whether the purchase will go through.`,
       },
       {
         q: "Why is there a small reserve?",
@@ -50,8 +50,8 @@ const FAQ: { topic: string; items: { q: string; a: string }[] }[] = [
         a: "Many items are created the moment someone buys or claims them, so you only pay for the copy you get. Limited editions show how many are left.",
       },
       {
-        q: "How do I get Wadzzo tokens?",
-        a: "Accounts that sign in with email or social login can buy token packs by card from the Wallet. Wallet users can receive Wadzzo tokens from anyone, or earn them by winning bounties.",
+        q: `How do I get ${platformBranding.name} tokens?`,
+        a: `Accounts that sign in with email or social login can buy token packs by card from the Wallet. Wallet users can receive ${platformBranding.name} tokens from anyone, or earn them by winning bounties.`,
       },
     ],
   },
@@ -85,7 +85,7 @@ const FAQ: { topic: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "I'm a creator. How do I start?",
-        a: "Create your brand in the Wadzzo brand portal. From there you can post, create and sell items, set up membership tiers and run bounties.",
+        a: `Create your brand in the ${platformBranding.name} brand portal. From there you can post, create and sell items, set up membership tiers and run bounties.`,
       },
     ],
   },

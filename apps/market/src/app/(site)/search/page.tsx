@@ -10,6 +10,7 @@ import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { serverApi } from "~/server/api/server";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const queryOf = (sp: Record<string, string | string[] | undefined>) =>
   typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "";
@@ -47,12 +48,15 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <PageBody wide className="space-y-8">
-      <PageHeader eyebrow="Search" title={q ? <>Results for “{q}”</> : "Search Wadzzo"} />
+      <PageHeader
+        eyebrow="Search"
+        title={q ? <>Results for “{q}”</> : `Search ${platformBranding.name}`}
+      />
 
       {!results ? (
         <EmptyState
           icon={Search}
-          title="Search Wadzzo"
+          title={`Search ${platformBranding.name}`}
           description="Type at least 2 characters to find items, creators, posts and bounties."
         />
       ) : total === 0 ? (

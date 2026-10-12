@@ -5,11 +5,11 @@ import Link from "next/link";
 import { StaticHeader } from "~/components/static/static-header";
 import { env } from "~/env";
 import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
   title: "About",
-  description:
-    "Wadzzo connects fans with the creators and brands they love — collect items, join memberships and win rewards, all on Stellar.",
+  description: `${platformBranding.name} connects fans with the creators and brands they love — collect items, join memberships and win rewards, all on Stellar.`,
   alternates: { canonical: "/about" },
 };
 
@@ -56,13 +56,13 @@ export default function AboutPage() {
   return (
     <PageBody wide className="space-y-10">
       <StaticHeader
-        eyebrow="About Wadzzo"
+        eyebrow={`About ${platformBranding.name}`}
         title={
           <>
             Where fans and brands <span className="text-gradient">meet</span>
           </>
         }
-        description="Wadzzo connects you with the creators and brands you love. Collect their items, join their memberships and win rewards — everything you earn lives in your own wallet on Stellar."
+        description={`${platformBranding.name} connects you with the creators and brands you love. Collect their items, join their memberships and win rewards — everything you earn lives in your own wallet on Stellar.`}
       />
 
       <section className="space-y-4">

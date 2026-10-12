@@ -20,6 +20,7 @@ import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Section } from "~/ui/section";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { stellarNetwork } from "@wadzzo/wallet/config";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 const getItem = cache(async (id: number) => {
   try {
@@ -39,10 +40,11 @@ export async function generateMetadata({ params }: PageProps<"/item/[id]">): Pro
   const item = await load(params);
   if (!item) return { title: "Item not found", robots: { index: false } };
   const description = (
-    item.description ?? `${MEDIA_META[item.mediaType].label} by ${item.creator?.name ?? "Wadzzo"}`
+    item.description ??
+    `${MEDIA_META[item.mediaType].label} by ${item.creator?.name ?? "${platformBranding.name}"}`
   ).slice(0, 180);
   return {
-    title: `${item.name} by ${item.creator?.name ?? "Wadzzo"}`,
+    title: `${item.name} by ${item.creator?.name ?? "${platformBranding.name}"}`,
     description,
     alternates: { canonical: `/item/${item.id}` },
     openGraph: {

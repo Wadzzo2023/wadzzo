@@ -9,6 +9,7 @@ import type { Signer } from "./keys";
 import { settle, submitXdr } from "./ledger";
 import { preparePurchase, quotePurchase } from "./purchase";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 
@@ -68,7 +69,7 @@ export async function purchaseWithCard(
     sourceId,
     verificationToken,
     usd: quote.total,
-    note: `Wadzzo item ×${quantity} (listing ${listingId})`,
+    note: `${platformBranding.name} item ×${quantity} (listing ${listingId})`,
   });
 
   let prepared;
