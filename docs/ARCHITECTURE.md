@@ -80,6 +80,8 @@ Each app reads its own folder (`apps/<app>/`), in Next.js order: `.env.developme
 | `.env`, `.env.development`, `.env.production`         | no        | Real values, same sections as the example                                                                                                                                    |
 | `.env.clintoncounty`, `.env.clintoncounty.production` | no        | Only what differs for Clinton County (brand and AR): `cp .env.clintoncounty .env.development.local` to run it locally; on the host set these on top of the production values |
 
+The apps deploy separately (`app.wadzzo.com`, `brand.wadzzo.com`, `web.wadzzo.com`) but share one database, the platform wallets and one bucket, so a few values must be identical in every app and the URLs must agree with each other. `pnpm env:check` verifies that against the real files before a deploy (secrets are compared by hash and never printed).
+
 The S3 settings are read as `AWS_*` and, if those are unset, as the web apps' older `NEXT_AWS_*`. Names in the real files were made canonical when they were moved here.
 
 ## Deploying

@@ -8,19 +8,20 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "clean": "git clean -xdf node_modules .turbo .next",
+    "db:generate": "pnpm --filter @wadzzo/db generate",
+    "db:local": "pnpm --filter @wadzzo/local-db start",
+    "db:studio": "pnpm --filter @wadzzo/db studio",
     "dev": "turbo run dev --parallel",
+    "dev:ar": "turbo run dev --filter=@wadzzo/ar",
     "dev:brand": "turbo run dev --filter=@wadzzo/brand",
     "dev:market": "turbo run dev --filter=@wadzzo/market",
-    "dev:ar": "turbo run dev --filter=@wadzzo/ar",
-    "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
+    "env:check": "node scripts/check-env.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml}\" --ignore-path .prettierignore",
-    "db:generate": "pnpm --filter @wadzzo/db generate",
-    "db:studio": "pnpm --filter @wadzzo/db studio",
-    "clean": "git clean -xdf node_modules .turbo .next",
-    "db:local": "pnpm --filter @wadzzo/local-db start"
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@wadzzo/prettier-config": "workspace:*",
