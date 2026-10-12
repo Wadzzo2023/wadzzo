@@ -42,7 +42,7 @@ const morganMw = morgan("combined", {
 
 const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "60000", 10),
-    max: parseInt(process.env.RATE_LIMIT_MAX ?? "200", 10),
+    limit: parseInt(process.env.RATE_LIMIT_MAX ?? "200", 10),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many requests, please slow down" },

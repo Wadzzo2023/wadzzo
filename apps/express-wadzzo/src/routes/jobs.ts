@@ -10,6 +10,7 @@ import {
 import { sseSubscribe, sseClientCount } from "../lib/sse";
 import { enqueueJob } from "../workers/dispatcher";
 import { logger } from "../lib/logger";
+import { routeParam } from "../lib/route-param";
 
 const router: IRouter = Router();
 
@@ -20,7 +21,7 @@ const JOB_TYPES = ["agent_run", "create_pins", "generic"] as const;
 const EnqueueSchema = z.object({
     type: z.enum(JOB_TYPES),
     creatorId: z.string().min(1),
-    payload: z.record(z.unknown()),
+    payload: z.record(z.string(), z.unknown()),
     maxAttempts: z.number().int().min(1).max(5).optional(),
 });
 
@@ -59,7 +60,7 @@ router.post("/enqueue", (req, res) => {
 // Poll job status + result.
 
 router.get("/:id", (req, res) => {
-    const job = getJob(req.params.id);
+    const job = getJob(routeParam(req.params.id));
     if (!job) {
         res.status(404).json({ error: "Job not found" });
         return;
@@ -89,7 +90,7 @@ router.get("/", (req, res) => {
 // ─── POST /jobs/:id/cancel ────────────────────────────────────────────────────
 
 router.post("/:id/cancel", (req, res) => {
-    const job = cancelJob(req.params.id);
+    const job = cancelJob(routeParam(req.params.id));
     if (!job) {
         res.status(404).json({ error: "Job not found or cannot be cancelled" });
         return;
@@ -104,7 +105,7 @@ router.post("/:id/cancel", (req, res) => {
 //        es.onmessage = (e) => console.log(JSON.parse(e.data))
 
 router.get("/:id/stream", (req, res) => {
-    const job = getJob(req.params.id);
+    const job = getJob(routeParam(req.params.id));
     if (!job) {
         res.status(404).json({ error: "Job not found" });
         return;
@@ -126,12 +127,12 @@ router.get("/:id/stream", (req, res) => {
     }
 
     // Live subscription
-    const cleanup = sseSubscribe(req.params.id, res);
-    logger.debug(`[sse] Client connected to job ${req.params.id} (${sseClientCount(req.params.id)} total)`);
+    const cleanup = sseSubscribe(routeParam(req.params.id), res);
+    logger.debug(`[sse] Client connected to job ${routeParam(req.params.id)} (${sseClientCount(routeParam(req.params.id))} total)`);
 
     req.on("close", () => {
         cleanup();
-        logger.debug(`[sse] Client disconnected from job ${req.params.id}`);
+        logger.debug(`[sse] Client disconnected from job ${routeParam(req.params.id)}`);
     });
 });
 
@@ -139,7 +140,7 @@ router.get("/:id/stream", (req, res) => {
 // Return all log entries for a job (useful for debugging).
 
 router.get("/:id/logs", (req, res) => {
-    const job = getJob(req.params.id);
+    const job = getJob(routeParam(req.params.id));
     if (!job) {
         res.status(404).json({ error: "Job not found" });
         return;

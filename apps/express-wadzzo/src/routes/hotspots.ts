@@ -13,6 +13,7 @@ import { hotspotScheduler } from "../lib/hotspot-scheduler";
 import { dropPinsForHotspot, isPendingFirstDrop } from "../lib/hotspot-drop";
 import { generateRandomLocations } from "../lib/map";
 import { logger } from "../lib/logger";
+import { routeParam } from "../lib/route-param";
 
 const router: IRouter = Router();
 
@@ -216,7 +217,7 @@ router.get(
         }
 
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId },
+            where: { id: routeParam(req.params.id), creatorId },
             include: {
                 locationGroups: {
                     where: { hidden: false },
@@ -252,16 +253,16 @@ router.post(
 
         const { creatorId } = parse.data;
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId },
+            where: { id: routeParam(req.params.id), creatorId },
             select: { id: true },
         });
         if (!hotspot) { res.status(404).json({ error: "Hotspot not found" }); return; }
 
-        hotspotScheduler.pause(req.params.id);
-        await db.hotspot.update({ where: { id: req.params.id }, data: { isActive: false } });
+        hotspotScheduler.pause(routeParam(req.params.id));
+        await db.hotspot.update({ where: { id: routeParam(req.params.id) }, data: { isActive: false } });
 
-        logger.info(`[hotspots] Paused hotspot=${req.params.id} creator=${creatorId}`);
-        res.json({ ok: true, hotspotId: req.params.id, isActive: false });
+        logger.info(`[hotspots] Paused hotspot=${routeParam(req.params.id)} creator=${creatorId}`);
+        res.json({ ok: true, hotspotId: routeParam(req.params.id), isActive: false });
     })
 );
 
@@ -278,7 +279,7 @@ router.post(
 
         const { creatorId } = parse.data;
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId },
+            where: { id: routeParam(req.params.id), creatorId },
             select: {
                 id: true, dropEveryDays: true, createdAt: true, hotspotStartDate: true,
                 locationGroups: { where: { hidden: true }, select: { hidden: true, startDate: true, createdAt: true } },
@@ -286,18 +287,18 @@ router.post(
         });
         if (!hotspot) { res.status(404).json({ error: "Hotspot not found" }); return; }
 
-        if (!hotspotScheduler.has(req.params.id)) {
+        if (!hotspotScheduler.has(routeParam(req.params.id))) {
             const anchor = hotspot.hotspotStartDate > hotspot.createdAt ? hotspot.hotspotStartDate : hotspot.createdAt;
             const pending = hotspot.locationGroups.some(isPendingFirstDrop);
-            hotspotScheduler.start(req.params.id, creatorId, hotspot.dropEveryDays, anchor, pending ? hotspot.hotspotStartDate : undefined);
+            hotspotScheduler.start(routeParam(req.params.id), creatorId, hotspot.dropEveryDays, anchor, pending ? hotspot.hotspotStartDate : undefined);
         } else {
-            hotspotScheduler.resume(req.params.id);
+            hotspotScheduler.resume(routeParam(req.params.id));
         }
 
-        await db.hotspot.update({ where: { id: req.params.id }, data: { isActive: true } });
+        await db.hotspot.update({ where: { id: routeParam(req.params.id) }, data: { isActive: true } });
 
-        logger.info(`[hotspots] Resumed hotspot=${req.params.id} creator=${creatorId}`);
-        res.json({ ok: true, hotspotId: req.params.id, isActive: true });
+        logger.info(`[hotspots] Resumed hotspot=${routeParam(req.params.id)} creator=${creatorId}`);
+        res.json({ ok: true, hotspotId: routeParam(req.params.id), isActive: true });
     })
 );
 
@@ -327,7 +328,7 @@ router.patch(
         }
         const { creatorId, scope, ...input } = parse.data;
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId, hidden: false },
+            where: { id: routeParam(req.params.id), creatorId, hidden: false },
             select: {
                 id: true, isActive: true, createdAt: true, dropEveryDays: true, pinDurationDays: true,
                 hotspotStartDate: true, hotspotEndDate: true,
@@ -406,24 +407,24 @@ router.delete(
 
         const { creatorId } = parse.data;
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId },
+            where: { id: routeParam(req.params.id), creatorId },
             select: { id: true },
         });
         if (!hotspot) { res.status(404).json({ error: "Hotspot not found" }); return; }
 
-        hotspotScheduler.stop(req.params.id);
+        hotspotScheduler.stop(routeParam(req.params.id));
 
         await db.locationGroup.updateMany({
-            where: { hotspotId: req.params.id },
+            where: { hotspotId: routeParam(req.params.id) },
             data: { hidden: true },
         });
         await db.hotspot.update({
-            where: { id: req.params.id },
+            where: { id: routeParam(req.params.id) },
             data: { isActive: false, hidden: true },
         });
 
-        logger.info(`[hotspots] Deleted hotspot=${req.params.id} creator=${creatorId}`);
-        res.json({ ok: true, hotspotId: req.params.id });
+        logger.info(`[hotspots] Deleted hotspot=${routeParam(req.params.id)} creator=${creatorId}`);
+        res.json({ ok: true, hotspotId: routeParam(req.params.id) });
     })
 );
 
@@ -440,20 +441,20 @@ router.post(
 
         const { creatorId } = parse.data;
         const hotspot = await db.hotspot.findFirst({
-            where: { id: req.params.id, creatorId },
+            where: { id: routeParam(req.params.id), creatorId },
             select: { id: true },
         });
         if (!hotspot) { res.status(404).json({ error: "Hotspot not found" }); return; }
 
-        const result = await dropPinsForHotspot(db, req.params.id, { force: true });
+        const result = await dropPinsForHotspot(db, routeParam(req.params.id), { force: true });
 
         if ("expired" in result && result.expired) {
-            hotspotScheduler.stop(req.params.id);
+            hotspotScheduler.stop(routeParam(req.params.id));
             res.json({ ok: false, reason: "expired" });
             return;
         }
 
-        logger.info(`[hotspots] Manual drop hotspot=${req.params.id}`, result);
+        logger.info(`[hotspots] Manual drop hotspot=${routeParam(req.params.id)}`, result);
         res.json({ ok: true, result });
     })
 );
