@@ -4,7 +4,7 @@ import fs from "fs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { env } from "~/env";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "@wadzzo/auth";
 
 const pinata = new PinataClient({ pinataJWTKey: env.PINATA_JWT });
 

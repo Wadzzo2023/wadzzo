@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import { env } from "~/env";
-import type { AuthUser } from "~/server/auth/credentials";
+import type { AuthenticatedUser } from "@wadzzo/auth";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**

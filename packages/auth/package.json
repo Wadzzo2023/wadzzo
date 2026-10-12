@@ -1,0 +1,32 @@
+{
+  "name": "@wadzzo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sign-in for every web app: turns a credential (wallet signature, Firebase token, email + password) into a user, and the NextAuth options built on it.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "dependencies": {
+    "@albedo-link/signature-verification": "catalog:",
+    "@wadzzo/db": "workspace:*",
+    "@wadzzo/errors": "workspace:*",
+    "@wadzzo/platform": "workspace:*",
+    "@wadzzo/utils": "workspace:*",
+    "@wadzzo/wallet": "workspace:*",
+    "axios": "catalog:",
+    "firebase": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": { "next": "catalog:", "next-auth": "catalog:" },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "next": "catalog:",
+    "next-auth": "catalog:",
+    "typescript": "catalog:"
+  }
+}

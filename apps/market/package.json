@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@albedo-link/intent": "catalog:",
-    "@albedo-link/signature-verification": "catalog:",
     "@aws-sdk/client-s3": "catalog:",
     "@aws-sdk/s3-request-presigner": "catalog:",
     "@creit.tech/xbull-wallet-connect": "catalog:",
@@ -37,6 +36,7 @@
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
+    "@wadzzo/auth": "workspace:*",
     "@wadzzo/db": "workspace:*",
     "@wadzzo/errors": "workspace:*",
     "@wadzzo/platform": "workspace:*",

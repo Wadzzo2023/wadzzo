@@ -454,9 +454,6 @@ importers:
       '@albedo-link/intent':
         specifier: 'catalog:'
         version: 0.13.0
-      '@albedo-link/signature-verification':
-        specifier: 'catalog:'
-        version: 0.1.2
       '@aws-sdk/client-s3':
         specifier: 'catalog:'
         version: 3.1150.0
@@ -514,6 +511,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.19.0(typescript@6.0.3)
+      '@wadzzo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@wadzzo/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -734,9 +734,6 @@ importers:
       '@albedo-link/intent':
         specifier: 'catalog:'
         version: 0.13.0
-      '@albedo-link/signature-verification':
-        specifier: 'catalog:'
-        version: 0.1.2
       '@aws-sdk/client-s3':
         specifier: 'catalog:'
         version: 3.1150.0
@@ -803,6 +800,9 @@ importers:
       '@types/three':
         specifier: 'catalog:'
         version: 0.186.0
+      '@wadzzo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@wadzzo/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -1153,9 +1153,6 @@ importers:
       '@albedo-link/intent':
         specifier: 'catalog:'
         version: 0.13.0
-      '@albedo-link/signature-verification':
-        specifier: 'catalog:'
-        version: 0.1.2
       '@aws-sdk/client-s3':
         specifier: 'catalog:'
         version: 3.1150.0
@@ -1210,6 +1207,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.19.0(typescript@6.0.3)
+      '@wadzzo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@wadzzo/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -1403,6 +1403,58 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 5.0.4(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/auth:
+    dependencies:
+      '@albedo-link/signature-verification':
+        specifier: 'catalog:'
+        version: 0.1.2
+      '@wadzzo/db':
+        specifier: workspace:*
+        version: link:../db
+      '@wadzzo/errors':
+        specifier: workspace:*
+        version: link:../errors
+      '@wadzzo/platform':
+        specifier: workspace:*
+        version: link:../platform
+      '@wadzzo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@wadzzo/wallet':
+        specifier: workspace:*
+        version: link:../wallet
+      axios:
+        specifier: 'catalog:'
+        version: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      firebase:
+        specifier: 'catalog:'
+        version: 13.0.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.5
+      '@wadzzo/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@wadzzo/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: 'catalog:'
+        version: 10.12.0(jiti@2.7.0)(supports-color@7.2.0)
+      next:
+        specifier: 'catalog:'
+        version: 16.4.0(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next-auth:
+        specifier: 'catalog:'
+        version: 4.24.15(next@16.4.0(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(nodemailer@10.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   packages/db:
     dependencies:

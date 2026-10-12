@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 // Who may set home areas (routers/home-area.ts), against a stand-in database.
-vi.mock("~/server/auth", () => ({ getServerAuthSession: vi.fn() }));
+vi.mock("@wadzzo/auth", () => ({ getServerAuthSession: vi.fn() }));
 vi.mock("@wadzzo/db/server", () => ({ db: {} }));
 vi.mock("~/env", () => ({ env: { PLATFORM_SLUG: "wadzzo" } }));
 

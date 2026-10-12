@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 
-import { authOptions } from "~/server/auth";
+import { authOptions } from "@wadzzo/auth";
 
 // next-auth v4 types its route-handler form loosely
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -15,7 +15,7 @@ import { isAppError } from "@wadzzo/errors";
 import { appErrorMiddleware } from "@wadzzo/errors/trpc";
 import { z, ZodError } from "zod";
 
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "@wadzzo/auth";
 import { db } from "@wadzzo/db/server";
 import { canAdminPlatform, getCurrentPlatform } from "@wadzzo/platform/server";
 
