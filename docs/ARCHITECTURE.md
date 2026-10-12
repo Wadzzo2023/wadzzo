@@ -8,6 +8,13 @@
 - Import the client from `@wadzzo/db/server` (`db`); it opens connections and must not reach a client bundle.
 - Never run `prisma db push` from habit: the `push` script refuses unless `CONFIRM_DB_PUSH=yes`.
 
+## Server foundation
+
+- `@wadzzo/api`: one tRPC context (`session`, `platform`, `db`), `publicProcedure` / `protectedProcedure`, and routers shared by several apps (`fan-bounty`). Apps add their own admin/creator procedures on top.
+- `@wadzzo/auth`: `authorizeCredentials` (wallet signature, Firebase token, email + password) and `authOptions` for NextAuth; the mobile API calls the same function.
+- `@wadzzo/storage`: the one S3 bucket: `publicS3Url`, `signEntryUpload`, `uploadBufferToS3`, `createOptimizedImage`, upload rules.
+- The task server (`apps/express-wadzzo`) is bundled with tsup so it can import these workspace packages.
+
 ## One network per deployment
 
 `@wadzzo/wallet/config` resolves the Stellar network once:

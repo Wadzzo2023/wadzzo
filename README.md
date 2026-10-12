@@ -10,15 +10,21 @@ apps/
   express-wadzzo/   Task server (map agent, job queue, hotspot drops)                Express 5
   mobile/           Native app (Expo). Not a workspace member: it installs with npm  Expo
 packages/
+  api/              tRPC context + base procedures, and routers every app serves (fan bounties)
+  auth/             Credential sign-in (wallets, Firebase, email) and the NextAuth options
   db/               The one Prisma schema, the generated client, the `db` instance
   errors/           AppError + ErrorCodes (one stable code per failure) + tRPC glue
-  platform/         White-label: branding, themes, assets, row scoping, audit, notify
+  platform/         White-label: branding, themes, assets, row scoping, audit, notify, notifications, stellar.toml
+  storage/          The S3 bucket: public URLs, presigned uploads, image helpers, upload rules
   stellar/          StellarAccount, price lookups, quote types
-  ui/               Current shadcn components + shared page patterns
+  ui/               Current shadcn components + shared page patterns (PageBody, skeletons, ...)
   utils/            Small framework-free helpers
   wallet/           Connect wallets (extension + custodial), sign, testnet/mainnet config
+  agent-contract/   Types shared by the brand portal's agent UI and the task server
+  geo/              Random-location helpers shared by the portal and the task server
 tooling/
   eslint/ prettier/ typescript/ vitest/    One setup shared by every package
+  local-db/         `pnpm db:local`: an embedded Postgres with the shared schema
 ```
 
 ## Quick start

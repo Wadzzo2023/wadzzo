@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 import { PLATFORM_ASSET, stellarNetwork } from "@wadzzo/wallet/config";

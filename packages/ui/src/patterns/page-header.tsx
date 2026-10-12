@@ -65,11 +65,5 @@ export function PageBody({
   className?: string;
   wide?: boolean;
 }) {
-  return (
-    <div
-      className={pageContainerClass({ wide, className })}
-    >
-      {children}
-    </div>
-  );
+  return <div className={pageContainerClass({ wide, className })}>{children}</div>;
 }

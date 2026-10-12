@@ -15,7 +15,16 @@ const PORT = Number(process.env.LOCAL_DB_PORT ?? 54329);
 console.log("[local-db] generating SQL from packages/db/prisma/schema.prisma …");
 const sql = execFileSync(
   "pnpm",
-  ["exec", "prisma", "migrate", "diff", "--from-empty", "--to-schema", "prisma/schema.prisma", "--script"],
+  [
+    "exec",
+    "prisma",
+    "migrate",
+    "diff",
+    "--from-empty",
+    "--to-schema",
+    "prisma/schema.prisma",
+    "--script",
+  ],
   { cwd: dbPackage, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
 );
 
@@ -33,4 +42,6 @@ await db.exec(`
 const server = new PGLiteSocketServer({ db, port: PORT, host: "127.0.0.1" });
 await server.start();
 console.log(`[local-db] ready: postgresql://postgres:postgres@127.0.0.1:${PORT}/postgres`);
-console.log("[local-db] one connection at a time: run apps with DATABASE_POOL_MAX=1, one app per database.");
+console.log(
+  "[local-db] one connection at a time: run apps with DATABASE_POOL_MAX=1, one app per database.",
+);

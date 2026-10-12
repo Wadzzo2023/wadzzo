@@ -7,7 +7,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": {
     "@albedo-link/signature-verification": "catalog:",
     "@wadzzo/db": "workspace:*",
@@ -19,7 +22,10 @@
     "firebase": "catalog:",
     "zod": "catalog:"
   },
-  "peerDependencies": { "next": "catalog:", "next-auth": "catalog:" },
+  "peerDependencies": {
+    "next": "catalog:",
+    "next-auth": "catalog:"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",

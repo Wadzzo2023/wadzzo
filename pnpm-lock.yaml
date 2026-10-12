@@ -1634,6 +1634,9 @@ importers:
 
   packages/geo:
     devDependencies:
+      '@types/geojson':
+        specifier: ^7946.0.16
+        version: 7946.0.16
       '@wadzzo/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint

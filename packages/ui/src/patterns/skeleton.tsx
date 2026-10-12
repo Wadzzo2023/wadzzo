@@ -16,11 +16,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 /** A page while access is checked: PageBody padding, header, then a grid of cards. */
 export function PageSkeleton({ cards = 6 }: { cards?: number }) {
   return (
-    <div
-      className={pageContainerClass()}
-      role="status"
-      aria-label="Loading"
-    >
+    <div className={pageContainerClass()} role="status" aria-label="Loading">
       <div className="space-y-2">
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-8 w-56" />
@@ -44,11 +40,7 @@ export function FormSkeleton({
   aside?: boolean;
 }) {
   return (
-    <div
-      className={pageContainerClass({ form: true })}
-      role="status"
-      aria-label="Loading form"
-    >
+    <div className={pageContainerClass({ form: true })} role="status" aria-label="Loading form">
       <div className="flex items-end justify-between gap-4">
         <div className="space-y-2">
           <Skeleton className="h-3 w-16" />

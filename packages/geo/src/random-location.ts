@@ -1,3 +1,5 @@
+import type { Feature, Polygon } from "geojson";
+
 interface Location {
   latitude: number;
   longitude: number;
@@ -27,7 +29,7 @@ export function randomLocation(lat: number, lng: number, radius: number): Locati
 
 export function generateRandomLocations(
   shape: "polygon" | "rectangle" | "circle",
-  geoJson: GeoJSON.Feature | null | undefined,
+  geoJson: Feature | null | undefined,
   count: number,
 ): { latitude: number; longitude: number }[] {
   if (!geoJson || count <= 0) return [];
@@ -40,7 +42,7 @@ export function generateRandomLocations(
   return generateInPolygon(geoJson, count);
 }
 function generateInCircle(
-  feature: GeoJSON.Feature,
+  feature: Feature,
   count: number,
 ): { latitude: number; longitude: number }[] {
   const { center, radiusMetres } = feature.properties as {
@@ -72,10 +74,10 @@ function generateInCircle(
 // ── Polygon / Rectangle ───────────────────────────────────────────────────────
 
 function generateInPolygon(
-  feature: GeoJSON.Feature,
+  feature: Feature,
   count: number,
 ): { latitude: number; longitude: number }[] {
-  const geometry = feature.geometry as GeoJSON.Polygon;
+  const geometry = feature.geometry as Polygon;
   // Your coords are [lat, lng]
   const ring = geometry.coordinates[0] as [number, number][];
 
