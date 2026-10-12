@@ -1,0 +1,15 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  bufferutil: true
+  core-js: true
+  esbuild: true
+  # CPU binaries ship in the package; the script only fetches optional CUDA builds.
+  onnxruntime-node: false
+  prisma: true
+  protobufjs: true
+  secp256k1: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true

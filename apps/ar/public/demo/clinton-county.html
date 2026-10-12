@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Clinton County, Iowa — Wadzzo map embed (demo mockup)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!--
+    Sales mockup: a look-alike of the Clinton County homepage showing where a
+    Wadzzo map embed would sit. Not affiliated with or published by Clinton
+    County. The two maps use the editor's preview URL (same origin, so the
+    embed's frame-ancestors allows it) — on the county's real site they'd use
+    the one-line snippet shown in the panel at the bottom.
+  -->
+  <style>
+    :root {
+      --maroon: #7d2a3c;
+      --maroon-dark: #5f1f2e;
+      --green: #1f5b33;
+      --ink: #1d2327;
+      --muted: #5b6770;
+      --line: #e3e6e8;
+      --bg: #f6f7f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Source Sans 3", system-ui, sans-serif; color: var(--ink); background: #fff; }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3 { font-family: "Roboto Slab", Georgia, serif; }
+
+    .demo-bar { background: #111; color: #fff; font-size: 13px; text-align: center; padding: 7px 16px; }
+    .demo-bar b { color: #7dffb0; }
+
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 10px 32px 8px; max-width: 1280px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .seal { width: 64px; height: 64px; flex-shrink: 0; }
+    .brand-name { font-family: "Roboto Slab", serif; font-weight: 800; font-size: 20px; line-height: 1.05; color: var(--maroon); }
+    .brand-name small { display: block; font-family: "Source Sans 3", sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .navs { text-align: right; }
+    .util { display: flex; gap: 18px; justify-content: flex-end; font-size: 13px; color: var(--muted); }
+    .util a:hover { color: var(--maroon); }
+    .main-nav { display: flex; gap: 28px; justify-content: flex-end; margin-top: 10px; font-family: "Roboto Slab", serif; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: .02em; }
+    .main-nav a:hover { color: var(--maroon); }
+
+    .bar { background: var(--maroon); }
+    .bar-inner { max-width: 1280px; margin: 0 auto; padding: 8px 32px; display: flex; justify-content: flex-end; align-items: center; gap: 14px; color: #fff; font-size: 13px; }
+    .search { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 6px; padding: 6px 10px; width: min(360px, 60vw); color: var(--muted); font-size: 14px; }
+
+    /* ── Placement 1: the map IS the hero ─────────────────────────────── */
+    .hero { position: relative; height: 440px; background: #dfe3e1; }
+    .hero .map { position: absolute; inset: 0; }
+    .hero .map iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .quick { position: relative; z-index: 2; max-width: 980px; margin: 20px auto 0; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; grid-template-columns: repeat(6, 1fr); padding: 16px 8px; }
+    .quick a { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-weight: 700; font-size: 14px; color: var(--green); padding: 6px; border-radius: 8px; }
+    .quick a:hover { background: #f1f6f2; }
+    .quick svg { width: 40px; height: 40px; stroke: var(--green); fill: none; stroke-width: 1.6; }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 48px 32px 24px; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+    h2.sec { font-size: 26px; text-transform: uppercase; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 18px; }
+    .event { display: grid; grid-template-columns: 58px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .date { text-align: center; background: var(--bg); border-radius: 8px; padding: 6px 0; font-family: "Roboto Slab", serif; }
+    .date b { display: block; font-size: 20px; color: var(--maroon); }
+    .date span { font-size: 12px; text-transform: uppercase; color: var(--muted); }
+    .event a { font-weight: 700; color: var(--green); }
+    .event p { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+    .news { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .news small { color: var(--muted); font-size: 13px; }
+    .news a { display: block; font-weight: 700; color: var(--green); margin-top: 2px; }
+    .more { display: inline-block; margin-top: 14px; font-weight: 700; color: var(--maroon); }
+
+    /* ── Placement 2: a section on the page ──────────────────────────── */
+    .explore { background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 40px; }
+    .explore-inner { max-width: 1180px; margin: 0 auto; padding: 44px 32px 48px; }
+    .explore-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+    .explore-head p { margin: 4px 0 0; color: var(--muted); max-width: 640px; }
+    .pill { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .frame { height: 620px; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.12); background: #dfe3e1; }
+    .frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .snippet { max-width: 1180px; margin: 36px auto 0; padding: 0 32px; }
+    .snippet details { background: #fff; border: 1px dashed #b9c2c7; border-radius: 12px; padding: 14px 18px; }
+    .snippet summary { cursor: pointer; font-weight: 700; }
+    .snippet pre { background: #0f1a14; color: #b8ffd2; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+
+    footer { background: var(--maroon-dark); color: #f3e7ea; margin-top: 48px; }
+    .foot { max-width: 1180px; margin: 0 auto; padding: 28px 32px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 14px; }
+    .foot nav { display: flex; gap: 20px; }
+
+    @media (max-width: 860px) {
+      header.top { flex-direction: column; align-items: flex-start; padding: 10px 16px; }
+      .navs { text-align: left; }
+      .util, .main-nav { justify-content: flex-start; flex-wrap: wrap; gap: 12px; }
+      .main-nav { font-size: 14px; }
+      .bar-inner { padding: 8px 16px; }
+      .hero { height: 400px; }
+      .quick { grid-template-columns: repeat(3, 1fr); margin: 16px 16px 0; }
+      main, .explore-inner, .snippet { padding-left: 16px; padding-right: 16px; }
+      .cols { grid-template-columns: 1fr; gap: 32px; }
+      .explore-head { flex-direction: column; align-items: flex-start; }
+      .frame { height: 560px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-bar">
+    <b>Demo mockup</b> — shows how a Wadzzo map embed could look on the Clinton County website. Not the official site.
+  </div>
+
+  <header class="top">
+    <a class="brand" href="#">
+      <!-- Placeholder seal (not the county's artwork). -->
+      <svg class="seal" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" fill="#c9a75a" />
+        <circle cx="32" cy="32" r="24" fill="#fff8e6" stroke="#8a6d2b" stroke-width="1.5" />
+        <text x="32" y="30" text-anchor="middle" font-family="Roboto Slab, serif" font-weight="800" font-size="10" fill="#5f1f2e">CLINTON</text>
+        <text x="32" y="41" text-anchor="middle" font-family="Roboto Slab, serif" font-weight="700" font-size="7" fill="#5f1f2e">COUNTY · 1837</text>
+      </svg>
+      <span class="brand-name">Clinton County<small>Iowa</small></span>
+    </a>
+    <div class="navs">
+      <nav class="util">
+        <a href="#">Bid Notices</a><a href="#calendar">Calendar</a><a href="#">Courts</a><a href="#">Elections</a>
+        <a href="#">Employment</a><a href="#">FAQ</a><a href="#">Translate</a>
+      </nav>
+      <nav class="main-nav">
+        <a href="#">Home</a><a href="#">About</a><a href="#">Departments</a><a href="#">New Residents</a><a href="#">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="bar-inner">
+      <span>☾ Clear · 54°</span>
+      <div class="search">🔍 Find departments, services, staff, and more</div>
+    </div>
+  </div>
+
+  <!-- ── Placement 1: map as the hero ─────────────────────────────────── -->
+  <section class="hero" aria-label="Explore Clinton County map">
+    <div class="map" id="hero-map"></div>
+  </section>
+
+  <nav class="quick" aria-label="Quick links">
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg>Alert Iowa</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg>Meetings &amp; Agendas</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="m7 3-4 8h3l-3 6h8l-3-6h3L7 3ZM17 5l-3 6h2l-3 6h8l-3-6h2l-3-6Z"/><path d="M7 17v4M17 17v4"/></svg>Parks</a>
+    <a href="#"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="7"/><path d="m21 21-6-6"/></svg>Property Search</a>
+    <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="9" rx="1"/><path d="M7 11V5h10v6M3 15h18"/></svg>Register to Vote</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M5 17V9l2-4h10l2 4v8M3 17h18v3H3z"/><circle cx="7.5" cy="13" r="1"/><circle cx="16.5" cy="13" r="1"/></svg>Renew Vehicle Tags</a>
+  </nav>
+
+  <main>
+    <div class="cols">
+      <section id="calendar">
+        <h2 class="sec">What's Happening</h2>
+        <p class="sub">Keep up-to-date with county events.</p>
+        <div class="event"><div class="date"><b>29</b><span>Sep</span></div><div><a href="#">DeWitt Immunization Clinic</a><p>9:00 am · 1008 11th Street · DeWitt, IA</p></div></div>
+        <div class="event"><div class="date"><b>30</b><span>Sep</span></div><div><a href="#">Wheatland Immunization Clinic</a><p>9:00 am · 102 Washington Street · Wheatland, IA</p></div></div>
+        <div class="event"><div class="date"><b>30</b><span>Sep</span></div><div><a href="#">Grand Mound Flu Clinic</a><p>10:30 am · 510 Smith Street · Grand Mound, IA</p></div></div>
+        <div class="event"><div class="date"><b>7</b><span>Oct</span></div><div><a href="#">Maquoketa Immunization Clinic</a><p>4:00 pm · 500 E Summit St · Maquoketa, IA</p></div></div>
+        <a class="more" href="#">All Events »</a>
+      </section>
+      <section>
+        <h2 class="sec">What's New</h2>
+        <p class="sub">Stay connected with Clinton County.</p>
+        <div class="news"><small>Conservation · posted 2/2/26</small><a href="#">The Heron Newsletter — Jan.–April 2026</a></div>
+        <div class="news"><small>Board of Supervisors · posted 1/27/26</small><a href="#">America250 / 2026 Iowa State Fair 250</a></div>
+        <div class="news"><small>Board of Supervisors · posted 1/8/26</small><a href="#">Board &amp; Commissions Vacancies</a></div>
+        <div class="news"><small>Zoning · posted 12/17/25</small><a href="#">Updated Zoning Ordinance</a></div>
+        <a class="more" href="#">News »</a>
+      </section>
+    </div>
+  </main>
+
+  <!-- ── Placement 2: a section on the page ───────────────────────────── -->
+  <section class="explore" aria-label="Explore the county">
+    <div class="explore-inner">
+      <div class="explore-head">
+        <div>
+          <h2 class="sec">Explore the County</h2>
+          <p>Parks, landmarks and events across Clinton County. Visit a spot to collect its digital badge in the free Wadzzo web app — no download needed.</p>
+        </div>
+        <span class="pill">Map by Wadzzo</span>
+      </div>
+      <div class="frame" id="section-map"></div>
+    </div>
+  </section>
+
+  <div class="snippet">
+    <details>
+      <summary>How this map is added to the site (for the web team)</summary>
+      <p>Paste one snippet where the map should appear. The county controls the map's start point, colours, buttons and allowed domains from the Wadzzo brand dashboard, so changes don't need a website update.</p>
+      <pre>&lt;div data-wadzzo-embed="YOUR_EMBED_ID" style="height:600px"&gt;&lt;/div&gt;
+&lt;script async src="https://web.wadzzo.com/embed.js"&gt;&lt;/script&gt;</pre>
+    </details>
+  </div>
+
+  <footer>
+    <div class="foot">
+      <div><b>Clinton County, Iowa</b><br />Demo page — not affiliated with Clinton County.</div>
+      <nav><a href="#">Departments</a><a href="#">Hours</a><a href="#">Holidays</a><a href="#">Staff &amp; Contacts</a></nav>
+    </div>
+  </footer>
+
+  <script>
+    // Both maps render through the embed's preview route with inline settings.
+    // A saved embed would load the same settings by id instead.
+    var base = {
+      name: "Clinton County",
+      centerLat: 41.862,
+      centerLng: -90.42,
+      zoom: 9.2,
+      userLocation: true,
+      gestureMode: "COOPERATIVE",
+      theme: "LIGHT",
+      accentColor: "#7d2a3c",
+      pinTypes: [],
+      showSearch: true,
+      eventsLabel: "Find Events",
+      eventsUrl: location.origin + "/events",
+      bountiesLabel: "View Bounties",
+      bountiesUrl: location.origin + "/bounty",
+    };
+    function embed(el, extra) {
+      var json = JSON.stringify(Object.assign({}, base, extra));
+      var c = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      var f = document.createElement("iframe");
+      f.src = "/embed/preview?c=" + c;
+      f.title = "Clinton County map — powered by Wadzzo";
+      f.loading = "lazy";
+      f.allow = "geolocation";
+      document.getElementById(el).appendChild(f);
+    }
+    // Hero: clean — just the map, no side list or chips.
+    embed("hero-map", { showNearby: false, showFilterChips: false, zoom: 9.3, centerLat: 41.89 });
+    // Section: the full browsing experience.
+    embed("section-map", { showNearby: true, showFilterChips: true });
+  </script>
+</body>
+</html>
