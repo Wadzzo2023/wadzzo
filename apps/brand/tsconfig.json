@@ -1,0 +1,60 @@
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+    /* Bundled projects */
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "ES2022"
+    ],
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true,
+    /* Path Aliases (relative to this file; no baseUrl — deprecated in TS 6) */
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "package/*": [
+        "./package/*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.js",
+    "**/*.mjs",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  // express-wadzzo is its own project with its own tsconfig. Tests have their
+  // own (tests/tsconfig.json): some import the task server's code, whose
+  // packages aren't installed where the app is built (e.g. Vercel).
+  "exclude": [
+    "node_modules",
+    ".next",
+    "package/express-wadzzo",
+    "tests"
+  ]
+}
