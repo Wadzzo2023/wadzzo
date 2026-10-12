@@ -66,3 +66,17 @@ export const isEnvValidationSkipped = (): boolean => {
   const { process } = globalThis as { process?: { env?: Record<string, string | undefined> } };
   return Boolean(process?.env?.SKIP_ENV_VALIDATION);
 };
+
+/**
+ * True only for the production deployment. On Vercel every deployment runs
+ * with NODE_ENV=production (previews and the shared dev domain too), so
+ * `VERCEL_ENV` decides there; elsewhere NODE_ENV does.
+ */
+export const isProductionDeployment = (): boolean => {
+  const { process } = globalThis as {
+    process?: { env?: Record<string, string | undefined> };
+  };
+  const vercelEnv = process?.env?.VERCEL_ENV;
+  if (vercelEnv) return vercelEnv === "production";
+  return process?.env?.NODE_ENV === "production";
+};

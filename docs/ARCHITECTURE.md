@@ -86,9 +86,11 @@ The S3 settings are read as `AWS_*` and, if those are unset, as the web apps' ol
 
 ## Deploying
 
-- Web apps: one deployment per app per platform, same repo, different env (`PLATFORM_SLUG`, `NEXT_PUBLIC_STELLAR_NETWORK`, ...). Each app runs `sync:platform` before `dev`/`build`.
-- `apps/express-wadzzo` is bundled with `tsup` (workspace packages inlined) and runs under PM2 (`ecosystem.config.cjs`).
-- `.github/workflows`: `ci.yml` (format, typecheck, lint, test), `deploy-brand.yml`, `deploy-market.yml` (path-filtered, EC2).
+- Web apps: one Vercel project per app (`app.wadzzo.com`, `brand.wadzzo.com`, `web.wadzzo.com`), Root Directory `apps/<app>`, deployed by Vercel's Git integration; `main` is production, `develop` the development domains.
+- `apps/express-wadzzo`: bundled with `tsup`, one PM2 process behind nginx on AWS EC2, deployed by `.github/workflows/deploy-express.yml`.
+- `.github/workflows`: `ci.yml` (format, typecheck, lint, test) and `deploy-express.yml`.
+
+Full steps, environment variables per environment and troubleshooting: [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Conventions
 

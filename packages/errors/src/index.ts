@@ -2,6 +2,7 @@ export {
   AppError,
   isAppError,
   isEnvValidationSkipped,
+  isProductionDeployment,
   requireEnv,
   toAppError,
   type AppErrorOptions,

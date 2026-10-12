@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AppError,
@@ -7,6 +7,7 @@ import {
   ErrorCodes,
   isAppError,
   isErrorCode,
+  isProductionDeployment,
   requireEnv,
   toAppError,
 } from "../index";
@@ -100,5 +101,27 @@ describe("tRPC mapping", () => {
 
     const fine = { ok: true as const };
     await expect(appErrorMiddleware({ next: () => Promise.resolve(fine) })).resolves.toBe(fine);
+  });
+});
+
+describe("isProductionDeployment", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  const where = (vars: { VERCEL_ENV?: string; NODE_ENV?: string }) => {
+    vi.stubEnv("VERCEL_ENV", vars.VERCEL_ENV ?? "");
+    vi.stubEnv("NODE_ENV", vars.NODE_ENV ?? "");
+    return isProductionDeployment();
+  };
+
+  it("lets VERCEL_ENV decide on Vercel, where every deployment is NODE_ENV=production", () => {
+    expect(where({ VERCEL_ENV: "production", NODE_ENV: "production" })).toBe(true);
+    expect(where({ VERCEL_ENV: "preview", NODE_ENV: "production" })).toBe(false);
+    expect(where({ VERCEL_ENV: "development", NODE_ENV: "production" })).toBe(false);
+  });
+
+  it("uses NODE_ENV when not on Vercel", () => {
+    expect(where({ NODE_ENV: "production" })).toBe(true);
+    expect(where({ NODE_ENV: "development" })).toBe(false);
+    expect(where({})).toBe(false);
   });
 });

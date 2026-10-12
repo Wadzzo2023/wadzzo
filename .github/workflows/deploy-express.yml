@@ -1,0 +1,86 @@
+name: Deploy task server (AWS EC2)
+
+# The three web apps deploy through Vercel's Git integration (see docs/DEPLOYMENT.md).
+# Only the task server is deployed from here: one always-on Node process under PM2.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/express-wadzzo/**"
+      - "packages/agent-contract/**"
+      - "packages/errors/**"
+      - "packages/geo/**"
+      - "packages/storage/**"
+      - "packages/db/prisma/schema.prisma"
+      - "tooling/typescript/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/deploy-express.yml"
+  workflow_dispatch:
+
+# Two deploys at once would restart the one process twice and drop its jobs twice.
+concurrency:
+  group: deploy-express
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm --filter @wadzzo/express test
+
+      - name: Build
+        run: pnpm --filter @wadzzo/express build
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      # The whole workspace goes over (pnpm checks the lockfile against every project),
+      # but never env files, installed packages or git history: the server keeps its
+      # own apps/express-wadzzo/.env, created once by hand.
+      - name: Copy the build and the workspace to the server
+        run: |
+          rsync -az --delete \
+            --exclude='.env*' --exclude='node_modules' --exclude='.git' \
+            --exclude='.next' --exclude='apps/mobile' \
+            -e "ssh -i ~/.ssh/deploy_key.pem" \
+            ./ \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_PATH }}/
+
+      - name: Install and restart
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'REMOTE'
+            set -euo pipefail
+            cd ${{ secrets.EC2_APP_PATH }}
+            pnpm install --frozen-lockfile --filter "@wadzzo/express..."
+            pm2 startOrRestart apps/express-wadzzo/ecosystem.config.cjs --update-env
+            pm2 save
+          REMOTE
+
+      - name: Wait for /health
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'REMOTE'
+            for i in $(seq 1 20); do
+              if curl -fsS http://127.0.0.1:4000/health > /dev/null; then echo "healthy"; exit 0; fi
+              sleep 3
+            done
+            echo "task server did not become healthy"; pm2 logs express-server --lines 60 --nostream; exit 1
+          REMOTE

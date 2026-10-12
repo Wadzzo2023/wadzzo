@@ -1,5 +1,11 @@
 {
-  "git": {
-    "deploymentEnabled": {}
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm run build",
+  "ignoreCommand": "npx turbo-ignore @wadzzo/brand --fallback=HEAD^1",
+  "functions": {
+    "src/pages/api/**/*.ts": {
+      "maxDuration": 60
+    }
   }
 }
