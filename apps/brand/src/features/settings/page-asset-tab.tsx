@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { env } from "~/env";
-import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, stellarNetwork } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Field } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
@@ -20,7 +20,7 @@ type PageAsset = NonNullable<
   NonNullable<RouterOutputs["fan"]["creator"]["profileOverview"]>["pageAsset"]
 >;
 
-const NETWORK = env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet";
+const NETWORK = stellarNetwork.stellarExpertNetwork;
 const explorer = (code: string, issuer: string) =>
   `https://stellar.expert/explorer/${NETWORK}/asset/${code}-${issuer}`;
 

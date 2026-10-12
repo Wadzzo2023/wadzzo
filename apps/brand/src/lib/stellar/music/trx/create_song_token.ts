@@ -7,7 +7,7 @@ import {
   Asset,
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { STELLAR_URL } from "@wadzzo/wallet/config";
+import { STELLAR_URL, stellarNetwork } from "@wadzzo/wallet/config";
 import { type AccountType } from "../../fan/utils";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
@@ -15,9 +15,7 @@ const log = console;
 
 // transection variables
 
-export const networkPassphrase = env.NEXT_PUBLIC_STELLAR_PUBNET
-  ? Networks.PUBLIC
-  : Networks.TESTNET;
+export const networkPassphrase = stellarNetwork.passphrase;
 
 export type trxResponse = {
   successful: boolean;

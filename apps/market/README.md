@@ -1,20 +1,10 @@
-## Wadzzo Full Econsystem
+# Fan marketplace (`@wadzzo/market`)
 
-## Chat Assistant Integration
+Part of the Wadzzo monorepo: see the [root README](../../README.md) and [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md).
 
-The application includes an AI-powered chat assistant that provides information about brands, locations, and deals. The assistant uses OpenAI's API to generate responses based on location data and user questions.
+```bash
+cp .env.example .env.local   # fill in
+pnpm dev                     # from this folder, or `pnpm dev:market` from the root
+```
 
-### Setup
-
-1. Make sure you have an OpenAI API key. You can get one by signing up at [OpenAI](https://openai.com).
-2. Add your OpenAI API key to the `.env` file:
-   ```
-   OPENAI_API_KEY=your-api-key-here
-   ```
-3. The chat assistant will automatically provide information about the brands and locations displayed on the map.
-
-### Features
-
-- Location-aware responses: The assistant can use the user's current location (if shared) to provide information about nearby locations.
-- Creator-specific information: When viewing specific creators on the map, the assistant will focus on providing information about those creators.
-- Interactive interface: Users can ask questions about brands, locations, deals, or general information about the platform.
+Platform: `PLATFORM_SLUG=wadzzo` (default) or `clintoncounty`. Network: `NEXT_PUBLIC_STELLAR_NETWORK=testnet|mainnet`.

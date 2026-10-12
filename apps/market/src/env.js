@@ -41,7 +41,10 @@ export const env = createEnv({
     NEXT_PUBLIC_DESC: z.string(),
     NEXT_PUBLIC_URL: z.string(),
     NEXT_PUBLIC_STAGE: z.string(),
-    NEXT_PUBLIC_STELLAR_PUBNET: bool,
+    /** testnet | mainnet: the one network this deployment runs on. */
+    NEXT_PUBLIC_STELLAR_NETWORK: z.enum(["testnet", "mainnet"]).optional(),
+    /** Legacy: "true" | "false". Used only while NEXT_PUBLIC_STELLAR_NETWORK is unset. */
+    NEXT_PUBLIC_STELLAR_PUBNET: z.enum(["true", "false"]).optional(),
     NEXT_PUBLIC_ASSET_CODE: z.string(),
     NEXT_PUBLIC_ASSET_ISSUER: z.string(),
     NEXT_PUBLIC_HOME_DOMAIN: z.string(),
@@ -71,6 +74,7 @@ export const env = createEnv({
     NEXT_PUBLIC_DESC: process.env.NEXT_PUBLIC_DESC,
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     NEXT_PUBLIC_STAGE: process.env.NEXT_PUBLIC_STAGE,
+    NEXT_PUBLIC_STELLAR_NETWORK: process.env.NEXT_PUBLIC_STELLAR_NETWORK,
     NEXT_PUBLIC_STELLAR_PUBNET: process.env.NEXT_PUBLIC_STELLAR_PUBNET,
     NEXT_PUBLIC_ASSET_CODE: process.env.NEXT_PUBLIC_ASSET_CODE,
     NEXT_PUBLIC_ASSET_ISSUER: process.env.NEXT_PUBLIC_ASSET_ISSUER,

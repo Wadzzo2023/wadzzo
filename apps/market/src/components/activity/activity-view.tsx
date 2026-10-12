@@ -16,6 +16,7 @@ import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
 import { StatusPill, type Tone } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 
 type Row = RouterOutputs["activity"]["list"]["items"][number];
 
@@ -53,7 +54,7 @@ const ROLES = [
 ] as const;
 
 const expertTx = (hash: string) =>
-  `https://stellar.expert/explorer/${env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet"}/tx/${hash}`;
+  `https://stellar.expert/explorer/${stellarNetwork.stellarExpertNetwork}/tx/${hash}`;
 
 /** My transaction history, with a receipt for each entry. */
 export function ActivityView({ me }: { me: string }) {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { env } from "~/env";
-import { networkPassphrase, PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { networkPassphrase, PLATFORM_ASSET, stellarNetwork } from "@wadzzo/wallet/config";
 
 interface PlatformAssetInfo {
   price: number;
@@ -65,7 +65,7 @@ export async function getAssetPrice(): Promise<number> {
 }
 
 export async function getPlatformAssetPrice() {
-  if (env.NEXT_PUBLIC_STELLAR_PUBNET) return await getAssetPrice();
+  if (stellarNetwork.isMainnet) return await getAssetPrice();
   else return 0.5;
 }
 

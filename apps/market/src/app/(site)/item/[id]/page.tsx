@@ -19,6 +19,7 @@ import { serverApi } from "~/server/api/server";
 import { PageBody } from "~/ui/page-header";
 import { Section } from "~/ui/section";
 import { Avatar } from "@wadzzo/ui/patterns/person";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 
 const getItem = cache(async (id: number) => {
   try {
@@ -77,7 +78,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
     .filter(Boolean)
     .sort((a, b) => a!.price - b!.price)[0];
   const left = item.limit == null ? null : Math.max(0, item.limit - item.mintedCount);
-  const expert = `https://stellar.expert/explorer/${env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet"}/asset/${item.code}-${item.issuer}`;
+  const expert = `https://stellar.expert/explorer/${stellarNetwork.stellarExpertNetwork}/asset/${item.code}-${item.issuer}`;
 
   // Structured data so search engines can show the item with its price.
   const jsonLd = {
@@ -277,7 +278,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
                     ],
                     ["Minted", item.mintedCount.toLocaleString("en-US")],
                     ["Creator royalty", `${item.royaltyPercent}% of every resale`],
-                    ["Network", env.NEXT_PUBLIC_STELLAR_PUBNET ? "Stellar" : "Stellar testnet"],
+                    ["Network", stellarNetwork.isMainnet ? "Stellar" : "Stellar testnet"],
                   ].map(([k, v]) => (
                     <div key={k} className="flex items-center justify-between gap-3 px-4 py-3">
                       <dt className="text-muted-foreground">{k}</dt>

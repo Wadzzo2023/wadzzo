@@ -43,6 +43,7 @@ import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { creatorExtraFiledsSchema } from "~/types/creator";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 /** A vanity URL is free to claim if nobody else has it. */
 async function assertVanityFree(db: import("@wadzzo/db").Db, vanityURL: string, creatorId: string) {
   const taken = await db.creator.findUnique({
@@ -721,11 +722,7 @@ export const creatorRouter = createTRPCRouter({
     .input(z.object({ assetCode: z.string(), issuer: z.string() }))
     .mutation(async ({ ctx, input }) => {
       console.log("input", input);
-      console.log("process.env.NEXT_PUBLIC_STELLAR_PUBNET", process.env.NEXT_PUBLIC_STELLAR_PUBNET);
-
-      const isPubnet = process.env.NEXT_PUBLIC_STELLAR_PUBNET === "true"; // Explicit comparison
-
-      const url = `https://api.stellar.expert/explorer/${isPubnet ? "public" : "testnet"}/asset/${input.assetCode}-${input.issuer}`;
+      const url = `https://api.stellar.expert/explorer/${stellarNetwork.stellarExpertNetwork}/asset/${input.assetCode}-${input.issuer}`;
 
       console.log("Generated URL:", url);
 
@@ -977,7 +974,7 @@ export const creatorRouter = createTRPCRouter({
         return { status: "pending" as const };
       }
 
-      const network = process.env.NEXT_PUBLIC_STELLAR_PUBNET === "true" ? "public" : "testnet";
+      const network = stellarNetwork.stellarExpertNetwork;
       const exists = await axios
         .get(`https://api.stellar.expert/explorer/${network}/asset/${input.code}-${input.issuer}`)
         .then((r) => r.status === 200)

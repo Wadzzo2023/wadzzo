@@ -23,10 +23,11 @@ import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "~/ui/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 
 const fmt = (n: number, dp = 2) => n.toLocaleString("en-US", { maximumFractionDigits: dp });
 const explorer = (path: string) =>
-  `https://stellar.expert/explorer/${env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet"}/${path}`;
+  `https://stellar.expert/explorer/${stellarNetwork.stellarExpertNetwork}/${path}`;
 
 /**
  * The brand's storage wallet: the Stellar account that holds its stock until

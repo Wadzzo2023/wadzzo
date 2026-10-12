@@ -6,6 +6,7 @@ import { useQueryParams } from "~/lib/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { env } from "~/env";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 
 /**
  * ── /albedo ────────────────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ export default function AlbedoBridge() {
       } else if (xdr) {
         const res = await albedo.tx({
           xdr,
-          network: env.NEXT_PUBLIC_STELLAR_PUBNET ? "public" : "testnet",
+          network: stellarNetwork.albedoNetwork,
         });
         post({ type: "xdr", res });
       }
