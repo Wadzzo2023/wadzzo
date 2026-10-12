@@ -26,7 +26,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Wadzzo tokens — the same palette as the fan apps (wadzzoAR `arcade.css`),
+   Wadzzo tokens — the same palette as the fan apps (the AR app `arcade.css`),
    so the portal and the apps read as one product. `:root` is light, `.dark`
    overrides. Components never use these directly: they're mapped onto the
    shadcn variables below, which every primitive already reads.

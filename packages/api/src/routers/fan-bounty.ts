@@ -19,7 +19,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
  *
  * The fan's half of the brand portal's bounty system (`routers/bounty/bounty.ts` and
  * `pages/bounty/[id].tsx`): browse, join, submit entries, talk to the brand,
- * and see whether you won. Creating, reviewing and paying out stay in wadzz0 —
+ * and see whether you won. Creating, reviewing and paying out stay in the marketplace —
  * nothing here can create a bounty or change another user's entry.
  *
  * Rewards need no claim step. In the original app the brand pays the winner

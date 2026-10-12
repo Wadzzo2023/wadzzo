@@ -18,7 +18,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 /**
  * ── Events & announcements ─────────────────────────────────────────────────
  *
- * The fan side of what brands publish from brand-wadzzo's Events page. Both
+ * The fan side of what brands publish from the brand portal's Events page. Both
  * are public — signed-out viewers can browse everything — and there's no
  * moderation gate: a brand's post is live the moment it's saved. Auth only
  * guards what a viewer *does*: RSVP, comment, and the Following filter

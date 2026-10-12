@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 
 // Deep import, not the package barrel — `useConnectWalletDialogStore` is the wallet
 // dialog's own visibility switch and isn't re-exported from
-// `package/connect_wallet`'s public index, same as the deep imports
+// `@wadzzo/wallet`'s public index, same as the deep imports
 // src/server/auth.ts already makes into this submodule.
 import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 
@@ -25,7 +25,7 @@ import { platformBranding } from "@wadzzo/platform/branding";
  *
  * `signIn` no longer sets a user directly — signing in is now genuinely
  * asynchronous (a wallet popup, an email round-trip), so all it does is open
- * the real chooser from the connect_wallet submodule. `signOut` calls
+ * the real chooser from the wallet package. `signOut` calls
  * NextAuth's own signOut; the resulting `unauthenticated` session state is
  * what actually clears `user`, via SessionSync, once the cookie is gone.
  */

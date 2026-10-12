@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
  * presigned PUT per file (`bounty.uploadUrls`), then send the bytes straight
  * to S3 — the app server never carries the file.
  *
- * The hex SHA-256 and a bare `Content-Type` PUT match wadzz0's uploader
+ * The hex SHA-256 and a bare `Content-Type` PUT match the marketplace's uploader
  * exactly (`pages/test.tsx`), against the same bucket and SDK version, so
  * the signature S3 expects is the one this sends.
  *

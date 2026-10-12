@@ -65,7 +65,7 @@ const CARD_WORLD_W = PIN_RADIUS_M * 5.2;
  * A real 3D object for one pin: a slowly spinning coin at true human scale,
  * textured with the pin's own image, floating above a soft shadow on the
  * ground, with an information card hanging beside it. Adapted from bandfan's
- * `ARCoin` for wadzzoAR's actual pin shape.
+ * `ARCoin` for the AR app's actual pin shape.
  *
  * The coin carries only what it can say without words — rarity in its edge
  * colour, and a dimmed, inert finish when a pin isn't collectible. It used to

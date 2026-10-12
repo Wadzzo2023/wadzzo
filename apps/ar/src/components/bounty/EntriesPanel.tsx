@@ -10,7 +10,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
 /**
- * The review path wadzz0's brand screen moves an entry along. Rejected and
+ * The review path the marketplace's brand screen moves an entry along. Rejected and
  * approved are two ends of the same last step.
  */
 const STEPS = ["UNCHECKED", "CHECKED", "ONREVIEW", "DONE"] as const;

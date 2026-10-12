@@ -15,7 +15,10 @@ import { Keypair } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
 import { PLATFORM_ASSET, PLATFORM_FEE, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
-import { createStorageTrx, createStorageTrxWithXLM } from "~/lib/stellar/fan/create-storage-account";
+import {
+  createStorageTrx,
+  createStorageTrxWithXLM,
+} from "~/lib/stellar/fan/create-storage-account";
 import { follow_creator } from "~/lib/stellar/fan/follow-creator";
 import { sendGift, sendGitfAsPlatformAsset } from "~/lib/stellar/fan/send-gift";
 import { trustCustomPageAsset } from "~/lib/stellar/fan/trust-custom-page-asset";

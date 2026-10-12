@@ -1,11 +1,11 @@
-# brand-wadzzo — UI/UX upgrade & framework migration plan
+# the brand portal — UI/UX upgrade & framework migration plan
 
 Status: **plan, not started** · Decided with the user on 2026-09-30 · Delivery: one branch.
 
-brand-wadzzo is the **brand portal**: brands/artists manage their pins, hotspots,
+the brand portal is the **brand portal**: brands/artists manage their pins, hotspots,
 stores, posts, bounties, events, gifts and memberships; admins manage users,
 creators, pins, maps and reports. This plan makes it consistent with the Wadzzo
-fan apps (wadzzoAR web + mobile), mobile-responsive, and brings it up to date.
+fan apps (the AR app web + mobile), mobile-responsive, and brings it up to date.
 
 ---
 
@@ -15,13 +15,13 @@ fan apps (wadzzoAR web + mobile), mobile-responsive, and brings it up to date.
 |---|---|
 | Router | **Pages Router → App Router** |
 | Versions | Latest stable: Next 16, React 19, tRPC 11, TanStack Query 5, Tailwind 4, Zod 4, Prisma **7.10** (not the 8 RC), **next-auth 4.24.15** (stable; not the Auth.js v5 beta) |
-| Look | **wadzzoAR arcade tokens, calmer UI**: same colours, fonts (Chakra Petch + Sora), rarity colours; flatter, denser components suited to a work tool |
+| Look | **the AR app arcade tokens, calmer UI**: same colours, fonts (Chakra Petch + Sora), rarity colours; flatter, denser components suited to a work tool |
 | Theme | Light + dark, follows the system, with a toggle |
 | Layout | One shell. Desktop: collapsible left sidebar. Phone: bottom tab bar **Map · Stores · [+ Create] · Bounties · More** |
 | Admin | Same shell; admins see an **Admin** group in the nav |
 | Sections | **No page merges** (user, 2026-09-30): Map, Pin management, Reports and Redeem stay separate pages. Drop dead code — **each item listed for approval before deleting** |
 | Modals → pages | Pin create/edit, hotspot create/edit, bounty create/edit, post create, asset/NFT create become full pages. Small confirmations/details stay dialogs |
-| Branches | brand-wadzzo `ui-upgrade` · connect_wallet `wadzzo-appRouter` (from its `wadzzo` branch) · express-wadzzo `upgrade` |
+| Branches | the brand portal `ui-upgrade` · the wallet package `wadzzo-appRouter` (from its `wadzzo` branch) · express-wadzzo `upgrade` |
 | express-wadzzo | Update packages + clean up; **HTTP API stays compatible** |
 | Map | **Mapbox** (replaces Google Maps; same provider and pin look as the fan apps) |
 | Verification | Local dev DB on localhost:3001, click through every page as brand and admin at desktop and phone widths, plus typecheck / lint / build |
@@ -35,7 +35,7 @@ fan apps (wadzzoAR web + mobile), mobile-responsive, and brings it up to date.
 - **26 pages**, several huge: `create` 2,283 lines, `admin/collection-report` 1,675, `report` 1,637, `pin-manage` 1,120, `redeem` 1,047.
 - **19 modals, ~11,600 lines**; the six biggest (1,000–1,300 lines each) are the create-pin, admin-pin, pin-detail, bounty, NFT and hotspot modals.
 - Three separate layouts (root / creator / admin), nav defined in `components/common/navlinks.tsx`.
-- Submodules: `package/connect_wallet` (used in 27 files, uses `next/router` in its connect dialog) and `package/express-wadzzo` (Express task server called over HTTP via `TASK_SERVER_URL` for hotspots and jobs).
+- Submodules: `@wadzzo/wallet` (used in 27 files, uses `next/router` in its connect dialog) and `apps/express-wadzzo` (Express task server called over HTTP via `TASK_SERVER_URL` for hotspots and jobs).
 - 23 routes under `pages/api/game` (used by clients outside this app — kept, moved to route handlers).
 
 ---
@@ -75,7 +75,7 @@ Bottom bar: **Map · Stores · [+ Create] · Bounties · More**.
 
 Built once, used everywhere — the main source of the "reusable code" and of the shrinking page sizes.
 
-- **Tokens**: port wadzzoAR's `arcade.css` variables (surfaces, lines, text, green accent, rarity colours, radii) into Tailwind 4 `@theme`, with light and dark values. Fonts: Chakra Petch (headings/labels), Sora (body).
+- **Tokens**: port the AR app's `arcade.css` variables (surfaces, lines, text, green accent, rarity colours, radii) into Tailwind 4 `@theme`, with light and dark values. Fonts: Chakra Petch (headings/labels), Sora (body).
 - **Primitives** (shadcn/Radix, restyled to the tokens): Button, IconButton, Input, Textarea, Select, Combobox, Checkbox, Switch, RadioGroup, DatePicker, Tabs, Badge/RarityBadge/StatusBadge, Card, Tooltip, DropdownMenu, Dialog, Sheet (bottom on phone / side on desktop), Toast, Skeleton, EmptyState, Pagination.
 - **Patterns**:
   - `PageHeader` (title, description, actions, breadcrumbs), `PageSection`.
@@ -110,10 +110,10 @@ Kept as dialogs/sheets (small, in-context): pin detail (becomes a side panel on 
 1. **Next 16 + React 19**, App Router (`src/app`): route groups `(portal)` and `(portal)/admin`, one `layout.tsx` for the shell, `loading.tsx`/`error.tsx`/`not-found.tsx` per section.
 2. **tRPC 11 + TanStack Query 5**: route handler at `app/api/trpc/[trpc]/route.ts`; client via the `@trpc/tanstack-react-query` integration; server-side prefetch where it helps first paint. Router code stays; call sites updated.
 3. **next-auth 4.24.15** on App Router: route handler `app/api/auth/[...nextauth]/route.ts`, `getServerSession` in server components/layouts, middleware for protected routes and the admin group.
-4. **Prisma 7.10**: `prisma.config.ts`, driver adapter, generated client. **No schema or DB changes** (schema is shared with wadz0 / wadzzoAR / express-wadzzo).
+4. **Prisma 7.10**: `prisma.config.ts`, driver adapter, generated client. **No schema or DB changes** (schema is shared with wadz0 / the AR app / express-wadzzo).
 5. **Tailwind 4** (+ shadcn's Tailwind 4 setup), **Zod 4**, `motion` (renamed framer-motion), `react-map-gl` 8 / `mapbox-gl` latest, ESLint flat config.
 6. **API routes** (`/api/game/*`, `xdr`, `toml`, `file`) → route handlers with the **same paths and responses** (other clients call them).
-7. **connect_wallet** → branch `wadzzo-appRouter` from `wadzzo`: replace `next/router` with `next/navigation`, React 19 / Query 5 compatibility. brand-wadzzo's submodule pointer moves to that branch.
+7. **the wallet package** → branch `wadzzo-appRouter` from `wadzzo`: replace `next/router` with `next/navigation`, React 19 / Query 5 compatibility. the brand portal's submodule pointer moves to that branch.
 8. **express-wadzzo** → branch `upgrade`: bump dependencies, remove unused ones, tidy; routes, payloads and job formats unchanged.
 
 ---
@@ -137,7 +137,7 @@ Kept as dialogs/sheets (small, in-context): pin detail (becomes a side panel on 
 5. Stores (Assets + Page asset tabs; QR items removed) + asset page, Posts + post page, Bounties + bounty pages, Events, Website Map, Gifts, Membership.
 6. Reports and Redeem (separate pages), Settings.
 7. Admin section (DataTable everywhere, admin pin page).
-8. connect_wallet `wadzzo-appRouter`, express-wadzzo `upgrade`.
+8. the wallet package `wadzzo-appRouter`, express-wadzzo `upgrade`.
 9. Cleanup (dead code list → your approval → delete; unused packages).
 10. Full click-through as brand and admin, desktop and phone, dark and light; typecheck, lint, production build.
 
@@ -148,7 +148,7 @@ Kept as dialogs/sheets (small, in-context): pin detail (becomes a side panel on 
 - **Size**: this touches every page; one branch means one large review at the end. The before/after screenshots and a page-by-page checklist are there to make it reviewable.
 - **Shared DB**: Prisma 7 changes only the client, not the schema. No `db push` from this branch.
 - **External callers**: `/api/game/*` and the express task server keep their exact contracts.
-- **connect_wallet is shared** with other apps; the new work lives only on `wadzzo-appRouter`, other branches untouched.
+- **the wallet package is shared** with other apps; the new work lives only on `wadzzo-appRouter`, other branches untouched.
 
 ## 10. Still to ask during the work
 
@@ -160,7 +160,7 @@ Kept as dialogs/sheets (small, in-context): pin detail (becomes a side panel on 
 
 ## Baseline (2026-09-30, before any change, branch `ui-upgrade` = main)
 
-- `tsc --noEmit`: **107 errors** (≈half from express-wadzzo being inside brand-wadzzo's tsconfig). The build hides them: `ignoreBuildErrors` + `ignoreDuringBuilds` are on. Target: 0 errors, both flags off.
+- `tsc --noEmit`: **107 errors** (≈half from express-wadzzo being inside the brand portal's tsconfig). The build hides them: `ignoreBuildErrors` + `ignoreDuringBuilds` are on. Target: 0 errors, both flags off.
 - `pnpm build`: passes, with a broken import warning (`SIMPLIFIED_FEE_IN_XLM` not exported from `~/lib/stellar/constant`).
 - **First Load JS shared by all pages: 797 kB** (/map 871 kB, /create 757 kB, /admin/collection-report 795 kB). Target: well under half.
 
@@ -183,7 +183,7 @@ Test account: Fyron (GAP4E5…EZH) on the **dev DB** (`ep-winter-art`), granted 
 
 - **Local dev:** the portal reads `EXPRESS_SERVER_URL` (server env). Production falls back to
   `https://portal.actn.xyz/wadzzo/api/`; anywhere else it must be set, so local testing never
-  writes to production. Locally: `package/express-wadzzo` → `pnpm build && node dist/index.js`
+  writes to production. Locally: `apps/express-wadzzo` → `pnpm build && node dist/index.js`
   (port 4000, `.env` with the **dev** DATABASE_URL), and `EXPRESS_SERVER_URL=http://localhost:4000`
   in `.env.development`. `pnpm dev` (tsx watch) fails on Node 24 — fix in the `upgrade` branch.
 - **No auth on `/hotspots`** (deferred by decision): anyone who can reach the server can create,
@@ -207,7 +207,7 @@ Test account: Fyron (GAP4E5…EZH) on the **dev DB** (`ep-winter-art`), granted 
 - Store edit pages & page asset sales: /stores/[id], /stores/page-asset/new, and /stores/page-asset/[id] converted from dialogs to full FormPages with live preview.
 - Admin pin and hotspot controls: Admins can drop pins/hotspots on behalf of any creator; admins can edit any creator pin at /pins/[id]/edit with automatic back-links to /admin/pins.
 - Dropzone preview fix: S3 extensionless hashes properly classified via endpoint/accept fallbacks.
-- Subprojects upgrade (Step 8): `package/connect_wallet` verified on branch `wadzzo-appRouter` with Next 16 / React 19 App Router; `package/express-wadzzo` on branch `upgrade` resolved Node 24 `ERR_INVALID_URL_SCHEME` issue by removing `.js` import extensions and replacing ESM `p-limit` with native zero-dependency `src/lib/limit.ts` (unit tests verified). Both `tsx watch` (dev) and `node dist/index.js` (prod) launch cleanly on Node 24.
+- Subprojects upgrade (Step 8): `@wadzzo/wallet` verified on branch `wadzzo-appRouter` with Next 16 / React 19 App Router; `apps/express-wadzzo` on branch `upgrade` resolved Node 24 `ERR_INVALID_URL_SCHEME` issue by removing `.js` import extensions and replacing ESM `p-limit` with native zero-dependency `src/lib/limit.ts` (unit tests verified). Both `tsx watch` (dev) and `node dist/index.js` (prod) launch cleanly on Node 24.
 - Hotspot edit page: Created full-page form at `/pins/hotspots/[id]/edit` (`EditHotspotPage`) with schedule adjustment, drop frequency and duration options, cascade scope selection (future drops vs all drops), pin template customization, and live area preview. Added edit links to `HotspotDetailModal` and `HotspotRow` in list view.
 - Security hardening completed:
   1. `admin.users.sendEmail` open relay closed (restricted to `adminProcedure`).
@@ -219,7 +219,7 @@ Test account: Fyron (GAP4E5…EZH) on the **dev DB** (`ep-winter-art`), granted 
   - `OnboardingGate` verified: redirects already-approved creators to `/pins` (or `/admin/creators`).
   - Added `vitest.config.ts` excluding submodules; created `tests/onboarding.test.ts` validating payload schemas and edge cases (all 17 unit tests passing).
 - Step 9 (Cleanup & Dead Code) completed:
-  - Audited all dependencies across `src/` and `package/connect_wallet`.
+  - Audited all dependencies across `src/` and `@wadzzo/wallet`.
   - Removed unused `pino` logger dependency and orphaned import in `src/lib/stellar/fan/redeem.ts`.
   - Confirmed 0 unreferenced files in `src/` (all 34 routes and shared UI primitives actively used).
 - Next: Final click-through & bundle size measurement (Step 10).

@@ -2,7 +2,7 @@
 
 One basemap for every Wadzzo map — web (`src/lib/ar/theme.ts` → main map,
 directions, embed, collection mini-map), the mobile app
-(`wadzzoWebAR-public/src/theme/theme.ts`) and brand-wadzzo
+(`wadzzoWebAR-public/src/theme/theme.ts`) and the brand portal
 (`src/components/map-kit/base-map.tsx`).
 
 | Theme | Studio style (account `wadzzo`) | URL |

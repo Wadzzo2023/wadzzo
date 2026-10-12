@@ -5,7 +5,7 @@ import { matchRoute } from "~/server/mobile/routes";
 /**
  * ── /api/mobile/v1/* ───────────────────────────────────────────────────────
  *
- * The native app's API (wadzzoAR-mobile). One catch-all so the route table
+ * The native app's API (the mobile app). One catch-all so the route table
  * in `server/mobile/routes.ts` is the single place endpoints are declared.
  * `v1` never breaks: shipped app builds can't be force-updated, so a breaking
  * change ships as `v2` beside it. Paths, methods, request bodies and the

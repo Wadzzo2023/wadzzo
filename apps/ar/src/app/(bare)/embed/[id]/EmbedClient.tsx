@@ -64,12 +64,12 @@ function track(id: string, e: EmbedEvent) {
 }
 
 /**
- * Preview mode only (brand-wadzzo's editor frames `/embed/preview`):
+ * Preview mode only (the brand portal's editor frames `/embed/preview`):
  *  - settings arrive as `{ type: "wadzzo-embed:config", config }` messages, so
  *    editing a field updates the map in place instead of reloading it;
  *  - every settled view goes back up as `{ type: "wadzzo-embed:view", … }`,
  *    which the editor offers as "Set start view here".
- * Messages are accepted only from brand-wadzzo's origins.
+ * Messages are accepted only from the brand portal's origins.
  */
 function usePreviewBridge(initial: EmbedConfig, origins: string[] | undefined) {
   const [config, setConfig] = useState(initial);
@@ -237,7 +237,7 @@ export function EmbedClient({
   const meFix: GeoFix | null = me
     ? { ...me, accuracy: 0, heading: null, speed: null, timestamp: 0 }
     : null;
-  // Relative on purpose: links in the iframe resolve against wadzzoAR, not
+  // Relative on purpose: links in the iframe resolve against the AR app, not
   // the host site, and the markup matches between server and client.
   const openUrl = (pin: ArPin) =>
     `/collection/${encodeURIComponent(pin.id)}?ref=embed-${config.id}`;

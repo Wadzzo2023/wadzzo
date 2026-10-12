@@ -30,7 +30,7 @@ const METRICS = [
   },
 ] as const;
 
-/** Totals plus a day-by-day table (UTC days). Counts come from wadzzoAR. */
+/** Totals plus a day-by-day table (UTC days). Counts come from the AR app. */
 export function EmbedStats({ id }: { id: string }) {
   const [days, setDays] = useState<7 | 30 | 90>(30);
   const q = api.embeds.stats.useQuery({ id, days });

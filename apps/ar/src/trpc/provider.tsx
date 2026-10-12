@@ -11,7 +11,7 @@ import { api } from "~/utils/api";
  * The query client and tRPC client for the whole app (App Router). Created
  * once per browser session with useState — never at module scope, so a server
  * render can't share a cache between requests. Also supplies the
- * `QueryClient` the connect_wallet submodule's email/password form needs
+ * `QueryClient` the wallet package's email/password form needs
  * (it calls plain `useMutation()` and throws without a provider above it).
  */
 export function TRPCReactProvider({ children }: { children: ReactNode }) {

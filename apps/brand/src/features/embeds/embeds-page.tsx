@@ -41,7 +41,7 @@ import { platformBranding } from "@wadzzo/platform/branding";
  *
  * A brand's website maps: the Wadzzo map, configured here, pasted onto their
  * own site (a county homepage hero, a tourism page…) with one snippet. The map
- * itself is served by wadzzoAR; changes saved here go live without touching
+ * itself is served by the AR app; changes saved here go live without touching
  * the website.
  */
 export default function EmbedsPage() {

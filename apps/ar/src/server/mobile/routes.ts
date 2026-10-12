@@ -16,7 +16,7 @@ import { signMobileToken } from "./token";
  * Every handler is thin on purpose: parse the path/query/body, then call the
  * existing tRPC procedure through `caller`. Validation, eligibility, the
  * geofence, tier gating and every fix already in the routers apply as-is.
- * Contract: wadzzoAR-mobile/docs/02-api.md.
+ * Contract: the mobile app/docs/02-api.md.
  */
 
 type Auth = "none" | "optional" | "required";

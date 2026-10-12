@@ -11,7 +11,7 @@ export const MAP_MODE_STORAGE_KEY = "wadzzo-brand-map-mode";
 
 export const MAP_STYLE_3D = {
   // "Wadzzo 3D Light/Dark" (Mapbox Standard + Wadzzo colour theme) — see
-  // wadzzoAR/docs/map-style.md.
+  // apps/ar/docs/map-style.md.
   light: "mapbox://styles/wadzzo/cmuwc16ut00gz01sd6359b3sw",
   dark: "mapbox://styles/wadzzo/cmuwbonsf00rv01sdcun4fhdu",
 } as const;

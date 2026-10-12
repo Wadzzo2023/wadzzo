@@ -60,7 +60,6 @@ const supplyOf = (limit: number): number | null =>
  */
 const GEOFENCE_SLACK_M = 40;
 
-
 /** One query shape, so `list` and `getById` can't drift apart on includes. */
 const groupInclude = {
   Subscription: { select: { id: true, price: true } },
@@ -527,7 +526,7 @@ export const pinsRouter = createTRPCRouter({
    * dropped here and the gating is done properly.
    *
    * `approved` is NOT relaxed, on purpose. It's a tri-state admin moderation
-   * gate — null pending, true approved, false rejected — set only by wadzz0's
+   * gate — null pending, true approved, false rejected — set only by the marketplace's
    * admin-only `approveLocationGroups`. That's the intended gate doing its
    * job: an empty map means nothing has cleared moderation yet.
    *

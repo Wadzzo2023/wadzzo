@@ -9,7 +9,7 @@ Repos touched (built in parallel once §4–§5 are agreed):
 | Repo | Role |
 |---|---|
 | `wadzzoAR` | Schema owner, tRPC `murals` + `coins` routers, REST mirrors for mobile, web Murals camera, map pins, collection, embed |
-| `brand-wadzzo` | Admin › Mural review + Mural settings |
+| `the brand portal` | Admin › Mural review + Mural settings |
 | `wadzzoWebAR-public` | Mobile Murals camera, map pins, collection |
 
 ---
@@ -131,7 +131,7 @@ $0.0015. First 1,000 units/month free. Signed-out viewers can't reach step 1.
 ## 4. Data model
 
 Edited identically in `wadzzoAR/prisma/schema.prisma` and
-`brand-wadzzo/prisma/schema.prisma`. **The user runs `prisma db push`.**
+`the brand portal/prisma/schema.prisma`. **The user runs `prisma db push`.**
 
 ```prisma
 enum MuralStatus {
@@ -287,7 +287,7 @@ covers what slips through).
 
 ## 5. API
 
-### 5.1 wadzzoAR tRPC (`murals`, `coins`) + REST mirrors for mobile
+### 5.1 the AR app tRPC (`murals`, `coins`) + REST mirrors for mobile
 
 | tRPC | REST (`/api/mobile/v1`) | Auth | Purpose |
 |---|---|---|---|
@@ -313,7 +313,7 @@ type ScanResult =
 Rate limits: `startScan` ≤ 30/hour/user; submissions ≤ 20/day/user that reach
 Cloud Vision (protects cost from a single account).
 
-### 5.2 brand-wadzzo (admin only)
+### 5.2 the brand portal (admin only)
 
 `admin.murals.list({status, sort, filters})`, `byId`, `decide({ids, status,
 reason?})`, `edit({id, title, artist, coverUrl})`, `merge({fromId, intoId})`,
@@ -431,7 +431,7 @@ not kept).
 - Collection cards and mural detail show the **user's own** keyframes (they
   took them); other people's photos are never shown.
 
-## 9. UX — admin (brand-wadzzo)
+## 9. UX — admin (the brand portal)
 
 Nav: Admin › **Mural review** (`/admin/murals`), with a **Settings** tab on
 the same page (no separate nav item). Built on the pin-review pieces
@@ -477,7 +477,7 @@ toasts).
 
 ## 11. Milestones (parallel after M1)
 
-| | wadzzoAR | brand-wadzzo | wadzzoWebAR-public |
+| | the AR app | the brand portal | wadzzoWebAR-public |
 |---|---|---|---|
 | **M0 spike** | MobileCLIP in browser (fps on iPhone/Android, model size); server-side embedding on Vercel vs task server; Cloud Vision on 30 sample photos incl. screens | — | vision-camera + ORT on RN 0.86 |
 | **M1** | Schema (both repos), settings row, `murals`/`coins` routers, REST mirrors, S3 prefix `murals/` | schema copy | — |
@@ -518,9 +518,9 @@ toasts).
 - Cloud Vision: not tested yet (needs `GOOGLE_VISION_CREDENTIALS`).
 
 **2026-10-04 — M1 (server) built, DB not pushed**
-- Schema §4 added to both repos (brand-wadzzo keeps 4-space/CRLF).
+- Schema §4 added to both repos (the brand portal keeps 4-space/CRLF).
   **User runs `prisma db push`.**
-- wadzzoAR: `src/lib/murals/{constants.ts,prompts.s0.json}`,
+- the AR app: `src/lib/murals/{constants.ts,prompts.s0.json}`,
   `src/server/murals/{clip,vision,geo,service,scan}.ts`, routers `murals` +
   `coins`, REST mirrors in `server/mobile/routes.ts`, S3 helpers
   `signMuralFrames` / `getObjectBytes`, env `GOOGLE_VISION_CREDENTIALS`
@@ -531,7 +531,7 @@ toasts).
   0.34.1 → 0.35.5 (plaiceholder); `next build` passes.
 
 **2026-10-04 — M2 web camera + admin built, DB not pushed**
-- wadzzoAR `/murals`: permission gate (shared `ArPermissionGate`, now with
+- the AR app `/murals`: permission gate (shared `ArPermissionGate`, now with
   per-mode `copy`), live MobileCLIP detector (`useMuralDetector`, WebGPU →
   WASM, 4 fps, lock 4/5 ≥ 0.5, hold until 3 < 0.3), guidance for light/blur/
   confidence/GPS, device pre-match against `murals.nearby`, sign-in at the
@@ -546,7 +546,7 @@ toasts).
 - Verified headless (iPhone 15 size, fake camera): mural video locks
   ("Mural found" → sign-in sheet), monitor video doesn't. Full sweep/submit
   not exercised yet — needs `db push` and a signed-in session.
-- brand-wadzzo Admin › Mural review (`/admin/murals`, nav after Pin review):
+- the brand portal Admin › Mural review (`/admin/murals`, nav after Pin review):
   tabs Pending · Gathering · Approved · Rejected · Settings with counts;
   photo-card grid; flags (new account, quick confirm, check photos,
   possible duplicate); preview sheet (all keyframes → set cover, scan map,
@@ -558,7 +558,7 @@ toasts).
   ask first), M3 map pins / collection / coins UI.
 
 **2026-10-04 — M3 (web + mobile) and the mobile camera built, DB not pushed**
-- wadzzoAR: mural frame markers + layer toggle (all / verified / off) + mural
+- the AR app: mural frame markers + layer toggle (all / verified / off) + mural
   sheet on `/map` (loaded by visible area); `/collection` Drops | Murals tab;
   `/murals/[id]` detail (own photo, Found → In review → Verified, history);
   `/coins` ledger with "Redeem coming soon"; Wadzzo Coins row on the profile.
@@ -575,10 +575,10 @@ toasts).
 - Embeds: `MapEmbed.showMurals` (default on) flows through `normalizeConfig`;
   `/embed/[id]` loads approved murals for the view box (skipped beyond ~40 km
   radius), draws them from zoom 12 (`EmbedMap`), and opens a mural card →
-  "Open in Wadzzo" (`/murals/[id]?ref=embed-…`). brand-wadzzo embed editor has
+  "Open in Wadzzo" (`/murals/[id]?ref=embed-…`). the brand portal embed editor has
   a "Murals" toggle (draft, schema input, default true).
-- Admin › Mural review › **Insights** (brand-wadzzo; the plan had it under
-  wadzzoAR, but brand-wadzzo is the only admin): 7/30/90-day range; tiles for
+- Admin › Mural review › **Insights** (the brand portal; the plan had it under
+  the AR app, but the brand portal is the only admin): 7/30/90-day range; tiles for
   attempts, acceptance, Cloud Vision $ (list-price estimate from
   `costUnits`), coins issued/taken back; stacked daily accepted-vs-rejected
   bars with hover + table view; reject reasons; top-15 accounts with new-

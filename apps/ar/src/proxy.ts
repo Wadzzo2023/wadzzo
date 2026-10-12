@@ -5,7 +5,7 @@ import { brandOrigins } from "~/lib/embed/config";
 /**
  * Sets the iframe allowlist (CSP `frame-ancestors`) on `/embed/[id]` before the
  * page renders: each brand lists the sites that may frame its map, and the
- * editor's `/embed/preview` may only be framed by brand-wadzzo.
+ * editor's `/embed/preview` may only be framed by the brand portal.
  */
 export async function proxy(request: NextRequest) {
   const id = request.nextUrl.pathname.split("/")[2] ?? "";

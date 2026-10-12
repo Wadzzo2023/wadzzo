@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 import { TRPCReactProvider } from "~/trpc/provider";
 
-// connect_wallet's global dialogs (sign-in, wallet connect) and the toast container. Browser-only.
+// the wallet package's global dialogs (sign-in, wallet connect) and the toast container. Browser-only.
 const WalletPopups = dynamic(
   () => import("@wadzzo/wallet").then((mod) => mod.ConnectWalletPopups),
   { ssr: false },

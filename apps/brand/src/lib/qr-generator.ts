@@ -11,7 +11,7 @@ import { WADZZO_AR_URL } from "./embed";
  * at (`WADZZO_AR_URL` in `~/lib/embed`), so a sticker and an embed on the same
  * drop land a visitor in the same place.
  *
- * On the reading side, wadzzoAR's `/scan` takes `pin` straight off the query
+ * On the reading side, the AR app's `/scan` takes `pin` straight off the query
  * and claims it — no camera needed on that path at all, because the phone's own
  * camera app did the scanning. `pinIdFromScan` in `src/lib/ar/useQrScanner.ts`
  * accepts the id from the URL query or as a bare cuid-like token, so the same

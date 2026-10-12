@@ -25,7 +25,7 @@ export const TONE_CLASS: Record<Tone, string> = {
 };
 
 /**
- * The review states wadzz0's brand-side screen moves an entry through, in
+ * The review states the marketplace's brand-side screen moves an entry through, in
  * the fan's words. "Checked" there means the brand opened it.
  */
 export const ENTRY_STATUS: Record<EntryStatus, { label: string; tone: Tone }> = {

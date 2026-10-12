@@ -8,9 +8,9 @@ import { platformScope, type PlatformContext } from "@wadzzo/platform/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
- * Admin › Mural review (wadzzoAR/docs/murals/plan.md §9).
+ * Admin › Mural review (apps/ar/docs/murals/plan.md §9).
  *
- * Murals are discovered by users in wadzzoAR, never created here. A mural
+ * Murals are discovered by users in the AR app, never created here. A mural
  * reaches PENDING once `confirmationsNeeded` different people have scanned
  * it; this router approves (shown on every map), rejects, edits, merges
  * duplicates, and owns the global MuralSettings row.

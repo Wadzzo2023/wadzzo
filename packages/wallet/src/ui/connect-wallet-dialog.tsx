@@ -142,7 +142,7 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
   const session = useSession();
   const [loading, setLoading] = useState(false);
 
-  // True only inside wadzzoAR's phone-shaped device frame (see the note on
+  // True only inside the AR app's phone-shaped device frame (see the note on
   // AR_APP_FRAME_SELECTOR) — everywhere else this package is used, including
   // any other project sharing this same submodule, `isFramedHost` stays
   // false and the dialog keeps its original wide two-column layout below.
@@ -469,7 +469,7 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
            Two layouts, chosen by `isFramedHost`: the original wide
            two-column grid (unchanged, for every other consumer of this
            shared package), or a single column capped to a phone-comfortable
-           width for wadzzoAR's device frame — Tailwind's `lg:` variants key
+           width for the AR app's device frame — Tailwind's `lg:` variants key
            off the real browser viewport, not that frame's width, so left
            alone the two-column grid would still activate on any wide screen
            and cram a 280px side panel into a ~400px box. */

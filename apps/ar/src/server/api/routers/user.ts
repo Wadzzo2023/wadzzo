@@ -14,7 +14,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
  * Wallet-derived facts about the signed-in viewer that don't belong to any
  * one brand or drop, plus the viewer's own profile. Profile editing and
  * account deletion exist for the mobile app (the web has neither yet); they
- * mirror wadzz0's `api/game/user/update-profile-details` and `delete-user`.
+ * mirror the marketplace's `api/game/user/update-profile-details` and `delete-user`.
  */
 export const userRouter = createTRPCRouter({
   /**
@@ -76,7 +76,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   /**
-   * Same limits as wadzz0's `update-profile-details` (name 2–100, bio ≤200).
+   * Same limits as the marketplace's `update-profile-details` (name 2–100, bio ≤200).
    * `name` is unique across the shared database, so a clash is reported as
    * a readable message rather than a 500.
    */
@@ -123,9 +123,9 @@ export const userRouter = createTRPCRouter({
    * signed up with one) and their `User` row, which cascades their follows,
    * claims, bounty activity and comments. Required by App Store review.
    *
-   * Mirrors wadzz0's `delete-user`, with one guard it lacks: an account that
+   * Mirrors the marketplace's `delete-user`, with one guard it lacks: an account that
    * is also a brand (`Creator` row) is refused here. Deleting it would cascade
-   * into the brand's page, drops and bounties — that belongs in wadzz0, not
+   * into the brand's page, drops and bounties — that belongs in the marketplace, not
    * behind a button in a fan app.
    */
   deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {

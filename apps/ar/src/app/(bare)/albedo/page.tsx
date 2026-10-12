@@ -11,8 +11,8 @@ import { stellarNetwork } from "@wadzzo/wallet/config";
 /**
  * ── /albedo ────────────────────────────────────────────────────────────────
  *
- * The bridge the native app (wadzzoAR-mobile) opens in a WebView to use the
- * Albedo wallet, ported from wadzz0's `/albedo`:
+ * The bridge the native app (the mobile app) opens in a WebView to use the
+ * Albedo wallet, ported from the marketplace's `/albedo`:
  *
  *   /albedo?token=<random>  → `albedo.publicKey` → posts `{ type: "token", res }`
  *   /albedo?xdr=<xdr>       → `albedo.tx`        → posts `{ type: "xdr", res }`

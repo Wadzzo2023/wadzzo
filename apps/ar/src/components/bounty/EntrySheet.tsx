@@ -26,7 +26,7 @@ export const formatBytes = (n: number) =>
 /**
  * ── EntrySheet ─────────────────────────────────────────────────────────────
  *
- * Send (or edit) an entry. A plain text box rather than wadzz0's desktop
+ * Send (or edit) an entry. A plain text box rather than the marketplace's desktop
  * rich-text editor — on a phone, a toolbar of formatting buttons is mostly in
  * the way — plus up to five attachments straight from the camera roll.
  *

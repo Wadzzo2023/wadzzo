@@ -18,7 +18,7 @@ import { api, type RouterOutputs } from "~/utils/api";
 type Insights = RouterOutputs["admin"]["murals"]["insights"];
 type Range = "7" | "30" | "90";
 
-/** Reject codes in plain words (wadzzoAR `REJECT_COPY`, shortened). */
+/** Reject codes in plain words (the AR app `REJECT_COPY`, shortened). */
 const REASON_LABEL: Record<string, string> = {
   NOT_ART: "Not street art",
   SCREEN: "Screen or photo",

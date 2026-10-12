@@ -12,7 +12,7 @@ import { platformScope } from "@wadzzo/platform/scope";
  * ── murals ─────────────────────────────────────────────────────────────────
  *
  * User-discovered street art (docs/murals/plan.md). Reads are public; the
- * scan itself needs a session. Admin decisions live in brand-wadzzo.
+ * scan itself needs a session. Admin decisions live in the brand portal.
  *
  * Privacy: only `coverUrl` is ever public. Scan keyframes are returned to the
  * person who took them and nobody else.

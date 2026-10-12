@@ -5,7 +5,7 @@ import { platformBranding } from "@wadzzo/platform/branding";
  * ── Website embed config ───────────────────────────────────────────────────
  *
  * What `/embed/[id]` needs from a `MapEmbed` row, in a JSON-safe shape (it
- * crosses getServerSideProps). The same shape is what brand-wadzzo's editor
+ * crosses getServerSideProps). The same shape is what the brand portal's editor
  * sends for a live preview (`/embed/preview?c=…`), so the preview and the
  * saved embed render through exactly one code path.
  */
@@ -28,7 +28,7 @@ export interface EmbedConfig {
   showFilterChips: boolean;
   showSearch: boolean;
   showNearby: boolean;
-  /** Approved murals in view (wadzzoAR docs/murals/plan.md §7; on by default). */
+  /** Approved murals in view (the AR app docs/murals/plan.md §7; on by default). */
   showMurals: boolean;
   eventsLabel: string;
   eventsUrl: string | null;
@@ -111,7 +111,7 @@ export function decodePreview(c: string | undefined): Record<string, unknown> | 
   }
 }
 
-/** Origins of brand-wadzzo, which may always frame embeds (editor preview). */
+/** Origins of the brand portal, which may always frame embeds (editor preview). */
 export function brandOrigins(): string[] {
   return (
     process.env.BRAND_APP_ORIGINS ?? `${platformBranding.urls.brandPortal} http://localhost:3001`
@@ -139,7 +139,7 @@ export function normalizeDomain(input: string): string | null {
  * a Referer check, it can't be spoofed from the embedding page.
  *
  * Each domain also covers its subdomains (www., maps., …) and both schemes
- * (plenty of small-town sites are still on http). brand-wadzzo is always
+ * (plenty of small-town sites are still on http). the brand portal is always
  * allowed so the editor's preview works. Empty allowlist = any site.
  */
 export function frameAncestors(domains: string[]): string {

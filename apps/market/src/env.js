@@ -25,7 +25,7 @@ export const env = createEnv({
     RUBY_ACCOUNTS_SECRET: z.string(),
     /**
      * 32-byte key (hex or base64) that encrypts creator issuer secrets at rest.
-     * Must be the same in every app that mints (brand-wadzzo, wadzz0, wadzzoAR).
+     * Must be the same in every app that mints (the brand portal, the marketplace, the AR app).
      */
     ISSUER_ENCRYPTION_KEY: z.string().min(32),
     SQUARE_ACCESS_TOKEN: z.string(),
@@ -50,7 +50,7 @@ export const env = createEnv({
     NEXT_PUBLIC_HOME_DOMAIN: z.string(),
     NEXT_PUBLIC_SQUARE_APP_ID: z.string(),
     NEXT_PUBLIC_SQUARE_LOCATION: z.string(),
-    /** The brand portal (brand-wadzzo), linked from "Become a creator". */
+    /** The brand portal (the brand portal), linked from "Become a creator". */
     NEXT_PUBLIC_BRAND_PORTAL_URL: z.string().url().default("https://brand.wadzzo.com"),
   },
 

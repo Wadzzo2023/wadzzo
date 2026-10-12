@@ -37,8 +37,8 @@ export const env = createEnv({
     // secrets — lets claims mint on demand. Must match the fan app and the
     // brand portal. Without it only copies already in storage can be claimed.
     ISSUER_ENCRYPTION_KEY: z.string().min(32).optional(),
-    // Looked up by the connect_wallet submodule's custodial-signing path
-    // (packages/connect_wallet/src/lib/stellar/get-acc-secret.ts) to fetch a
+    // Looked up by the wallet package's custodial-signing path
+    // (packages/wallet/src/server/custodial-account-secret.ts) to fetch a
     // user's Stellar secret from the accounts service.
     RUBY_ACCOUNTS_SECRET: z.string(),
     // AWS

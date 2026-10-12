@@ -6,9 +6,9 @@ import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
- * Website map embeds (`MapEmbed`). The map itself is served by wadzzoAR at
+ * Website map embeds (`MapEmbed`). The map itself is served by the AR app at
  * `/embed/[id]`; this router only manages the saved settings and reads the
- * daily counters wadzzoAR writes. Every write is scoped to the caller's own
+ * daily counters the AR app writes. Every write is scoped to the caller's own
  * creator row.
  */
 
@@ -18,7 +18,7 @@ const httpUrl = z
   .url("Enter a full link starting with https://")
   .refine((u) => /^https?:\/\//i.test(u), "Only http(s) links are allowed");
 
-/** "https://www.Example.gov/path" → "example.gov". Mirrors wadzzoAR's normalizeDomain. */
+/** "https://www.Example.gov/path" → "example.gov". Mirrors the AR app's normalizeDomain. */
 export function normalizeDomain(input: string): string | null {
   let host = input.trim().toLowerCase();
   if (!host) return null;

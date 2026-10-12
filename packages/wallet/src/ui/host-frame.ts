@@ -1,10 +1,10 @@
 /**
  * ── Host frame detection ───────────────────────────────────────────────────
  *
- * This package is shared across multiple projects (wadzzoAR and others) via
+ * This package is shared across multiple projects (the AR app and others) via
  * a single git submodule — there is one copy of this file's history, and any
  * commit pushed to it is a commit every consumer can pull. Nothing here may
- * assume it's only ever rendered inside wadzzoAR's phone-shaped device
+ * assume it's only ever rendered inside the AR app's phone-shaped device
  * frame; a desktop-capable host (like the main Wadzzo web app) needs this
  * package's original behaviour untouched.
  *

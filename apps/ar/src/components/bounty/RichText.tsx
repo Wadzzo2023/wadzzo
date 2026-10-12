@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 /**
- * Renders HTML written in wadzz0's rich-text editor — bounty briefs, and
+ * Renders HTML written in the marketplace's rich-text editor — bounty briefs, and
  * entries submitted from there. It's user-authored markup from another app,
  * so it goes through DOMPurify before it touches the DOM; the reference
  * renders it raw.

@@ -5,7 +5,7 @@ import type { Db } from "@wadzzo/db";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
- * Creator side of Events & Announcements. Fans see them in wadzzoAR and the
+ * Creator side of Events & Announcements. Fans see them in the AR app and the
  * mobile app (`events` router there). Everything is public and goes live on
  * save — there is no approval step.
  *

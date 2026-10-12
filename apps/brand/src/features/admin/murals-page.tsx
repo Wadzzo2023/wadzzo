@@ -42,7 +42,7 @@ const VIEWS: View[] = ["pending", "gathering", "approved", "rejected", "insights
 const LISTS = new Set<View>(["pending", "gathering", "approved", "rejected"]);
 
 /**
- * Admin › Mural review (wadzzoAR/docs/murals/plan.md §9).
+ * Admin › Mural review (apps/ar/docs/murals/plan.md §9).
  *
  * Murals come from users, not brands: anyone scanning street art creates
  * one, and it lands here once enough different people have found it. Cards

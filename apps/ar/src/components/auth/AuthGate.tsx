@@ -19,7 +19,7 @@ import { BottomSheet } from "~/components/ui/BottomSheet";
  * decide they want it, and only then meet this.
  *
  * "Connect wallet" below opens the real chooser: `signIn()` (in
- * `lib/ar/store.ts`) just flips the connect_wallet submodule's own
+ * `lib/ar/store.ts`) just flips the wallet package's own
  * `useConnectWalletDialogStore` open, and `<ConnectDialog>` (mounted once in `_app.tsx`)
  * does the rest — Albedo, Freighter, xBull, Rabet, Hana, MetaMask, HOT
  * Wallet, Lobstr, Google, Apple, and email/password all in one dialog.

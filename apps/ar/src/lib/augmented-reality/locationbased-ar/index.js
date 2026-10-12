@@ -6,7 +6,7 @@
  * adapts AR.js's location-based components and three.js's own (now removed
  * from three.js core) `DeviceOrientationControls`.
  *
- * Replaces wadzzoAR's earlier hand-rolled approach — a flat CSS-percentage
+ * Replaces the AR app's earlier hand-rolled approach — a flat CSS-percentage
  * projection driven by a from-scratch Euler-to-heading conversion — which
  * went through many rounds of real-device bugs (dual-event oscillation, an
  * iOS compass sentinel, gain/FOV tuning that never felt right) because it was

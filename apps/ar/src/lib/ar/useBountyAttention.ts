@@ -14,7 +14,7 @@ import { useAuth } from "./store";
  *
  * Read state is per device. There is no read-receipt column in the shared
  * schema, and adding one for a dot isn't worth a migration against the
- * database wadzz0 also owns — so the server reports *when* each event
+ * database the marketplace also owns — so the server reports *when* each event
  * happened (`bounty.attention`) and this store remembers, per bounty, the
  * last time the viewer opened it. Anything newer than that is unseen.
  */

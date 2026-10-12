@@ -11,13 +11,13 @@ import { platformBranding } from "@wadzzo/platform/branding";
  * ── /embed/[id] ────────────────────────────────────────────────────────────
  *
  * The page inside a website's iframe. Settings come from the brand's saved
- * `MapEmbed` (or, for `/embed/preview?c=…`, from brand-wadzzo's editor), read
+ * `MapEmbed` (or, for `/embed/preview?c=…`, from the brand portal's editor), read
  * on the server. The CSP `frame-ancestors` header — the domain allowlist — is
  * set by `src/proxy.ts`, so it goes out with the very first response.
  *
  * Nothing here signs anyone in: third-party iframes can't hold a session
  * reliably (Safari drops the cookies), so gated drops show locked, and every
- * action hands off to wadzzoAR in a new tab.
+ * action hands off to the AR app in a new tab.
  */
 type Loaded = { config: EmbedConfig; previewOrigins?: string[] } | null;
 

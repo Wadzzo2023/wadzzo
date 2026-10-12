@@ -82,7 +82,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
         )}
       </DeviceFrame>
 
-      {/* The real wallet/email chooser, from the connect_wallet submodule.
+      {/* The real wallet/email chooser, from the wallet package.
           Its own visibility is a separate zustand store (`useConnectWalletDialogStore`)
           that `useAuth().signIn()` opens; mounted once here, outside
           `DeviceFrame`, because its dialog is not constrained to the phone
