@@ -5,7 +5,7 @@ import Supercluster from "supercluster";
 import { MuralMarker, type MapMural } from "~/components/map/MuralMarker";
 import { PinMarker } from "~/components/map/PinMarker";
 import { distanceMeters } from "~/lib/ar/geo";
-import { MAP_STYLE, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
+import { mapStyleFor, useMapMode, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import type { ArPin, Coords } from "~/lib/ar/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
@@ -57,6 +57,8 @@ export const EmbedMap = forwardRef<
   const mapRef = useRef<MapRef | null>(null);
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
+  const mapMode = useMapMode();
+  const is3d = mapMode === "3d";
   const [view, setView] = useState<{ bounds: Bounds; zoom: number } | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -111,6 +113,11 @@ export const EmbedMap = forwardRef<
     report();
   }, [theme, report]);
 
+  // 2D lies the map flat, 3D tilts it back to the city view.
+  useEffect(() => {
+    mapRef.current?.easeTo({ pitch: is3d ? 45 : 0, duration: 500 });
+  }, [is3d]);
+
   if (!MAPBOX_TOKEN) {
     return (
       <div className="ar-grid absolute inset-0 flex items-center justify-center bg-ar-bg text-[12px] text-ar-faint">
@@ -126,8 +133,9 @@ export const EmbedMap = forwardRef<
       <MapGL
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
-        initialViewState={{ longitude: initial.center.lng, latitude: initial.center.lat, zoom: initial.zoom }}
-        mapStyle={MAP_STYLE[theme]}
+        initialViewState={{ longitude: initial.center.lng, latitude: initial.center.lat, zoom: initial.zoom, pitch: is3d ? 45 : 0 }}
+        mapStyle={mapStyleFor(mapMode, theme)}
+        maxPitch={is3d ? 60 : 0}
         cooperativeGestures={cooperative}
         attributionControl={false}
         dragRotate={false}

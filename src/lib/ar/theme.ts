@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * ── Theme ──────────────────────────────────────────────────────────────────
@@ -44,6 +44,72 @@ export const MAP_STYLE: Record<ResolvedTheme, string> = {
   dark: "mapbox://styles/wadzzo/cmuwbonsf00rv01sdcun4fhdu",
   light: "mapbox://styles/wadzzo/cmuwc16ut00gz01sd6359b3sw",
 };
+
+/**
+ * ── Map mode: 2D / 3D ──────────────────────────────────────────────────────
+ *
+ * "2d" is the default: a flat Mapbox Light (day) / Dark (night) basemap seen
+ * straight down. "3d" is the Wadzzo 3D style above (Mapbox Standard with 3D
+ * buildings), tilted. The choice is stored per device and shared by every map
+ * in the app, so flipping it on the main map also applies to directions, a
+ * collected card's mini-map and the embed.
+ */
+export type MapMode = "2d" | "3d";
+
+export const MAP_MODE_STORAGE_KEY = "wadzzo-ar-map-mode";
+
+export const MAP_STYLE_2D: Record<ResolvedTheme, string> = {
+  dark: "mapbox://styles/mapbox/dark-v11",
+  light: "mapbox://styles/mapbox/light-v11",
+};
+
+/** The basemap style for a mode + live theme. */
+export function mapStyleFor(mode: MapMode, theme: ResolvedTheme): string {
+  return mode === "3d" ? MAP_STYLE[theme] : MAP_STYLE_2D[theme];
+}
+
+const mapModeListeners = new Set<() => void>();
+/** Holds the choice when localStorage is unavailable, so the toggle still works for the session. */
+let memoryMapMode: MapMode | null = null;
+
+function readMapMode(): MapMode {
+  if (memoryMapMode) return memoryMapMode;
+  try {
+    return window.localStorage.getItem(MAP_MODE_STORAGE_KEY) === "3d" ? "3d" : "2d";
+  } catch {
+    return "2d";
+  }
+}
+
+function subscribeMapMode(listener: () => void) {
+  mapModeListeners.add(listener);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === MAP_MODE_STORAGE_KEY) {
+      memoryMapMode = null;
+      listener();
+    }
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    mapModeListeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+export function setMapMode(mode: MapMode) {
+  memoryMapMode = mode;
+  try {
+    window.localStorage.setItem(MAP_MODE_STORAGE_KEY, mode);
+  } catch {
+    // Storage blocked: the choice lasts until the page is closed.
+  }
+  mapModeListeners.forEach((l) => l());
+}
+
+/** The shared 2D/3D choice. "2d" on the server and until hydrated, like `useResolvedTheme`. */
+export function useMapMode(): MapMode {
+  return useSyncExternalStore(subscribeMapMode, readMapMode, () => "2d" as MapMode);
+}
 
 function isThemePreference(value: unknown): value is ThemePreference {
   return value === "auto" || value === "light" || value === "dark";

@@ -37,7 +37,7 @@ import {
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { Skeleton, SkeletonText } from "~/components/ui/Skeleton";
 import { pinStatus, RARITY_META, timeRemaining } from "~/lib/ar/rarity";
-import { MAP_STYLE, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
+import { mapStyleFor, useMapMode, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
 import { useAuth } from "~/lib/ar/store";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import {
@@ -81,6 +81,7 @@ export default function CollectionDetail() {
   const { query: urlQuery, ready: urlReady } = useQueryParams();
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
+  const mapMode = useMapMode();
   const id = typeof urlQuery.id === "string" ? urlQuery.id : null;
 
   const { pins, isLoading: pinsLoading } = usePinsQuery();
@@ -432,9 +433,9 @@ export default function CollectionDetail() {
                   longitude: pin.lng,
                   latitude: pin.lat,
                   zoom: 15.4,
-                  pitch: 40,
+                  pitch: mapMode === "3d" ? 40 : 0,
                 }}
-                mapStyle={MAP_STYLE[theme]}
+                mapStyle={mapStyleFor(mapMode, theme)}
                 attributionControl={false}
                 interactive={false}
                 style={{ width: "100%", height: "100%" }}

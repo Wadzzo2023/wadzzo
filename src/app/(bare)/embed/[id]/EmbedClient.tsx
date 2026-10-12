@@ -10,7 +10,7 @@ import type { MapMural } from "~/components/map/MuralMarker";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { RarityPlate } from "~/components/ui/Badges";
 import { distanceMeters, formatDistance } from "~/lib/ar/geo";
-import { applyTheme } from "~/lib/ar/theme";
+import { applyTheme, setMapMode, useMapMode } from "~/lib/ar/theme";
 import type { ArPin, ArPinType, Coords, GeoFix } from "~/lib/ar/types";
 import {
   accentVars,
@@ -79,6 +79,7 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
   const config = usePreviewBridge(initialConfig, previewOrigins);
   useEmbedTheme(config.theme);
   const mapRef = useRef<EmbedMapHandle>(null);
+  const mapMode = useMapMode();
   const [viewport, setViewport] = useState<Viewport | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchPin, setSearchPin] = useState<ArPin | null>(null);
@@ -283,6 +284,9 @@ export function EmbedClient({ initialConfig, previewOrigins }: { initialConfig: 
                 <LocateFixed size={16} className={cn(locating && "animate-pulse")} />
               </RoundButton>
             )}
+            <RoundButton label={`Switch to the ${mapMode === "3d" ? "2D" : "3D"} map`} onClick={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}>
+              <span className="font-hud text-[10px] font-bold">{mapMode === "3d" ? "2D" : "3D"}</span>
+            </RoundButton>
             <RoundButton label="Zoom in" onClick={() => mapRef.current?.zoomBy(1)}>
               <Plus size={16} />
             </RoundButton>

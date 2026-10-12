@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { Compass, Crosshair, Frame, RotateCw, Zap } from "lucide-react";
 
+import type { MapMode } from "~/lib/ar/theme";
 import { cn } from "~/lib/utils";
+
+import { MapModeButton } from "./MapModeButton";
 
 /**
  * ── MapControls ────────────────────────────────────────────────────────────
@@ -27,6 +30,8 @@ export function MapControls({
   onToggleAutoCollect,
   muralLayer,
   onCycleMuralLayer,
+  mapMode,
+  onToggleMapMode,
 }: {
   onRecenter: () => void;
   onRefetch: () => void;
@@ -39,6 +44,9 @@ export function MapControls({
   /** Murals on the map: every one, verified only, or hidden. */
   muralLayer?: "all" | "verified" | "off";
   onCycleMuralLayer?: () => void;
+  /** Flat 2D or tilted 3D basemap. */
+  mapMode?: MapMode;
+  onToggleMapMode?: () => void;
 }) {
   return (
     <div className="pointer-events-none absolute right-3.5 top-1/2 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
@@ -128,6 +136,9 @@ export function MapControls({
       >
         <Compass size={18} strokeWidth={2.1} />
       </motion.button>
+
+      {/* ── 2D / 3D ─────────────────────────────────────────────────── */}
+      {mapMode && onToggleMapMode && <MapModeButton mode={mapMode} onToggle={onToggleMapMode} />}
 
       {/* ── Murals layer ───────────────────────────────────────────────
           One tap cycles all → verified only → hidden; the map's toast says

@@ -59,7 +59,8 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { distanceMeters, formatDistance } from "~/lib/ar/geo";
 import { formatDuration, formatNavDistance } from "~/lib/ar/navigation";
 import { RARITY_META } from "~/lib/ar/rarity";
-import { MAP_STYLE, useResolvedTheme } from "~/lib/ar/theme";
+import { MapModeButton } from "~/components/map/MapModeButton";
+import { mapStyleFor, setMapMode, useMapMode, useResolvedTheme } from "~/lib/ar/theme";
 import type { TravelMode } from "~/lib/ar/types";
 import {
   firstText,
@@ -193,11 +194,13 @@ export default function DirectionsScreen() {
   const router = useRouter();
   const { query: urlQuery, ready: urlReady } = useQueryParams();
   const theme = useResolvedTheme();
+  const mapMode = useMapMode();
+  const is3d = mapMode === "3d";
   // Our style imports Mapbox Standard; the root style says "loaded" before that import is,
   // and adding a layer then throws "Style is not done loading" (mapbox validates the whole
   // style, imports included). So the route layers mount only once `style.load` has fired
   // for the current style URL.
-  const styleUrl = MAP_STYLE[theme];
+  const styleUrl = mapStyleFor(mapMode, theme);
   const styleUrlRef = useRef(styleUrl);
   styleUrlRef.current = styleUrl;
   const [loadedStyle, setLoadedStyle] = useState<string | null>(null);
@@ -411,7 +414,7 @@ export default function DirectionsScreen() {
       map.easeTo({
         center: at,
         bearing: o === "heading" ? facing : map.getBearing(),
-        pitch: navStyle === "compass" ? 0 : 60,
+        pitch: !is3d || navStyle === "compass" ? 0 : 60,
         zoom: navStyle === "compass" ? 17.2 : 17.6,
         padding: padding(),
         duration: 900,
@@ -419,7 +422,7 @@ export default function DirectionsScreen() {
       });
       setFollowing(true);
     },
-    [at, facing, orientation, navStyle, padding],
+    [at, facing, orientation, navStyle, padding, is3d],
   );
 
   const fitRoute = useCallback(
@@ -443,7 +446,7 @@ export default function DirectionsScreen() {
         ],
         {
           padding: { top: 96, bottom: PREVIEW_PEEK + 40, left: 48, right: 48 },
-          pitch: 45,
+          pitch: is3d ? 45 : 0,
           bearing: 0,
           duration: 900,
           maxZoom: 17.5,
@@ -451,7 +454,7 @@ export default function DirectionsScreen() {
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fix, boxH],
+    [fix, boxH, is3d],
   );
   useEffect(() => {
     if (!navigating) fitRoute(route);
@@ -645,7 +648,7 @@ export default function DirectionsScreen() {
               longitude: fix.lng,
               latitude: fix.lat,
               zoom: 15,
-              pitch: 45,
+              pitch: is3d ? 45 : 0,
             }}
             mapStyle={styleUrl}
             // Theme switch = rebuild, not diff: a diff reloads the import in place under our layers.
@@ -1141,6 +1144,7 @@ export default function DirectionsScreen() {
               onClick={onCompass}
               northUp={navigating && orientation === "north"}
             />
+            <MapModeButton mode={mapMode} onToggle={() => setMapMode(is3d ? "2d" : "3d")} />
             {!navigating && (
               <MapIconButton
                 icon={LocateFixed}

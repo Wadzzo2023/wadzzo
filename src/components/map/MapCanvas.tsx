@@ -5,9 +5,11 @@ import Supercluster, { type ClusterProperties } from "supercluster";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
 import {
-  MAP_STYLE,
+  mapStyleFor,
   type ResolvedTheme,
-  useResolvedTheme, useThemeRead,
+  useMapMode,
+  useResolvedTheme,
+  useThemeRead,
 } from "~/lib/ar/theme";
 import { cn } from "~/lib/utils";
 import { ClusterBillboard } from "./ClusterBillboard";
@@ -161,6 +163,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   const [view, setView] = useState<View | null>(null);
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
+  const mapMode = useMapMode();
+  const is3d = mapMode === "3d";
 
   // Imperative handle rather than prop-driven view state: a controlled
   // viewState re-renders every marker on every frame of a pan.
@@ -195,6 +199,13 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     if (typeof ref === "function") ref({ recenter, flyToPin, flyToMural, resetBearing });
     else if (ref) ref.current = { recenter, flyToPin, flyToMural, resetBearing };
   }, [ref, recenter, flyToPin, flyToMural, resetBearing]);
+
+  // 2D lies the map flat; 3D tilts it back to the city view. Only the tilt is
+  // touched, so the bearing (and compass mode) carry over.
+  useEffect(() => {
+    if (!ready) return;
+    mapRef.current?.easeTo({ pitch: is3d ? 48 : 0, duration: 600, essential: true });
+  }, [is3d, ready]);
 
   // Follow the fix while the viewer hasn't taken the wheel.
   useEffect(() => {
@@ -289,10 +300,10 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
           longitude: center.lng,
           latitude: center.lat,
           zoom: 16.4,
-          pitch: 48,
-          bearing: -14,
+          pitch: is3d ? 48 : 0,
+          bearing: is3d ? -14 : 0,
         }}
-        mapStyle={MAP_STYLE[theme]}
+        mapStyle={mapStyleFor(mapMode, theme)}
         attributionControl={false}
         onLoad={() => {
           setReady(true);
@@ -309,7 +320,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         onClick={() => onSelect(null)}
         // A pitched map with 3D extrusions is what makes a city read as a
         // place rather than a street diagram — worth the extra tiles.
-        maxPitch={62}
+        maxPitch={is3d ? 62 : 0}
         // The whole world, like the app: zoomed out, pins group into
         // billboards (and Standard turns into a globe).
         minZoom={1}

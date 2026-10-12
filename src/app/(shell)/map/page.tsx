@@ -22,6 +22,7 @@ import { LocationGate } from "~/components/shell/LocationGate";
 import { FALLBACK_CENTER } from "~/lib/ar/mock";
 import { pinStatus } from "~/lib/ar/rarity";
 import { useFeedback } from "~/lib/ar/feedback";
+import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "~/lib/ar/types";
@@ -112,6 +113,7 @@ export default function MapScreen() {
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const mapRef = useRef<MapCanvasHandle>(null);
+  const mapMode = useMapMode();
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
@@ -454,6 +456,8 @@ export default function MapScreen() {
           autoCollect={settings.autoCollect}
           muralLayer={muralLayer}
           onCycleMuralLayer={cycleMuralLayer}
+          mapMode={mapMode}
+          onToggleMapMode={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
           onToggleAutoCollect={() => {
             if (!requireAuth("settings")) return;
             const turningOn = !settings.autoCollect;
