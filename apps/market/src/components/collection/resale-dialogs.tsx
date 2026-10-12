@@ -17,7 +17,7 @@ import { Input } from "@wadzzo/ui/components/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 type PayIn = "PLATFORM_ASSET" | "XLM";

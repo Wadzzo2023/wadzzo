@@ -9,7 +9,7 @@ import { CreatorTabs } from "~/components/creator/creator-tabs";
 import { Button } from "@wadzzo/ui/components/button";
 import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 
 const getProfile = cache(async (key: string) => {

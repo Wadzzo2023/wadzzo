@@ -8,7 +8,7 @@ import { Store } from "lucide-react";
 import type { ListingsInput } from "~/server/api/routers/market";
 import { serverApi } from "~/server/api/server";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 
 export const metadata: Metadata = {
   title: "Marketplace",

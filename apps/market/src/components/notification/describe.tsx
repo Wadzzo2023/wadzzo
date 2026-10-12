@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import type { InboxItem } from "~/server/notification-inbox";
+import type { InboxItem } from "@wadzzo/platform/notifications";
 
 type Meta = {
   bounty?: string;

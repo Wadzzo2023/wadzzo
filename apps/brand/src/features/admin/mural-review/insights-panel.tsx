@@ -9,7 +9,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatCard } from "@wadzzo/ui/patterns/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { FilterChips } from "@wadzzo/ui/patterns/toolbar";

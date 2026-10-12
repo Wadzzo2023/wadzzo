@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 /**

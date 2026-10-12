@@ -17,7 +17,7 @@ import {
 import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 
 /** What a column's loading placeholder looks like, so skeletons match the real rows. */
 export type CellShape =

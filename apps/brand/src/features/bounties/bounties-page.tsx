@@ -20,8 +20,8 @@ import { sortOptionEnum } from "~/types/bounty/bounty-type";
 import { htmlToText } from "~/ui/ai/shared";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
-import { Skeleton } from "~/ui/skeleton";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
 

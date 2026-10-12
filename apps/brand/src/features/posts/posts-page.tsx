@@ -9,8 +9,8 @@ import PostCard from "~/components/post/post-card";
 import { Button } from "@wadzzo/ui/components/button";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
-import { Skeleton } from "~/ui/skeleton";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
 

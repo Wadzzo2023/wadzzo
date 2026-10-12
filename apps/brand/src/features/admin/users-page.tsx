@@ -10,7 +10,7 @@ import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";

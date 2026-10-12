@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { InboxItem } from "~/server/notification-inbox";
+import type { InboxItem } from "@wadzzo/platform/notifications";
 
 import { describeBrand, TONE } from "./describe";
 import { useInboxActions } from "./use-inbox-actions";

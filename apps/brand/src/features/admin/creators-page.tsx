@@ -31,7 +31,7 @@ import { BLANK_KEYWORD } from "~/lib/utils";
 import type { CreatorExtraFields } from "~/types/creator";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { DataTable, type Column, type RowAction } from "~/ui/data-table";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { FilterChips, SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";

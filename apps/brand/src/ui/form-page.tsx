@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import { PageHeader } from "./page-header";
+import { PageHeader } from "@wadzzo/ui/patterns/page-header";
 
 /**
  * Layout for the create/edit pages (pins, hotspots, bounties, posts, assets).

@@ -16,7 +16,7 @@ import {
 import { Input } from "@wadzzo/ui/components/input";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 const num = (n: number, max = 2) => n.toLocaleString("en-US", { maximumFractionDigits: max });

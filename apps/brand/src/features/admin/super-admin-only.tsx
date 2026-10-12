@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 import { Button } from "@wadzzo/ui/components/button";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { PageSkeleton } from "~/ui/skeleton";
+import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 
 /** Pages only the Wadzzo deployment's admins may use (platform management, audit log). */
 export function SuperAdminOnly({ children }: { children: ReactNode }) {

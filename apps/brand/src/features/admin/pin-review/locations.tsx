@@ -13,7 +13,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { Check } from "~/ui/data-table";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 

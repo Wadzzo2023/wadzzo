@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { Button } from "@wadzzo/ui/components/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { PageSkeleton } from "~/ui/skeleton";
+import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 
 /** Personal pages: the content when signed in, otherwise a friendly sign-in card. */
 export function SignedIn({

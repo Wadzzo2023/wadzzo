@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 import { NotificationRow } from "./notification-row";

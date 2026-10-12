@@ -27,9 +27,9 @@ import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { SendDialog, type SendableAsset } from "./send-dialog";

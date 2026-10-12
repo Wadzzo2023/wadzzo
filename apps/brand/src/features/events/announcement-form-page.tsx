@@ -25,7 +25,7 @@ import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
-import { FormSkeleton } from "~/ui/skeleton";
+import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";

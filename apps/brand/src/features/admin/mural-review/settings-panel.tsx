@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 type Form = {

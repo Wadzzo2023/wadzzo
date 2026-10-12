@@ -20,7 +20,7 @@ import { useRequireAuth } from "~/hooks/use-require-auth";
 import { type BountyCardData, formatTokens } from "~/lib/bounty";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 /**

@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/p
 import type { SelectedCreator } from "~/components/store/creator-selection-store";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 
 /** Searchable brand picker for admin tools (All maps, admin new pin / hotspot). */
 export function BrandPicker({

@@ -7,7 +7,7 @@ import {
   POST_TYPES,
   scopeTypes,
   type InboxScope,
-} from "~/lib/notification-catalog";
+} from "./catalog";
 import type { Db } from "@wadzzo/db";
 
 export type InboxActor = {

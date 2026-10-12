@@ -3,7 +3,7 @@ import { HeroCarousel } from "~/components/home/hero-carousel";
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { LoadMoreListings } from "~/components/market/load-more";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Section } from "~/ui/section";
 
 // Fresh listings on every visit, rendered on the server so search engines see them.

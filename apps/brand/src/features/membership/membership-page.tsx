@@ -24,8 +24,8 @@ import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Field } from "~/ui/form-page";
-import { PageBody, PageHeader } from "~/ui/page-header";
-import { Skeleton } from "~/ui/skeleton";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 export type SubscriptionType = Omit<Subscription, "issuerPrivate" | "platformId">;

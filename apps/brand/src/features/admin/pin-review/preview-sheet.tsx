@@ -23,7 +23,7 @@ import { Button } from "@wadzzo/ui/components/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@wadzzo/ui/components/sheet";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Person } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
 

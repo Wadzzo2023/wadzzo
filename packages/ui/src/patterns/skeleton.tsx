@@ -1,4 +1,5 @@
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
+import { pageContainerClass } from "./page-layout";
 
 /**
  * Loading placeholders with the shared sweep (`.skeleton` in globals.css).
@@ -16,7 +17,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 export function PageSkeleton({ cards = 6 }: { cards?: number }) {
   return (
     <div
-      className="mx-auto w-full max-w-7xl px-4 pt-5 pb-10 sm:px-6 lg:pt-8"
+      className={pageContainerClass()}
       role="status"
       aria-label="Loading"
     >
@@ -44,7 +45,7 @@ export function FormSkeleton({
 }) {
   return (
     <div
-      className="mx-auto w-full max-w-7xl px-4 pt-5 pb-10 sm:px-6 lg:pt-8"
+      className={pageContainerClass({ form: true })}
       role="status"
       aria-label="Loading form"
     >

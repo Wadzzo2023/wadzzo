@@ -8,6 +8,17 @@
 @source "../../../../packages/ui/src";
 @source "../../../../packages/wallet/src";
 
+/* Page layout numbers read by @wadzzo/ui's PageBody / PageSkeleton. */
+:root {
+  --page-max: 64rem;
+  --page-max-wide: 80rem;
+  --page-pad-bottom: 2.5rem;
+  --page-pad-bottom-lg: 2.5rem;
+  --page-pad-bottom-form: 2.5rem;
+  --page-pad-bottom-form-lg: 2.5rem;
+  --page-pad-x-lg: 1.5rem;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════════════════

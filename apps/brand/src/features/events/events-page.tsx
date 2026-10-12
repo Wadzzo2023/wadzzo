@@ -43,7 +43,7 @@ import {
 import { Skeleton } from "@wadzzo/ui/components/skeleton";
 import { EngagementDialog } from "~/components/events/engagement-dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { api, type RouterOutputs } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";
 

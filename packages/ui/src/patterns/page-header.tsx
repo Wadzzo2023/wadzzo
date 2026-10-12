@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
+import { pageContainerClass } from "./page-layout";
 
 /**
  * Every page's top: optional back link, eyebrow, title, one-line description,
@@ -54,7 +55,7 @@ export function PageHeader({
   );
 }
 
-/** Standard page body: max width, padding, and room above the phone tab bar. */
+/** Standard page body: max width and padding (sizes come from the app's `--page-*` variables). */
 export function PageBody({
   children,
   className,
@@ -66,11 +67,7 @@ export function PageBody({
 }) {
   return (
     <div
-      className={cn(
-        "mx-auto w-full px-4 pt-5 pb-28 sm:px-6 lg:px-8 lg:pt-8 lg:pb-10",
-        wide ? "max-w-[1400px]" : "max-w-6xl",
-        className,
-      )}
+      className={pageContainerClass({ wide, className })}
     >
       {children}
     </div>

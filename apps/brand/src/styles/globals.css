@@ -12,6 +12,17 @@
 @source "../../../../packages/ui/src";
 @source "../../../../packages/wallet/src";
 
+/* Page layout numbers read by @wadzzo/ui's PageBody / PageSkeleton. */
+:root {
+  --page-max: 72rem;
+  --page-max-wide: 87.5rem;
+  --page-pad-bottom: 7rem; /* room for the phone tab bar */
+  --page-pad-bottom-lg: 2.5rem;
+  --page-pad-bottom-form: 10rem;
+  --page-pad-bottom-form-lg: 3rem;
+  --page-pad-x-lg: 2rem;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════════════════

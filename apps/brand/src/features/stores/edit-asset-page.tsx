@@ -26,7 +26,7 @@ import { Textarea } from "@wadzzo/ui/components/textarea";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
-import { FormSkeleton } from "~/ui/skeleton";
+import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";

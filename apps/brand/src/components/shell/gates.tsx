@@ -12,7 +12,7 @@ import JoinArtistPage from "~/components/brand/join-artist";
 import PendingArtistPage from "~/components/brand/pending-artist";
 import RequestApprovalCard from "~/components/brand/request-approval";
 import { Button } from "@wadzzo/ui/components/button";
-import { PageSkeleton } from "~/ui/skeleton";
+import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 
 import type { usePortalAccess } from "./use-portal-access";
 import { platformBranding } from "@wadzzo/platform/branding";

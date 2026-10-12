@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/
 import { MEDIA_META } from "~/components/media/media-meta";
 import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Section } from "~/ui/section";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { stellarNetwork } from "@wadzzo/wallet/config";

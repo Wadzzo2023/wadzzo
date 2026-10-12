@@ -25,9 +25,9 @@ import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { PageHero } from "~/ui/page-hero";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 

@@ -12,7 +12,7 @@ import {
 } from "@wadzzo/ui/components/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
 

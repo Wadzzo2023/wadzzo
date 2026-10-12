@@ -26,7 +26,7 @@ import { Textarea } from "@wadzzo/ui/components/textarea";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
-import { FormSkeleton } from "~/ui/skeleton";
+import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 

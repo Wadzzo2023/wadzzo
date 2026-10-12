@@ -8,12 +8,12 @@ import { NotificationRow } from "~/components/notification/notification-row";
 import { useInboxActions } from "~/components/notification/use-inbox-actions";
 import { SignedIn } from "~/components/shell/sign-in-prompt";
 import { Button } from "@wadzzo/ui/components/button";
-import { CATEGORIES } from "~/lib/notification-catalog";
+import { CATEGORIES } from "@wadzzo/platform/notifications";
 import { cn } from "@wadzzo/ui/lib/cn";
-import type { InboxItem } from "~/server/notification-inbox";
+import type { InboxItem } from "@wadzzo/platform/notifications";
 import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
-import { Skeleton } from "~/ui/skeleton";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
 export function NotificationsPage() {

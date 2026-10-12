@@ -6,7 +6,7 @@ import { MEDIA_META } from "~/components/media/media-meta";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard as ListingCardData } from "~/server/api/routers/market";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 
 const num = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 

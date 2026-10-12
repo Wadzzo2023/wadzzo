@@ -24,9 +24,9 @@ import { useRequireAuth } from "~/hooks/use-require-auth";
 import { isCustodial } from "~/lib/custodial";
 import { describeFile, putFile } from "~/lib/upload";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/patterns/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import { Skeleton } from "~/ui/skeleton";
+import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Me = NonNullable<RouterOutputs["user"]["me"]>;

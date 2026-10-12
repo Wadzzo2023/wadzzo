@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import * as inbox from "~/server/notification-inbox";
+import * as inbox from "@wadzzo/platform/notifications";
 
 const SCOPE = "fan" as const;
 const ids = z.array(z.number().int()).min(1).max(200);

@@ -17,7 +17,7 @@ import { Input } from "@wadzzo/ui/components/input";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { DataTable, type Column } from "~/ui/data-table";
 import { Field } from "~/ui/form-page";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 

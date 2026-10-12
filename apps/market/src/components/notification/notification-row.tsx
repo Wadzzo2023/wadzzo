@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
-import type { InboxItem } from "~/server/notification-inbox";
+import type { InboxItem } from "@wadzzo/platform/notifications";
 
 import { describeFan } from "./describe";
 import { useInboxActions } from "./use-inbox-actions";
