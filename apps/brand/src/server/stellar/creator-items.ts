@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
@@ -223,7 +224,7 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
       reserveCost: (q.needsIssuer ? ISSUER_STARTING_XLM : 0) + (input.mintNow > 0 ? BASE_RESERVE : 0),
       networkFee: FEE_XLM(1),
       total: q.totalXlm,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },

@@ -9,7 +9,7 @@ export default async function handler(
 ) {
   try {
     const pubkey = z.string().length(56).parse(req.query.pubkey);
-    const xdr = await buildLoginChallengeXdr({ pubkey });
+    const xdr = await buildLoginChallengeXdr({ publicKey: pubkey });
 
     res.status(200).json({ xdr });
   } catch (e) {

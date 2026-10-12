@@ -8,7 +8,8 @@ import {
 
 import { env } from "~/env";
 import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { getplatformAssetNumberForXLM as getPlatformAssetNumberForXLM } from "./get_token_price";
 import { type AccountType } from "./utils";
 

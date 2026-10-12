@@ -17,7 +17,8 @@ export async function getBlurData(imgUrl: string, isUrl = true) {
   }
 
   try {
-    const { base64 } = await getPlaiceholder(imgUrl);
+    const response = await fetch(imgUrl);
+    const { base64 } = await getPlaiceholder(Buffer.from(await response.arrayBuffer()));
     return base64;
   } catch (e) {
     // log.error( e);

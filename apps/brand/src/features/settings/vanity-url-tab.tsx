@@ -1,5 +1,7 @@
 "use client";
 
+import { getTransactionHashHex } from "@wadzzo/wallet";
+
 import type { VanitySubscription } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 import { format, formatDistanceToNow } from "date-fns";
@@ -68,7 +70,7 @@ export function VanityUrlTab({ vanityURL, subscription }: { vanityURL: string | 
     try {
       const xdr = await getXdr.mutateAsync({ vanityURL: url, signWith: getCustodialSigner() });
       // Signing doesn't change the hash, so we know which payment to verify.
-      const txHash = TransactionBuilder.fromXDR(xdr, networkPassphrase).hash().toString("hex");
+      const txHash = getTransactionHashHex(TransactionBuilder.fromXDR(xdr, networkPassphrase));
       const paid = await signAndSubmitTransaction({
         xdr: xdr,
         walletType: session.data?.user?.walletType,

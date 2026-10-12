@@ -16,3 +16,4 @@ export {
   accountServiceResponseSchema,
   type AccountServiceResponse,
 } from "./providers/custodial/account-service-schema";
+export type { WadzzoSessionUser } from "./session/session-user";

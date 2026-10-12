@@ -1,4 +1,4 @@
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 
 function Skeleton({
   className,

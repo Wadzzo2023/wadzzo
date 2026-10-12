@@ -7,7 +7,8 @@ import {
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type MyAssetType } from "./utils";
 
 /**

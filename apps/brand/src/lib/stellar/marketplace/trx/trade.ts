@@ -7,7 +7,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../SECRET";
-import { type CustodialSigner, signXdrForCustodialUser } from "../../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 
 export async function tradeAssetXDR(props: {

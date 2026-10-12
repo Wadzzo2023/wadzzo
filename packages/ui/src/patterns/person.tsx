@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 
 /** First letter for an avatar without a picture. */
@@ -41,7 +41,7 @@ export function Person({
   className?: string;
 }) {
   // An empty name counts as no name.
-  const title = (name?.trim() ? name.trim() : undefined) ?? (id ? addrShort(id, 5) : "Unknown");
+  const title = (name?.trim() ? name.trim() : undefined) ?? (id ? abbreviateAddress(id, 5) : "Unknown");
   const avatar = size === "sm" ? "size-7 text-xs" : size === "lg" ? "size-12 text-base" : "size-9";
   return (
     <div className={cn("flex min-w-0 items-center gap-3", className)}>

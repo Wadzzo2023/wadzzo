@@ -8,7 +8,8 @@ import {
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { AccountSchema, type AccountType } from "./utils";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 
 const log = console;
 

@@ -3,6 +3,7 @@
 // UI
 export { ConnectWalletButton } from "./ui/connect-wallet-button";
 export { ConnectWalletDialog } from "./ui/connect-wallet-dialog";
+export { ConnectWalletPopups } from "./ui/connect-wallet-popups";
 
 // state
 export { useConnectWalletDialogStore } from "./state/connect-dialog-store";
@@ -27,3 +28,4 @@ export {
 } from "./errors/stellar-transaction-error";
 export { isStellarAccountActive, submitSignedTransaction } from "./stellar/horizon";
 export { concatAssetWithIssuer, splitAssetKey } from "./stellar/asset-keys";
+export { getTransactionHashHex } from "./stellar/transaction-hash";

@@ -1,6 +1,7 @@
 import { db } from "@wadzzo/db";
 import { addMonths } from 'date-fns'
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { Horizon, Keypair, Operation, TransactionBuilder, } from "@stellar/stellar-sdk";
 import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";

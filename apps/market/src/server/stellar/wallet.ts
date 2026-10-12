@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
@@ -76,7 +77,7 @@ export async function buyTokenPack(
       total: usd,
       quantity: tokens,
       paymentRef: paymentId,
-      txHash: tx.hash().toString("hex"),
+      txHash: getTransactionHashHex(tx),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },
@@ -120,7 +121,7 @@ export async function prepareSwap(ctx: Ctx, { userId, tokens, signer }: { userId
       currency: PLATFORM_ASSET.code,
       price: tokens,
       total: tokens,
-      txHash: tx.hash().toString("hex"),
+      txHash: getTransactionHashHex(tx),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },
@@ -165,7 +166,7 @@ export async function prepareGiftClaim(ctx: Ctx, { userId, balanceId, signer }: 
       reserveCost: needsTrust ? BASE_RESERVE_XLM : 0,
       networkFee: need - (needsTrust ? BASE_RESERVE_XLM : 0),
       total: need,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },

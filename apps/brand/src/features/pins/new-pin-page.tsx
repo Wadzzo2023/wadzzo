@@ -1,5 +1,7 @@
 "use client";
 
+import type { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PinType } from "@wadzzo/db";
 import { Calendar, Loader2, MapPin, Settings, Sparkles, Tag } from "lucide-react";
@@ -57,7 +59,7 @@ export default function NewPinPage() {
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
-  const methods = useForm<CreatePinType>({
+  const methods = useForm<z.input<typeof createPinFormSchema>, unknown, CreatePinType>({
     resolver: zodResolver(createPinFormSchema),
     defaultValues: {
       lat: fromQuery?.lat,

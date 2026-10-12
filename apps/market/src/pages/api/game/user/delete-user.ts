@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 
 import { createTransport, Transporter } from "nodemailer";
-import { initFirebaseAdmin } from "@wadzzo/wallet/server";
+import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db";
@@ -46,9 +46,7 @@ export default async function handler(req: NextApiRequest,
         });
     }
     if (token.email) {
-        const admin = initFirebaseAdmin();
-        const userRecord = await admin.auth().getUserByEmail(token.email);
-        const deleteUser = await admin.auth().deleteUser(userRecord.uid);
+        await deleteFirebaseUserByEmail(token.email);
     }
     try {
         const user = await db.user.findUnique({

@@ -122,7 +122,7 @@ function HotspotForm({ feature, shape }: { feature: StoredFeature; shape: Hotspo
 
   const selectedCreator = creatorsQuery.data?.find((c) => c.id === selectedCreatorId);
 
-  const methods = useForm<HotspotForm>({
+  const methods = useForm<z.input<typeof createHotspotFormSchema>, unknown, HotspotForm>({
     resolver: zodResolver(createHotspotFormSchema),
     defaultValues: {
       title: "",

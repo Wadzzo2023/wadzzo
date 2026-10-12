@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
@@ -115,7 +116,7 @@ export async function prepareStorageSetup(ctx: Ctx, { userId, payIn, signer }: {
       platformFee: quote.lines.find((l) => l.key === "platformFee")?.amount ?? 0,
       networkFee: quote.lines.find((l) => l.key === "networkFee")?.amount ?? 0,
       total: quote.total,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },
@@ -189,7 +190,7 @@ export async function prepareListing(
       platformFee: quote.lines.find((l) => l.key === "platformFee")?.amount ?? 0,
       networkFee: quote.lines.find((l) => l.key === "networkFee")?.amount ?? 0,
       total: quote.total,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },
@@ -235,7 +236,7 @@ export async function prepareUnlisting(ctx: Ctx, { userId, listingId, copies, si
       currency: "XLM",
       networkFee: networkXlm,
       total: networkXlm,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },

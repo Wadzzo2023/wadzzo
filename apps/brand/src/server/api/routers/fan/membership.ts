@@ -25,7 +25,7 @@ export const TierSchema = z.object({
   popular: z.boolean().default(false),
   isActive: z.boolean().default(true),
   price: z
-    .number({ required_error: "Price must be entered as a number", invalid_type_error: "Price must be entered as a number" })
+    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .min(1, { message: "Price must be at least 1" }),
 });
 
@@ -57,28 +57,19 @@ export const CreatorPageAssetSchema = z.object({
       },
     ),
   limit: z
-    .number({
-      required_error: "Limit must be entered as a number",
-      invalid_type_error: "Limit must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
     .min(1, { message: "Limit must be greater than 0" })
     .max(MAX_ASSET_LIMIT, {
       message: `Limit must be less than ${MAX_ASSET_LIMIT} `,
     })
     .nonnegative(),
   price: z
-    .number({
-      required_error: "Price must be entered as a number",
-      invalid_type_error: "Price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .nonnegative().min(.01, {
       message: "Price must be greater than 0"
     }).default(2),
   priceUSD: z
-    .number({
-      required_error: "Price must be entered as a number",
-      invalid_type_error: "Price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .nonnegative().min(.01, {
       message: "Price must be greater than 0"
     })

@@ -5,12 +5,15 @@
   "type": "module",
   "description": "Shared shadcn/Radix components and page patterns for the Wadzzo web apps.",
   "exports": {
+    "./components/use-toast": "./src/components/use-toast.ts",
     "./components/*": "./src/components/*.tsx",
     "./patterns/*": "./src/patterns/*.tsx",
-    "./lib/*": "./src/lib/*.ts",
-    "./hooks/*": "./src/components/*.ts"
+    "./lib/*": "./src/lib/*.ts"
   },
-  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "catalog:",
     "@radix-ui/react-avatar": "catalog:",
@@ -38,7 +41,10 @@
     "tailwind-merge": "catalog:",
     "vaul": "catalog:"
   },
-  "peerDependencies": { "react": "catalog:", "react-dom": "catalog:" },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

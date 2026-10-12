@@ -77,7 +77,7 @@ function HotspotForm({ feature, shape }: { feature: StoredFeature; shape: Hotspo
   const today = useMemo(() => new Date(), []);
   const inOneYear = useMemo(() => new Date(today.getFullYear() + 1, today.getMonth(), today.getDate(), today.getHours(), today.getMinutes()), [today]);
 
-  const methods = useForm<HotspotForm>({
+  const methods = useForm<z.input<typeof createHotspotFormSchema>, unknown, HotspotForm>({
     resolver: zodResolver(createHotspotFormSchema),
     defaultValues: {
       title: "",

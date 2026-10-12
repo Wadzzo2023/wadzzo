@@ -7,7 +7,8 @@ import {
 } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset, networkPassphrase } from "@wadzzo/wallet/config";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { getplatformAssetNumberForXLM } from "./get_token_price";
 
 export async function createRedeemXDRAsset({

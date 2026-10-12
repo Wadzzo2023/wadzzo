@@ -3,8 +3,10 @@
 @import "tailwind-scrollbar-hide/v4";
 @import "./styles.css";
 
-/* The connect_wallet submodule's classes live outside src/. */
-@source "../../package";
+
+/* Class names used inside the shared packages (Tailwind only scans the app by default). */
+@source "../../../../packages/ui/src";
+@source "../../../../packages/wallet/src";
 
 @custom-variant dark (&:is(.dark *));
 

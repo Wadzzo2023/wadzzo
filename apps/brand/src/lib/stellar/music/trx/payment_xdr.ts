@@ -7,7 +7,8 @@ import {
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { networkPassphrase } from "./create_song_token";
-import { type CustodialSigner, signXdrForCustodialUser } from "../../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { StellarAccount } from "../../marketplace/test/Account";

@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
@@ -107,7 +108,7 @@ export async function preparePageTokens(ctx: Ctx, { buyerId, saleId, payIn, sign
       networkFee: lineAmt("networkFee"),
       reserveCost: lineAmt("reserve"),
       total: p.quote.total,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },

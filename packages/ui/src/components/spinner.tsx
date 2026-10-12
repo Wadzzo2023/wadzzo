@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 import { type VariantProps, cva } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 

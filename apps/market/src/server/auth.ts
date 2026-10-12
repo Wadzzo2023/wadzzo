@@ -2,7 +2,6 @@ import { verifyMessageSignature } from "@albedo-link/signature-verification";
 import axios from "axios";
 import {
   getServerSession,
-  type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 
@@ -12,7 +11,7 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { WalletType } from "@wadzzo/wallet/shared";
+import { WalletType, type WadzzoSessionUser as User } from "@wadzzo/wallet/shared";
 import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken } from "@wadzzo/wallet/server";
 import { firebaseAuth } from "@wadzzo/wallet";
 import { accountServiceResponseSchema } from "@wadzzo/wallet/shared";
@@ -26,25 +25,6 @@ import { USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { verifyTransactionSignature } from "@wadzzo/wallet/server";
 import { env } from "~/env";
 
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
-type User = DefaultSession["user"] & {
-  id: string;
-  walletType: WalletType;
-  emailVerified: boolean;
-  // ...other properties
-  // role: UserRole;
-};
-
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: User;
-  }
-}
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -89,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         if (cred.walletType == WalletType.emailPass) {
           const { email, password, fromAppSign } = cred;
           const userCredential = await signInWithEmailAndPassword(
-            auth,
+            firebaseAuth,
             email,
             password,
           );

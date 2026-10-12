@@ -4,6 +4,10 @@
 @plugin "@tailwindcss/typography";
 
 /* Class-based dark mode (next-themes puts `.dark` on <html>). */
+/* Class names used inside the shared packages (Tailwind only scans the app by default). */
+@source "../../../../packages/ui/src";
+@source "../../../../packages/wallet/src";
+
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════════════════

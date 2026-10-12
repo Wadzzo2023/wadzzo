@@ -4,8 +4,8 @@ import type { LucideIcon } from "lucide-react";
 import { Search, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-import { Input } from "@wadzzo/ui/components/input";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Input } from "../components/input";
+import { cn } from "../lib/cn";
 
 /** The row above a list: search on the left, filters and actions after it. */
 export function Toolbar({ children, className }: { children: ReactNode; className?: string }) {

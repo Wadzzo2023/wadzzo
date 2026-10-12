@@ -1,6 +1,6 @@
 import { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
-import { initFirebaseAdmin } from "@wadzzo/wallet/server";
+import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 import { z } from "zod";
 
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
@@ -155,16 +155,9 @@ export const userRouter = createTRPCRouter({
     }
 
     if (user.email) {
-      try {
-        const admin = initFirebaseAdmin();
-        const record = await admin.auth().getUserByEmail(user.email);
-        await admin.auth().deleteUser(record.uid);
-      } catch (e) {
-        // No Firebase user for this email (wallet sign-up) is fine; anything
-        // else means the login would survive the deletion, so stop.
-        const code = (e as { code?: string }).code;
-        if (code !== "auth/user-not-found") throw e;
-      }
+      // No Firebase user for this email (wallet sign-up) is fine; any other
+      // failure means the login would survive the deletion, so it propagates.
+      await deleteFirebaseUserByEmail(user.email);
     }
 
     await ctx.db.user.delete({ where: { id: userId } });

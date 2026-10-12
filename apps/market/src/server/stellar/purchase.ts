@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Keypair, Operation, TransactionBuilder, type Transaction } from "@stellar/stellar-sdk";
@@ -365,7 +366,7 @@ async function buildTransaction(ctx: Ctx, p: Plan, buyerId: string, signer: Sign
   // Card purchases where the buyer has nothing to sign go out without them.
   const buyerMustSign = fromBuyer || quote.needsTrustline || p.feeSource === "buyer";
   const xdr = buyerMustSign ? await signForUser(built.toXDR(), signer) : built.toXDR();
-  return { xdr, hash: built.hash().toString("hex"), minted, buyerMustSign, expiresAt: txExpiry(built) };
+  return { xdr, hash: getTransactionHashHex(built), minted, buyerMustSign, expiresAt: txExpiry(built) };
 }
 
 async function stockKeypair(ctx: Ctx, l: Listing) {

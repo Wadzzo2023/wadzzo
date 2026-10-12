@@ -48,7 +48,7 @@ const bal = async (id: string, code: string, issuer: string) => {
 describe("gift an item (testnet)", () => {
   it("mints on demand, delivers directly or as a claimable gift, and uses stock first", async () => {
     const { db } = await import("@wadzzo/db");
-    const { PLATFORM_ASSET } = await import("~/lib/stellar/constant");
+    const { PLATFORM_ASSET } = await import("@wadzzo/wallet/config");
     const { quoteGiftItem, prepareGiftItem, confirmGiftItem, giftableItems } = await import("~/server/stellar/gift-item");
 
     const brand = Keypair.random(), storage = Keypair.random(), issuer = Keypair.random(), fan = Keypair.random();

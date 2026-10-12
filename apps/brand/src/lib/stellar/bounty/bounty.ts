@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import {
   Asset,
   BASE_FEE,
@@ -9,7 +10,8 @@ import {
 } from "@stellar/stellar-sdk";
 import { networkPassphrase, PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../marketplace/SECRET";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 
 const assetIssuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 const assetCode = "USDC";
@@ -480,7 +482,7 @@ export async function checkXDRSubmitted(xdr: string) {
   try {
     const server = new Horizon.Server(STELLAR_URL);
     const transaction = new Transaction(xdr, networkPassphrase);
-    const txHash = transaction.hash().toString("hex");
+    const txHash = getTransactionHashHex(transaction);
 
     try {
       const transactionResult = await server

@@ -33,7 +33,7 @@ export class StellarAccount {
     })?.balance;
   }
 
-  getTokenBalance(code: string, issuer: string) {
+  getTokenBalance(code: string, issuer: string | undefined) {
     const asset = this.balances.find((balance) => {
       if (
         balance.asset_type === "credit_alphanum12" ||
@@ -50,7 +50,7 @@ export class StellarAccount {
     } else return 0;
   }
 
-  hasTrustline(code: string, issuer: string) {
+  hasTrustline(code: string, issuer: string | undefined) {
     const trustline = this.balances.find((balance) => {
       if (
         (balance.asset_type === "credit_alphanum12" ||

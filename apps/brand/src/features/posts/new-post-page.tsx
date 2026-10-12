@@ -45,7 +45,7 @@ export default function NewPostPage() {
   const creator = api.fan.creator.meCreator.useQuery();
   const tiers = api.fan.member.getAllMembership.useQuery({});
 
-  const { register, handleSubmit, setValue, watch, control, formState } = useForm<PostForm>({
+  const { register, handleSubmit, setValue, watch, control, formState } = useForm<z.input<typeof PostSchema>, unknown, PostForm>({
     resolver: zodResolver(PostSchema),
     defaultValues: { heading: "", content: "", subscription: "public" },
   });

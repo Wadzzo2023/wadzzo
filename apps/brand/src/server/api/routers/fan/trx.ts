@@ -306,9 +306,7 @@ export const trxRouter = createTRPCRouter({
     .input(z.object({
       pubkey: z.string().length(56),
       amount: z.number({
-        required_error: "Amount is required",
-        invalid_type_error: "Amount must be a number",
-        message: "Amount must be a number",
+        error: (issue) => (issue.input === undefined ? "Amount is required" : "Amount must be a number"),
       }).int().positive(),
       assetCode: z.string().nonempty(),
       assetIssuer: z.string().nonempty(),

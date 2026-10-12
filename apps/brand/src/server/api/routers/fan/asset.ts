@@ -1,7 +1,6 @@
 import { ItemPrivacy, MediaType } from "@wadzzo/db";
 import { Horizon } from "@stellar/stellar-sdk";
 import { TRPCError } from "@trpc/server";
-import { storage } from "firebase-admin";
 import { z } from "zod";
 
 import { ExtraSongInfo, NftFormSchema } from "~/types/asset";
@@ -38,30 +37,18 @@ export const SellPageAssetSchema = z.object({
     ).optional(),
   description: z.string().optional(),
   amountToSell: z
-    .number({
-      required_error: "Amount to sell must be entered as a number",
-      invalid_type_error: "Amount to sell must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Amount to sell must be entered as a number" : "Amount to sell must be entered as a number") })
     .int({ message: "Amount must be a whole number" })
     .positive({ message: "Amount must be greater than 0" }),
   price: z
-    .number({
-      required_error: "Price must be entered as a number",
-      invalid_type_error: "Price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .positive({ message: "Price must be greater than 0" }),
   priceUSD: z
-    .number({
-      required_error: "USD price must be entered as a number",
-      invalid_type_error: "USD price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "USD price must be entered as a number" : "USD price must be entered as a number") })
     .positive({ message: "USD price must be greater than 0" })
     .default(1),
   priceXLM: z
-    .number({
-      required_error: "XLM price must be entered as a number",
-      invalid_type_error: "XLM price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "XLM price must be entered as a number" : "XLM price must be entered as a number") })
     .nonnegative({ message: "XLM price cannot be negative" })
     .default(0),
 })
@@ -467,7 +454,7 @@ export const shopRouter = createTRPCRouter({
   }),
   deleteSoldPageAsset: creatorProcedure.input(z.object({
     id: z.number({
-      required_error: "Sell Pageasset id must be needed"
+      error: (issue) => (issue.input === undefined ? "Sell Pageasset id must be needed" : undefined)
     })
   })).mutation(async ({ ctx, input }) => {
     // Only the brand that listed it.

@@ -15,14 +15,8 @@ import {
 export const tradeFormSchema = z.object({
   selling: z.string(),
   buying: z.string(),
-  amount: z.number({
-    required_error: "Amount  must be a number",
-    invalid_type_error: "Amount must be a number",
-  }).positive(),
-  price: z.number({
-    required_error: "Price  must be a number",
-    invalid_type_error: "Price must be a number",
-  }).positive(),
+  amount: z.number({ error: (issue) => (issue.input === undefined ? "Amount  must be a number" : "Amount must be a number") }).positive(),
+  price: z.number({ error: (issue) => (issue.input === undefined ? "Price  must be a number" : "Price must be a number") }).positive(),
 });
 export const tradeRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {

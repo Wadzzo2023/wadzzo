@@ -91,7 +91,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
     scope: "future_drops",
   };
 
-  const methods = useForm<UpdateForm>({
+  const methods = useForm<z.input<typeof updateHotspotFormSchema>, unknown, UpdateForm>({
     resolver: zodResolver(updateHotspotFormSchema),
     defaultValues,
   });

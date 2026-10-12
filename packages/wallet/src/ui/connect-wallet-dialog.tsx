@@ -11,6 +11,7 @@ import {
   walletConnectProvider,
 } from "../providers/extension/wallet-connect";
 import { useConnectWalletDialogStore } from "../state/connect-dialog-store";
+import { useWalletConnectModalStore } from "../state/wallet-connect-modal-store";
 import { isStellarAccountActive } from "../stellar/horizon";
 import { abbreviateAddress } from "@wadzzo/utils/utils";
 import { ForgotPasswordForm } from "./forgot-password-form";
@@ -593,6 +594,7 @@ function WCButton({
 }) {
   const [initializing, setInitializing] = useState(true);
   const [wcLoading, setWcLoading] = useState(false);
+  const walletConnectModal = useWalletConnectModalStore();
 
   async function onInitialize() {
     try {
@@ -618,7 +620,9 @@ function WCButton({
               await onInitialize();
             }
             setWcLoading(false);
+            walletConnectModal.setIsOpen(true);
             await walletConnectProvider.login();
+            walletConnectModal.setIsOpen(false);
             toast("WalletConnect session ended");
           };
           void runner();

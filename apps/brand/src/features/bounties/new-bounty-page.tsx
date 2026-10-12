@@ -33,10 +33,10 @@ const XLM_PER_USD = 0.7;
 
 const BountySchema = z.object({
   title: z.string().min(1, { message: "Title can't be empty" }).max(65, { message: "Title can't be more than 65 characters" }),
-  totalWinner: z.number({ invalid_type_error: "Enter how many winners" }).int().min(1, { message: "At least 1 winner" }),
-  prizeInUSD: z.number({ invalid_type_error: "Enter the prize" }).min(0.00001, { message: "Enter the prize" }),
+  totalWinner: z.number({ error: "Enter how many winners" }).int().min(1, { message: "At least 1 winner" }),
+  prizeInUSD: z.number({ error: "Enter the prize" }).min(0.00001, { message: "Enter the prize" }),
   prize: z.number().min(0.00001, { message: "Enter the prize" }),
-  requiredBalance: z.number({ invalid_type_error: "Must be a number" }).nonnegative({ message: "Can't be less than 0" }).optional(),
+  requiredBalance: z.number({ error: "Must be a number" }).nonnegative({ message: "Can't be less than 0" }).optional(),
   content: z.string().min(2, { message: "Describe the task" }),
 });
 type BountyForm = z.infer<typeof BountySchema>;
@@ -60,7 +60,7 @@ export default function NewBountyPage() {
   const [uploading, setUploading] = useState(false);
   const [signing, setSigning] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, control, getValues, formState } = useForm<BountyForm>({
+  const { register, handleSubmit, setValue, watch, control, getValues, formState } = useForm<z.input<typeof BountySchema>, unknown, BountyForm>({
     resolver: zodResolver(BountySchema),
     defaultValues: { title: "", content: "", totalWinner: 1, prizeInUSD: 0, prize: 0, requiredBalance: 0 },
   });

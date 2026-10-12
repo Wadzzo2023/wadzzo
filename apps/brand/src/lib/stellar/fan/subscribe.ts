@@ -8,7 +8,8 @@ import {
 import { env } from "~/env";
 import { PLATFORM_ASSET, PLATFORM_FEE, STELLAR_URL, STROOP, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "../marketplace/test/Account";
-import { type CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type MyAssetType } from "./utils";
 
 const log = console;

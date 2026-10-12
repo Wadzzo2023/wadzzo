@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 
 /** The one busy indicator (same Loader2 spin as the fan apps). */
 export function Spinner({ className, label = "Loading" }: { className?: string; label?: string }) {

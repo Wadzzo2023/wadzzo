@@ -47,7 +47,7 @@ export async function authorizeCredentials(
     if (cred.walletType == WalletType.emailPass) {
       const { email, password, fromAppSign } = cred;
       const userCredential = await signInWithEmailAndPassword(
-        auth,
+        firebaseAuth,
         email,
         password,
       );

@@ -3,8 +3,8 @@
 import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@wadzzo/ui/components/alert-dialog";
-import { Button } from "@wadzzo/ui/components/button";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/alert-dialog";
+import { Button } from "../components/button";
 
 /**
  * The one "are you sure?" dialog (replaces window.confirm, which blocks the

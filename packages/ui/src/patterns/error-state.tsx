@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Button } from "../components/button";
+import { cn } from "../lib/cn";
 
 /** A query failed: say so plainly and offer a retry. */
 export function ErrorState({ message, onRetry, className }: { message?: string; onRetry?: () => void; className?: string }) {

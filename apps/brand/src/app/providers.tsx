@@ -8,8 +8,8 @@ import type { ReactNode } from "react";
 import { Toaster } from "@wadzzo/ui/components/toaster";
 import { TRPCReactProvider } from "~/trpc/provider";
 
-// connect_wallet's global dialogs (wallet connect, toasts). Browser-only.
-const WalletPopups = dynamic(() => import("package/connect_wallet/src/components/popup_imports"), { ssr: false });
+// The wallet package's global dialogs (connect wallet, toasts). Browser-only.
+const WalletPopups = dynamic(() => import("@wadzzo/wallet").then((mod) => mod.ConnectWalletPopups), { ssr: false });
 
 export function Providers({ children }: { children: ReactNode }) {
   return (

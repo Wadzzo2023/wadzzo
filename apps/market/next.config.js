@@ -4,7 +4,7 @@
 
 /** @type {import("next").NextConfig} */
 const config = {
-  transpilePackages: ["three"],
+  transpilePackages: ["three", "@wadzzo/db", "@wadzzo/errors", "@wadzzo/platform", "@wadzzo/ui", "@wadzzo/utils", "@wadzzo/wallet"],
   reactStrictMode: true,
   images: {
     remotePatterns: [

@@ -23,24 +23,15 @@ export const NftFormSchema = z.object({
   coverImgUrl: z.string().min(1, { message: "Thumbnail is required" }),
   mediaType: z.nativeEnum(MediaType),
   price: z
-    .number({
-      required_error: "Price must be entered as a number",
-      invalid_type_error: "Price must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Price must be entered as a number" : "Price must be entered as a number") })
     .nonnegative()
     .default(2),
   priceUSD: z
-    .number({
-      required_error: "Limit must be entered as a number",
-      invalid_type_error: "Limit must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
     .nonnegative()
     .default(1),
   limit: z
-    .number({
-      required_error: "Limit must be entered as a number",
-      invalid_type_error: "Limit must be entered as a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Limit must be entered as a number" : "Limit must be entered as a number") })
     .nonnegative(),
   //code can't contain any spaces
   code: z

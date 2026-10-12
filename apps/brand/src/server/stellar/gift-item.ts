@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Claimant, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
@@ -242,7 +243,7 @@ export async function prepareGiftItem(ctx: Ctx, input: { assetId: number; pubkey
           networkFee: q.lines.find((l) => l.label === "Network fee")?.amount ?? 0,
           reserveCost: q.lines.filter((l) => l.label === "Gift reserve").reduce((s, l) => s + l.amount, 0),
           total: q.total,
-          txHash: built.hash().toString("hex"),
+          txHash: getTransactionHashHex(built),
           expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
           platformId: ctx.platform.id,
         },

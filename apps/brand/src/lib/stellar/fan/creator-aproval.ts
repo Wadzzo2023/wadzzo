@@ -8,7 +8,7 @@ import {
 
 import { env } from "~/env";
 import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
-import { CustodialSigner } from "../utils";
+import { CustodialSigner } from "@wadzzo/wallet/shared";
 import { type AccountType } from "./utils";
 import { Key } from "lucide-react";
 

@@ -22,8 +22,9 @@ async function fetchLoginChallenge(publicKey: string): Promise<string | null> {
   return ((await response.json()) as { xdr: string }).xdr;
 }
 
-const toastError = (error: unknown, fallback: string) =>
+const toastError = (error: unknown, fallback: string): void => {
   toast.error(isAppError(error) ? error.message : fallback);
+};
 
 /** The sign-in flow every extension wallet shares: connect → challenge → sign → session. */
 export function createExtensionProvider(wallet: ExtensionWallet): WalletProvider {

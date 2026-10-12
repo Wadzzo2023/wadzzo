@@ -67,7 +67,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
   const backHref = isAdmin ? "/admin/pins" : "/pins";
   const backLabel = isAdmin ? "Pin review" : "Pins";
 
-  const methods = useForm<EditForm>({
+  const methods = useForm<z.input<typeof updateMapFormSchema>, unknown, EditForm>({
     resolver: zodResolver(updateMapFormSchema),
     defaultValues: {
       pinId: pin.id,

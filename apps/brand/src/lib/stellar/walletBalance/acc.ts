@@ -13,7 +13,8 @@ import {
 
 import { Horizon } from "@stellar/stellar-sdk";
 import { StellarAccount } from "../marketplace/test/Account";
-import { CustodialSigner, signXdrForCustodialUser } from "../utils";
+import { CustodialSigner } from "@wadzzo/wallet/shared";
+import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
 import { api } from "~/utils/api";

@@ -1,3 +1,4 @@
+import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import "server-only";
 
 import { Asset, Claimant, Operation, StrKey, TransactionBuilder } from "@stellar/stellar-sdk";
@@ -109,7 +110,7 @@ export async function prepareSend(ctx: Ctx, { userId, signer, ...input }: SendIn
       total: input.amount,
       // fees are paid in XLM; recorded only when the amount itself is XLM, so `currency` stays true
       networkFee: isXlm(input) ? FEE_XLM : 0,
-      txHash: built.hash().toString("hex"),
+      txHash: getTransactionHashHex(built),
       expiresAt: new Date(Date.now() + TX_TIMEOUT_SECONDS * 1000),
       platformId: ctx.platform.id,
     },

@@ -3,6 +3,7 @@ import SignClient from "@walletconnect/sign-client";
 import { getSdkError } from "@walletconnect/utils";
 import { ConfigCtrl, ModalCtrl } from "@web3modal/core";
 import { Web3Modal } from "@web3modal/standalone";
+import { type W3mModal } from "@web3modal/ui";
 import toast from "react-hot-toast";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
@@ -184,3 +185,12 @@ export const walletConnectProvider: WalletProvider = {
     return Boolean(result);
   },
 };
+
+// React 19 keeps JSX in the react module, so the custom element is declared there.
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "w3m-modal": Partial<W3mModal>;
+    }
+  }
+}

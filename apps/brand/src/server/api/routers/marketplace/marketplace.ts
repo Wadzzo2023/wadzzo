@@ -19,10 +19,7 @@ import { logAudit } from "@wadzzo/platform/server";
 import { platformScope } from "@wadzzo/platform/server";
 export const BackMarketFormSchema = z.object({
   placingCopies: z
-    .number({
-      required_error: "Placing Copies  must be a number",
-      invalid_type_error: "Placing Copies must be a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Placing Copies  must be a number" : "Placing Copies must be a number") })
     .nonnegative()
     .int(),
   code: z
@@ -52,10 +49,7 @@ export const AssetSelectAllProperty = {
 };
 export const PlaceMarketFormSchema = z.object({
   placingCopies: z
-    .number({
-      required_error: "Placing Copies  must be a number",
-      invalid_type_error: "Placing Copies must be a number",
-    })
+    .number({ error: (issue) => (issue.input === undefined ? "Placing Copies  must be a number" : "Placing Copies must be a number") })
     .nonnegative()
     .int(),
   code: z
