@@ -1,0 +1,26 @@
+{
+  "name": "@wadzzo/errors",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./trpc": "./src/trpc.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@trpc/server": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@trpc/server": { "optional": true }
+  },
+  "devDependencies": {
+    "@wadzzo/tsconfig": "workspace:*",
+    "@trpc/server": "catalog:",
+    "typescript": "catalog:"
+  }
+}

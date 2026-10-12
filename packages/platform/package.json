@@ -1,0 +1,25 @@
+{
+  "name": "@wadzzo/platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "White-label platforms: which platform a deployment serves, row scoping, audit log and notifications.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./scope": "./src/scope.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@wadzzo/db": "workspace:*",
+    "@wadzzo/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@wadzzo/tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
