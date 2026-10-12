@@ -1,5 +1,6 @@
 import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, STROOP } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 type Balances = (
   | Horizon.HorizonApi.BalanceLineNative
@@ -9,7 +10,7 @@ type Balances = (
 )[];
 
 export async function accountBalances({ userPub }: { userPub: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const transactionInializer = await server.loadAccount(userPub);
   const balances = transactionInializer.balances;
@@ -25,7 +26,7 @@ export async function getCreatorPageAssetBalance({
   code: string;
   issuer: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   console.log("Fetching asset balance for:", pubkey, code, issuer);
   const transactionInializer = await server.loadAccount(pubkey);
 
@@ -102,7 +103,7 @@ export async function getAccountInfos(pubkey: string) {
 }
 
 export async function accountDetailsWithHomeDomain({ userPub }: { userPub: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const account = await server.loadAccount(userPub);
 

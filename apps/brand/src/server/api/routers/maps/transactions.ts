@@ -5,9 +5,6 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const trxRouter = createTRPCRouter({
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
   getClaimXDR: protectedProcedure
     .input(
       z.object({

@@ -13,7 +13,7 @@ import { Field } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { uploadToIpfsUrl } from "~/ui/upload/ipfs";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 type PageAsset = NonNullable<

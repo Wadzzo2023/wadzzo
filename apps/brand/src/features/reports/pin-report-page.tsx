@@ -31,7 +31,7 @@ import { StatCard } from "@wadzzo/ui/patterns/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 import { CollectionsChart, downloadCsv, pinStatus } from "./report-kit";
 

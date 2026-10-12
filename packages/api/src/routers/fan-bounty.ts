@@ -464,7 +464,7 @@ export const fanBountyRouter = createTRPCRouter({
         where: { id: input.entryId },
         select: { userId: true, bountyId: true },
       });
-      if (!entry || entry.userId !== userId) {
+      if (entry?.userId !== userId) {
         throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Entry not found" });
       }
       await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
@@ -491,7 +491,7 @@ export const fanBountyRouter = createTRPCRouter({
         where: { id: input.entryId },
         select: { userId: true, bountyId: true },
       });
-      if (!entry || entry.userId !== userId) {
+      if (entry?.userId !== userId) {
         throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Entry not found" });
       }
       await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
@@ -534,6 +534,8 @@ export const fanBountyRouter = createTRPCRouter({
     .input(z.object({ bountyId: z.number().int() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user.id;
+      // Same visibility as the bounty page: approved, and on this platform.
+      await loadForViewer(ctx.db, input.bountyId, userId ?? "", ctx);
       const userSelect = { select: { id: true, name: true, image: true } };
       const rows = await ctx.db.bountyComment.findMany({
         where: { bountyId: input.bountyId, bountyParentCommentID: null },
@@ -580,7 +582,7 @@ export const fanBountyRouter = createTRPCRouter({
           select: { bountyId: true, bountyParentCommentID: true },
         });
         // One level of replies, and only within the same bounty.
-        if (!parent || parent.bountyId !== bounty.id || parent.bountyParentCommentID !== null) {
+        if (parent?.bountyId !== bounty.id || parent.bountyParentCommentID !== null) {
           throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Can't reply here" });
         }
       }

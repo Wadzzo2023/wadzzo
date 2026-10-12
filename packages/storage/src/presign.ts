@@ -30,7 +30,7 @@ const randomKey = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");
  * One presigned PUT. The browser uploads straight to S3; the server only signs,
  * and the checksum pins the URL to exactly the declared file.
  */
-async function presignPut(file: DeclaredFile) {
+export async function presignUpload(file: DeclaredFile) {
   const key = randomKey();
   const uploadUrl = await getSignedUrl(
     getS3Client(),
@@ -66,7 +66,7 @@ export async function signEntryUpload(file: DeclaredFile) {
     tooLarge: "File is too large",
     wrongType: "That file type can't be attached",
   });
-  return presignPut(file);
+  return presignUpload(file);
 }
 
 /** Presigned upload of a profile picture or cover image. */
@@ -77,7 +77,7 @@ export async function signImageUpload(file: DeclaredFile) {
     tooLarge: "Image is too large (max 10 MB)",
     wrongType: "Use a JPG, PNG, WebP or GIF image",
   });
-  return presignPut(file);
+  return presignUpload(file);
 }
 
 /**
@@ -110,9 +110,16 @@ export async function getObjectBytes(key: string): Promise<Buffer> {
   return Buffer.from(await response.Body.transformToByteArray());
 }
 
-/** Upload bytes made on the server (e.g. an AI-generated image); returns the public URL. */
-export async function uploadBufferToS3(body: Buffer, contentType: string): Promise<string> {
-  const key = randomKey();
+/**
+ * Upload bytes made on the server (an AI-generated image, a resized copy);
+ * returns the public URL. `keyPrefix` makes derived files recognisable in the bucket.
+ */
+export async function uploadBufferToS3(
+  body: Buffer,
+  contentType: string,
+  { keyPrefix = "" }: { keyPrefix?: string } = {},
+): Promise<string> {
+  const key = `${keyPrefix}${randomKey()}`;
   await getS3Client().send(
     new PutObjectCommand({
       Bucket: getBucketName(),

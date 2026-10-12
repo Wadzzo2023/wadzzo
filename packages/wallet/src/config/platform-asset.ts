@@ -1,5 +1,5 @@
 import { Asset } from "@stellar/stellar-sdk";
-import { AppError } from "@wadzzo/errors";
+import { AppError, isEnvValidationSkipped } from "@wadzzo/errors";
 
 /**
  * The token this deployment's platform runs on, and the fees charged in it.
@@ -12,7 +12,7 @@ const stage = process.env.NEXT_PUBLIC_STAGE;
 function createPlatformAsset(): Asset & { issuer: string } {
   if (!assetCode || !assetIssuer) {
     // Builds that skip env validation have no token; they never move money.
-    if (process.env.SKIP_ENV_VALIDATION) return Asset.native() as Asset & { issuer: string };
+    if (isEnvValidationSkipped()) return Asset.native() as Asset & { issuer: string };
     throw new AppError("CONFIG_MISSING", {
       message: "Set NEXT_PUBLIC_ASSET_CODE and NEXT_PUBLIC_ASSET_ISSUER.",
       details: { name: "NEXT_PUBLIC_ASSET_CODE / NEXT_PUBLIC_ASSET_ISSUER" },

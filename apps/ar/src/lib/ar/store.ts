@@ -9,7 +9,7 @@ import { persist } from "zustand/middleware";
 import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 
 import { nonBlank } from "@wadzzo/utils/blank";
-import { truncateString } from "@wadzzo/utils/string";
+import { truncateMiddle } from "@wadzzo/utils/string";
 import { DEFAULT_SETTINGS } from "./mock";
 import type { ArSettings, ArUser } from "./types";
 import { platformBranding } from "@wadzzo/platform/branding";
@@ -60,10 +60,10 @@ function deriveArUser(sessionUser: {
   const id = sessionUser.id;
   return {
     id,
-    name: nonBlank(sessionUser.name) ?? truncateString(id, 6, 4),
-    handle: truncateString(id, 4, 4).toLowerCase(),
+    name: nonBlank(sessionUser.name) ?? truncateMiddle(id, 6, 4),
+    handle: truncateMiddle(id, 4, 4).toLowerCase(),
     avatarUrl: nonBlank(sessionUser.image) ?? platformBranding.assets.mark,
-    pubkey: truncateString(id, 4, 4).toUpperCase(),
+    pubkey: truncateMiddle(id, 4, 4).toUpperCase(),
     joinedAt: new Date().toISOString(),
     collectedCount: 0,
     brandsFollowed: 0,

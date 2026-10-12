@@ -2,9 +2,8 @@
  * The map agent's contract between the task server (which runs the agent) and
  * the brand app (which shows it and carries out confirmed actions).
  *
- * KEEP IN SYNC: this file is copied verbatim to
- * apps/express-wadzzo/src/agent/contract.ts (the task server in this monorepo).
- * tests/agent-contract.test.ts fails if the two copies differ.
+ * This package is the only definition: `apps/express-wadzzo` and `apps/brand`
+ * both import it, so the two sides can't drift apart.
  */
 
 // ─── Progress ────────────────────────────────────────────────────────────────

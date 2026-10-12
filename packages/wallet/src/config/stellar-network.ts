@@ -1,5 +1,5 @@
 import { Networks } from "@stellar/stellar-sdk";
-import { AppError } from "@wadzzo/errors";
+import { AppError, isEnvValidationSkipped } from "@wadzzo/errors";
 
 export type StellarNetworkName = "testnet" | "mainnet";
 
@@ -16,6 +16,8 @@ export interface StellarNetworkConfig {
   readonly horizonUrl: string;
   /** Name Albedo expects ("public" | "testnet"). */
   readonly albedoNetwork: "public" | "testnet";
+  /** Name Rabet expects ("mainnet" | "testnet"), not the passphrase. */
+  readonly rabetNetwork: "mainnet" | "testnet";
   /** CAIP-2 chain id WalletConnect sessions use. */
   readonly walletConnectChain: "stellar:pubnet" | "stellar:testnet";
   readonly stellarExpertNetwork: "public" | "testnet";
@@ -28,6 +30,7 @@ export const STELLAR_NETWORKS: Readonly<Record<StellarNetworkName, StellarNetwor
     passphrase: Networks.TESTNET,
     horizonUrl: "https://horizon-testnet.stellar.org",
     albedoNetwork: "testnet",
+    rabetNetwork: "testnet",
     walletConnectChain: "stellar:testnet",
     stellarExpertNetwork: "testnet",
   },
@@ -37,6 +40,7 @@ export const STELLAR_NETWORKS: Readonly<Record<StellarNetworkName, StellarNetwor
     passphrase: Networks.PUBLIC,
     horizonUrl: "https://horizon.stellar.org",
     albedoNetwork: "public",
+    rabetNetwork: "mainnet",
     walletConnectChain: "stellar:pubnet",
     stellarExpertNetwork: "public",
   },
@@ -66,7 +70,7 @@ export function resolveStellarNetworkName(): StellarNetworkName {
   if (legacy === "false") return "testnet";
 
   // Builds that skip env validation have no network and must never touch mainnet.
-  if (process.env.SKIP_ENV_VALIDATION) return "testnet";
+  if (isEnvValidationSkipped()) return "testnet";
 
   throw new AppError("CONFIG_MISSING", {
     message: 'Set NEXT_PUBLIC_STELLAR_NETWORK to "testnet" or "mainnet".',

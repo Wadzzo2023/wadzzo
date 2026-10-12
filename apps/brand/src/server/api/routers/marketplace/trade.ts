@@ -1,11 +1,11 @@
-import { Asset, Horizon } from "@stellar/stellar-sdk";
+import { Asset } from "@stellar/stellar-sdk";
 import { z } from "zod";
-import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { buyOfferXDR, tradeAssetXDR } from "~/lib/stellar/marketplace/transactions/trade";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 export const tradeFormSchema = z.object({
   selling: z.string(),
   buying: z.string(),
@@ -23,10 +23,6 @@ export const tradeFormSchema = z.object({
     .positive(),
 });
 export const tradeRouter = createTRPCRouter({
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   getTradeXDR: protectedProcedure
     .input(tradeFormSchema.extend({ signWith: custodialSignerSchema }))
     .mutation(async ({ ctx, input }) => {
@@ -56,7 +52,7 @@ export const tradeRouter = createTRPCRouter({
       const uid = ctx.session.user.id;
       const { offerId, signWith } = input;
 
-      const server = new Horizon.Server(STELLAR_URL);
+      const server = horizonServer();
       const offer = await server.offers().offer(offerId).call();
 
       if (
@@ -87,7 +83,7 @@ export const tradeRouter = createTRPCRouter({
 
   getOffers: protectedProcedure.query(async ({ ctx, input }) => {
     const id = ctx.session.user.id;
-    const server = new Horizon.Server(STELLAR_URL);
+    const server = horizonServer();
     const offers = await server
       .offers()
       .forAccount("GD5UILGTWNRIWERORCB7YBLDRITMVP47QZ25UPYBJHHHHSM5AFE73HHB")
@@ -97,7 +93,7 @@ export const tradeRouter = createTRPCRouter({
   }),
 
   getOffer: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const server = new Horizon.Server(STELLAR_URL);
+    const server = horizonServer();
     const offer = await server.offers().offer(input).call();
     return offer;
   }),

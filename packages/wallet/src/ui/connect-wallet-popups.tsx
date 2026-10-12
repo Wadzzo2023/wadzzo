@@ -22,7 +22,7 @@ export function ConnectWalletPopups({ className }: { className: string }) {
           className: "!rounded-xl !border !border-border !bg-card !text-card-foreground !shadow-lg",
         }}
       />
-      <ConnectWalletDialog className={className} />
+      <ConnectWalletDialog />
       {isWalletConnectOpen ? <w3m-modal /> : null}
     </>
   );

@@ -13,10 +13,18 @@ const BRANDINGS: Readonly<Record<string, PlatformBranding>> = {
 export const getPlatformBranding = (slug: string): PlatformBranding =>
   BRANDINGS[slug] ?? wadzzoBranding;
 
+const configuredSlug =
+  process.env.NEXT_PUBLIC_PLATFORM_SLUG ?? process.env.PLATFORM_SLUG ?? "wadzzo";
+
+if (!(configuredSlug in BRANDINGS)) {
+  console.warn(
+    `[platform] No branding for "${configuredSlug}", so this deployment shows Wadzzo's. ` +
+      `Add packages/platform/src/branding/${configuredSlug}.ts and register it in branding/index.ts.`,
+  );
+}
+
 /**
  * The branding of this deployment. `NEXT_PUBLIC_PLATFORM_SLUG` is set from
  * `PLATFORM_SLUG` by each app's next.config.js so browser bundles know it too.
  */
-export const platformBranding: PlatformBranding = getPlatformBranding(
-  process.env.NEXT_PUBLIC_PLATFORM_SLUG ?? process.env.PLATFORM_SLUG ?? "wadzzo",
-);
+export const platformBranding: PlatformBranding = getPlatformBranding(configuredSlug);

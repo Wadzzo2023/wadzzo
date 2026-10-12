@@ -16,7 +16,7 @@ import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 type User = RouterOutputs["admin"]["user"]["getUsers"]["users"][number];
 

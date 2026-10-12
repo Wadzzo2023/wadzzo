@@ -1,5 +1,7 @@
 import { getAuth } from "firebase-admin/auth";
 
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+
 import { initFirebaseAdmin } from "./admin-app";
 import { verifyAppleToken } from "./verify-apple-token";
 
@@ -33,24 +35,46 @@ export async function findEmailByFirebaseUid(uid: string): Promise<string | unde
 }
 
 /**
- * The Firebase user behind a "Sign in with Apple" token: the existing user for
- * that email, or a new one linked to the Apple identity.
+ * The Firebase user behind a "Sign in with Apple" identity token.
+ *
+ * Which account you get is decided only by what Apple vouches for in the
+ * token, never by an email the client sends alongside it (otherwise anyone
+ * with *an* Apple token could ask for someone else's account):
+ *
+ * 1. an Apple account that signed in before → the Firebase user linked to it;
+ * 2. first time → the user for the email Apple verified (linked to this Apple
+ *    account from now on), created if there is none.
  */
-export async function getOrCreateFirebaseUserFromApple(appleToken: string, email: string) {
-  const appleIdentity = await verifyAppleToken(appleToken);
+export async function getOrCreateFirebaseUserFromApple(appleToken: string) {
+  const identity = await verifyAppleToken(appleToken);
   const auth = adminAuth();
 
   try {
-    return await auth.getUserByEmail(email);
+    return await auth.getUserByProviderUid("apple.com", identity.sub);
   } catch (error) {
-    if ((error as { code?: string }).code !== "auth/user-not-found") throw error;
+    if (!isUserNotFound(error)) throw error;
+  }
 
-    const created = await auth.createUser({ email, displayName: appleIdentity.name });
-    return auth.updateUser(created.uid, {
-      providerToLink: { uid: appleIdentity.sub, providerId: "apple.com", email },
+  if (!identity.email || !identity.emailVerified) {
+    throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+      message: "Apple didn't share a verified email address. Use another sign-in method.",
     });
   }
+
+  const providerToLink = { uid: identity.sub, providerId: "apple.com", email: identity.email };
+  try {
+    const existing = await auth.getUserByEmail(identity.email);
+    return await auth.updateUser(existing.uid, { providerToLink });
+  } catch (error) {
+    if (!isUserNotFound(error)) throw error;
+  }
+
+  const created = await auth.createUser({ email: identity.email, emailVerified: true });
+  return auth.updateUser(created.uid, { providerToLink });
 }
+
+const isUserNotFound = (error: unknown) =>
+  (error as { code?: string }).code === "auth/user-not-found";
 
 /**
  * Deletes the Firebase account for `email`.
@@ -63,7 +87,7 @@ export async function deleteFirebaseUserByEmail(email: string): Promise<boolean>
     await auth.deleteUser(user.uid);
     return true;
   } catch (error) {
-    if ((error as { code?: string }).code === "auth/user-not-found") return false;
+    if (isUserNotFound(error)) return false;
     throw error;
   }
 }

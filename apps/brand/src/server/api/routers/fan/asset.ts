@@ -1,10 +1,8 @@
 import { ItemPrivacy, MediaType } from "@wadzzo/db";
-import { Horizon } from "@stellar/stellar-sdk";
 import { z } from "zod";
 
 import { ExtraSongInfo, NftFormSchema } from "~/types/asset";
 export { ExtraSongInfo, NftFormSchema };
-import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { AccountSchema } from "~/lib/stellar/fan/stellar-schemas";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import {
@@ -21,6 +19,7 @@ import {
 import { BADWORDS } from "~/utils/banned-word";
 import { assertOwnerOrAdmin } from "~/server/api/access";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 export const updateAssetFormShema = z.object({
   assetId: z.number(),
   price: z.number().nonnegative(),
@@ -416,7 +415,7 @@ export const shopRouter = createTRPCRouter({
       }
 
       console.log("creator", creator);
-      const server = new Horizon.Server(STELLAR_URL);
+      const server = horizonServer();
       const account = await server.loadAccount(creator.storagePub);
       console.log("Code, issuer", code, issuer);
       const tokens = (await StellarAccount.loadOrThrow(creator.storagePub)).tokenBalance(

@@ -1,9 +1,8 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
@@ -12,6 +11,7 @@ import { getplatformAssetNumberForXLM } from "./fan/get-token-price";
 import { type AccountType } from "./fan/stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -35,7 +35,7 @@ export async function createUniAsset({
   homeDomain: string;
   ipfsHash: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   // accounts
   const issuerAcc = Keypair.random();
@@ -160,7 +160,7 @@ export async function createUniAssetWithXLM({
   homeDomain: string;
   ipfsHash: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   // accounts
   const issuerAcc = Keypair.random();

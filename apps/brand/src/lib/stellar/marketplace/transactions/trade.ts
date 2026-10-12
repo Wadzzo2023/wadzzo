@@ -1,15 +1,9 @@
-import {
-  type Asset,
-  BASE_FEE,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { type Asset, BASE_FEE, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../../platform-secrets";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
+import { networkPassphrase, TrxBaseFee } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function tradeAssetXDR(props: {
   sellingAsset: Asset;
@@ -26,7 +20,7 @@ export async function tradeAssetXDR(props: {
 
   // const creatorStorage = Keypair.fromSecret(creatorStorageSecret);
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(STORAGE_SECRET);
   //   const pubAcc = Keypair.fromSecret(secret);
@@ -80,7 +74,7 @@ export async function buyOfferXDR(props: {
 
   // const creatorStorage = Keypair.fromSecret(creatorStorageSecret);
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(STORAGE_SECRET);
   //   const pubAcc = Keypair.fromSecret(secret);

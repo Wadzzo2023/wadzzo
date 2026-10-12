@@ -243,10 +243,6 @@ export const postRouter = createTRPCRouter({
     }
   }),
 
-  getSecretMessage: protectedProcedure.query(async ({ ctx }) => {
-    return "secret message";
-  }),
-
   likeApost: protectedProcedure.input(z.number()).mutation(async ({ input: postId, ctx }) => {
     const userId = ctx.session.user.id;
 

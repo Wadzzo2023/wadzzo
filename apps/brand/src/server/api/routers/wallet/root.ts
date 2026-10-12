@@ -3,7 +3,6 @@ import { assetRouter } from "./asset";
 import { accountRouter } from "./account";
 import { adminRouter } from "./admin";
 import { tagRouter } from "./tag";
-import { pinataUploadRouter } from "./upload";
 /**
  * This is the primary router for your server.
  *
@@ -14,7 +13,6 @@ export const walletRouter = createTRPCRouter({
   account: accountRouter,
   admin: adminRouter,
   tag: tagRouter,
-  pinata: pinataUploadRouter,
 });
 
 // export type definition of API

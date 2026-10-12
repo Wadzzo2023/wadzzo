@@ -37,7 +37,7 @@ import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatCard } from "@wadzzo/ui/patterns/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 import { useCreatorActions } from "./use-creator-actions";
 

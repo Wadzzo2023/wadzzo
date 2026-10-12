@@ -5,7 +5,7 @@ import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-
 import type { Platform } from "@wadzzo/db";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 
-import { StellarAccount, horizon } from "@wadzzo/stellar/account";
+import { StellarAccount } from "@wadzzo/stellar/account";
 import {
   BASE_RESERVE_XLM,
   PLATFORM_ASSET,
@@ -20,6 +20,7 @@ import { motherKeypair, platformStorageKeypair, signForUser, type Signer } from 
 import { settle, submitXdr } from "./ledger";
 import { platformToXlm } from "@wadzzo/stellar/prices";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);
@@ -68,7 +69,7 @@ async function ensureCanReceiveTokens(userId: string, email: string | null | und
   tx.addOperation(Operation.changeTrust({ source: userId, asset: PLATFORM_ASSET }));
   const built = tx.build();
   built.sign(mother, userKp);
-  await horizon().submitTransaction(built);
+  await horizonServer().submitTransaction(built);
 }
 
 /** Buy a token pack by card: charge, then the platform sends the tokens (refunded if that fails). */
@@ -216,7 +217,12 @@ export async function prepareSwap(
 
 /** Gifts waiting for me (claimable balances). */
 export async function pendingGifts(userId: string) {
-  const res = await horizon().claimableBalances().claimant(userId).limit(50).order("desc").call();
+  const res = await horizonServer()
+    .claimableBalances()
+    .claimant(userId)
+    .limit(50)
+    .order("desc")
+    .call();
   return res.records.map((r) => {
     const [code, issuer] = r.asset === "native" ? ["XLM", ""] : r.asset.split(":");
     return {

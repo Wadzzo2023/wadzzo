@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { stellarNetwork } from "../../config/stellar-network";
 import { StellarTransactionError } from "../../errors/stellar-transaction-error";
 import { signInWithAlbedo } from "../../session/sign-in-with-credentials";
-import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/utils";
+import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/address";
 import { WalletType } from "../../wallet-type";
 import type { WalletProvider } from "../wallet-provider";
 

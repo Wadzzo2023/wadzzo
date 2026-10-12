@@ -1,140 +1,128 @@
 import type { Feature, Polygon } from "geojson";
 
-interface Location {
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+
+export interface Coordinates {
   latitude: number;
   longitude: number;
 }
-const EARTH_RADIUS_M = 6_371_000;
-const EarthRadius = 6371; // Earth's radius in kilometers
-const OneDegree = ((EarthRadius * 2 * Math.PI) / 360) * 1000; // One degree in meters
 
-function randomPointInDisk(radius: number): [number, number] {
-  const r = radius * Math.sqrt(Math.random());
-  const theta = Math.random() * 2 * Math.PI;
-  return [r * Math.cos(theta), r * Math.sin(theta)];
+const EARTH_RADIUS_METERS = 6_371_000;
+const METERS_PER_DEGREE_OF_LATITUDE = (EARTH_RADIUS_METERS * 2 * Math.PI) / 360;
+
+const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+
+/** A uniformly random point in a disk of `radius` (sqrt keeps it from bunching at the centre). */
+function randomPointInDisk(radius: number): { dx: number; dy: number } {
+  const distance = radius * Math.sqrt(Math.random());
+  const angle = Math.random() * 2 * Math.PI;
+  return { dx: distance * Math.cos(angle), dy: distance * Math.sin(angle) };
 }
 
-export function randomLocation(lat: number, lng: number, radius: number): Location {
-  if (radius <= 0) return { latitude: lat, longitude: lng };
-  const [dx, dy] = randomPointInDisk(radius);
+/** A random point within `radiusMeters` of (`latitude`, `longitude`). */
+export function randomLocation(
+  latitude: number,
+  longitude: number,
+  radiusMeters: number,
+): Coordinates {
+  if (radiusMeters <= 0) return { latitude, longitude };
 
-  const randomLat = lat + dy / OneDegree;
-  const randomLng = lng + dx / (OneDegree * Math.cos((lat * Math.PI) / 180));
+  const { dx, dy } = randomPointInDisk(radiusMeters);
+  const metersPerDegreeOfLongitude = METERS_PER_DEGREE_OF_LATITUDE * Math.cos(toRadians(latitude));
 
   return {
-    latitude: randomLat,
-    longitude: randomLng,
+    latitude: latitude + dy / METERS_PER_DEGREE_OF_LATITUDE,
+    longitude: longitude + dx / metersPerDegreeOfLongitude,
   };
 }
 
+export type HotspotShape = "polygon" | "rectangle" | "circle";
+
+/** Give up on a polygon after this many misses per requested point (thin or empty shapes). */
+const MAX_POLYGON_ATTEMPTS_PER_POINT = 100;
+
+/**
+ * `count` random points inside a hotspot's shape.
+ *
+ * Both shapes use the app's `[latitude, longitude]` order (not GeoJSON's
+ * `[longitude, latitude]`):
+ * - circle: `properties = { center: [lat, lng], radiusMetres }`
+ * - polygon / rectangle: the first ring of the `Polygon` geometry
+ *
+ * A polygon that is thin or tiny can return fewer than `count` points.
+ */
 export function generateRandomLocations(
-  shape: "polygon" | "rectangle" | "circle",
-  geoJson: Feature | null | undefined,
+  shape: HotspotShape,
+  feature: Feature | null | undefined,
   count: number,
-): { latitude: number; longitude: number }[] {
-  if (!geoJson || count <= 0) return [];
-
-  if (shape === "circle") {
-    return generateInCircle(geoJson, count);
-  }
-
-  // polygon + rectangle both use the polygon ring
-  return generateInPolygon(geoJson, count);
+): Coordinates[] {
+  if (!feature || count <= 0) return [];
+  return shape === "circle" ? pointsInCircle(feature, count) : pointsInPolygon(feature, count);
 }
-function generateInCircle(
-  feature: Feature,
-  count: number,
-): { latitude: number; longitude: number }[] {
-  const { center, radiusMetres } = feature.properties as {
-    center: [number, number]; // [lat, lng]
-    radiusMetres: number;
-  };
 
-  const [centerLat, centerLng] = center;
-  const R = 6_371_000;
-  const results: { latitude: number; longitude: number }[] = [];
+function pointsInCircle(feature: Feature, count: number): Coordinates[] {
+  const properties = feature.properties as {
+    center?: [number, number];
+    radiusMetres?: number;
+  } | null;
+  const [centerLatitude, centerLongitude] = properties?.center ?? [];
+  const radiusMeters = properties?.radiusMetres;
 
-  while (results.length < count) {
-    // Uniform sampling inside a circle: sqrt of uniform random for radius
-    const r = radiusMetres * Math.sqrt(Math.random());
-    const angle = Math.random() * 2 * Math.PI;
-
-    const dLat = (r * Math.cos(angle)) / R;
-    const dLng = (r * Math.sin(angle)) / (R * Math.cos((centerLat * Math.PI) / 180));
-
-    results.push({
-      latitude: centerLat + (dLat * 180) / Math.PI,
-      longitude: centerLng + (dLng * 180) / Math.PI,
+  if (
+    centerLatitude === undefined ||
+    centerLongitude === undefined ||
+    radiusMeters === undefined ||
+    !(radiusMeters > 0)
+  ) {
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "A circle hotspot needs a centre and a radius.",
     });
   }
 
-  return results;
+  return Array.from({ length: count }, () =>
+    randomLocation(centerLatitude, centerLongitude, radiusMeters),
+  );
 }
 
-// ── Polygon / Rectangle ───────────────────────────────────────────────────────
+type LatLngRing = [latitude: number, longitude: number][];
 
-function generateInPolygon(
-  feature: Feature,
-  count: number,
-): { latitude: number; longitude: number }[] {
-  const geometry = feature.geometry as Polygon;
-  // Your coords are [lat, lng]
-  const ring = geometry.coordinates[0] as [number, number][];
-
-  // Bounding box
-  const lats = ring.map((c) => c[0]);
-  const lngs = ring.map((c) => c[1]);
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-
-  const results: { latitude: number; longitude: number }[] = [];
-  let attempts = 0;
-  const maxAttempts = count * 100; // safety cap
-
-  while (results.length < count && attempts < maxAttempts) {
-    attempts++;
-    const lat = minLat + Math.random() * (maxLat - minLat);
-    const lng = minLng + Math.random() * (maxLng - minLng);
-
-    if (pointInPolygon([lat, lng], ring)) {
-      results.push({ latitude: lat, longitude: lng });
-    }
+function pointsInPolygon(feature: Feature, count: number): Coordinates[] {
+  const ring = (feature.geometry as Polygon | null)?.coordinates[0] as LatLngRing | undefined;
+  if (!ring || ring.length < 3) {
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
+      message: "A polygon hotspot needs at least three points.",
+    });
   }
 
-  return results;
+  const latitudes = ring.map(([latitude]) => latitude);
+  const longitudes = ring.map(([, longitude]) => longitude);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+
+  const points: Coordinates[] = [];
+  const maxAttempts = count * MAX_POLYGON_ATTEMPTS_PER_POINT;
+
+  // rejection sampling: draw in the bounding box, keep what falls inside the ring
+  for (let attempt = 0; points.length < count && attempt < maxAttempts; attempt++) {
+    const latitude = minLatitude + Math.random() * (maxLatitude - minLatitude);
+    const longitude = minLongitude + Math.random() * (maxLongitude - minLongitude);
+    if (isInsideRing(latitude, longitude, ring)) points.push({ latitude, longitude });
+  }
+  return points;
 }
 
-/**
- * Ray-casting point-in-polygon.
- * coords are [lat, lng] pairs — consistent with your app's convention.
- */
-function pointInPolygon(point: [number, number], ring: [number, number][]): boolean {
-  const [px, py] = point;
+/** Ray casting: count the ring edges a ray from the point crosses; odd means inside. */
+function isInsideRing(latitude: number, longitude: number, ring: LatLngRing): boolean {
   let inside = false;
-
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i]!;
-    const [xj, yj] = ring[j]!;
-
-    const intersects = yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
-
-    if (intersects) inside = !inside;
+    const [latI, lngI] = ring[i]!;
+    const [latJ, lngJ] = ring[j]!;
+    const crosses =
+      lngI > longitude !== lngJ > longitude &&
+      latitude < ((latJ - latI) * (longitude - lngI)) / (lngJ - lngI) + latI;
+    if (crosses) inside = !inside;
   }
-
   return inside;
-}
-
-export function dropIntervalToCron(days: number): string {
-  const map: Record<number, string> = {
-    1: "0 9 * * *",
-    2: "0 9 */2 * *",
-    3: "0 9 */3 * *",
-    5: "0 9 */5 * *",
-    7: "0 9 * * 1",
-    14: "0 9 1,15 * *",
-    30: "0 9 1 * *",
-  };
-  return map[days] ?? "0 9 * * *";
 }

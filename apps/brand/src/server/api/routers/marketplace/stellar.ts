@@ -167,10 +167,6 @@ export const stellarRouter = createTRPCRouter({
     return "test";
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   getPlatformAssetToXLM: protectedProcedure
     .input(
       z.object({

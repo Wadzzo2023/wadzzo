@@ -1,19 +1,7 @@
-import {
-  Asset,
-  BASE_FEE,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, BASE_FEE, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { STORAGE_SECRET } from "../../platform-secrets";
-import {
-  STROOP,
-  STELLAR_URL,
-  PLATFORM_ASSET,
-  networkPassphrase,
-  TrxBaseFee,
-} from "@wadzzo/wallet/config";
+import { STROOP, PLATFORM_ASSET, networkPassphrase, TrxBaseFee } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function covertSiteAsset2XLM(props: {
   siteAssetAmount: number;
@@ -26,7 +14,7 @@ export async function covertSiteAsset2XLM(props: {
 
   const assetAmount = (Number(siteAssetAmount) * Number(STROOP)).toFixed(7).toString();
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(STORAGE_SECRET);
   const pubAcc = Keypair.fromSecret(secret);

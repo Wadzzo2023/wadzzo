@@ -9,7 +9,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { MultiUploadS3Button } from "../common/upload-button";
 import { api } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 import type { MutableRefObject } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";

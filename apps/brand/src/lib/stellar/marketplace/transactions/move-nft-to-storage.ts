@@ -1,17 +1,9 @@
-import {
-  Asset,
-  BASE_FEE,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, BASE_FEE, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import {
   networkPassphrase,
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
 } from "@wadzzo/wallet/config";
@@ -19,6 +11,7 @@ import { getplatformAssetNumberForXLM } from "../../fan/get-token-price";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { StellarAccount } from "@wadzzo/stellar/account";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function sendNft2StorageXDR({
   assetCode,
@@ -37,7 +30,7 @@ export async function sendNft2StorageXDR({
 }) {
   // const assetAmount = DEFAULT_ASSET_LIMIT
   const asset = new Asset(assetCode, issuerPub);
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
   const storageAcc = Keypair.fromSecret(storageSec);
 
@@ -116,7 +109,7 @@ export async function sendNftback({
   const storageAcc = Keypair.fromSecret(storageSecret);
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const userAcc = await StellarAccount.loadOrThrow(userPub);
   const hasTrust = userAcc.hasTrustline(assetCode, issuerPub);

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { api } from "~/utils/api";
 import { Button } from "@wadzzo/ui/components/button";
 import { Textarea } from "@wadzzo/ui/components/textarea";
-import { Spinner } from "@wadzzo/ui/components/spinner";
+import { Spinner } from "@wadzzo/ui/patterns/spinner";
 
 export const BountyCommentSchema = z.object({
   bountyId: z.number(),
@@ -51,7 +51,7 @@ export function AddBountyComment({ bountyId }: { bountyId: number }) {
               type="submit"
             >
               {createBountyCommentMutation.isPending ? (
-                <Spinner size="small" className="text-black" />
+                <Spinner className="size-4 text-black" />
               ) : (
                 <Send size={14} />
               )}

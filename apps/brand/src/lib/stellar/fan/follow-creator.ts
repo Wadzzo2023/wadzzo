@@ -1,9 +1,10 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type MyAssetType } from "./stellar-schemas";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 /**
  * Following a creator don't need fee from user.
@@ -19,7 +20,7 @@ export async function follow_creator({
   creatorPageAsset: MyAssetType;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const asset = new Asset(creatorPageAsset.code, creatorPageAsset.issuer);
 

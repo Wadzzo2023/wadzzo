@@ -15,7 +15,7 @@ import {
 } from "@wadzzo/ui/components/dropdown-menu";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { api } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 /** The avatar menu in the header: settings and sign in/out. Navigation lives in the sidebar. */
 export function UserMenu() {

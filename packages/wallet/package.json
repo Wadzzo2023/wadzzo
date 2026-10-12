@@ -14,7 +14,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@albedo-link/intent": "catalog:",
@@ -35,7 +36,6 @@
     "@web3modal/ui": "catalog:",
     "axios": "catalog:",
     "clsx": "catalog:",
-    "cookies-next": "catalog:",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "jsonwebtoken": "catalog:",
@@ -43,28 +43,26 @@
     "lucide-react": "catalog:",
     "react-hook-form": "catalog:",
     "react-hot-toast": "catalog:",
-    "server-only": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
   "peerDependencies": {
     "next": "catalog:",
     "next-auth": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:"
+    "react": "catalog:"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "@wadzzo/vitest-config": "workspace:*",
     "eslint": "catalog:",
     "next": "catalog:",
     "next-auth": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

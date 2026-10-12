@@ -3,12 +3,10 @@
 import {
   type AuthError,
   AuthErrorCodes,
-  type User,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
   sendEmailVerification,
 } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
 
@@ -38,15 +36,7 @@ interface EmailSignUpFormProps {
 }
 
 export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [emailSent, setEmailSent] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
-  }, []);
 
   const {
     register,
@@ -66,7 +56,7 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
       }
       return user;
     },
-    onSuccess: (user) => {
+    onSuccess: () => {
       toast.success("Account created! Please check your email to verify.");
       setEmailSent(true);
       reset();

@@ -8,7 +8,7 @@ import type { ExtensionWallet } from "../wallet-provider";
 /** The slice of the `window.rabet` API we use. */
 interface RabetApi {
   connect(): Promise<{ publicKey: string; error?: string }>;
-  sign(xdr: string, network: string): Promise<{ xdr: string; error?: string }>;
+  sign(xdr: string, network: "mainnet" | "testnet"): Promise<{ xdr: string; error?: string }>;
   disconnect(): Promise<void>;
 }
 
@@ -47,7 +47,7 @@ const rabetWallet: ExtensionWallet = {
     const rabet = getRabet();
     try {
       await rabet.connect();
-      const result = await rabet.sign(xdr, stellarNetwork.passphrase);
+      const result = await rabet.sign(xdr, stellarNetwork.rabetNetwork);
       if (!result.xdr) {
         throw new AppError(ErrorCodes.WALLET_SIGNING_FAILED, {
           message: "Signing failed. Please try again.",

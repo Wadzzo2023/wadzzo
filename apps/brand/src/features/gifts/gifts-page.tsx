@@ -21,7 +21,7 @@ import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { fetchPubkeyfromEmail } from "~/utils/get-pubkey";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { platformBranding } from "@wadzzo/platform/branding";
 

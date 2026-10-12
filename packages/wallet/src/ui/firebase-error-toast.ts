@@ -190,24 +190,19 @@ const AuthErrorMessages = {
     "An error has occurred. Please contact an admin or write an email to support@wadzzo.com with the following error code. Error Code: WZAR102",
 };
 
-type errorType = {
+interface ShowFirebaseAuthErrorInput {
+  /** The error string Firebase put on the failed sign-in. */
   error: string;
-  email?: string;
-  password?: string;
   setVerifyEmail?: (value: boolean) => void;
   setForgetPass?: (value: boolean) => void;
-};
+}
 
 export const showFirebaseAuthError = async ({
   error,
-  email,
-  password,
   setVerifyEmail,
   setForgetPass,
-}: errorType) => {
-  const errorKey = Object.entries(AuthErrorCodes).find(([key, value]) =>
-    error.includes(value),
-  )?.[0];
+}: ShowFirebaseAuthErrorInput) => {
+  const errorKey = Object.entries(AuthErrorCodes).find(([, value]) => error.includes(value))?.[0];
 
   if (errorKey) {
     const errorMessage = AuthErrorMessages[errorKey as keyof typeof AuthErrorMessages];

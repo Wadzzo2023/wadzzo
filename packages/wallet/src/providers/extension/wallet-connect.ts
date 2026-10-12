@@ -9,7 +9,7 @@ import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 import { stellarNetwork } from "../../config/stellar-network";
 import { signInWithSignedChallenge } from "../../session/sign-in-with-credentials";
-import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/utils";
+import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/address";
 import { WalletType } from "../../wallet-type";
 import type { WalletProvider } from "../wallet-provider";
 

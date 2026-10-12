@@ -1,16 +1,11 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  STROOP,
-  networkPassphrase,
-} from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, PLATFORM_FEE, STROOP, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type MyAssetType } from "./stellar-schemas";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 // transection variables
@@ -30,7 +25,7 @@ export async function getClawbackAsPayment({
   creatorStorageSec: string;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const creatorStorageAcc = Keypair.fromSecret(creatorStorageSec);
   const asset = new Asset(assetInfo.code, assetInfo.issuer);

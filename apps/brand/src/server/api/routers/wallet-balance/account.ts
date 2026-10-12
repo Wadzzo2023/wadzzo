@@ -17,10 +17,10 @@ import {
 import { User } from "firebase/auth";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
-import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export const WBalanceRouter = createTRPCRouter({
   getWalletsBalance: protectedProcedure.query(async ({ ctx, input }) => {
@@ -36,7 +36,7 @@ export const WBalanceRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { limit, cursor } = input;
-      const server = new Horizon.Server(STELLAR_URL);
+      const server = horizonServer();
       // Wadzzo and Bandcoin keep their known domains; a partner token uses its own home domain.
       const assetCode = PLATFORM_ASSET.code.toLowerCase();
       const homeDomain =

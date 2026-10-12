@@ -1,18 +1,17 @@
-export function truncateString(str: string, firstFew = 3, lastFew = 3): string {
-  if (str.length <= firstFew + lastFew) {
-    // No need to truncate, the string is already shorter than the specified length
-    return str;
-  }
-
-  const truncatedString = str.slice(0, firstFew) + "..." + str.slice(-lastFew);
-  return truncatedString;
+/**
+ * Keeps the start and end of a long string and replaces the middle with
+ * "...": `GABC...WXYZ`. Short strings come back unchanged.
+ */
+export function truncateMiddle(text: string, startLength = 3, endLength = 3): string {
+  if (text.length <= startLength + endLength) return text;
+  return `${text.slice(0, startLength)}...${text.slice(-endLength)}`;
 }
 
 export function isValidUrl(url: string): boolean {
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

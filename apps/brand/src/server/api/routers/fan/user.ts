@@ -1,7 +1,6 @@
 import { Horizon } from "@stellar/stellar-sdk";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
 import { z } from "zod";
-import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { claimRedeemXDR } from "~/lib/stellar/fan/redeem";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { custodialSignerSchema } from "@wadzzo/wallet/shared";

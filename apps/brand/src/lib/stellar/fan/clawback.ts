@@ -1,17 +1,17 @@
-import { Asset, Keypair, Horizon, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
 import { getplatformAssetNumberForXLM } from "./get-token-price";
 import { type AccountType } from "./stellar-schemas";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 // transaction variables
 
@@ -30,7 +30,7 @@ export async function creatorPageAccCreate({
   ipfs: string;
   storageSecret: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const requiredAsset2refundXlm = await getplatformAssetNumberForXLM(2);
   const total = requiredAsset2refundXlm + Number(PLATFORM_FEE) + Number(TrxBaseFeeInPlatformAsset);
@@ -140,7 +140,7 @@ export async function creatorPageAccCreateWithXLM({
   ipfs: string;
   storageSecret: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(storageSecret);
   const PLATFORM_MOTHER_ACC = Keypair.fromSecret(env.MOTHER_SECRET);

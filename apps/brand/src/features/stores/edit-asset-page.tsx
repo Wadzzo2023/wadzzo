@@ -30,7 +30,7 @@ import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 const ThreeD = dynamic(() => import("~/components/3d-model/model-show"), {
   ssr: false,

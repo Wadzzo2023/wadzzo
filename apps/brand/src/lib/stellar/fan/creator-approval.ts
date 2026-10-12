@@ -1,10 +1,11 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import { networkPassphrase, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
+import { networkPassphrase, TrxBaseFee } from "@wadzzo/wallet/config";
 import { CustodialSigner } from "@wadzzo/wallet/shared";
 import { type AccountType } from "./stellar-schemas";
 import { Key } from "lucide-react";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -19,7 +20,7 @@ export async function creatorAprovalTrx({
   };
   storage?: AccountType;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const storageAcc = storage ? Keypair.fromSecret(storage.secretKey) : Keypair.random();
 
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);

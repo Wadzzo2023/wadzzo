@@ -1,10 +1,11 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { type MyAssetType } from "../fan/stellar-schemas";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
-import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
+import { networkPassphrase, PLATFORM_ASSET, TrxBaseFee } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function ClaimXDR({
   asset,
@@ -19,7 +20,7 @@ export async function ClaimXDR({
   receiver: string;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(storageSecret);
   const claimAsset = new Asset(asset.code, asset.issuer);

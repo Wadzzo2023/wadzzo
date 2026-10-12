@@ -1,11 +1,10 @@
-import { Horizon } from "@stellar/stellar-sdk";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
-import { STELLAR_URL } from "@wadzzo/wallet/config";
 import { EnableCors } from "~/server/api-cors";
 import { db } from "@wadzzo/db/server";
 // import { getSession } from "next-auth/react";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await EnableCors(req, res);
@@ -46,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (creator.pageAsset) {
     const { code, issuer } = creator.pageAsset;
 
-    const server = new Horizon.Server(STELLAR_URL);
+    const server = horizonServer();
 
     const userAcc = await server.loadAccount(userId);
 

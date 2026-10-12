@@ -1,15 +1,7 @@
-import {
-  Asset,
-  Claimant,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, Claimant, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import {
   PLATFORM_ASSET,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
@@ -20,6 +12,7 @@ import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "./get-token-price";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -38,7 +31,7 @@ export async function sendGift({
   creatorStorageSec: string;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const asset = new Asset(creatorPageAsset.code, creatorPageAsset.issuer);
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
   const assetStorage = Keypair.fromSecret(creatorStorageSec);
@@ -151,7 +144,7 @@ export const sendGitfAsPlatformAsset = async ({
   assetIssuer: string;
   signWith: CustodialSigner;
 }) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const asset = new Asset(assetCode, assetIssuer);
   const transactionInializer = await server.loadAccount(creatorId);
   const receiverAcc = await StellarAccount.loadOrThrow(reciver);

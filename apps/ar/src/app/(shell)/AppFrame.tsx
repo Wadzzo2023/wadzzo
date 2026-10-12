@@ -87,7 +87,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
           that `useAuth().signIn()` opens; mounted once here, outside
           `DeviceFrame`, because its dialog is not constrained to the phone
           frame and renders as a normal centred desktop modal. */}
-      <ConnectDialog className="" />
+      <ConnectDialog />
     </SessionProvider>
   );
 }

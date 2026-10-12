@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { requireEnv } from "@wadzzo/errors";
+import { isEnvValidationSkipped, requireEnv } from "@wadzzo/errors";
 
 /** Neon databases sleep when idle; give a cold start time to wake. */
 const CONNECTION_TIMEOUT_MS = 30_000;
@@ -12,9 +12,7 @@ const CONNECTION_TIMEOUT_MS = 30_000;
  */
 function createDbClient() {
   const poolMax = Number(process.env.DATABASE_POOL_MAX) || undefined;
-  const isBuildWithoutEnv =
-    process.env.SKIP_ENV_VALIDATION === "1" || process.env.SKIP_ENV_VALIDATION === "true";
-  const connectionString = isBuildWithoutEnv
+  const connectionString = isEnvValidationSkipped()
     ? process.env.DATABASE_URL
     : requireEnv("DATABASE_URL", process.env.DATABASE_URL);
 

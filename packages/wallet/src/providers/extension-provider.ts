@@ -5,7 +5,7 @@ import { isAppError } from "@wadzzo/errors";
 import { submitSignedTransaction } from "../stellar/horizon";
 import { signInWithSignedChallenge } from "../session/sign-in-with-credentials";
 import { showFundAccountToast } from "../ui/fund-account-toast";
-import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/utils";
+import { abbreviateAddress, isInvalidPublicKey } from "@wadzzo/utils/address";
 import type { SignedChallengeCredential } from "../session/auth-credentials";
 import type { ExtensionWallet, WalletProvider } from "./wallet-provider";
 

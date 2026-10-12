@@ -3,6 +3,9 @@ import { Horizon, Transaction, xdr } from "@stellar/stellar-sdk";
 import { stellarNetwork } from "../config/stellar-network";
 import { StellarTransactionError } from "../errors/stellar-transaction-error";
 
+/** A Horizon client for this deployment's network (testnet or mainnet). The one place servers are made. */
+export const horizonServer = (): Horizon.Server => new Horizon.Server(stellarNetwork.horizonUrl);
+
 /** Result of a transaction the network accepted. */
 export interface SubmittedTransaction {
   readonly success: true;
@@ -23,7 +26,7 @@ export const parseTransactionXdr = (envelopeXdr: string): Transaction =>
  */
 export async function submitSignedTransaction(signedXdr: string): Promise<SubmittedTransaction> {
   try {
-    const server = new Horizon.Server(stellarNetwork.horizonUrl);
+    const server = horizonServer();
     const result = await server.submitTransaction(parseTransactionXdr(signedXdr));
     return { success: true, message: "Transaction submitted successfully", hash: result.hash };
   } catch (error) {

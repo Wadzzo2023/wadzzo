@@ -1,4 +1,11 @@
-export { AppError, isAppError, requireEnv, toAppError, type AppErrorOptions } from "./app-error";
+export {
+  AppError,
+  isAppError,
+  isEnvValidationSkipped,
+  requireEnv,
+  toAppError,
+  type AppErrorOptions,
+} from "./app-error";
 export {
   ERROR_DEFINITIONS,
   ErrorCodes,

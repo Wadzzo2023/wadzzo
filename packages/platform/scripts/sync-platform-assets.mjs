@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Prepares an app for the platform it is being built for (PLATFORM_SLUG):
 //   - src/styles/platform-theme.css  <- themes/<slug>/<app>.css
-//   - public/platform/**             <- assets/<slug>/<app>/**
+//   - public/platform/**             <- assets/<slug>/shared/** then assets/<slug>/<app>/**
+//                                       (the app's own files win over shared ones)
 // Both outputs are generated and git-ignored. Run from the app directory by
 // the app's `predev` / `prebuild` scripts:  node <this file> <app-name>
 import fs from "node:fs";
@@ -47,9 +48,11 @@ fs.writeFileSync(
 
 const publicDir = path.join(appRoot, "public/platform");
 fs.rmSync(publicDir, { recursive: true, force: true });
-const assetsDir = path.join(platformRoot, "assets", slug, app);
-if (fs.existsSync(assetsDir)) fs.cpSync(assetsDir, publicDir, { recursive: true });
+const assetDirs = ["shared", app]
+  .map((name) => path.join(platformRoot, "assets", slug, name))
+  .filter(fs.existsSync);
+for (const dir of assetDirs) fs.cpSync(dir, publicDir, { recursive: true });
 
 console.log(
-  `[platform] ${app}: ${slug}${themeFile ? "" : " (no theme)"}${fs.existsSync(assetsDir) ? " + assets" : ""}`,
+  `[platform] ${app}: ${slug}${themeFile ? "" : " (no theme)"}${assetDirs.length ? " + assets" : ""}`,
 );

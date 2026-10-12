@@ -5,18 +5,18 @@ import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { getCurrentPlatform, getPlatformSlug, recordUserPlatform } from "@wadzzo/platform/server";
-import { truncateString } from "@wadzzo/utils/string";
+import { truncateMiddle } from "@wadzzo/utils/string";
 import { PLATFORM_ASSET, USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { firebaseAuth } from "@wadzzo/wallet/firebase";
 import {
   getOrCreateFirebaseUserFromApple,
   verifyFirebaseIdToken,
-  verifyTransactionSignature,
+  verifyLoginChallenge,
 } from "@wadzzo/wallet/server";
 import {
   accountServiceResponseSchema,
+  authCredentialSchema,
   WalletType,
-  type AuthCredential,
 } from "@wadzzo/wallet/shared";
 
 /** What a successful sign-in resolves to (the shape NextAuth keeps in the JWT). */
@@ -46,12 +46,20 @@ const SIGNED_CHALLENGE_WALLETS: readonly WalletType[] = [
  * (`POST /api/mobile/v1/auth/session`), so they can never disagree about who
  * someone is.
  *
+ * `input` is whatever the client sent, so it is validated here, once, for every caller.
+ *
  * Throws `WALLET_AUTH_FAILED` for a bad credential (Firebase error strings like
  * "Firebase: Error (auth/unverified-email)." are meant to reach the client).
  */
-export async function authorizeCredentials(
-  credential: AuthCredential,
-): Promise<AuthenticatedUser | null> {
+export async function authorizeCredentials(input: unknown): Promise<AuthenticatedUser | null> {
+  const parsed = authCredentialSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
+      message: "That sign-in request is incomplete or malformed.",
+    });
+  }
+  const credential = parsed.data;
+
   switch (credential.walletType) {
     case WalletType.emailPass: {
       const { email, password, fromAppSign } = credential;
@@ -106,27 +114,40 @@ export async function authorizeCredentials(
     case WalletType.apple: {
       const { appleToken, token, email, fromAppSign } = credential;
       let uid: string;
+      let accountEmail = email;
       if (token) {
         ({ uid } = await verifyFirebaseIdToken(token));
       } else if (appleToken) {
-        ({ uid } = await getOrCreateFirebaseUserFromApple(appleToken, email));
+        // The account comes from the Apple token itself, not from the email the client sent.
+        const firebaseUser = await getOrCreateFirebaseUserFromApple(appleToken);
+        uid = firebaseUser.uid;
+        accountEmail = firebaseUser.email ?? email;
       } else {
         return null;
       }
-      const { publicKey } = await requestAccountPublicKey({ uid, email, fromAppSign });
+      const { publicKey } = await requestAccountPublicKey({
+        uid,
+        email: accountEmail,
+        fromAppSign,
+      });
       const dbUser = await findOrCreateUser({
         publicKey,
         fromAppSign,
-        email,
+        email: accountEmail,
         signUpMethod: credential.walletType,
       });
-      return { ...dbUser, walletType: credential.walletType, email, emailVerified: true };
+      return {
+        ...dbUser,
+        walletType: credential.walletType,
+        email: accountEmail,
+        emailVerified: true,
+      };
     }
 
     default: {
       if (SIGNED_CHALLENGE_WALLETS.includes(credential.walletType)) {
         const { pubkey, signedXDR, fromAppSign } = credential;
-        if (!verifyTransactionSignature({ publicKey: pubkey, xdr: signedXDR })) {
+        if (!verifyLoginChallenge({ publicKey: pubkey, xdr: signedXDR })) {
           throw invalidSignature();
         }
         const dbUser = await findOrCreateUser({
@@ -169,7 +190,7 @@ async function findOrCreateUser(input: {
   const created = await db.user.create({
     data: {
       id: publicKey,
-      name: truncateString(publicKey),
+      name: truncateMiddle(publicKey),
       fromAppSignup: fromAppSign === "true",
       email,
       firstSignUpMethod: signUpMethod,

@@ -1,7 +1,7 @@
 "use client";
 
-import { type AuthError, AuthErrorCodes, type User, onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { type AuthError, AuthErrorCodes } from "firebase/auth";
+import { useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
 
@@ -29,17 +29,9 @@ interface EmailLoginFormProps {
 }
 
 export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [verifyEmail, setVerifyEmail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
-  }, []);
 
   const {
     register,
@@ -52,16 +44,14 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
 
   const loginMutation = useMutation({
     mutationFn: (data: FormInputs) => loginUser(data.email, data.password),
-    onSuccess: async (res, variables) => {
+    onSuccess: async (res) => {
       if (res?.ok) {
         toast.success("Successfully logged in");
       }
 
       if (res?.error) {
-        showFirebaseAuthError({
+        void showFirebaseAuthError({
           error: res.error,
-          email: variables.email,
-          password: variables.password,
           setVerifyEmail,
         });
       }

@@ -31,7 +31,7 @@ import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 type Admin = RouterOutputs["wallet"]["admin"]["admins"][number];
 const PUBKEY = /^G[A-Z2-7]{55}$/;

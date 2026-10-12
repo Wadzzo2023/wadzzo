@@ -5,10 +5,6 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import { env } from "~/env";
 
 export const gameRouter = createTRPCRouter({
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   decodeSessionToken: publicProcedure.input(z.string()).query(async ({ input }) => {
     const sessionToken = input;
     const decoded = await decode({

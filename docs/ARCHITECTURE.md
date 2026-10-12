@@ -35,8 +35,22 @@ NEXT_PUBLIC_STELLAR_NETWORK = testnet | mainnet      (legacy: NEXT_PUBLIC_STELLA
 | Custodial (keys held by the accounts service) | Email + password, Google, Apple, Facebook                                          |
 
 - Browser: `signAndSubmitTransaction({ xdr, publicKey, walletType })`.
-- Server: `signXdrForCustodialUser`, `buildLoginChallengeXdr`, `verifyTransactionSignature`.
+- Server: `signXdrForCustodialUser`, `buildLoginChallengeXdr`, `verifyLoginChallenge`.
+- One Horizon client: `horizonServer()` from `@wadzzo/wallet/stellar`. Nothing builds its own.
+- The central accounts service (`stellar-accounts`) creates and funds custodial accounts on **mainnet only**. On a testnet deployment a custodial user's key still signs testnet transactions, but the account has to be funded on testnet separately.
 - Entries are split by environment so a server module can never pull in UI: `@wadzzo/wallet` (UI + hooks), `/shared` (types, schemas), `/stellar`, `/firebase`, `/config`, `/server`.
+
+## Who may sign, and who may sign in
+
+These checks live in the shared packages so no app can forget them:
+
+- **Signer guard** (`@wadzzo/api`): procedures that take `signWith` accept only the caller's own custodial account, or `{ isAdmin }` from a real admin of the platform. Anything else is `AUTH_FORBIDDEN` before the procedure runs.
+- **Login challenge** (`verifyLoginChallenge`): a wallet login must be the challenge we issued for that key (one payment of 0.000001 XLM to the platform account), signed, and not older than 5 minutes. A transaction the account signed for anything else, which is public on the ledger, can't be replayed as a login.
+- **Apple sign-in**: the account comes from what Apple's identity token vouches for (its linked Firebase user, or its verified email), never from an email the client sends with it.
+- **Server-side image fetches** (`@wadzzo/storage`): http(s) only, no private or link-local addresses (including through redirects), size and time limits.
+- **`authorizeCredentials`** parses its input with `authCredentialSchema`; malformed sign-ins fail with `WALLET_AUTH_FAILED`.
+
+Known gap: Albedo login signs a token the _client_ chooses, so a captured signature can be replayed. Fixing it needs a server-issued nonce, which changes the mobile contract.
 
 ## Errors
 
@@ -46,10 +60,14 @@ Every deliberate failure is an `AppError` with a code from `@wadzzo/errors` (`Er
 
 See [PLATFORMS.md](PLATFORMS.md). `PLATFORM_SLUG` selects branding, theme and assets at build time and the `Platform` row at run time; rows are scoped by `@wadzzo/platform/scope`.
 
+## Tests
+
+Every shared package with logic has its own `vitest` suite (`pnpm test` runs them all through turbo): `errors` (codes and tRPC mapping), `wallet` (signer guard, login challenge, network config, Stellar error mapping, Apple sign-in), `auth`, `api` (guard through a real tRPC caller, bounty visibility), `storage` (URL guard, upload rules), `stellar` (account maths, prices), `platform` (scoping, stellar.toml escaping, Clinton assets present for every app), `geo`, `utils`.
+
 ## Deploying
 
 - Web apps: one deployment per app per platform, same repo, different env (`PLATFORM_SLUG`, `NEXT_PUBLIC_STELLAR_NETWORK`, ...). Each app runs `sync:platform` before `dev`/`build`.
-- `apps/express-wadzzo` compiles with `tsc` and runs under PM2 (`ecosystem.config.cjs`). It depends on no workspace TypeScript package at runtime.
+- `apps/express-wadzzo` is bundled with `tsup` (workspace packages inlined) and runs under PM2 (`ecosystem.config.cjs`).
 - `.github/workflows`: `ci.yml` (format, typecheck, lint, test), `deploy-brand.yml`, `deploy-market.yml` (path-filtered, EC2).
 
 ## Conventions

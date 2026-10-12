@@ -10,7 +10,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@trpc/server": "catalog:",
@@ -32,9 +33,11 @@
     "@types/node": "catalog:",
     "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "@wadzzo/vitest-config": "workspace:*",
     "eslint": "catalog:",
     "next": "catalog:",
     "next-auth": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

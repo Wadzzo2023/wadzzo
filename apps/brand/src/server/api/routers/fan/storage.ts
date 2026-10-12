@@ -1,11 +1,11 @@
 import { Horizon, NotFoundError } from "@stellar/stellar-sdk";
 import { z } from "zod";
 
-import { PLATFORM_ASSET, STELLAR_URL } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { Db } from "@wadzzo/db";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
-const horizon = () => new Horizon.Server(STELLAR_URL);
 export type HistoryRow = {
   id: string;
   at: string;
@@ -37,7 +37,7 @@ export const storageRouter = createTRPCRouter({
 
     let acc: Awaited<ReturnType<Horizon.Server["loadAccount"]>>;
     try {
-      acc = await horizon().loadAccount(publicKey);
+      acc = await horizonServer().loadAccount(publicKey);
     } catch (e) {
       if (e instanceof NotFoundError)
         return {
@@ -121,7 +121,11 @@ export const storageRouter = createTRPCRouter({
 
       let page;
       try {
-        let call = horizon().payments().forAccount(publicKey).order("desc").limit(input.limit);
+        let call = horizonServer()
+          .payments()
+          .forAccount(publicKey)
+          .order("desc")
+          .limit(input.limit);
         if (input.cursor) call = call.cursor(input.cursor);
         page = await call.call();
       } catch (e) {

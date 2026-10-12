@@ -54,10 +54,6 @@ export const notificationRouter = createTRPCRouter({
         void (await inbox.clearRead(ctx.db, ctx.session.user.id, input.scope)),
     ),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   getCreatorNotifications: protectedProcedure
     .input(
       z.object({

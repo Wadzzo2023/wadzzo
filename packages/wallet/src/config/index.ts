@@ -5,6 +5,5 @@ export * from "./stellar-network";
 
 import { stellarNetwork } from "./stellar-network";
 
-/** Compat names the apps used before the network config object existed. */
+/** The network passphrase transactions are built and signed against. */
 export const networkPassphrase = stellarNetwork.passphrase;
-export const STELLAR_URL = stellarNetwork.horizonUrl;

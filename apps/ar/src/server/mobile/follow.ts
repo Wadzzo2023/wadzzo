@@ -1,12 +1,13 @@
-import { Horizon, Keypair, Transaction, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Keypair, Transaction, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Session } from "next-auth";
 
 import { env } from "~/env";
-import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
+import { networkPassphrase } from "@wadzzo/wallet/config";
 
 import type { Caller } from "./context";
 import { HttpError } from "./http";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const CUSTODIAL = new Set(["emailPass", "google", "facebook", "apple"]);
 
@@ -51,7 +52,7 @@ function assertFollowTx(xdr: string, userId: string) {
 async function submit(xdr: string, userId: string) {
   const tx = assertFollowTx(xdr, userId);
   try {
-    await new Horizon.Server(STELLAR_URL).submitTransaction(tx);
+    await horizonServer().submitTransaction(tx);
   } catch (e) {
     const codes = (e as { response?: { data?: { extras?: { result_codes?: unknown } } } }).response
       ?.data?.extras?.result_codes;

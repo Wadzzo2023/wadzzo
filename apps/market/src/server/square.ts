@@ -7,13 +7,19 @@ import { SquareClient, SquareEnvironment, SquareError } from "square";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-const square = new SquareClient({
-  token: env.SQUARE_ACCESS_TOKEN,
-  environment:
-    env.SQUARE_ENVIRONMENT.toLowerCase() === "production"
-      ? SquareEnvironment.Production
-      : SquareEnvironment.Sandbox,
-});
+let client: SquareClient | undefined;
+
+/** The Square client, made on first payment so importing this file needs no Square settings. */
+function getSquareClient(): SquareClient {
+  client ??= new SquareClient({
+    token: env.SQUARE_ACCESS_TOKEN,
+    environment:
+      env.SQUARE_ENVIRONMENT.toLowerCase() === "production"
+        ? SquareEnvironment.Production
+        : SquareEnvironment.Sandbox,
+  });
+  return client;
+}
 
 function describe(e: unknown) {
   if (e instanceof SquareError && e.errors.length)
@@ -34,7 +40,7 @@ export async function chargeCard({
   note: string;
 }) {
   try {
-    const res = await square.payments.create({
+    const res = await getSquareClient().payments.create({
       idempotencyKey: randomUUID(),
       sourceId,
       verificationToken,
@@ -57,7 +63,7 @@ export async function chargeCard({
 
 /** Refunds a whole card payment (used when the item can't be delivered). */
 export async function refundCard(paymentId: string, usd: number, reason: string) {
-  await square.refunds.refundPayment({
+  await getSquareClient().refunds.refundPayment({
     idempotencyKey: randomUUID(),
     paymentId,
     reason,

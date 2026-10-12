@@ -24,7 +24,7 @@ import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 type Listing = RouterOutputs["fan"]["asset"]["getMyAssets"][number];
 const platform = PLATFORM_ASSET.code.toUpperCase();

@@ -6,8 +6,7 @@ import type { Platform } from "@wadzzo/db";
 import { networkPassphrase } from "@wadzzo/wallet/config";
 import type { Db } from "@wadzzo/db";
 import { notifyFan } from "@wadzzo/platform/server";
-
-import { horizon } from "./creator-items";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 type DbClient = Db;
 
@@ -68,7 +67,7 @@ export async function confirmTokenGift(
   let ok: boolean | null = null;
   for (let i = 0; i < 6 && ok === null; i++) {
     try {
-      ok = (await horizon().transactions().transaction(txHash).call()).successful;
+      ok = (await horizonServer().transactions().transaction(txHash).call()).successful;
     } catch {
       await new Promise((r) => setTimeout(r, 1500));
     }

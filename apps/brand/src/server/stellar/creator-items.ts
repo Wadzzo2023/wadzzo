@@ -9,10 +9,11 @@ import type { Session } from "next-auth";
 import { WalletType } from "@wadzzo/wallet/shared";
 
 import { env } from "~/env";
-import { STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import type { Db } from "@wadzzo/db";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 /*
  * Creator items under the lazy-mint model. Every creator has ONE issuer
@@ -76,11 +77,9 @@ export function decryptSecret(payload: string) {
 
 // ── chain helpers ────────────────────────────────────────────────────────────
 
-export const horizon = () => new Horizon.Server(STELLAR_URL);
-
 export async function loadAccount(id: string) {
   try {
-    return await horizon().loadAccount(id);
+    return await horizonServer().loadAccount(id);
   } catch {
     return null;
   }
@@ -291,7 +290,7 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
     where: { creatorId },
   });
   const issuerKp = Keypair.fromSecret(decryptSecret(issuerRow.secretEncrypted));
-  const creatorAcc = await horizon().loadAccount(creatorId);
+  const creatorAcc = await horizonServer().loadAccount(creatorId);
   const tx = new TransactionBuilder(creatorAcc, {
     fee: TrxBaseFee,
     networkPassphrase,
@@ -374,7 +373,7 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
 
 async function txSucceeded(hash: string): Promise<boolean | null> {
   try {
-    const t = await horizon().transactions().transaction(hash).call();
+    const t = await horizonServer().transactions().transaction(hash).call();
     return t.successful;
   } catch {
     return null; // not on the ledger (yet)

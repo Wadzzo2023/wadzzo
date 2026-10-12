@@ -1,32 +1,9 @@
 import { db } from "@wadzzo/db/server";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { ipfsHashToUrl } from "@wadzzo/utils/ipfs";
 
 import { platformBranding } from "./branding";
 import { getCurrentPlatform } from "./current-platform";
-
-interface TomlCurrency {
-  code: string;
-  issuer: string;
-  name: string;
-  description: string | null;
-  thumbnail: string;
-}
-
-/** One `[[CURRENCIES]]` entry of a stellar.toml. */
-function currencyToml(currency: TomlCurrency): string {
-  const ipfsHash = currency.thumbnail.split("/").pop();
-  const lines = [
-    "[[CURRENCIES]]",
-    `code="${currency.code}"`,
-    `issuer="${currency.issuer}"`,
-    "display_decimals=7",
-    `name="${currency.name}"`,
-    `desc="${currency.description}"`,
-  ];
-  if (ipfsHash) lines.push(`image="${ipfsHashToUrl(ipfsHash)}"`);
-  return `${lines.join("\n")}\n\n`;
-}
+import { currencyToml, tomlField, tomlString } from "./stellar-toml-format";
 
 /**
  * The organisation behind this deployment's assets. A deployment can override
@@ -37,10 +14,8 @@ function documentationToml(): string {
   // A partner that sets its own name leaves unset fields out rather than showing the platform's.
   const isOverridden = Boolean(env.TOML_ORG_NAME);
   const { toml } = platformBranding;
-  const field = (key: string, value: string | undefined, platformDefault: string | undefined) => {
-    const resolved = value ?? (isOverridden ? undefined : platformDefault);
-    return resolved ? [`${key}="${resolved}"`] : [];
-  };
+  const field = (key: string, value: string | undefined, platformDefault: string | undefined) =>
+    tomlField(key, value ?? (isOverridden ? undefined : platformDefault));
 
   const lines = [
     "[DOCUMENTATION]",
@@ -54,15 +29,17 @@ function documentationToml(): string {
   ];
 
   if (env.TOML_PRINCIPAL_NAME) {
-    lines.push("[[PRINCIPALS]]", `name="${env.TOML_PRINCIPAL_NAME}"`);
-    if (env.TOML_PRINCIPAL_EMAIL) lines.push(`email="${env.TOML_PRINCIPAL_EMAIL}"`);
-    lines.push("");
+    lines.push("[[PRINCIPALS]]", ...tomlField("name", env.TOML_PRINCIPAL_NAME));
+    lines.push(...tomlField("email", env.TOML_PRINCIPAL_EMAIL), "");
   } else if (!isOverridden) {
     for (const principal of toml.principals) {
-      lines.push("[[PRINCIPALS]]", `name="${principal.name}"`);
-      if (principal.twitter) lines.push(`twitter="${principal.twitter}"`);
-      if (principal.github) lines.push(`github="${principal.github}"`);
-      lines.push("");
+      lines.push(
+        "[[PRINCIPALS]]",
+        `name=${tomlString(principal.name)}`,
+        ...tomlField("twitter", principal.twitter),
+        ...tomlField("github", principal.github),
+        "",
+      );
     }
   }
   return `${lines.join("\n")}\n`;
@@ -95,7 +72,7 @@ export async function renderStellarToml(): Promise<string> {
       issuer: asset.issuer,
       name: asset.creator.name || PLATFORM_ASSET.code,
       description: `Page Asset of ${asset.creator.name}`,
-      thumbnail: asset.thumbnail ?? "",
+      thumbnail: asset.thumbnail,
     });
   }
   return toml;

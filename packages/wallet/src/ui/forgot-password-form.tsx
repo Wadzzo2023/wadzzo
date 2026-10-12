@@ -48,7 +48,8 @@ export function ForgotPasswordForm() {
     mutationFn: ({ email }: { email: string }) => sendPasswordResetEmail(firebaseAuth, email),
     onSuccess: () => {
       toast.success("Password reset email sent!");
-      startCooldown(30);
+      setEmailSent(true);
+      startCooldown(COOLDOWN_SECONDS);
     },
     onError: (error: AuthError) => {
       toast.error(error.message);

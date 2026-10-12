@@ -175,9 +175,6 @@ export const userRouter = createTRPCRouter({
     });
     return user;
   }),
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
   // Accounts are shared by every platform, so only Wadzzo admins can delete one.
   deleteUser: superAdminProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     const deleted = await ctx.db.user.delete({ where: { id: input } });

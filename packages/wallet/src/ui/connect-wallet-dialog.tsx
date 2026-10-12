@@ -23,7 +23,7 @@ import {
 import { useConnectWalletDialogStore } from "../state/connect-dialog-store";
 import { useWalletConnectModalStore } from "../state/wallet-connect-modal-store";
 import { isStellarAccountActive } from "../stellar/horizon";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 import { ForgotPasswordForm } from "./forgot-password-form";
 import { EmailLoginForm } from "./email-login-form";
 import { EmailSignUpForm } from "./email-sign-up-form";
@@ -35,13 +35,14 @@ import { useFacebookIosUserAgent } from "./use-facebook-ios-user-agent";
 import { HanaIcon, MetaMaskIcon } from "./wallet-icons";
 import { NON_CUSTODIAL_PROVIDERS } from "../providers/registry";
 import { WalletType } from "../wallet-type";
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
+
+import albedoLogo from "./assets/albedo.svg";
+import freighterLogo from "./assets/freighter.png";
+import rabetLogo from "./assets/rabet.png";
+import xbullLogo from "./assets/xbull-dark.svg";
 
 type AuthView = "login" | "signup" | "forgot-password";
-interface ConnectWalletDialogProps {
-  className: string;
-}
-
 function getWalletLabel(walletType: WalletType): string {
   switch (walletType) {
     case WalletType.freighter:
@@ -75,14 +76,14 @@ function WalletButton({
   onClick,
   selected,
   tooltip,
-  imageUrl,
+  image,
   icon,
 }: {
   label: string;
   onClick: () => void;
   selected: boolean;
   tooltip?: string;
-  imageUrl?: string;
+  image?: string | StaticImageData;
   icon?: React.ReactNode;
 }) {
   return (
@@ -98,9 +99,9 @@ function WalletButton({
         )}
       >
         <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-          {imageUrl ? (
+          {image ? (
             <Image
-              src={imageUrl}
+              src={image}
               alt={label}
               width={28}
               height={28}
@@ -119,19 +120,19 @@ function WalletButton({
 
 /** Logo (hosted image or inline icon) shown on each wallet's connect button. */
 const WALLET_BUTTON_ART: Partial<
-  Record<WalletType, { imageUrl?: string; icon?: React.ReactNode }>
+  Record<WalletType, { image?: string | StaticImageData; icon?: React.ReactNode }>
 > = {
-  [WalletType.freighter]: { imageUrl: "/images/wallets/freighter.png" },
-  [WalletType.rabet]: { imageUrl: "/images/wallets/rabet.png" },
-  [WalletType.albedo]: { imageUrl: "/images/wallets/albedo.svg" },
-  [WalletType.xBull]: { imageUrl: "/images/wallets/xbull-dark.svg" },
+  [WalletType.freighter]: { image: freighterLogo },
+  [WalletType.rabet]: { image: rabetLogo },
+  [WalletType.albedo]: { image: albedoLogo },
+  [WalletType.xBull]: { image: xbullLogo },
   [WalletType.hana]: { icon: <HanaIcon /> },
   [WalletType.metamask]: { icon: <MetaMaskIcon /> },
-  [WalletType.hotWallet]: { imageUrl: "https://storage.herewallet.app/logo.png" },
+  [WalletType.hotWallet]: { image: "https://storage.herewallet.app/logo.png" },
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
+export function ConnectWalletDialog() {
   const [authView, setAuthView] = useState<AuthView>("login");
   const [activeTab, setActiveTab] = useState<"action" | "stellar">("action");
   const [isAccountActivate, setAccountActivate] = useState(false);
@@ -140,12 +141,10 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
   const [selectedWallet, setSelectedWallet] = useState(WalletType.none);
   const isIosFBuser = useFacebookIosUserAgent();
   const session = useSession();
-  const [loading, setLoading] = useState(false);
 
   // True only inside the AR app's phone-shaped device frame (see the note on
-  // AR_APP_FRAME_SELECTOR) — everywhere else this package is used, including
-  // any other project sharing this same submodule, `isFramedHost` stays
-  // false and the dialog keeps its original wide two-column layout below.
+  // AR_APP_FRAME_SELECTOR). Everywhere else `isFramedHost` stays false and the
+  // dialog keeps its wide two-column layout below.
   const [frameContainer, setFrameContainer] = useState<HTMLElement | null>(null);
   const isFramedHost = frameContainer !== null;
   useEffect(() => {
@@ -161,11 +160,7 @@ export function ConnectWalletDialog({ className }: ConnectWalletDialogProps) {
 
   const checkStatus = useCallback(async () => {
     const user = session.data?.user;
-    if (user) {
-      setLoading(true);
-      await checkAccountActivity(user.id);
-      setLoading(false);
-    }
+    if (user) await checkAccountActivity(user.id);
   }, [checkAccountActivity, session.data?.user]);
 
   // Plain browser navigation, not next/router or next/navigation: this

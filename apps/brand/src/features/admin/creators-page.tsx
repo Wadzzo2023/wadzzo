@@ -36,7 +36,7 @@ import { Person } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { FilterChips, SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 import { useCreatorActions } from "./use-creator-actions";
 

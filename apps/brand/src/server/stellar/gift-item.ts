@@ -17,8 +17,9 @@ import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import type { Db } from "@wadzzo/db";
 import { notifyFan } from "@wadzzo/platform/server";
 
-import { decryptSecret, horizon, loadAccount, signerFor } from "./creator-items";
+import { decryptSecret, loadAccount, signerFor } from "./creator-items";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 /*
  * Gifting a brand's item to a follower, lazily minted.
@@ -316,7 +317,7 @@ export async function prepareGiftItem(
       const motherPub = mother.publicKey();
       const signers: Keypair[] = [mother];
 
-      const builder = new TransactionBuilder(await horizon().loadAccount(motherPub), {
+      const builder = new TransactionBuilder(await horizonServer().loadAccount(motherPub), {
         fee: TrxBaseFee,
         networkPassphrase,
       }).setTimeout(TX_TIMEOUT_SECONDS);
@@ -418,7 +419,7 @@ export async function prepareGiftItem(
 
 async function txSucceeded(hash: string): Promise<boolean | null> {
   try {
-    return (await horizon().transactions().transaction(hash).call()).successful;
+    return (await horizonServer().transactions().transaction(hash).call()).successful;
   } catch {
     return null;
   }

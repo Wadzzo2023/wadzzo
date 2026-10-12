@@ -5,10 +5,10 @@ import Image from "next/image";
 import { LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useConnectWalletDialogStore } from "../state/connect-dialog-store";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 import { Button } from "@wadzzo/ui/components/button";
 
-export function ConnectWalletButton({ text }: { text?: string }) {
+export function ConnectWalletButton() {
   const session = useSession();
 
   const setDialog = useConnectWalletDialogStore();
@@ -16,14 +16,12 @@ export function ConnectWalletButton({ text }: { text?: string }) {
     <div className="flex items-center gap-2">
       <Button
         size="lg"
-
         onClick={() => setDialog.setIsOpen(true)}
-        className="flex items-center gap-2 bg-[#39BD2B] p-2 text-white shadow-xs shadow-black hover:bg-[#31a128]"
+        className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 p-2 shadow-xs shadow-black"
       >
         <div className="flex items-center gap-2">
           <Image
             alt="logo"
-
             src={session.data?.user.image ?? "/favicon.ico"}
             height={200}
             width={200}

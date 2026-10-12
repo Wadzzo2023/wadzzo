@@ -1,18 +1,11 @@
-import { Asset, Horizon, NotFoundError } from "@stellar/stellar-sdk";
+import { Asset, type Horizon, NotFoundError } from "@stellar/stellar-sdk";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
-import {
-  BASE_RESERVE_XLM,
-  MAX_SUBENTRIES,
-  PLATFORM_ASSET,
-  STELLAR_URL,
-} from "@wadzzo/wallet/config";
+import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export type Balances = Horizon.HorizonApi.AccountResponse["balances"];
 export type AssetRef = { code: string; issuer: string };
-
-/** A Horizon server for this deployment's network. */
-export const horizon = () => new Horizon.Server(STELLAR_URL);
 
 export const toAsset = ({ code, issuer }: AssetRef) => new Asset(code, issuer);
 
@@ -34,7 +27,7 @@ export class StellarAccount {
   /** The account, or `null` when it doesn't exist on-chain yet (an unfunded wallet holds nothing). */
   static async load(id: string): Promise<StellarAccount | null> {
     try {
-      return new StellarAccount(id, await horizon().loadAccount(id));
+      return new StellarAccount(id, await horizonServer().loadAccount(id));
     } catch (error) {
       if (error instanceof NotFoundError) return null;
       throw error;
@@ -128,7 +121,7 @@ export class StellarAccount {
 /** Whether a transaction with this hash made it on-chain successfully (`null` = not found yet). */
 export async function transactionSucceeded(hash: string): Promise<boolean | null> {
   try {
-    const transaction = await horizon().transactions().transaction(hash).call();
+    const transaction = await horizonServer().transactions().transaction(hash).call();
     return transaction.successful;
   } catch (error) {
     if (error instanceof NotFoundError) return null;

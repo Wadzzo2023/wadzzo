@@ -3,9 +3,10 @@ import { addMonths } from "date-fns";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { MOTHER_SECRET } from "../platform-secrets";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function getVanitySubscriptionXDR({
   amount,
@@ -16,7 +17,7 @@ export async function getVanitySubscriptionXDR({
   signWith: CustodialSigner;
   userPubKey: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
 
@@ -156,7 +157,7 @@ export async function verifyVanityPayment({
   amount: number;
   after?: Date | null;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   let tx: Horizon.ServerApi.TransactionRecord;
   try {
     tx = await server.transactions().transaction(txHash).call();

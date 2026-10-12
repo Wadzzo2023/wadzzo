@@ -59,6 +59,7 @@ catalog:
   "@trpc/client": "^11.19.0"
   "@trpc/react-query": "^11.19.0"
   "@trpc/server": "^11.19.0"
+  "@types/geojson": "^7946.0.16"
   "@types/jsonwebtoken": "^9.0.10"
   "@types/node": "^26.6.5"
   "@types/nodemailer": "^8.0.2"

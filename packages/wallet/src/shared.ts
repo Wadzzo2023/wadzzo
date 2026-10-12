@@ -18,6 +18,10 @@ export {
 } from "./session/auth-credentials";
 export { custodialSignerSchema, type CustodialSigner } from "./session/custodial-signer";
 export {
+  assertSignerBelongsToSession,
+  type SigningSessionUser,
+} from "./session/assert-signer-belongs-to-session";
+export {
   accountServiceResponseSchema,
   type AccountServiceResponse,
 } from "./providers/custodial/account-service-schema";

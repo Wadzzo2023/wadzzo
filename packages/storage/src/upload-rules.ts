@@ -30,6 +30,56 @@ export const ENTRY_FILE_TYPES = [
   "text/plain",
 ] as const;
 
+/** What a creator may upload through the brand tools: any slot, up to 1 GB. */
+export const MAX_CREATOR_FILE_BYTES = 1024 * 1024 * 1024;
+
+/** Everything creators may upload: images, video, audio, 3D models, documents and spreadsheets. */
+export const CREATOR_FILE_TYPES: readonly string[] = [
+  // images
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  // video
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+  // audio
+  "audio/mp3",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/aac",
+  "audio/flac",
+  "audio/alac",
+  "audio/aiff",
+  "audio/wma",
+  "audio/m4a",
+  "audio/x-wav",
+  "audio/x-ms-wma",
+  "audio/x-aiff",
+  "audio/x-flac",
+  "audio/x-m4a",
+  "audio/x-mp3",
+  "audio/x-mpeg",
+  "audio/x-ogg",
+  "audio/x-aac",
+  "audio/x-alac",
+  // 3D models (browsers send octet-stream for .obj / .glb)
+  "application/octet-stream",
+  // documents and spreadsheets
+  "application/vnd.google-apps.document",
+  "application/vnd.google-apps.spreadsheet",
+  "text/plain",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "text/csv",
+  "text/tab-separated-values",
+  "application/pdf",
+  "application/vnd.oasis.opendocument.spreadsheet",
+];
+
 /** A profile picture or cover image. */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const IMAGE_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;

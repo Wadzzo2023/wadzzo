@@ -13,11 +13,16 @@ const aliases = (appRoot) => [
 /** Fast unit tests (no network, no database). */
 export function unitTestConfig(
   appRoot,
-  { include = ["tests/**/*.test.ts", "src/**/*.test.ts"] } = {},
+  { include = ["tests/**/*.test.ts", "src/**/*.test.ts"], env = {} } = {},
 ) {
   return defineConfig({
     resolve: { alias: aliases(appRoot) },
-    test: { environment: "node", include, exclude: ["node_modules/**", ".next/**", "e2e/**"] },
+    test: {
+      environment: "node",
+      include,
+      env,
+      exclude: ["node_modules/**", ".next/**", "e2e/**"],
+    },
   });
 }
 

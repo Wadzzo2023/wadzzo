@@ -54,7 +54,7 @@ import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { ENDPOINT_ACCEPT } from "~/ui/upload/accept";
 import { useS3Upload } from "~/ui/upload/use-s3-upload";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 
 import { PageAssetTab } from "./page-asset-tab";
 import { VANITY_HOST, VanityUrlTab } from "./vanity-url-tab";

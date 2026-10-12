@@ -22,7 +22,7 @@ import { ErrorState } from "@wadzzo/ui/patterns/error-state";
 import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
-import { abbreviateAddress } from "@wadzzo/utils/utils";
+import { abbreviateAddress } from "@wadzzo/utils/address";
 import { stellarNetwork } from "@wadzzo/wallet/config";
 
 const fmt = (n: number, dp = 2) => n.toLocaleString("en-US", { maximumFractionDigits: dp });

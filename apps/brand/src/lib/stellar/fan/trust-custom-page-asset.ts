@@ -1,14 +1,14 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import {
   PLATFORM_ASSET,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function trustCustomPageAsset({
   creator,
@@ -25,7 +25,7 @@ export async function trustCustomPageAsset({
   storageSecret: string;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const asset = new Asset(code, issuer);
 

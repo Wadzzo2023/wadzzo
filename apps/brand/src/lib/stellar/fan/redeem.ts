@@ -1,9 +1,8 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
@@ -11,6 +10,7 @@ import {
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { getplatformAssetNumberForXLM } from "./get-token-price";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export async function createRedeemXDRAsset({
   creatorId,
@@ -21,7 +21,7 @@ export async function createRedeemXDRAsset({
   maxRedeems: number;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
 
@@ -65,7 +65,7 @@ export async function createRedeemXDRNative({
   maxRedeems: number;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
 
@@ -114,7 +114,7 @@ export async function claimRedeemXDR({
   userPub: string;
   storageSecret: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const asset = new Asset(assetCode, assetIssuer);
 

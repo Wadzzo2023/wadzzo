@@ -1,24 +1,17 @@
-import {
-  Asset,
-  BASE_FEE,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Asset, BASE_FEE, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { networkPassphrase } from "./create-song-token";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
 } from "@wadzzo/wallet/config";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { getplatformAssetNumberForXLM } from "../../fan/get-token-price";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -41,7 +34,7 @@ export async function XDR4BuyAsset({
 }) {
   // this asset limit only for buying more item.
   const asset = new Asset(code, issuerPub);
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const storageAcc = Keypair.fromSecret(storageSecret);
 
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
@@ -145,7 +138,7 @@ export async function XDR4BuyAssetWithXLM({
 }) {
   // this asset limit only for buying more item.
   const asset = new Asset(code, issuerPub);
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const storageAcc = Keypair.fromSecret(storageSecret);
 
   const transactionInializer = await server.loadAccount(buyer);
@@ -234,7 +227,7 @@ export async function XDR4BuyAssetWithSquire({
 }) {
   // this asset limit only for buying more item.
   const asset = new Asset(code, issuerPub);
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const storageAcc = Keypair.fromSecret(storageSecret);
 
   const mother = Keypair.fromSecret(env.MOTHER_SECRET);

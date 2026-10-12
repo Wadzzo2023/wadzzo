@@ -188,10 +188,6 @@ const reviewSelect = {
 } as const;
 
 export const pinRouter = createTRPCRouter({
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   // ─── Hotspot mutations → Express task server ────────────────────────────────
   //
   // These no longer touch QStash or the cron scheduler directly.

@@ -18,7 +18,7 @@ Where brands create and manage drops, stores, posts, bounties and events (Next 1
 - New rows of platform-stamped models must set `platformId`; queries use `platformScope` / `relationScope` from `@wadzzo/platform/scope` (`tests/platform-stamping.test.ts` guards it).
 - Platform copy, colours and URLs: `platformBranding` from `@wadzzo/platform/branding`.
 - Failures are `AppError` with an `ErrorCodes` code; tRPC maps them and sends `data.appCode`.
-- The task server is `apps/express-wadzzo`; `src/lib/agent/contract.ts` must stay byte-identical to its `src/agent/contract.ts` (a test checks it).
+- The task server is `apps/express-wadzzo`. The map agent's contract (steps, cards, actions) is `@wadzzo/agent-contract`, imported by both sides; change it there.
 - **Never commit a `Co-Authored-By: Claude` trailer** or any other Claude attribution.
 
 ## Checks

@@ -1,12 +1,8 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import {
-  PLATFORM_ASSET,
-  PLATFORM_FEE,
-  STELLAR_URL,
-  networkPassphrase,
-} from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, PLATFORM_FEE, networkPassphrase } from "@wadzzo/wallet/config";
 import { type MyAssetType } from "./stellar-schemas";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -23,7 +19,7 @@ export async function buyAssetTrx({
   creatorId: string;
   storageSecret: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const asset = new Asset(assetType.code, assetType.issuer);
 
   const assetStorage = Keypair.fromSecret(storageSecret);

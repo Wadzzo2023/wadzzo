@@ -214,10 +214,6 @@ export const trxRouter = createTRPCRouter({
       return await signXdrForCustodialUser({ xdr, signWith: input.signWith });
     }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
   getAssetPrice: publicProcedure.query(async () => {
     return await getPlatformAssetPrice();
   }),

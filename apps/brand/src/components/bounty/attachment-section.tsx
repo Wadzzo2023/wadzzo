@@ -4,7 +4,8 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
 import { Download } from "lucide-react";
-import { downloadAttachment } from "@wadzzo/utils/utils";
+import toast from "react-hot-toast";
+import { downloadFile } from "@wadzzo/utils/download-file";
 import { Button } from "@wadzzo/ui/components/button";
 import CustomPlayer from "../common/custom-bounty-player";
 
@@ -24,8 +25,9 @@ const AttachmentSection: React.FC<AttachmentSectionProps> = ({ title, attachment
   if (!attachments || attachments.length === 0) return null;
   const handleDownload = async (fileName: string, fileUrl: string) => {
     setLoading(true);
-    await downloadAttachment(fileUrl, fileName);
+    const saved = await downloadFile(fileUrl, fileName);
     setLoading(false);
+    if (!saved) toast.error("Couldn't download that file. Please try again.");
   };
   return (
     <div className="bg-secondary rounded-lg p-2">

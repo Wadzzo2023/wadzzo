@@ -1,15 +1,15 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import {
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
   networkPassphrase,
 } from "@wadzzo/wallet/config";
 import { env } from "~/env";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export const sendAssetXDRForAsset = async ({
   creatorId,
@@ -30,7 +30,7 @@ export const sendAssetXDRForAsset = async ({
   userPublicKey: string;
   totoalTokenToSend: number;
 }) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const asset = new Asset(code, issuer);
 
@@ -91,7 +91,7 @@ export const sendAssetXDRForNative = async ({
   userPublicKey: string;
   totoalTokenToSend: number;
 }) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const asset = new Asset(code, issuer);
 
@@ -138,7 +138,7 @@ export const getCreatorShopAssetBalance = async ({
 }: {
   creatorStoragePub: string;
 }) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(creatorStoragePub);
   const balaces = account.balances;
   return balaces;

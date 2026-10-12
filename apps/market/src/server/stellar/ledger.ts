@@ -3,13 +3,14 @@ import "server-only";
 import type { AssetTransaction } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 
-import { StellarAccount, horizon, transactionSucceeded } from "@wadzzo/stellar/account";
+import { StellarAccount, transactionSucceeded } from "@wadzzo/stellar/account";
 import { networkPassphrase } from "@wadzzo/wallet/config";
 import type { Db } from "@wadzzo/db";
 
 import { announceSettled } from "~/server/notify-events";
 
 import { platformToUsd } from "@wadzzo/stellar/prices";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -125,5 +126,5 @@ export async function settleOpenFor(db: Db, userId: string) {
 /** Submit a fully signed transaction from the server (custodial users, card deliveries). */
 export async function submitXdr(xdr: string) {
   const tx = TransactionBuilder.fromXDR(xdr, networkPassphrase);
-  return horizon().submitTransaction(tx);
+  return horizonServer().submitTransaction(tx);
 }

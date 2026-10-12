@@ -1,9 +1,10 @@
-import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { env } from "~/env";
-import { STELLAR_URL, networkPassphrase } from "@wadzzo/wallet/config";
+import { networkPassphrase } from "@wadzzo/wallet/config";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 /**
  * ── Follow, on-chain ───────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ export async function buildFollowTrustlineXdr({
   creatorPageAsset: { code: string; issuer: string };
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const asset = new Asset(creatorPageAsset.code, creatorPageAsset.issuer);
   const motherAccount = Keypair.fromSecret(env.MOTHER_SECRET);
 

@@ -1,5 +1,6 @@
 import { Horizon } from "@stellar/stellar-sdk";
-import { PLATFORM_ASSET, STELLAR_URL, STROOP } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, STROOP } from "@wadzzo/wallet/config";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export function checkSiteAssetBalance(accRes: Horizon.AccountResponse) {
   for (const balance of accRes.balances) {
@@ -39,7 +40,7 @@ export async function alreadyHaveTrustOnNft({
   asset: { code: string; issuer: string };
   accRes?: Horizon.AccountResponse;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const transactionInializer = accRes ?? (await server.loadAccount(pubkey));
 
   for (const item of transactionInializer.balances) {

@@ -2,7 +2,7 @@ import type { GetServerSidePropsContext } from "next";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import type { AuthCredential, WadzzoSessionUser } from "@wadzzo/wallet/shared";
+import type { WadzzoSessionUser } from "@wadzzo/wallet/shared";
 
 import { authorizeCredentials } from "./authorize-credentials";
 
@@ -33,9 +33,7 @@ export const authOptions: NextAuthOptions = {
       type: "credentials",
       credentials: {},
       authorize: (credentials) =>
-        authorizeCredentials(
-          credentials as unknown as AuthCredential,
-        ) as Promise<WadzzoSessionUser | null>,
+        authorizeCredentials(credentials) as Promise<WadzzoSessionUser | null>,
     }),
   ],
 };

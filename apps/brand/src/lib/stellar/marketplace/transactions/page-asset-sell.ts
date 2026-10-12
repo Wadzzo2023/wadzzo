@@ -1,15 +1,9 @@
-import {
-  Asset,
-  Horizon,
-  Keypair,
-  Operation,
-  TransactionBuilder,
-  Transaction,
-} from "@stellar/stellar-sdk";
+import { Asset, Keypair, Operation, TransactionBuilder, Transaction } from "@stellar/stellar-sdk";
 import { env } from "~/env";
 import { StellarAccount } from "@wadzzo/stellar/account";
-import { PLATFORM_ASSET, STELLAR_URL, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, TrxBaseFee, networkPassphrase } from "@wadzzo/wallet/config";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 // Shared helper for building and signing transaction
 async function buildAssetBuyTransaction({
@@ -31,7 +25,7 @@ async function buildAssetBuyTransaction({
 }) {
   try {
     const assetToBuy = new Asset(code, issuer);
-    const server = new Horizon.Server(STELLAR_URL);
+    const server = horizonServer();
     const motherKeypair = Keypair.fromSecret(env.MOTHER_SECRET);
     const motherAccount = await server.loadAccount(motherKeypair.publicKey());
 

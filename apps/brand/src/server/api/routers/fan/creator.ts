@@ -35,7 +35,7 @@ import {
 } from "~/server/api/trpc";
 import { brandWorksOnPlatform, platformScope } from "@wadzzo/platform/server";
 import { BADWORDS } from "~/utils/banned-word";
-import { truncateString } from "@wadzzo/utils/string";
+import { truncateMiddle } from "@wadzzo/utils/string";
 import { PaymentMethodEnum } from "../bounty/bounty";
 import axios from "axios";
 import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
@@ -390,7 +390,7 @@ export const creatorRouter = createTRPCRouter({
     const id = ctx.session.user.id;
     const data = await ctx.db.creator.create({
       data: {
-        name: truncateString(id),
+        name: truncateMiddle(id),
         aprovalSend: true,
         bio: id,
 
@@ -486,10 +486,6 @@ export const creatorRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
       });
     }),
-
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
 
   search: publicProcedure
     .input(

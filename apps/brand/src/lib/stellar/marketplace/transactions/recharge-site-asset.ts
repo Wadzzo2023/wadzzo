@@ -1,11 +1,12 @@
-import { BASE_FEE, Keypair, Operation, Horizon, TransactionBuilder } from "@stellar/stellar-sdk";
+import { BASE_FEE, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import { MOTHER_SECRET, STORAGE_SECRET } from "../../platform-secrets";
-import { STELLAR_URL, PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
+import { PLATFORM_ASSET, networkPassphrase } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 async function checkSiteAssetTrustLine(accPub: string) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const accRes = await server.loadAccount(accPub);
   for (const bal of accRes.balances) {
     if (bal.asset_type == "credit_alphanum12" || bal.asset_type == "credit_alphanum4") {
@@ -27,7 +28,7 @@ export async function sendSiteAsset2pub(
   // 1. Create trustline - wadzzo
   // 2. Send X amount - wadzzo
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   // const userAcc = Keypair.fromSecret(secret);
@@ -71,7 +72,7 @@ export async function sendXLM_SiteAsset(props: {
   const { pubkey, siteAssetAmount, xlm, secret } = props;
   // change wadzooNum to 1 fo testing
 
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const storageAcc = Keypair.fromSecret(STORAGE_SECRET);
   const pubAcc = Keypair.fromSecret(secret);

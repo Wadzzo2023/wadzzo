@@ -1,6 +1,11 @@
 import { z } from "zod";
+
+import { signCreatorUpload, uploadEndpoints } from "@wadzzo/storage";
+
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { signUploadForEndpoint, uploadEndpoints } from "@wadzzo/storage";
+
+/** Most files one batch may sign (the multi-file upload slot takes five). */
+const MAX_FILES_PER_BATCH = 20;
 
 const fileUploadSchema = z.object({
   fileSize: z.number(),
@@ -10,27 +15,18 @@ const fileUploadSchema = z.object({
   fileName: z.string(),
 });
 
+/** The browser declares the file; the server signs a one-time upload straight to S3. */
 export const s3Router = createTRPCRouter({
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
-
-  getSignedURL: protectedProcedure.input(fileUploadSchema).mutation(({ ctx, input }) => {
-    return signUploadForEndpoint({ ...input, endpoint: input.endPoint });
+  getSignedURL: protectedProcedure.input(fileUploadSchema).mutation(({ input }) => {
+    return signCreatorUpload(input);
   }),
 
   getSignedMultiURLs: protectedProcedure
     .input(
       z.object({
-        files: z.array(fileUploadSchema),
+        files: z.array(fileUploadSchema).min(1).max(MAX_FILES_PER_BATCH),
         endPoint: z.enum(uploadEndpoints).default("multiBlobUploader"),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const { files } = input;
-      const urls = await Promise.all(
-        files.map((file) => signUploadForEndpoint({ ...file, endpoint: file.endPoint })),
-      );
-      return urls;
-    }),
+    .mutation(({ input }) => Promise.all(input.files.map((file) => signCreatorUpload(file)))),
 });

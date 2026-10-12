@@ -2,7 +2,6 @@ import { getTransactionHashHex } from "@wadzzo/wallet/server";
 import {
   Asset,
   BASE_FEE,
-  Horizon,
   Keypair,
   Operation,
   Transaction,
@@ -12,7 +11,6 @@ import {
   networkPassphrase,
   PLATFORM_ASSET,
   PLATFORM_FEE,
-  STELLAR_URL,
   TrxBaseFee,
   TrxBaseFeeInPlatformAsset,
 } from "@wadzzo/wallet/config";
@@ -20,6 +18,7 @@ import { MOTHER_SECRET } from "../platform-secrets";
 import { type CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const assetIssuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 const assetCode = "USDC";
@@ -36,7 +35,7 @@ export async function SendBountyBalanceToMotherAccount({
   userPubKey: string;
   secretKey?: string | undefined;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
 
@@ -82,7 +81,7 @@ export async function SendBountyBalanceToMotherAccountViaXLM({
   userPubKey: string;
   secretKey?: string | undefined;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
 
   const account = await server.loadAccount(motherAcc.publicKey());
@@ -125,7 +124,7 @@ export async function SendBountyBalanceToUserAccount({
   prize: number;
   userPubKey: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
 
@@ -180,7 +179,7 @@ export async function SendBountyBalanceToUserAccountViaXLM({
   prizeInXLM: number;
   userPubKey: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
 
@@ -210,7 +209,7 @@ export async function SendBountyBalanceToWinner({
   prize: number;
   recipientID: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
   //console.log("account", account);
@@ -280,7 +279,7 @@ export async function SendBountyBalanceToWinnerViaXLM({
   prizeInXLM: number;
   recipientID: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
 
   const account = await server.loadAccount(motherAcc.publicKey());
@@ -314,7 +313,7 @@ export async function SendBountyBalanceToWinnerViaXLM({
 }
 
 export async function NativeBalance({ userPub }: { userPub: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const account = await server.loadAccount(userPub);
 
@@ -340,7 +339,7 @@ export async function SwapUserAssetToMotherUSDC({
   secretKey?: string | undefined;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
   const senderAcc = await server.loadAccount(userPubKey);
@@ -437,7 +436,7 @@ export async function SwapUserAssetToMotherUSDC({
 }
 
 export async function getHasMotherTrustOnUSDC() {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const motherAcc = Keypair.fromSecret(MOTHER_SECRET);
   const account = await server.loadAccount(motherAcc.publicKey());
   const motherHasTrust = account.balances.some((balance) => {
@@ -455,7 +454,7 @@ export async function getHasMotherTrustOnUSDC() {
 }
 
 export async function getHasUserHasTrustOnUSDC(userPubKey: string) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(userPubKey);
   const userHasTrust = account.balances.some((balance) => {
     //console.log(balance);
@@ -471,7 +470,7 @@ export async function getHasUserHasTrustOnUSDC(userPubKey: string) {
 
 export async function checkXDRSubmitted(xdr: string) {
   try {
-    const server = new Horizon.Server(STELLAR_URL);
+    const server = horizonServer();
     const transaction = new Transaction(xdr, networkPassphrase);
     const txHash = getTransactionHashHex(transaction);
 

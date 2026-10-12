@@ -7,6 +7,7 @@ export {
   type StellarErrorSummary,
 } from "./errors/stellar-transaction-error";
 export {
+  horizonServer,
   isStellarAccountActive,
   parseTransactionXdr,
   submitSignedTransaction,

@@ -1,15 +1,9 @@
-import {
-  Keypair,
-  Operation,
-  Horizon,
-  Networks,
-  TransactionBuilder,
-  Asset,
-} from "@stellar/stellar-sdk";
+import { Keypair, Operation, Networks, TransactionBuilder, Asset } from "@stellar/stellar-sdk";
 import { env } from "~/env";
-import { STELLAR_URL, stellarNetwork } from "@wadzzo/wallet/config";
+import { stellarNetwork } from "@wadzzo/wallet/config";
 import { type AccountType } from "../../fan/stellar-schemas";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 const log = console;
 
@@ -34,7 +28,7 @@ export async function firstTransection({
   limit: string; // full number
   ipfsHash: string;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   // mother acc
 
   const motherAcc = Keypair.fromSecret(env.MOTHER_SECRET);
@@ -129,7 +123,7 @@ export type BalanceType = {
   balance: string;
 };
 export const getAccBalance = async (accPub: string) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(accPub);
   const balances: BalanceType[] = [];
 
@@ -153,7 +147,7 @@ export const checkAssetBalance = async ({
   storagePub: string;
   assset: { code: string; issuer: string };
 }) => {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(storagePub);
 
   for (const balance of account.balances) {

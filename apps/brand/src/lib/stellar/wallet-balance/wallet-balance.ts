@@ -16,10 +16,11 @@ import { StellarAccount } from "@wadzzo/stellar/account";
 import { CustodialSigner } from "@wadzzo/wallet/shared";
 import { signXdrForCustodialUser } from "@wadzzo/wallet/server";
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
-import { networkPassphrase, PLATFORM_ASSET, STELLAR_URL, TrxBaseFee } from "@wadzzo/wallet/config";
+import { networkPassphrase, PLATFORM_ASSET, TrxBaseFee } from "@wadzzo/wallet/config";
 import { api } from "~/utils/api";
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { horizonServer } from "@wadzzo/wallet/stellar";
 
 export type Balances = (
   | Horizon.HorizonApi.BalanceLineNative
@@ -58,7 +59,7 @@ interface PendingClaimableBalance {
   }>;
 }
 export async function NativeBalance({ userPub }: { userPub: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const account = await server.loadAccount(userPub);
 
@@ -72,7 +73,7 @@ export async function NativeBalance({ userPub }: { userPub: string }) {
 }
 
 export async function BalanceWithHomeDomain({ userPub }: { userPub: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const account = await server.loadAccount(userPub);
   const balances = await Promise.all(
@@ -141,7 +142,7 @@ export async function SendAssets({
   signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(userPubKey);
 
   if (userPubKey === recipientId) {
@@ -229,7 +230,7 @@ export async function AddAssetTrustLine({
   signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(userPubKey);
   if (asset_code.toUpperCase() === "XLM") {
     throw new AppError(ErrorCodes.STELLAR_TRUSTLINE_MISSING, {
@@ -284,7 +285,7 @@ export async function RecentTransactionHistory({
     cursor?: string | null;
   };
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const limit = input.limit ?? 10;
   const cursor = input.cursor ?? undefined;
 
@@ -405,7 +406,7 @@ export async function PendingAssetList({
 }: {
   userPubKey: string;
 }): Promise<PendingClaimableBalance[]> {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const pendingItems = await server
     .claimableBalances()
@@ -436,7 +437,7 @@ export async function AcceptClaimableBalance({
   balanceId: string;
   signWith: CustodialSigner;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(userPubKey);
   // finding balance using balance id
   console.log("balanceId", balanceId);
@@ -509,7 +510,7 @@ export async function DeclineClaimableBalance({
   signWith: CustodialSigner;
   secretKey?: string | undefined;
 }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   const account = await server.loadAccount(pubKey);
 
   const transaction = new TransactionBuilder(account, {
@@ -535,7 +536,7 @@ export async function DeclineClaimableBalance({
   return { xdr: buildTrx.toXDR(), pubKey: pubKey };
 }
 export async function CheckHasTrustLineOnPlatformAsset({ userPubKey }: { userPubKey: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
 
   const account = await server.loadAccount(userPubKey);
   const findAsset = account.balances.some((balance) => {
@@ -553,7 +554,7 @@ export async function CheckHasTrustLineOnPlatformAsset({ userPubKey }: { userPub
 }
 
 export async function PlatformAssetBalance({ userPubKey }: { userPubKey: string }) {
-  const server = new Horizon.Server(STELLAR_URL);
+  const server = horizonServer();
   try {
     const account = await server.loadAccount(userPubKey);
     const findAsset = account.balances.find((balance) => {

@@ -17,7 +17,7 @@ import {
 } from "@wadzzo/wallet/config";
 import type { CostLine, Problem } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
-import { truncateString } from "@wadzzo/utils/string";
+import { truncateMiddle } from "@wadzzo/utils/string";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 import { xlmToPlatform } from "@wadzzo/stellar/prices";
@@ -222,7 +222,7 @@ export async function prepareStorageSetup(
     await ctx.db.creator.create({
       data: {
         id: userId,
-        name: truncateString(userId),
+        name: truncateMiddle(userId),
         bio: "",
         aprovalSend: false,
         notCreatorButSeller: true,

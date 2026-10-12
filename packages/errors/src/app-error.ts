@@ -53,3 +53,16 @@ export function requireEnv(name: string, value: string | undefined): string {
   }
   return value;
 }
+
+/**
+ * True when the build runs without environment variables
+ * (`SKIP_ENV_VALIDATION=1`, same switch the apps' env files use). Config
+ * modules then fall back to inert defaults instead of throwing, so a build
+ * can compile; those defaults never touch mainnet or move money.
+ */
+export const isEnvValidationSkipped = (): boolean => {
+  // `process` is read off globalThis so this file needs no Node typings and
+  // can't throw in a runtime that has no `process`.
+  const { process } = globalThis as { process?: { env?: Record<string, string | undefined> } };
+  return Boolean(process?.env?.SKIP_ENV_VALIDATION);
+};
