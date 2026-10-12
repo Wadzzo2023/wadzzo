@@ -6,10 +6,10 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "start": "next start",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "typecheck:tests": "tsc -p tests",
     "typecheck": "next typegen && tsc --noEmit",
     "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs brand",

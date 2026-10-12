@@ -14,10 +14,23 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
-    "dev": { "cache": false, "persistent": true },
-    "typecheck": { "dependsOn": ["^typecheck"], "outputs": [".cache/tsbuildinfo.json"] },
-    "lint": { "dependsOn": ["^lint"], "outputs": [".cache/.eslintcache"] },
-    "test": { "outputs": [] },
-    "generate": { "cache": false }
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "outputs": []
+    },
+    "test": {
+      "outputs": []
+    },
+    "generate": {
+      "cache": false
+    }
   }
 }

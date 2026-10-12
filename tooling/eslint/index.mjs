@@ -93,6 +93,6 @@ export function nextConfig({ tsconfigRootDir }) {
     ...nextCoreWebVitals,
     ...nextTypescript,
     typeChecked(tsconfigRootDir),
-    { rules: reactCompilerRules },
+    { files: ["**/*.{js,jsx,mjs,ts,tsx}"], rules: reactCompilerRules },
   );
 }

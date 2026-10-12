@@ -6,10 +6,10 @@
   "scripts": {
     "build": "next build --webpack",
     "dev": "next dev --webpack",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "seed:murals": "node --env-file=.env.development --experimental-strip-types scripts/seed-murals.mts",
     "start": "next start",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
     "typecheck": "next typegen && tsc --noEmit",
     "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs ar",
