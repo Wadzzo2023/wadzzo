@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createTransport, type Transporter } from "nodemailer";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 

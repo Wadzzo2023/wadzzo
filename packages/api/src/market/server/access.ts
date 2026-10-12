@@ -1,5 +1,3 @@
-import "server-only";
-
 import { StellarAccount, type AssetRef } from "@wadzzo/stellar/account";
 import type { Db } from "@wadzzo/db";
 

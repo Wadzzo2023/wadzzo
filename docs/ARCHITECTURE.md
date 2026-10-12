@@ -64,6 +64,12 @@ See [PLATFORMS.md](PLATFORMS.md). `PLATFORM_SLUG` selects branding, theme and as
 
 Every shared package with logic has its own `vitest` suite (`pnpm test` runs them all through turbo): `errors` (codes and tRPC mapping), `wallet` (signer guard, login challenge, network config, Stellar error mapping, Apple sign-in), `auth`, `api` (guard through a real tRPC caller, bounty visibility), `storage` (URL guard, upload rules), `stellar` (account maths, prices), `platform` (scoping, stellar.toml escaping, Clinton assets present for every app), `geo`, `utils`.
 
+## Rules for package code
+
+- No `import "server-only"` in packages: Next loads it as an external module and it throws in pages-router API routes. Keep server code out of client bundles by what you import, and use the `/server` entries.
+- No `~/` imports and nothing from an app. A package never reaches back into an app.
+- Settings come from `@wadzzo/api/env` (read on first use), never at import time.
+
 ## Environment files
 
 Each app reads its own folder (`apps/<app>/`), in Next.js order: `.env.development` or `.env.production` over the shared `.env`.

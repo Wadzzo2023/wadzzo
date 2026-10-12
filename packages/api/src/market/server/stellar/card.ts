@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { Platform } from "@wadzzo/db";
 
 import type { Db } from "@wadzzo/db";

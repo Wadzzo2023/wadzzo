@@ -1,5 +1,3 @@
-import "server-only";
-
 import { Asset, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 
 import { StellarAccount, toAsset, type AssetRef } from "@wadzzo/stellar/account";

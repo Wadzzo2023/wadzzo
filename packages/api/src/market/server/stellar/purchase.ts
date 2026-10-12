@@ -1,5 +1,4 @@
 import { getTransactionHashHex } from "@wadzzo/wallet/server";
-import "server-only";
 
 import {
   Asset,

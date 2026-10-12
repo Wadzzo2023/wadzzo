@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { AssetTransaction } from "@wadzzo/db";
 import { TransactionBuilder } from "@stellar/stellar-sdk";
 

@@ -1,5 +1,3 @@
-import "server-only";
-
 import { randomUUID } from "crypto";
 
 import { SquareClient, SquareEnvironment, SquareError } from "square";

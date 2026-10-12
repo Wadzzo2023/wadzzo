@@ -1595,9 +1595,6 @@ importers:
       qrcode:
         specifier: 'catalog:'
         version: 1.5.4
-      server-only:
-        specifier: 'catalog:'
-        version: 0.0.1
       square:
         specifier: 'catalog:'
         version: 46.0.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)

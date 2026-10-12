@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createDecipheriv } from "crypto";
 
 import { Keypair } from "@stellar/stellar-sdk";

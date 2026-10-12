@@ -1,5 +1,4 @@
 import { getTransactionHashHex } from "@wadzzo/wallet/server";
-import "server-only";
 
 import { Asset, Claimant, Operation, StrKey, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Platform } from "@wadzzo/db";
