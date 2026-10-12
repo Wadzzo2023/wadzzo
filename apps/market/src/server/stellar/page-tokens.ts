@@ -20,6 +20,7 @@ import type { Db } from "@wadzzo/db";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 import { xlmToPlatform } from "@wadzzo/stellar/prices";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 export type PagePayIn = "PLATFORM_ASSET" | "XLM";
@@ -44,10 +45,7 @@ async function load(ctx: Ctx, saleId: number) {
   });
   const page = sale?.placer ? pageAssetRef(sale.placer) : null;
   if (!sale?.placer || !page || sale.isSold || sale.placer.approved !== true)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "This offer isn't available.",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "This offer isn't available." });
   return { sale, creator: sale.placer, page };
 }
 

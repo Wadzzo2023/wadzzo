@@ -7,6 +7,7 @@ import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isOwnS3Url } from "@wadzzo/storage";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── User ───────────────────────────────────────────────────────────────────
@@ -59,7 +60,7 @@ export const userRouter = createTRPCRouter({
         _count: { select: { followings: true, LocationConsumer: true } },
       },
     });
-    if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    if (!user) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "User not found" });
     return {
       id: user.id,
       name: user.name,
@@ -92,8 +93,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       for (const url of [input.image, input.coverImage]) {
         if (url && !isOwnS3Url(url)) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "Images must be uploaded through the app",
           });
         }
@@ -110,8 +110,7 @@ export const userRouter = createTRPCRouter({
         });
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-          throw new TRPCError({
-            code: "CONFLICT",
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
             message: "That name is already taken",
           });
         }
@@ -138,8 +137,7 @@ export const userRouter = createTRPCRouter({
     });
     if (!user) return { deleted: true };
     if (user.creator) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
+      throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
         message:
           "This account runs a brand. Delete it from wadzzo.com so the brand's drops and bounties are handled properly.",
       });

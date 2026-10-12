@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/scope";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /** Listings anyone may see (drafts and not-for-sale items stay hidden). */
 const VISIBLE: ItemPrivacy[] = [
@@ -155,7 +156,7 @@ export const marketRouter = createTRPCRouter({
         },
       });
       if (!asset || asset.creator?.approved === false)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Item not found" });
       const original = asset.marketItems.find((m) => m.placerId === asset.creatorId) ?? null;
       const resales = asset.marketItems.filter((m) => m.placerId !== asset.creatorId);
       return { ...asset, original, resales };
@@ -177,7 +178,7 @@ export const marketRouter = createTRPCRouter({
         where: { id: input.assetId, ...platformScope(ctx) },
         select: { id: true, creatorId: true, mediaType: true },
       });
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Item not found" });
 
       const visible: Prisma.MarketAssetWhereInput = {
         ...platformScope(ctx),

@@ -156,10 +156,7 @@ export const shopRouter = createTRPCRouter({
       select: { placerId: true, asset: { select: { creatorId: true } } },
     });
     if (!listing)
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Store item not found",
-      });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Store item not found" });
     await assertOwnerOrAdmin(ctx, listing.placerId, listing.asset.creatorId);
     return await ctx.db.marketAsset.update({
       where: { id: assetId },
@@ -174,7 +171,7 @@ export const shopRouter = createTRPCRouter({
         where: { id: input },
         select: { creatorId: true },
       });
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND", message: "Asset not found" });
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Asset not found" });
       await assertOwnerOrAdmin(ctx, asset.creatorId);
       return await ctx.db.asset.delete({
         where: { id: input },
@@ -456,10 +453,7 @@ export const shopRouter = createTRPCRouter({
       where: { id: input, placerId: ctx.session.user.id },
     });
     if (!listing)
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Listing not found",
-      });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Listing not found" });
     return listing;
   }),
   /** One store item the brand listed (or any, for admins), for its edit page. */
@@ -493,10 +487,7 @@ export const shopRouter = createTRPCRouter({
       },
     });
     if (!item)
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Store item not found",
-      });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Store item not found" });
     await assertOwnerOrAdmin(ctx, item.placerId, item.asset.creatorId);
     return item;
   }),
@@ -604,17 +595,13 @@ export const shopRouter = createTRPCRouter({
       });
 
       if (!asset || asset.isSold) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Asset not found or already sold",
         });
       }
 
       if (asset.placerId === ctx.session.user.id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot buy your own asset",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Cannot buy your own asset" });
       }
 
       // Add your payment logic here
@@ -645,24 +632,19 @@ export const shopRouter = createTRPCRouter({
       });
 
       if (!asset || asset.isSold) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Asset not found or already sold",
         });
       }
 
       if (asset.priceXLM <= 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "XLM payment not available for this asset",
         });
       }
 
       if (asset.placerId === ctx.session.user.id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cannot buy your own asset",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Cannot buy your own asset" });
       }
 
       // Add your XLM payment logic here
@@ -701,15 +683,13 @@ export const shopRouter = createTRPCRouter({
       });
 
       if (!asset || asset.isSold) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Asset not found or already sold",
         });
       }
 
       if (!asset.placer) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Placer does not have a  page asset code issuer",
         });
       }
@@ -730,8 +710,7 @@ export const shopRouter = createTRPCRouter({
       }
 
       if (!code || !issuer) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Invalid custom page asset code issuer format",
         });
       }
@@ -756,10 +735,7 @@ export const shopRouter = createTRPCRouter({
           userId: ctx.session.user.id,
         });
       } else {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid payment option",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Invalid payment option" });
       }
     }),
 });

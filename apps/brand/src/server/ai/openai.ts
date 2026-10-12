@@ -4,6 +4,8 @@ import OpenAI from "openai";
 import { env } from "~/env";
 import { db } from "@wadzzo/db/server";
 import { canAdminPlatform, getCurrentPlatform } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { isKnownError } from "@wadzzo/errors/trpc";
 
 export const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
@@ -75,8 +77,7 @@ export async function withAiQuota<T>(
     });
     const u = readUsage(creator?.extraFields);
     if (u[kind] >= AI_DAILY_LIMIT[kind])
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
+      throw new AppError(ErrorCodes.RATE_LIMITED, {
         message: `You've used today's ${AI_DAILY_LIMIT[kind]} AI ${kind === "image" ? "images" : "generations"}. It resets at midnight UTC.`,
       });
   }
@@ -85,10 +86,9 @@ export async function withAiQuota<T>(
   try {
     result = await work();
   } catch (e) {
-    if (e instanceof TRPCError) throw e;
+    if (isKnownError(e)) throw e;
     console.error("[ai]", e);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
+    throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
       message:
         e instanceof OpenAI.APIError
           ? friendlyOpenAiError(e)

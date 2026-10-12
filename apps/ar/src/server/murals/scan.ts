@@ -29,6 +29,7 @@ import { dot, embedImage, muralScore } from "./clip";
 import { autoTitleFor, localDay, timeZoneAt } from "./geo";
 import { boxAround, creditCoins, getMuralSettings, toMuralCard } from "./service";
 import { checkWithVision } from "./vision";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Mural scan pipeline ────────────────────────────────────────────────────
@@ -150,10 +151,9 @@ export async function submitScan(
     where: { id: input.sessionId },
   });
   if (!session || session.userId !== userId)
-    throw new TRPCError({ code: "NOT_FOUND", message: "Unknown scan" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Unknown scan" });
   if (session.finishedAt)
-    throw new TRPCError({
-      code: "CONFLICT",
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
       message: "This scan was already submitted",
     });
 
@@ -190,13 +190,12 @@ export async function submitScan(
 
   // ── 3. keyframes → embeddings (server-side, never the client's) ─────────
   if (session.frameKeys.length !== FRAME_COUNT)
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Scan has no frames" });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Scan has no frames" });
   const frames = await Promise.all(
     session.frameKeys.map(async (key) => {
       const bytes = await getObjectBytes(key).catch(() => null);
       if (!bytes || bytes.length > MAX_FRAME_BYTES || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Keyframes are missing or not JPEGs",
         });
       }
@@ -378,8 +377,7 @@ export async function nameMural(
     select: { id: true },
   });
   if (!ranked)
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
       message: "Only the first finders can name this mural",
     });
 

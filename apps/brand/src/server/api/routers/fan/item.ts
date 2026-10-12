@@ -10,6 +10,7 @@ import {
   quoteCreateItem,
 } from "~/server/stellar/creator-items";
 import { BADWORDS } from "~/utils/banned-word";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const MAX_ROYALTY = 50;
 
@@ -70,8 +71,7 @@ export const itemRouter = createTRPCRouter({
 
   create: creatorProcedure.input(createInput).mutation(async ({ ctx, input }) => {
     if (input.limit != null && input.mintNow > input.limit)
-      throw new TRPCError({
-        code: "BAD_REQUEST",
+      throw new AppError(ErrorCodes.VALIDATION_FAILED, {
         message: "You can't mint more than the supply.",
       });
     if (input.access !== "public" && input.access !== "private") {
@@ -80,8 +80,7 @@ export const itemRouter = createTRPCRouter({
         select: { id: true },
       });
       if (!tier)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Pick one of your own tiers.",
         });
     }
@@ -121,10 +120,9 @@ export const itemRouter = createTRPCRouter({
         where: { id: input.assetId, creatorId },
         select: { id: true, mintedCount: true },
       });
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Item not found" });
       if (input.limit != null && input.limit < asset.mintedCount) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: `${asset.mintedCount} copies already exist, so the supply can't go below that.`,
         });
       }
@@ -172,7 +170,7 @@ export const itemRouter = createTRPCRouter({
           },
         },
       });
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Item not found" });
       const { marketItems, ...rest } = asset;
       return { ...rest, listing: marketItems[0] ?? null };
     }),

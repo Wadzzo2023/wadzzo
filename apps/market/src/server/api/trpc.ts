@@ -2,7 +2,7 @@ import type { Platform } from "@wadzzo/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { isAppError } from "@wadzzo/errors";
+import { AppError, ErrorCodes, isAppError } from "@wadzzo/errors";
 import { appErrorMiddleware } from "@wadzzo/errors/trpc";
 import { z, ZodError } from "zod";
 
@@ -107,7 +107,7 @@ export const publicProcedure = baseProcedure;
  */
 export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
   return next({
     ctx: {

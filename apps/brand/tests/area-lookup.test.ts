@@ -96,7 +96,7 @@ describe("an area's outline", () => {
   it("says so when a place has no outline", async () => {
     reply([{ geojson: { type: "Point", coordinates: [0, 0] } }]);
     const check = expect(areaOutline("W4", 1)).rejects.toMatchObject({
-      code: "NOT_FOUND",
+      code: "RESOURCE_NOT_FOUND",
     });
     await vi.advanceTimersByTimeAsync(1200);
     await check;

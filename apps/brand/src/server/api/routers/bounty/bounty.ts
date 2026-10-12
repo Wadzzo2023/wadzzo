@@ -773,13 +773,11 @@ export const BountyRoute = createTRPCRouter({
         }),
       ]);
       if (!submitted)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "This user hasn't submitted to the bounty",
         });
       if (alreadyWon)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "This user is already a winner",
         });
 
@@ -850,13 +848,11 @@ export const BountyRoute = createTRPCRouter({
         }),
       ]);
       if (!submitted)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "This user hasn't submitted to the bounty",
         });
       if (alreadyWon)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "This user is already a winner",
         });
       await ctx.db.bounty.update({
@@ -1257,7 +1253,8 @@ export const BountyRoute = createTRPCRouter({
         where: { id: input.BountyId },
         select: { creatorId: true },
       });
-      if (!owner) throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+      if (!owner)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
       await assertOwnerOrAdmin(ctx, owner.creatorId);
       const submissions = await ctx.db.bountySubmission.findMany({
         where: {

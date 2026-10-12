@@ -10,6 +10,7 @@ import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { uploadBufferToS3 } from "@wadzzo/storage";
 import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pinataSDK = require("@pinata/sdk") as new (o: { pinataJWTKey: string }) => {
@@ -80,8 +81,7 @@ ${RULES}`,
           text: { format: zodTextFormat(schema, "form") },
         });
         if (!res.output_parsed)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
             message: "The AI didn't return a form. Try rephrasing.",
           });
         return res.output_parsed;
@@ -134,8 +134,7 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
         if (input.format === "text") text = text.replace(/^["“](.*)["”]$/s, "$1");
         if (input.maxChars) text = text.slice(0, input.maxChars);
         if (!text)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
             message: "The AI came back empty. Try again.",
           });
         return { text };
@@ -168,8 +167,7 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
         });
         const b64 = res.data?.[0]?.b64_json;
         if (!b64)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
             message: "No image came back. Try again.",
           });
         const bytes = Buffer.from(b64, "base64");

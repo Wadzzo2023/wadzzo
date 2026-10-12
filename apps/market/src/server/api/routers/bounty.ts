@@ -7,7 +7,13 @@ import type { Db } from "@wadzzo/db";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { isOwnS3Url, MAX_ENTRY_FILE_BYTES, MAX_ENTRY_FILES, signEntryUpload } from "@wadzzo/storage";
+import {
+  isOwnS3Url,
+  MAX_ENTRY_FILE_BYTES,
+  MAX_ENTRY_FILES,
+  signEntryUpload,
+} from "@wadzzo/storage";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Bounty ─────────────────────────────────────────────────────────────────
@@ -157,8 +163,7 @@ function textToHtml(text: string) {
 
 function assertOwnMedia(medias: { url: string }[]) {
   if (medias.some((m) => !isOwnS3Url(m.url))) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, {
       message: "Attachments must be uploaded through the app",
     });
   }
@@ -181,7 +186,7 @@ async function loadForViewer(db: Db, bountyId: number, userId: string, ctx: Plat
     !isInPlatformScope(ctx, bounty.platformId) ||
     (bounty.status !== "APPROVED" && !joined)
   ) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
   }
   return { bounty, joined };
 }
@@ -194,16 +199,10 @@ async function requireOpenMembership(
 ) {
   const { bounty, joined } = await loadForViewer(db, bountyId, userId, ctx);
   if (!joined) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Join this bounty first",
-    });
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "Join this bounty first" });
   }
   if (!isOpen(bounty)) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "This bounty is closed",
-    });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "This bounty is closed" });
   }
   return bounty;
 }
@@ -332,11 +331,11 @@ export const bountyRouter = createTRPCRouter({
       },
     });
     if (!row || !isInPlatformScope(ctx, row.platformId)) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
     }
     const card = toCard(row, userId);
     if (row.status !== "APPROVED" && !card.viewer.joined) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Bounty not found" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Bounty not found" });
     }
     return {
       ...card,
@@ -356,24 +355,19 @@ export const bountyRouter = createTRPCRouter({
       if (joined) return { joined: true };
 
       if (bounty.creatorId === userId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "You can't join your own bounty",
         });
       }
       if (!isOpen(bounty)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "This bounty is closed",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "This bounty is closed" });
       }
 
       if (bounty.requiredBalance > 0) {
         const account = await StellarAccount.load(userId);
         const balance = account?.tokenBalance(PLATFORM_ASSET.code, PLATFORM_ASSET.issuer) ?? 0;
         if (balance < bounty.requiredBalance) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
+          throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
             message: `You need at least ${bounty.requiredBalance} ${PLATFORM_ASSET.code} to join`,
           });
         }
@@ -456,7 +450,7 @@ export const bountyRouter = createTRPCRouter({
         select: { userId: true, bountyId: true },
       });
       if (!entry || entry.userId !== userId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Entry not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Entry not found" });
       }
       await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
       assertOwnMedia(input.medias);
@@ -483,7 +477,7 @@ export const bountyRouter = createTRPCRouter({
         select: { userId: true, bountyId: true },
       });
       if (!entry || entry.userId !== userId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Entry not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Entry not found" });
       }
       await requireOpenMembership(ctx.db, entry.bountyId, userId, ctx);
       await ctx.db.bountySubmission.delete({ where: { id: input.entryId } });
@@ -513,8 +507,7 @@ export const bountyRouter = createTRPCRouter({
       try {
         return await Promise.all(input.files.map((f) => signEntryUpload(f)));
       } catch (e) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: e instanceof Error ? e.message : "Upload refused",
         });
       }
@@ -573,10 +566,7 @@ export const bountyRouter = createTRPCRouter({
         });
         // One level of replies, and only within the same bounty.
         if (!parent || parent.bountyId !== bounty.id || parent.bountyParentCommentID !== null) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Can't reply here",
-          });
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Can't reply here" });
         }
       }
 
@@ -627,10 +617,7 @@ export const bountyRouter = createTRPCRouter({
         where: { id: input.commentId, userId: ctx.session.user.id },
       });
       if (count === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Comment not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Comment not found" });
       }
       return { id: input.commentId };
     }),
@@ -671,10 +658,7 @@ export const bountyRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { bounty, joined } = await loadForViewer(ctx.db, input.bountyId, userId, ctx);
       if (!joined) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Join this bounty first",
-        });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "Join this bounty first" });
       }
 
       const existing = await ctx.db.bountyDoubt.findFirst({

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const qrRouter = createTRPCRouter({
   // Get all QR items for the current user/organization
@@ -47,10 +48,7 @@ export const qrRouter = createTRPCRouter({
       });
 
       if (!qrItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "QR item not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "QR item not found" });
       }
 
       return {
@@ -86,8 +84,7 @@ export const qrRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Validate dates
       if (input.startDate >= input.endDate) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "End date must be after start date",
         });
       }
@@ -160,8 +157,7 @@ export const qrRouter = createTRPCRouter({
       });
 
       if (!existingItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "QR item not found or you don't have permission to edit it",
         });
       }
@@ -171,8 +167,7 @@ export const qrRouter = createTRPCRouter({
       const endDate = input.endDate ?? existingItem.endDate;
 
       if (startDate >= endDate) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "End date must be after start date",
         });
       }
@@ -241,8 +236,7 @@ export const qrRouter = createTRPCRouter({
       });
 
       if (!existingItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "QR item not found or you don't have permission to delete it",
         });
       }
@@ -268,8 +262,7 @@ export const qrRouter = createTRPCRouter({
       });
 
       if (!existingItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "QR item not found or you don't have permission to modify it",
         });
       }

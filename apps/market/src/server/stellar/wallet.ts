@@ -20,6 +20,7 @@ import { chargeCard, refundCard } from "~/server/square";
 import { motherKeypair, platformStorageKeypair, signForUser, type Signer } from "./keys";
 import { settle, submitXdr } from "./ledger";
 import { platformToXlm } from "@wadzzo/stellar/prices";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);
@@ -45,8 +46,7 @@ async function ensureCanReceiveTokens(userId: string, email: string | null | und
   const acc = await StellarAccount.load(userId);
   if (acc?.trustsPlatformAsset()) return;
   if (!email)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.WALLET_NEEDS_SETUP, {
       message: `Add ${PLATFORM_ASSET.code} to your wallet first.`,
     });
   const userKp = Keypair.fromSecret(await fetchCustodialAccountSecret(email));
@@ -90,11 +90,10 @@ export async function buyTokenPack(
   },
 ) {
   if (!PACK_PRICES.includes(usd))
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Unknown pack" });
+    throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Unknown pack" });
   const tokens = packTokens(usd);
   if (!(await tokenPacks()).some((p) => p.usd === usd))
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
       message: "This pack is sold out right now.",
     });
   await ensureCanReceiveTokens(userId, email);
@@ -144,8 +143,7 @@ export async function buyTokenPack(
   const settled = await settle(ctx.db, row.id);
   if (settled?.status !== "SUCCESS") {
     await refundCard(paymentId, usd, "Token delivery failed").catch(() => undefined);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
+    throw new AppError(ErrorCodes.INTERNAL, {
       message: "We couldn't deliver the tokens, so your card was refunded.",
     });
   }
@@ -170,8 +168,7 @@ export async function prepareSwap(
 ) {
   const q = await quoteSwap(userId, tokens);
   if (!q.ok)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.PRECONDITION_NOT_MET, {
       message: `You have ${q.balance} ${PLATFORM_ASSET.code}.`,
     });
   const storage = platformStorageKeypair();
@@ -239,13 +236,12 @@ export async function prepareGiftClaim(
   { userId, balanceId, signer }: { userId: string; balanceId: string; signer: Signer },
 ) {
   const gift = (await pendingGifts(userId)).find((g) => g.id === balanceId);
-  if (!gift) throw new TRPCError({ code: "NOT_FOUND", message: "Gift not found" });
+  if (!gift) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Gift not found" });
   const user = await StellarAccount.loadOrThrow(userId);
   const needsTrust = gift.code !== "XLM" && !user.hasTrustline(gift.code, gift.issuer);
   const need = (needsTrust ? BASE_RESERVE_XLM : 0) + (2 * Number(TrxBaseFee)) / 1e7;
   if (user.spendableXlm() < need)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.WALLET_NEEDS_SETUP, {
       message: `You need ${need} XLM available to accept this gift.`,
     });
 

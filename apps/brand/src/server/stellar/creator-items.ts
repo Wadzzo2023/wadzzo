@@ -39,8 +39,7 @@ const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);
 function key() {
   const raw = env.ISSUER_ENCRYPTION_KEY;
   if (!raw)
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
+    throw new AppError(ErrorCodes.INTERNAL, {
       message: "Minting isn't configured on this server (ISSUER_ENCRYPTION_KEY).",
     });
   const buf = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
@@ -254,8 +253,7 @@ export async function createItem(ctx: Ctx, input: CreateItemInput) {
     limit: input.limit,
   });
   if (!q.ok)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
       message: q.problems[0] ?? "This item can't be created.",
     });
 
@@ -389,7 +387,7 @@ export async function confirmCreateItem(db: DbClient, creatorId: string, txId: s
   const row = await db.assetTransaction.findFirst({
     where: { id: txId, creatorId },
   });
-  if (!row?.txHash) throw new TRPCError({ code: "NOT_FOUND" });
+  if (!row?.txHash) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
   if (row.status !== "PENDING") return { status: row.status };
 
   let ok: boolean | null = null;

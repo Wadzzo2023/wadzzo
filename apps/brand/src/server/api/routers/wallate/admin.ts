@@ -5,6 +5,7 @@ import { getPlatformAdmin } from "~/server/api/access";
 import { createTRPCRouter, protectedProcedure, adminProcedure } from "~/server/api/trpc";
 import { logAudit } from "@wadzzo/platform/server";
 import { isInPlatformScope, platformScope } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const adminRouter = createTRPCRouter({
   /** The caller's admin access on this deployment (undefined when not an admin here). */
@@ -35,8 +36,7 @@ export const adminRouter = createTRPCRouter({
       const platformId = input.platformId ?? ctx.platform.id;
       // A platform's admins add admins to their own platform; a Wadzzo admin can add to any.
       if (!ctx.isSuperAdmin && !isInPlatformScope(ctx, platformId))
-        throw new TRPCError({
-          code: "FORBIDDEN",
+        throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, {
           message: "You can only add admins to your own platform.",
         });
       if (
@@ -45,18 +45,14 @@ export const adminRouter = createTRPCRouter({
           select: { id: true },
         }))
       ) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Unknown platform.",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Unknown platform." });
       }
       const user = await ctx.db.user.findUnique({
         where: { id: input.pubkey },
         select: { id: true },
       });
       if (!user)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "No account has that public key — they need to sign in once first.",
         });
       const existing = await ctx.db.admin.findUnique({
@@ -65,20 +61,17 @@ export const adminRouter = createTRPCRouter({
       });
       if (existing) {
         if (existing.platformId === platformId)
-          throw new TRPCError({
-            code: "CONFLICT",
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
             message: "That account is already an admin.",
           });
         // An account is an admin of one platform. Only Wadzzo can move one to another (e.g. promote a
         // Clinton County admin to Wadzzo admin); a platform's own admins can't take another's.
         if (!ctx.isSuperAdmin)
-          throw new TRPCError({
-            code: "CONFLICT",
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
             message: `That account is already an admin of ${existing.platformId}.`,
           });
         if (input.pubkey === ctx.session.user.id)
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "You can't change your own admin platform.",
           });
         await ctx.db.admin.update({
@@ -122,8 +115,7 @@ export const adminRouter = createTRPCRouter({
   deleteAdmin: adminProcedure.input(z.string().length(56)).mutation(async ({ input, ctx }) => {
     // Never lock a platform out: not yourself, and never its last admin.
     if (input === ctx.session.user.id)
-      throw new TRPCError({
-        code: "BAD_REQUEST",
+      throw new AppError(ErrorCodes.VALIDATION_FAILED, {
         message: "You can't remove your own admin access.",
       });
     const target = await ctx.db.admin.findUnique({
@@ -131,14 +123,13 @@ export const adminRouter = createTRPCRouter({
       select: { platformId: true },
     });
     if (!target || (!ctx.isSuperAdmin && !isInPlatformScope(ctx, target.platformId)))
-      throw new TRPCError({ code: "NOT_FOUND", message: "Admin not found." });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Admin not found." });
     if (
       (await ctx.db.admin.count({
         where: { platformId: target.platformId },
       })) <= 1
     ) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
+      throw new AppError(ErrorCodes.VALIDATION_FAILED, {
         message: "There must always be at least one admin.",
       });
     }

@@ -6,6 +6,7 @@ import { adminProcedure, createTRPCRouter, superAdminProcedure } from "~/server/
 import { logAudit } from "@wadzzo/platform/server";
 import type { Db } from "@wadzzo/db";
 import { platformScope, type PlatformContext } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * Admin › Mural review (wadzzoAR/docs/murals/plan.md §9).
@@ -193,7 +194,7 @@ async function assertMuralsInScope(ctx: PlatformContext & { db: Db }, ids: strin
     where: { id: { in: ids }, ...platformScope(ctx) },
   });
   if (found !== new Set(ids).size)
-    throw new TRPCError({ code: "NOT_FOUND", message: "Mural not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Mural not found" });
 }
 
 export const muralsAdminRouter = createTRPCRouter({
@@ -307,7 +308,7 @@ export const muralsAdminRouter = createTRPCRouter({
         },
       },
     });
-    if (!mural) throw new TRPCError({ code: "NOT_FOUND" });
+    if (!mural) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
     await assertMuralsInScope(ctx, [mural.id]);
 
     const nearby = await ctx.db.mural.findMany({
@@ -393,8 +394,7 @@ export const muralsAdminRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (input.status === "REJECTED" && !input.reason) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Pick a reason for rejecting",
         });
       }
@@ -470,8 +470,7 @@ export const muralsAdminRouter = createTRPCRouter({
           select: { id: true },
         });
         if (!owns)
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "Pick a photo from this mural's scans",
           });
       }
@@ -490,10 +489,7 @@ export const muralsAdminRouter = createTRPCRouter({
     .input(z.object({ fromId: z.string(), intoId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.fromId === input.intoId)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Pick a different mural",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Pick a different mural" });
       await assertMuralsInScope(ctx, [input.fromId, input.intoId]);
       const result = await ctx.db.$transaction(async (tx) => {
         const settings = await getSettings(tx);
@@ -502,14 +498,10 @@ export const muralsAdminRouter = createTRPCRouter({
           tx.mural.findUnique({ where: { id: input.intoId } }),
         ]);
         if (!from || !into || from.mergedIntoId || into.mergedIntoId)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Mural not found",
-          });
+          throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Mural not found" });
         // Each platform's murals, scans and coins stay on that platform.
         if (from.platformId !== into.platformId)
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "Murals on different platforms can't be merged",
           });
 

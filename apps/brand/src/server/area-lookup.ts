@@ -8,6 +8,7 @@
  */
 import { TRPCError } from "@trpc/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { isKnownError } from "@wadzzo/errors/trpc";
 
 const NOMINATIM = "https://nominatim.openstreetmap.org";
 const HEADERS = {
@@ -42,8 +43,7 @@ const cache = new Map<string, unknown>();
 async function nominatim<T>(path: string): Promise<T> {
   if (cache.has(path)) return cache.get(path) as T;
   if (queued >= MAX_QUEUE)
-    throw new TRPCError({
-      code: "TOO_MANY_REQUESTS",
+    throw new AppError(ErrorCodes.RATE_LIMITED, {
       message: "Area search is busy. Try again in a moment.",
     });
   queued++;
@@ -64,10 +64,9 @@ async function nominatim<T>(path: string): Promise<T> {
     cache.set(path, data);
     return data;
   } catch (e) {
-    if (e instanceof TRPCError) throw e;
+    if (isKnownError(e)) throw e;
     console.error("[area-lookup]", e);
-    throw new TRPCError({
-      code: "BAD_GATEWAY",
+    throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
       message: "Couldn't reach the map service. Try again.",
     });
   } finally {
@@ -125,8 +124,7 @@ export async function areaOutline(id: string, spanDeg: number): Promise<AreaOutl
   const [hit] = await nominatim<{ geojson?: Geometry }[]>(`/lookup?${q.toString()}`);
   const rings = outerRings(hit?.geojson);
   if (!rings.length)
-    throw new TRPCError({
-      code: "NOT_FOUND",
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
       message: "That place has no outline on the map. Try another match, or draw it.",
     });
   return {

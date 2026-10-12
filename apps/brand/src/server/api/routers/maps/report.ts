@@ -12,6 +12,7 @@ import { assertOwnerOrAdmin, isAdmin } from "~/server/api/access";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/server";
 import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = Parameters<typeof assertOwnerOrAdmin>[0];
 
@@ -28,8 +29,7 @@ type Scope = { creatorId: string | null; platformId: string | null };
 async function resolveScope(ctx: Ctx, creatorId: string | undefined): Promise<Scope> {
   if (creatorId === "all") {
     if (!(await isAdmin(ctx)))
-      throw new TRPCError({
-        code: "FORBIDDEN",
+      throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, {
         message: "Only admins can see every brand",
       });
     return {
@@ -46,8 +46,7 @@ async function resolveScope(ctx: Ctx, creatorId: string | undefined): Promise<Sc
     select: { id: true },
   });
   if (!creator)
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
       message: "Only brands have collection reports",
     });
   return { creatorId: creator.id, platformId: null };
@@ -183,7 +182,7 @@ export const reportRouter = createTRPCRouter({
         },
       },
     });
-    if (!group) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+    if (!group) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
     await assertOwnerOrAdmin(ctx, group.creatorId);
 
     const [daily, consumers] = await Promise.all([
@@ -242,7 +241,7 @@ export const reportRouter = createTRPCRouter({
           where: { id: input.pinId },
           select: { creatorId: true },
         });
-        if (!g) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+        if (!g) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
         await assertOwnerOrAdmin(ctx, g.creatorId);
         scope = { creatorId: g.creatorId, platformId: null };
       }

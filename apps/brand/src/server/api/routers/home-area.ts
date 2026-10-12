@@ -7,6 +7,7 @@ import { resolveActingBrand } from "~/server/api/access";
 import { adminProcedure, createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { logAudit } from "@wadzzo/platform/server";
 import { getHomeAreaLayers, HomeAreaInput, readHomeArea } from "~/server/home-area";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const BrandInput = z.object({ creatorId: z.string().optional() });
 
@@ -34,7 +35,7 @@ export const homeAreaRouter = createTRPCRouter({
   brand: protectedProcedure.input(BrandInput).query(async ({ ctx, input }) => {
     const { creatorId } = await resolveActingBrand(ctx, input.creatorId);
     const layers = await getHomeAreaLayers(ctx.db, creatorId);
-    if (!layers) throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+    if (!layers) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
     return layers;
   }),
 
@@ -61,11 +62,7 @@ export const homeAreaRouter = createTRPCRouter({
         where: { id: platformId },
         select: { id: true, name: true, homeArea: true, homeAreaName: true },
       });
-      if (!p)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Platform not found",
-        });
+      if (!p) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Platform not found" });
       return {
         id: p.id,
         name: p.name,
@@ -103,8 +100,7 @@ export const homeAreaRouter = createTRPCRouter({
 function platformFor(ctx: { platform: { id: string }; isSuperAdmin: boolean }, requested?: string) {
   const platformId = requested ?? ctx.platform.id;
   if (platformId !== ctx.platform.id && !ctx.isSuperAdmin)
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
       message: "You can only set your own platform's home area",
     });
   return platformId;

@@ -9,6 +9,7 @@ import { platformScope } from "@wadzzo/platform/scope";
 import { buildFollowTrustlineXdr, creatorAsset, signWithFor } from "~/lib/stellar/follow-creator";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Brands ─────────────────────────────────────────────────────────────────
@@ -199,7 +200,7 @@ export const brandsRouter = createTRPCRouter({
         select: brandSelect,
       });
       if (!creator) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
       }
       const [{ pinCounts, categories }, follow] = await Promise.all([
         brandFacets(ctx.db, [creator.id]),
@@ -248,10 +249,7 @@ export const brandsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.brandId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You can't follow yourself",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "You can't follow yourself" });
       }
 
       const creator = await ctx.db.creator.findFirst({
@@ -262,13 +260,12 @@ export const brandsRouter = createTRPCRouter({
         },
       });
       if (!creator) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
       }
 
       const asset = creatorAsset(creator);
       if (!asset) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
+        throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
           message: "This brand hasn't set up a page asset yet",
         });
       }
@@ -306,10 +303,7 @@ export const brandsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (userId === input.brandId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You can't follow yourself",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "You can't follow yourself" });
       }
 
       const creator = await ctx.db.creator.findFirst({
@@ -321,7 +315,7 @@ export const brandsRouter = createTRPCRouter({
         },
       });
       if (!creator) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
       }
 
       const existing = await ctx.db.follow.findUnique({
@@ -334,8 +328,7 @@ export const brandsRouter = createTRPCRouter({
       if (asset) {
         const account = await StellarAccount.load(userId);
         if (account && !account.hasTrustline(asset.code, asset.issuer)) {
-          throw new TRPCError({
-            code: "PRECONDITION_FAILED",
+          throw new AppError(ErrorCodes.WALLET_NEEDS_SETUP, {
             message: `Trust ${asset.code} first — approve the wallet transaction to follow.`,
           });
         }

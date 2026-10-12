@@ -28,6 +28,8 @@ import { resolveActingBrand } from "~/server/api/access";
 import { getHomeArea } from "~/server/home-area";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { AppError, ErrorCodes, isAppError } from "@wadzzo/errors";
+import { isKnownError } from "@wadzzo/errors/trpc";
 
 type Ctx = Parameters<typeof resolveActingBrand>[0];
 
@@ -51,10 +53,7 @@ async function ownConversation(ctx: Ctx, creatorId: string, id: string) {
     select: { id: true, title: true, platformId: true },
   });
   if (!conversation)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Conversation not found",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Conversation not found" });
   return conversation;
 }
 
@@ -246,7 +245,7 @@ export const agentRouter = createTRPCRouter({
   poll: protectedProcedure.input(z.object({ jobId: z.string() })).query(async ({ ctx, input }) => {
     const job = await taskClient.poll(input.jobId).catch(() => null);
     if (!job || !(await mayActFor(ctx, job.creatorId)))
-      throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Job not found" });
 
     const steps = (job.steps ?? []) as AgentStep[];
     if (job.status !== "completed") {
@@ -298,10 +297,7 @@ export const agentRouter = createTRPCRouter({
         select: { id: true, payload: true },
       });
       if (!action)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Proposal not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Proposal not found" });
 
       // Claim it: only a pending proposal runs, and only once.
       const { count } = await ctx.db.agentAction.updateMany({
@@ -309,8 +305,7 @@ export const agentRouter = createTRPCRouter({
         data: { status: "running" },
       });
       if (count === 0)
-        throw new TRPCError({
-          code: "CONFLICT",
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
           message: "This proposal was already handled",
         });
 
@@ -327,12 +322,13 @@ export const agentRouter = createTRPCRouter({
         });
         return { status: "done" as const, ...result };
       } catch (err) {
-        const message =
-          err instanceof TRPCError
-            ? err.message
-            : "Couldn't complete this change. Please try again.";
+        const message = isKnownError(err)
+          ? err.message
+          : "Couldn't complete this change. Please try again.";
         // A rejected input can be fixed on the card and retried; anything else stays failed.
-        const retryable = err instanceof TRPCError && err.code === "BAD_REQUEST";
+        const retryable =
+          (err instanceof TRPCError && err.code === "BAD_REQUEST") ||
+          (isAppError(err) && err.status === 400);
         await ctx.db.agentAction.update({
           where: { id: action.id },
           data: {
@@ -340,9 +336,9 @@ export const agentRouter = createTRPCRouter({
             result: { message },
           },
         });
-        if (err instanceof TRPCError) throw err;
+        if (isKnownError(err)) throw err;
         console.error("[agent.confirm]", err);
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message });
+        throw new AppError(ErrorCodes.INTERNAL);
       }
     }),
 
@@ -360,8 +356,7 @@ export const agentRouter = createTRPCRouter({
         data: { status: "cancelled" },
       });
       if (count === 0)
-        throw new TRPCError({
-          code: "CONFLICT",
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
           message: "This proposal was already handled",
         });
       return { status: "cancelled" as const };
@@ -385,7 +380,7 @@ export const agentRouter = createTRPCRouter({
         },
       });
       if (!job || !(await mayActFor(ctx, job.creatorId)))
-        throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Job not found" });
       const log = (Array.isArray(job.log) ? job.log : []) as {
         title: string;
         status: "ok" | "error";

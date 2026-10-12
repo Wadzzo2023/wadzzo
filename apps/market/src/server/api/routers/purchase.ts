@@ -7,12 +7,12 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { purchaseWithCard, resumeCardPurchase } from "~/server/stellar/card";
 import { preparePurchase, quotePurchase } from "~/server/stellar/purchase";
 import { signerFor } from "~/server/stellar/session-signer";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /** Card payments are for custodial (email/social) accounts, where the platform signs the delivery. */
 function requireCardAllowed(walletType: Parameters<typeof isCustodial>[0]) {
   if (!isCustodial(walletType))
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
       message: "Card payment is only available for email and social accounts.",
     });
 }

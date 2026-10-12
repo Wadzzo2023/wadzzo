@@ -73,6 +73,26 @@ export const ERROR_DEFINITIONS = define({
     trpc: "CONFLICT",
     message: "That was changed by someone else. Refresh and try again.",
   },
+  PRECONDITION_NOT_MET: {
+    status: 412,
+    trpc: "PRECONDITION_FAILED",
+    message: "That can't be done right now.",
+  },
+  ITEM_NOT_AVAILABLE: {
+    status: 412,
+    trpc: "PRECONDITION_FAILED",
+    message: "This item isn't available right now.",
+  },
+  WALLET_NEEDS_SETUP: {
+    status: 412,
+    trpc: "PRECONDITION_FAILED",
+    message: "Your wallet needs a little setup first (a trustline or some XLM).",
+  },
+  STORAGE_ACCOUNT_UNAVAILABLE: {
+    status: 412,
+    trpc: "PRECONDITION_FAILED",
+    message: "The storage account isn't available.",
+  },
   RATE_LIMITED: {
     status: 429,
     trpc: "TOO_MANY_REQUESTS",
@@ -174,6 +194,11 @@ export const ERROR_DEFINITIONS = define({
     status: 502,
     trpc: "BAD_GATEWAY",
     message: "A service we depend on isn't responding.",
+  },
+  AI_GENERATION_FAILED: {
+    status: 500,
+    trpc: "INTERNAL_SERVER_ERROR",
+    message: "The AI couldn't produce a result. Try again.",
   },
   CONFIG_MISSING: {
     status: 500,

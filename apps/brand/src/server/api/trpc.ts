@@ -12,7 +12,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { isAppError } from "@wadzzo/errors";
+import { AppError, ErrorCodes, isAppError } from "@wadzzo/errors";
 import { appErrorMiddleware } from "@wadzzo/errors/trpc";
 import { z, ZodError } from "zod";
 
@@ -136,7 +136,7 @@ export const publicProcedure = baseProcedure;
  */
 export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
   return next({
     ctx: {
@@ -148,7 +148,7 @@ export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
 
 export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   const admin = await ctx.db.admin.findUnique({
@@ -158,10 +158,7 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
   // An admin manages their own platform's panel; root-platform (wadzzo) admins manage every panel.
   if (!admin || !canAdminPlatform(admin, ctx.platform)) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Admin access required",
-    });
+    throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, { message: "Admin access required" });
   }
 
   return next({
@@ -176,17 +173,14 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
 /** Wadzzo (root-platform) admins, on any platform's site: platform management, audit log, cross-platform admin. */
 export const superAdminProcedure = adminProcedure.use(({ ctx, next }) => {
   if (!ctx.isSuperAdmin) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Wadzzo admin access required",
-    });
+    throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, { message: "Wadzzo admin access required" });
   }
   return next();
 });
 
 export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   const creator = await ctx.db.creator.findUnique({
@@ -194,16 +188,14 @@ export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
   });
 
   if (!creator || !creator.aprovalSend || creator.approved !== true) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_NOT_A_CREATOR, {
       message: "Creator access requires an approved brand account",
     });
   }
 
   // A brand belongs to one platform and works in that platform's panel, or in the root (Wadzzo) one.
   if (!brandWorksOnPlatform(ctx.platform, creator.platformId)) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.PLATFORM_FORBIDDEN, {
       message: `This brand belongs to another platform (${creator.platformId})`,
     });
   }

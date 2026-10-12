@@ -16,6 +16,7 @@ import {
   quoteSwap,
   tokenPacks,
 } from "~/server/stellar/wallet";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const sendInput = z.object({
   code: z.string().min(1).max(12),
@@ -123,8 +124,7 @@ export const walletRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       // Card packs are for custodial (email/social) accounts; wallet users bring their own tokens.
       if (!isCustodial(ctx.session.user.walletType))
-        throw new TRPCError({
-          code: "FORBIDDEN",
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
           message: "Card top-ups are only available for email and social accounts.",
         });
       return buyTokenPack(ctx, {

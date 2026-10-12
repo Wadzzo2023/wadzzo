@@ -151,10 +151,10 @@ describe("create_pins", () => {
         { type: "create_pins", items: [place("a")], defaults },
         { defaults: { endDate: "2026-01-01" } },
       ),
-    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
     await expect(
       run({ type: "create_pins", items: [place("a")], defaults }, { keep: [] }),
-    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
   });
 
   it("keeps an event's own dates", async () => {
@@ -215,7 +215,7 @@ describe("pin edits and deletes", () => {
         pins: [{ id: "p1", title: "x" }],
         changes: { endDate: "2025-01-01" },
       }),
-    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
   });
 });
 
@@ -235,7 +235,7 @@ describe("hotspots", () => {
         hotspot: { id: "h_other", title: "x" },
         op: "delete",
       }),
-    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "RESOURCE_NOT_FOUND" });
     expect(hotspotClient.delete).not.toHaveBeenCalled();
   });
 
@@ -290,7 +290,7 @@ describe("events and announcements", () => {
         },
       }),
     ).rejects.toMatchObject({
-      code: "BAD_REQUEST",
+      code: "VALIDATION_FAILED",
     });
     await expect(
       run({
@@ -302,7 +302,7 @@ describe("events and announcements", () => {
           ctaLabel: "Go",
         },
       }),
-    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
   });
 
   it("of another brand can't be edited or deleted", async () => {
@@ -312,13 +312,13 @@ describe("events and announcements", () => {
         event: { id: "ev_other", title: "x" },
         changes: { title: "Mine now" },
       }),
-    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "RESOURCE_NOT_FOUND" });
     expect(db.creatorEvent.findFirst).toHaveBeenCalledWith({
       where: { id: "ev_other", creatorId: "BRAND_A" },
     });
     await expect(
       run({ type: "delete_event", event: { id: "ev_other", title: "x" } }),
-    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    ).rejects.toMatchObject({ code: "RESOURCE_NOT_FOUND" });
     expect(db.creatorEvent.deleteMany).toHaveBeenCalledWith({
       where: { id: "ev_other", creatorId: "BRAND_A" },
     });

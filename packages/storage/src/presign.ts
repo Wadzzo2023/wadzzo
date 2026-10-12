@@ -114,7 +114,12 @@ export async function getObjectBytes(key: string): Promise<Buffer> {
 export async function uploadBufferToS3(body: Buffer, contentType: string): Promise<string> {
   const key = randomKey();
   await getS3Client().send(
-    new PutObjectCommand({ Bucket: getBucketName(), Key: key, Body: body, ContentType: contentType }),
+    new PutObjectCommand({
+      Bucket: getBucketName(),
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
   );
   return publicS3Url(key);
 }

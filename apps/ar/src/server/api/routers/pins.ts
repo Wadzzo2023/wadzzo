@@ -11,6 +11,7 @@ import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/
 import { notifyBrand } from "@wadzzo/platform/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Pins ───────────────────────────────────────────────────────────────────
@@ -341,23 +342,17 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
   const group = location?.locationGroup;
   // Another platform's drop can't be claimed here (web.wadzzo.com may claim any).
   if (!location || !group || location.hidden || !isInPlatformScope(ctx, group.platformId)) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
   }
 
   // Same gate `list` applies, so a pin that was never claimable can't be
   // claimed by calling this directly.
   const now = new Date();
   if (group.hidden || group.approved !== true || group.endDate < now) {
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: "This drop isn't available",
-    });
+    throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, { message: "This drop isn't available" });
   }
   if (group.startDate > now) {
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: "This drop hasn't started yet",
-    });
+    throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, { message: "This drop hasn't started yet" });
   }
 
   // Eligibility, re-checked against live state — a client holding a stale pin
@@ -371,7 +366,7 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
 
   const lockReason = lockReasonFor(group, followedCreatorIds, account, true);
   if (lockReason) {
-    throw new TRPCError({ code: "FORBIDDEN", message: lockReason });
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: lockReason });
   }
 
   return { location, group };
@@ -427,8 +422,7 @@ async function writeClaimRow(
     select: { id: true },
   });
   if (priorClaim) {
-    throw new TRPCError({
-      code: "CONFLICT",
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
       message: "You've already collected this one",
     });
   }
@@ -447,8 +441,7 @@ async function writeClaimRow(
           data: { remaining: { decrement: 1 } },
         });
         if (claimed.count === 0) {
-          throw new TRPCError({
-            code: "PRECONDITION_FAILED",
+          throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
             message: "Every one of these has been claimed",
           });
         }
@@ -486,10 +479,7 @@ async function writeClaimRow(
     }
   }
 
-  throw new TRPCError({
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Could not allocate a redeem code",
-  });
+  throw new AppError(ErrorCodes.INTERNAL, { message: "Could not allocate a redeem code" });
 }
 
 /**
@@ -725,7 +715,7 @@ export const pinsRouter = createTRPCRouter({
           })
         : null;
       if (!group || group.approved !== true || !isInPlatformScope(ctx, group.platformId)) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Drop not found" });
       }
 
       const [followedCreatorIds, account] = await Promise.all([
@@ -743,7 +733,7 @@ export const pinsRouter = createTRPCRouter({
         lockReasonFor(group, followedCreatorIds, account, userId != null),
       ).find((p) => p.id === input.id);
       if (!pin) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Drop not found" });
       }
       return pin;
     }),
@@ -1018,8 +1008,7 @@ export const pinsRouter = createTRPCRouter({
         { lat: location.latitude, lng: location.longitude },
       );
       if (distance > AR_CAPTURE_RADIUS + GEOFENCE_SLACK_M) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
+        throw new AppError(ErrorCodes.PRECONDITION_NOT_MET, {
           message: `You're ${Math.round(distance)} m away — get within ${AR_CAPTURE_RADIUS} m to capture this.`,
         });
       }

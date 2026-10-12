@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, creatorProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export const tagRouter = createTRPCRouter({
   // Get all tags created by the creator
@@ -129,8 +130,7 @@ Return ONLY a valid JSON array of 7 strings.`,
       if (!response.ok) {
         const err = (await response.json()) as { error: { message: string } };
         console.error("OpenAI error:", err);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
           message: "AI tag generation failed",
         });
       }

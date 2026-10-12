@@ -7,6 +7,7 @@ import {
   isInPlatformScope,
   type ScopePlatform,
 } from "@wadzzo/platform/scope";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type AuthCtx = {
   db: Db;
@@ -59,8 +60,7 @@ export async function assertOwnerOrAdmin(ctx: AuthCtx, ...allowed: (string | nul
   if (allowed.some((id) => id && id === ctx.session.user.id)) return;
   const owners = allowed.filter((id): id is string => Boolean(id));
   if (!(await isAdmin(ctx)) || !(await ownersInPlatform(ctx, owners))) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
+    throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, {
       message: "Only the owner or an admin can do this",
     });
   }
@@ -73,7 +73,7 @@ export async function assertCreatorInScope(ctx: AuthCtx, creatorId: string) {
     select: { platformId: true },
   });
   if (!creator || !isInPlatformScope(ctx, creator.platformId))
-    throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
   return creator.platformId;
 }
 
@@ -97,19 +97,17 @@ export async function resolveActingBrand(ctx: AuthCtx, requestedId?: string | nu
       creator.approved !== true ||
       !brandWorksOnPlatform(ctx.platform, creator.platformId)
     ) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
+      throw new AppError(ErrorCodes.AUTH_NOT_A_CREATOR, {
         message: "Creator access requires an approved brand account",
       });
     }
   } else {
     if (!(await isAdmin(ctx)))
-      throw new TRPCError({
-        code: "FORBIDDEN",
+      throw new AppError(ErrorCodes.AUTH_ADMIN_ONLY, {
         message: "Only an admin can act for another brand",
       });
     if (!creator || !isInPlatformScope(ctx, creator.platformId))
-      throw new TRPCError({ code: "NOT_FOUND", message: "Brand not found" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Brand not found" });
   }
 
   return { creatorId, platformId: creator.platformId };
@@ -122,5 +120,5 @@ export async function assertUserInScope(ctx: AuthCtx, userId: string) {
     where: { userId_platformId: { userId, platformId: ctx.platform.id } },
     select: { userId: true },
   });
-  if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+  if (!member) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "User not found" });
 }

@@ -17,7 +17,7 @@ export function pageContainerClass({
   className,
 }: { wide?: boolean; form?: boolean; className?: string } = {}) {
   return cn(
-    "mx-auto w-full px-4 pt-5 sm:px-6 lg:pt-8 lg:px-[var(--page-pad-x-lg,1.5rem)]",
+    "mx-auto w-full px-4 pt-5 sm:px-6 lg:px-[var(--page-pad-x-lg,1.5rem)] lg:pt-8",
     form
       ? "pb-[var(--page-pad-bottom-form,2.5rem)] lg:pb-[var(--page-pad-bottom-form-lg,2.5rem)]"
       : "pb-[var(--page-pad-bottom,2.5rem)] lg:pb-[var(--page-pad-bottom-lg,2.5rem)]",

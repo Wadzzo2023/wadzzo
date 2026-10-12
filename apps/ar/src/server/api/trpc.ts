@@ -11,7 +11,7 @@ import type { Platform } from "@wadzzo/db";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { isAppError } from "@wadzzo/errors";
+import { AppError, ErrorCodes, isAppError } from "@wadzzo/errors";
 import { appErrorMiddleware } from "@wadzzo/errors/trpc";
 import { z, ZodError } from "zod";
 
@@ -125,7 +125,7 @@ export const publicProcedure = baseProcedure;
  */
 export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
   return next({
     ctx: {
@@ -137,7 +137,7 @@ export const protectedProcedure = baseProcedure.use(({ ctx, next }) => {
 
 export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   if (ctx.session && ctx.session.user) {
@@ -147,7 +147,7 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
     });
 
     if (!admin || !canAdminPlatform(admin, ctx.platform))
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   return next({
@@ -160,7 +160,7 @@ export const adminProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
 export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   if (ctx.session && ctx.session.user) {
@@ -169,7 +169,7 @@ export const creatorProcedure = baseProcedure.use(async ({ ctx, next }) => {
     });
 
     if (!creator || creator.platformId !== ctx.platform.id)
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new AppError(ErrorCodes.AUTH_REQUIRED);
   }
 
   return next({

@@ -28,7 +28,9 @@ export const s3Router = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { files } = input;
-      const urls = await Promise.all(files.map((file) => signUploadForEndpoint({ ...file, endpoint: file.endPoint })));
+      const urls = await Promise.all(
+        files.map((file) => signUploadForEndpoint({ ...file, endpoint: file.endPoint })),
+      );
       return urls;
     }),
 });

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ownsAsset } from "~/server/access";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { platformScope } from "@wadzzo/platform/scope";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /** An item's locked file (video / audio / image / 3D): owners only. */
 export const contentRouter = createTRPCRouter({
@@ -36,10 +37,9 @@ export const contentRouter = createTRPCRouter({
           name: true,
         },
       });
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
       if (!(await ownsAsset(ctx.db, ctx.session.user.id, asset))) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, {
           message: "Only owners of this item can open its content.",
         });
       }

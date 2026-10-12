@@ -34,6 +34,7 @@ import {
   type Signer,
 } from "./keys";
 import { platformToUsd, platformToXlm, xlmToPlatform } from "@wadzzo/stellar/prices";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 
@@ -64,7 +65,7 @@ async function loadListing(ctx: Ctx, listingId: number) {
     },
   });
   if (!listing || !isInPlatformScope(ctx, listing.platformId))
-    throw new TRPCError({ code: "NOT_FOUND", message: "Listing not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Listing not found" });
 
   const { asset } = listing;
   // No placer = a platform (admin) listing sold from the platform's storage.
@@ -651,8 +652,7 @@ async function buildTransaction(ctx: Ctx, p: Plan, buyerId: string, signer: Sign
   }
   if (toMint > 0) {
     if (!p.avail.issuer)
-      throw new TRPCError({
-        code: "PRECONDITION_FAILED",
+      throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
         message: "This item can't be minted right now.",
       });
     tx.addOperation(
@@ -692,8 +692,7 @@ async function stockKeypair(ctx: Ctx, l: Listing) {
     select: { storageSecret: true },
   });
   if (!c?.storageSecret)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.STORAGE_ACCOUNT_UNAVAILABLE, {
       message: "The seller's storage is unavailable.",
     });
   return Keypair.fromSecret(c.storageSecret);

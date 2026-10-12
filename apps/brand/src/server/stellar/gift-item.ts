@@ -19,6 +19,7 @@ import type { Db } from "@wadzzo/db";
 import { notifyFan } from "@wadzzo/platform/server";
 
 import { decryptSecret, horizon, loadAccount, signerFor } from "./creator-items";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /*
  * Gifting a brand's item to a follower, lazily minted.
@@ -112,10 +113,7 @@ async function load(db: DbClient, creatorId: string, assetId: number) {
     },
   });
   if (!asset)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "That item isn't yours.",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "That item isn't yours." });
   const creator = await db.creator.findUniqueOrThrow({
     where: { id: creatorId },
     select: { storagePub: true },
@@ -309,8 +307,7 @@ export async function prepareGiftItem(
       await tx.$queryRaw`SELECT id FROM "Asset" WHERE id = ${input.assetId} FOR UPDATE`;
       const q = await quoteGiftItem(db, creatorId, input);
       if (!q.ok || !q.item)
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
+        throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
           message: q.problems[0] ?? "This gift can't be sent.",
         });
 
@@ -375,8 +372,7 @@ export async function prepareGiftItem(
       if (q.toMint > 0) {
         const issuer = await mintingIssuer(db, creatorId, asset);
         if (!issuer)
-          throw new TRPCError({
-            code: "PRECONDITION_FAILED",
+          throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
             message: "This item can't be minted right now.",
           });
         deliver(issuer, q.toMint);
@@ -434,7 +430,7 @@ export async function confirmGiftItem(db: DbClient, creatorId: string, txId: str
   const row = await db.assetTransaction.findFirst({
     where: { id: txId, creatorId, type: "GIFT" },
   });
-  if (!row?.txHash) throw new TRPCError({ code: "NOT_FOUND" });
+  if (!row?.txHash) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
   if (row.status !== "PENDING") return { status: row.status };
 
   let ok: boolean | null = null;

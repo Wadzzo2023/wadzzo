@@ -9,6 +9,7 @@ import { chargeCard, refundCard } from "~/server/square";
 import type { Signer } from "./keys";
 import { settle, submitXdr } from "./ledger";
 import { preparePurchase, quotePurchase } from "./purchase";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 
@@ -60,8 +61,7 @@ export async function purchaseWithCard(
 ): Promise<CardResult> {
   const quote = await quotePurchase(ctx, buyerId, listingId, "CARD", quantity);
   if (!quote.ok)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
       message: quote.problems[0]?.message ?? "Can't buy this item",
     });
 
@@ -88,8 +88,7 @@ export async function purchaseWithCard(
   }
   if (!prepared.ok) {
     await refundCard(paymentId, quote.total, "Item became unavailable").catch(() => undefined);
-    throw new TRPCError({
-      code: "CONFLICT",
+    throw new AppError(ErrorCodes.STELLAR_QUOTE_EXPIRED, {
       message: `${prepared.quote.problems[0]?.message ?? "Item unavailable"} Your card was refunded.`,
     });
   }
@@ -109,7 +108,7 @@ export async function resumeCardPurchase(
     !row.paymentRef ||
     !row.marketAssetId
   ) {
-    throw new TRPCError({ code: "NOT_FOUND" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
   }
   if (row.status === "SUCCESS") return { status: "delivered", txId } as CardResult;
   const prepared = await preparePurchase(ctx, {
@@ -121,8 +120,7 @@ export async function resumeCardPurchase(
     quantity: row.quantity,
   });
   if (!prepared.ok) {
-    throw new TRPCError({
-      code: "CONFLICT",
+    throw new AppError(ErrorCodes.STELLAR_QUOTE_EXPIRED, {
       message: `${prepared.quote.problems[0]?.message ?? "Item unavailable"} Contact support for a refund (payment ${row.paymentRef}).`,
     });
   }

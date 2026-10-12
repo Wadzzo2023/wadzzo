@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
 import { logAudit } from "@wadzzo/platform/server";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const PlatformInput = z.object({
   /** slug; must equal the deployment's PLATFORM_SLUG */
@@ -86,15 +87,11 @@ export const platformsRouter = createTRPCRouter({
         select: { id: true },
       });
       if (isNew && existing)
-        throw new TRPCError({
-          code: "CONFLICT",
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
           message: "A platform with that slug already exists",
         });
       if (!isNew && !existing)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Platform not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Platform not found" });
 
       const platform = isNew
         ? await ctx.db.platform.create({ data: { id, ...data } })

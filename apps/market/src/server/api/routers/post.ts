@@ -7,6 +7,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import type { Db } from "@wadzzo/db";
 import { notify } from "@wadzzo/platform/server";
 import { platformScope } from "@wadzzo/platform/scope";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const postSelect = {
   id: true,
@@ -146,7 +147,7 @@ export const postRouter = createTRPCRouter({
       },
       select: postSelect,
     });
-    if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
+    if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Post not found" });
     const [post] = await present(ctx.db, ctx.session?.user.id, [row]);
     return post!;
   }),
@@ -159,7 +160,7 @@ export const postRouter = createTRPCRouter({
         where: { id: input.postId },
         select: { creatorId: true },
       });
-      if (!post) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!post) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
       const existing = await ctx.db.like.findUnique({
         where: { postId_userId: { postId: input.postId, userId: me } },
       });
@@ -220,7 +221,7 @@ export const postRouter = createTRPCRouter({
         where: { id: input.postId },
         select: { creatorId: true },
       });
-      if (!post) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!post) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
       const comment = await ctx.db.comment.create({
         data: {
           postId: input.postId,

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { isOwnS3Url, signImageUpload } from "@wadzzo/storage";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const imageUrl = z.url().refine(isOwnS3Url, "Upload the image first");
 
@@ -45,7 +46,7 @@ export const userRouter = createTRPCRouter({
         joinedAt: true,
       },
     });
-    if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+    if (!user) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
     return user;
   }),
 
@@ -66,10 +67,7 @@ export const userRouter = createTRPCRouter({
         });
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "That name is taken.",
-          });
+          throw new AppError(ErrorCodes.RESOURCE_CONFLICT, { message: "That name is taken." });
         }
         throw e;
       }

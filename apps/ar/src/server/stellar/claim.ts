@@ -30,6 +30,7 @@ import { isInPlatformScope } from "@wadzzo/platform/scope";
 
 import { issuerKeypairFor, motherKeypair, platformStorageKeypair, storageKeypairFor } from "./keys";
 import { xlmToPlatform } from "@wadzzo/stellar/prices";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * Claiming a collected pin's item into the collector's wallet.
@@ -112,10 +113,7 @@ async function load(ctx: Ctx, userId: string, consumerId: string) {
   });
   const group = consumer?.location.locationGroup;
   if (consumer?.userId !== userId || !group || !isInPlatformScope(ctx, group.platformId)) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Collected pin not found",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Collected pin not found" });
   }
 
   let unit: Unit | null = null;
@@ -527,8 +525,7 @@ export async function quoteClaim(
 async function stockKeypair(ctx: Ctx, asset: Unit) {
   const kp = await storageKeypairFor(ctx.db, asset.creatorId);
   if (!kp)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.STORAGE_ACCOUNT_UNAVAILABLE, {
       message: "The brand's storage is unavailable.",
     });
   return kp;
@@ -632,8 +629,7 @@ export async function prepareClaim(
         signers.push(storage);
       } else {
         if (!p.avail.issuer)
-          throw new TRPCError({
-            code: "PRECONDITION_FAILED",
+          throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
             message: "This item can't be minted right now.",
           });
         built.addOperation(
@@ -683,8 +679,7 @@ export async function prepareClaim(
         data: { claimTxId: row.id },
       });
       if (linked.count === 0)
-        throw new TRPCError({
-          code: "CONFLICT",
+        throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
           message: "This claim is already in progress.",
         });
 

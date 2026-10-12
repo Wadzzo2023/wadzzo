@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { isAppError } from "./app-error";
+import { isAppError, type AppError } from "./app-error";
 import { ERROR_DEFINITIONS } from "./error-codes";
 
 /** `throw toTRPCError(new AppError(...))`: the app code stays on `error.cause`. */
@@ -15,6 +15,10 @@ export function toTRPCError(error: unknown): TRPCError {
   }
   return new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: error });
 }
+
+/** True for an error we raised on purpose: an `AppError` or a `TRPCError` (anything else is a bug or an outage). */
+export const isKnownError = (error: unknown): error is AppError | TRPCError =>
+  error instanceof TRPCError || isAppError(error);
 
 /**
  * tRPC middleware: an `AppError` thrown anywhere below becomes the tRPC error

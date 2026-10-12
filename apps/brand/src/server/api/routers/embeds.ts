@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * Website map embeds (`MapEmbed`). The map itself is served by wadzzoAR at
@@ -78,16 +79,13 @@ async function creatorIdOf(db: Db, userId: string) {
     select: { id: true },
   });
   if (!c)
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only brands can create map embeds",
-    });
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "Only brands can create map embeds" });
   return c.id;
 }
 
 async function own(db: Db, creatorId: string, id: string) {
   const row = await db.mapEmbed.findFirst({ where: { id, creatorId } });
-  if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Embed not found" });
+  if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Embed not found" });
   return row;
 }
 

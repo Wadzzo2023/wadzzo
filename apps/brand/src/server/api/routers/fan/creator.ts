@@ -951,13 +951,9 @@ export const creatorRouter = createTRPCRouter({
         },
       });
       if (!creator)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Set up your brand first",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Set up your brand first" });
       if (creator.pageAsset ?? creator.customPageAssetCodeIssuer)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Your brand already has a page asset",
         });
 
@@ -980,8 +976,7 @@ export const creatorRouter = createTRPCRouter({
         .then((r) => r.status === 200)
         .catch(() => false);
       if (!exists)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: `We couldn't find ${input.code} from that issuer on Stellar`,
         });
 

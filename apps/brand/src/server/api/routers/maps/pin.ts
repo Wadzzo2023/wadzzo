@@ -39,6 +39,7 @@ import { BADWORDS } from "~/utils/banned-word";
 import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
 import { randomLocation as getLocationInLatLngRad } from "@wadzzo/geo";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { isKnownError } from "@wadzzo/errors/trpc";
 
 export type LocationWithConsumers = {
   title: string;
@@ -162,7 +163,7 @@ async function manageableHotspot(ctx: AuthCtx, hotspotId: string) {
     where: { id: hotspotId },
     select: { id: true, creatorId: true, isActive: true },
   });
-  if (!h) throw new TRPCError({ code: "NOT_FOUND", message: "Hotspot not found" });
+  if (!h) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Hotspot not found" });
   await assertOwnerOrAdmin(ctx, h.creatorId);
   return h;
 }
@@ -204,8 +205,7 @@ export const pinRouter = createTRPCRouter({
       // Creating a hotspot for another brand is an admin action.
       await assertOwnerOrAdmin(ctx, creatorId);
       if (input.hotspotEndDate <= input.hotspotStartDate)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "The hotspot must end after it starts",
         });
 
@@ -234,8 +234,7 @@ export const pinRouter = createTRPCRouter({
 
         return { hotspotId: result.hotspotId };
       } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to create hotspot",
         });
       }
@@ -360,11 +359,7 @@ export const pinRouter = createTRPCRouter({
         creator: { select: { name: true, profileUrl: true } },
       },
     });
-    if (!h)
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Hotspot not found",
-      });
+    if (!h) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Hotspot not found" });
     await assertOwnerOrAdmin(ctx, h.creatorId);
 
     const now = new Date();
@@ -447,8 +442,7 @@ export const pinRouter = createTRPCRouter({
             scope,
           });
         } catch (err) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message:
               err instanceof Error ? err.message : "The task server couldn't update the hotspot",
           });
@@ -502,8 +496,7 @@ export const pinRouter = createTRPCRouter({
       try {
         return await hotspotClient.pause(h.creatorId, input.hotspotId);
       } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to pause hotspot",
         });
       }
@@ -517,8 +510,7 @@ export const pinRouter = createTRPCRouter({
       try {
         return await hotspotClient.resume(h.creatorId, input.hotspotId);
       } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to resume hotspot",
         });
       }
@@ -532,8 +524,7 @@ export const pinRouter = createTRPCRouter({
       try {
         return await hotspotClient.delete(h.creatorId, input.hotspotId);
       } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to delete hotspot",
         });
       }
@@ -712,12 +703,9 @@ export const pinRouter = createTRPCRouter({
         },
       },
     });
-    if (!pin) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+    if (!pin) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
     if (!pin.locationGroup)
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Location group not found",
-      });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Location group not found" });
 
     await assertOwnerOrAdmin(ctx, pin.locationGroup.creatorId);
 
@@ -797,7 +785,8 @@ export const pinRouter = createTRPCRouter({
         },
       },
     });
-    if (!pin?.locationGroup) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+    if (!pin?.locationGroup)
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
     await assertOwnerOrAdmin(ctx, pin.locationGroup.creatorId);
     const g = pin.locationGroup;
     return {
@@ -885,7 +874,7 @@ export const pinRouter = createTRPCRouter({
         },
       });
     } catch (e) {
-      if (e instanceof TRPCError) throw e;
+      if (isKnownError(e)) throw e;
       console.error("Error updating location group:", e);
       throw new AppError(ErrorCodes.EXTERNAL_SERVICE_FAILED, {
         message: "Failed to update location group",
@@ -1128,7 +1117,7 @@ export const pinRouter = createTRPCRouter({
         },
       },
     });
-    if (!g) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+    if (!g) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
     return g;
   }),
 
@@ -1247,7 +1236,7 @@ export const pinRouter = createTRPCRouter({
       // Admins may look at any brand; a brand only ever sees its own report.
       let creatorId: string;
       if (input?.isAdmin) {
-        if (!(await checkIsAdmin(ctx))) throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (!(await checkIsAdmin(ctx))) throw new AppError(ErrorCodes.AUTH_REQUIRED);
         if (!input.creatorId) return;
         await assertOwnerOrAdmin(ctx, input.creatorId);
         creatorId = input.creatorId;
@@ -1255,7 +1244,7 @@ export const pinRouter = createTRPCRouter({
         const creator = await ctx.db.creator.findUnique({
           where: { id: ctx.session.user.id },
         });
-        if (!creator) throw new TRPCError({ code: "UNAUTHORIZED" });
+        if (!creator) throw new AppError(ErrorCodes.AUTH_REQUIRED);
         creatorId = creator.id;
       }
 
@@ -1326,10 +1315,7 @@ export const pinRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (!input.creatorId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Creator ID is required",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "Creator ID is required" });
       }
       // The export contains fans' names and emails: owner or admin only.
       await assertOwnerOrAdmin(ctx, input.creatorId);
@@ -1569,7 +1555,8 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.id },
         select: { locationGroup: { select: { creatorId: true } } },
       });
-      if (!location) throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+      if (!location)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
       await assertOwnerOrAdmin(ctx, location.locationGroup?.creatorId);
       await ctx.db.location.update({
         where: { id: input.id },
@@ -2159,7 +2146,7 @@ export const pinRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
       const group = await ctx.db.locationGroup.findUnique({ where: { id } });
-      if (!group) throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      if (!group) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Group not found" });
       await assertOwnerOrAdmin(ctx, group.creatorId);
 
       const imageChanged = data.image !== undefined && data.image !== group.image;
@@ -2183,7 +2170,7 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.id },
         select: { creatorId: true },
       });
-      if (!group) throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      if (!group) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Group not found" });
       await assertOwnerOrAdmin(ctx, group.creatorId);
       await ctx.db.locationGroup.update({
         where: { id: input.id },
@@ -2200,8 +2187,7 @@ export const pinRouter = createTRPCRouter({
         select: { creatorId: true },
       });
       if (groups.length !== input.ids.length)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Some groups were not found",
         });
       for (const owner of new Set(groups.map((g) => g.creatorId)))
@@ -2220,7 +2206,7 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.locationGroupId },
         select: { creatorId: true },
       });
-      if (!group) throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      if (!group) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Group not found" });
       await assertOwnerOrAdmin(ctx, group.creatorId);
       // Only a pin that really is in this group.
       const { count } = await ctx.db.location.updateMany({
@@ -2228,8 +2214,7 @@ export const pinRouter = createTRPCRouter({
         data: { hidden: true },
       });
       if (!count)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Pin not found in this group",
         });
       return { success: true };
@@ -2247,7 +2232,7 @@ export const pinRouter = createTRPCRouter({
         where: { id: input.locationGroupId },
         select: { creatorId: true },
       });
-      if (!group) throw new TRPCError({ code: "NOT_FOUND", message: "Group not found" });
+      if (!group) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Group not found" });
       await assertOwnerOrAdmin(ctx, group.creatorId);
       await ctx.db.location.updateMany({
         where: {
@@ -2342,8 +2327,7 @@ export const pinRouter = createTRPCRouter({
           return await hotspotClient.resume(hotspot.creatorId, input.id);
         }
       } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to toggle hotspot",
         });
       }
@@ -2359,8 +2343,7 @@ export const pinRouter = createTRPCRouter({
         data: { hidden: true },
       });
       if (!count)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "Drop not found in this hotspot",
         });
       return { success: true };
@@ -2428,26 +2411,20 @@ export const pinRouter = createTRPCRouter({
         },
       });
       if (!location?.locationGroup) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Pin not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
       }
 
       const group = location.locationGroup;
       // A hidden drop is off the map, so a sticker still in circulation would
       // land on a 404. Same rule as `list`, which filters `hidden: false`.
       if (group.hidden) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "This drop is hidden",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "This drop is hidden" });
       }
       // A hidden pin is soft-deleted, so it can't be collected and
       // `generateDropQRs` never returns one. Without this the dialog would happily
       // print a sticker for a pin the bulk path insists doesn't exist.
       if (location.hidden) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "This pin is hidden",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "This pin is hidden" });
       }
       await assertOwnerOrAdmin(ctx, group.creatorId);
 
@@ -2522,7 +2499,7 @@ export const pinRouter = createTRPCRouter({
         },
       });
       if (!group || group.hidden) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Drop not found" });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Drop not found" });
       }
       await assertOwnerOrAdmin(ctx, group.creatorId);
 
@@ -2533,8 +2510,7 @@ export const pinRouter = createTRPCRouter({
         take: MAX_QR_CODES_PER_DROP,
       });
       if (locations.length === 0) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
+        throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, {
           message: "This drop has no active pins",
         });
       }

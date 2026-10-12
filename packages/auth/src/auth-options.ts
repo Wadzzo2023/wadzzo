@@ -33,7 +33,9 @@ export const authOptions: NextAuthOptions = {
       type: "credentials",
       credentials: {},
       authorize: (credentials) =>
-        authorizeCredentials(credentials as unknown as AuthCredential) as Promise<WadzzoSessionUser | null>,
+        authorizeCredentials(
+          credentials as unknown as AuthCredential,
+        ) as Promise<WadzzoSessionUser | null>,
     }),
   ],
 };

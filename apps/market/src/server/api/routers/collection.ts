@@ -13,6 +13,7 @@ import {
   quoteStorageSetup,
 } from "~/server/stellar/resale";
 import { signerFor } from "~/server/stellar/session-signer";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const payIn = z.enum(["PLATFORM_ASSET", "XLM"]);
 
@@ -165,7 +166,8 @@ export const collectionRouter = createTRPCRouter({
         where: { id: input.listingId },
         select: { placerId: true },
       });
-      if (!l || l.placerId !== ctx.session.user.id) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!l || l.placerId !== ctx.session.user.id)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
       await ctx.db.marketAsset.update({
         where: { id: input.listingId },
         data: {

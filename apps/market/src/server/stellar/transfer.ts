@@ -16,6 +16,7 @@ import type { CostLine } from "@wadzzo/stellar/quote";
 import type { Db } from "@wadzzo/db";
 
 import { signForUser, type Signer } from "./keys";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 const amt = (n: number) => (Math.floor(n * 1e7) / 1e7).toFixed(7);
@@ -155,8 +156,7 @@ export async function prepareSend(
 ) {
   const q = await quoteSend(userId, input);
   if (!q.ok || !q.mode)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.PRECONDITION_NOT_MET, {
       message: q.problems[0] ?? "This send can't go through.",
     });
 

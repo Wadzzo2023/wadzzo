@@ -22,6 +22,7 @@ import { truncateString } from "@wadzzo/utils/string";
 
 import { motherKeypair, signForUser, type Signer } from "./keys";
 import { xlmToPlatform } from "@wadzzo/stellar/prices";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 type Ctx = { db: Db; platform: Pick<Platform, "id" | "isRoot"> };
 export type PayIn = "PLATFORM_ASSET" | "XLM";
@@ -172,8 +173,7 @@ export async function prepareStorageSetup(
 ) {
   const existing = await getStorage(ctx.db, userId);
   if (existing && (await StellarAccount.load(existing.storagePub)))
-    throw new TRPCError({
-      code: "CONFLICT",
+    throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
       message: "You already have a storage account.",
     });
 
@@ -263,11 +263,10 @@ async function loadOwned(ctx: Ctx, userId: string, assetId: number) {
     where: { id: assetId },
     select: { id: true, code: true, issuer: true, name: true, creatorId: true },
   });
-  if (!asset) throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+  if (!asset) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Item not found" });
   const storage = await getStorage(ctx.db, userId);
   if (!storage)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.STORAGE_ACCOUNT_UNAVAILABLE, {
       message: "Open a storage account first.",
     });
   return { asset, storagePub: storage.storagePub };
@@ -423,7 +422,7 @@ export async function prepareUnlisting(
     include: { asset: { select: { id: true, code: true, issuer: true } } },
   });
   if (!listing || listing.placerId !== userId)
-    throw new TRPCError({ code: "NOT_FOUND", message: "Listing not found" });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Listing not found" });
   const c = await ctx.db.creator.findUniqueOrThrow({
     where: { id: userId },
     select: { storagePub: true, storageSecret: true },
@@ -441,15 +440,13 @@ export async function prepareUnlisting(
     return { ok: true as const, txId: null, xdr: null };
   }
   if (!user.hasTrustline(listing.asset.code, listing.asset.issuer) && !user.canAddSubentries(1)) {
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.WALLET_NEEDS_SETUP, {
       message: "Your wallet can't hold another item type.",
     });
   }
   const networkXlm = (2 * Number(TrxBaseFee)) / 1e7;
   if (user.spendableXlm() < networkXlm)
-    throw new TRPCError({
-      code: "PRECONDITION_FAILED",
+    throw new AppError(ErrorCodes.WALLET_NEEDS_SETUP, {
       message: "You need a little XLM for the network fee.",
     });
 

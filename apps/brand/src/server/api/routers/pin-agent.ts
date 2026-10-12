@@ -2,6 +2,8 @@ import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { isKnownError } from "@wadzzo/errors/trpc";
 
 const enhanceDescriptionSchema = z.object({
   description: z.string().min(1, "Description cannot be empty"),
@@ -51,8 +53,7 @@ Return ONLY the enhanced description, nothing else.`,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const error = await response.json();
           console.error("OpenAI API error:", error);
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
             message: "Failed to enhance description",
           });
         }
@@ -63,20 +64,16 @@ Return ONLY the enhanced description, nothing else.`,
         const enhancedDescription = data.choices[0]?.message?.content as string;
 
         if (!enhancedDescription) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "No response from AI",
-          });
+          throw new AppError(ErrorCodes.AI_GENERATION_FAILED, { message: "No response from AI" });
         }
 
         return {
           enhancedDescription: enhancedDescription.trim(),
         };
       } catch (error) {
-        if (error instanceof TRPCError) throw error;
+        if (isKnownError(error)) throw error;
         console.error("Description enhancement error:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
           message: "Failed to enhance description",
         });
       }

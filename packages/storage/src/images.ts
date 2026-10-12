@@ -30,7 +30,12 @@ async function downloadImage(sourceUrl: string): Promise<{ bytes: Buffer; conten
 
 async function putObject(key: string, body: Buffer, contentType: string): Promise<string> {
   await getS3Client().send(
-    new PutObjectCommand({ Bucket: getBucketName(), Key: key, Body: body, ContentType: contentType }),
+    new PutObjectCommand({
+      Bucket: getBucketName(),
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
   );
   return publicS3Url(key);
 }

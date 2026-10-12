@@ -27,6 +27,7 @@ import {
 import type { Db } from "@wadzzo/db";
 import { createOptimizedImage } from "@wadzzo/storage";
 import { BADWORDS } from "~/utils/banned-word";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type ActingBrand = { creatorId: string; platformId: string };
 export type ActionResult = { message: string; pinJobId?: string; id?: string };
@@ -34,7 +35,7 @@ export type ActionResult = { message: string; pinJobId?: string; id?: string };
 const DAY = 86_400_000;
 const bad = (text: string) =>
   BADWORDS.some((w) => text.toLowerCase().includes(w.toLowerCase())) ? text : null;
-const badRequest = (message: string) => new TRPCError({ code: "BAD_REQUEST", message });
+const badRequest = (message: string) => new AppError(ErrorCodes.VALIDATION_FAILED);
 const day = z.string().refine((s) => !Number.isNaN(new Date(s).getTime()), "Not a date");
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
@@ -124,8 +125,7 @@ export async function executeAction(
         where: { id: action.event.id, creatorId: brand.creatorId },
       });
       if (!count)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "That event no longer exists",
         });
       return { message: `Deleted event “${action.event.title}”.` };
@@ -142,8 +142,7 @@ export async function executeAction(
         where: { id: action.announcement.id, creatorId: brand.creatorId },
       });
       if (!count)
-        throw new TRPCError({
-          code: "NOT_FOUND",
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
           message: "That announcement no longer exists",
         });
       return {
@@ -243,10 +242,7 @@ async function updatePins(
     },
   });
   if (pins.length === 0)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Those pins no longer exist",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Those pins no longer exist" });
   if (changes.title && (changes.title.trim().length < 3 || bad(changes.title)))
     throw badRequest("That title isn't allowed");
   for (const url of [changes.link, changes.image])
@@ -298,10 +294,7 @@ async function ownHotspot(db: Db, brand: ActingBrand, id: string) {
     select: { id: true },
   });
   if (!h)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "That hotspot no longer exists",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "That hotspot no longer exists" });
   return h;
 }
 
@@ -412,10 +405,7 @@ async function updateEvent(
     where: { id, creatorId: brand.creatorId },
   });
   if (!current)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "That event no longer exists",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "That event no longer exists" });
   const input = toEventInput({ ...current, ...changes });
   // Linked pins and bounties are left as they are.
   await db.creatorEvent.update({ where: { id }, data: eventData(input) });
@@ -460,8 +450,7 @@ async function updateAnnouncement(
     where: { id, creatorId: brand.creatorId },
   });
   if (!current)
-    throw new TRPCError({
-      code: "NOT_FOUND",
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
       message: "That announcement no longer exists",
     });
   const input = toAnnouncementInput({ ...current, ...changes });

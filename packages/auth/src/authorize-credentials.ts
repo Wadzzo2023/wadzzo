@@ -4,15 +4,15 @@ import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth
 
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
-import {
-  getCurrentPlatform,
-  getPlatformSlug,
-  recordUserPlatform,
-} from "@wadzzo/platform/server";
+import { getCurrentPlatform, getPlatformSlug, recordUserPlatform } from "@wadzzo/platform/server";
 import { truncateString } from "@wadzzo/utils/string";
 import { PLATFORM_ASSET, USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
 import { firebaseAuth } from "@wadzzo/wallet/firebase";
-import { getOrCreateFirebaseUserFromApple, verifyFirebaseIdToken, verifyTransactionSignature } from "@wadzzo/wallet/server";
+import {
+  getOrCreateFirebaseUserFromApple,
+  verifyFirebaseIdToken,
+  verifyTransactionSignature,
+} from "@wadzzo/wallet/server";
 import {
   accountServiceResponseSchema,
   WalletType,
@@ -64,14 +64,28 @@ export async function authorizeCredentials(
         });
       }
       const { publicKey } = await requestAccountPublicKey({ email, uid: user.uid, fromAppSign });
-      const dbUser = await findOrCreateUser({ publicKey, fromAppSign, email, signUpMethod: WalletType.emailPass });
-      return { ...dbUser, walletType: WalletType.emailPass, email, emailVerified: user.emailVerified };
+      const dbUser = await findOrCreateUser({
+        publicKey,
+        fromAppSign,
+        email,
+        signUpMethod: WalletType.emailPass,
+      });
+      return {
+        ...dbUser,
+        walletType: WalletType.emailPass,
+        email,
+        emailVerified: user.emailVerified,
+      };
     }
 
     case WalletType.albedo: {
       const { pubkey, signature, token, fromAppSign } = credential;
       if (!verifyMessageSignature(pubkey, token, signature)) throw invalidSignature();
-      const dbUser = await findOrCreateUser({ publicKey: pubkey, fromAppSign, signUpMethod: credential.walletType });
+      const dbUser = await findOrCreateUser({
+        publicKey: pubkey,
+        fromAppSign,
+        signUpMethod: credential.walletType,
+      });
       return { ...dbUser, walletType: WalletType.albedo, emailVerified: true };
     }
 
@@ -80,7 +94,12 @@ export async function authorizeCredentials(
       const { token, email, fromAppSign } = credential;
       const { uid } = await verifyFirebaseIdToken(token);
       const { publicKey } = await requestAccountPublicKey({ uid, email, fromAppSign });
-      const dbUser = await findOrCreateUser({ publicKey, fromAppSign, email, signUpMethod: credential.walletType });
+      const dbUser = await findOrCreateUser({
+        publicKey,
+        fromAppSign,
+        email,
+        signUpMethod: credential.walletType,
+      });
       return { ...dbUser, walletType: credential.walletType, email, emailVerified: true };
     }
 
@@ -95,7 +114,12 @@ export async function authorizeCredentials(
         return null;
       }
       const { publicKey } = await requestAccountPublicKey({ uid, email, fromAppSign });
-      const dbUser = await findOrCreateUser({ publicKey, fromAppSign, email, signUpMethod: credential.walletType });
+      const dbUser = await findOrCreateUser({
+        publicKey,
+        fromAppSign,
+        email,
+        signUpMethod: credential.walletType,
+      });
       return { ...dbUser, walletType: credential.walletType, email, emailVerified: true };
     }
 
@@ -105,7 +129,11 @@ export async function authorizeCredentials(
         if (!verifyTransactionSignature({ publicKey: pubkey, xdr: signedXDR })) {
           throw invalidSignature();
         }
-        const dbUser = await findOrCreateUser({ publicKey: pubkey, fromAppSign, signUpMethod: credential.walletType });
+        const dbUser = await findOrCreateUser({
+          publicKey: pubkey,
+          fromAppSign,
+          signUpMethod: credential.walletType,
+        });
         return { ...dbUser, walletType: credential.walletType, emailVerified: true };
       }
       return null;
@@ -153,7 +181,11 @@ async function findOrCreateUser(input: {
 }
 
 /** Asks the accounts service for (and, first time, creates) the Stellar account of a Firebase user. */
-async function requestAccountPublicKey(input: { uid: string; email: string; fromAppSign: string | undefined }) {
+async function requestAccountPublicKey(input: {
+  uid: string;
+  email: string;
+  fromAppSign: string | undefined;
+}) {
   const response = await axios.get<unknown>(USER_ACCOUNT_URL, {
     params: {
       uid: input.uid,

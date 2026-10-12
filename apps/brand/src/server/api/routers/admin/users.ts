@@ -196,7 +196,7 @@ export const userRouter = createTRPCRouter({
       select: { platformId: true },
     });
     if (!post || !isInPlatformScope(ctx, post.platformId))
-      throw new TRPCError({ code: "NOT_FOUND" });
+      throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
     const deleted = await ctx.db.post.delete({ where: { id: input } });
     await logAudit(ctx, {
       action: "post.delete",

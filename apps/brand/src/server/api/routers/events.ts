@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import type { Db } from "@wadzzo/db";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * Creator side of Events & Announcements. Fans see them in wadzzoAR and the
@@ -74,10 +75,7 @@ async function creatorIdOf(db: Db, userId: string) {
     select: { id: true },
   });
   if (!creator) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only brands can post events",
-    });
+    throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "Only brands can post events" });
   }
   return creator.id;
 }
@@ -89,8 +87,7 @@ async function assertOwnLinks(db: Db, creatorId: string, pinIds: string[], bount
       where: { id: { in: pinIds }, creatorId },
     });
     if (n !== new Set(pinIds).size) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
+      throw new AppError(ErrorCodes.VALIDATION_FAILED, {
         message: "You can only link your own pins",
       });
     }
@@ -100,8 +97,7 @@ async function assertOwnLinks(db: Db, creatorId: string, pinIds: string[], bount
       where: { id: { in: bountyIds }, creatorId },
     });
     if (n !== new Set(bountyIds).size) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
+      throw new AppError(ErrorCodes.VALIDATION_FAILED, {
         message: "You can only link your own bounties",
       });
     }
@@ -113,7 +109,7 @@ async function ownEvent(db: Db, creatorId: string, id: string) {
     where: { id, creatorId },
     select: { id: true },
   });
-  if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+  if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Event not found" });
   return row;
 }
 
@@ -123,10 +119,7 @@ async function ownAnnouncement(db: Db, creatorId: string, id: string) {
     select: { id: true },
   });
   if (!row)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Announcement not found",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Announcement not found" });
   return row;
 }
 
@@ -369,10 +362,7 @@ export const eventsRouter = createTRPCRouter({
               where: { id: input.commentId, announcement: { creatorId } },
             });
       if (!owned)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Comment not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Comment not found" });
       if (input.kind === "event") {
         await ctx.db.eventComment.delete({ where: { id: input.commentId } });
       } else {

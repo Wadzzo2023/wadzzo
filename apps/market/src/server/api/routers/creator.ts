@@ -8,6 +8,7 @@ import { platformScope } from "@wadzzo/platform/scope";
 import { followTrustlineXdr } from "~/server/stellar/follow";
 import { preparePageTokens, quotePageTokens } from "~/server/stellar/page-tokens";
 import { signerFor } from "~/server/stellar/session-signer";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 const pageAssetSelect = {
   pageAsset: { select: { code: true, issuer: true, thumbnail: true } },
@@ -107,10 +108,7 @@ export const creatorRouter = createTRPCRouter({
         },
       });
       if (!creator)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Creator not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Creator not found" });
 
       // same rules as market.listings({ creatorId }): the brand's drops plus fan resales of its items
       const items = await ctx.db.marketAsset.count({
@@ -168,15 +166,12 @@ export const creatorRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const me = ctx.session.user.id;
       if (me === input.creatorId)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You can't follow yourself.",
-        });
+        throw new AppError(ErrorCodes.VALIDATION_FAILED, { message: "You can't follow yourself." });
       const creator = await ctx.db.creator.findFirst({
         where: { id: input.creatorId, approved: true },
         select: { id: true, ...pageAssetSelect },
       });
-      if (!creator) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!creator) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
 
       const existing = await ctx.db.follow.findUnique({
         where: { userId_creatorId: { userId: me, creatorId: creator.id } },

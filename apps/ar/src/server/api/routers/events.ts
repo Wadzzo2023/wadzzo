@@ -14,6 +14,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import { platformScope, type PlatformContext } from "@wadzzo/platform/scope";
 
 import { WADZZO_ICON } from "./pins";
+import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 /**
  * ── Events & announcements ─────────────────────────────────────────────────
@@ -49,10 +50,7 @@ const TARGET = z.object({
 
 async function followedIds(db: Db, userId: string | undefined) {
   if (!userId) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Sign in to see brands you follow",
-    });
+    throw new AppError(ErrorCodes.AUTH_REQUIRED, { message: "Sign in to see brands you follow" });
   }
   const rows = await db.follow.findMany({
     where: { userId },
@@ -126,7 +124,7 @@ async function assertTarget(db: Db, target: z.infer<typeof TARGET>, ctx: Platfor
       where: { id: target.id, ...platformScope(ctx) },
       select: { creatorId: true },
     });
-    if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+    if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Event not found" });
     return row;
   }
   const row = await db.creatorAnnouncement.findFirst({
@@ -138,10 +136,7 @@ async function assertTarget(db: Db, target: z.infer<typeof TARGET>, ctx: Platfor
     select: { creatorId: true },
   });
   if (!row)
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Announcement not found",
-    });
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Announcement not found" });
   return row;
 }
 
@@ -215,7 +210,7 @@ export const eventsRouter = createTRPCRouter({
           },
         },
       });
-      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+      if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Event not found" });
 
       const card = toCard(row);
       return {
@@ -256,7 +251,7 @@ export const eventsRouter = createTRPCRouter({
         where: { id: input.id, ...platformScope(ctx) },
         select: { id: true, endDate: true, capacity: true },
       });
-      if (!event) throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+      if (!event) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Event not found" });
 
       if (!input.going) {
         await ctx.db.eventRsvp.deleteMany({
@@ -264,8 +259,7 @@ export const eventsRouter = createTRPCRouter({
         });
       } else {
         if (event.endDate < new Date()) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "This event has already ended",
           });
         }
@@ -284,8 +278,7 @@ export const eventsRouter = createTRPCRouter({
                   where: { eventId: event.id },
                 });
                 if (taken >= event.capacity) {
-                  throw new TRPCError({
-                    code: "CONFLICT",
+                  throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
                     message: "This event is full",
                   });
                 }
@@ -301,8 +294,7 @@ export const eventsRouter = createTRPCRouter({
             // P2002: a double tap already inserted it. P2034: lost a
             // serialization race — safe for the viewer to just try again.
             if (e.code === "P2034") {
-              throw new TRPCError({
-                code: "CONFLICT",
+              throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
                 message: "Lots of people RSVPing — try again",
               });
             }
@@ -383,10 +375,7 @@ export const eventsRouter = createTRPCRouter({
         },
       });
       if (!row)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Announcement not found",
-        });
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Announcement not found" });
       return toAnnouncement(row);
     }),
 
@@ -402,7 +391,7 @@ export const eventsRouter = createTRPCRouter({
         input.kind === "event"
           ? await ctx.db.creatorEvent.count({ where })
           : await ctx.db.creatorAnnouncement.count({ where });
-      if (!found) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!found) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND);
     }
     const rows =
       input.kind === "event"
@@ -462,17 +451,10 @@ export const eventsRouter = createTRPCRouter({
                 announcement: { select: { creatorId: true } },
               },
             });
-      if (!row)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Comment not found",
-        });
+      if (!row) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Comment not found" });
       const ownerId = "event" in row ? row.event.creatorId : row.announcement.creatorId;
       if (row.userId !== userId && ownerId !== userId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can't delete this comment",
-        });
+        throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: "You can't delete this comment" });
       }
       if (input.kind === "event") {
         await ctx.db.eventComment.delete({ where: { id: input.commentId } });
