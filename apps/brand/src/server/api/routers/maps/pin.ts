@@ -12,7 +12,6 @@
 import { ItemPrivacy } from "@wadzzo/db";
 import { PinType } from "@wadzzo/db";
 import type { Db } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   assertCreatorInScope,

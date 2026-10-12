@@ -6,7 +6,6 @@
  * stored format: [lat, lng] rings, one per part, simplified to a size that's
  * quick to draw and check.
  */
-import { TRPCError } from "@trpc/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { isKnownError } from "@wadzzo/errors/trpc";
 

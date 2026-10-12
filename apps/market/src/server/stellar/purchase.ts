@@ -9,7 +9,6 @@ import {
   type Transaction,
 } from "@stellar/stellar-sdk";
 import { ItemPrivacy, type Platform } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 
 import { StellarAccount, toAsset, type AssetRef } from "@wadzzo/stellar/account";
 import {

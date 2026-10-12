@@ -1,6 +1,5 @@
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { isKnownError } from "@wadzzo/errors/trpc";

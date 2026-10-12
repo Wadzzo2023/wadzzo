@@ -1,5 +1,4 @@
 import { Prisma } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { StellarAccount } from "@wadzzo/stellar/account";

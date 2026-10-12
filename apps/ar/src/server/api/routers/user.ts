@@ -1,5 +1,4 @@
 import { Prisma } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { deleteFirebaseUserByEmail } from "@wadzzo/wallet/server";
 import { z } from "zod";
 

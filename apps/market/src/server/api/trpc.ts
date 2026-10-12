@@ -1,5 +1,5 @@
 import type { Platform } from "@wadzzo/db";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import { type Session } from "next-auth";
 import superjson from "superjson";
 import { AppError, ErrorCodes, isAppError } from "@wadzzo/errors";

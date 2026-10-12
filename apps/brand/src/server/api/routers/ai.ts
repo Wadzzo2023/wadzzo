@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { zodTextFormat } from "openai/helpers/zod";
 import { Readable } from "stream";
 import { z } from "zod";

@@ -38,7 +38,6 @@ import { BADWORDS } from "~/utils/banned-word";
 import { truncateString } from "@wadzzo/utils/string";
 import { PaymentMethodEnum } from "../bounty/bounty";
 import axios from "axios";
-import { TRPCError } from "@trpc/server";
 import { RequestBrandCreateFormSchema } from "~/types/brand-onboarding";
 import { creatorExtraFiledsSchema } from "~/types/creator";
 import { AppError, ErrorCodes } from "@wadzzo/errors";

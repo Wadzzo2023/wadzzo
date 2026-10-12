@@ -1,6 +1,5 @@
 import { ItemPrivacy, MediaType } from "@wadzzo/db";
 import { Horizon } from "@stellar/stellar-sdk";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { ExtraSongInfo, NftFormSchema } from "~/types/asset";

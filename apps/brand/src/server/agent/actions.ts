@@ -6,7 +6,6 @@
  * are validated, and the same input rules as the normal forms apply.
  */
 import { PinType } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { circleAround } from "~/components/map-kit/geo";

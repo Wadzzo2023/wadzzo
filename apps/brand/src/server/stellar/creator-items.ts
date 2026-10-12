@@ -5,7 +5,6 @@ import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 import { Asset, Horizon, Keypair, Operation, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Platform } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 import { WalletType } from "@wadzzo/wallet/shared";
 

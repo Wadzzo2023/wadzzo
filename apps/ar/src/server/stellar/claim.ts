@@ -8,7 +8,6 @@ import {
   type Transaction,
 } from "@stellar/stellar-sdk";
 import type { AssetTransaction, Platform } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 
 import { StellarAccount, toAsset, transactionSucceeded } from "@wadzzo/stellar/account";
 import {

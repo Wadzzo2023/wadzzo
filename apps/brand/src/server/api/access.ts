@@ -1,5 +1,3 @@
-import { TRPCError } from "@trpc/server";
-
 import type { Db } from "@wadzzo/db";
 import {
   brandWorksOnPlatform,

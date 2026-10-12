@@ -1,6 +1,5 @@
 import type { Mural, Prisma } from "@wadzzo/db";
 import type { Db } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 
 import { distanceMeters } from "~/lib/ar/geo";
 import {

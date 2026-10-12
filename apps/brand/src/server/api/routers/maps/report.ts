@@ -5,7 +5,6 @@
 // export. Counting happens in SQL so long histories stay fast.
 
 import { Prisma } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { assertOwnerOrAdmin, isAdmin } from "~/server/api/access";

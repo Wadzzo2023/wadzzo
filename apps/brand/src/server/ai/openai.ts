@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import OpenAI from "openai";
 
 import { env } from "~/env";

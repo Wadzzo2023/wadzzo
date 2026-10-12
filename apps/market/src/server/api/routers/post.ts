@@ -1,5 +1,4 @@
 import { type Prisma } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { pageAssetRef, tierBalances } from "~/server/access";

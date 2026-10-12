@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { assertUserInScope } from "~/server/api/access";
 import {
   adminProcedure,

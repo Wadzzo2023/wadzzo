@@ -1,6 +1,5 @@
 import { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/db";
 import type { Db } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";

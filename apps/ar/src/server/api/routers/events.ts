@@ -1,6 +1,5 @@
 import { Prisma } from "@wadzzo/db";
 import type { Db } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type {

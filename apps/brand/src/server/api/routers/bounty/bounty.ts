@@ -8,7 +8,6 @@ import {
   UserRole,
 } from "@wadzzo/db"; // Assuming you are using Prisma
 import { fetchCustodialAccountSecret } from "@wadzzo/wallet/server";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertOwnerOrAdmin } from "~/server/api/access";
 import { notify, notifyFan } from "@wadzzo/platform/server";

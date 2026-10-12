@@ -3,7 +3,6 @@ import "server-only";
 
 import { Asset, Claimant, Operation, StrKey, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { Platform } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 
 import { StellarAccount } from "@wadzzo/stellar/account";
 import {

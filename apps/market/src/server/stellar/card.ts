@@ -1,7 +1,6 @@
 import "server-only";
 
 import type { Platform } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 
 import type { Db } from "@wadzzo/db";
 import { chargeCard, refundCard } from "~/server/square";

@@ -1,5 +1,4 @@
 import { MediaType } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, creatorProcedure } from "~/server/api/trpc";

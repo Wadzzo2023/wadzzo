@@ -1,7 +1,6 @@
 // server/api/routers/tag.ts
 import { z } from "zod";
 import { createTRPCRouter, creatorProcedure } from "../trpc";
-import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 

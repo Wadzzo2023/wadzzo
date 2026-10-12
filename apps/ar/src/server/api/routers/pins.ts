@@ -1,6 +1,5 @@
 import { ItemPrivacy, PinType, Prisma } from "@wadzzo/db";
 import type { Db } from "@wadzzo/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
