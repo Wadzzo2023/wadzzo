@@ -5,7 +5,7 @@
 // and their usual pin settings. Every query is scoped to the one brand.
 
 import { db } from "../lib/db";
-import type { PinTypeName } from "./contract";
+import type { PinTypeName } from "@wadzzo/agent-contract";
 import { areaFromFeature, type SearchArea } from "./area";
 
 export type BrandContext = {

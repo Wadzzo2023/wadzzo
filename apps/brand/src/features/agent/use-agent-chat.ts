@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-import type { ActionEdits, ActionStatus, AgentStep } from "~/lib/agent/contract";
+import type { ActionEdits, ActionStatus, AgentStep } from "@wadzzo/agent-contract";
 import type { AgentMessage } from "~/server/api/routers/agent";
 import { api } from "~/utils/api";
 

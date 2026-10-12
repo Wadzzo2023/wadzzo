@@ -20,7 +20,7 @@ import type {
   AgentStep,
   ActionStatus,
   ProposedAction,
-} from "~/lib/agent/contract";
+} from "@wadzzo/agent-contract";
 import { taskClient } from "~/lib/express/taskClient-sdk";
 import { ActionEditsInput, executeAction } from "~/server/agent/actions";
 import { withAiQuota } from "~/server/ai/openai";

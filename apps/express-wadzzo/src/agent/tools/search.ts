@@ -1,7 +1,7 @@
 // src/agent/tools/search.ts — finding real places and events to pin.
 
 import { z } from "zod";
-import type { PlaceItem } from "../contract";
+import type { PlaceItem } from "@wadzzo/agent-contract";
 import { inArea, metresBetween, searchBoxes, type SearchArea } from "../area";
 import { geocode, searchPlaces } from "../google";
 import type { Run } from "../run";

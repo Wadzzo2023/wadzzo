@@ -14,7 +14,7 @@ import {
 } from "@wadzzo/ui/components/select";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { Textarea } from "@wadzzo/ui/components/textarea";
-import { UNLIMITED_COLLECTIONS, type PinDefaults, type PlaceItem } from "~/lib/agent/contract";
+import { UNLIMITED_COLLECTIONS, type PinDefaults, type PlaceItem } from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { MapRow, day } from "./card-kit";

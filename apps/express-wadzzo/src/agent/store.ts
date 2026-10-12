@@ -6,7 +6,7 @@
 
 import type { Prisma } from "@prisma/client";
 import { db } from "../lib/db";
-import type { AgentBlock, ActionStatus } from "./contract";
+import type { AgentBlock, ActionStatus } from "@wadzzo/agent-contract";
 import type { Run } from "./run";
 
 const HISTORY_MESSAGES = 30;

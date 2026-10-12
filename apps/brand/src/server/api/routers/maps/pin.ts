@@ -37,7 +37,7 @@ import {
 import { type PinLocation } from "~/types/pin";
 import { BADWORDS } from "~/utils/banned-word";
 import { fetchUsersByPublicKeys } from "~/utils/get-pubkey";
-import { randomLocation as getLocationInLatLngRad } from "~/utils/map";
+import { randomLocation as getLocationInLatLngRad } from "@wadzzo/geo";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type LocationWithConsumers = {

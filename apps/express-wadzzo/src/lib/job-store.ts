@@ -8,7 +8,7 @@
 
 import { randomUUID } from "crypto";
 import type { Job, JobType, JobStatus, JobPayload, LogEntry, JobListQuery } from "../types/index";
-import type { AgentStep } from "../agent/contract";
+import type { AgentStep } from "@wadzzo/agent-contract";
 import { logger } from "./logger";
 import { sseBroadcast } from "../lib/sse";
 

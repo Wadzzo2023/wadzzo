@@ -6,7 +6,7 @@
 
 import type { Prisma } from "@prisma/client";
 import { db } from "../../lib/db";
-import type { HotspotItem, PinItem, PinStatus, PinTypeName } from "../contract";
+import type { HotspotItem, PinItem, PinStatus, PinTypeName } from "@wadzzo/agent-contract";
 import { inArea, type Box, type SearchArea } from "../area";
 
 export const PIN_TYPES = [

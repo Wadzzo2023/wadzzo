@@ -11,7 +11,7 @@ import type {
   NamedRef,
   PinDefaults,
   ProposedAction,
-} from "~/lib/agent/contract";
+} from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 

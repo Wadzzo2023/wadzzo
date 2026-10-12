@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { BarChart3, Table2 } from "lucide-react";
 import { useState } from "react";
 
-import type { AgentBlock, ReportBar } from "~/lib/agent/contract";
+import type { AgentBlock, ReportBar } from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { Card, n } from "./card-kit";

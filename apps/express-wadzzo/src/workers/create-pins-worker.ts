@@ -1,10 +1,10 @@
 // src/workers/create-pins-worker.ts
 import type { Job } from "../types/index";
 import { db } from "../lib/db";
-import { randomLocation } from "../lib/map";
+import { randomLocation } from "@wadzzo/geo";
 import { logger } from "../lib/logger";
 import { enrichPinFromGooglePlace } from "../lib/google-place-enrichment";
-import { createOptimizedImage } from "../lib/image-optimizer";
+import { createOptimizedImage } from "@wadzzo/storage";
 import pLimit from "../lib/limit";
 
 const ENRICHMENT_CONCURRENCY = 5;

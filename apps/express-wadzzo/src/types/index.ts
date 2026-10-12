@@ -1,6 +1,6 @@
 // src/types/index.ts
 
-import type { AgentStep } from "../agent/contract";
+import type { AgentStep } from "@wadzzo/agent-contract";
 
 export type JobType =
   | "agent_run" // the map agent answering one message

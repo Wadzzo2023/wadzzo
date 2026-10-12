@@ -10,7 +10,7 @@
 
 import type { PrismaClient } from "@prisma/client";
 import { db } from "./db";
-import { generateRandomLocations } from "../lib/map";
+import { generateRandomLocations } from "@wadzzo/geo";
 import { logger } from "./logger";
 import type * as GeoJSON from "geojson";
 

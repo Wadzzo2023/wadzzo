@@ -11,7 +11,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import pLimit from "../lib/limit";
 import { logger } from "../lib/logger";
-import type { PlaceItem } from "./contract";
+import type { PlaceItem } from "@wadzzo/agent-contract";
 import { findPlace, geocode } from "./google";
 import { AGENT_MODEL } from "./model";
 

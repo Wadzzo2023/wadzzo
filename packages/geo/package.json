@@ -1,0 +1,15 @@
+{
+  "name": "@wadzzo/geo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Small geographic helpers shared by the brand portal and the task server.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "devDependencies": {
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

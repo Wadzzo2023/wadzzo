@@ -18,7 +18,7 @@ import type {
   ProposedAction,
   ReportBar,
   ReportStat,
-} from "./contract";
+} from "@wadzzo/agent-contract";
 import type { BrandContext } from "./context";
 
 /** A set of things a tool found, which later tools can show or act on by its ref. */

@@ -11,7 +11,7 @@ import { ItemPrivacy, Prisma, PinType } from "@prisma/client";
 import { db } from "../lib/db";
 import { hotspotScheduler } from "../lib/hotspot-scheduler";
 import { dropPinsForHotspot, isPendingFirstDrop } from "../lib/hotspot-drop";
-import { generateRandomLocations } from "../lib/map";
+import { generateRandomLocations } from "@wadzzo/geo";
 import { logger } from "../lib/logger";
 import { routeParam } from "../lib/route-param";
 

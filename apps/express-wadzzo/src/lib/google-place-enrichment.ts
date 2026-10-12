@@ -1,8 +1,5 @@
 // src/lib/google-place-enrichment.ts
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3Client } from "./s3"; // adjust path to your s3 module
-
-import crypto from "crypto";
+import { copyImageToBucket } from "@wadzzo/storage";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,37 +54,8 @@ function buildPlacePhotoUrl(photoName: string, maxWidth = 1200): string {
 
 // ─── S3 upload helper ─────────────────────────────────────────────────────────
 
-/**
- * Download an image from `sourceUrl` and upload it to S3.
- * Returns the public S3 URL.
- */
-async function uploadImageFromUrlToS3(sourceUrl: string): Promise<string> {
-  // 1. Fetch the image bytes
-  const imageRes = await fetch(sourceUrl, { signal: AbortSignal.timeout(15_000) });
-  if (!imageRes.ok) {
-    throw new Error(`Failed to fetch image from Google (${imageRes.status}): ${sourceUrl}`);
-  }
-
-  const contentType = imageRes.headers.get("content-type") ?? "image/jpeg";
-  const buffer = Buffer.from(await imageRes.arrayBuffer());
-
-  // 2. Generate a random key (same pattern as your existing getSignedURL helper)
-  const key = crypto.randomBytes(32).toString("hex");
-
-  // 3. Put directly into S3 (server-side, no presigned URL needed)
-  await s3Client.send(
-    new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-      ContentLength: buffer.byteLength,
-    }),
-  );
-
-  // 4. Return the public URL
-  return `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`;
-}
+/** Download an image from `sourceUrl` and upload it to S3; returns the public S3 URL. */
+const uploadImageFromUrlToS3 = (sourceUrl: string) => copyImageToBucket(sourceUrl);
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 

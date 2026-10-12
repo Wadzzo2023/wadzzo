@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { db } from "../../lib/db";
-import type { PinStatus } from "../contract";
+import type { PinStatus } from "@wadzzo/agent-contract";
 import { boxAround } from "../area";
 import { geocode } from "../google";
 import { defineTool, plural } from "./define";

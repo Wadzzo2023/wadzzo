@@ -17,7 +17,7 @@ import {
   type ActionEdits,
   type PinDefaults,
   type ProposedAction,
-} from "~/lib/agent/contract";
+} from "@wadzzo/agent-contract";
 import {
   AnnouncementInput,
   EventInput,

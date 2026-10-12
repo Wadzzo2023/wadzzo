@@ -6,7 +6,7 @@
 
 import { logger } from "../lib/logger";
 import pLimit from "../lib/limit";
-import type { PlaceItem } from "./contract";
+import type { PlaceItem } from "@wadzzo/agent-contract";
 import { boxSpanKm, tiles, type Box } from "./area";
 import { cached, cacheKey } from "./geo-cache";
 import { geocodeOsm } from "./osm";

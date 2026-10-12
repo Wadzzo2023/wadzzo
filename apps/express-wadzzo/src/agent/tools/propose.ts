@@ -16,7 +16,7 @@ import {
   type PinChanges,
   type PinDefaults,
   type PinTypeName,
-} from "../contract";
+} from "@wadzzo/agent-contract";
 import { geocode } from "../google";
 import type { Run } from "../run";
 import { defineTool, isoDay, parseDate, plural } from "./define";

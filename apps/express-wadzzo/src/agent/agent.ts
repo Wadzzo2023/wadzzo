@@ -13,7 +13,7 @@ import {
 } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import { logger } from "../lib/logger";
-import type { AgentBlock, AgentRunPayload, AgentRunResult } from "./contract";
+import type { AgentBlock, AgentRunPayload, AgentRunResult } from "@wadzzo/agent-contract";
 import { loadBrandContext } from "./context";
 import { AGENT_MODEL } from "./model";
 import { systemPrompt } from "./prompt";

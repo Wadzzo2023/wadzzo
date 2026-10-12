@@ -4,7 +4,7 @@ import { AlertTriangle, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { Button } from "@wadzzo/ui/components/button";
-import type { AgentBlock } from "~/lib/agent/contract";
+import type { AgentBlock } from "@wadzzo/agent-contract";
 import type { AgentMessage } from "~/server/api/routers/agent";
 
 import { useAgentMap, type AgentMarker } from "./agent-map";

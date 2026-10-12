@@ -8,7 +8,7 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "../../lib/db";
-import type { ReportBar, ReportStat } from "../contract";
+import type { ReportBar, ReportStat } from "@wadzzo/agent-contract";
 import type { Run } from "../run";
 import { defineTool, plural } from "./define";
 
