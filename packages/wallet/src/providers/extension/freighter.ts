@@ -7,9 +7,12 @@ import { WalletType } from "../../wallet-type";
 import { createExtensionProvider } from "../extension-provider";
 import type { ExtensionWallet } from "../wallet-provider";
 
-/** Freighter's API reports failures as `{ error }` instead of throwing. */
-const messageOf = (error: { message?: string } | string | undefined): string | undefined =>
-  typeof error === "string" ? error : error?.message;
+
+/** Freighter reports failures as `{ error }` objects instead of throwing. */
+const errorMessage = (error: unknown): string | undefined => {
+  if (typeof error !== "object" || error === null || !("message" in error)) return undefined;
+  return String(error.message);
+};
 
 const freighterWallet: ExtensionWallet = {
   type: WalletType.freighter,
@@ -40,7 +43,7 @@ const freighterWallet: ExtensionWallet = {
     });
     if (signed.error || !signed.signedTxXdr) {
       throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, {
-        message: messageOf(signed.error) ?? undefined,
+        message: errorMessage(signed.error),
         cause: signed.error,
       });
     }

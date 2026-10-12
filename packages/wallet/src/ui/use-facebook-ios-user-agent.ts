@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-const testUserAgent =
-  "Mozilla/5.0 (iPhone; CPU iPhone OS 17 1 1 like Mac OS X). AppleWebKit/605.1.15 (KHTML, like Gecko). Mobile/21B91 [FBAN/FBIOS;FBAV/441.1.0";
-
 /** True inside Facebook's iOS in-app browser, where Google sign-in is blocked. */
 export function useFacebookIosUserAgent(): boolean | null {
   const [isFacebookiOS, setIsFacebookiOS] = useState<boolean | null>(null);

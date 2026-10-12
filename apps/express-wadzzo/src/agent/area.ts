@@ -23,8 +23,8 @@ function cleanRing(ring: unknown): Ring | null {
 /** The outer ring of every part of a stored feature, as [lat, lng] pairs. */
 export function ringsOf(feature: unknown): Ring[] {
     const g = (feature as StoredFeature)?.geometry;
-    const outer = g?.type === "MultiPolygon" && Array.isArray(g.coordinates) ? g.coordinates.map((p: unknown) => (Array.isArray(p) ? p[0] : null)) : [Array.isArray(g?.coordinates) ? g.coordinates[0] : null];
-    return outer.map(cleanRing).filter((r): r is Ring => r !== null);
+    const outer = g?.type === "MultiPolygon" && Array.isArray(g.coordinates) ? (g.coordinates as unknown[]).map((part): unknown => (Array.isArray(part) ? (part[0] as unknown) : null)) : [Array.isArray(g?.coordinates) ? (g.coordinates[0] as unknown) : null];
+    return outer.map((ring) => cleanRing(ring)).filter((ring): ring is Ring => ring !== null);
 }
 
 export function boxOfRing(ring: [number, number][]): Box {

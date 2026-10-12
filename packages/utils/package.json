@@ -10,9 +10,14 @@
     "./hash": "./src/hash.ts",
     "./ipfs": "./src/ipfs.ts"
   },
-  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "devDependencies": {
+    "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
     "typescript": "catalog:"
   }
 }

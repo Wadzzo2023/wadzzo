@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  AuthError,
+  type AuthError,
   AuthErrorCodes,
-  User,
+  type User,
   onAuthStateChanged,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -13,10 +13,9 @@ import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
-import type { AuthCredential } from "../session/auth-credentials";
 import { firebaseAuth } from "../firebase/client";
 import { WalletType } from "../wallet-type";
 import { showFirebaseAuthError } from "./firebase-error-toast";
@@ -89,7 +88,7 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
       password,
       email,
       walletType: WalletType.emailPass,
-    } as AuthCredential)
+    })
   }
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {

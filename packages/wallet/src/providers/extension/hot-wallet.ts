@@ -20,8 +20,8 @@ const hotWallet: ExtensionWallet = {
       });
     }
     try {
-      const result = (await HOT.request("stellar:getAddress", {})) as { address: string };
-      return result.address;
+      const result = await HOT.request("stellar:getAddress", {});
+      return (result).address;
     } catch (cause) {
       throw new AppError(ErrorCodes.WALLET_CONNECTION_REJECTED, {
         message: "Failed to get address from HOT Wallet.",

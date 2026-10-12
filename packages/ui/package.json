@@ -32,7 +32,9 @@
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:"

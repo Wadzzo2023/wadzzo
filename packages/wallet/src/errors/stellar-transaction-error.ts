@@ -250,7 +250,7 @@ export class StellarTransactionError extends AppError {
   readonly isRecoverable: boolean;
   readonly technicalDetails: unknown;
 
-  constructor(summaryOrCause: StellarErrorSummary | unknown) {
+  constructor(summaryOrCause: unknown) {
     const info = isSummary(summaryOrCause) ? summaryOrCause : summarizeStellarError(summaryOrCause);
     super(codeForResult(info.resultCode), {
       message: info.message,

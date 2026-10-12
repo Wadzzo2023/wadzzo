@@ -11,7 +11,6 @@ function initial(text: string | null | undefined) {
 /** A round avatar — the picture, or the first letter on a tinted circle. */
 export function Avatar({ src, name, className }: { src?: string | null; name?: string | null; className?: string }) {
   return src ? (
-    // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt="" className={cn("size-9 shrink-0 rounded-full bg-muted object-cover", className)} />
   ) : (
     <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-sm font-semibold text-primary", className)} aria-hidden>

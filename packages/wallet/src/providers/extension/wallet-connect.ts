@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- WalletConnect's session types are not exported */
 import SignClient from "@walletconnect/sign-client";
 import { getSdkError } from "@walletconnect/utils";
 import { ConfigCtrl, ModalCtrl } from "@web3modal/core";
@@ -15,6 +14,16 @@ import { WalletType } from "../../wallet-type";
 import type { WalletProvider } from "../wallet-provider";
 
 type StellarMethod = "stellar_signXDR" | "stellar_signAndSubmitXDR";
+
+type ConnectResult = Awaited<ReturnType<SignClient["connect"]>>;
+/** An approved WalletConnect session. */
+type WalletConnectSession = Awaited<ReturnType<ConnectResult["approval"]>>;
+
+/** What the wallet answers to a Stellar request (the SDK types the response as `unknown`). */
+interface SignedXdrResponse {
+  signedXDR?: string;
+  result?: { status?: string };
+}
 
 const STELLAR_METHODS: Record<"SIGN" | "SIGN_AND_SUBMIT", StellarMethod> = {
   SIGN: "stellar_signXDR",
@@ -64,8 +73,8 @@ const rejectAfter = (ms: number, message: string) =>
   new Promise<never>((_, reject) => setTimeout(() => reject(new Error(message)), ms));
 
 /** The public key is the third part of a CAIP-10 account id (`stellar:pubnet:G…`). */
-const publicKeyOfSession = (session: any): string =>
-  String(session.namespaces.stellar.accounts[0]).split(":")[2] ?? "";
+const publicKeyOfSession = (session: WalletConnectSession): string =>
+  (session.namespaces.stellar?.accounts[0] ?? "").split(":")[2] ?? "";
 
 async function login(): Promise<void> {
   if (!signClient) return;
@@ -78,10 +87,7 @@ async function login(): Promise<void> {
 
   try {
     toast("WalletConnect session timeout 3 minute");
-    const session: any = await Promise.race([
-      rejectAfter(SESSION_TIMEOUT_MS, "timeout wc"),
-      approval(),
-    ]);
+    const session = await Promise.race([rejectAfter(SESSION_TIMEOUT_MS, "timeout wc"), approval()]);
 
     const publicKey = publicKeyOfSession(session);
     if (isInvalidPublicKey(publicKey)) {
@@ -96,7 +102,7 @@ async function login(): Promise<void> {
       if (!challengeResponse.ok) return;
       const { xdr } = (await challengeResponse.json()) as { xdr: string };
 
-      const signed: any = await client.request({
+      const signed = await client.request<SignedXdrResponse>({
         topic: session.topic,
         chainId: stellarNetwork.walletConnectChain,
         request: { method: STELLAR_METHODS.SIGN, params: { xdr } },
@@ -152,7 +158,7 @@ async function requestSignature(xdr: string, method: StellarMethod): Promise<str
 
     await modal.openModal({ uri });
     const session = await approval();
-    const result: any = await signClient.request({
+    const result = await signClient.request<SignedXdrResponse>({
       topic: session.topic,
       chainId: stellarNetwork.walletConnectChain,
       request: { method, params: { xdr } },
@@ -162,7 +168,7 @@ async function requestSignature(xdr: string, method: StellarMethod): Promise<str
     if (method === STELLAR_METHODS.SIGN_AND_SUBMIT) {
       return result.result?.status === "success" ? true : undefined;
     }
-    return result.signedXDR as string | undefined;
+    return result.signedXDR;
   } catch (cause) {
     console.error("[WalletConnect] request failed", cause);
     throw new AppError(ErrorCodes.WALLET_SIGNING_REJECTED, {
@@ -188,6 +194,7 @@ export const walletConnectProvider: WalletProvider = {
 
 // React 19 keeps JSX in the react module, so the custom element is declared there.
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- React's own typing hook for custom elements
   namespace JSX {
     interface IntrinsicElements {
       "w3m-modal": Partial<W3mModal>;

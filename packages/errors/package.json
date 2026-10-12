@@ -16,11 +16,15 @@
     "@trpc/server": "catalog:"
   },
   "peerDependenciesMeta": {
-    "@trpc/server": { "optional": true }
+    "@trpc/server": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@wadzzo/tsconfig": "workspace:*",
     "@trpc/server": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
+    "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
     "typescript": "catalog:"
   }
 }

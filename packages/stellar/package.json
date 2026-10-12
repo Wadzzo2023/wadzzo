@@ -9,7 +9,10 @@
     "./quote": "./src/quote.ts",
     "./prices": "./src/prices.ts"
   },
-  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": {
     "@stellar/stellar-sdk": "catalog:",
     "@wadzzo/errors": "workspace:*",
@@ -19,7 +22,9 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
     "typescript": "catalog:"
   }
 }

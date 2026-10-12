@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  AuthError,
+  type AuthError,
   AuthErrorCodes,
-  User,
+  type User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendEmailVerification,
-  sendPasswordResetEmail,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 
@@ -15,12 +14,10 @@ import { useMutation } from "@tanstack/react-query";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, Mail } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 import { firebaseAuth } from "../firebase/client";
-import { WalletType } from "../wallet-type";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 const formSchema = z

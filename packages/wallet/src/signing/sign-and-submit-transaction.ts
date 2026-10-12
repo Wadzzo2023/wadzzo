@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 import { getWalletProvider } from "../providers/registry";
-import { WalletType } from "../wallet-type";
+import { type WalletType } from "../wallet-type";
 
 export interface SignAndSubmitTransactionInput {
   /** The transaction to sign (base64 XDR). For custodial accounts and admins it is already signed. */

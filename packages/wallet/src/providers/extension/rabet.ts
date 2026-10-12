@@ -24,7 +24,7 @@ const getRabet = (): RabetApi => {
 
 const errorText = (error: unknown, fallback: string): string =>
   (typeof error === "object" && error !== null && "error" in error
-    ? String((error as { error: unknown }).error)
+    ? String((error).error)
     : undefined) ?? fallback;
 
 const rabetWallet: ExtensionWallet = {

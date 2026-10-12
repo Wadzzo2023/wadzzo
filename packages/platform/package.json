@@ -20,7 +20,9 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@wadzzo/eslint-config": "workspace:*",
     "@wadzzo/tsconfig": "workspace:*",
+    "eslint": "catalog:",
     "typescript": "catalog:"
   }
 }
