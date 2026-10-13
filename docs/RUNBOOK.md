@@ -14,7 +14,7 @@ pnpm --filter @wadzzo/market dev -p 3002     # fan marketplace
 pnpm --filter @wadzzo/express dev            # task server on :4000
 
 pnpm typecheck && pnpm lint && pnpm test && pnpm format:check    # the CI gate
-pnpm env:check                                                    # real env files agree with each other
+pnpm env:check                                                    # env files agree
 ```
 
 ## 1. Prerequisites
@@ -124,19 +124,19 @@ Scope a command to one package (much faster):
 pnpm --filter @wadzzo/api typecheck
 pnpm --filter @wadzzo/api exec vitest run src/brand            # a folder
 pnpm --filter @wadzzo/wallet exec vitest watch                  # watch mode
-pnpm --filter @wadzzo/brand... typecheck                        # the app and everything it depends on
+pnpm --filter @wadzzo/brand... typecheck                        # the app + its dependencies
 ```
 
 Turbo caches `typecheck`, `lint` and `test`. After editing the Prisma schema run `pnpm db:generate` first or types will be stale.
 
 ## 5. Environment files
 
-| File (in `apps/<app>/`)                               | Tracked | Holds                                                     |
-| ----------------------------------------------------- | ------- | --------------------------------------------------------- |
-| `.env.example`                                        | yes     | every variable the app reads, grouped, with a description |
-| `.env.local`                                          | no      | your machine's values (loaded in dev and prod mode)       |
-| `.env`, `.env.development`, `.env.production`         | no      | the shared real values (same sections as the example)     |
-| `.env.clintoncounty`, `.env.clintoncounty.production` | no      | Clinton County overrides only (brand and AR)              |
+| File (in `apps/<app>/`)                               | In git | Holds                                                     |
+| ----------------------------------------------------- | ------ | --------------------------------------------------------- |
+| `.env.example`                                        | yes    | every variable the app reads, grouped, with a description |
+| `.env.local`                                          | no     | your machine's values (loaded in dev and prod mode)       |
+| `.env`, `.env.development`, `.env.production`         | no     | the shared real values (same sections as the example)     |
+| `.env.clintoncounty`, `.env.clintoncounty.production` | no     | Clinton County overrides only (brand and AR)              |
 
 Next.js loads, highest first: `.env.<mode>.local`, `.env.local`, `.env.<mode>`, `.env`. A variable already in the shell wins over all of them.
 

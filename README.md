@@ -48,3 +48,5 @@ pnpm dev:brand              # or dev:market, dev:ar
 | `CONFIRM_DB_PUSH=yes pnpm --filter @wadzzo/db push` | `prisma db push` (guarded: it can drop data on the shared DB)                  |
 
 Start with [docs/RUNBOOK.md](docs/RUNBOOK.md) to run and manage the repo, then [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit, [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) to deploy (Vercel for the web apps, AWS for the task server), [docs/PLATFORMS.md](docs/PLATFORMS.md) to add a white-label platform and [docs/MIGRATION.md](docs/MIGRATION.md) for what moved where.
+
+PDF copies of the runbook and the deployment guide are in `docs/pdf/` (regenerate with `node scripts/docs-to-pdf.mjs`).
