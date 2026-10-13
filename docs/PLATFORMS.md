@@ -24,4 +24,4 @@ A platform (Wadzzo, Clinton County, ...) is _configuration_, never a branch.
 
 - `pnpm sync:platform` (run by `predev`/`prebuild`) writes `src/styles/platform-theme.css` and `public/platform/**`. Both are generated and git-ignored.
 - Code reads `platformBranding` from `@wadzzo/platform/branding`; there is no `if (slug === ...)` in components.
-- Server code scopes queries with `platformScope(ctx)` and creates rows with `platformId` (guarded by `tests/platform-stamping.test.ts`).
+- Server code scopes queries with `platformScope(ctx)` and creates rows with `platformId` (guarded by `packages/api/src/brand/__tests__/platform-stamping.test.ts`).

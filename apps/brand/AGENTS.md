@@ -15,7 +15,7 @@ Where brands create and manage drops, stores, posts, bounties and events (Next 1
 ## Rules that matter
 
 - Schema: `packages/db/prisma/schema.prisma` (single source for every app). `pnpm db:generate` after editing.
-- New rows of platform-stamped models must set `platformId`; queries use `platformScope` / `relationScope` from `@wadzzo/platform/scope` (`tests/platform-stamping.test.ts` guards it).
+- New rows of platform-stamped models must set `platformId`; queries use `platformScope` / `relationScope` from `@wadzzo/platform/scope` (`packages/api/src/brand/__tests__/platform-stamping.test.ts` guards it).
 - Platform copy, colours and URLs: `platformBranding` from `@wadzzo/platform/branding`.
 - Failures are `AppError` with an `ErrorCodes` code; tRPC maps them and sends `data.appCode`.
 - The task server is `apps/express-wadzzo`. The map agent's contract (steps, cards, actions) is `@wadzzo/agent-contract`, imported by both sides; change it there.
