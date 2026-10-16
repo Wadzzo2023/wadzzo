@@ -19,13 +19,13 @@ pnpm env:check                                                    # env files ag
 
 ## 1. Prerequisites
 
-| Tool         | Version                               | Notes                                                                 |
-| ------------ | ------------------------------------- | --------------------------------------------------------------------- |
-| Node.js      | `>=20.19` (`.nvmrc` says 20)          | `nvm use` picks it up                                                 |
-| pnpm         | `12.9.1` (the `packageManager` field) | `corepack enable` installs the right one; do not use npm or yarn here |
-| Git          | any recent                            |                                                                       |
-| Postgres     | optional                              | `pnpm db:local` gives you one with no install                         |
-| Expo tooling | only for `apps/mobile`                | it installs with **npm** on its own, see 8                            |
+| Tool         | Version                               | Notes                                                                             |
+| ------------ | ------------------------------------- | --------------------------------------------------------------------------------- |
+| Node.js      | `>=22.12` (`.nvmrc` says 22)          | `nvm use` picks it up; `firebase-admin@14` and its ES-module dependencies need it |
+| pnpm         | `12.9.1` (the `packageManager` field) | `corepack enable` installs the right one; do not use npm or yarn here             |
+| Git          | any recent                            |                                                                                   |
+| Postgres     | optional                              | `pnpm db:local` gives you one with no install                                     |
+| Expo tooling | only for `apps/mobile`                | it installs with **npm** on its own, see 8                                        |
 
 ## 2. First-time setup
 

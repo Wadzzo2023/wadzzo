@@ -9,7 +9,7 @@ export default defineConfig({
   entry: ["src/index.ts"],
   format: ["cjs"],
   platform: "node",
-  target: "node20",
+  target: "node22",
   outDir: "dist",
   sourcemap: true,
   clean: true,

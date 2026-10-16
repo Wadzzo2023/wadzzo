@@ -57,7 +57,7 @@ Vercel → **Add New… → Project** → import this repository, then:
 | Framework preset                                       | Next.js         | Next.js        | Next.js     |
 | **Root Directory**                                     | `apps/market`   | `apps/brand`   | `apps/ar`   |
 | **Include source files outside of the Root Directory** | on              | on             | on          |
-| Node.js Version                                        | 20.x            | 20.x           | 20.x        |
+| Node.js Version                                        | **22.x**        | **22.x**       | **22.x**    |
 | Production Branch                                      | `main`          | `main`         | `main`      |
 
 The remaining behaviour is committed in each app's `vercel.json`: build command (`pnpm run build`, which runs `sync:platform` first), the ignored-build step (a push that doesn't touch the app or a package it depends on does not rebuild it), `framework`, and a 60 s function limit.
@@ -177,8 +177,8 @@ The task server (`apps/express-wadzzo`) is **one long-running Node process**. It
 sudo adduser --disabled-password wadzzo && sudo usermod -aG sudo wadzzo   # or reuse an existing user
 sudo apt update && sudo apt install -y nginx certbot python3-certbot-nginx git rsync curl
 
-# Node 20 (matches .nvmrc), pnpm (from packageManager), PM2
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+# Node 22 (matches .nvmrc), pnpm (from packageManager), PM2
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo corepack enable
 sudo npm install -g pm2
@@ -304,18 +304,19 @@ See [PLATFORMS.md](PLATFORMS.md) for adding a platform.
 
 ## 8. Troubleshooting
 
-| Symptom                                                                    | Cause and fix                                                                                                                 |
-| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Build fails with `CONFIG_MISSING` / `Invalid environment variables`        | A required variable is missing for that environment (Production vs Preview). Compare with `.env.example`.                     |
-| Login popup closes, or "unauthorized domain"                               | The domain isn't in Firebase's authorized domains (2.4).                                                                      |
-| Login works but the session is lost on the next request                    | `NEXTAUTH_URL` differs from the domain being used, or `NEXTAUTH_SECRET` differs between deployments.                          |
-| Brand features that use the agent fail with "task server isn't configured" | `EXPRESS_SERVER_URL` is unset in a non-production environment (by design, see section 1).                                     |
-| Task server answers `401`                                                  | Brand's and the task server's `NEXTAUTH_SECRET` differ.                                                                       |
-| Uploads fail with `CONFIG_MISSING` naming `AWS_*`                          | Bucket variables missing. They are read as `AWS_*` or the older `NEXT_AWS_*`.                                                 |
-| `too many connections` in Postgres logs                                    | `DATABASE_POOL_MAX` not `1` on Vercel, or no PgBouncer (section 3).                                                           |
-| A function times out at 60 s                                               | Raise `maxDuration` in the app's `vercel.json` (plan limits apply), or move the work to the task server.                      |
-| The AR project's function is too large                                     | Check the build output for the `onnxruntime-node` / `@huggingface/transformers` bundle sizes; the AR app was sized for these. |
-| `pnpm env:check` reports a mismatch                                        | Fix the value in the file _and_ in the Vercel project; the check reads files, Vercel holds the truth.                         |
+| Symptom                                                                        | Cause and fix                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime error `ERR_REQUIRE_ESM … jose … jwks-rsa` (from `firebase-admin/auth`) | The function runs on a Node older than 22.12 / 20.19, which cannot `require()` ES modules. Set the project's Node.js Version to **22.x** (each app's `engines.node` is `22.x`, which Vercel reads from the Root Directory) and **redeploy**. `firebase-admin@14` itself needs Node ≥ 22. |
+| Build fails with `CONFIG_MISSING` / `Invalid environment variables`            | A required variable is missing for that environment (Production vs Preview). Compare with `.env.example`.                                                                                                                                                                                |
+| Login popup closes, or "unauthorized domain"                                   | The domain isn't in Firebase's authorized domains (2.4).                                                                                                                                                                                                                                 |
+| Login works but the session is lost on the next request                        | `NEXTAUTH_URL` differs from the domain being used, or `NEXTAUTH_SECRET` differs between deployments.                                                                                                                                                                                     |
+| Brand features that use the agent fail with "task server isn't configured"     | `EXPRESS_SERVER_URL` is unset in a non-production environment (by design, see section 1).                                                                                                                                                                                                |
+| Task server answers `401`                                                      | Brand's and the task server's `NEXTAUTH_SECRET` differ.                                                                                                                                                                                                                                  |
+| Uploads fail with `CONFIG_MISSING` naming `AWS_*`                              | Bucket variables missing. They are read as `AWS_*` or the older `NEXT_AWS_*`.                                                                                                                                                                                                            |
+| `too many connections` in Postgres logs                                        | `DATABASE_POOL_MAX` not `1` on Vercel, or no PgBouncer (section 3).                                                                                                                                                                                                                      |
+| A function times out at 60 s                                                   | Raise `maxDuration` in the app's `vercel.json` (plan limits apply), or move the work to the task server.                                                                                                                                                                                 |
+| The AR project's function is too large                                         | Check the build output for the `onnxruntime-node` / `@huggingface/transformers` bundle sizes; the AR app was sized for these.                                                                                                                                                            |
+| `pnpm env:check` reports a mismatch                                            | Fix the value in the file _and_ in the Vercel project; the check reads files, Vercel holds the truth.                                                                                                                                                                                    |
 
 ## What this guide does not cover
 
