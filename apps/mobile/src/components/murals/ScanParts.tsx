@@ -51,7 +51,7 @@ const RANGE = SWEEP_SIDE_DEG * 1.6;
 const pos = (deg: number) => 50 + (Math.max(-RANGE, Math.min(RANGE, deg)) / RANGE) * 50;
 const STOPS: { slot: 0 | 1 | 2; at: number; label: string; step: SweepStep }[] = [
   { slot: 0, at: -SWEEP_SIDE_DEG, label: "Left", step: "left" },
-  { slot: 1, at: 0, label: "Centre", step: "centre" },
+  { slot: 1, at: 0, label: "Middle", step: "centre" },
   { slot: 2, at: SWEEP_SIDE_DEG, label: "Right", step: "right" },
 ];
 

@@ -6,11 +6,17 @@ secret `RNMAPBOX_MAPS_DOWNLOAD_TOKEN` (never committed). Public `pk.` token via
 `EXPO_PUBLIC_MAPBOX_TOKEN` → `Mapbox.setAccessToken`.
 
 ## Styles
-`mapbox://styles/mapbox/light-v11` / `dark-v11`, switched with the app theme —
-identical to web `MAP_STYLE`.
+Two modes, same as the web (`useMapMode` in `src/theme/theme.ts`, stored per
+device under `wadzzo-map-mode`, shared by every map in the app):
+
+- **2D (default):** `mapbox://styles/mapbox/light-v11` / `dark-v11`, flat, pitch 0.
+- **3D:** the Wadzzo 3D styles (`MAP_STYLE`, Mapbox Standard + city buildings), tilted.
+
+Both follow the app theme. `mapStyleFor(mode, theme)` picks the style; the
+2D/3D button (`MapModeButton`) is on the map's right rail and the directions screen.
 
 ## Camera
-- Start: last known location → user fix, zoom 16, pitch 45 (as web).
+- Start: last known location → user fix, zoom 16.4, pitch 48 in 3D / 0 in 2D (as web).
 - Follow mode on until the user pans; recenter button re-enables it.
 - Compass-map mode: `followUserMode="compass"`; off → north up.
 

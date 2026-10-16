@@ -80,6 +80,10 @@ const config = {
   },
   reactStrictMode: true,
   images: {
+    // Next 16 only serves qualities listed here (default [75]). The mobile
+    // app's AR asks for q=70 (builds up to 6.0.1/203) and gets a 400 without
+    // it, which crashed AR: the coin textures never loaded.
+    qualities: [70, 75],
     remotePatterns: [
       {
         protocol: "https",

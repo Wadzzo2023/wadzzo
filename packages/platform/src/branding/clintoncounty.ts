@@ -3,16 +3,16 @@ import type { PlatformBranding } from "./types";
 /** Clinton County, Iowa: partner platform (web.clintoncounty-ia.gov, brand.clintoncounty-ia.gov). */
 export const clintonCountyBranding: PlatformBranding = {
   slug: "clintoncounty",
-  name: "Clinton City",
+  name: "Clinton, IA",
   longName: "Clinton County",
   coinName: "Clinton Coins",
   coinOwner: "Clinton",
-  arAppTitle: "Clinton City AR — Collect the real world",
-  portalTitle: "Clinton City Brand Portal",
+  arAppTitle: "Clinton, IA AR — Collect the real world",
+  portalTitle: "Clinton, IA Brand Portal",
   hashtag: "#ClintonCounty",
   filePrefix: "clinton",
   fallbackSlug: "clinton",
-  wordmark: { letters: ["C", "L", "I", "N", "T", "O", "N"], plate: "CITY" },
+  wordmark: { letters: ["C", "L", "I", "N", "T", "O", "N"], plate: "IA" },
   assets: {
     mark: "/platform/brand/brand-mark.png",
     logo: "/platform/images/logo.png",
@@ -42,7 +42,7 @@ export const clintonCountyBranding: PlatformBranding = {
   },
   contact: { supportEmail: "support@wadzzo.com", supportUrl: "mailto:support@wadzzo.com" },
   toml: {
-    orgName: "Clinton City",
+    orgName: "Clinton, IA",
     orgUrl: "https://www.clintoncounty-ia.gov/",
     principals: [],
   },

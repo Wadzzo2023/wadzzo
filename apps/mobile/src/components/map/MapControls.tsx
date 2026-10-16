@@ -5,7 +5,9 @@ import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, wi
 
 import { ArIconButton } from "~/components/ui/ArButton";
 import { PulseRing } from "~/components/ui/PulseDot";
-import { useColors } from "~/theme/theme";
+import { useColors, type MapMode } from "~/theme/theme";
+
+import { MapModeButton } from "./MapModeButton";
 
 /**
  * Port of the web's right-hand rail: recenter + refresh welded into one
@@ -23,6 +25,8 @@ export function MapControls({
   onToggleAutoCollect,
   muralLayer,
   onCycleMuralLayer,
+  mapMode,
+  onToggleMapMode,
 }: {
   onRecenter: () => void;
   onRefetch: () => void;
@@ -35,6 +39,9 @@ export function MapControls({
   /** Murals on the map: all, verified only, or hidden. */
   muralLayer?: "all" | "verified" | "off";
   onCycleMuralLayer?: () => void;
+  /** Flat 2D or tilted 3D basemap. */
+  mapMode?: MapMode;
+  onToggleMapMode?: () => void;
 }) {
   const { c } = useColors();
   const spin = useSharedValue(0);
@@ -69,6 +76,8 @@ export function MapControls({
       </ArIconButton>
 
       <ArIconButton icon={Compass} label={compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"} active={compassMode} onPress={onToggleCompass} />
+
+      {mapMode && onToggleMapMode && <MapModeButton mode={mapMode} onToggle={onToggleMapMode} />}
 
       {onCycleMuralLayer && (
         <ArIconButton

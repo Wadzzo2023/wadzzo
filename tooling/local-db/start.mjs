@@ -35,7 +35,7 @@ await db.exec(sql);
 await db.exec(`
   INSERT INTO "Platform" ("id","name","isRoot","webUrl","brandUrl","active","createdAt","updatedAt") VALUES
     ('wadzzo','Wadzzo',true,'http://localhost:3000','http://localhost:3001',true,now(),now()),
-    ('clintoncounty','Clinton City',false,'http://localhost:3000','http://localhost:3001',true,now(),now())
+    ('clintoncounty','Clinton, IA',false,'http://localhost:3000','http://localhost:3001',true,now(),now())
   ON CONFLICT DO NOTHING;
 `);
 

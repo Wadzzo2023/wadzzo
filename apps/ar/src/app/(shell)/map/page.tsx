@@ -3,7 +3,7 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, HelpCircle, Satellite } from "lucide-react";
-import { useRouter } from "~/lib/navigation";
+import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
@@ -296,6 +296,32 @@ export default function MapScreen() {
   );
   const murals = muralLayer === "off" ? [] : (muralsQuery.data?.murals ?? []);
   const selectedMural = murals.find((m) => m.id === selectedMuralId) ?? null;
+  const selectMural = useCallback(
+    (id: string) => {
+      setSelectedId(null);
+      setSelectedMuralId(id);
+      setFollowing(false);
+      const m = murals.find((x) => x.id === id);
+      if (m) mapRef.current?.flyToMural(m);
+    },
+    [murals],
+  );
+
+  // `/map?mural=<id>` (after a mural scan): open that mural once it's loaded.
+  const { query: urlQuery } = useQueryParams();
+  const focusMural = typeof urlQuery.mural === "string" ? urlQuery.mural : null;
+  const focusedMural = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusMural || focusedMural.current === focusMural) return;
+    if (!murals.some((m) => m.id === focusMural)) return;
+    // Next tick, once the map has the mural's marker.
+    const t = setTimeout(() => {
+      focusedMural.current = focusMural;
+      selectMural(focusMural);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [focusMural, murals, selectMural]);
+
   const cycleMuralLayer = useCallback(() => {
     const next = muralLayer === "all" ? "verified" : muralLayer === "verified" ? "off" : "all";
     setMuralLayer(next);
@@ -373,13 +399,7 @@ export default function MapScreen() {
           murals={murals}
           muralDailyLimit={muralsQuery.data?.dailyLimit}
           selectedMuralId={selectedMuralId}
-          onSelectMural={(id) => {
-            setSelectedId(null);
-            setSelectedMuralId(id);
-            setFollowing(false);
-            const m = murals.find((x) => x.id === id);
-            if (m) mapRef.current?.flyToMural(m);
-          }}
+          onSelectMural={selectMural}
           onBoundsChange={setBounds}
         />
 

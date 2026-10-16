@@ -2,6 +2,7 @@ import { TabList, Tabs, TabSlot, TabTrigger, type TabSlotProps } from "expo-rout
 import { StyleSheet, View } from "react-native";
 import { Screen } from "react-native-screens";
 
+import { CameraLauncher } from "~/components/camera/CameraLauncher";
 import { BottomTabBar, LEFT_TABS, RIGHT_TABS } from "~/components/shell/BottomTabBar";
 
 /**
@@ -46,10 +47,10 @@ export default function TabsLayout() {
         {[...LEFT_TABS, ...RIGHT_TABS].map((t) => (
           <TabTrigger key={t.name} name={t.name} href={t.href} />
         ))}
-        {/* The AR launcher's page (AR / QR / Murals) — a tab so the bar stays. */}
-        <TabTrigger name="camera" href="/camera" />
       </TabList>
       <BottomTabBar />
+      {/* What the AR button opens: pick AR, QR or Murals. */}
+      <CameraLauncher />
     </Tabs>
   );
 }

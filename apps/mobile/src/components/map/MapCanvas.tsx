@@ -15,7 +15,7 @@ import Supercluster, { type ClusterProperties } from "supercluster";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import type { ArPin, Coords, GeoFix } from "~/lib/ar/types";
 import type { AreaMural } from "~/lib/murals/api";
-import { MAP_STYLE, useResolvedTheme } from "~/theme/theme";
+import { mapStyleFor, useMapMode, useResolvedTheme } from "~/theme/theme";
 
 import { ClusterBillboard } from "./ClusterBillboard";
 import { MuralMarker } from "./MuralMarker";
@@ -35,7 +35,7 @@ export type MapCanvasHandle = {
  * Port of the web's MapCanvas on `@rnmapbox/maps`, with the same camera
  * numbers: opens at zoom 16.4, pitch 48, bearing −14; recenter eases to 16.8;
  * a selected pin flies to 17.6 nudged above centre so the sheet doesn't cover
- * it; pitch ≤ 62, zoom 1–19.5 (the web stops at 11; the app can see the whole world). Follows the fix until the viewer pans.
+ * it; pitch ≤ 62 in 3D (the 2D map stays flat), zoom 1–19.5 (the web stops at 11; the app can see the whole world). Follows the fix until the viewer pans.
  *
  * Pins are React views (PinMarker) so they look and move exactly like the
  * web's. Zoomed out, pins that would overlap are grouped (supercluster, in
@@ -106,6 +106,7 @@ export const MapCanvas = forwardRef<
   ref,
 ) {
   const theme = useResolvedTheme();
+  const { mode: mapMode, is3d } = useMapMode();
   const camera = useRef<Camera>(null);
   const [zoom, setZoom] = useState(16.4);
   /** Where the camera settled last (snapped in onMapIdle); null until it has. */
@@ -150,6 +151,12 @@ export const MapCanvas = forwardRef<
     flyToMural,
     resetBearing,
   ]);
+
+  // 2D lies the map flat; 3D tilts it back to the city view. Only the tilt is
+  // touched, so the bearing (and compass mode) carry over.
+  useEffect(() => {
+    camera.current?.setCamera({ pitch: is3d ? 48 : 0, animationDuration: 600, animationMode: "easeTo" });
+  }, [is3d]);
 
   // Follow the fix while the viewer hasn't taken the wheel — but only for
   // real movement: easing the camera on every GPS tick read as the whole
@@ -389,14 +396,14 @@ export const MapCanvas = forwardRef<
   return (
     <MapView
       style={StyleSheet.absoluteFill}
-      styleURL={MAP_STYLE[theme]}
+      styleURL={mapStyleFor(mapMode, theme)}
       logoEnabled={false}
       // Hidden by product decision (2026-10-06), knowing Mapbox's terms ask
       // for visible attribution — revisit if Mapbox flags the account.
       attributionEnabled={false}
       scaleBarEnabled={false}
       compassEnabled={false}
-      pitchEnabled
+      pitchEnabled={is3d}
       onPress={() => onSelect(null)}
       onCameraChanged={(s) => {
         // Fires every frame while the camera moves, so no state here: markers
@@ -444,8 +451,8 @@ export const MapCanvas = forwardRef<
         defaultSettings={{
           centerCoordinate: [(fix ?? center).lng, (fix ?? center).lat],
           zoomLevel: 16.4,
-          pitch: 48,
-          heading: -14,
+          pitch: is3d ? 48 : 0,
+          heading: is3d ? -14 : 0,
         }}
         // Zoom all the way out to the whole world; pins group into
         // billboards, so a world view stays a few dozen views.

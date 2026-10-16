@@ -29,7 +29,7 @@ import { pinStatus } from "~/lib/ar/rarity";
 import type { ArPin, Coords, TravelMode } from "~/lib/ar/types";
 import { useSession } from "~/lib/auth/session";
 import { useMuralsInArea } from "~/lib/murals/api";
-import { useColors } from "~/theme/theme";
+import { useColors, useMapMode } from "~/theme/theme";
 
 /**
  * ── /map ───────────────────────────────────────────────────────────────────
@@ -106,7 +106,8 @@ export default function MapScreen() {
   const signedIn = useSession((s) => Boolean(s.user));
 
   const mapRef = useRef<MapCanvasHandle>(null);
-  const { focus } = useLocalSearchParams<{ focus?: string }>();
+  const { mode: mapMode, is3d, toggle: toggleMapMode } = useMapMode();
+  const { focus, mural: focusMural } = useLocalSearchParams<{ focus?: string; mural?: string }>();
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
@@ -243,6 +244,19 @@ export default function MapScreen() {
     if (m) mapRef.current?.flyToMural(m);
   }, []);
 
+  // `/map?mural=<id>` (after a mural scan): open that mural once it's loaded.
+  const focusedMural = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusMural || focusedMural.current === focusMural) return;
+    if (!murals.some((m) => m.id === focusMural)) return;
+    // Next tick, once the map has the mural's marker.
+    const t = setTimeout(() => {
+      focusedMural.current = focusMural;
+      handleSelectMural(focusMural);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [focusMural, murals, handleSelectMural]);
+
   const handleCapture = useCallback(
     (pin: ArPin) => {
       const go = () => router.push({ pathname: "/ar", params: { target: pin.id } });
@@ -333,6 +347,11 @@ export default function MapScreen() {
 
       {fix && (
         <MapControls
+          mapMode={mapMode}
+          onToggleMapMode={() => {
+            toggleMapMode();
+            setToast(is3d ? "2D map" : "3D map");
+          }}
           onRecenter={handleRecenter}
           onRefetch={handleRefetch}
           compassMode={settings.compassMode}

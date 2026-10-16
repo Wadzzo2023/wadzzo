@@ -24,7 +24,7 @@ import { useToggleFollow } from "~/lib/api/follow";
 import { useBrandPinsQuery, useBrandQuery, usePinQuery } from "~/lib/api/queries";
 import { pinStatus, RARITY_META, timeRemaining } from "~/lib/ar/rarity";
 import { useSession } from "~/lib/auth/session";
-import { MAP_STYLE, useColors, useResolvedTheme } from "~/theme/theme";
+import { mapStyleFor, useColors, useMapMode, useResolvedTheme } from "~/theme/theme";
 
 /** Scroll offset past which the big card (≈ 370pt tall, under the header) is mostly off-screen. */
 const CARD_OUT_OF_VIEW = 380;
@@ -37,6 +37,7 @@ const dateFmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(
 export default function CardScreen() {
   const { c, rarity: rc } = useColors();
   const theme = useResolvedTheme();
+  const { mode: mapMode, is3d } = useMapMode();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: pin, isLoading, isError } = usePinQuery(id ?? null);
@@ -225,8 +226,8 @@ export default function CardScreen() {
 
         <Section title="Where you found it">
           <View className="h-[168px] overflow-hidden rounded-ar border border-ar-line">
-            <MapView style={StyleSheet.absoluteFill} styleURL={MAP_STYLE[theme]} scrollEnabled={false} zoomEnabled={false} rotateEnabled={false} pitchEnabled={false} logoEnabled={false} scaleBarEnabled={false} compassEnabled={false} attributionEnabled={false}>
-              <Camera defaultSettings={{ centerCoordinate: [pin.lng, pin.lat], zoomLevel: 15.4, pitch: 40 }} />
+            <MapView style={StyleSheet.absoluteFill} styleURL={mapStyleFor(mapMode, theme)} scrollEnabled={false} zoomEnabled={false} rotateEnabled={false} pitchEnabled={false} logoEnabled={false} scaleBarEnabled={false} compassEnabled={false} attributionEnabled={false}>
+              <Camera defaultSettings={{ centerCoordinate: [pin.lng, pin.lat], zoomLevel: 15.4, pitch: is3d ? 40 : 0 }} />
               <MarkerView coordinate={[pin.lng, pin.lat]} anchor={{ x: 0.5, y: 0.5 }}>
                 <View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 2, borderColor: rc(pin.rarity), backgroundColor: rc(pin.rarity, 0.35) }} />
               </MarkerView>

@@ -253,7 +253,7 @@ const HEADING_MIN_DEG = 2;
  * on leave shut the sensor off — the map's compass froze until restart.
  * Screens now share this store; the watch stops when the last one leaves.
  */
-const useHeadingStore = create<{ heading: number | null; accuracy: number | null }>()(() => ({ heading: null, accuracy: null }));
+const useHeadingStore = create<{ heading: number | null; accuracy: number | null; declination: number }>()(() => ({ heading: null, accuracy: null, declination: 0 }));
 let headingUsers = 0;
 let headingGen = 0;
 let headingSub: Location.LocationSubscription | null = null;
@@ -265,6 +265,11 @@ function startHeading() {
   let lastAt = 0;
   Location.watchHeadingAsync((h) => {
     const deg = h.trueHeading >= 0 ? h.trueHeading : h.magHeading;
+    // True minus magnetic north here, for the AR camera heading (cameraHeading.ts).
+    if (h.trueHeading >= 0) {
+      const declination = ((h.trueHeading - h.magHeading + 540) % 360) - 180;
+      if (Math.abs(declination - useHeadingStore.getState().declination) >= 0.5) useHeadingStore.setState({ declination });
+    }
     const now = Date.now();
     const turned = lastDeg == null ? Infinity : Math.abs(((deg - lastDeg + 540) % 360) - 180);
     if (turned < HEADING_MIN_DEG || now - lastAt < HEADING_MS) return;
@@ -312,6 +317,11 @@ AppState.addEventListener("change", (s) => {
   headingSub = null;
   startHeading();
 });
+
+/** True minus magnetic north (degrees) where you are; 0 until known. */
+export function useDeclination() {
+  return useHeadingStore((s) => s.declination);
+}
 
 export function useHeading(enabled: boolean) {
   const heading = useHeadingStore((s) => s.heading);

@@ -78,12 +78,12 @@ Privacy Policy: https://app.wadzzo.com/privacy
 Support: https://app.wadzzo.com/support
 ```
 
-## 4. Keywords (95/100) and What's New
+## 4. Keywords (97/100) and What's New
 
 Keywords (comma separated, no spaces after commas, none repeating the name or subtitle):
 
 ```
-collectibles,rewards,bounties,qr,scanner,map,coins,cards,murals,street art,events,treasure,hunt
+collectibles,rewards,bounties,qr,scanner,coins,cards,murals,street art,augmented reality,treasure
 ```
 
 What's New in this version (616/4000):

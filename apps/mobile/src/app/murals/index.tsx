@@ -1,7 +1,7 @@
 import { useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
 import { DeviceMotion } from "expo-sensors";
-import { Camera as CameraIcon, Coins, Download, Frame, MapPin, RotateCcw, X, type LucideIcon } from "lucide-react-native";
+import { Camera as CameraIcon, CircleHelp, Coins, Download, Frame, MapPin, RotateCcw, X, type LucideIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Linking, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeOut, useSharedValue } from "react-native-reanimated";
@@ -13,7 +13,9 @@ import { NameMuralSheet } from "~/components/murals/NameMuralSheet";
 import { MuralOutline } from "~/components/murals/MuralOutline";
 import { PackPanel } from "~/components/murals/PackPanel";
 import { failedCheck, MuralViewfinder, ScanVerifying, SweepGauge } from "~/components/murals/ScanParts";
-import { EdgeChevrons, GhostPhone } from "~/components/murals/TurnGuide";
+import { ScanCoach, TurnPrompt, useScanCoachSeen } from "~/components/murals/ScanCoach";
+import { EdgeChevrons } from "~/components/murals/TurnGuide";
+import { MuralCelebration } from "~/components/murals/MuralCelebration";
 import { ScanResult } from "~/components/murals/ScanResult";
 import { ArButton } from "~/components/ui/ArButton";
 import { Glass } from "~/components/ui/surfaces";
@@ -135,7 +137,7 @@ export default function MuralsScreen() {
           if (phaseRef.current !== "sweeping") return;
           filesRef.current = filesRef.current.map((f, i) => (i === slot ? `file://${filePath}` : f));
           setFiles(filesRef.current);
-          // The centre frame is the last stop; once all three are in, send.
+          // Taken middle, left, right; once all three are in, send.
           if (filesRef.current.every(Boolean)) send();
         })
         .catch(() => setToast("Couldn't take that photo — try again"));
@@ -213,7 +215,22 @@ export default function MuralsScreen() {
   }, []);
   const packOk = integrity === "ok";
 
-  const detector = useMuralDetector({ enabled: live && Boolean(permission?.granted) && packOk, onLockChange });
+  // "How to scan": opens by itself the first time, and from the ? button.
+  // Detection waits while it's open.
+  const [coachOpen, setCoachOpen] = useState(false);
+  useEffect(() => {
+    const firstTime = () => {
+      if (!useScanCoachSeen.getState().seen) setCoachOpen(true);
+    };
+    if (useScanCoachSeen.persist.hasHydrated()) queueMicrotask(firstTime);
+    return useScanCoachSeen.persist.onFinishHydration(firstTime);
+  }, []);
+  const closeCoach = useCallback(() => {
+    useScanCoachSeen.getState().markSeen();
+    setCoachOpen(false);
+  }, []);
+
+  const detector = useMuralDetector({ enabled: live && Boolean(permission?.granted) && packOk && !coachOpen, onLockChange });
 
   // Sweep feedback: the outline slides with the turn; a haptic tick per 3°.
   const offsetX = useSharedValue(0);
@@ -238,6 +255,9 @@ export default function MuralsScreen() {
     const t = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(t);
   }, [toast]);
+
+  /** To the map, focused on the mural just scanned. */
+  const openOnMap = useCallback((muralId: string) => router.replace({ pathname: "/map", params: { mural: muralId } }), []);
 
   const restart = useCallback(() => {
     clearFiles();
@@ -275,7 +295,7 @@ export default function MuralsScreen() {
       if (atLimit && match) return { title: `${match.title} · ${match.scansToday}/${nearby.dailyLimit} today`, sub: "Come back after midnight to scan it again.", Icon: Frame };
       return match ? { title: match.title, sub: "Get ready to turn", Icon: Frame } : { title: "Mural found", sub: "Looks new — let's check it", Icon: Frame };
     }
-    const turn = sweep.tooFast ? "A little slower" : sweep.step === "left" ? "Slowly turn left" : sweep.step === "right" ? "Now turn right" : "Back to the middle";
+    const turn = sweep.tooFast ? "A little slower" : sweep.step === "centre" ? "Hold steady" : sweep.step === "left" ? "Slowly turn left" : "Now turn right";
     return { title: turn, sub: "Keep the mural in view.", Icon: Frame };
   })();
 
@@ -351,6 +371,14 @@ export default function MuralsScreen() {
         </Pressable>
       </View>
 
+      {/* How to scan. */}
+      <Pressable onPress={() => setCoachOpen(true)} accessibilityRole="button" accessibilityLabel="How to scan a mural" hitSlop={8} style={{ position: "absolute", top: insets.top + 56, right: 16 }}>
+        <Glass style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" }}>
+          <CircleHelp size={18} strokeWidth={2.3} color={c("ar-text")} />
+        </Glass>
+      </Pressable>
+      <ScanCoach open={coachOpen} onClose={closeCoach} />
+
       {live && (nearbyCount > 0 || roughGps) && (
         <View style={{ position: "absolute", top: insets.top + 56, alignSelf: "center" }}>
           <Glass style={{ borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -377,7 +405,8 @@ export default function MuralsScreen() {
               </View>
             ) : phase === "sweeping" ? (
               <>
-                <GhostPhone step={sweep.step} />
+                <TurnPrompt step={sweep.step} progress={sweep.progress} wrongWay={sweep.wrongWay} tooFast={sweep.tooFast} />
+                <View style={{ height: 10 }} />
                 <SweepGauge delta={sweep.delta} step={sweep.step} captured={captured} />
               </>
             ) : (
@@ -397,10 +426,15 @@ export default function MuralsScreen() {
                 <Icon size={17} strokeWidth={2.3} color={phase === "locked" ? c("rarity-epic") : c("ar-text-dim")} />
               </View>
             )}
-            <Text className="font-hud mt-1 text-center text-[13px] font-bold uppercase tracking-[1.5px] text-ar-text" accessibilityLiveRegion="polite">
-              {title}
-            </Text>
-            {sub && <Text className="mt-1.5 text-center text-[11.5px] leading-[17px] text-ar-dim">{sub}</Text>}
+            {/* While turning, TurnPrompt says it all. */}
+            {phase !== "sweeping" && (
+              <>
+                <Text className="font-hud mt-1 text-center text-[13px] font-bold uppercase tracking-[1.5px] text-ar-text" accessibilityLiveRegion="polite">
+                  {title}
+                </Text>
+                {sub && <Text className="mt-1.5 text-center text-[11.5px] leading-[17px] text-ar-dim">{sub}</Text>}
+              </>
+            )}
             {phase === "locked" && !signedIn && (
               <View style={{ alignSelf: "stretch", marginTop: 12 }}>
                 <ArButton variant="primary" size="md" onPress={() => requireAuth("murals")}>
@@ -420,13 +454,17 @@ export default function MuralsScreen() {
       )}
 
       {/* ── Sending / result ───────────────────────────────────────── */}
-      {(phase === "sending" || phase === "result") && (
+      {(phase === "sending" || (phase === "result" && result?.kind === "rejected")) && (
         <Animated.View entering={FadeIn} style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,18,14,0.82)", alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }]}>
           {phase === "sending" && <ScanVerifying frames={files.filter((f): f is string => Boolean(f))} outcome={outcome} />}
           {phase === "result" && result && (
             <ScanResult result={result} photo={files[1] ?? null} onDone={() => router.replace("/map")} onRetry={restart} onName={() => setNaming(true)} />
           )}
         </Animated.View>
+      )}
+      {/* Accepted: full-screen celebration, then the map on that mural. */}
+      {phase === "result" && result && result.kind !== "rejected" && (
+        <MuralCelebration result={result} photo={files[1] ?? null} onDone={() => openOnMap(result.mural.id)} onName={() => setNaming(true)} />
       )}
 
       {result && result.kind !== "rejected" && (
@@ -437,7 +475,7 @@ export default function MuralsScreen() {
           open={naming}
           onClose={() => {
             setNaming(false);
-            router.replace("/map");
+            openOnMap(result.mural.id);
           }}
         />
       )}

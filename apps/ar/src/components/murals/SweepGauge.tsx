@@ -7,7 +7,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 /**
  * ── SweepGauge ─────────────────────────────────────────────────────────────
  *
- * A horizontal track with three stops (left, centre, right) and a phone
+ * A horizontal track with three stops (left, middle, right) and a phone
  * glyph riding on the live turn angle. Each stop fills when its keyframe is
  * taken, so the person sees the scan being built rather than waiting on a
  * timer. The stop they're heading for pulses.
@@ -18,7 +18,7 @@ const RANGE = SWEEP_SIDE_DEG * 1.6;
 
 const STOPS: { slot: 0 | 1 | 2; at: number; label: string; step: SweepStep }[] = [
   { slot: 0, at: -SWEEP_SIDE_DEG, label: "Left", step: "left" },
-  { slot: 1, at: 0, label: "Centre", step: "centre" },
+  { slot: 1, at: 0, label: "Middle", step: "centre" },
   { slot: 2, at: SWEEP_SIDE_DEG, label: "Right", step: "right" },
 ];
 

@@ -40,7 +40,7 @@
 
     var iframe = document.createElement("iframe");
     iframe.src = origin + "/embed/" + encodeURIComponent(id);
-    iframe.title = el.getAttribute("data-title") || "Clinton City map";
+    iframe.title = el.getAttribute("data-title") || "Clinton, IA map";
     iframe.loading = "lazy";
     // "Near me" needs this; the browser still asks the visitor first.
     iframe.allow = "geolocation";

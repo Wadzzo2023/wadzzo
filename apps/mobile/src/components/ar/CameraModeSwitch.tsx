@@ -88,11 +88,3 @@ export function CameraModeSwitch({ mode }: { mode: CameraMode }) {
     </Glass>
   );
 }
-
-export function CameraModeSwitchBar({ mode, top }: { mode: CameraMode; top: number }) {
-  return (
-    <View pointerEvents="box-none" style={{ position: "absolute", top, left: 0, right: 0, alignItems: "center", zIndex: 40 }}>
-      <CameraModeSwitch mode={mode} />
-    </View>
-  );
-}

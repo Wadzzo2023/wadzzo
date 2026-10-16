@@ -53,7 +53,8 @@ import type { TravelMode } from "~/lib/ar/types";
 import { firstText, PROFILE_LABEL, useDirections, type Route, type RouteStep } from "~/lib/ar/useDirections";
 import { useNavigation } from "~/lib/ar/useNavigation";
 import { useMural } from "~/lib/murals/api";
-import { MAP_STYLE, useColors, useResolvedTheme } from "~/theme/theme";
+import { MapModeButton } from "~/components/map/MapModeButton";
+import { mapStyleFor, useColors, useMapMode, useResolvedTheme } from "~/theme/theme";
 
 const MODES: { id: TravelMode; icon: LucideIcon; label: string }[] = [
   { id: "walk", icon: Footprints, label: "Walk" },
@@ -188,6 +189,7 @@ function HudStat({ value, unit, label, right }: { value: ReactNode; unit?: strin
 export default function DirectionsScreen() {
   const { c, rarity: rc } = useColors();
   const theme = useResolvedTheme();
+  const { mode: mapMode, is3d, toggle: toggleMapMode } = useMapMode();
   const insets = useSafeAreaInsets();
   const { height: winH, width: winW } = useWindowDimensions();
   const camera = useRef<Camera>(null);
@@ -313,6 +315,11 @@ export default function DirectionsScreen() {
     }
   };
 
+  // 2D lies the map flat; 3D tilts it. While navigating, the follow camera's own pitch takes over.
+  useEffect(() => {
+    if (!navigating) camera.current?.setCamera({ pitch: is3d ? 45 : 0, animationDuration: 500, animationMode: "easeTo" });
+  }, [is3d, navigating]);
+
   const needleStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${-mapHeading.get()}deg` }] }));
   const dialStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${-mapHeading.get()}deg` }] }));
   const facing = nav ? (moving || compassHeading == null ? nav.snap.heading : compassHeading) : (compassHeading ?? 0);
@@ -404,7 +411,7 @@ export default function DirectionsScreen() {
       {navigating && <KeepAwake />}
       <MapView
         style={StyleSheet.absoluteFill}
-        styleURL={MAP_STYLE[theme]}
+        styleURL={mapStyleFor(mapMode, theme)}
         logoEnabled={false}
         scaleBarEnabled={false}
         compassEnabled={false}
@@ -422,11 +429,11 @@ export default function DirectionsScreen() {
       >
         <Camera
           ref={camera}
-          defaultSettings={{ centerCoordinate: [fix.lng, fix.lat], zoomLevel: 15, pitch: 45 }}
+          defaultSettings={{ centerCoordinate: [fix.lng, fix.lat], zoomLevel: 15, pitch: is3d ? 45 : 0 }}
           followUserLocation={navigating && following}
           followUserMode={northUp ? UserTrackingMode.Follow : moving ? UserTrackingMode.FollowWithCourse : UserTrackingMode.FollowWithHeading}
           followZoomLevel={hud ? 17.2 : 17.6}
-          followPitch={hud ? 0 : 60}
+          followPitch={hud || !is3d ? 0 : 60}
           followPadding={hud ? { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 } : { paddingTop: insets.top + 190, paddingBottom: NAV_PEEK + 40, paddingLeft: 0, paddingRight: 0 }}
           onUserTrackingModeChange={(e) => {
             if (navigating && !e.nativeEvent.payload.followUserLocation) setFollowing(false);
@@ -684,6 +691,7 @@ export default function DirectionsScreen() {
               <LocateFixed size={19} strokeWidth={2.3} color={c("ar-text")} />
             </Pressable>
           )}
+          <MapModeButton mode={mapMode} onToggle={toggleMapMode} />
         </View>
       )}
 

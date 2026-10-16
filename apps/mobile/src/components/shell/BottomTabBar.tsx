@@ -1,6 +1,6 @@
 import { Canvas, Circle, SweepGradient, vec } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, usePathname } from "expo-router";
+import { usePathname } from "expo-router";
 import { TabTrigger } from "expo-router/ui";
 import { LayoutGrid, Map as MapIcon, Store, Trophy, type LucideIcon } from "lucide-react-native";
 import { forwardRef, useEffect, useState } from "react";
@@ -18,6 +18,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
+import { useCameraLauncher } from "~/lib/camera/launcher";
 import { PackRing } from "~/components/murals/PackRing";
 import { PulseRing } from "~/components/ui/PulseDot";
 import { Text } from "~/components/ui/Text";
@@ -223,7 +224,9 @@ function ArLauncher() {
   const pathname = usePathname();
   // Keeps spinning (decided), but not while hidden, backgrounded or in Low Power Mode.
   const live = useDecorativeMotion();
-  const arActive = pathname === "/camera" || pathname === "/ar" || pathname === "/scan";
+  const launcherOpen = useCameraLauncher((s) => s.open);
+  const showLauncher = useCameraLauncher((s) => s.show);
+  const arActive = launcherOpen || pathname === "/ar" || pathname === "/scan";
   const spin = useSharedValue(0);
   useEffect(() => {
     if (!live) {
@@ -252,8 +255,8 @@ function ArLauncher() {
       <Pressable
         onPress={() => {
           tap();
-          // The camera picker tab (AR / QR / Murals), not AR directly.
-          router.navigate("/camera");
+          // The camera picker dialog (AR / QR / Murals), not AR directly.
+          showLauncher();
         }}
         onPressIn={() => (pressed.value = withTiming(1, { duration: 90 }))}
         onPressOut={() => (pressed.value = withTiming(0, { duration: 140 }))}
