@@ -4,7 +4,7 @@
   "description": "Wadzzo monorepo: brand portal, fan marketplace, AR collector, mobile app and the shared packages behind them.",
   "packageManager": "pnpm@12.9.1",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "build": "turbo run build",

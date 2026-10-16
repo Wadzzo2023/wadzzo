@@ -92,7 +92,7 @@ catalog:
   google-auth-library: "^11.2.0"
   formidable: "^3.5.4"
   jsonwebtoken: "^9.0.3"
-  "jwks-rsa": "^3.2.0"
+  "jwks-rsa": "^4.1.0"
   lucide-react: "^1.55.0"
   mapbox-gl: "^3.32.0"
   next: "^16.4.0"
@@ -241,6 +241,3 @@ minimumReleaseAgeExclude:
   - "@electric-sql/pglite@0.5.9"
 
 overrides:
-  # firebase-admin@14 asks for jwks-rsa 4, which needs jose 6 (ES modules only) and therefore a Node that can
-  # require() ES modules. 3.x has the same API and loads on any Node 20/22 runtime.
-  jwks-rsa: ^3.2.0

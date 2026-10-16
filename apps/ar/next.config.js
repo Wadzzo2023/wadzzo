@@ -13,6 +13,11 @@ const config = {
   // Browser bundles read the platform from here (see @wadzzo/platform/branding).
   env: { NEXT_PUBLIC_PLATFORM_SLUG: process.env.PLATFORM_SLUG ?? "wadzzo" },
   transpilePackages: [
+    // Bundled, not loaded as externals: firebase-admin -> jwks-rsa -> jose is ES-module only
+    // and an external require() of it fails on Node versions without require(esm).
+    "firebase-admin",
+    "jwks-rsa",
+    "jose",
     "three",
     "@wadzzo/db",
     "@wadzzo/errors",
