@@ -7,12 +7,12 @@ import { useMemo, useState } from "react";
 import { NotificationRow } from "~/components/notification/notification-row";
 import { useInboxActions } from "~/components/notification/use-inbox-actions";
 import { SignedIn } from "~/components/shell/sign-in-prompt";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { CATEGORIES } from "@wadzzo/platform/notifications";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { InboxItem } from "@wadzzo/platform/notifications";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
@@ -75,7 +75,7 @@ function NotificationsView() {
             <Button
               variant="outline"
               size="sm"
-              className="glass shrink-0 rounded-xl"
+              className="shrink-0"
               disabled={!totalUnread || markAllRead.isPending}
               onClick={() => markAllRead.mutate({ category })}
             >
@@ -84,7 +84,7 @@ function NotificationsView() {
             <Button
               variant="ghost"
               size="sm"
-              className="shrink-0 rounded-xl"
+              className="shrink-0"
               disabled={clearRead.isPending}
               onClick={() => clearRead.mutate()}
             >
@@ -112,7 +112,11 @@ function NotificationsView() {
             />
           ))}
         </div>
-        <div className="glass flex gap-1 rounded-xl p-1" role="tablist" aria-label="Show">
+        <div
+          className="bg-surface-2 flex h-12 items-center gap-1 rounded-2xl p-1"
+          role="tablist"
+          aria-label="Show"
+        >
           {[
             { id: false, label: "All" },
             { id: true, label: "Unread" },
@@ -124,9 +128,9 @@ function NotificationsView() {
               aria-selected={unreadOnly === o.id}
               onClick={() => setUnreadOnly(o.id)}
               className={cn(
-                "h-8 rounded-lg px-3.5 text-sm font-semibold transition-colors",
+                "font-hud flex h-10 items-center px-4 text-lg uppercase transition-colors",
                 unreadOnly === o.id
-                  ? "bg-primary text-primary-foreground"
+                  ? "blob bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -137,7 +141,7 @@ function NotificationsView() {
       </div>
 
       {q.isLoading ? (
-        <div className="glass space-y-2 rounded-2xl p-2">
+        <div className="glass space-y-2 rounded-[1.4rem] p-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
@@ -153,7 +157,7 @@ function NotificationsView() {
           }
           action={
             !unreadOnly && (
-              <Button asChild className="rounded-xl">
+              <Button asChild>
                 <Link href="/creators">Find creators</Link>
               </Button>
             )
@@ -163,8 +167,10 @@ function NotificationsView() {
         <div className="space-y-5">
           {sections.map((s) => (
             <section key={s.label} className="space-y-2">
-              <h2 className="label-caps">{s.label}</h2>
-              <ul className="glass divide-foreground/[0.06] divide-y overflow-hidden rounded-2xl">
+              <h2 className="marker text-muted-foreground -rotate-1 text-base">
+                *{s.label.toLowerCase()}*
+              </h2>
+              <ul className="glass divide-foreground/10 divide-y-2 divide-dashed overflow-hidden rounded-[1.4rem]">
                 {s.rows.map((i) => (
                   <NotificationRow key={i.ids[0]} item={i} />
                 ))}
@@ -175,7 +181,6 @@ function NotificationsView() {
             <div className="flex justify-center">
               <Button
                 variant="outline"
-                className="rounded-xl"
                 disabled={q.isFetchingNextPage}
                 onClick={() => void q.fetchNextPage()}
               >
@@ -207,15 +212,15 @@ function Chip({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors",
+        "font-hud inline-flex h-10 items-center gap-1.5 rounded-full border-2 px-4 text-base uppercase transition-colors",
         active
-          ? "border-primary bg-primary/10 text-primary"
-          : "glass text-muted-foreground hover:text-foreground",
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-foreground/12 text-muted-foreground hover:border-foreground hover:text-foreground",
       )}
     >
       {label}
       {count > 0 && (
-        <span className="bg-primary text-primary-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
+        <span className="bg-pink text-side-ink flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-sans text-[10px] font-bold">
           {count > 99 ? "99+" : count}
         </span>
       )}

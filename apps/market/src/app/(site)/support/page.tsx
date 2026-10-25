@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { StaticHeader } from "~/components/static/static-header";
 import { SupportForm } from "~/components/static/support-form";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
@@ -40,14 +40,14 @@ export default function SupportPage() {
         }
         description="Send us a message and we'll reply by email."
       />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <SupportForm />
         <aside className="space-y-3">
           <a
             href="mailto:support@wadzzo.com"
-            className="glass hover:glow flex items-center gap-3 rounded-2xl p-4 transition-all"
+            className="glass hover:border-foreground flex items-center gap-3 rounded-[1.4rem] p-4 transition-all"
           >
-            <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
+            <span className="blob bg-primary text-primary-foreground flex size-10 items-center justify-center">
               <Mail className="size-5" />
             </span>
             <span>
@@ -59,9 +59,9 @@ export default function SupportPage() {
             <Link
               key={h.title}
               href={h.href}
-              className="glass hover:glow flex items-center gap-3 rounded-2xl p-4 transition-all"
+              className="glass hover:border-foreground flex items-center gap-3 rounded-[1.4rem] p-4 transition-all"
             >
-              <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
+              <span className="blob bg-primary text-primary-foreground flex size-10 items-center justify-center">
                 <h.icon className="size-5" />
               </span>
               <span>

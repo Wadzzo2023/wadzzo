@@ -1,20 +1,19 @@
-"use client";
-
-import { formatTokenNumber, formatUsdAmount, useCurrency } from "~/hooks/use-currency";
+import { formatTokenNumber, formatUsdAmount } from "~/lib/money";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 const SIZES = {
-  xs: { main: "text-xs", unit: "text-[10px]", sub: "text-[10px]" },
-  sm: { main: "text-sm", unit: "text-[11px]", sub: "text-[11px]" },
-  md: { main: "text-lg", unit: "text-xs", sub: "text-xs" },
-  lg: { main: "text-2xl", unit: "text-sm", sub: "text-sm" },
-  xl: { main: "text-4xl", unit: "text-lg", sub: "text-sm" },
+  xs: { main: "text-base", unit: "text-[10px]", sub: "text-[10px]" },
+  sm: { main: "text-xl", unit: "text-[11px]", sub: "text-[11px]" },
+  md: { main: "text-3xl", unit: "text-xs", sub: "text-xs" },
+  lg: { main: "text-4xl", unit: "text-sm", sub: "text-sm" },
+  xl: { main: "text-6xl", unit: "text-lg", sub: "text-sm" },
 } as const;
 
 /**
- * A price in the viewer's chosen currency: that one big and bold, the other
- * small underneath (or beside it when `inline`). `usd` is the amount's own
+ * A price: Wadzzo big and bold, the dollar value small underneath (or beside
+ * it when `inline`). `usd` is the amount's own
  * stored dollar value (a listing's priceUSD, a bounty's USD reward…); when
  * it's missing only the token amount shows.
  */
@@ -37,28 +36,21 @@ export function Price({
   gradient?: boolean;
   className?: string;
 }) {
-  const { currency } = useCurrency();
   const s = SIZES[size];
-  const hasUsd = usd != null;
-  const usdFirst = currency === "USD" && hasUsd;
-
-  const main = usdFirst ? (
-    <span className={cn("font-hud font-bold tabular-nums", s.main, gradient && "text-gradient")}>
-      {formatUsdAmount(usd)}
-    </span>
-  ) : (
-    <span className={cn("font-hud font-bold tabular-nums", s.main)}>
-      <span className={cn(gradient && "text-gradient")}>{formatTokenNumber(tokens)}</span>{" "}
-      <span className={cn("text-primary font-semibold", s.unit)}>{code}</span>
+  const main = (
+    <span className={cn("display tabular-nums", s.main)}>
+      <span className={cn(gradient && "text-primary")}>{formatTokenNumber(tokens)}</span>{" "}
+      {code === PLATFORM_ASSET.code ? (
+        <>
+          <WadzzoMark className="text-primary h-[0.8em]" />
+          <span className="sr-only">{code}</span>
+        </>
+      ) : (
+        <span className={cn("text-primary font-sans font-bold", s.unit)}>{code}</span>
+      )}
     </span>
   );
-  const sub = !secondary
-    ? null
-    : usdFirst
-      ? `${formatTokenNumber(tokens)} ${code}`
-      : hasUsd
-        ? `≈ ${formatUsdAmount(usd)}`
-        : null;
+  const sub = secondary && usd != null ? `≈ ${formatUsdAmount(usd)}` : null;
 
   return (
     <span
@@ -68,7 +60,7 @@ export function Price({
         className,
       )}
     >
-      <span className="truncate leading-tight">{main}</span>
+      <span className="leading-tight">{main}</span>
       {sub && (
         <span className={cn("text-muted-foreground truncate tabular-nums", s.sub)}>{sub}</span>
       )}
@@ -76,11 +68,6 @@ export function Price({
   );
 }
 
-/** Plain text price in the chosen currency (for buttons and sentences). */
-export function usePriceText() {
-  const { currency } = useCurrency();
-  return (tokens: number, usd: number | null | undefined, code = PLATFORM_ASSET.code) =>
-    currency === "USD" && usd != null
-      ? formatUsdAmount(usd)
-      : `${formatTokenNumber(tokens)} ${code}`;
-}
+/** Plain text price (for buttons and sentences). */
+export const priceText = (tokens: number, code = PLATFORM_ASSET.code) =>
+  `${formatTokenNumber(tokens)} ${code}`;

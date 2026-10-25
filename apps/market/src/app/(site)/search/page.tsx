@@ -8,8 +8,8 @@ import { BountyCard } from "~/components/bounty/bounty-card";
 import { CreatorCard } from "~/components/creator/creator-card";
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody, PageHeader } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 const queryOf = (sp: Record<string, string | string[] | undefined>) =>
@@ -78,7 +78,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {creators && creators.items.length > 0 && (
             <Section title="Creators" href={`/creators?q=${encodeURIComponent(q)}`}>
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {creators.items.map((c) => (
                   <CreatorCard key={c.id} creator={c} />
                 ))}
@@ -87,7 +87,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {bounties && bounties.items.length > 0 && (
             <Section title="Bounties" href="/bounties">
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {bounties.items.map((b) => (
                   <BountyCard key={b.id} bounty={b} />
                 ))}
@@ -96,7 +96,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {posts.length > 0 && (
             <Section title="Posts" href="/feed">
-              <ul className="glass divide-foreground/[0.06] divide-y overflow-hidden rounded-2xl">
+              <ul className="glass divide-foreground/10 divide-y-2 divide-dashed overflow-hidden rounded-[1.4rem]">
                 {posts.map((p) => {
                   const thumb = p.medias.find((m) => m.type === "IMAGE")?.url;
                   return (
@@ -113,7 +113,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
                             className="size-12 shrink-0 rounded-xl object-cover"
                           />
                         ) : (
-                          <span className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
+                          <span className="blob bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center">
                             {p.locked ? (
                               <Lock className="size-5" />
                             ) : (
@@ -147,10 +147,10 @@ function Section({ title, href, children }: { title: string; href: string; child
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-hud text-lg font-bold tracking-tight">{title}</h2>
+        <h2 className="display text-3xl">{title}</h2>
         <Link
           href={href}
-          className="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+          className="marker text-primary inline-flex items-center gap-1 text-sm hover:underline"
         >
           See all <ArrowRight className="size-3.5" />
         </Link>

@@ -67,14 +67,14 @@ export function TierCard({
   return (
     <div
       className={cn(
-        "glass relative flex flex-col overflow-hidden rounded-2xl p-5",
+        "glass relative flex flex-col overflow-hidden rounded-[1.4rem] p-5",
         (current || tier.popular) && c.ring,
         current && "glow",
       )}
     >
       <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", c.bar)} />
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-hud text-lg font-bold">{tier.name}</h3>
+        <h3 className="display text-3xl">{tier.name}</h3>
         {current ? (
           <span className="tone-success rounded-full px-2 py-0.5 text-[11px] font-semibold">
             Your tier
@@ -90,7 +90,7 @@ export function TierCard({
           </span>
         ) : null}
       </div>
-      <p className="font-hud mt-1 text-2xl font-bold tabular-nums">
+      <p className="display mt-1 text-4xl tabular-nums">
         {tier.price.toLocaleString("en-US")}{" "}
         <span className="text-muted-foreground text-sm font-medium">{code}</span>
       </p>

@@ -53,7 +53,7 @@ export function NotificationRow({ item }: { item: InboxItem }) {
     <li
       className={cn(
         "group hover:bg-foreground/[0.04] relative flex items-start gap-1 pl-1 transition-colors",
-        item.unread && "bg-primary/[0.06]",
+        item.unread && "bg-primary/10",
       )}
     >
       <button

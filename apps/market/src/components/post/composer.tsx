@@ -41,7 +41,7 @@ export function Composer() {
     <a
       href={href}
       onClick={go}
-      className="glass group hover:glow block rounded-2xl p-4 transition-all"
+      className="glass group hover:border-foreground block rounded-[1.6rem] p-4 transition-colors"
     >
       <div className="flex items-center gap-3">
         <Avatar src={avatar} name={name} className="size-10" />
@@ -49,7 +49,7 @@ export function Composer() {
           {prompt}
         </span>
       </div>
-      <div className="border-foreground/[0.06] text-muted-foreground mt-3 flex items-center gap-1 border-t pt-3 text-xs font-semibold">
+      <div className="border-foreground/10 text-muted-foreground mt-3 flex items-center gap-1 border-t-2 border-dashed pt-3 text-xs font-semibold">
         {[
           { icon: ImageIcon, label: "Photo" },
           { icon: Video, label: "Video" },
@@ -59,10 +59,11 @@ export function Composer() {
             key={c.label}
             className="group-hover:text-foreground inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-colors"
           >
-            <c.icon className="text-primary size-4" /> {c.label}
+            <c.icon className="text-primary size-4" />{" "}
+            <span className="hidden sm:inline">{c.label}</span>
           </span>
         ))}
-        <span className="bg-primary text-primary-foreground ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]">
+        <span className="blob bg-primary text-primary-foreground ml-auto inline-flex shrink-0 -rotate-2 items-center gap-1.5 px-3.5 py-2 transition-transform group-hover:rotate-0">
           <PenSquare className="size-3.5" />{" "}
           {isBrand || loading ? "Post" : signedIn ? "Create brand" : "Sign in"}
         </span>

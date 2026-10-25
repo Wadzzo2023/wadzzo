@@ -9,7 +9,7 @@ import { Comments } from "~/components/post/comments";
 import { PostCard } from "~/components/post/post-card";
 import { PostSidebar } from "~/components/post/post-sidebar";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 
 const getPost = cache(async (id: number) => {
   try {
@@ -72,7 +72,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
       >
         <ArrowLeft className="size-4" /> Feed
       </Link>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-5">
           <PostCard post={post} full />
           <Comments postId={post.id} />

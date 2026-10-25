@@ -6,13 +6,15 @@ import { useState } from "react";
 
 import { CardForm } from "~/components/payment/card-form";
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
+import { Amount } from "~/components/price/amount";
 import { Price } from "~/components/price/price";
 import { MethodPicker, type PayMethod } from "~/components/payment/method-picker";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { useRequireAuth } from "~/hooks/use-require-auth";
+import { useFollow } from "~/hooks/use-follow";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { MAX_PER_PURCHASE, formatAmount } from "@wadzzo/stellar/quote";
+import { MAX_PER_PURCHASE } from "@wadzzo/stellar/quote";
 import { QuantityStepper } from "~/ui/quantity-stepper";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
@@ -30,9 +32,9 @@ type Listing = NonNullable<Item["original"]>;
 export function BuyPanel({ item, listing }: { item: Item; listing: Listing | null }) {
   if (!listing) {
     return (
-      <div className="rounded-xl border border-dashed p-6 text-center">
+      <div className="border-foreground/15 rounded-[1.2rem] border-[3px] border-dashed p-6 text-center">
         <ShoppingBag className="text-muted-foreground mx-auto mb-2 size-6" />
-        <p className="font-hud font-semibold">Not for sale from the creator right now</p>
+        <p className="display text-2xl">Not for sale from the creator right now</p>
         <p className="text-muted-foreground mt-1 text-sm">
           {item.resales.length
             ? "Fans are reselling it — see the resale listings below."
@@ -68,7 +70,7 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
   );
   const prepare = api.purchase.prepare.useMutation();
   const payByCard = api.purchase.payByCard.useMutation();
-  const follow = api.creator.follow.useMutation();
+  const follow = useFollow();
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
   const [done, setDone] = useState(false);
@@ -115,19 +117,18 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
 
   const followCreator = async () => {
     if (!item.creatorId) return;
-    const res = await follow.mutateAsync({ creatorId: item.creatorId });
-    if (res.xdr) await sign.signOnly(res.xdr);
+    await follow.run(item.creatorId);
     await quote.refetch();
   };
 
   if (done) {
     return (
-      <div className="border-primary/40 bg-primary/5 space-y-3 rounded-xl border p-5 text-center">
-        <CheckCircle2 className="text-primary mx-auto size-8" />
-        <p className="font-hud text-lg font-bold">
+      <div className="blob bg-primary text-primary-foreground space-y-3 p-5 text-center">
+        <CheckCircle2 className="mx-auto size-9" strokeWidth={2.4} />
+        <p className="display text-4xl">
           {quantity > 1 ? `${quantity} copies are yours!` : "It's yours!"}
         </p>
-        <p className="text-muted-foreground text-sm">
+        <p className="marker text-sm">
           They&apos;re in your wallet, and the full content is unlocked.
         </p>
         <div className="flex justify-center gap-2">
@@ -148,119 +149,158 @@ function Checkout({ item, listing }: { item: Item; listing: Listing }) {
   const busy = prepare.isPending || payByCard.isPending || sign.busy;
   const error = prepare.error?.message ?? payByCard.error?.message ?? sign.error;
 
+  // Wide layout: what you're buying on the left (price, quantity, method), what it costs and the button on the right.
   return (
-    <div className="space-y-4">
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="label-caps">
-            {isResale ? "Resale price" : "Price"}
-            {quantity > 1 && " · each"}
-          </p>
-          <Price
-            tokens={listing.price}
-            usd={listing.priceUSD}
-            size="xl"
-            gradient
-            className="mt-0.5"
-          />
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2 lg:gap-8">
+      <div className="space-y-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="label-caps">
+              {isResale ? "Resale price" : "Price"}
+              {quantity > 1 && " · each"}
+            </p>
+            <Price
+              tokens={listing.price}
+              usd={listing.priceUSD}
+              size="lg"
+              gradient
+              className="mt-0.5"
+            />
+          </div>
+          {q &&
+            (q.copiesLeft === 0 ? (
+              <StatusPill tone="danger">Sold out</StatusPill>
+            ) : (
+              <StatusPill
+                tone={q.source === "stock" ? "neutral" : "info"}
+                icon={q.source === "stock" ? undefined : Sparkles}
+              >
+                {q.source === "stock" ? "In stock" : "Minted for you"}
+                {q.copiesLeft != null && ` · ${q.copiesLeft} left`}
+              </StatusPill>
+            ))}
         </div>
-        {q &&
-          (q.copiesLeft === 0 ? (
-            <StatusPill tone="danger">Sold out</StatusPill>
-          ) : (
-            <StatusPill
-              tone={q.source === "stock" ? "neutral" : "info"}
-              icon={q.source === "stock" ? undefined : Sparkles}
-            >
-              {q.source === "stock" ? "In stock" : "Minted for you"}
-              {q.copiesLeft != null && ` · ${q.copiesLeft} left`}
-            </StatusPill>
-          ))}
+
+        {signedIn && (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="label-caps">Quantity</p>
+                <p className="text-muted-foreground text-xs">
+                  {!q
+                    ? "Checking availability…"
+                    : q.copiesLeft != null
+                      ? `${q.copiesLeft} available`
+                      : "Unlimited"}
+                </p>
+              </div>
+              <QuantityStepper
+                value={quantity}
+                onChange={setQuantity}
+                max={maxQty}
+                disabled={busy}
+              />
+            </div>
+            <MethodPicker value={method} onChange={setMethod} methods={methods} />
+            {q ? (
+              <CostBreakdown lines={q.lines} total={q.total} currency={q.currency} part="lines" />
+            ) : quote.isLoading ? (
+              <Skeleton className="h-32 rounded-xl" />
+            ) : null}
+          </>
+        )}
       </div>
 
-      {!signedIn ? (
-        <Button
-          size="lg"
-          className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)]"
-          onClick={openSignIn}
-        >
-          Sign in to buy
-        </Button>
-      ) : (
-        <>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="label-caps">Quantity</p>
-              <p className="text-muted-foreground text-xs">
-                {!q
-                  ? "Checking availability…"
-                  : q.copiesLeft != null
-                    ? `${q.copiesLeft} available`
-                    : "Unlimited"}
-              </p>
-            </div>
-            <QuantityStepper value={quantity} onChange={setQuantity} max={maxQty} disabled={busy} />
+      <div className="lg:border-foreground/10 space-y-4 lg:border-l-2 lg:border-dashed lg:pl-8">
+        {!signedIn ? (
+          <div className="flex h-full flex-col justify-center gap-2">
+            <Button size="lg" className="w-full" onClick={openSignIn}>
+              <span className="marker text-lg">Sign in to buy</span>
+            </Button>
+            <p className="text-muted-foreground text-center text-xs">
+              You&apos;ll see the full cost before you pay.
+            </p>
           </div>
-          <MethodPicker value={method} onChange={setMethod} methods={methods} />
-          {quote.isLoading || !q ? (
-            <div className="space-y-2">
-              <Skeleton className="h-40 rounded-xl" />
-              <Skeleton className="h-10 rounded-lg" />
-            </div>
-          ) : (
-            <>
-              <CostBreakdown
-                lines={q.lines}
-                total={q.total}
-                currency={q.currency}
-                balance={q.balance}
-                collapsible
-              />
-              {q.payout.royalty > 0 && (
-                <p className="text-muted-foreground text-xs">
-                  The seller receives {formatAmount(q.payout.seller, q.payout.currency)}; the
-                  creator earns {formatAmount(q.payout.royalty, q.payout.currency)} royalty.
-                </p>
-              )}
-              {q.problems.length > 0 && (
-                <ProblemList
-                  problems={q.problems}
-                  creatorHref={creatorHref}
-                  onFollow={followCreator}
-                />
-              )}
-              {method === "CARD" ? (
-                q.ok && <CardForm usd={q.total} disabled={busy} onToken={(t) => void payCard(t)} />
-              ) : (
+        ) : (
+          <>
+            {quote.isError && !q ? (
+              // The price check itself failed (as opposed to "you can't buy this"): say so and let them retry,
+              // instead of spinning forever.
+              <div className="tone-danger space-y-2 rounded-xl p-4" role="alert">
+                <p className="text-sm font-semibold">We couldn&apos;t check the price right now.</p>
+                <p className="text-xs opacity-80">{quote.error.message}</p>
                 <Button
-                  size="lg"
-                  className="h-12 w-full rounded-xl text-base font-bold shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)] disabled:shadow-none"
-                  disabled={!q.ok || busy}
-                  onClick={buy}
+                  variant="outline"
+                  size="sm"
+                  disabled={quote.isFetching}
+                  onClick={() => void quote.refetch()}
                 >
-                  {sign.step === "signing"
-                    ? "Confirm in your wallet…"
-                    : sign.step === "confirming"
-                      ? "Confirming on Stellar…"
-                      : prepare.isPending
-                        ? "Preparing…"
-                        : `Buy ${quantity > 1 ? `${quantity} ` : ""}for ${formatAmount(q.total, q.currency)}`}
+                  {quote.isFetching ? "Checking…" : "Try again"}
                 </Button>
-              )}
-              {item.privacy !== "PUBLIC" && !isResale && (
-                <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                  <Lock className="size-3.5" />{" "}
-                  {item.privacy === "TIER"
-                    ? `For ${item.tier?.name ?? "tier"} members`
-                    : "For followers"}{" "}
-                  of {item.creator?.name}
-                </p>
-              )}
-            </>
-          )}
-          {error && <p className="tone-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
-        </>
-      )}
+              </div>
+            ) : quote.isLoading || !q ? (
+              <div className="space-y-2">
+                <Skeleton className="h-24 rounded-xl" />
+                <Skeleton className="h-10 rounded-lg" />
+              </div>
+            ) : (
+              <>
+                <CostBreakdown
+                  lines={q.lines}
+                  total={q.total}
+                  currency={q.currency}
+                  balance={q.balance}
+                  part="total"
+                />
+                {q.payout.royalty > 0 && (
+                  <p className="text-muted-foreground text-xs">
+                    The seller receives{" "}
+                    <Amount value={q.payout.seller} currency={q.payout.currency} />; the creator
+                    earns <Amount value={q.payout.royalty} currency={q.payout.currency} /> royalty.
+                  </p>
+                )}
+                {q.problems.length > 0 && (
+                  <ProblemList
+                    problems={q.problems}
+                    creatorHref={creatorHref}
+                    onFollow={followCreator}
+                  />
+                )}
+                {method === "CARD" ? (
+                  q.ok && (
+                    <CardForm usd={q.total} disabled={busy} onToken={(t) => void payCard(t)} />
+                  )
+                ) : (
+                  <Button size="lg" className="w-full" disabled={!q.ok || busy} onClick={buy}>
+                    {sign.step === "signing" ? (
+                      "Confirm in your wallet…"
+                    ) : sign.step === "confirming" ? (
+                      "Confirming on Stellar…"
+                    ) : prepare.isPending ? (
+                      "Preparing…"
+                    ) : (
+                      <>
+                        Buy {quantity > 1 ? `${quantity} ` : ""}for{" "}
+                        <Amount value={q.total} currency={q.currency} />
+                      </>
+                    )}
+                  </Button>
+                )}
+                {item.privacy !== "PUBLIC" && !isResale && (
+                  <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <Lock className="size-3.5" />{" "}
+                    {item.privacy === "TIER"
+                      ? `For ${item.tier?.name ?? "tier"} members`
+                      : "For followers"}{" "}
+                    of {item.creator?.name}
+                  </p>
+                )}
+              </>
+            )}
+            {error && <p className="tone-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 }

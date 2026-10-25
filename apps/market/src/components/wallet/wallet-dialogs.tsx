@@ -5,19 +5,20 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { CardForm } from "~/components/payment/card-form";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "~/ui/skin/dialog";
+import { Input } from "~/ui/skin/fields";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
+import { Amount, TokenCode } from "~/components/price/amount";
 
 const num = (n: number, max = 2) => n.toLocaleString("en-US", { maximumFractionDigits: max });
 
@@ -25,8 +26,8 @@ function Done({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div className="space-y-3 py-4 text-center">
       <CheckCircle2 className="text-primary mx-auto size-10" />
-      <p className="font-hud font-semibold">{title}</p>
-      <Button variant="outline" className="rounded-xl" onClick={onClose}>
+      <p className="display text-2xl">{title}</p>
+      <Button variant="outline" onClick={onClose}>
         Done
       </Button>
     </div>
@@ -48,7 +49,7 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-hud">Get {code}</DialogTitle>
+          <DialogTitle className="display text-2xl">Get {code}</DialogTitle>
           <DialogDescription>Pay by card. Tokens land in your wallet right away.</DialogDescription>
         </DialogHeader>
         {buy.isSuccess ? (
@@ -82,13 +83,15 @@ export function GetTokensDialog({ onClose }: { onClose: () => void }) {
                     className={cn(
                       "rounded-xl p-3 text-left ring-1 transition-all",
                       usd === p.usd
-                        ? "bg-primary/10 ring-primary shadow-[0_0_20px_-8px_hsl(var(--primary)/0.8)] ring-2"
+                        ? "bg-primary/10 ring-primary ring-2"
                         : "bg-foreground/[0.03] ring-foreground/[0.08] hover:ring-primary/40",
                     )}
                   >
-                    <p className="font-hud text-lg font-bold tabular-nums">{num(p.tokens, 0)}</p>
+                    <p className="display flex items-center gap-1.5 text-3xl tabular-nums">
+                      {num(p.tokens, 0)}
+                      <TokenCode code={code} className="text-2xl" />
+                    </p>
                     <p className="text-muted-foreground text-xs">
-                      {code} ·{" "}
                       <span className="text-foreground font-semibold">${p.usd.toFixed(2)}</span>
                     </p>
                   </button>
@@ -145,9 +148,9 @@ export function SwapDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud">Swap {code} for XLM</DialogTitle>
+          <DialogTitle className="display text-2xl">Swap {code} for XLM</DialogTitle>
           <DialogDescription>
-            You have {num(balance)} {code}.
+            You have <Amount value={balance} currency={code} />.
           </DialogDescription>
         </DialogHeader>
         {sign.step === "done" ? (
@@ -165,12 +168,12 @@ export function SwapDialog({
                   onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
                   placeholder="0"
                   aria-label={`Amount of ${code}`}
-                  className="font-hud h-12 rounded-xl text-lg"
+                  className="display h-12 rounded-xl text-3xl"
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-12 rounded-xl"
+                  className="h-12"
                   onClick={() => setAmount(String(balance))}
                 >
                   Max
@@ -179,13 +182,13 @@ export function SwapDialog({
             </div>
             <div className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center justify-between rounded-xl px-4 py-3 ring-1">
               <span className="text-muted-foreground text-sm">You receive</span>
-              <span className="font-hud text-lg font-bold tabular-nums">
+              <span className="display text-3xl tabular-nums">
                 {valid && quote.data ? `${num(quote.data.xlm, 7)} XLM` : "—"}
               </span>
             </div>
             {valid && quote.data && !quote.data.ok && (
               <p className="tone-danger rounded-lg px-3 py-2 text-sm">
-                You only have {num(quote.data.balance)} {code}.
+                You only have <Amount value={quote.data.balance} currency={code} />.
               </p>
             )}
             {(prepare.error ?? sign.error) && (
@@ -194,7 +197,7 @@ export function SwapDialog({
               </p>
             )}
             <Button
-              className="h-11 w-full rounded-xl font-bold"
+              className="h-11 w-full font-bold"
               disabled={!quote.data?.ok || prepare.isPending || sign.busy}
               onClick={() => void go()}
             >
@@ -222,7 +225,7 @@ export function ReceiveDialog({ address, onClose }: { address: string; onClose: 
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud">Receive</DialogTitle>
+          <DialogTitle className="display text-2xl">Receive</DialogTitle>
           <DialogDescription>
             Share this Stellar address to receive XLM, tokens or items. To receive a token you
             don&apos;t hold yet, the sender can send it as a gift — it waits under Pending gifts.
@@ -232,7 +235,7 @@ export function ReceiveDialog({ address, onClose }: { address: string; onClose: 
           <p className="bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-4 font-mono text-sm break-all ring-1">
             {address}
           </p>
-          <Button className="w-full rounded-xl" onClick={copy}>
+          <Button className="w-full" onClick={copy}>
             <Copy className="size-4" /> Copy address
           </Button>
         </div>

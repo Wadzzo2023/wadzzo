@@ -6,16 +6,15 @@ import { Activity, ArrowDownLeft, ArrowRight, ArrowUpRight, ExternalLink } from 
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
-import { env } from "~/env";
-import { formatAmount } from "@wadzzo/stellar/quote";
+import { Button } from "~/ui/skin/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/ui/skin/dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody, PageHeader } from "~/ui/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill, type Tone } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
+import { Amount } from "~/components/price/amount";
 import { stellarNetwork } from "@wadzzo/wallet/config";
 
 type Row = RouterOutputs["activity"]["list"]["items"][number];
@@ -70,9 +69,12 @@ export function ActivityView({ me }: { me: string }) {
       <PageHeader
         eyebrow="Account"
         title="Activity"
-        description="Every purchase, sale and listing, with exactly what it cost."
+        description="every purchase, sale and listing — with exactly what it cost"
         actions={
-          <div className="glass flex w-fit gap-1 rounded-xl p-1" role="tablist">
+          <div
+            className="bg-surface-2 flex h-12 w-fit items-center gap-1 rounded-2xl p-1"
+            role="tablist"
+          >
             {ROLES.map((r) => (
               <button
                 key={r.id}
@@ -81,9 +83,9 @@ export function ActivityView({ me }: { me: string }) {
                 aria-selected={role === r.id}
                 onClick={() => setRole(r.id)}
                 className={cn(
-                  "flex h-9 shrink-0 items-center rounded-lg px-4 text-sm font-semibold transition-colors",
+                  "font-hud flex h-10 shrink-0 items-center px-4 text-lg uppercase transition-colors",
                   role === r.id
-                    ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]"
+                    ? "blob bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -109,7 +111,6 @@ export function ActivityView({ me }: { me: string }) {
         <div className="flex justify-center">
           <Button
             variant="outline"
-            className="rounded-xl"
             disabled={q.isFetchingNextPage}
             onClick={() => void q.fetchNextPage()}
           >
@@ -128,10 +129,10 @@ export function RecentActivity({ me, limit = 5 }: { me: string; limit?: number }
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-hud text-lg font-bold">Recent activity</h2>
+        <h2 className="display text-3xl">Recent activity</h2>
         <Link
           href="/activity"
-          className="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+          className="marker text-primary inline-flex items-center gap-1 text-sm hover:underline"
         >
           View all <ArrowRight className="size-3.5" />
         </Link>
@@ -154,7 +155,7 @@ export function RecentActivity({ me, limit = 5 }: { me: string; limit?: number }
 
 function ActivitySkeleton({ rows }: { rows: number }) {
   return (
-    <div className="glass space-y-2 rounded-2xl p-2">
+    <div className="glass space-y-2 rounded-[1.4rem] p-2">
       {Array.from({ length: rows }).map((_, i) => (
         <Skeleton key={i} className="h-14 rounded-xl" />
       ))}
@@ -167,7 +168,7 @@ function ActivityRows({ rows, me }: { rows: Row[]; me: string }) {
   const [open, setOpen] = useState<Row | null>(null);
   return (
     <>
-      <ul className="glass divide-foreground/[0.06] divide-y overflow-hidden rounded-2xl">
+      <ul className="glass divide-foreground/10 divide-y-2 divide-dashed overflow-hidden rounded-[1.4rem]">
         {rows.map((r) => {
           const outgoing = r.buyerId === me;
           return (
@@ -214,7 +215,7 @@ function ActivityRows({ rows, me }: { rows: Row[]; me: string }) {
                 <span className="flex flex-col items-end gap-1">
                   {r.total > 0 && (
                     <span className="font-hud text-sm font-bold tabular-nums">
-                      {formatAmount(r.total, r.currency)}
+                      <Amount value={r.total} currency={r.currency} />
                     </span>
                   )}
                   <StatusPill tone={STATUS[r.status].tone}>{STATUS[r.status].label}</StatusPill>
@@ -247,7 +248,7 @@ function Receipt({ r, me }: { r: Row; me: string }) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-hud">{labelFor(r, me)}</DialogTitle>
+        <DialogTitle className="display text-2xl">{labelFor(r, me)}</DialogTitle>
       </DialogHeader>
       <div className="space-y-4 text-sm">
         {r.asset && (
@@ -267,7 +268,9 @@ function Receipt({ r, me }: { r: Row; me: string }) {
             .map(([k, v]) => (
               <div key={k} className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">{k}</dt>
-                <dd className="tabular-nums">{formatAmount(v, r.currency)}</dd>
+                <dd className="tabular-nums">
+                  <Amount value={v} currency={r.currency} />
+                </dd>
               </div>
             ))}
           <div className="flex justify-between gap-3 border-t pt-2 font-semibold">
@@ -278,7 +281,9 @@ function Receipt({ r, me }: { r: Row; me: string }) {
                   : "Total received"
                 : "Total paid"}
             </dt>
-            <dd className="tabular-nums">{formatAmount(r.total, r.currency)}</dd>
+            <dd className="tabular-nums">
+              <Amount value={r.total} currency={r.currency} />
+            </dd>
           </div>
         </dl>
         <dl className="text-muted-foreground space-y-1 text-xs">

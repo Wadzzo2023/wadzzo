@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { StaticHeader } from "~/components/static/static-header";
 import { env } from "~/env";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
@@ -66,14 +66,14 @@ export default function AboutPage() {
       />
 
       <section className="space-y-4">
-        <h2 className="font-hud text-xl font-bold">For fans</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="display text-4xl">For fans</h2>
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {FOR_FANS.map((f) => (
-            <div key={f.title} className="glass space-y-2 rounded-2xl p-5">
-              <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
+            <div key={f.title} className="glass space-y-2 rounded-[1.4rem] p-5">
+              <span className="blob bg-primary text-primary-foreground flex size-10 items-center justify-center">
                 <f.icon className="size-5" />
               </span>
-              <h3 className="font-hud font-bold">{f.title}</h3>
+              <h3 className="display text-2xl">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.text}</p>
             </div>
           ))}
@@ -81,11 +81,11 @@ export default function AboutPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-hud text-xl font-bold">How it works</h2>
-        <ol className="grid gap-3 md:grid-cols-3">
+        <h2 className="display text-4xl">How it works</h2>
+        <ol className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="glass flex gap-4 rounded-2xl p-5">
-              <span className="bg-primary font-hud text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full font-bold">
+            <li key={s.title} className="glass flex gap-4 rounded-[1.4rem] p-5">
+              <span className="display bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-2xl">
                 {i + 1}
               </span>
               <span>
@@ -97,35 +97,35 @@ export default function AboutPage() {
         </ol>
       </section>
 
-      <section className="grid gap-3 lg:grid-cols-2">
-        <div className="glass space-y-3 rounded-2xl p-6">
-          <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
+      <section className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2">
+        <div className="glass space-y-3 rounded-[1.4rem] p-6">
+          <span className="blob bg-primary text-primary-foreground flex size-10 items-center justify-center">
             <Coins className="size-5" />
           </span>
-          <h2 className="font-hud text-xl font-bold">For creators and brands</h2>
+          <h2 className="display text-4xl">For creators and brands</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Sell items that are minted the moment a fan buys them, set up membership tiers around
             your own page token, post to your fans and run bounties — all from the brand portal.
           </p>
           <a
             href={`${portal}/onboarding`}
-            className="text-primary inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+            className="marker text-primary inline-flex items-center gap-1.5 text-sm hover:underline"
           >
             Create your brand <ArrowRight className="size-4" />
           </a>
         </div>
-        <div className="glass space-y-3 rounded-2xl p-6">
-          <span className="bg-primary/15 text-primary flex size-10 items-center justify-center rounded-xl">
+        <div className="glass space-y-3 rounded-[1.4rem] p-6">
+          <span className="blob bg-primary text-primary-foreground flex size-10 items-center justify-center">
             <ShieldCheck className="size-5" />
           </span>
-          <h2 className="font-hud text-xl font-bold">Built on Stellar</h2>
+          <h2 className="display text-4xl">Built on Stellar</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Items, tokens and payments are real Stellar assets and transactions. What you own is in
             your wallet, and every transaction can be checked on the public ledger.
           </p>
           <Link
             href="/faq"
-            className="text-primary inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+            className="marker text-primary inline-flex items-center gap-1.5 text-sm hover:underline"
           >
             Read the FAQ <ArrowRight className="size-4" />
           </Link>

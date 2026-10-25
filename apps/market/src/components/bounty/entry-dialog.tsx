@@ -3,15 +3,15 @@
 import { FileText, Film, Image as ImageIcon, Music, Paperclip, X } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+} from "~/ui/skin/dialog";
+import { Textarea } from "~/ui/skin/fields";
 import { useEntryUpload, type UploadedMedia } from "~/hooks/use-entry-upload";
 import { MAX_ENTRY_FILES, entryFileProblem } from "@wadzzo/storage/upload-rules";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -113,7 +113,7 @@ export function EntryDialog({
     <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-hud">
+          <DialogTitle className="display text-2xl">
             {editing ? "Edit your entry" : "Submit an entry"}
           </DialogTitle>
           <DialogDescription>
@@ -167,7 +167,6 @@ export function EntryDialog({
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl"
               onClick={() => input.current?.click()}
               disabled={busy || total >= MAX_ENTRY_FILES}
             >
@@ -175,7 +174,7 @@ export function EntryDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-xl px-6 font-bold"
+              className="px-6 font-bold"
               disabled={busy || text.trim().length < 2}
             >
               {busy ? "Sending…" : editing ? "Save changes" : "Send entry"}

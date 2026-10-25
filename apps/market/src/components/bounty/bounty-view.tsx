@@ -26,28 +26,24 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { RichText } from "~/components/post/post-card";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { Price } from "~/components/price/price";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "~/ui/skin/fields";
 import { env } from "~/env";
 import { useBountySeen } from "~/hooks/use-bounty-attention";
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import {
-  ENTRY_STATUS,
-  type BountyDetail,
-  formatTokens,
-  spotsFilled,
-  viewerBadge,
-} from "~/lib/bounty";
+import { ENTRY_STATUS, type BountyDetail, formatUsd, spotsFilled, viewerBadge } from "~/lib/bounty";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { wordTab, wordTabList, wordTabOff, wordTabOn } from "~/ui/styles";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody } from "~/ui/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
 
 import { EntryDialog, type Entry, formatBytes, MediaTypeIcon } from "./entry-dialog";
+import { Amount } from "~/components/price/amount";
 
 const SECTIONS = [
   { id: "brief", label: "Brief", icon: FileText },
@@ -86,36 +82,50 @@ export function BountyView({ initial }: { initial: BountyDetail }) {
   };
 
   return (
-    <div>
-      {/* Cover */}
-      <div className="relative h-52 overflow-hidden sm:h-72 lg:h-80">
+    <>
+      {/* Full-width hero: the cover behind a dark fade, with the brief's headline details on it. */}
+      <section className="on-dark bg-surface-3 relative isolate overflow-hidden text-white">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt="" className="size-full object-cover" />
+          <img
+            src={cover}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 -z-10 size-full scale-105 object-cover"
+          />
         ) : (
-          <div className="flex size-full items-center justify-center bg-[radial-gradient(circle_at_20%_30%,hsl(var(--primary)/0.35),transparent_60%),radial-gradient(circle_at_80%_70%,hsl(190_90%_50%/0.2),transparent_55%)]">
-            <Target className="text-primary/60 size-16" />
+          <div
+            aria-hidden
+            className="bg-pink/25 absolute inset-0 -z-10 flex items-center justify-center"
+          >
+            <Target className="text-pink/50 size-40" strokeWidth={1.4} />
           </div>
         )}
-        <div className="via-background/30 to-background absolute inset-0 bg-gradient-to-b from-black/10" />
-      </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-black/90 via-black/60 to-black/10"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-transparent to-transparent"
+        />
 
-      <PageBody wide className="relative -mt-24 space-y-8 pt-0 sm:-mt-28">
-        <header className="space-y-4">
+        <div className="mx-auto max-w-[88rem] space-y-6 px-4 pt-6 pb-10 sm:px-10 lg:pb-14">
           <nav
-            className="text-muted-foreground flex items-center gap-1.5 text-sm"
+            className="flex items-center gap-1.5 text-sm font-semibold text-white/70"
             aria-label="Breadcrumb"
           >
-            <Link href="/bounties" className="hover:text-foreground">
+            <Link href="/bounties" className="hover:text-white">
               Bounties
             </Link>
             <span>/</span>
-            <span className="text-foreground truncate">{b.title}</span>
+            <span className="truncate text-white">{b.title}</span>
           </nav>
-          <div className="flex flex-wrap items-center gap-2">
+
+          <div className="flex flex-wrap items-center gap-2 pt-4">
             <Link
               href={`/creator/${b.brand.id}`}
-              className="glass hover:border-primary/40 inline-flex items-center gap-2 rounded-full py-1 pr-3 pl-1 text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 py-1 pr-3 pl-1 text-sm font-bold transition-colors hover:border-white"
             >
               <Avatar src={b.brand.avatarUrl} name={b.brand.name} className="size-7 text-[10px]" />
               {b.brand.name}
@@ -123,23 +133,50 @@ export function BountyView({ initial }: { initial: BountyDetail }) {
             </Link>
             <StatusPill tone={badge.tone}>{badge.label}</StatusPill>
           </div>
-          <h1 className="font-hud max-w-4xl text-3xl leading-[1.1] font-bold tracking-tight sm:text-5xl">
+
+          <h1 className="display max-w-5xl text-5xl break-words sm:text-6xl lg:text-7xl xl:text-8xl">
             {b.title}
           </h1>
-        </header>
 
-        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          {/* reward + winners + spots stickers */}
+          <div className="flex flex-wrap items-stretch gap-3">
+            <div className="blob bg-primary text-primary-foreground -rotate-2 px-4 py-2">
+              <p className="text-[10px] font-bold tracking-wider uppercase opacity-75">
+                Reward per winner
+              </p>
+              <p className="display text-4xl leading-none tabular-nums lg:text-5xl">
+                <Amount value={b.rewardAsset} currency={b.assetCode} />
+              </p>
+              {b.rewardUsd != null && (
+                <p className="text-xs font-bold opacity-75">≈ {formatUsd(b.rewardUsd)}</p>
+              )}
+            </div>
+            <div className="blob bg-side-mint text-side-ink rotate-1 px-4 py-2">
+              <p className="text-[10px] font-bold tracking-wider uppercase opacity-70">Winners</p>
+              <p className="display text-4xl">{b.totalWinners}</p>
+              <p className="text-xs font-bold opacity-70">will be paid</p>
+            </div>
+            <div className="blob bg-pink text-side-ink -rotate-1 px-4 py-2">
+              <p className="text-[10px] font-bold tracking-wider uppercase opacity-70">Spots</p>
+              <p className="display text-4xl">{b.open ? b.spotsLeft : "Closed"}</p>
+              <p className="text-xs font-bold opacity-70">
+                {b.open ? "left to join" : "no more entries"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PageBody wide className="space-y-8">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
           {/* Reward card first on phones, beside the tabs on wide screens */}
-          <aside className="space-y-4 lg:sticky lg:top-24 lg:order-2">
+          <aside className="space-y-4 lg:sticky lg:top-8 lg:order-2">
             <RewardCard b={b} onSubmit={openSubmit} onShowEntries={() => setSection("entries")} />
             <BrandCard b={b} />
           </aside>
 
           <div className="min-w-0 space-y-5 lg:order-1">
-            <div
-              className="glass flex w-full gap-1 overflow-x-auto rounded-xl p-1 sm:w-fit"
-              role="tablist"
-            >
+            <div className={wordTabList} role="tablist">
               {SECTIONS.map((s) => {
                 const locked = !joined && (s.id === "entries" || s.id === "chat");
                 const count =
@@ -155,20 +192,17 @@ export function BountyView({ initial }: { initial: BountyDetail }) {
                     role="tab"
                     aria-selected={section === s.id}
                     onClick={() => setSection(s.id)}
-                    className={cn(
-                      "flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold transition-colors",
-                      section === s.id
-                        ? "bg-primary text-primary-foreground shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
+                    className={cn(wordTab, section === s.id ? wordTabOn : wordTabOff)}
                   >
-                    {locked ? <Lock className="size-3.5" /> : <s.icon className="size-4" />}
+                    {locked && <Lock className="size-5" strokeWidth={2.6} />}
                     {s.label}
                     {count > 0 && (
                       <span
                         className={cn(
-                          "rounded-full px-1.5 text-[11px] tabular-nums",
-                          section === s.id ? "bg-black/15" : "bg-foreground/10",
+                          "rounded-full px-2 font-sans text-xs font-bold tabular-nums",
+                          section === s.id
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-foreground/10",
                         )}
                       >
                         {count}
@@ -210,7 +244,7 @@ export function BountyView({ initial }: { initial: BountyDetail }) {
           onClose={() => setEntryDialog(null)}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -237,7 +271,7 @@ function RewardCard({
   const short = needsBalance && balance.data != null && balance.data.balance < b.requiredBalance;
   const filled = spotsFilled(b);
   const portal = env.NEXT_PUBLIC_BRAND_PORTAL_URL.replace(/\/$/, "");
-  const cta = "h-12 w-full rounded-xl text-base font-bold";
+  const cta = "h-14 w-full text-base";
 
   const share = async () => {
     const url = window.location.href;
@@ -249,10 +283,10 @@ function RewardCard({
   };
 
   return (
-    <div className="glass space-y-5 rounded-2xl p-5 shadow-[0_20px_60px_-25px_hsl(var(--primary)/0.45)]">
+    <div className="border-foreground bg-surface space-y-5 rounded-[1.6rem] border-[3px] p-5 shadow-[8px_9px_0_0_hsl(var(--primary))]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="label-caps">Reward per winner</p>
+          <p className="marker text-muted-foreground -rotate-1 text-sm">*reward per winner*</p>
           <Price
             tokens={b.rewardAsset}
             usd={b.rewardUsd}
@@ -265,7 +299,7 @@ function RewardCard({
         <Button
           variant="outline"
           size="icon"
-          className="glass rounded-full"
+          className="rounded-full"
           onClick={() => void share()}
           aria-label="Share"
         >
@@ -291,12 +325,9 @@ function RewardCard({
             value: b.totalEntries.toLocaleString("en-US"),
           },
         ].map((s) => (
-          <div
-            key={s.label}
-            className="bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-2.5 text-center ring-1"
-          >
+          <div key={s.label} className="blob bg-surface-2 p-2.5 text-center">
             <s.icon className="text-primary mx-auto mb-1 size-3.5" />
-            <dd className="font-hud text-lg font-bold tabular-nums">{s.value}</dd>
+            <dd className="display text-3xl tabular-nums">{s.value}</dd>
             <dt className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
               {s.label}
             </dt>
@@ -309,9 +340,9 @@ function RewardCard({
           <span>Winner spots filled</span>
           <span className="tabular-nums">{filled}%</span>
         </div>
-        <div className="bg-foreground/[0.08] h-2 overflow-hidden rounded-full">
+        <div className="border-foreground/15 h-3 overflow-hidden rounded-full border-2">
           <div
-            className="from-primary via-green-hot h-full rounded-full bg-gradient-to-r to-cyan-400 shadow-[0_0_12px_hsl(var(--primary)/0.6)]"
+            className="bg-primary h-full rounded-full"
             style={{ width: `${Math.max(filled, 3)}%` }}
           />
         </div>
@@ -332,16 +363,13 @@ function RewardCard({
       ) : b.viewer.joined ? (
         <div className="space-y-2">
           {b.open && (
-            <Button
-              className={cn(cta, "shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)]")}
-              onClick={onSubmit}
-            >
+            <Button className={cn(cta, "")} onClick={onSubmit}>
               <Upload className="size-4" />{" "}
               {b.viewer.entryCount ? "Submit another entry" : "Submit your entry"}
             </Button>
           )}
           {b.viewer.entryCount > 0 && (
-            <Button variant="outline" className="w-full rounded-xl" onClick={onShowEntries}>
+            <Button variant="outline" className="w-full" onClick={onShowEntries}>
               View my entries ({b.viewer.entryCount})
             </Button>
           )}
@@ -352,10 +380,7 @@ function RewardCard({
       ) : (
         <div className="space-y-2">
           <Button
-            className={cn(
-              cta,
-              b.open && !short && "shadow-[0_0_30px_-6px_hsl(var(--primary)/0.8)]",
-            )}
+            className={cn(cta, b.open && !short && "")}
             disabled={!b.open || join.isPending || short}
             onClick={requireAuth(() => join.mutate({ id: b.id }))}
           >
@@ -374,8 +399,13 @@ function RewardCard({
                 short ? "text-destructive font-semibold" : "text-muted-foreground",
               )}
             >
-              Hold at least {b.requiredBalance.toLocaleString("en-US")} {b.assetCode} to join
-              {short && balance.data && ` — you have ${formatTokens(balance.data.balance)}`}
+              Hold at least <Amount value={b.requiredBalance} currency={b.assetCode} /> to join
+              {short && balance.data && (
+                <>
+                  {" "}
+                  — you have <Amount value={balance.data.balance} currency={b.assetCode} />
+                </>
+              )}
               {short && (
                 <>
                   {" · "}
@@ -399,14 +429,12 @@ function BrandCard({ b }: { b: BountyDetail }) {
   return (
     <Link
       href={`/creator/${b.brand.id}`}
-      className="glass hover:border-primary/40 flex items-center gap-3 rounded-2xl p-4 transition-colors"
+      className="glass hover:border-foreground flex items-center gap-3 rounded-[1.4rem] p-4 transition-colors"
     >
       <Avatar src={b.brand.avatarUrl} name={b.brand.name} className="size-11" />
       <span className="min-w-0 flex-1">
-        <span className="text-muted-foreground block text-[10px] font-semibold tracking-wider uppercase">
-          Posted by
-        </span>
-        <span className="block truncate font-semibold">{b.brand.name}</span>
+        <span className="marker text-muted-foreground block text-xs">posted by</span>
+        <span className="display block truncate text-2xl">{b.brand.name}</span>
       </span>
       <BadgeCheck className="text-primary size-5" />
     </Link>
@@ -424,12 +452,12 @@ function Brief({ b }: { b: BountyDetail }) {
   const images = b.imageUrls;
   return (
     <div className="space-y-4">
-      <div className="glass rounded-2xl p-5 sm:p-6">
+      <div className="glass rounded-[1.4rem] p-5 sm:p-6">
         <RichText html={b.description} className="prose-base" />
       </div>
       {images.length > 1 && (
         <div className="space-y-2">
-          <div className="glass overflow-hidden rounded-2xl p-1.5">
+          <div className="glass overflow-hidden rounded-[1.4rem] p-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={images[active]}
@@ -486,13 +514,7 @@ function Entries({
             ? "Send your work to the brand — you can edit it until they open it."
             : "This bounty is closed."
         }
-        action={
-          b.open ? (
-            <Button className="rounded-xl" onClick={onNew}>
-              Submit your entry
-            </Button>
-          ) : undefined
-        }
+        action={b.open ? <Button onClick={onNew}>Submit your entry</Button> : undefined}
         className="glass border-solid"
       />
     );
@@ -503,7 +525,7 @@ function Entries({
         const st = ENTRY_STATUS[e.status];
         const editable = e.status === "UNCHECKED" && b.open;
         return (
-          <li key={e.id} className="glass space-y-3 rounded-2xl p-4 sm:p-5">
+          <li key={e.id} className="glass space-y-3 rounded-[1.4rem] p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <StatusPill tone={st.tone} dot>
                 {st.label}
@@ -538,7 +560,7 @@ function Entries({
             </div>
             <RichText html={e.content} />
             {e.medias.length > 0 && (
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
                 {e.medias.map((m) => (
                   <li key={m.id}>
                     <Attachment m={m} />
@@ -550,7 +572,7 @@ function Entries({
         );
       })}
       {b.open && (
-        <Button variant="outline" className="w-full rounded-xl" onClick={onNew}>
+        <Button variant="outline" className="w-full" onClick={onNew}>
           <Upload className="size-4" /> Submit another entry
         </Button>
       )}
@@ -568,7 +590,7 @@ function Chat({ b }: { b: BountyDetail }) {
   useEffect(() => end.current?.scrollIntoView({ block: "nearest" }), [thread.data?.length]);
 
   return (
-    <div className="glass flex h-[32rem] flex-col overflow-hidden rounded-2xl">
+    <div className="glass flex h-[32rem] flex-col overflow-hidden rounded-[1.4rem]">
       <div className="border-foreground/[0.06] flex items-center gap-3 border-b px-4 py-3">
         <Avatar src={b.brand.avatarUrl} name={b.brand.name} className="size-8 text-xs" />
         <div>
@@ -638,7 +660,7 @@ function Chat({ b }: { b: BountyDetail }) {
         <Button
           type="submit"
           size="icon"
-          className="size-11 rounded-xl"
+          className="size-11"
           disabled={send.isPending || !text.trim()}
           aria-label="Send"
         >
@@ -680,7 +702,7 @@ function Discussion({ bountyId }: { bountyId: number }) {
               });
           })();
         }}
-        className="glass space-y-2 rounded-2xl p-3"
+        className="glass space-y-2 rounded-[1.4rem] p-3"
       >
         {replyTo && (
           <p className="bg-primary/10 text-primary flex items-center justify-between rounded-lg px-3 py-1.5 text-xs">
@@ -701,11 +723,7 @@ function Discussion({ bountyId }: { bountyId: number }) {
             }
             className="bg-foreground/[0.04] resize-none rounded-xl border-0"
           />
-          <Button
-            type="submit"
-            className="rounded-xl"
-            disabled={add.isPending || (signedIn && !text.trim())}
-          >
+          <Button type="submit" disabled={add.isPending || (signedIn && !text.trim())}>
             {signedIn ? "Post" : "Sign in"}
           </Button>
         </div>
@@ -723,7 +741,7 @@ function Discussion({ bountyId }: { bountyId: number }) {
       ) : (
         <ul className="space-y-3">
           {comments.data.map((c) => (
-            <li key={c.id} className="glass space-y-3 rounded-2xl p-4">
+            <li key={c.id} className="glass space-y-3 rounded-[1.4rem] p-4">
               {[c, ...c.replies].map((r, i) => (
                 <div
                   key={r.id}

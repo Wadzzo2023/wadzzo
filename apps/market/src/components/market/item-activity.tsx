@@ -2,9 +2,9 @@
 
 import { formatDistanceToNow } from "date-fns";
 
-import { formatAmount } from "@wadzzo/stellar/quote";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
+import { Amount } from "~/components/price/amount";
 
 const LABEL = {
   PURCHASE: "Bought",
@@ -19,15 +19,15 @@ export function ItemActivity({ assetId }: { assetId: number }) {
   if (activity.isLoading) return <div className="skeleton h-32 rounded-xl" />;
   if (!activity.data?.length)
     return (
-      <p className="glass text-muted-foreground rounded-xl p-6 text-center text-sm">
-        No sales yet — be the first to own this.
+      <p className="marker text-primary py-6 text-center text-base">
+        no sales yet — be the first to own this!
       </p>
     );
   return (
     <section>
-      <ul className="glass divide-foreground/[0.06] divide-y rounded-xl">
+      <ul className="divide-foreground/10 divide-y-2 divide-dashed">
         {activity.data.map((a) => (
-          <li key={a.id} className="flex items-center gap-3 p-3">
+          <li key={a.id} className="flex items-center gap-3 py-3">
             <Person
               name={a.buyer?.name}
               image={a.buyer?.image}
@@ -37,8 +37,8 @@ export function ItemActivity({ assetId }: { assetId: number }) {
               className="flex-1"
             />
             {a.price > 0 && (
-              <span className="text-sm font-medium tabular-nums">
-                {formatAmount(a.price, a.currency)}
+              <span className="display text-xl tabular-nums">
+                <Amount value={a.price} currency={a.currency} />
               </span>
             )}
             <time className="text-muted-foreground w-24 text-right text-xs">

@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import { CreatorCard } from "~/components/creator/creator-card";
 import { CreatorSearch, LoadMoreCreators } from "~/components/creator/creator-list";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody, PageHeader } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
@@ -20,18 +20,18 @@ export default async function CreatorsPage({ searchParams }: PageProps<"/creator
   const first = await (await serverApi()).creator.list({ search: q, limit: 24 });
 
   return (
-    <PageBody wide className="space-y-5">
+    <PageBody wide className="space-y-8">
       <PageHeader
         eyebrow="Discover"
         title="Creators"
-        description="Brands and creators on Wadzzo."
+        description="the brands and creators dropping stuff on wadzzo"
         actions={<CreatorSearch value={q} />}
       />
       {first.items.length === 0 ? (
         <EmptyState icon={Users} title="No creators found" description="Try a different name." />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {first.items.map((c) => (
               <CreatorCard key={c.id} creator={c} />
             ))}
