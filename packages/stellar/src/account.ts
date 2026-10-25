@@ -1,4 +1,4 @@
-import { Asset, BadRequestError, type Horizon, NotFoundError } from "@stellar/stellar-sdk";
+import { Asset, type Horizon, NetworkError, NotFoundError } from "@stellar/stellar-sdk";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET } from "@wadzzo/wallet/config";
@@ -34,7 +34,9 @@ export class StellarAccount {
       return new StellarAccount(id, await horizonServer().loadAccount(id));
     } catch (error) {
       if (error instanceof NotFoundError) return null;
-      if (error instanceof BadRequestError) {
+      // Horizon answers 400 for an id it can't parse; stellar-sdk raises that as a NetworkError
+      // whose response status is 400 (message "Bad Request"), not as BadRequestError.
+      if (error instanceof NetworkError && error.getResponse().status === 400) {
         console.warn(`[stellar] not a valid account id: ${id.slice(0, 8)}…`);
         return null;
       }
