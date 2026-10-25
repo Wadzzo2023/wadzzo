@@ -1,12 +1,30 @@
 "use client";
 
 import { Search, X } from "lucide-react";
+import type * as React from "react";
 import { useEffect, useState } from "react";
 
-import { Input } from "~/ui/skin/fields";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Input } from "./fields";
+import { cn } from "../lib/cn";
 
-export { Toolbar } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips as BaseFilterChips } from "../patterns/toolbar";
+
+export { Toolbar } from "../patterns/toolbar";
+
+/** One-of filter as chunky pills in condensed caps. */
+export function FilterChips<T extends string>(
+  props: React.ComponentProps<typeof BaseFilterChips<T>>,
+) {
+  return (
+    <BaseFilterChips
+      {...props}
+      chipClass={{
+        base: "font-hud h-10 border-2 px-4 text-base tracking-wide uppercase",
+        off: "border-foreground/12 hover:border-foreground bg-transparent",
+      }}
+    />
+  );
+}
 
 /** Search box with a clear button. `onSearch` fires after typing pauses. */
 export function SearchInput({

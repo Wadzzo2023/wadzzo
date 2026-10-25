@@ -2,7 +2,7 @@
 
 import { Loader2, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { api } from "~/utils/api";
 
 /**
@@ -23,11 +23,11 @@ export default function RequestApprovalCard({ creatorName }: { creatorName: stri
   });
 
   return (
-    <div className="bg-card mx-4 flex w-full max-w-md flex-col items-center rounded-2xl border p-8 text-center shadow-xs">
-      <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-2xl">
-        <ShieldCheck className="text-primary h-6 w-6" />
+    <div className="bg-card border-foreground/10 mx-4 flex w-full max-w-md flex-col items-center rounded-[1.6rem] border-2 p-8 text-center shadow-[8px_9px_0_0_hsl(var(--primary))]">
+      <div className="blob bg-primary text-primary-foreground flex size-16 -rotate-6 items-center justify-center">
+        <ShieldCheck className="size-7" strokeWidth={2.4} />
       </div>
-      <h2 className="mt-4 text-lg font-semibold">Get your brand approved</h2>
+      <h2 className="display mt-5 text-4xl">Get your brand approved</h2>
       <p className="text-muted-foreground mt-1.5 text-sm">
         {creatorName}, your brand account is set up but hasn&apos;t been sent for review yet. Once
         an admin approves it you can create pins, events and bounties.

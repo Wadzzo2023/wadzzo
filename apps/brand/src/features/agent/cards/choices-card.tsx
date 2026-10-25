@@ -3,7 +3,7 @@
 import { Check, CornerDownLeft, MessageCircleQuestion } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import type { AgentBlock } from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
 

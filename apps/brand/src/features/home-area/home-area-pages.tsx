@@ -9,10 +9,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
 

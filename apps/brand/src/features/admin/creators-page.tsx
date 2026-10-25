@@ -16,25 +16,25 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { BLANK_KEYWORD } from "@wadzzo/utils/blank";
 import type { CreatorExtraFields } from "@wadzzo/schemas/creator";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { DataTable, type Column, type RowAction } from "~/ui/data-table";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { FilterChips, SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips, SearchInput, Toolbar } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
 

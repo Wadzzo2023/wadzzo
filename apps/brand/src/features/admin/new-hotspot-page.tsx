@@ -26,21 +26,21 @@ import {
   type AssetType,
   type CreatePinType,
 } from "~/components/pins/pin-form-parts";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+} from "@wadzzo/ui/poster/select";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useHotspotDraft } from "~/store/hotspot-draft";
 import { useSelectCreatorStore } from "~/components/store/creator-selection-store";
 import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
@@ -285,7 +285,7 @@ function HotspotForm({
                 <Link href={`/admin/maps?draw=1&shape=${shape}`}>Redraw on the map</Link>
               </Button>
             </FormSection>
-            <section className="bg-card rounded-xl border p-5">
+            <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-5">
               <h2 className="font-hud mb-3 text-base font-semibold">Summary</h2>
               {values.image && (
                 // eslint-disable-next-line @next/next/no-img-element

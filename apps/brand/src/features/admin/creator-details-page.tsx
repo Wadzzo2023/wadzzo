@@ -23,18 +23,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { WADZZO_AR_URL } from "@wadzzo/schemas/embed";
 import { BLANK_KEYWORD } from "@wadzzo/utils/blank";
 import type { CreatorExtraFields } from "@wadzzo/schemas/creator";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
-import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatCard } from "@wadzzo/ui/poster/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
@@ -223,7 +223,7 @@ function Details({ c }: { c: Creator }) {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">
         {/* Recent pins */}
-        <section className="bg-card rounded-xl border">
+        <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2">
           <header className="flex items-center justify-between border-b px-4 py-3">
             <h2 className="font-hud text-sm font-semibold">Recent pins</h2>
             <span className="text-muted-foreground text-xs">
@@ -282,7 +282,7 @@ function Details({ c }: { c: Creator }) {
         </section>
 
         <div className="space-y-4">
-          <section className="bg-card rounded-xl border p-4">
+          <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4">
             <h2 className="font-hud text-sm font-semibold">Access</h2>
             <label className="mt-3 flex items-start gap-3">
               <span className="flex-1">
@@ -300,7 +300,7 @@ function Details({ c }: { c: Creator }) {
             </label>
           </section>
 
-          <section className="bg-card rounded-xl border p-4">
+          <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4">
             <h2 className="font-hud text-sm font-semibold">Page asset</h2>
             {asset ? (
               <div className="mt-3 flex items-center gap-3">

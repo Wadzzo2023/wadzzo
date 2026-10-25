@@ -8,12 +8,12 @@ import { BountyCard, BountyCardSkeleton } from "~/components/bounty/bounty-card"
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { LoadMoreListings } from "~/components/market/load-more";
 import { PostCard } from "~/components/post/post-card";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { env } from "~/env";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard as ListingCardData } from "@wadzzo/api/market/routers/market";
-import { EmptyState } from "~/ui/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { wordTab, wordTabList, wordTabOff, wordTabOn } from "~/ui/styles";
 import { api, type RouterOutputs } from "~/utils/api";

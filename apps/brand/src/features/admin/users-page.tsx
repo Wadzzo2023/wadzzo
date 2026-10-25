@@ -5,16 +5,16 @@ import { ExternalLink, Shield, Store, Trash2, Users } from "lucide-react";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { PlatformFilter } from "~/features/admin/platform-filter";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { SearchInput, Toolbar } from "@wadzzo/ui/patterns/toolbar";
+import { SearchInput, Toolbar } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
 

@@ -413,7 +413,7 @@ export function Dropzone({
 
         {/* Uploading */}
         {busy && (
-          <span className="bg-card/80 absolute inset-0 flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]">
+          <span className="bg-card/80 absolute inset-0 flex flex-col items-center justify-center gap-2">
             <Loader2 className="text-primary size-5 animate-spin" />
             <span className="font-hud text-xs font-semibold tabular-nums">{pct}</span>
             {!circle && (

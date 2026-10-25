@@ -2,8 +2,8 @@
 
 import { ShieldAlert, Mail } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@wadzzo/ui/components/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@wadzzo/ui/components/card";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@wadzzo/ui/poster/card";
 import { Separator } from "@wadzzo/ui/components/separator";
 
 interface BannedCreatorCardProps {
@@ -12,7 +12,7 @@ interface BannedCreatorCardProps {
 
 export function BannedCreatorCard({ creatorName }: BannedCreatorCardProps) {
   return (
-    <Card className="border-destructive w-full max-w-md">
+    <Card className="border-destructive w-full max-w-md overflow-hidden">
       <CardHeader className="bg-destructive/10 pb-4">
         <div className="flex items-center gap-2">
           <ShieldAlert className="text-destructive h-5 w-5" />

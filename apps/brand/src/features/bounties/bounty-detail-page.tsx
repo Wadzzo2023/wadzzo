@@ -25,21 +25,21 @@ import { AddBountyComment } from "~/components/comment/Add-Bounty-Comment";
 import ViewBountyComment from "~/components/comment/View-Bounty-Comment";
 import CustomAvatar from "~/components/common/custom-avatar";
 import ViewBountyAttachmentModal from "~/components/modals/view-bounty-attachment-modal";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+} from "@wadzzo/ui/poster/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -242,14 +242,14 @@ function BountyView({ bounty: b }: { bounty: Bounty }) {
         <TabsContent value="details" className="mt-5">
           <SafeHTML
             html={b.description}
-            className="prose prose-sm bg-card dark:prose-invert max-w-none rounded-xl border p-5"
+            className="prose prose-sm bg-card dark:prose-invert border-foreground/10 max-w-none rounded-[1.4rem] border-2 p-5"
           />
         </TabsContent>
         <TabsContent value="submissions" className="mt-5">
           <Submissions bounty={b} onChanged={refresh} />
         </TabsContent>
         <TabsContent value="chat" className="mt-5">
-          <div className="bg-card rounded-xl border">
+          <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2">
             <Chat bountyId={b.id} />
           </div>
         </TabsContent>
@@ -334,7 +334,10 @@ function Submissions({ bounty: b, onChanged }: { bounty: Bounty; onChanged: () =
           return (
             <li
               key={s.id}
-              className={cn("bg-card rounded-xl border p-4 sm:p-5", won && "border-primary/50")}
+              className={cn(
+                "bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5",
+                won && "border-primary/50",
+              )}
             >
               <div className="flex flex-wrap items-center gap-3">
                 <CustomAvatar url={s.user.image} winnerCount={s.userWinCount} className="size-10" />
@@ -473,7 +476,7 @@ function EntryText({ html }: { html: string }) {
 function Comments({ bountyId }: { bountyId: number }) {
   const comments = api.bounty.Bounty.getBountyComments.useQuery({ bountyId });
   return (
-    <div className="bg-card space-y-4 rounded-xl border p-4 sm:p-5">
+    <div className="bg-card border-foreground/10 space-y-4 rounded-[1.4rem] border-2 p-4 sm:p-5">
       <AddBountyComment bountyId={bountyId} />
       {comments.isPending ? (
         <div className="flex justify-center py-6">
@@ -506,7 +509,7 @@ function Stat({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-card rounded-xl border p-3">
+    <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-3">
       <dt className="font-hud text-muted-foreground flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase">
         {Icon && <Icon className="size-3.5" />}
         {label}

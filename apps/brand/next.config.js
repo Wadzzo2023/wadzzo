@@ -28,6 +28,8 @@ const config = {
     "@wadzzo/wallet",
   ],
   reactStrictMode: true,
+  /** Dev only: lets the portal be opened at 127.0.0.1 too (a second, signed-out session next to localhost). */
+  allowedDevOrigins: ["127.0.0.1"],
   images: {
     remotePatterns: [
       {

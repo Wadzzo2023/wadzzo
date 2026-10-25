@@ -69,12 +69,15 @@ export function FilterChips<T extends string>({
   options,
   label,
   className,
+  chipClass,
 }: {
   value: T;
   onChange: (value: T) => void;
   options: { value: T; label: string; icon?: LucideIcon; count?: number }[];
   label: string;
   className?: string;
+  /** Extra classes for every chip, and for the selected / unselected ones (a look's own styling). */
+  chipClass?: { base?: string; on?: string; off?: string };
 }) {
   return (
     <div
@@ -96,6 +99,8 @@ export function FilterChips<T extends string>({
               on
                 ? "border-primary bg-primary text-primary-foreground"
                 : "bg-card text-muted-foreground hover:border-line-bright hover:text-foreground",
+              chipClass?.base,
+              on ? chipClass?.on : chipClass?.off,
             )}
           >
             {o.icon && <o.icon className="size-3.5" />}

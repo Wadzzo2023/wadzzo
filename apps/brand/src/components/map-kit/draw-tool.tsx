@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { PlaceSearch } from "./place-search";
@@ -340,7 +340,7 @@ export function DrawTool({
       )}
 
       {/* Top Floating Controls */}
-      <div className="bg-card/95 absolute top-3 left-1/2 z-20 w-[min(92%,440px)] -translate-x-1/2 rounded-xl border p-3 shadow-lg backdrop-blur-sm">
+      <div className="bg-card/95 border-foreground/10 absolute top-3 left-1/2 z-20 w-[min(92%,440px)] -translate-x-1/2 rounded-[1.4rem] border-2 p-3 shadow-lg">
         <div className="flex items-center gap-2">
           <p className="font-hud text-sm font-semibold">{title}</p>
           <div
@@ -463,7 +463,7 @@ export function DrawTool({
 
       {/* Floating zoom hint pill when zoomed too far out */}
       {tooFar && (
-        <div className="border-warning/30 bg-card/95 text-warning pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 animate-pulse items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium shadow-xl backdrop-blur-md">
+        <div className="border-warning/30 bg-card/95 text-warning pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 animate-pulse items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium shadow-xl">
           <ZoomIn className="text-warning size-4" />
           <span>Click anywhere on the map to zoom in &amp; start drawing</span>
         </div>

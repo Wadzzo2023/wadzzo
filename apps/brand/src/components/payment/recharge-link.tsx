@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { WalletType } from "@wadzzo/wallet/shared";
 import { isRechargeAbleClient } from "~/utils/recharge/is-rechargeable-client";
 

@@ -16,7 +16,7 @@ import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
 import HotspotDetailModal from "~/components/modals/hotspot-details-modal";
 import PinDetailAndActionsModal from "~/components/modals/pin-detail-modal";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { Label } from "@wadzzo/ui/components/label";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { AgentChat } from "~/features/agent/agent-chat";

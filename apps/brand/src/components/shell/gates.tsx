@@ -1,47 +1,50 @@
 "use client";
 
-import { Loader2, ShieldAlert } from "lucide-react";
-import Image from "next/image";
+import { Loader2, ShieldAlert, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ConnectWalletButton } from "@wadzzo/wallet";
+import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 import { useEffect, type ReactNode } from "react";
 
 import { BannedCreatorCard } from "~/components/brand/ban-artist";
 import JoinArtistPage from "~/components/brand/join-artist";
 import PendingArtistPage from "~/components/brand/pending-artist";
 import RequestApprovalCard from "~/components/brand/request-approval";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 
 import type { usePortalAccess } from "./use-portal-access";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 type Access = ReturnType<typeof usePortalAccess>;
 
 /** Signed out: one clear screen with the wallet/email sign-in. */
+/** Opens the shared sign-in dialog (email, Google, Apple or a Stellar wallet). */
+function SignInButton() {
+  const open = useConnectWalletDialogStore((s) => s.setIsOpen);
+  return (
+    <Button size="lg" onClick={() => open(true)}>
+      <LogIn className="size-5" strokeWidth={2.6} />
+      <span className="marker text-base">Sign in / Sign up</span>
+    </Button>
+  );
+}
+
 export function SignInScreen() {
   return (
     <div className="bg-background flex min-h-dvh items-center justify-center px-4">
-      <div className="bg-card w-full max-w-sm rounded-2xl border p-8 text-center">
-        <span className="bg-primary/10 mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl">
-          <Image
-            src={platformBranding.assets.loading}
-            alt=""
-            width={32}
-            height={32}
-            className="object-contain"
-          />
+      <div className="bg-card border-foreground/10 w-full max-w-sm rounded-[1.6rem] border-2 p-8 text-center shadow-[8px_9px_0_0_hsl(var(--primary))]">
+        <span className="bg-side-ink text-side mx-auto mb-5 flex size-14 -rotate-3 items-center justify-center rounded-2xl">
+          <WadzzoMark className="h-7" />
         </span>
-        <p className="font-hud text-primary text-[11px] font-semibold tracking-[0.18em] uppercase">
-          Brand portal
-        </p>
-        <h1 className="font-hud mt-1 text-2xl font-bold">Sign in to {platformBranding.name}</h1>
+        <p className="marker text-primary text-sm">Brand portal</p>
+        <h1 className="display mt-1 text-5xl">Sign in to {platformBranding.name}</h1>
         <p className="text-muted-foreground mt-2 text-sm">
           Create drops, run bounties and stores, and see how fans engage with your brand.
         </p>
         <div className="mt-6 flex justify-center [&_button]:w-full">
-          <ConnectWalletButton />
+          <SignInButton />
         </div>
       </div>
     </div>
@@ -108,7 +111,7 @@ function OtherPlatformCard({ platformName }: { platformName: string }) {
   return (
     <div className="max-w-sm text-center">
       <ShieldAlert className="text-muted-foreground mx-auto mb-3 size-8" />
-      <h1 className="font-hud text-xl font-bold">This brand is on {platformName}</h1>
+      <h1 className="display text-4xl">This brand is on {platformName}</h1>
       <p className="text-muted-foreground mt-1 text-sm">
         Your account is already a brand on {platformName}, and a brand belongs to one platform only.
         Sign in with a different account to create a brand here.
@@ -125,7 +128,7 @@ export function AdminGate({ access, children }: { access: Access; children: Reac
     <div className="flex min-h-[70dvh] items-center justify-center px-4">
       <div className="max-w-sm text-center">
         <ShieldAlert className="text-muted-foreground mx-auto mb-3 size-8" />
-        <h1 className="font-hud text-xl font-bold">Admins only</h1>
+        <h1 className="display text-4xl">Admins only</h1>
         <p className="text-muted-foreground mt-1 text-sm">
           This area is for {platformBranding.name} admins. Your account doesn&apos;t have admin
           access.

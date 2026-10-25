@@ -1,6 +1,17 @@
 "use client";
 
-import { Check, LogOut, Monitor, Moon, Settings, Sun, User, ChevronsUpDown } from "lucide-react";
+import {
+  Check,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
+  User,
+  ChevronsUpDown,
+  Wallet,
+} from "lucide-react";
+import { useConnectWalletDialogStore } from "@wadzzo/wallet";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -13,7 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
@@ -38,15 +49,16 @@ export function UserMenu({
     enabled: session.status === "authenticated",
   });
   const { theme, setTheme } = useTheme();
+  const openAccount = useConnectWalletDialogStore((s) => s.setIsOpen);
 
   const name = creator.data?.name ?? session.data?.user?.name ?? "Your account";
   const image = creator.data?.profileUrl ?? session.data?.user?.image ?? undefined;
   const id = session.data?.user?.id;
 
   const avatar = (
-    <Avatar className="size-8">
+    <Avatar className="ring-side-ink/25 size-9 ring-2">
       <AvatarImage src={image} alt="" />
-      <AvatarFallback className="bg-primary/10 text-primary">
+      <AvatarFallback className="bg-side-ink text-side">
         <User className="size-4" />
       </AvatarFallback>
     </Avatar>
@@ -56,7 +68,7 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          "hover:bg-accent flex w-full items-center gap-2.5 rounded-lg p-1.5 text-left transition-colors",
+          "hover:bg-side-ink/10 flex w-full items-center gap-2.5 rounded-xl p-1.5 text-left transition-colors",
           (collapsed || compact) && "w-auto justify-center",
         )}
         aria-label="Account menu"
@@ -65,14 +77,14 @@ export function UserMenu({
         {!collapsed && !compact && (
           <>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold">{name}</span>
+              <span className="display block truncate text-lg leading-none">{name}</span>
               {id && (
-                <span className="text-muted-foreground block truncate font-mono text-[10px]">
+                <span className="mt-0.5 block truncate font-mono text-[10px] opacity-60">
                   {short(id)}
                 </span>
               )}
             </span>
-            <ChevronsUpDown className="text-muted-foreground size-4 shrink-0" />
+            <ChevronsUpDown className="size-4 shrink-0 opacity-60" />
           </>
         )}
       </DropdownMenuTrigger>
@@ -89,6 +101,10 @@ export function UserMenu({
             </span>
           )}
         </DropdownMenuLabel>
+        <DropdownMenuItem onSelect={() => openAccount(true)} className="gap-2">
+          <Wallet className="size-4" />
+          Account &amp; wallets
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="font-hud text-muted-foreground text-[10px] tracking-wider uppercase">
           Theme

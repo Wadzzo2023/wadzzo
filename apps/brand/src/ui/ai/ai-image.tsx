@@ -4,7 +4,7 @@ import { Check, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+} from "@wadzzo/ui/poster/dialog";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { FillForm } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";

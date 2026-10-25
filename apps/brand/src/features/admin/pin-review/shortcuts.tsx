@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 
 export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["J"], label: "Next pin" },

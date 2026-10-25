@@ -28,20 +28,20 @@ import {
   pinQRBulkActions,
   useDropQRs,
 } from "~/components/pins/qr";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
-import { Input } from "@wadzzo/ui/components/input";
+} from "@wadzzo/ui/poster/dropdown-menu";
+import { Input } from "@wadzzo/ui/poster/input";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -168,7 +168,7 @@ export default function PinManagementPage() {
             aria-selected={kind === k.id}
             onClick={() => setKind(k.id)}
             className={cn(
-              "bg-card focus-visible:outline-primary rounded-xl border p-3 text-left transition-colors focus-visible:outline-2",
+              "bg-card focus-visible:outline-primary border-foreground/10 rounded-[1.4rem] border-2 p-3 text-left transition-colors focus-visible:outline-2",
               kind === k.id ? "border-primary ring-primary ring-1" : "hover:border-primary/40",
             )}
           >
@@ -375,7 +375,10 @@ function GroupRow({
 
   return (
     <li
-      className={cn("bg-card overflow-hidden rounded-xl border", selected && "border-primary/60")}
+      className={cn(
+        "bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2",
+        selected && "border-primary/60",
+      )}
     >
       <div className="flex items-center gap-3 p-3">
         <input
@@ -694,7 +697,7 @@ function HotspotRow({
    * header above them.
    */
   return (
-    <li className="bg-card overflow-hidden rounded-xl border">
+    <li className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
       <div className="flex items-center gap-3 p-3">
         <span className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-lg">
           <Radar className="size-5" />

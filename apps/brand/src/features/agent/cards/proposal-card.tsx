@@ -3,7 +3,7 @@
 import { AlertTriangle, Check, CircleSlash, ClipboardCheck, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { Progress } from "@wadzzo/ui/components/progress";
 import type {
   ActionEdits,

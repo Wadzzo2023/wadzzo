@@ -1,0 +1,8 @@
+/*
+ * Wadzzo poster look (marketplace + brand portal): its fonts. The tokens are the defaults in @wadzzo/ui/styles/poster.css. Loaded after the app's own stylesheet, so these declarations win
+ * on equal specificity. Edit values here, never fork the app.
+ */
+
+@import "@fontsource-variable/sora";
+@import "@fontsource/anton/400.css";
+@import "@fontsource/permanent-marker/400.css";

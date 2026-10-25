@@ -2,7 +2,7 @@
 
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   type EmbedDraft,
   embedPageUrl,

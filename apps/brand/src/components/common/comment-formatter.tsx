@@ -1,5 +1,5 @@
 import { cn } from "@wadzzo/ui/lib/cn";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useState, type ReactElement } from "react";
 
 interface CommentFormatterProps {

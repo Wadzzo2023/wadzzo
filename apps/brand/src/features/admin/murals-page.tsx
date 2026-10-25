@@ -21,15 +21,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast, { type Toast } from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { FilterChips, SearchInput } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips, SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api } from "~/utils/api";
 
 import { plural, REJECT_LABEL, VIEW_STATUS, type MuralRow, type View } from "./mural-review/model";
@@ -368,7 +368,7 @@ function MuralCard({
   return (
     <li
       className={cn(
-        "bg-card flex flex-col overflow-hidden rounded-xl border transition-shadow",
+        "bg-card border-foreground/10 flex flex-col overflow-hidden rounded-[1.4rem] border-2 transition-shadow",
         focused && "ring-primary ring-2",
       )}
     >
@@ -471,7 +471,10 @@ function GridSkeleton() {
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {Array.from({ length: 6 }, (_, i) => (
-        <li key={i} className="bg-card overflow-hidden rounded-xl border">
+        <li
+          key={i}
+          className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2"
+        >
           <Skeleton className="aspect-[4/3] w-full rounded-none" />
           <div className="space-y-2 p-3">
             <Skeleton className="h-5 w-2/3" />

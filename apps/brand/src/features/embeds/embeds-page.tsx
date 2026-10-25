@@ -18,20 +18,20 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { scriptSnippet } from "@wadzzo/schemas/embed";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";
@@ -129,7 +129,7 @@ export default function EmbedsPage() {
               <article
                 key={e.id}
                 className={cn(
-                  "bg-card flex flex-col rounded-xl border p-4",
+                  "bg-card border-foreground/10 flex flex-col rounded-[1.4rem] border-2 p-4",
                   !e.enabled && "opacity-75",
                 )}
               >

@@ -9,10 +9,10 @@ import toast from "react-hot-toast";
 import { plainText } from "~/components/common/enhance-button";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Editor } from "~/components/common/quill-editor";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Dropzone } from "~/ui/upload/dropzone";
@@ -116,7 +116,7 @@ function EditForm({ bounty }: { bounty: Bounty }) {
       onSubmit={submit}
       actions={actions}
       aside={
-        <section className="bg-card rounded-xl border p-5">
+        <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-5">
           <h2 className="font-hud mb-3 text-base font-semibold">Reward</h2>
           <div className="divide-y text-sm">
             {(

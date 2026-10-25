@@ -15,24 +15,24 @@ import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { DataTable, type Column } from "~/ui/data-table";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
-import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatCard } from "@wadzzo/ui/poster/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
+import { SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
 
@@ -470,7 +470,9 @@ function Leaders({
 }) {
   const items = Array.isArray(children) ? children.filter(Boolean) : children ? [children] : [];
   return (
-    <section className={cn("bg-card rounded-xl border p-4", className)}>
+    <section
+      className={cn("bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4", className)}
+    >
       <h2 className="label-caps flex items-center gap-1.5">
         <Icon className="size-3.5" /> {title}
       </h2>

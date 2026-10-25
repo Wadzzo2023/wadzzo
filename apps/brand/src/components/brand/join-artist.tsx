@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 
 export default function JoinArtistPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function JoinArtistPage() {
     <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
       <Loader2 className="text-primary size-8 animate-spin" />
       <div>
-        <h2 className="font-hud text-xl font-bold">Setting up your brand</h2>
+        <h2 className="display text-4xl">Setting up your brand</h2>
         <p className="text-muted-foreground mt-1 text-sm">Redirecting you to brand onboarding...</p>
       </div>
       <Button asChild variant="outline" size="sm" className="mt-2">

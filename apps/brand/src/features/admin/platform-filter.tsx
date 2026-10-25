@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { api } from "~/utils/api";
 

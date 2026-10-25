@@ -6,11 +6,11 @@ import { Activity, ArrowDownLeft, ArrowRight, ArrowUpRight, ExternalLink } from 
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "~/ui/skin/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/ui/skin/dialog";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/poster/dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "~/ui/empty-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill, type Tone } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";

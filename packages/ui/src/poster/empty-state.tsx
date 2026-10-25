@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 
 /** "Nothing here yet" in the marketplace look: a tilted icon sticker, the title in display type and a hand-written line. */
 export function EmptyState({

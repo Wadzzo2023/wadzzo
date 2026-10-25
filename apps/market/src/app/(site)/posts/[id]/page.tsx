@@ -9,7 +9,7 @@ import { Comments } from "~/components/post/comments";
 import { PostCard } from "~/components/post/post-card";
 import { PostSidebar } from "~/components/post/post-sidebar";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 
 const getPost = cache(async (id: number) => {
   try {

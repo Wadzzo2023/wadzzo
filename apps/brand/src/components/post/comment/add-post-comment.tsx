@@ -9,8 +9,8 @@ import { z } from "zod";
 import { api } from "~/utils/api";
 
 import { useSession } from "next-auth/react";
-import { Button } from "@wadzzo/ui/components/button";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import CustomAvatar from "~/components/common/custom-avatar";
 

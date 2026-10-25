@@ -3,15 +3,15 @@
 import { FileText, Film, Image as ImageIcon, Music, Paperclip, X } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/ui/skin/dialog";
-import { Textarea } from "~/ui/skin/fields";
+} from "@wadzzo/ui/poster/dialog";
+import { Textarea } from "@wadzzo/ui/poster/fields";
 import { useEntryUpload, type UploadedMedia } from "~/hooks/use-entry-upload";
 import { MAX_ENTRY_FILES, entryFileProblem } from "@wadzzo/storage/upload-rules";
 import { api, type RouterOutputs } from "~/utils/api";

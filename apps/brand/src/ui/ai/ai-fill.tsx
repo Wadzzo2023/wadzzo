@@ -4,8 +4,8 @@ import { Loader2, Sparkles, Undo2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import type { FillForm, FillResult } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";
 

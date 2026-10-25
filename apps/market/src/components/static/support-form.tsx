@@ -3,9 +3,9 @@
 import { CheckCircle2, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { Button } from "~/ui/skin/button";
-import { Input } from "~/ui/skin/fields";
-import { Textarea } from "~/ui/skin/fields";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/fields";
+import { Textarea } from "@wadzzo/ui/poster/fields";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";

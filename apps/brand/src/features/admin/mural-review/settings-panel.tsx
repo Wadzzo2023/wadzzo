@@ -4,9 +4,9 @@ import { Coins, Info, Save, Sparkles, Users, Repeat } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
@@ -92,7 +92,7 @@ export function SettingsPanel() {
 
   return (
     <form
-      className="bg-card max-w-2xl rounded-xl border"
+      className="bg-card border-foreground/10 max-w-2xl rounded-[1.4rem] border-2"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) save.mutate(form);

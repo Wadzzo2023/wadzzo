@@ -20,11 +20,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
@@ -176,15 +176,15 @@ function EditForm({ item }: { item: Item }) {
         </>
       }
       aside={
-        <section className="bg-card overflow-hidden rounded-xl border">
+        <section className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
           <div className="bg-muted relative aspect-square">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={thumbnail} alt="" className="size-full object-cover" />
-            <span className="bg-card/90 absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium backdrop-blur">
+            <span className="bg-card/90 absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
               <media.icon className="size-3.5" /> {media.label}
             </span>
             {a.tier && (
-              <span className="bg-card/90 absolute top-3 right-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium backdrop-blur">
+              <span className="bg-card/90 absolute top-3 right-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium">
                 <Lock className="size-3" /> {a.tier.name}
               </span>
             )}

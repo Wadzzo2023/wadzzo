@@ -24,19 +24,19 @@ import { AddPostComment } from "~/components/post/comment/add-post-comment";
 import { SinglePostCommentSection } from "~/components/post/comment/single-post-comment-section";
 import MediaGallery from "~/components/post/media-gallery";
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -130,7 +130,7 @@ function PostView({ post }: { post: PostData }) {
     <PageBody className="max-w-3xl">
       <PageHeader title={post.heading} back={back} />
 
-      <article className="bg-card mt-6 overflow-hidden rounded-xl border">
+      <article className="bg-card border-foreground/10 mt-6 overflow-hidden rounded-[1.4rem] border-2">
         <header className="flex items-center gap-3 p-4 sm:p-5">
           <CustomAvatar url={post.creator.profileUrl} className="size-10" />
           <div className="min-w-0 flex-1">
@@ -221,7 +221,10 @@ function PostView({ post }: { post: PostData }) {
         </div>
       </article>
 
-      <section id="comments" className="bg-card mt-6 scroll-mt-20 rounded-xl border p-4 sm:p-5">
+      <section
+        id="comments"
+        className="bg-card border-foreground/10 mt-6 scroll-mt-20 rounded-[1.4rem] border-2 p-4 sm:p-5"
+      >
         <h2 className="font-hud text-muted-foreground text-sm font-semibold tracking-wider uppercase">
           Comments
         </h2>
@@ -248,7 +251,7 @@ function PostSkeleton() {
     <PageBody className="max-w-3xl">
       <Skeleton className="h-4 w-16" />
       <Skeleton className="mt-3 h-8 w-2/3" />
-      <div className="bg-card mt-6 space-y-4 rounded-xl border p-5">
+      <div className="bg-card border-foreground/10 mt-6 space-y-4 rounded-[1.4rem] border-2 p-5">
         <div className="flex items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
           <div className="space-y-1.5">

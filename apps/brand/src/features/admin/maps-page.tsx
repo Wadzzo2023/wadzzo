@@ -16,7 +16,7 @@ import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
 import HotspotDetailModal from "~/components/modals/hotspot-details-modal";
 import PinDetailAndActionsModal from "~/components/modals/pin-detail-modal";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { Switch } from "@wadzzo/ui/components/switch";
 import {
   useSelectCreatorStore,
@@ -257,7 +257,7 @@ export default function AdminMapsPage() {
             className="pointer-events-auto w-full sm:w-72"
             onSelect={(p) => flyTo(p, 14)}
           />
-          <label className="bg-card/95 pointer-events-auto flex h-10 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-medium shadow-sm backdrop-blur-sm">
+          <label className="bg-card/95 pointer-events-auto flex h-10 cursor-pointer items-center gap-2 rounded-lg border px-3 text-xs font-medium shadow-sm">
             <Switch
               checked={showExpired}
               onCheckedChange={setShowExpired}
@@ -268,7 +268,7 @@ export default function AdminMapsPage() {
           <div className="pointer-events-auto ml-auto flex items-center gap-2">
             <Button
               variant="outline"
-              className="bg-card/95 shadow-sm backdrop-blur-sm"
+              className="bg-card/95 shadow-sm"
               onClick={() => setDrawing(true)}
               disabled={!brand}
             >
@@ -293,12 +293,12 @@ export default function AdminMapsPage() {
               Click the map to {isPinCut ? "move" : "paste"} the pin
             </span>
           ) : loading ? (
-            <span className="bg-card/95 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs shadow-md backdrop-blur-sm">
+            <span className="bg-card/95 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs shadow-md">
               <Loader2 className="text-primary size-3.5 animate-spin" /> Loading {brand?.name}
               &rsquo;s pins…
             </span>
           ) : (
-            <span className="bg-card/95 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs shadow-md backdrop-blur-sm">
+            <span className="bg-card/95 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs shadow-md">
               <MapPinOff className="text-muted-foreground size-3.5" />
               {brand?.name} has no {showExpired ? "expired" : "live"} pins — click the map to drop
               one.

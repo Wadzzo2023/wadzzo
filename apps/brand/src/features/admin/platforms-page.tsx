@@ -4,7 +4,7 @@ import { Building2, Loader2, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +12,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { DataTable, type Column } from "~/ui/data-table";
 import { Field } from "~/ui/form-page";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
 

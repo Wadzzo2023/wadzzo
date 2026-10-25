@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { FillForm } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";

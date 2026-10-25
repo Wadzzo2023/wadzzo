@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
+import { DialogProfileSync } from "~/components/shell/dialog-profile-sync";
 import { TRPCReactProvider } from "~/trpc/provider";
 
 // The wallet package's global dialogs (connect wallet, toasts). Browser-only.
@@ -20,6 +21,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <TRPCReactProvider>
           {children}
           <WalletPopups className="font-sans" />
+          <DialogProfileSync />
         </TRPCReactProvider>
       </ThemeProvider>
     </SessionProvider>

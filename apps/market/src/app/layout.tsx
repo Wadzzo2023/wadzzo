@@ -1,7 +1,4 @@
-// Self-hosted fonts: Sora body, Anton display, Permanent Marker for hand-written notes.
-import "@fontsource-variable/sora";
-import "@fontsource/anton/400.css";
-import "@fontsource/permanent-marker/400.css";
+// Fonts come with the platform theme (packages/platform/themes/<slug>/poster.css).
 import "~/styles/globals.css";
 import "~/styles/platform-theme.css";
 

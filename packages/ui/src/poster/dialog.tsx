@@ -1,10 +1,7 @@
 import type * as React from "react";
 
-import {
-  DialogContent as BaseContent,
-  DialogTitle as BaseTitle,
-} from "@wadzzo/ui/components/dialog";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { DialogContent as BaseContent, DialogTitle as BaseTitle } from "../components/dialog";
+import { cn } from "../lib/cn";
 
 export {
   Dialog,
@@ -15,7 +12,7 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTrigger,
-} from "@wadzzo/ui/components/dialog";
+} from "../components/dialog";
 
 /** A sticker-style panel: thick border and a hard green drop shadow (the overlay is restyled in globals.css). */
 export function DialogContent({ className, ...props }: React.ComponentProps<typeof BaseContent>) {

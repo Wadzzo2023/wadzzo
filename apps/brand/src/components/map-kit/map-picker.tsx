@@ -4,7 +4,7 @@ import { LocateFixed, MapPin } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layer, Marker, Source, type MapRef } from "react-map-gl/mapbox";
 
-import { Input } from "@wadzzo/ui/components/input";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { cn } from "@wadzzo/ui/lib/cn";
 

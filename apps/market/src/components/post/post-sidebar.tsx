@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { FollowButton } from "~/components/creator/creator-actions";
 import { tierColor } from "~/components/creator/tier-card";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { env } from "~/env";
 import { creatorHref } from "~/lib/creator";
 import { cn } from "@wadzzo/ui/lib/cn";

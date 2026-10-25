@@ -6,22 +6,22 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createElement, useMemo, useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+} from "@wadzzo/ui/poster/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import type { MarketAssetType } from "~/lib/state/play/use-modal-store";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { PageAssetTab } from "./page-asset-tab";
@@ -134,7 +134,10 @@ function AssetsTab() {
     return (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="bg-card overflow-hidden rounded-xl border">
+          <div
+            key={i}
+            className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2"
+          >
             <Skeleton className="aspect-square w-full rounded-none" />
             <div className="space-y-2 p-3">
               <Skeleton className="h-4 w-2/3" />
@@ -245,7 +248,7 @@ export function AssetCard({ item }: { item: MarketAssetType }) {
   return (
     <Link
       href={`/stores/${item.id}`}
-      className="group bg-card focus-visible:outline-primary block w-full overflow-hidden rounded-xl border text-left transition-shadow hover:shadow-md focus-visible:outline-2"
+      className="group bg-card focus-visible:outline-primary border-foreground/10 block w-full overflow-hidden rounded-[1.4rem] border-2 text-left transition-shadow hover:shadow-md focus-visible:outline-2"
     >
       <div className="bg-surface-2 relative aspect-square overflow-hidden">
         {item.asset.thumbnail ? (

@@ -14,12 +14,12 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { env } from "~/env";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
@@ -94,7 +94,7 @@ function Summary({ data }: { data: Data }) {
     { label: "Assets held", value: String(data.tokens.length) },
   ];
   return (
-    <section className="bg-card rounded-xl border p-4 sm:p-5">
+    <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
       <div className="flex flex-wrap items-center gap-3">
         <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
           <Wallet className="size-5" />
@@ -145,7 +145,7 @@ function Holdings({ tokens }: { tokens: Data["tokens"] }) {
           description="Items you mint ahead of time land here and leave when fans buy or claim them."
         />
       ) : (
-        <ul className="bg-card divide-y rounded-xl border">
+        <ul className="bg-card border-foreground/10 divide-y rounded-[1.4rem] border-2">
           {tokens.map((t) => (
             <li key={`${t.code}-${t.issuer}`} className="flex items-center gap-3 p-3">
               {t.item?.thumbnail ? (
@@ -193,7 +193,7 @@ function History() {
         />
       ) : (
         <>
-          <ul className="bg-card divide-y rounded-xl border">
+          <ul className="bg-card border-foreground/10 divide-y rounded-[1.4rem] border-2">
             {rows.map((r) => {
               const out = r.kind === "sent";
               return (

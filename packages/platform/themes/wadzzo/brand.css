@@ -1,10 +1,4 @@
 /*
- * Wadzzo brand portal theme. Loaded after the app's own stylesheet, so these declarations win
- * on equal specificity. Generated from the differences between the platform's
- * look and the default Wadzzo look; edit values here, never fork the app.
+ * Wadzzo brand portal theme (no overrides: the poster look comes from poster.css). Loaded after the app's own stylesheet, so these declarations win
+ * on equal specificity. Edit values here, never fork the app.
  */
-
-@import "@fontsource-variable/sora";
-@import "@fontsource/chakra-petch/500.css";
-@import "@fontsource/chakra-petch/600.css";
-@import "@fontsource/chakra-petch/700.css";

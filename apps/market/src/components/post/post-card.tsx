@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 import { creatorHref } from "~/lib/creator";
 import { tierColor } from "~/components/creator/tier-card";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";

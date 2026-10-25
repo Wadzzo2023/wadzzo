@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import { PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageHeader } from "@wadzzo/ui/poster/page-header";
 
 /**
  * Layout for the create/edit pages (pins, hotspots, bounties, posts, assets).
@@ -44,7 +44,7 @@ export function FormPage({
         {aside && <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">{aside}</aside>}
       </div>
       {/* Phone: actions stay reachable above the tab bar. */}
-      <div className="bg-card/95 fixed inset-x-0 bottom-[calc(4rem+var(--safe-bottom))] z-30 flex items-center justify-end gap-2 border-t px-4 py-3 backdrop-blur-sm lg:hidden">
+      <div className="bg-card fixed inset-x-0 bottom-[calc(4rem+var(--safe-bottom))] z-30 flex items-center justify-end gap-2 border-t-2 px-4 py-3 lg:hidden">
         {actions}
       </div>
     </form>
@@ -66,10 +66,16 @@ export function FormSection({
   className?: string;
 }) {
   return (
-    <section className={cn("bg-card rounded-xl border p-5", className)}>
+    <section
+      className={cn("bg-card border-foreground/10 rounded-[1.4rem] border-2 p-5", className)}
+    >
       <div className="mb-4">
-        <h2 className="font-hud flex items-center gap-2 text-base font-semibold">
-          {Icon && <Icon className="text-primary size-4" />}
+        <h2 className="display flex items-center gap-2.5 text-2xl">
+          {Icon && (
+            <span className="bg-primary text-primary-foreground flex size-8 shrink-0 -rotate-6 items-center justify-center rounded-lg">
+              <Icon className="size-4" strokeWidth={2.4} />
+            </span>
+          )}
           {title}
         </h2>
         {description && <div className="text-muted-foreground mt-1 text-sm">{description}</div>}

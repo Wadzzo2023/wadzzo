@@ -26,26 +26,26 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import toast, { type Toast } from "react-hot-toast";
 
 import { PinQRDownloadAllButton, pinQRBulkActions, useDropQRs } from "~/components/pins/qr";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { PlatformFilter } from "~/features/admin/platform-filter";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { Check, RowMenu, type RowAction } from "~/ui/data-table";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { FilterChips, SearchInput } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips, SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api } from "~/utils/api";
 
 import { AreaDialog } from "./pin-review/area-dialog";
@@ -563,9 +563,7 @@ export default function AdminPinsPage() {
         <div
           className={cn(
             "sticky top-2 z-20 mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border px-3 py-2 transition-colors sm:px-4",
-            selectedIds.length
-              ? "bg-card/95 shadow-md backdrop-blur"
-              : "border-transparent bg-transparent",
+            selectedIds.length ? "bg-card/95 shadow-md" : "border-transparent bg-transparent",
           )}
         >
           <Check
@@ -690,7 +688,7 @@ export default function AdminPinsPage() {
               <section
                 key={b.id}
                 className={cn(
-                  "bg-card overflow-hidden rounded-xl border",
+                  "bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2",
                   picked > 0 && "ring-primary/40 ring-1",
                 )}
               >
@@ -770,7 +768,7 @@ export default function AdminPinsPage() {
             );
           })
         ) : (
-          <section className="bg-card overflow-hidden rounded-xl border">
+          <section className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
             <ul className="divide-y">
               {rows.slice(0, shownOf(FLAT)).map((g) => (
                 <PinRow key={g.id} {...rowProps(g, true)} />
@@ -1077,7 +1075,10 @@ function ListSkeleton() {
   return (
     <>
       {[5, 0, 0, 0].map((rows, i) => (
-        <div key={i} className="bg-card overflow-hidden rounded-xl border">
+        <div
+          key={i}
+          className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2"
+        >
           <div className="flex items-center gap-3 px-3 py-3">
             <Skeleton className="size-6 rounded" />
             <Skeleton className="size-4 rounded" />

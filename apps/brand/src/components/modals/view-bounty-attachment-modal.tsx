@@ -1,13 +1,13 @@
 import React from "react";
 import { useModal } from "../../lib/state/play/use-modal-store";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 import AttachmentSection from "../bounty/attachment-section";
 import { type SubmissionAttachment } from "@wadzzo/db";
 

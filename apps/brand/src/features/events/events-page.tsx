@@ -32,18 +32,18 @@ import {
   AlertDialogTitle,
 } from "@wadzzo/ui/components/alert-dialog";
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { Skeleton } from "@wadzzo/ui/components/skeleton";
 import { EngagementDialog } from "~/components/events/engagement-dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { api, type RouterOutputs } from "~/utils/api";
 import { platformBranding } from "@wadzzo/platform/branding";
 

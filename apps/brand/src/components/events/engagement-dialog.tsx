@@ -11,8 +11,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+} from "@wadzzo/ui/poster/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import { api } from "~/utils/api";
 
 type Target = { kind: "event" | "announcement"; id: string; title: string };

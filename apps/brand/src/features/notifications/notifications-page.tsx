@@ -5,11 +5,11 @@ import { useMemo, useState } from "react";
 
 import { NotificationRow } from "~/components/notification/notification-row";
 import { useInboxActions } from "~/components/notification/use-inbox-actions";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { CATEGORIES } from "@wadzzo/platform/notifications";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import type { InboxItem } from "@wadzzo/platform/notifications";
 import { api } from "~/utils/api";
@@ -125,7 +125,7 @@ export default function NotificationsPage() {
       </div>
 
       {list.isPending ? (
-        <div className="bg-card space-y-2 rounded-xl border p-2">
+        <div className="bg-card border-foreground/10 space-y-2 rounded-[1.4rem] border-2 p-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-14 rounded-lg" />
           ))}
@@ -147,7 +147,7 @@ export default function NotificationsPage() {
               <h2 className="font-hud text-faint px-1 text-[11px] font-semibold tracking-[0.18em] uppercase">
                 {s.label}
               </h2>
-              <div className="bg-card divide-y rounded-xl border p-1">
+              <div className="bg-card border-foreground/10 divide-y rounded-[1.4rem] border-2 p-1">
                 {s.rows.map((i) => (
                   <NotificationRow key={i.ids[0]} item={i} />
                 ))}

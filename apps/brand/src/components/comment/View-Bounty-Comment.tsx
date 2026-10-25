@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { api } from "~/utils/api";
 import { type BountyComment } from "@wadzzo/db";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import CustomAvatar from "../common/custom-avatar";
 import { AddBountyReplyComment } from "../reply/Add-Reply-Bounty-Comment";
 import ViewReplyBountyComment from "../reply/View-Reply-Bounty-Comment";

@@ -5,15 +5,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { CardForm } from "~/components/payment/card-form";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/ui/skin/dialog";
-import { Input } from "~/ui/skin/fields";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/fields";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";

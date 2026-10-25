@@ -7,17 +7,10 @@ import { FILL_FORMS, FILL_SCHEMAS, FORM_BRIEF } from "@wadzzo/schemas/ai-forms";
 import { aiRemaining, IMAGE_MODEL, openai, TEXT_MODEL, withAiQuota } from "../server/ai/openai";
 import { createTRPCRouter, creatorProcedure } from "../trpc";
 import { uploadBufferToS3 } from "@wadzzo/storage";
+import { pinataClient } from "../server/pinata";
 import { ipfsHashToPinataGatewayUrl } from "@wadzzo/utils/ipfs";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pinataSDK = require("@pinata/sdk") as new (o: { pinataJWTKey: string }) => {
-  pinFileToIPFS: (
-    s: Readable,
-    o: { pinataMetadata: { name: string } },
-  ) => Promise<{ IpfsHash: string }>;
-};
 
 const formEnum = z.enum(FILL_FORMS);
 const context = z.record(z.string(), z.string().max(4000)).default({});
@@ -175,9 +168,9 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
           const stream = Object.assign(Readable.from(bytes), {
             path: "ai-thumbnail.png",
           });
-          const pinned = await new pinataSDK({
-            pinataJWTKey: env.PINATA_JWT,
-          }).pinFileToIPFS(stream, {
+          const pinned = await (
+            await pinataClient(env.PINATA_JWT)
+          ).pinFileToIPFS(stream, {
             pinataMetadata: { name: "ai-thumbnail.png" },
           });
           return {

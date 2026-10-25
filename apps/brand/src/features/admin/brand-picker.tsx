@@ -3,7 +3,7 @@
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/poster/popover";
 import type { SelectedCreator } from "~/components/store/creator-selection-store";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
@@ -46,7 +46,7 @@ export function BrandPicker({
         <button
           type="button"
           className={cn(
-            "bg-card/95 hover:border-line-bright flex h-10 items-center gap-2 rounded-lg border px-2.5 text-left text-sm shadow-sm backdrop-blur-sm transition-colors",
+            "bg-card/95 hover:border-line-bright flex h-10 items-center gap-2 rounded-lg border px-2.5 text-left text-sm shadow-sm transition-colors",
             className,
           )}
           aria-label="Choose a brand"

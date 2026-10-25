@@ -8,16 +8,16 @@ import toast from "react-hot-toast";
 import { z } from "zod";
 
 import CustomAvatar from "~/components/common/custom-avatar";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { useCustodialSigner } from "@wadzzo/wallet";
 import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import { PLATFORM_ASSET, TrxBaseFee, TrxBaseFeeInPlatformAsset } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Field, FormSection } from "~/ui/form-page";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { fetchPubkeyfromEmail } from "@wadzzo/api/brand/server/accounts-directory";
@@ -478,7 +478,7 @@ type ItemQuote = RouterOutputs["fan"]["gift"]["quote"];
 /** What the brand pays for an item gift, line by line, and what's left after. */
 function Breakdown({ quote }: { quote: ItemQuote }) {
   return (
-    <div className="bg-card rounded-xl border">
+    <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2">
       <p className="font-hud text-muted-foreground border-b px-4 py-2.5 text-[11px] font-semibold tracking-wider uppercase">
         Price breakdown
       </p>
@@ -528,7 +528,7 @@ function FansPanel({
   });
 
   return (
-    <aside className="bg-card rounded-xl border lg:sticky lg:top-6 lg:self-start">
+    <aside className="bg-card border-foreground/10 rounded-[1.4rem] border-2 lg:sticky lg:top-6 lg:self-start">
       <div className="border-b p-4">
         <h2 className="font-hud flex items-center gap-2 text-base font-semibold">
           <Gift className="text-primary size-4" /> Your followers

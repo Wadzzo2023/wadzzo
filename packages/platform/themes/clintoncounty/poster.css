@@ -1,0 +1,94 @@
+/*
+ * Clinton County poster look (marketplace + brand portal): the Wadzzo layout and type in
+ * clintoncounty-ia.gov's maroon and gold —
+ *   maroon #802D40  the sidebar and brand blocks (the site's top bar), buttons, links, emphasis
+ *   gold   #CEC08D  the current page in the nav, tags and stickers, with dark text
+ *   white cards on a light-grey page, near-black text.
+ * Type is the same as Wadzzo's (Anton display, Permanent Marker notes, Sora for reading).
+ * Loaded after the app's own stylesheet, so these declarations win on equal specificity.
+ * Edit values here, never fork the app.
+ */
+
+@import "@fontsource-variable/sora";
+@import "@fontsource/anton/400.css";
+@import "@fontsource/permanent-marker/400.css";
+
+:root {
+  --cc-maroon: 346 48% 34%;
+  --cc-gold: 47 40% 68%;
+
+  --ar-void: 0 0% 90%;
+  --ar-bg: 0 0% 95%;
+  --ar-surface: 0 0% 100%;
+  --ar-surface-2: 0 0% 93%;
+  --ar-surface-3: 0 0% 90%;
+  --ar-line: 0 0% 87%;
+  --ar-line-bright: 0 0% 70%;
+  --ar-text: 0 0% 7%;
+  --ar-text-dim: 0 0% 30%;
+  --ar-text-faint: 0 0% 44%;
+
+  /* green only for "success" states */
+  --ar-green: 145 60% 28%;
+  --ar-green-hot: 145 60% 34%;
+  --ar-green-deep: 145 70% 18%;
+  --ar-green-ink: 0 0% 100%;
+
+  --primary: var(--cc-maroon);
+  --primary-foreground: 0 0% 100%;
+  --primary-text: var(--cc-maroon);
+  --ring: var(--cc-maroon);
+
+  /* outside the sidebar: gold chips and stickers with dark text */
+  --side-bg: var(--cc-maroon);
+  --side-ink: 0 0% 7%;
+  --side-mint: var(--cc-gold);
+  /* the sidebar and other brand blocks: maroon with white type */
+  --ink: var(--cc-maroon);
+  --ink-fg: 0 0% 100%;
+  --ink-mint: 346 45% 26%;
+  /* the current page in the nav: gold */
+  --side-active-bg: var(--cc-gold);
+  --side-active-fg: 0 0% 10%;
+
+  --ar-pink: var(--cc-gold);
+  --ar-violet: var(--cc-maroon);
+  --ar-cyan: 205 65% 34%;
+
+  --rarity-common: 0 0% 38%;
+  --rarity-rare: 205 65% 34%;
+  --rarity-epic: var(--cc-maroon);
+  --rarity-legendary: 42 72% 30%;
+  --rarity-mythic: 322 62% 40%;
+
+  --radius: 8px;
+}
+
+/* The site has no dark mode; this is its palette on a charcoal page. */
+.dark {
+  --ar-void: 0 0% 5%;
+  --ar-bg: 0 0% 8%;
+  --ar-surface: 0 0% 12%;
+  --ar-surface-2: 0 0% 15%;
+  --ar-surface-3: 0 0% 19%;
+  --ar-line: 0 0% 22%;
+  --ar-line-bright: 0 0% 33%;
+  --ar-text: 0 0% 96%;
+  --ar-text-dim: 0 0% 72%;
+  --ar-text-faint: 0 0% 52%;
+
+  --ar-green: 145 50% 42%;
+  --ar-green-hot: 145 55% 50%;
+  --primary: 346 52% 48%;
+  --primary-text: 346 60% 72%;
+  --ring: 346 52% 48%;
+
+  --side-bg: 346 48% 30%;
+  --side-ink: 0 0% 100%;
+  --side-mint: 346 40% 22%;
+
+  /* white sticker text in dark mode, so maroon stickers instead of gold */
+  --ar-pink: 346 50% 42%;
+  --ar-violet: 346 60% 62%;
+  --ar-cyan: 205 80% 64%;
+}

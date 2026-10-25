@@ -23,12 +23,12 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { LocationAddressDisplay } from "~/components/map/address-display";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -62,7 +62,7 @@ export default function RedeemView() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="bg-card rounded-xl border p-4 sm:p-5">
+        <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
               <Ticket className="text-primary size-5" />
@@ -79,7 +79,7 @@ export default function RedeemView() {
             </div>
           </div>
         </div>
-        <div className="bg-card rounded-xl border p-4 sm:p-5">
+        <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <div className="bg-warning/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
               <Users className="text-warning size-5" />
@@ -96,7 +96,7 @@ export default function RedeemView() {
             </div>
           </div>
         </div>
-        <div className="bg-card rounded-xl border p-4 sm:p-5">
+        <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 flex size-10 shrink-0 items-center justify-center rounded-lg">
               <CheckCircle2 className="text-primary size-5" />
@@ -188,7 +188,7 @@ function CodeChecker() {
     result && (result.status === "pending" || result.status === "already_redeemed") ? result : null;
 
   return (
-    <section className="bg-card grid gap-4 rounded-xl border p-4 sm:p-6 lg:grid-cols-[minmax(0,380px)_1fr]">
+    <section className="bg-card border-foreground/10 grid gap-4 rounded-[1.4rem] border-2 p-4 sm:p-6 lg:grid-cols-[minmax(0,380px)_1fr]">
       <form onSubmit={check} className="flex flex-col">
         <h2 className="font-hud flex items-center gap-2 text-lg font-semibold">
           <Ticket className="text-primary size-5" /> Redeem a code
@@ -553,7 +553,7 @@ function RewardRow({ group: g }: { group: Group }) {
   const pct = g.totalConsumers ? Math.round((g.totalRedeemed / g.totalConsumers) * 100) : 0;
 
   return (
-    <li className="bg-card overflow-hidden rounded-xl border">
+    <li className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -692,7 +692,7 @@ function HistoryTab() {
         />
       ) : (
         <>
-          <ul className="bg-card divide-y overflow-hidden rounded-xl border">
+          <ul className="bg-card border-foreground/10 divide-y overflow-hidden rounded-[1.4rem] border-2">
             {items.map((i) => (
               <HistoryRow key={i.id} item={i} />
             ))}

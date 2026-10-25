@@ -6,10 +6,10 @@ import { cache, Suspense } from "react";
 
 import { FollowButton, ShareButton } from "~/components/creator/creator-actions";
 import { CreatorTabs } from "~/components/creator/creator-tabs";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { platformBranding } from "@wadzzo/platform/branding";
 

@@ -17,14 +17,14 @@ import { useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
 import { SignedIn } from "~/components/shell/sign-in-prompt";
-import { Button } from "~/ui/skin/button";
-import { Input } from "~/ui/skin/fields";
-import { Textarea } from "~/ui/skin/fields";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/fields";
+import { Textarea } from "@wadzzo/ui/poster/fields";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { describeFile, putFile } from "~/lib/upload";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";

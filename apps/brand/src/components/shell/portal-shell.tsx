@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 
@@ -13,6 +12,7 @@ import { Sidebar } from "./sidebar";
 import { usePortalAccess } from "./use-portal-access";
 import { UserMenu } from "./user-menu";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 const COLLAPSE_KEY = "wadzzo.sidebar.collapsed";
 /** The saved choice only changes through our own toggle, so there's nothing to subscribe to. */
@@ -65,24 +65,14 @@ export function PortalShell({ children }: { children: ReactNode }) {
   if (isOnboardingRoute) {
     return (
       <div className="bg-background flex min-h-dvh flex-col">
-        <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 backdrop-blur-sm sm:px-8">
+        <header className="side-scope bg-side text-side-ink sticky top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-2.5">
-            <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
-              <Image
-                src={platformBranding.assets.loading}
-                alt=""
-                width={20}
-                height={20}
-                className="object-contain"
-              />
+            <span className="bg-side-ink text-side flex size-10 -rotate-3 items-center justify-center rounded-xl">
+              <WadzzoMark className="h-5" />
             </span>
-            <span className="leading-tight">
-              <span className="font-hud block text-base font-bold tracking-tight">
-                {platformBranding.name}
-              </span>
-              <span className="font-hud text-muted-foreground block text-[10px] font-semibold tracking-[0.18em] uppercase">
-                Brand Onboarding
-              </span>
+            <span className="leading-none">
+              <span className="display block text-[1.7rem]">{platformBranding.name}</span>
+              <span className="marker mt-0.5 block text-[11px] opacity-75">brand onboarding</span>
             </span>
           </div>
           <UserMenu compact />

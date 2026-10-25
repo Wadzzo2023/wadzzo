@@ -6,10 +6,10 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 import PostCard from "~/components/post/post-card";
-import { Button } from "@wadzzo/ui/components/button";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { Button } from "@wadzzo/ui/poster/button";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api } from "~/utils/api";
@@ -46,7 +46,10 @@ export default function PostsPage() {
       <div className="mt-6 space-y-4">
         {posts.isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-card space-y-3 rounded-xl border p-5">
+            <div
+              key={i}
+              className="bg-card border-foreground/10 space-y-3 rounded-[1.4rem] border-2 p-5"
+            >
               <div className="flex items-center gap-3">
                 <Skeleton className="size-10 rounded-full" />
                 <div className="space-y-1.5">

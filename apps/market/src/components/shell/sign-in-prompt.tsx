@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 

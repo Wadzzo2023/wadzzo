@@ -20,16 +20,16 @@ import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
 import { featureCenter, toMapboxFeature, type StoredFeature } from "@wadzzo/geo/map-geometry";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { api } from "~/utils/api";
 
 type Props = {

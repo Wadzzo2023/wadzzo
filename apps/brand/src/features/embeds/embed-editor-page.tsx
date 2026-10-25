@@ -16,11 +16,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { EmbedInstall } from "~/components/embeds/embed-install";
 import { EmbedStats } from "~/components/embeds/embed-stats";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import {
   DEFAULT_DRAFT,
   type EmbedDraft,

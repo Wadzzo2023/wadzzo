@@ -16,16 +16,16 @@ import { useState } from "react";
 
 import { MEDIA_META } from "~/components/media/media-meta";
 import { Price } from "~/components/price/price";
-import { Button } from "~/ui/skin/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/ui/skin/dialog";
-import { Input } from "~/ui/skin/fields";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/fields";
 import { env } from "~/env";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "~/ui/empty-state";
-import { ErrorState } from "~/ui/error-state";
-import { PageBody } from "~/ui/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { PageHero } from "~/ui/page-hero";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import {
@@ -36,7 +36,7 @@ import {
   wordTabOff,
   wordTabOn,
 } from "~/ui/styles";
-import { SearchInput } from "~/ui/toolbar";
+import { SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { ListDialog, StorageSetupDialog } from "./resale-dialogs";

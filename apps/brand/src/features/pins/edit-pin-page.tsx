@@ -12,18 +12,18 @@ import type { z } from "zod";
 import { MapPicker } from "~/components/map-kit/map-picker";
 import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";

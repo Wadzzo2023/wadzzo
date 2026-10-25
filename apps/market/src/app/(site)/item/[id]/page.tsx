@@ -11,7 +11,12 @@ import { BuyPanel } from "~/components/market/buy-panel";
 import { ItemActions } from "~/components/market/item-actions";
 import { ListingCard, ListingGrid } from "~/components/market/listing-card";
 import { ItemMedia } from "~/components/media/item-media";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@wadzzo/ui/poster/accordion";
 import { MEDIA_META } from "~/components/media/media-meta";
 import { env } from "~/env";
 import { formatTokenShort, formatUsdShort } from "~/lib/money";
@@ -19,7 +24,7 @@ import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { stellarNetwork } from "@wadzzo/wallet/config";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { Section } from "~/ui/section";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { WadzzoMark } from "~/ui/wadzzo-mark";

@@ -3,14 +3,14 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { CREATE_ACTIONS } from "./nav";
@@ -27,7 +27,10 @@ export function CreateMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className={cn("w-full", collapsed && "px-0")} aria-label="Create">
+        <Button
+          className={cn("bg-side-ink text-side hover:bg-side-ink w-full", collapsed && "px-0")}
+          aria-label="Create"
+        >
           <Plus />
           {!collapsed && "Create"}
         </Button>

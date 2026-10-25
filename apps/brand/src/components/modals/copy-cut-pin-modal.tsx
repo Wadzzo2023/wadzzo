@@ -3,9 +3,9 @@
 import { BadgeMinus, ClipboardCheck } from "lucide-react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/poster/dialog";
 import { api } from "~/utils/api";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useMapInteractionStore } from "~/store/map-stores";
 import { useCopyCutModalStore } from "~/store/copy-cut-modal-store";
 

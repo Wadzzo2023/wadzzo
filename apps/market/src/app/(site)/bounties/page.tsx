@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { BountyBrowser } from "~/components/bounty/bounty-browser";
 import { formatUsd } from "~/lib/bounty";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { PageHero } from "~/ui/page-hero";
 
 export const metadata: Metadata = {

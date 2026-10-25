@@ -6,7 +6,7 @@ import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { PlaceSearch } from "~/components/map-kit/place-search";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 
 import type { Area } from "./model";
 

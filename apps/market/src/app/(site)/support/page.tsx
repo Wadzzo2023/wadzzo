@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { StaticHeader } from "~/components/static/static-header";
 import { SupportForm } from "~/components/static/support-form";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {

@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter } from "next/navigation";
 
-import { Button } from "~/ui/skin/button";
-import { SearchInput } from "~/ui/toolbar";
+import { Button } from "@wadzzo/ui/poster/button";
+import { SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api } from "~/utils/api";
 
 import { CreatorCard } from "./creator-card";

@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@wadzzo/ui/components/alert-dialog";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 

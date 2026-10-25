@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -14,20 +14,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { DataTable, type Column } from "~/ui/data-table";
 import { Field } from "~/ui/form-page";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";

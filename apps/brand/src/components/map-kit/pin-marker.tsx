@@ -150,7 +150,7 @@ export function PinLegend({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "bg-card/95 pointer-events-auto rounded-xl border p-2.5 text-[11px] shadow-sm backdrop-blur-sm",
+        "bg-card/95 border-foreground/10 pointer-events-auto rounded-[1.4rem] border-2 p-2.5 text-[11px] shadow-sm",
         className,
       )}
     >

@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPostCreatedAt } from "~/utils/format-date";
 import { type Comment } from "@wadzzo/db";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { cn } from "@wadzzo/ui/lib/cn";

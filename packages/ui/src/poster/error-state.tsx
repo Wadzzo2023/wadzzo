@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 
-import { Button } from "~/ui/skin/button";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Button } from "./button";
+import { cn } from "../lib/cn";
 
 /** A query failed: say so plainly and offer a retry. */
 export function ErrorState({

@@ -24,17 +24,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { PinQRDialog } from "~/components/pins/qr";
-import { Button } from "@wadzzo/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@wadzzo/ui/poster/dialog";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useMapInteractionStore } from "~/store/map-stores";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
@@ -165,16 +160,16 @@ export default function PinDetailPanel() {
                 aria-hidden
               />
               <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                <StatusPill tone={status.tone} className="bg-card/95 backdrop-blur">
+                <StatusPill tone={status.tone} className="bg-card/95">
                   {status.label}
                 </StatusPill>
                 {pin.autoCollect && (
-                  <StatusPill tone="primary" icon={Zap} className="bg-card/95 backdrop-blur">
+                  <StatusPill tone="primary" icon={Zap} className="bg-card/95">
                     Auto-collect
                   </StatusPill>
                 )}
                 {pin.hidden && (
-                  <StatusPill tone="danger" className="bg-card/95 backdrop-blur">
+                  <StatusPill tone="danger" className="bg-card/95">
                     Hidden
                   </StatusPill>
                 )}
@@ -282,7 +277,7 @@ export default function PinDetailPanel() {
               </DialogDescription>
 
               {/* How fans collect it — the one setting worth flipping from here. */}
-              <label className="bg-card flex cursor-pointer items-start gap-3 rounded-xl border p-3.5">
+              <label className="bg-card border-foreground/10 flex cursor-pointer items-start gap-3 rounded-[1.4rem] border-2 p-3.5">
                 <Zap
                   className={cn(
                     "mt-0.5 size-4 shrink-0",
@@ -430,7 +425,7 @@ function ToolButton({
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="bg-card rounded-xl border px-3 py-2.5">
+    <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 px-3 py-2.5">
       <dt className="label-caps">{label}</dt>
       <dd className="font-hud mt-0.5 truncate text-lg font-bold tabular-nums">{value}</dd>
       {hint && <dd className="text-muted-foreground text-[11px]">{hint}</dd>}

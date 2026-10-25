@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Card, CardHeader, CardContent, CardFooter } from "@wadzzo/ui/components/card";
+import { Card, CardHeader, CardContent, CardFooter } from "@wadzzo/ui/poster/card";
 import { Loader2, Paperclip, Plus, Search, Send, Trash } from "lucide-react";
 import { UserRole } from "@wadzzo/db";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -14,16 +14,16 @@ import { abbreviateAddress } from "@wadzzo/utils/address";
 import type { MutableRefObject } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@wadzzo/ui/components/avatar";
 import { ScrollArea } from "@wadzzo/ui/components/scroll-area";
-import { Input } from "@wadzzo/ui/components/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
-import { Button } from "@wadzzo/ui/components/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 import CustomAvatar from "../common/custom-avatar";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";

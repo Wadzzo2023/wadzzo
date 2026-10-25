@@ -11,8 +11,8 @@ import type { z } from "zod";
 
 import type { StoredFeature } from "@wadzzo/geo/map-geometry";
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
 import {
   Select,
@@ -20,13 +20,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { updateHotspotFormSchema } from "@wadzzo/schemas/hotspot";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -172,7 +172,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       aside={
         <aside className="space-y-4">
           {feature && (
-            <div className="bg-card space-y-2 rounded-xl border p-4">
+            <div className="bg-card border-foreground/10 space-y-2 rounded-[1.4rem] border-2 p-4">
               <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 Area
               </p>
@@ -186,7 +186,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
             </div>
           )}
 
-          <div className="bg-card space-y-3 rounded-xl border p-4">
+          <div className="bg-card border-foreground/10 space-y-3 rounded-[1.4rem] border-2 p-4">
             <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Stats
             </p>

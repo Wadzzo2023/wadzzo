@@ -4,8 +4,8 @@ import {
   SelectContent as BaseContent,
   SelectItem as BaseItem,
   SelectTrigger as BaseTrigger,
-} from "@wadzzo/ui/components/select";
-import { cn } from "@wadzzo/ui/lib/cn";
+} from "../components/select";
+import { cn } from "../lib/cn";
 
 export {
   Select,
@@ -15,7 +15,7 @@ export {
   SelectScrollUpButton,
   SelectSeparator,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "../components/select";
 
 export function SelectTrigger({ className, ...props }: React.ComponentProps<typeof BaseTrigger>) {
   return (

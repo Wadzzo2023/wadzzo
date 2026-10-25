@@ -12,11 +12,11 @@ import {
 import { CalendarRange } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/poster/popover";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { FilterChips } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips } from "@wadzzo/ui/poster/toolbar";
 import type { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 
 // ── Period ──────────────────────────────────────────────────────────────────
@@ -225,7 +225,7 @@ export function CollectionsChart({
   const shown = hover !== null ? buckets.out[hover] : null;
 
   return (
-    <div className={cn("bg-card rounded-xl border p-4", className)}>
+    <div className={cn("bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="label-caps">Collections per {buckets.weekly ? "week" : "day"}</h2>
         <p className="text-muted-foreground text-xs tabular-nums">

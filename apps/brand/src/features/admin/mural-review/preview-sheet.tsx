@@ -21,11 +21,11 @@ import toast from "react-hot-toast";
 import { Marker } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@wadzzo/ui/components/sheet";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
@@ -261,7 +261,7 @@ function Body({
                 )}
               </div>
 
-              <dl className="bg-card grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border p-4 text-sm sm:grid-cols-3">
+              <dl className="bg-card border-foreground/10 grid grid-cols-2 gap-x-4 gap-y-3 rounded-[1.4rem] border-2 p-4 text-sm sm:grid-cols-3">
                 <Item label="Finders">{plural(m.distinctScanners, "person", "people")}</Item>
                 <Item label="Scans">{m.scanCount.toLocaleString()}</Item>
                 <Item label="Coins paid">

@@ -24,7 +24,7 @@ export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
   return (
     <section
       className={cn(
-        "bg-card/95 pointer-events-auto hidden w-80 overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm md:block",
+        "bg-card/95 border-foreground/10 pointer-events-auto hidden w-80 overflow-hidden rounded-[1.4rem] border-2 shadow-lg md:block",
         className,
       )}
     >

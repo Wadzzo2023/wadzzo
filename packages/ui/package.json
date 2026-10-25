@@ -8,7 +8,10 @@
     "./components/use-toast": "./src/components/use-toast.ts",
     "./components/*": "./src/components/*.tsx",
     "./patterns/*": "./src/patterns/*.tsx",
-    "./lib/*": "./src/lib/*.ts"
+    "./lib/*": "./src/lib/*.ts",
+    "./poster/styles": "./src/poster/styles.ts",
+    "./poster/*": "./src/poster/*.tsx",
+    "./styles/*": "./src/styles/*"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

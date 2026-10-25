@@ -7,19 +7,19 @@ import toast from "react-hot-toast";
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { MethodPicker } from "~/components/payment/method-picker";
 import { Price } from "~/components/price/price";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/ui/skin/dialog";
+} from "@wadzzo/ui/poster/dialog";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useFollow } from "~/hooks/use-follow";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "~/ui/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 

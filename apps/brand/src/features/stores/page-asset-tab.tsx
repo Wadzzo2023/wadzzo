@@ -15,12 +15,12 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -217,7 +217,7 @@ export function PageAssetTab() {
 
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
+    <div className="rounded-xl bg-white/10 px-3 py-2.5">
       <dt className="text-[10px] font-semibold tracking-wider text-white/70 uppercase">{label}</dt>
       <dd className="font-hud mt-0.5 text-lg font-bold tabular-nums">{value}</dd>
     </div>
@@ -238,7 +238,7 @@ function ListingCard({
   return (
     <article
       className={cn(
-        "bg-card flex h-full flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md",
+        "bg-card border-foreground/10 flex h-full flex-col overflow-hidden rounded-[1.4rem] border-2 transition-shadow hover:shadow-md",
         l.isSold && "opacity-80",
       )}
     >

@@ -12,7 +12,7 @@ export { ConnectWalletDialog } from "./ui/connect-wallet-dialog";
 export { ConnectWalletPopups } from "./ui/connect-wallet-popups";
 
 // state
-export { useConnectWalletDialogStore } from "./state/connect-dialog-store";
+export { useConnectWalletDialogStore, type DialogProfile } from "./state/connect-dialog-store";
 
 // signing
 export {

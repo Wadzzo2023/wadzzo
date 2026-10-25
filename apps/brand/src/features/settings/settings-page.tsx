@@ -25,7 +25,7 @@ import toast from "react-hot-toast";
 
 import PostCard from "~/components/post/post-card";
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -33,10 +33,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/input";
+import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { BountyCard } from "~/features/bounties/bounties-page";
@@ -46,10 +46,10 @@ import { AssetCard } from "~/features/stores/stores-page";
 import { WADZZO_AR_URL } from "@wadzzo/schemas/embed";
 import { sortOptionEnum } from "@wadzzo/schemas/bounty-type";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Field } from "~/ui/form-page";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { ENDPOINT_ACCEPT } from "~/ui/upload/accept";
 import { useS3Upload } from "~/ui/upload/use-s3-upload";
@@ -194,7 +194,7 @@ function Profile({ data }: { data: Overview }) {
 
       {/* Page asset + links */}
       <div className="mt-5 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-        <div className="bg-card flex items-center gap-3 rounded-xl border p-3">
+        <div className="bg-card border-foreground/10 flex items-center gap-3 rounded-[1.4rem] border-2 p-3">
           {data.pageAsset?.thumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -244,7 +244,7 @@ function Profile({ data }: { data: Overview }) {
           </Button>
         </div>
 
-        <div className="bg-card flex items-center gap-3 rounded-xl border p-3">
+        <div className="bg-card border-foreground/10 flex items-center gap-3 rounded-[1.4rem] border-2 p-3">
           <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
             <Link2 className="size-5" />
           </span>
@@ -595,7 +595,7 @@ function PinsTab({ pins, total }: { pins: Overview["recentPins"]; total: number 
             <li key={p.id}>
               <Link
                 href={href}
-                className="group bg-card focus-visible:outline-primary block overflow-hidden rounded-xl border transition-shadow hover:shadow-md focus-visible:outline-2"
+                className="group bg-card focus-visible:outline-primary border-foreground/10 block overflow-hidden rounded-[1.4rem] border-2 transition-shadow hover:shadow-md focus-visible:outline-2"
               >
                 <div className="bg-surface-2 relative aspect-[4/3]">
                   {p.image ? (
@@ -696,7 +696,7 @@ function PostsTab({ data, total }: { data: Overview; total: number }) {
       </div>
 
       <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start">
-        <section className="bg-card space-y-2 rounded-xl border p-4">
+        <section className="bg-card border-foreground/10 space-y-2 rounded-[1.4rem] border-2 p-4">
           <h2 className="font-hud font-semibold">About</h2>
           <p className="text-muted-foreground text-sm leading-relaxed break-words whitespace-pre-line">
             {data.bio?.trim() ? data.bio : "No bio yet."}
@@ -725,7 +725,7 @@ function StorageCard() {
   });
   const a = account.data;
   return (
-    <div className="bg-card flex items-center gap-3 rounded-xl border p-3 md:col-span-2 xl:col-span-1">
+    <div className="bg-card border-foreground/10 flex items-center gap-3 rounded-[1.4rem] border-2 p-3 md:col-span-2 xl:col-span-1">
       <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
         <Wallet className="size-5" />
       </span>

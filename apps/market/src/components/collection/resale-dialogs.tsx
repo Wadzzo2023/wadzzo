@@ -5,15 +5,15 @@ import { useState } from "react";
 
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { MethodPicker } from "~/components/payment/method-picker";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/ui/skin/dialog";
-import { Input } from "~/ui/skin/fields";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/fields";
 import { Label } from "@wadzzo/ui/components/label";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";

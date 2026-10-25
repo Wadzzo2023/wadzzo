@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -180,7 +180,7 @@ function SaleForm({
         </>
       }
       aside={
-        <section className="bg-card overflow-hidden rounded-xl border">
+        <section className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
           <div className="bg-foreground relative h-40 overflow-hidden text-white">
             {art && (
               // eslint-disable-next-line @next/next/no-img-element

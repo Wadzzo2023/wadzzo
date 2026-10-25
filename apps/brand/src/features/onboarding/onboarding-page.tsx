@@ -23,10 +23,10 @@ import {
 import toast from "react-hot-toast";
 import type { z } from "zod";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { RequestBrandCreateFormSchema } from "@wadzzo/schemas/brand-onboarding";

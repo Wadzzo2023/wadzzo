@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "~/ui/skin/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@wadzzo/ui/poster/dialog";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 

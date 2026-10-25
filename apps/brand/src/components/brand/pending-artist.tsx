@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Card, CardContent, CardFooter } from "@wadzzo/ui/components/card";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Card, CardContent, CardFooter } from "@wadzzo/ui/poster/card";
 import { Progress } from "@wadzzo/ui/components/progress";
 import { platformBranding } from "@wadzzo/platform/branding";
 
@@ -25,16 +25,16 @@ export default function PendingPage({ createdAt }: { createdAt?: Date | string |
   });
 
   return (
-    <Card className="border-primary/20 w-full max-w-md shadow-md">
-      <div className="bg-primary h-2 w-full rounded-t-xl" />
+    <Card className="w-full max-w-md overflow-hidden shadow-[8px_9px_0_0_hsl(var(--primary))]">
+      <div className="bg-primary -mt-6 h-2 w-full" />
 
       <CardContent className="pt-6 pb-4">
         <div className="mb-6 flex items-center gap-3">
-          <div className="bg-primary/10 rounded-full p-3">
-            <Clock className="text-primary h-5 w-5" />
+          <div className="blob bg-primary text-primary-foreground -rotate-6 p-3">
+            <Clock className="size-5" strokeWidth={2.4} />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Application Pending</h1>
+            <h1 className="display text-3xl">Application pending</h1>
             <p className="text-muted-foreground text-sm">Submitted on {formattedDate}</p>
           </div>
         </div>

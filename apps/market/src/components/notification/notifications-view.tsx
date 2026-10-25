@@ -7,12 +7,12 @@ import { useMemo, useState } from "react";
 import { NotificationRow } from "~/components/notification/notification-row";
 import { useInboxActions } from "~/components/notification/use-inbox-actions";
 import { SignedIn } from "~/components/shell/sign-in-prompt";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { CATEGORIES } from "@wadzzo/platform/notifications";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { InboxItem } from "@wadzzo/platform/notifications";
-import { EmptyState } from "~/ui/empty-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 

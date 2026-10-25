@@ -23,10 +23,10 @@ import {
   Tag,
   Plus,
 } from "lucide-react";
-import { Input } from "@wadzzo/ui/components/input";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
-import { Textarea } from "@wadzzo/ui/components/textarea";
-import { Button } from "@wadzzo/ui/components/button";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
 import { useCreatorStorageAcc } from "~/lib/state/wallet/stellar-balances";
 import { api } from "~/utils/api";
 import { BADWORDS } from "@wadzzo/schemas/banned-word";
@@ -37,10 +37,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@wadzzo/ui/components/card";
+} from "@wadzzo/ui/poster/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@wadzzo/ui/poster/card";
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/components/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import { Dropzone } from "~/ui/upload/dropzone";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { Switch } from "@wadzzo/ui/components/switch";

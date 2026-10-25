@@ -29,15 +29,15 @@ import { htmlToText } from "~/ui/ai/shared";
 import CustomAvatar from "~/components/common/custom-avatar";
 import { Editor } from "~/components/common/quill-editor";
 import { PostSchema } from "@wadzzo/schemas/post";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { UploadEndpoint } from "@wadzzo/storage";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
@@ -144,7 +144,7 @@ export default function NewPostPage() {
       onSubmit={(e) => void onSubmit(e)}
       actions={actions}
       aside={
-        <section className="bg-card rounded-xl border p-5">
+        <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-5">
           <h2 className="font-hud mb-4 flex items-center gap-2 text-base font-semibold">
             <Eye className="text-primary size-4" /> Preview
           </h2>

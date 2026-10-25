@@ -83,32 +83,32 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
   return (
     <form className="flex w-full flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-1">
-        <label className="text-foreground text-xs font-medium">Email address</label>
+        <label className="label-caps text-muted-foreground">Email address</label>
         <div className="relative">
-          <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Mail className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
           <Input
             type="email"
             disabled={loginMutation.isPending}
             required
             {...register("email")}
             placeholder="you@example.com"
-            className="bg-muted/50 pl-9"
+            className="border-foreground/12 bg-surface hover:border-foreground/25 focus-visible:border-primary h-11 rounded-xl border-2 pl-10 font-medium shadow-none"
           />
         </div>
         {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-1">
-        <label className="text-foreground text-xs font-medium">Password</label>
+        <label className="label-caps text-muted-foreground">Password</label>
         <div className="relative">
-          <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Lock className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
           <Input
             type={showPassword ? "text" : "password"}
             disabled={loginMutation.isPending}
             required
             {...register("password")}
             placeholder="••••••••"
-            className="bg-muted/50 pr-9 pl-9"
+            className="border-foreground/12 bg-surface hover:border-foreground/25 focus-visible:border-primary h-11 rounded-xl border-2 pr-10 pl-10 font-medium shadow-none"
           />
           <button
             type="button"
@@ -149,7 +149,11 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
         </p>
       )}
 
-      <Button disabled={loginMutation.isPending} type="submit" className="w-full rounded-xl py-2.5">
+      <Button
+        disabled={loginMutation.isPending}
+        type="submit"
+        className="h-11 w-full rounded-xl text-base font-bold"
+      >
         {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Sign In
       </Button>

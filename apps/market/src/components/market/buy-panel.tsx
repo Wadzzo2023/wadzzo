@@ -9,7 +9,7 @@ import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown"
 import { Amount } from "~/components/price/amount";
 import { Price } from "~/components/price/price";
 import { MethodPicker, type PayMethod } from "~/components/payment/method-picker";
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useFollow } from "~/hooks/use-follow";

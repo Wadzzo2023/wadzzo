@@ -7,8 +7,8 @@ import { MarketFilters } from "~/components/market/market-filters";
 import { Store } from "lucide-react";
 import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "~/ui/empty-state";
-import { PageBody, PageHeader } from "~/ui/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 
 export const metadata: Metadata = {
   title: "Marketplace",

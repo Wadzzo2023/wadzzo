@@ -4,8 +4,8 @@ import { Send } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { api } from "~/utils/api";
-import { Button } from "@wadzzo/ui/components/button";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 
 export const BountyCommentSchema = z.object({

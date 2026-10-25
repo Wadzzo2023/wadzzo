@@ -4,16 +4,16 @@ import { format } from "date-fns";
 import { useState } from "react";
 
 import { Checkbox } from "@wadzzo/ui/components/checkbox";
-import { Input } from "@wadzzo/ui/components/input";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { UNLIMITED_COLLECTIONS, type PinDefaults, type PlaceItem } from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
 

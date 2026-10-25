@@ -1,8 +1,8 @@
 import type * as React from "react";
 import type { VariantProps } from "class-variance-authority";
 
-import { Button as BaseButton, buttonVariants as baseVariants } from "@wadzzo/ui/components/button";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Button as BaseButton, buttonVariants as baseVariants } from "../components/button";
+import { cn } from "../lib/cn";
 
 /**
  * The marketplace's chunky look over the shared button: tilted "blob" fills, bolder type,

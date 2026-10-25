@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { cn } from "@wadzzo/ui/lib/cn";
+import { cn } from "../lib/cn";
 
 /**
  * Every page's top: optional back link, eyebrow, title, one-line description,
@@ -57,4 +57,4 @@ export function PageHeader({
 }
 
 /** Page body stays shared: its width and padding come from the `--page-*` variables in globals.css. */
-export { PageBody } from "@wadzzo/ui/patterns/page-header";
+export { PageBody } from "../patterns/page-header";

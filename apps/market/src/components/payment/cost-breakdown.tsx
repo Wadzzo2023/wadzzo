@@ -1,7 +1,7 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "~/ui/skin/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Amount } from "~/components/price/amount";
 import { type CostLine, type Problem } from "@wadzzo/stellar/quote";

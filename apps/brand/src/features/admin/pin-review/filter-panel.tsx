@@ -3,16 +3,16 @@
 import { MapIcon, SlidersHorizontal, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/components/popover";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@wadzzo/ui/poster/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import {

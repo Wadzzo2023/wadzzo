@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@wadzzo/ui/components/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@wadzzo/ui/components/card";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@wadzzo/ui/poster/card";
 import { Badge } from "@wadzzo/ui/components/badge";
 import {
   Heart,

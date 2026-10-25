@@ -3,7 +3,7 @@
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import type { AgentBlock } from "@wadzzo/agent-contract";
 import type { AgentMessage } from "@wadzzo/api/brand/routers/agent";
 

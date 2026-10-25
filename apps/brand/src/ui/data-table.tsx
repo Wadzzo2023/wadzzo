@@ -6,17 +6,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 
 /** What a column's loading placeholder looks like, so skeletons match the real rows. */
@@ -142,7 +142,7 @@ export function DataTable<T>({
   return (
     <div className={className}>
       {/* ── Desktop / tablet: a real table ─────────────────────────────── */}
-      <div className="bg-card hidden overflow-hidden rounded-xl border md:block">
+      <div className="bg-card border-foreground/10 hidden overflow-hidden rounded-[1.4rem] border-2 md:block">
         <div className="overflow-x-auto">
           <table
             className="w-full text-sm"
@@ -266,7 +266,10 @@ export function DataTable<T>({
       <ul className="space-y-2 md:hidden" aria-label={label} aria-busy={loading ? true : undefined}>
         {loading
           ? Array.from({ length: Math.min(skeletonRows, 5) }).map((_, r) => (
-              <li key={r} className="bg-card space-y-3 rounded-xl border p-4">
+              <li
+                key={r}
+                className="bg-card border-foreground/10 space-y-3 rounded-[1.4rem] border-2 p-4"
+              >
                 <CellSkeleton shape={primary?.skeleton ?? "person"} seed={r} />
                 <div className="grid grid-cols-2 gap-3">
                   {rest.slice(0, 4).map((c, i) => (
@@ -282,7 +285,7 @@ export function DataTable<T>({
               <li
                 key={rowKey(row)}
                 className={cn(
-                  "bg-card rounded-xl border",
+                  "bg-card border-foreground/10 rounded-[1.4rem] border-2",
                   selectable &&
                     selected!.has(String(rowKey(row))) &&
                     "border-primary/50 bg-primary/5",

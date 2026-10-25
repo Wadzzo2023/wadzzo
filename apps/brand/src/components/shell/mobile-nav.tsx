@@ -1,7 +1,6 @@
 "use client";
 
 import { MoreHorizontal, Plus } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -24,6 +23,7 @@ import {
 import { UserMenu } from "./user-menu";
 import { WalletBalance } from "./wallet-balance";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 /** Phone top bar: logo, current section, notifications, account. */
 export function MobileTopBar({
@@ -36,19 +36,13 @@ export function MobileTopBar({
   showBell?: boolean;
 }) {
   return (
-    <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-sm lg:hidden">
+    <header className="side-scope bg-side text-side-ink sticky top-0 z-30 flex h-14 items-center gap-3 px-4 lg:hidden">
       <Link href={homeHref} className="flex items-center gap-2" aria-label="Home">
-        <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
-          <Image
-            src={platformBranding.assets.loading}
-            alt=""
-            width={20}
-            height={20}
-            className="object-contain"
-          />
+        <span className="bg-side-ink text-side flex size-9 -rotate-3 items-center justify-center rounded-xl">
+          <WadzzoMark className="h-5" />
         </span>
       </Link>
-      <span className="font-hud min-w-0 flex-1 truncate text-base font-semibold">
+      <span className="display min-w-0 flex-1 truncate text-2xl">
         {title ?? platformBranding.name}
       </span>
       {showBell && <NotificationBell />}
@@ -97,7 +91,7 @@ export function MobileTabBar({
     return (
       <>
         <nav
-          className="bg-card/95 supports-[backdrop-filter]:bg-card/85 fixed inset-x-0 bottom-0 z-40 border-t pb-[var(--safe-bottom)] backdrop-blur-sm lg:hidden"
+          className="side-scope bg-side text-side-ink fixed inset-x-0 bottom-0 z-40 pb-[var(--safe-bottom)] lg:hidden"
           aria-label="Admin sections"
         >
           <div className="mx-auto flex h-16 max-w-md items-stretch">
@@ -108,8 +102,8 @@ export function MobileTabBar({
               type="button"
               onClick={() => setSheet("more")}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 transition-colors active:scale-95",
-                moreActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                "mx-0.5 my-1.5 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 transition-[opacity,transform] active:scale-95",
+                moreActive ? "side-active" : "opacity-70 hover:opacity-100",
               )}
               aria-label="More admin sections"
             >
@@ -176,7 +170,7 @@ export function MobileTabBar({
   return (
     <>
       <nav
-        className="bg-card/95 supports-[backdrop-filter]:bg-card/85 fixed inset-x-0 bottom-0 z-40 border-t pb-[var(--safe-bottom)] backdrop-blur-sm lg:hidden"
+        className="side-scope bg-side text-side-ink fixed inset-x-0 bottom-0 z-40 pb-[var(--safe-bottom)] lg:hidden"
         aria-label="Sections"
       >
         <div className="mx-auto flex h-16 max-w-md items-stretch">
@@ -187,7 +181,7 @@ export function MobileTabBar({
             <button
               type="button"
               onClick={() => setSheet("create")}
-              className="bg-primary text-primary-foreground shadow-primary/25 flex size-11 items-center justify-center rounded-xl shadow-md transition-transform active:scale-95"
+              className="blob bg-side-ink text-side flex size-12 -rotate-3 items-center justify-center transition-transform active:scale-95"
               aria-label="Create"
             >
               <Plus className="size-6" />
@@ -200,8 +194,8 @@ export function MobileTabBar({
             type="button"
             onClick={() => setSheet("more")}
             className={cn(
-              "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 transition-colors active:scale-95",
-              moreActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              "mx-0.5 my-1.5 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 transition-[opacity,transform] active:scale-95",
+              moreActive ? "side-active" : "opacity-70 hover:opacity-100",
             )}
             aria-label="More sections"
           >
@@ -295,8 +289,8 @@ function Tab({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 transition-colors active:scale-95",
-        active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+        "mx-0.5 my-1.5 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 transition-[opacity,transform] active:scale-95",
+        active ? "side-active" : "opacity-70 hover:opacity-100",
       )}
     >
       <Icon className="size-5 shrink-0" />

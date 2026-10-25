@@ -11,7 +11,7 @@ import { signAndSubmitTransaction } from "@wadzzo/wallet";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { env } from "~/env";
 import { useCustodialSigner } from "@wadzzo/wallet";
 import { networkPassphrase, PLATFORM_ASSET } from "@wadzzo/wallet/config";
@@ -135,7 +135,7 @@ export function VanityUrlTab({
     );
 
   return (
-    <div className="bg-card rounded-xl border p-4 sm:p-5">
+    <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
       <p className="text-muted-foreground text-sm">
         {state === "active"
           ? `Your short link is live. Changing it costs ${money(PRICE.change)}.`

@@ -4,8 +4,8 @@ import { Clock, Coins, Copy, ExternalLink, Link2, Loader2, Sparkles } from "luci
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { env } from "~/env";
 import { PLATFORM_ASSET, stellarNetwork } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -98,7 +98,7 @@ function SetupAsset() {
           setErrors({});
         }}
         className={cn(
-          "bg-card focus-visible:outline-primary flex items-start gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-2",
+          "bg-card focus-visible:outline-primary border-foreground/10 flex items-start gap-3 rounded-[1.4rem] border-2 p-4 text-left transition-colors focus-visible:outline-2",
           mode === id ? "border-primary ring-primary ring-1" : "hover:border-primary/40",
         )}
       >
@@ -119,7 +119,11 @@ function SetupAsset() {
   };
 
   return (
-    <form onSubmit={submit} className="bg-card rounded-xl border p-4 sm:p-5" noValidate>
+    <form
+      onSubmit={submit}
+      className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5"
+      noValidate
+    >
       <h3 className="font-hud text-lg font-semibold">Set up your page asset</h3>
       <p className="text-muted-foreground mt-1 text-sm">
         Your page asset is the token fans hold to join your membership tiers. You pick it once — it
@@ -251,7 +255,7 @@ function AssetDetails({ asset, onMembership }: { asset: PageAsset; onMembership?
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-      <div className="bg-card rounded-xl border p-4 sm:p-5">
+      <div className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5">
         <div className="flex items-start gap-4">
           {asset.thumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -314,7 +318,7 @@ function AssetDetails({ asset, onMembership }: { asset: PageAsset; onMembership?
       </div>
 
       <form
-        className="bg-card rounded-xl border p-4 sm:p-5"
+        className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 sm:p-5"
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

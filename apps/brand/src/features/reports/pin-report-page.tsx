@@ -20,16 +20,16 @@ import toast from "react-hot-toast";
 import { Marker } from "react-map-gl/mapbox";
 
 import { BaseMap } from "~/components/map-kit/base-map";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import { DataTable, type Column } from "~/ui/data-table";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { Person } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
-import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatCard } from "@wadzzo/ui/poster/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { SearchInput } from "@wadzzo/ui/patterns/toolbar";
+import { SearchInput } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
 
@@ -297,7 +297,7 @@ function Body({ r, admin }: { r: Report; admin: boolean }) {
       </dl>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <section className="bg-card overflow-hidden rounded-xl border">
+        <section className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
             <h2 className="label-caps">Locations</h2>
             {selectedLoc && (

@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
-import { StatCard } from "@wadzzo/ui/patterns/stat-card";
+import { StatCard } from "@wadzzo/ui/poster/stat-card";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
-import { FilterChips } from "@wadzzo/ui/patterns/toolbar";
+import { FilterChips } from "@wadzzo/ui/poster/toolbar";
 import { api, type RouterOutputs } from "~/utils/api";
 
 type Insights = RouterOutputs["admin"]["murals"]["insights"];
@@ -122,15 +122,15 @@ export function InsightsView({ data }: { data: Insights }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <section className="bg-card rounded-xl border p-4 lg:col-span-2">
+        <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4 lg:col-span-2">
           <DailyChart daily={data.daily} />
         </section>
-        <section className="bg-card rounded-xl border p-4">
+        <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-4">
           <ReasonBars reasons={data.reasons} />
         </section>
       </div>
 
-      <section className="bg-card rounded-xl border">
+      <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2">
         <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
           <div>
             <h3 className="font-semibold">Most active accounts</h3>

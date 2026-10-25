@@ -82,14 +82,14 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
     <form className="flex w-full flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-1">
         <div className="relative">
-          <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Mail className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
           <Input
             type="email"
             disabled={registerMutation.isPending}
             required
             {...register("email")}
             placeholder="Email address"
-            className="pl-9"
+            className="border-foreground/12 bg-surface hover:border-foreground/25 focus-visible:border-primary h-11 rounded-xl border-2 pl-10 font-medium shadow-none"
           />
         </div>
         {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
@@ -97,14 +97,14 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
 
       <div className="space-y-1">
         <div className="relative">
-          <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Lock className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
           <Input
             type="password"
             disabled={registerMutation.isPending}
             required
             {...register("password")}
             placeholder="Password"
-            className="pl-9"
+            className="border-foreground/12 bg-surface hover:border-foreground/25 focus-visible:border-primary h-11 rounded-xl border-2 pl-10 font-medium shadow-none"
           />
         </div>
         {errors.password && <p className="text-destructive text-xs">{errors.password.message}</p>}
@@ -112,14 +112,14 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
 
       <div className="space-y-1">
         <div className="relative">
-          <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Lock className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2" />
           <Input
             type="password"
             disabled={registerMutation.isPending}
             required
             {...register("confirmPassword")}
             placeholder="Confirm password"
-            className="pl-9"
+            className="border-foreground/12 bg-surface hover:border-foreground/25 focus-visible:border-primary h-11 rounded-xl border-2 pl-10 font-medium shadow-none"
           />
         </div>
         {errors.confirmPassword && (
@@ -136,7 +136,7 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
       <Button
         disabled={registerMutation.isPending}
         type="submit"
-        className="w-full rounded-xl py-2.5"
+        className="h-11 w-full rounded-xl text-base font-bold"
       >
         {registerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Create Account

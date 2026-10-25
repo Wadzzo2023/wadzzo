@@ -6,7 +6,7 @@ import "react-h5-audio-player/lib/styles.css";
 import { Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { downloadFile } from "@wadzzo/utils/download-file";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import CustomPlayer from "../common/custom-bounty-player";
 
 interface Attachment {

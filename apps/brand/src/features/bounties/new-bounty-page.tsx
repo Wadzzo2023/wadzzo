@@ -13,8 +13,8 @@ import { z } from "zod";
 
 import { Editor } from "~/components/common/quill-editor";
 import { PaymentChoose, usePaymentMethodStore } from "~/components/common/payment-options";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { useCustodialSigner } from "@wadzzo/wallet";
 import { useUserStellarAcc } from "~/lib/state/wallet/stellar-balances";
 import {
@@ -203,7 +203,7 @@ export default function NewBountyPage() {
         onSubmit={(e) => void onSubmit(e)}
         actions={actions}
         aside={
-          <section className="bg-card rounded-xl border p-5">
+          <section className="bg-card border-foreground/10 rounded-[1.4rem] border-2 p-5">
             <h2 className="font-hud mb-3 flex items-center gap-2 text-base font-semibold">
               <Receipt className="text-primary size-4" /> Summary
             </h2>

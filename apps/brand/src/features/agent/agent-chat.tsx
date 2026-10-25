@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@wadzzo/ui/components/dropdown-menu";
+} from "@wadzzo/ui/poster/dropdown-menu";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
@@ -85,7 +85,7 @@ export function AgentChat({ creatorId }: { creatorId?: string }) {
     <section
       className={cn(
         "bg-background fixed inset-0 z-40 flex flex-col",
-        "lg:bg-card/95 lg:absolute lg:inset-auto lg:right-4 lg:bottom-4 lg:z-20 lg:h-[min(720px,calc(100%-6rem))] lg:w-[420px] lg:overflow-hidden lg:rounded-2xl lg:border lg:shadow-2xl lg:backdrop-blur-md",
+        "lg:bg-card/95 lg:absolute lg:inset-auto lg:right-4 lg:bottom-4 lg:z-20 lg:h-[min(720px,calc(100%-6rem))] lg:w-[420px] lg:overflow-hidden lg:rounded-2xl lg:border lg:shadow-2xl",
       )}
       aria-label="Map assistant"
     >
@@ -187,7 +187,7 @@ function Welcome({
             key={s}
             type="button"
             onClick={() => onPick(s)}
-            className="bg-card hover:border-primary/50 hover:bg-primary/5 rounded-xl border px-3 py-2 text-left text-sm transition-colors"
+            className="bg-card hover:border-primary/50 hover:bg-primary/5 border-foreground/10 rounded-[1.4rem] border-2 px-3 py-2 text-left text-sm transition-colors"
           >
             {s}
           </button>
@@ -223,7 +223,7 @@ function Composer({ onSend, busy }: { onSend: (text: string) => void; busy: bool
         submit();
       }}
     >
-      <div className="bg-card focus-within:border-primary/60 flex items-end gap-2 rounded-xl border px-3 py-2">
+      <div className="bg-card focus-within:border-primary/60 border-foreground/10 flex items-end gap-2 rounded-[1.4rem] border-2 px-3 py-2">
         <textarea
           ref={ref}
           value={text}

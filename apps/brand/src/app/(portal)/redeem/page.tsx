@@ -1,5 +1,5 @@
 import RedeemView from "~/features/reports/redeem-view";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 
 export const metadata = { title: "Redeem" };
 

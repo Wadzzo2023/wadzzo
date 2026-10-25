@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -14,17 +14,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "@wadzzo/ui/poster/dialog";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { BADWORDS } from "@wadzzo/schemas/banned-word";
-import { ConfirmDialog } from "@wadzzo/ui/patterns/confirm-dialog";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
+import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
 import { Field } from "~/ui/form-page";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
 
@@ -142,7 +142,7 @@ export function MembershipTiers({
               <li
                 key={t.id}
                 className={cn(
-                  "bg-card relative flex flex-col overflow-hidden rounded-xl border p-5",
+                  "bg-card border-foreground/10 relative flex flex-col overflow-hidden rounded-[1.4rem] border-2 p-5",
                   t.popular && "border-primary/50",
                   !t.isActive && "opacity-70",
                 )}

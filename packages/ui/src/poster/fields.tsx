@@ -1,8 +1,8 @@
 import type * as React from "react";
 
-import { Input as BaseInput } from "@wadzzo/ui/components/input";
-import { Textarea as BaseTextarea } from "@wadzzo/ui/components/textarea";
-import { cn } from "@wadzzo/ui/lib/cn";
+import { Input as BaseInput } from "../components/input";
+import { Textarea as BaseTextarea } from "../components/textarea";
+import { cn } from "../lib/cn";
 
 /** Taller fields with a thick hairline that turns green on focus. */
 const FIELD =

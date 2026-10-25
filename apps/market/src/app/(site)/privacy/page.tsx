@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { StaticHeader } from "~/components/static/static-header";
-import { PageBody } from "~/ui/page-header";
+import { PageBody } from "@wadzzo/ui/poster/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {

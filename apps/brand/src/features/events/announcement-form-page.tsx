@@ -16,11 +16,11 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { firstError, fromLocalInput, toLocalInput } from "~/components/events/form-utils";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { Switch } from "@wadzzo/ui/components/switch";
-import { Textarea } from "@wadzzo/ui/components/textarea";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { Textarea } from "@wadzzo/ui/poster/textarea";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { AiTextButton } from "~/ui/ai/ai-text";
@@ -163,7 +163,7 @@ function AnnouncementForm({ announcement }: { announcement: EditableAnnouncement
       onSubmit={submit}
       actions={actions}
       aside={
-        <section className="bg-card overflow-hidden rounded-xl border">
+        <section className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2">
           {form.images[0] && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={form.images[0]} alt="" className="aspect-video w-full object-cover" />

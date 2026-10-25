@@ -8,8 +8,8 @@ import type { MapRef } from "react-map-gl/mapbox";
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
 import { areaBounds, toMapboxArea, type AreaFeature } from "@wadzzo/geo/map-geometry";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import { AreaSearch } from "./area-search";
@@ -103,7 +103,7 @@ export function HomeAreaEditor({
   return (
     <div className="space-y-3">
       {/* What's in use right now. */}
-      <div className="bg-card flex flex-wrap items-center gap-3 rounded-xl border p-3">
+      <div className="bg-card border-foreground/10 flex flex-wrap items-center gap-3 rounded-[1.4rem] border-2 p-3">
         <span
           className={cn(
             "flex size-9 shrink-0 items-center justify-center rounded-lg",

@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -21,10 +20,12 @@ import { isActive, type NavItem, type BrandEntry } from "./nav";
 import { UserMenu } from "./user-menu";
 import { WalletBalance } from "./wallet-balance";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 /**
- * Desktop navigation (lg and up). Full width shows group labels and names;
- * collapsed it's an icon rail with tooltips. The choice is remembered.
+ * Desktop navigation (lg and up), in the marketplace's look: a solid brand-colour panel (dark ink
+ * in light mode), the portal name in display type, and display-type rows with the current page as
+ * an inverted chip. Collapsed it's an icon rail with tooltips. The choice is remembered.
  */
 export function Sidebar({
   collapsed,
@@ -58,39 +59,33 @@ export function Sidebar({
     <TooltipProvider delayDuration={200}>
       <aside
         className={cn(
-          "bg-card sticky top-0 z-40 hidden h-dvh shrink-0 flex-col border-r transition-[width] duration-200 lg:flex",
-          collapsed ? "w-[72px]" : "w-64",
+          "side-scope bg-side text-side-ink sticky top-0 z-40 hidden h-dvh shrink-0 flex-col transition-[width] duration-200 lg:flex",
+          collapsed ? "w-[76px]" : "w-[17rem]",
         )}
         aria-label="Portal navigation"
       >
         {/* Brand and Toggle */}
         <div
           className={cn(
-            "flex items-center border-b",
-            collapsed ? "h-16 justify-center px-0" : "h-16 justify-between px-4",
+            "flex items-center",
+            collapsed ? "h-20 justify-center px-0" : "h-20 justify-between px-4",
           )}
         >
           <Link
             href={homeHref}
-            className="flex items-center gap-2.5"
+            className="flex min-w-0 items-center gap-2.5 pr-3"
             aria-label={`${platformBranding.name} portal home`}
           >
-            <span className="bg-primary/10 flex size-9 items-center justify-center rounded-lg">
-              <Image
-                src={platformBranding.assets.loading}
-                alt=""
-                width={22}
-                height={22}
-                className="object-contain"
-              />
+            <span className="bg-side-ink text-side flex size-11 shrink-0 -rotate-3 items-center justify-center rounded-xl">
+              <WadzzoMark className="h-6" />
             </span>
             {!collapsed && (
-              <span className="leading-tight">
-                <span className="font-hud block text-base font-bold tracking-tight">
+              <span className="min-w-0 leading-none">
+                <span className="display block truncate text-[length:var(--side-title-size,1.9rem)]">
                   {platformBranding.name}
                 </span>
-                <span className="font-hud text-muted-foreground block text-[10px] font-semibold tracking-[0.18em] uppercase">
-                  {isPureAdmin ? "Admin portal" : "Brand portal"}
+                <span className="marker mt-0.5 block text-[11px] opacity-75">
+                  {isPureAdmin ? "admin portal" : "brand portal"}
                 </span>
               </span>
             )}
@@ -111,17 +106,17 @@ export function Sidebar({
 
         {/* Groups */}
         <nav
-          className="flex-1 scrollbar-thin space-y-5 overflow-y-auto px-3 pb-4"
+          className="no-scrollbar flex-1 space-y-4 overflow-y-auto px-3 pb-4"
           aria-label="Sections"
         >
-          {groups.map((group) => (
+          {groups.map((group, g) => (
             <div key={group.label}>
+              {g > 0 && <div className="dash-rule mb-3" aria-hidden />}
               {!collapsed && (
-                <p className="font-hud text-faint mb-1.5 px-2 text-[10px] font-semibold tracking-[0.18em] uppercase">
-                  {group.label}
+                <p className="marker mb-1.5 px-2 text-xs opacity-70">
+                  *{group.label.toLowerCase()}*
                 </p>
               )}
-              {collapsed && <div className="bg-border mx-auto mb-2 h-px w-6" aria-hidden />}
               <ul className="space-y-0.5">
                 {group.items.map((item) => (
                   <li key={item.href}>
@@ -134,7 +129,8 @@ export function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className="space-y-1 border-t p-3">
+        <div className="space-y-1 p-3 pt-0">
+          <div className="dash-rule mb-3" aria-hidden />
           <UserMenu collapsed={collapsed} />
         </div>
 
@@ -145,7 +141,7 @@ export function Sidebar({
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
-          className="bg-card text-muted-foreground hover:bg-accent hover:text-foreground absolute top-5 -right-3 z-50 flex size-6 items-center justify-center rounded-full border shadow-sm transition-colors"
+          className="bg-side-ink text-side absolute top-7 -right-3.5 z-50 flex size-7 items-center justify-center rounded-full transition-transform duration-200 hover:scale-110"
         >
           {collapsed ? <ChevronRight className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
         </button>
@@ -169,14 +165,12 @@ function NavLink({
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors",
+        "display flex h-10 items-center gap-2.5 rounded-xl px-2.5 text-[length:var(--side-nav-size,1.3rem)] transition-[background-color,transform] duration-150",
         collapsed && "justify-center px-0",
-        active
-          ? "bg-primary/10 text-primary"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        active ? "side-active -rotate-1" : "hover:bg-side-ink/10 hover:translate-x-0.5",
       )}
     >
-      <Icon className="size-[18px] shrink-0" />
+      <Icon className="size-[18px] shrink-0" strokeWidth={2.4} />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );

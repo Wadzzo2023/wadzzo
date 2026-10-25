@@ -3,11 +3,17 @@
 import { usePathname, useRouter } from "next/navigation";
 
 import { MEDIA_META, MEDIA_TYPES } from "~/components/media/media-meta";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/ui/skin/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@wadzzo/ui/poster/select";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { wordTab, wordTabList, wordTabOff, wordTabOn } from "~/ui/styles";
-import { SearchInput, Toolbar } from "~/ui/toolbar";
+import { SearchInput, Toolbar } from "@wadzzo/ui/poster/toolbar";
 
 const KINDS = [
   { id: "all", label: "All" },

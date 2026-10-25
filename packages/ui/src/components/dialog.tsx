@@ -50,13 +50,15 @@ function DialogContent({
   /** Render into this element instead of `document.body` (for hosts that draw their own device frame). */
   portalContainer?: HTMLElement | null;
 }) {
+  // Width is "screen minus a 1rem margin", capped by max-w-lg: a caller's own max-w-* replaces
+  // the cap at every size (a `sm:max-w-lg` here would silently win over it from 640px up).
   return (
     <DialogPortal data-slot="dialog-portal" container={portalContainer ?? undefined}>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-card data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[92dvh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-xl border p-6 shadow-xl duration-200 outline-none sm:max-w-lg",
+          "bg-card data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-xl border p-6 shadow-xl duration-200 outline-none",
           className,
         )}
         {...props}

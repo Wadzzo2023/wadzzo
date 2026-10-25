@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "@wadzzo/ui/poster/button";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@wadzzo/ui/components/dialog";
+} from "@wadzzo/ui/poster/dialog";
 import { RadioGroup, RadioGroupItem } from "@wadzzo/ui/components/radio-group";
 import { Label } from "@wadzzo/ui/components/label";
 import { Coins, DollarSign, Loader2 } from "lucide-react";

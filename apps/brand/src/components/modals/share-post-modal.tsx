@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/components/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@wadzzo/ui/poster/dialog";
 import {
   FacebookShareButton,
   TwitterShareButton,

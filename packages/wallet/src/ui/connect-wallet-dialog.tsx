@@ -91,11 +91,11 @@ function WalletButton({
       <button
         onClick={onClick}
         className={clsx(
-          "flex w-full items-center gap-2.5 rounded-xl border px-3 py-2 text-sm font-medium transition-all duration-150",
-          "hover:border-primary/50 hover:bg-muted",
+          "flex w-full items-center gap-2.5 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-[transform,border-color] duration-150",
+          "hover:border-foreground hover:-translate-y-0.5",
           selected
-            ? "border-primary bg-primary/10 ring-primary/30 text-primary ring-1"
-            : "border-border bg-card text-card-foreground",
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-foreground/12 bg-card text-card-foreground",
         )}
       >
         <span className="flex h-7 w-7 shrink-0 items-center justify-center">
@@ -195,54 +195,107 @@ export function ConnectWalletDialog() {
   const authUser =
     session.status === "authenticated" && !!session.data?.user.emailVerified && isAccountActivate;
 
-  const title = activeTab === "stellar" ? "Connect Wallet" : "Welcome back";
-  const subtitle =
-    activeTab === "stellar"
-      ? authUser
-        ? "Your Stellar wallet is connected"
-        : "Choose your Stellar wallet to sign in"
+  const title = authUser
+    ? "Switch account"
+    : activeTab === "stellar"
+      ? "Connect Wallet"
+      : "Welcome back";
+  const subtitle = authUser
+    ? activeTab === "stellar"
+      ? "Use another Stellar wallet"
+      : "Use another email, Google or Apple account"
+    : activeTab === "stellar"
+      ? "Choose your Stellar wallet to sign in"
       : "Sign in to access your account";
 
   // ── Profile card ──
+  // Who is signed in: a brand-colour cover with the avatar breaking out of it, the name, how they
+  // signed in and their wallet address, plus copy and sign-out. The login tabs below it switch
+  // to another account.
   function ProfileCard() {
     if (session.status !== "authenticated" || !session.data) return null;
     const user = session.data.user;
-    const name = (user as { name?: string }).name ?? abbreviateAddress(user.id, 8);
+    const profile = dialogModalState.profile;
+    const name = profile?.name ?? (user as { name?: string }).name ?? abbreviateAddress(user.id, 8);
+    const image = profile?.image ?? (user as { image?: string | null }).image;
+    const cover = profile?.coverImage;
     const initials = name.slice(0, 2).toUpperCase();
     const walletLabel = getWalletLabel(user.walletType ?? "");
     return (
-      <div className="bg-muted/40 flex items-center gap-2 rounded-xl border px-3 py-2">
-        <div className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-          {initials}
+      <div
+        className={clsx(
+          // full width of the column and flush with the dialog's top: cancel the panel's padding
+          "border-foreground/10 bg-card shrink-0 overflow-hidden border-b-2",
+          isFramedHost ? "-mx-4 -mt-10" : "-mx-6 -mt-6 lg:-mx-8 lg:-mt-5",
+        )}
+      >
+        <div className="side-scope relative h-[4.5rem] bg-[hsl(var(--side-bg,var(--primary)))]">
+          {cover ? (
+            <>
+              <img src={cover} alt="" className="absolute inset-0 size-full object-cover" />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/10"
+              />
+            </>
+          ) : (
+            // no cover photo: a quiet dashed pattern on the brand colour
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-15"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, currentColor 0 2px, transparent 2px 14px)",
+                color: "hsl(var(--side-ink, var(--primary-foreground)))",
+              }}
+            />
+          )}
+          {/* how they signed in, as a badge on the cover */}
+          <span className="label-caps absolute top-3 right-4 rounded-full bg-black/55 px-2.5 py-1 text-[10px] text-white">
+            {walletLabel}
+          </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
-            <p className="text-foreground truncate text-xs font-semibold sm:text-sm">{name}</p>
-            <CheckCircle2 className="text-primary h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
+        <div
+          className={clsx("flex items-center gap-3 pb-3.5", isFramedHost ? "px-4" : "px-6 lg:px-8")}
+        >
+          <div className="border-card bg-primary text-primary-foreground relative z-10 -mt-7 flex size-16 shrink-0 items-center justify-center self-start overflow-hidden rounded-full border-4 text-lg font-bold">
+            {image ? <img src={image} alt="" className="size-full object-cover" /> : initials}
           </div>
-          <p className="text-muted-foreground truncate text-[10px] sm:text-xs">{walletLabel}</p>
-        </div>
-        <div className="divide-border flex shrink-0 items-center divide-x overflow-hidden rounded-lg border">
-          <button
-            onClick={() => {
-              void toast.promise(navigator.clipboard.writeText(user.id), {
-                loading: "Copying…",
-                success: "Copied!",
-                error: "Failed to copy",
-              });
-            }}
-            className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors sm:gap-1.5 sm:px-2.5"
-          >
-            <DocumentDuplicateIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="hidden sm:inline">Copy</span>
-          </button>
-          <button
-            onClick={disconnectWallet}
-            className="text-destructive hover:bg-destructive/10 flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors sm:gap-1.5 sm:px-2.5"
-          >
-            <LogOut className="h-3.5 w-3.5 shrink-0" />
-            <span className="hidden sm:inline">Disconnect</span>
-          </button>
+          <div className="min-w-0 flex-1 pt-1.5">
+            <div className="flex items-center gap-1.5">
+              <p className="display text-foreground truncate text-2xl">{name}</p>
+              <CheckCircle2 className="text-primary size-4 shrink-0" />
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-muted-foreground font-mono">
+                {abbreviateAddress(user.id, 6)}
+              </span>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-1.5 pt-1.5">
+            <button
+              onClick={() => {
+                void toast.promise(navigator.clipboard.writeText(user.id), {
+                  loading: "Copying…",
+                  success: "Address copied",
+                  error: "Failed to copy",
+                });
+              }}
+              title="Copy wallet address"
+              aria-label="Copy wallet address"
+              className="border-foreground/12 hover:border-foreground flex size-9 items-center justify-center rounded-xl border-2 transition-colors"
+            >
+              <DocumentDuplicateIcon className="size-4" />
+            </button>
+            <button
+              onClick={disconnectWallet}
+              title="Sign out"
+              aria-label="Sign out"
+              className="border-destructive/40 text-destructive hover:bg-destructive/10 flex size-9 items-center justify-center rounded-xl border-2 transition-colors"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -317,30 +370,43 @@ export function ConnectWalletDialog() {
   // ── Social auth buttons ──
   function SocialButtons() {
     return (
-      <div className="flex flex-col gap-2.5">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2.5">
         <button
           onClick={() => void appleProvider.login()}
-          className="bg-foreground text-background hover:bg-foreground/90 flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium transition"
+          className="border-foreground/12 bg-card text-card-foreground hover:border-foreground flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-bold whitespace-nowrap transition-[transform,border-color] duration-150 hover:-translate-y-0.5 disabled:opacity-50"
         >
-          <svg className="h-4 w-4" viewBox="0 0 384 512" fill="currentColor">
+          <svg className="size-[18px]" viewBox="0 0 384 512" fill="currentColor" aria-hidden>
             <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
           </svg>
-          Continue with Apple
+          Apple
         </button>
+
+        <span className="marker text-muted-foreground text-xs">or</span>
 
         <button
           onClick={() => void googleProvider.login()}
           disabled={isIosFBuser ?? false}
-          className="bg-background text-foreground hover:bg-muted flex w-full items-center justify-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
+          className="border-foreground/12 bg-card text-card-foreground hover:border-foreground flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-bold whitespace-nowrap transition-[transform,border-color] duration-150 hover:-translate-y-0.5 disabled:opacity-50"
         >
-          <svg className="h-4 w-4" viewBox="0 0 18 19" fill="currentColor">
+          <svg className="size-[18px]" viewBox="0 0 48 48" aria-hidden>
             <path
-              fillRule="evenodd"
-              d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z"
-              clipRule="evenodd"
+              fill="#FFC107"
+              d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
+            />
+            <path
+              fill="#FF3D00"
+              d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"
             />
           </svg>
-          Continue with Google
+          Google
         </button>
       </div>
     );
@@ -356,25 +422,30 @@ export function ConnectWalletDialog() {
 
             <div className="relative my-1">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="border-foreground/15 w-full border-t-2 border-dashed" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background text-muted-foreground px-2">or continue with</span>
+                <span className="bg-background marker text-muted-foreground px-2">
+                  or continue with
+                </span>
               </div>
             </div>
 
             <SocialButtons />
 
-            <p className="text-muted-foreground text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setAuthView("signup")}
-                className="text-primary font-semibold hover:underline"
-              >
-                Sign up
-              </button>
-            </p>
+            {/* already signed in: switching accounts doesn't need the sign-up prompt */}
+            {!authUser && (
+              <p className="text-muted-foreground text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setAuthView("signup")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Sign up
+                </button>
+              </p>
+            )}
           </>
         )}
 
@@ -477,8 +548,9 @@ export function ConnectWalletDialog() {
                   authUser ? "h-[85vh]" : "h-[80vh]",
                 )
               : clsx(
-                  "flex max-w-[800px] gap-0 overflow-hidden p-0 lg:grid lg:grid-cols-[1fr_280px]",
-                  authUser ? "h-[85vh]" : "h-[80vh]",
+                  // as tall as its content (no inner scroll), never shorter than the email view so switching tabs
+                  // doesn't resize it; the 92dvh cap only matters on very short screens
+                  "border-foreground/15 flex max-w-[820px] gap-0 overflow-hidden rounded-[1.6rem] border-2 p-0 shadow-[10px_11px_0_0_hsl(var(--primary))] lg:grid lg:min-h-[min(624px,92dvh)] lg:grid-cols-[1fr_290px] lg:grid-rows-[minmax(0,1fr)]",
                 )
           }
         >
@@ -486,7 +558,11 @@ export function ConnectWalletDialog() {
           <div
             className={clsx(
               "flex min-h-0 w-full flex-1 flex-col overflow-y-auto",
-              authUser ? "gap-3 px-4 pt-10 pb-4 sm:p-4 lg:p-5" : "gap-5 p-6 lg:p-8",
+              isFramedHost
+                ? "gap-4 px-4 pt-10 pb-4"
+                : authUser
+                  ? "gap-3 p-6 lg:px-8 lg:py-5"
+                  : "gap-4 p-6 lg:px-8 lg:py-7",
             )}
           >
             {/* Unverified email banner */}
@@ -509,14 +585,11 @@ export function ConnectWalletDialog() {
             {/* Header */}
             <div>
               <DialogTitle
-                className={clsx(
-                  "text-foreground font-bold tracking-tight",
-                  authUser ? "text-base" : "text-xl",
-                )}
+                className={clsx("display text-foreground", authUser ? "text-3xl" : "text-[2.6rem]")}
               >
                 {title}
               </DialogTitle>
-              <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
+              <p className="marker text-primary mt-2 -rotate-1 text-sm">{subtitle}</p>
             </div>
 
             {/* Tabs — controlled so switching is stable */}
@@ -525,16 +598,16 @@ export function ConnectWalletDialog() {
               onValueChange={(v) => setActiveTab(v as "action" | "stellar")}
               className="w-full"
             >
-              <TabsList className="bg-muted grid w-full grid-cols-2 rounded-xl p-1">
+              <TabsList className="bg-surface-2 grid h-12 w-full grid-cols-2 rounded-2xl p-1">
                 <TabsTrigger
                   value="action"
-                  className="data-[state=active]:bg-foreground data-[state=active]:text-background rounded-lg text-sm font-medium"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground font-hud rounded-xl text-sm tracking-wide uppercase data-[state=active]:shadow-none dark:data-[state=active]:border-transparent"
                 >
                   Action Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="stellar"
-                  className="data-[state=active]:bg-foreground data-[state=active]:text-background rounded-lg text-sm font-medium"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground font-hud rounded-xl text-sm tracking-wide uppercase data-[state=active]:shadow-none dark:data-[state=active]:border-transparent"
                 >
                   Stellar Login
                 </TabsTrigger>
@@ -546,21 +619,6 @@ export function ConnectWalletDialog() {
                 <StellarTabContent />
               </TabsContent>
             </Tabs>
-
-            {/* Disconnect */}
-            {authUser && (
-              <div className="mt-auto flex flex-col gap-2">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background text-muted-foreground px-2">or</span>
-                  </div>
-                </div>
-                <DisconnectButton />
-              </div>
-            )}
           </div>
 
           {/* ── Right panel ──
@@ -577,20 +635,18 @@ export function ConnectWalletDialog() {
             className={
               isFramedHost
                 ? "hidden"
-                : "bg-accent relative hidden flex-col overflow-hidden rounded-r-lg lg:flex"
+                : "bg-primary/10 dark:bg-primary/15 text-foreground border-foreground/10 relative hidden flex-col overflow-hidden border-l-2 lg:flex"
             }
           >
             <div className="p-6 pb-3">
-              <p className="text-accent-foreground/60 text-xs font-semibold tracking-widest uppercase">
-                Scan to connect
-              </p>
-              <h3 className="text-accent-foreground mt-1 text-lg font-bold">Action Auth System</h3>
+              <p className="marker text-primary text-sm">*scan to connect*</p>
+              <h3 className="display mt-2 text-4xl">Action Auth System</h3>
             </div>
 
             <div className="flex flex-1 items-center justify-center px-6">
-              <div className="bg-accent-foreground/10 ring-accent-foreground/20 relative flex h-44 w-full items-center justify-center overflow-hidden rounded-2xl shadow-lg ring-1">
+              <div className="bg-card border-foreground/10 relative flex h-44 w-full -rotate-2 items-center justify-center overflow-hidden rounded-2xl border-2">
                 {/* QR blurred watermark */}
-                <QrCodeIcon className="text-accent-foreground/30 absolute h-36 w-36 scale-110 blur-[3px]" />
+                <QrCodeIcon className="text-foreground absolute h-36 w-36 scale-110 opacity-10" />
                 {/* Button centred on top */}
                 <div className="relative z-10 w-full px-2">
                   <WCButton
@@ -609,7 +665,7 @@ export function ConnectWalletDialog() {
                   (window.location.href =
                     "https://github.com/Lobstrco/lobstr-browser-extension/tree/main")
                 }
-                className="border-accent-foreground/20 bg-accent-foreground/10 hover:bg-accent-foreground/20 flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors"
+                className="bg-card border-foreground/10 hover:border-foreground flex w-full items-center gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition-colors"
               >
                 <Image
                   src="/images/icons/labstr.png"
@@ -619,10 +675,8 @@ export function ConnectWalletDialog() {
                   className="shrink-0 rounded-full"
                 />
                 <div>
-                  <p className="text-accent-foreground/60 text-[10px] tracking-widest uppercase">
-                    Works with
-                  </p>
-                  <p className="text-accent-foreground text-sm font-semibold">Lobstr Mobile App</p>
+                  <p className="marker text-muted-foreground text-[11px]">works with</p>
+                  <p className="display text-xl">Lobstr Mobile App</p>
                 </div>
               </button>
             </div>
@@ -683,13 +737,13 @@ function WCButton({
           void runner();
         }}
         className={clsx(
-          "flex w-full items-center gap-2.5 rounded-xl border text-sm font-medium transition-all duration-150 disabled:opacity-60",
+          "flex w-full items-center gap-2.5 rounded-xl border-2 text-sm font-bold transition-[transform,border-color,background-color] duration-150 disabled:opacity-60",
           inGrid ? "px-3 py-2" : "justify-center px-4 py-2.5",
           isSelected
             ? "border-primary bg-primary/10 ring-primary/30 text-primary hover:bg-primary/20 ring-1"
             : onDark
-              ? "border-accent-foreground/30 bg-accent-foreground/10 text-accent-foreground hover:bg-accent-foreground/20"
-              : "border-border bg-card text-card-foreground hover:border-primary/50 hover:bg-muted",
+              ? "border-primary bg-primary text-primary-foreground hover:-translate-y-0.5"
+              : "border-foreground/12 bg-card text-card-foreground hover:border-foreground hover:-translate-y-0.5",
         )}
       >
         <span

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Prepares an app for the platform it is being built for (PLATFORM_SLUG):
-//   - src/styles/platform-theme.css  <- themes/<slug>/<app>.css
+//   - src/styles/platform-theme.css  <- themes/<slug>/poster.css (market and brand, which share
+//                                       the poster look) then themes/<slug>/<app>.css
 //   - public/platform/**             <- assets/<slug>/shared/** then assets/<slug>/<app>/**
 //                                       (the app's own files win over shared ones)
 // Both outputs are generated and git-ignored. Run from the app directory by
@@ -35,15 +36,37 @@ function resolveSlug() {
 }
 
 const slug = resolveSlug();
-const themeFile = [
-  path.join(platformRoot, "themes", slug, `${app}.css`),
-  path.join(platformRoot, "themes", DEFAULT_SLUG, `${app}.css`),
-].find(fs.existsSync);
+/** Apps built on the shared poster look (@wadzzo/ui/styles/poster.css) also get the platform's poster.css. */
+const POSTER_APPS = new Set(["market", "brand"]);
+/** A platform's own file, else the default platform's. */
+const themeFor = (name) =>
+  [
+    path.join(platformRoot, "themes", slug, name),
+    path.join(platformRoot, "themes", DEFAULT_SLUG, name),
+  ].find(fs.existsSync);
+const themeFiles = [
+  POSTER_APPS.has(app) ? themeFor("poster.css") : undefined,
+  themeFor(`${app}.css`),
+].filter(Boolean);
+// @import must precede every other rule, so the files' imports are hoisted to the top.
+const sources = themeFiles.map((file) => fs.readFileSync(file, "utf8"));
+const isImport = (line) => /^@import\s/.test(line);
+const imports = sources.flatMap((css) => css.split("\n").filter(isImport));
+const rules = sources.map((css) =>
+  css
+    .split("\n")
+    .filter((line) => !isImport(line))
+    .join("\n"),
+);
 const target = path.join(appRoot, "src/styles/platform-theme.css");
 fs.mkdirSync(path.dirname(target), { recursive: true });
 fs.writeFileSync(
   target,
-  `/* GENERATED for PLATFORM_SLUG=${slug} by packages/platform/scripts/sync-platform-assets.mjs. Do not edit or commit. */\n${themeFile ? fs.readFileSync(themeFile, "utf8") : ""}`,
+  [
+    `/* GENERATED for PLATFORM_SLUG=${slug} by packages/platform/scripts/sync-platform-assets.mjs. Do not edit or commit. */`,
+    ...imports,
+    ...rules,
+  ].join("\n"),
 );
 
 const publicDir = path.join(appRoot, "public/platform");
@@ -54,5 +77,5 @@ const assetDirs = ["shared", app]
 for (const dir of assetDirs) fs.cpSync(dir, publicDir, { recursive: true });
 
 console.log(
-  `[platform] ${app}: ${slug}${themeFile ? "" : " (no theme)"}${assetDirs.length ? " + assets" : ""}`,
+  `[platform] ${app}: ${slug}${themeFiles.length ? "" : " (no theme)"}${assetDirs.length ? " + assets" : ""}`,
 );

@@ -5,22 +5,22 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@wadzzo/ui/components/badge";
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
+import { Button } from "@wadzzo/ui/poster/button";
+import { Input } from "@wadzzo/ui/poster/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@wadzzo/ui/components/select";
+} from "@wadzzo/ui/poster/select";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { sortOptionEnum } from "@wadzzo/schemas/bounty-type";
 import { htmlToText } from "~/ui/ai/shared";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "@wadzzo/ui/poster/empty-state";
+import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -94,7 +94,10 @@ export default function BountiesPage() {
         {bounties.isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-card overflow-hidden rounded-xl border">
+              <div
+                key={i}
+                className="bg-card border-foreground/10 overflow-hidden rounded-[1.4rem] border-2"
+              >
                 <Skeleton className="aspect-[2/1] w-full rounded-none" />
                 <div className="space-y-2 p-4">
                   <Skeleton className="h-4 w-2/3" />
@@ -156,7 +159,7 @@ export function BountyCard({ bounty: b }: { bounty: Bounty }) {
   return (
     <Link
       href={`/bounties/${b.id}`}
-      className="group bg-card focus-visible:outline-primary flex h-full flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md focus-visible:outline-2"
+      className="group bg-card focus-visible:outline-primary border-foreground/10 flex h-full flex-col overflow-hidden rounded-[1.4rem] border-2 transition-shadow hover:shadow-md focus-visible:outline-2"
     >
       <div className="bg-surface-2 relative aspect-[2/1] w-full overflow-hidden">
         {b.imageUrls[0] ? (
