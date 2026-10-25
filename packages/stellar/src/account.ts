@@ -1,4 +1,4 @@
-import { Asset, type Horizon, NotFoundError } from "@stellar/stellar-sdk";
+import { Asset, BadRequestError, type Horizon, NotFoundError } from "@stellar/stellar-sdk";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { BASE_RESERVE_XLM, MAX_SUBENTRIES, PLATFORM_ASSET } from "@wadzzo/wallet/config";
@@ -24,12 +24,20 @@ export class StellarAccount {
     readonly raw: Horizon.AccountResponse,
   ) {}
 
-  /** The account, or `null` when it doesn't exist on-chain yet (an unfunded wallet holds nothing). */
+  /**
+   * The account, or `null` when it doesn't exist on-chain yet (an unfunded wallet holds nothing).
+   * An id Horizon rejects as malformed (400) counts as no account too, instead of failing the
+   * whole request with "Bad Request".
+   */
   static async load(id: string): Promise<StellarAccount | null> {
     try {
       return new StellarAccount(id, await horizonServer().loadAccount(id));
     } catch (error) {
       if (error instanceof NotFoundError) return null;
+      if (error instanceof BadRequestError) {
+        console.warn(`[stellar] not a valid account id: ${id.slice(0, 8)}…`);
+        return null;
+      }
       throw error;
     }
   }
