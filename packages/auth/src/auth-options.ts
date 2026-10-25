@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { WadzzoSessionUser } from "@wadzzo/wallet/shared";
 
 import { authorizeCredentials } from "./authorize-credentials";
+import { sharedSessionCookie } from "./session-cookie";
 
 /** NextAuth options shared by every app: JWT sessions carrying the wallet type. */
 export const authOptions: NextAuthOptions = {
@@ -28,6 +29,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   session: { strategy: "jwt" },
+  cookies: sharedSessionCookie,
   providers: [
     CredentialsProvider({
       type: "credentials",

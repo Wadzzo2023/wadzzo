@@ -1,13 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { brandOrigins } from "@wadzzo/ar-core/embed/config";
+import { clearLegacySessionCookie } from "@wadzzo/auth/session-cookie";
+
+export async function proxy(request: NextRequest) {
+  const res = /^\/embed\/[^/]+$/.test(request.nextUrl.pathname)
+    ? await embedPolicy(request)
+    : NextResponse.next();
+  clearLegacySessionCookie(request, res);
+  return res;
+}
 
 /**
  * Sets the iframe allowlist (CSP `frame-ancestors`) on `/embed/[id]` before the
  * page renders: each brand lists the sites that may frame its map, and the
  * editor's `/embed/preview` may only be framed by the brand portal.
  */
-export async function proxy(request: NextRequest) {
+async function embedPolicy(request: NextRequest) {
   const id = request.nextUrl.pathname.split("/")[2] ?? "";
   const res = NextResponse.next();
 
@@ -38,4 +47,6 @@ export async function proxy(request: NextRequest) {
   return res;
 }
 
-export const config = { matcher: "/embed/:id" };
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|images/).*)"],
+};
