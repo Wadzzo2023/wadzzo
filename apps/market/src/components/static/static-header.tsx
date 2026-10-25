@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-/** The top of an info page (About, FAQ, Support, Privacy): eyebrow, title, one line. */
+/** The top of an info page (About, FAQ, Support, Privacy): a green block with a marker eyebrow, giant title and one line. */
 export function StaticHeader({
   eyebrow,
   title,
@@ -11,16 +11,14 @@ export function StaticHeader({
   description?: ReactNode;
 }) {
   return (
-    <header className="border-foreground/[0.06] relative overflow-hidden rounded-3xl border p-6 sm:p-10">
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,hsl(var(--primary)/0.2),transparent_55%),radial-gradient(circle_at_85%_80%,hsl(190_90%_50%/0.12),transparent_55%)]"
-      />
-      <p className="label-caps text-primary">{eyebrow}</p>
-      <h1 className="font-hud mt-1 text-3xl leading-tight font-bold tracking-tight sm:text-5xl">
+    <header className="side-scope blob bg-side text-side-ink relative overflow-hidden p-6 sm:p-10">
+      <p className="marker -rotate-2 text-base">*{eyebrow.toLowerCase()}*</p>
+      <h1 className="display mt-2 text-5xl break-words sm:text-6xl lg:text-7xl xl:text-8xl">
         {title}
       </h1>
-      {description && <p className="text-muted-foreground mt-2 max-w-2xl">{description}</p>}
+      {description && (
+        <p className="text-side-ink/80 mt-3 max-w-2xl font-semibold">{description}</p>
+      )}
     </header>
   );
 }

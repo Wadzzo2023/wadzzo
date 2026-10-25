@@ -4,20 +4,20 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { CheckCircle2, Gift } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "~/ui/skin/dialog";
+import { Input } from "~/ui/skin/fields";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { api } from "~/utils/api";
+import { Amount } from "~/components/price/amount";
 
 /** Anything in the wallet that can be sent. `issuer` is null for XLM. */
 export type SendableAsset = {
@@ -51,12 +51,7 @@ export function SendDialog({
   const amount = Number(amountText);
   const ready = to.trim().length === 56 && Number.isFinite(amount) && amount > 0;
 
-  const input = useDeferredValue({
-    code: asset.code,
-    issuer: asset.issuer,
-    to: to.trim(),
-    amount,
-  });
+  const input = useDeferredValue({ code: asset.code, issuer: asset.issuer, to: to.trim(), amount });
   const quote = api.wallet.sendQuote.useQuery(input, {
     enabled: ready,
     placeholderData: keepPreviousData,
@@ -68,12 +63,7 @@ export function SendDialog({
 
   const go = async () => {
     const res = await prepare
-      .mutateAsync({
-        code: asset.code,
-        issuer: asset.issuer,
-        to: to.trim(),
-        amount,
-      })
+      .mutateAsync({ code: asset.code, issuer: asset.issuer, to: to.trim(), amount })
       .catch(() => null);
     if (res && (await sign.run(res)))
       await Promise.all([utils.wallet.balances.invalidate(), utils.activity.list.invalidate()]);
@@ -83,7 +73,7 @@ export function SendDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud">Send</DialogTitle>
+          <DialogTitle className="display text-2xl">Send</DialogTitle>
           <DialogDescription>
             Send XLM or any token in your wallet to a Stellar address.
           </DialogDescription>
@@ -92,16 +82,16 @@ export function SendDialog({
         {sign.step === "done" ? (
           <div className="space-y-3 py-4 text-center">
             <CheckCircle2 className="text-primary mx-auto size-10" />
-            <p className="font-hud font-semibold">
+            <p className="display text-2xl">
               {prepare.data?.mode === "gift" ? "Gift sent" : "Sent"}{" "}
-              {formatAmount(amount, asset.code)}
+              <Amount value={amount} currency={asset.code} />
             </p>
             {prepare.data?.mode === "gift" && (
               <p className="text-muted-foreground text-sm">
                 It waits in their Pending gifts until they accept it.
               </p>
             )}
-            <Button variant="outline" className="rounded-xl" onClick={onClose}>
+            <Button variant="outline" onClick={onClose}>
               Done
             </Button>
           </div>
@@ -143,9 +133,7 @@ export function SendDialog({
                       </span>
                     </span>
                     <span className="text-sm font-semibold tabular-nums">
-                      {a.balance.toLocaleString("en-US", {
-                        maximumFractionDigits: 7,
-                      })}
+                      {a.balance.toLocaleString("en-US", { maximumFractionDigits: 7 })}
                     </span>
                   </button>
                 ))}
@@ -177,23 +165,19 @@ export function SendDialog({
                   onChange={(e) => setAmountText(e.target.value.replace(/[^\d.]/g, ""))}
                   placeholder="0"
                   aria-label={`Amount of ${asset.code}`}
-                  className="font-hud h-11 rounded-xl text-lg"
+                  className="display h-11 rounded-xl text-3xl"
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 rounded-xl"
+                  className="h-11"
                   onClick={() => setAmountText(String(asset.balance))}
                 >
                   Max
                 </Button>
               </div>
               <p className="text-muted-foreground text-xs">
-                Available:{" "}
-                {asset.balance.toLocaleString("en-US", {
-                  maximumFractionDigits: 7,
-                })}{" "}
-                {asset.code}
+                Available: <Amount value={asset.balance} currency={asset.code} />
               </p>
             </div>
 
@@ -215,7 +199,9 @@ export function SendDialog({
                         {l.label}
                         {l.hint && <span className="block text-xs">{l.hint}</span>}
                       </dt>
-                      <dd className="tabular-nums">{formatAmount(l.amount, l.currency)}</dd>
+                      <dd className="tabular-nums">
+                        <Amount value={l.amount} currency={l.currency} />
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -233,7 +219,7 @@ export function SendDialog({
               </p>
             )}
             <Button
-              className="h-11 w-full rounded-xl font-bold"
+              className="h-11 w-full font-bold"
               disabled={!q?.ok || quote.isFetching || prepare.isPending || sign.busy}
               onClick={() => void go()}
             >

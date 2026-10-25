@@ -6,10 +6,10 @@ import { cache, Suspense } from "react";
 
 import { FollowButton, ShareButton } from "~/components/creator/creator-actions";
 import { CreatorTabs } from "~/components/creator/creator-tabs";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { env } from "~/env";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { platformBranding } from "@wadzzo/platform/branding";
 
@@ -66,67 +66,70 @@ export default async function CreatorPage({ params }: PageProps<"/creator/[key]"
   };
 
   return (
-    <div>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      {/* Cover, full width like the other page banners */}
-      <div className="relative h-[34svh] max-h-[380px] min-h-[220px] overflow-hidden bg-black">
-        {profile.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={profile.coverUrl} alt="" className="size-full object-cover" />
-        ) : profile.profileUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.profileUrl}
-            alt=""
-            className="size-full scale-125 object-cover opacity-60 blur-3xl"
-          />
-        ) : (
-          <div className="size-full bg-[radial-gradient(circle_at_20%_30%,hsl(var(--primary)/0.45),transparent_55%),radial-gradient(circle_at_80%_70%,hsl(190_90%_50%/0.3),transparent_55%)]" />
-        )}
-        <div className="to-background absolute inset-0 bg-gradient-to-b from-black/10 via-transparent" />
-      </div>
+      <PageBody wide className="space-y-8">
+        {/* Cover in a chunky frame; the avatar breaks out of it */}
+        <div className="relative">
+          <div className="border-foreground bg-surface-3 h-[28svh] max-h-[340px] min-h-[200px] overflow-hidden rounded-[1.8rem] border-[3px]">
+            {profile.coverUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.coverUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <div className="ink-cover bg-primary/20 flex size-full items-center justify-center">
+                <span className="display text-primary/25 text-[9rem] select-none">
+                  {profile.name}
+                </span>
+              </div>
+            )}
+          </div>
+          {profile.pageAsset && (
+            <span className="marker bg-pink text-side-ink absolute -top-3 right-6 rotate-6 rounded-lg px-3 py-1 text-sm">
+              ${profile.pageAsset.code}
+            </span>
+          )}
+        </div>
 
-      <PageBody wide className="relative space-y-6 pt-0">
-        {/* Avatar overlaps the cover; name, bio and actions sit beside it */}
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <span className="from-primary via-green-hot -mt-14 w-fit shrink-0 rounded-full bg-gradient-to-tr to-cyan-400 p-[3px] shadow-[0_0_40px_-8px_hsl(var(--primary)/0.8)] sm:-mt-20">
+        <header className="flex flex-col gap-5 px-1 sm:flex-row sm:items-end">
+          <span className="bg-primary relative z-10 -mt-20 w-fit shrink-0 -rotate-3 self-start rounded-full p-1 sm:-mt-24">
             <Avatar
               src={profile.profileUrl}
               name={profile.name}
-              className="border-background size-24 border-4 text-3xl sm:size-36"
+              className="border-background size-28 border-4 text-4xl sm:size-40"
             />
           </span>
-          <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0 space-y-1">
-              <h1 className="font-hud flex items-center gap-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                <span className="truncate">{profile.name}</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0 space-y-2">
+              <h1 className="display flex min-w-0 items-center gap-3 text-5xl sm:text-6xl lg:text-7xl">
+                <span className="min-w-0 truncate">{profile.name}</span>
                 <BadgeCheck
-                  className="text-primary size-6 shrink-0"
+                  className="text-primary size-8 shrink-0"
+                  strokeWidth={2.6}
                   aria-label="Verified creator"
                 />
               </h1>
-              {profile.bio && (
-                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed break-words whitespace-pre-line">
-                  {profile.bio}
-                </p>
-              )}
-              <p className="text-muted-foreground text-xs">
-                {profile.counts.followers.toLocaleString("en-US")} follower
-                {profile.counts.followers === 1 ? "" : "s"} · Joined{" "}
+              <p className="marker text-primary -rotate-1 text-base">
+                {profile.counts.followers.toLocaleString("en-US")} fan
+                {profile.counts.followers === 1 ? "" : "s"} · joined{" "}
                 {new Date(profile.joinedAt).toLocaleDateString("en-US", {
                   month: "long",
                   year: "numeric",
                 })}
               </p>
+              {profile.bio && (
+                <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed break-words whitespace-pre-line">
+                  {profile.bio}
+                </p>
+              )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {profile.viewer.isSelf ? (
-                <Button asChild variant="outline" className="glass rounded-full">
+                <Button asChild variant="outline" className="rounded-full">
                   <a href={env.NEXT_PUBLIC_BRAND_PORTAL_URL} target="_blank" rel="noreferrer">
                     <ExternalLink className="size-4" /> Manage brand
                   </a>
@@ -148,6 +151,6 @@ export default async function CreatorPage({ params }: PageProps<"/creator/[key]"
           />
         </Suspense>
       </PageBody>
-    </div>
+    </>
   );
 }

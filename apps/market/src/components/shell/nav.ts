@@ -3,17 +3,17 @@ import {
   Home,
   Layers,
   Newspaper,
+  Settings,
   Store,
   Target,
-  Users,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
 
 /**
- * Sidebar navigation. `MAIN` is browsing, `ACCOUNT` is the signed-in
- * wallet's own pages. Notifications are the bell in the header; Settings and
- * Sign out are in the avatar menu.
+ * Sidebar navigation (the app has no header: the sidebar holds everything).
+ * `EXPLORE` is browsing, `ACCOUNT` is the signed-in wallet's own pages;
+ * `authOnly` items are hidden when signed out. `TABS` are the phone tab bar's links (it adds Search and Menu).
  */
 export type NavItem = {
   href: string;
@@ -23,18 +23,24 @@ export type NavItem = {
   authOnly?: boolean;
 };
 
-export const MAIN: NavItem[] = [
+export const EXPLORE: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/marketplace", label: "Market", icon: Store, match: ["/item"] },
-  { href: "/collection", label: "Collection", icon: Layers },
+  { href: "/marketplace", label: "Marketplace", icon: Store, match: ["/item"] },
   { href: "/bounties", label: "Bounties", icon: Target },
   { href: "/feed", label: "Feed", icon: Newspaper, match: ["/posts"] },
-  { href: "/creators", label: "Creators", icon: Users, match: ["/creator"] },
 ];
 
 export const ACCOUNT: NavItem[] = [
-  { href: "/wallet", label: "Wallet", icon: Wallet },
-  { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/collection", label: "Collection", icon: Layers },
+  { href: "/wallet", label: "Wallet", icon: Wallet, authOnly: true },
+  { href: "/activity", label: "Activity", icon: Activity, authOnly: true },
+  { href: "/settings", label: "Settings", icon: Settings, authOnly: true },
+];
+
+export const TABS: NavItem[] = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/marketplace", label: "Market", icon: Store, match: ["/item"] },
+  { href: "/collection", label: "Collection", icon: Layers },
 ];
 
 /** Info pages, listed at the bottom of the sidebar. */

@@ -1,13 +1,15 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { formatAmount, type CostLine, type Problem } from "@wadzzo/stellar/quote";
+import { Amount } from "~/components/price/amount";
+import { type CostLine, type Problem } from "@wadzzo/stellar/quote";
 
 /**
  * Every line of what an action costs, the total, and the payer's balance.
  * `collapsible`: show only the total until "See breakdown" is opened.
+ * `part` splits it in two so the lines and the total can sit in different places.
  */
 export function CostBreakdown({
   lines,
@@ -15,6 +17,7 @@ export function CostBreakdown({
   currency,
   balance,
   collapsible = false,
+  part = "all",
   className,
 }: {
   lines: CostLine[];
@@ -22,6 +25,8 @@ export function CostBreakdown({
   currency: string;
   balance?: number | null;
   collapsible?: boolean;
+  /** `lines`: only the itemised costs; `total`: only the total and balance (to place them apart). */
+  part?: "all" | "lines" | "total";
   className?: string;
 }) {
   const rows = (
@@ -38,7 +43,7 @@ export function CostBreakdown({
               !l.inTotal && "text-muted-foreground",
             )}
           >
-            {formatAmount(l.amount, l.currency)}
+            <Amount value={l.amount} currency={l.currency} />
           </dd>
         </div>
       ))}
@@ -47,49 +52,76 @@ export function CostBreakdown({
   const totals = (
     <dl className="space-y-1 text-sm">
       <div className="flex items-center justify-between gap-3">
-        <dt className="font-hud font-semibold">Total</dt>
-        <dd className="font-hud text-lg font-bold tabular-nums">{formatAmount(total, currency)}</dd>
+        <dt className="display text-2xl">Total</dt>
+        <dd className="display text-primary text-3xl tabular-nums">
+          <Amount value={total} currency={currency} />
+        </dd>
       </div>
       {balance != null && (
         <div className="text-muted-foreground flex items-center justify-between gap-3 text-xs">
           <dt>Your balance</dt>
           <dd className={cn("tabular-nums", balance < total && "text-destructive font-semibold")}>
-            {formatAmount(balance, currency)}
+            <Amount value={balance} currency={currency} />
           </dd>
         </div>
       )}
     </dl>
   );
 
+  if (part === "lines")
+    return (
+      <div
+        className={cn(
+          "border-foreground/15 rounded-[1.2rem] border-2 border-dashed p-4",
+          className,
+        )}
+      >
+        <p className="label-caps mb-3">Cost breakdown</p>
+        {rows}
+      </div>
+    );
+
+  if (part === "total")
+    return (
+      <div
+        className={cn(
+          "border-foreground/15 rounded-[1.2rem] border-2 border-dashed p-4",
+          className,
+        )}
+      >
+        {totals}
+      </div>
+    );
+
   if (collapsible) {
     return (
       <details
         className={cn(
-          "group bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-3.5 ring-1",
+          "group border-foreground/15 rounded-[1.2rem] border-2 border-dashed p-3.5",
           className,
         )}
       >
         {/* closed: only the total shows; the hint lives in <summary> so it stays visible */}
         <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
           {totals}
-          <span className="text-primary mt-1.5 flex items-center justify-center gap-1 text-xs font-medium">
+          <span className="marker text-primary mt-1.5 flex items-center justify-center gap-1 text-xs">
             <span className="group-open:hidden">See breakdown</span>
             <span className="hidden group-open:inline">Hide breakdown</span>
             <ChevronDown className="size-3.5 transition-transform group-open:rotate-180" />
           </span>
         </summary>
-        <div className="border-foreground/[0.08] mt-3 border-t pt-3">{rows}</div>
+        <div className="border-foreground/10 mt-3 border-t-2 border-dashed pt-3">{rows}</div>
       </details>
     );
   }
 
   return (
     <div
-      className={cn("bg-foreground/[0.04] ring-foreground/[0.06] rounded-xl p-4 ring-1", className)}
+      className={cn("border-foreground/15 rounded-[1.2rem] border-2 border-dashed p-4", className)}
     >
       <p className="label-caps mb-3">Cost breakdown</p>
       {rows}
-      <div className="border-foreground/[0.08] mt-2.5 border-t pt-2.5">{totals}</div>
+      <div className="border-foreground/10 mt-2.5 border-t-2 border-dashed pt-2.5">{totals}</div>
     </div>
   );
 }
@@ -112,7 +144,7 @@ export function ProblemList({
 }) {
   if (!problems.length) {
     return (
-      <p className="tone-success flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
+      <p className="tone-success flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold">
         <CheckCircle2 className="size-4" /> Ready — this transaction will go through.
       </p>
     );

@@ -7,28 +7,29 @@ import toast from "react-hot-toast";
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { MethodPicker } from "~/components/payment/method-picker";
 import { Price } from "~/components/price/price";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
+} from "~/ui/skin/dialog";
 import { useRequireAuth } from "~/hooks/use-require-auth";
+import { useFollow } from "~/hooks/use-follow";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
-import { formatAmount } from "@wadzzo/stellar/quote";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "~/ui/empty-state";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { TierCard } from "./tier-card";
+import { Amount } from "~/components/price/amount";
 
 type Profile = RouterOutputs["creator"]["profile"];
 type Offer = RouterOutputs["market"]["pageTokenSales"][number];
 
-/** Follow / Following (also adds the brand's page-token trustline, paid by the platform). */
+/** Follow / Following. For brands with a page token, following also adds that token's trustline (paid by the platform) and only counts once it's on Stellar. */
 export function FollowButton({
   creatorId,
   initial,
@@ -40,9 +41,8 @@ export function FollowButton({
 }) {
   const { requireAuth } = useRequireAuth();
   const [following, setFollowing] = useState(initial);
-  const follow = api.creator.follow.useMutation();
   const unfollow = api.creator.unfollow.useMutation();
-  const sign = useSignAndConfirm();
+  const follow = useFollow();
 
   const toggle = requireAuth(async () => {
     if (following) {
@@ -50,24 +50,27 @@ export function FollowButton({
       await unfollow.mutateAsync({ creatorId }).catch(() => setFollowing(true));
       return;
     }
-    setFollowing(true);
-    const res = await follow.mutateAsync({ creatorId }).catch(() => (setFollowing(false), null));
-    if (res?.xdr) await sign.signOnly(res.xdr);
+    // not "Following" until it's saved: without a page token that's immediate, with one it waits for the trustline
+    setFollowing(await follow.run(creatorId));
   });
 
   return (
     <Button
       onClick={toggle}
       variant={following ? "outline" : "default"}
-      disabled={follow.isPending || unfollow.isPending || sign.busy}
-      className={cn(
-        "rounded-full px-5",
-        !following && "shadow-[0_0_24px_-6px_hsl(var(--primary)/0.8)]",
-        className,
-      )}
+      disabled={follow.busy || unfollow.isPending}
+      className={cn("rounded-full px-5", className)}
     >
       {following ? <UserCheck className="size-4" /> : <UserPlus className="size-4" />}
-      {sign.busy ? "Confirm in wallet…" : following ? "Following" : "Follow"}
+      {follow.stage === "signing"
+        ? "Confirm in wallet…"
+        : follow.stage === "confirming"
+          ? "Confirming…"
+          : follow.stage === "preparing"
+            ? "Following…"
+            : following
+              ? "Following"
+              : "Follow"}
     </Button>
   );
 }
@@ -85,7 +88,7 @@ export function ShareButton({ title }: { title: string }) {
     <Button
       variant="outline"
       size="icon"
-      className="glass rounded-full"
+      className="rounded-full"
       onClick={() => void share()}
       aria-label="Share"
     >
@@ -112,9 +115,9 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
   }
   return (
     <section id="tiers" className="scroll-mt-24 space-y-5">
-      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4">
+      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] p-4">
         <div>
-          <h2 className="font-hud text-lg font-bold">Membership</h2>
+          <h2 className="display text-3xl">Membership</h2>
           <p className="text-muted-foreground text-sm">
             Hold {profile.name}&apos;s page token ({code}) to unlock members-only posts and items.
           </p>
@@ -124,7 +127,7 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
             <p className="text-primary text-[10px] font-semibold tracking-wider uppercase">
               You hold
             </p>
-            <p className="font-hud text-lg font-bold tabular-nums">
+            <p className="display text-3xl tabular-nums">
               {held.toLocaleString("en-US")}{" "}
               <span className="text-muted-foreground text-sm">{code}</span>
             </p>
@@ -133,7 +136,7 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
       </div>
 
       {profile.subscriptions.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {profile.subscriptions.map((t) => (
             <TierCard
               key={t.id}
@@ -149,15 +152,15 @@ export function MembershipSection({ profile, offers }: { profile: Profile; offer
       {offers.length > 0 && (
         <div className="space-y-2">
           <p className="label-caps">Get {code}</p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {offers.map((o) => (
               <button
                 key={o.id}
                 type="button"
                 onClick={requireAuth(() => setBuying(o))}
-                className="glass hover:glow flex items-center gap-3 rounded-xl p-3 text-left transition-all"
+                className="glass hover:border-foreground flex items-center gap-3 rounded-xl p-3 text-left transition-all"
               >
-                <span className="bg-primary/15 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
+                <span className="blob bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center">
                   <Coins className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -210,7 +213,7 @@ function PageTokenDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud">{offer.title}</DialogTitle>
+          <DialogTitle className="display text-2xl">{offer.title}</DialogTitle>
           <DialogDescription>
             {offer.amountToSell.toLocaleString("en-US")} {code} from {offer.placer?.name}.
             {offer.description ? ` ${offer.description}` : ""}
@@ -219,7 +222,7 @@ function PageTokenDialog({
         {sign.step === "done" ? (
           <div className="space-y-3 py-4 text-center">
             <CheckCircle2 className="text-primary mx-auto size-8" />
-            <p className="font-hud font-semibold">
+            <p className="display text-2xl">
               {offer.amountToSell.toLocaleString("en-US")} {code} added to your wallet
             </p>
             <Button variant="outline" onClick={onClose}>
@@ -252,17 +255,21 @@ function PageTokenDialog({
               </p>
             )}
             <Button
-              className="h-11 w-full rounded-xl font-bold"
+              className="h-11 w-full font-bold"
               disabled={!quote.data?.ok || prepare.isPending || sign.busy}
               onClick={() => void go()}
             >
-              {sign.step === "signing"
-                ? "Confirm in your wallet…"
-                : sign.step === "confirming"
-                  ? "Confirming on Stellar…"
-                  : quote.data
-                    ? `Pay ${formatAmount(quote.data.total, quote.data.currency)}`
-                    : "Pay"}
+              {sign.step === "signing" ? (
+                "Confirm in your wallet…"
+              ) : sign.step === "confirming" ? (
+                "Confirming on Stellar…"
+              ) : quote.data ? (
+                <>
+                  Pay <Amount value={quote.data.total} currency={quote.data.currency} />
+                </>
+              ) : (
+                "Pay"
+              )}
             </Button>
           </div>
         )}

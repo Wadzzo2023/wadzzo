@@ -47,7 +47,7 @@ export function QuantityStepper({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(clamp(Number(e.target.value)))}
-        className="font-hud w-12 [appearance:textfield] bg-transparent text-center text-lg font-bold tabular-nums outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="display w-12 [appearance:textfield] bg-transparent text-center text-3xl tabular-nums outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         aria-label="Quantity"
       />
       <button

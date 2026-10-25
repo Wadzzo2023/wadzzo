@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 import { creatorHref } from "~/lib/creator";
 import { tierColor } from "~/components/creator/tier-card";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { Avatar } from "@wadzzo/ui/patterns/person";
@@ -63,16 +63,16 @@ export function PostCard({ post, full = false }: { post: PostData; full?: boolea
   };
 
   return (
-    <article className="glass space-y-4 rounded-2xl p-4 transition-shadow hover:shadow-[0_20px_50px_-30px_hsl(var(--primary)/0.6)] sm:p-5">
+    <article className="border-foreground/10 bg-surface hover:border-foreground space-y-4 rounded-[1.6rem] border-2 p-4 transition-[border-color,box-shadow] duration-200 hover:shadow-[6px_7px_0_0_hsl(var(--primary))] sm:p-5">
       <header className="flex items-center gap-3">
         <Link href={creatorHref(post.creator)} className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="from-primary via-green-hot rounded-full bg-gradient-to-tr to-cyan-400 p-[2px]">
+          <span className="bg-primary rounded-full p-[2px]">
             <span className="bg-background block rounded-full p-[2px]">
               <Avatar src={post.creator.profileUrl} name={post.creator.name} className="size-10" />
             </span>
           </span>
           <span className="min-w-0">
-            <span className="flex items-center gap-1 text-sm font-semibold">
+            <span className="display flex items-center gap-1 text-xl">
               <span className="truncate">{post.creator.name}</span>
               <BadgeCheck className="text-primary size-4 shrink-0" />
             </span>
@@ -100,14 +100,9 @@ export function PostCard({ post, full = false }: { post: PostData; full?: boolea
 
       <div className="space-y-2">
         {full ? (
-          <h1 className="font-hud text-2xl leading-tight font-bold tracking-tight">
-            {post.heading}
-          </h1>
+          <h1 className="display text-4xl">{post.heading}</h1>
         ) : (
-          <Link
-            href={href}
-            className="font-hud hover:text-primary block text-lg leading-snug font-bold transition-colors"
-          >
+          <Link href={href} className="display hover:text-primary block text-3xl transition-colors">
             {post.heading}
           </Link>
         )}
@@ -124,11 +119,11 @@ export function PostCard({ post, full = false }: { post: PostData; full?: boolea
       </div>
 
       {post.locked ? (
-        <div className="ring-primary/20 relative flex flex-col items-center gap-2 overflow-hidden rounded-xl bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.18),transparent_70%)] px-4 py-10 text-center ring-1">
-          <span className="bg-primary/15 text-primary flex size-12 items-center justify-center rounded-2xl shadow-[0_0_30px_-8px_hsl(var(--primary)/0.8)]">
-            <Lock className="size-5" />
+        <div className="border-pink/60 relative flex flex-col items-center gap-2 overflow-hidden rounded-[1.2rem] border-[3px] border-dashed px-4 py-10 text-center">
+          <span className="blob bg-pink text-side-ink flex size-14 -rotate-6 items-center justify-center">
+            <Lock className="size-6" strokeWidth={2.6} />
           </span>
-          <p className="font-hud font-semibold">For {post.unlock?.tierName} members</p>
+          <p className="display text-2xl">For {post.unlock?.tierName} members</p>
           <p className="text-muted-foreground max-w-xs text-sm">
             Hold {post.unlock?.price.toLocaleString("en-US")} {post.unlock?.code ?? "page tokens"}{" "}
             of {post.creator.name} to read this post
@@ -136,7 +131,7 @@ export function PostCard({ post, full = false }: { post: PostData; full?: boolea
               ` and see its ${post.lockedMedia.length} attachment${post.lockedMedia.length > 1 ? "s" : ""}`}
             .
           </p>
-          <Button asChild size="sm" className="mt-1 rounded-xl">
+          <Button asChild size="sm" className="mt-1">
             <Link href={`${creatorHref(post.creator)}?tab=membership`}>Unlock with membership</Link>
           </Button>
         </div>
@@ -144,7 +139,7 @@ export function PostCard({ post, full = false }: { post: PostData; full?: boolea
         post.medias.length > 0 && <MediaGrid medias={post.medias} href={full ? null : href} />
       )}
 
-      <footer className="border-foreground/[0.06] flex items-center gap-1 border-t pt-3 text-sm">
+      <footer className="border-foreground/10 flex items-center gap-1 border-t-2 border-dashed pt-3 text-sm">
         <button
           type="button"
           onClick={toggleLike}
@@ -284,7 +279,7 @@ function InlineComments({
           name={session?.user.name ?? null}
           className="size-7 text-[10px]"
         />
-        <div className="bg-foreground/[0.04] ring-foreground/[0.08] focus-within:ring-primary/50 flex h-10 flex-1 items-center rounded-full pr-1 pl-4 ring-1">
+        <div className="border-foreground/12 bg-surface focus-within:border-primary flex h-11 flex-1 items-center rounded-full border-2 pr-1 pl-4">
           <input
             ref={inputRef}
             value={text}
@@ -358,7 +353,7 @@ function MediaGrid({ medias, href }: { medias: Media[]; href: string | null }) {
               {extra > 0 && i === n - 1 && href && (
                 <Link
                   href={href}
-                  className="font-hud absolute inset-0 flex items-center justify-center bg-black/55 text-2xl font-bold text-white"
+                  className="display absolute inset-0 flex items-center justify-center bg-black/55 text-4xl text-white"
                 >
                   +{extra}
                 </Link>

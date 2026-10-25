@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { StaticHeader } from "~/components/static/static-header";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
@@ -120,8 +120,8 @@ export default function FaqPage() {
       />
       {FAQ.map((t) => (
         <section key={t.topic} className="space-y-3">
-          <h2 className="font-hud text-lg font-bold">{t.topic}</h2>
-          <div className="glass divide-foreground/[0.06] divide-y overflow-hidden rounded-2xl">
+          <h2 className="display text-3xl">{t.topic}</h2>
+          <div className="glass divide-foreground/10 divide-y-2 divide-dashed overflow-hidden rounded-[1.4rem]">
             {t.items.map((i) => (
               <details key={i.q} className="group">
                 <summary className="hover:bg-foreground/[0.03] flex cursor-pointer list-none items-center justify-between gap-4 p-4 font-semibold transition-colors [&::-webkit-details-marker]:hidden">
@@ -134,16 +134,16 @@ export default function FaqPage() {
           </div>
         </section>
       ))}
-      <section className="glass flex flex-col items-start gap-3 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="glass flex flex-col items-start gap-3 rounded-[1.4rem] p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-hud font-bold">Still stuck?</h2>
+          <h2 className="display text-2xl">Still stuck?</h2>
           <p className="text-muted-foreground text-sm">
             Send us a message and we&apos;ll get back to you.
           </p>
         </div>
         <Link
           href="/support"
-          className="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-xl px-5 text-sm font-semibold shadow-[0_0_20px_-6px_hsl(var(--primary)/0.8)]"
+          className="bg-primary text-primary-foreground inline-flex h-10 items-center rounded-xl px-5 text-sm font-semibold"
         >
           Contact support
         </Link>

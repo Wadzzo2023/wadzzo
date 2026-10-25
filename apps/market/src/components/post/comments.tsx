@@ -6,7 +6,7 @@ import { useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
 import { useRequireAuth } from "~/hooks/use-require-auth";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
+import { EmptyState } from "~/ui/empty-state";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
@@ -26,8 +26,8 @@ export function Comments({ postId }: { postId: number }) {
   const total = comments.data?.reduce((n, c) => n + 1 + c.childComments.length, 0) ?? 0;
 
   return (
-    <section id="comments" className="glass scroll-mt-24 space-y-5 rounded-2xl p-4 sm:p-5">
-      <h2 className="font-hud flex items-center gap-2 text-lg font-bold">
+    <section id="comments" className="glass scroll-mt-24 space-y-5 rounded-[1.4rem] p-4 sm:p-5">
+      <h2 className="display flex items-center gap-2 text-3xl">
         <MessageCircle className="text-primary size-5" /> Comments
         {comments.data && (
           <span className="bg-foreground/10 text-muted-foreground rounded-full px-2 text-xs tabular-nums">

@@ -5,20 +5,21 @@ import { useState } from "react";
 
 import { CostBreakdown, ProblemList } from "~/components/payment/cost-breakdown";
 import { MethodPicker } from "~/components/payment/method-picker";
-import { Button } from "@wadzzo/ui/components/button";
+import { Button } from "~/ui/skin/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@wadzzo/ui/components/dialog";
-import { Input } from "@wadzzo/ui/components/input";
+} from "~/ui/skin/dialog";
+import { Input } from "~/ui/skin/fields";
 import { Label } from "@wadzzo/ui/components/label";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api } from "~/utils/api";
+import { Amount, TokenCode } from "~/components/price/amount";
 
 type PayIn = "PLATFORM_ASSET" | "XLM";
 
@@ -76,7 +77,7 @@ export function StorageSetupDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud flex items-center gap-2">
+          <DialogTitle className="display flex items-center gap-2 text-2xl">
             <Archive className="text-primary size-5" /> Open your resale storage
           </DialogTitle>
           <DialogDescription>
@@ -160,7 +161,7 @@ export function ListDialog({
     <Dialog open={open} onOpenChange={(o) => (onOpenChange(o), !o && sign.reset())}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-hud">Resell “{item.name}”</DialogTitle>
+          <DialogTitle className="display text-2xl">Resell “{item.name}”</DialogTitle>
           <DialogDescription>
             The copies move to your storage and go on the marketplace once the transaction lands.
           </DialogDescription>
@@ -168,7 +169,7 @@ export function ListDialog({
         {sign.step === "done" ? (
           <div className="space-y-3 py-4 text-center">
             <CheckCircle2 className="text-primary mx-auto size-8" />
-            <p className="font-hud font-semibold">Listed!</p>
+            <p className="display text-2xl">Listed!</p>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Done
             </Button>
@@ -190,7 +191,9 @@ export function ListDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="price">Price each ({PLATFORM_ASSET.code})</Label>
+                <Label htmlFor="price" className="flex items-center gap-1.5">
+                  Price each <TokenCode code={PLATFORM_ASSET.code} />
+                </Label>
                 <Input
                   id="price"
                   type="number"
@@ -203,8 +206,7 @@ export function ListDialog({
             </div>
             {price > 0 && (
               <p className="text-muted-foreground text-xs">
-                You receive {youGet.toLocaleString(undefined, { maximumFractionDigits: 2 })}{" "}
-                {PLATFORM_ASSET.code} per sale
+                You receive <Amount value={youGet} currency={PLATFORM_ASSET.code} /> per sale
                 {item.royaltyPercent > 0 &&
                   ` (the creator earns a ${item.royaltyPercent}% royalty)`}
                 . Buyers pay the platform fee on top.

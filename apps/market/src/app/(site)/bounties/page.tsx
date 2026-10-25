@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { BountyBrowser } from "~/components/bounty/bounty-browser";
 import { formatUsd } from "~/lib/bounty";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { PageHero } from "~/ui/page-hero";
 
 export const metadata: Metadata = {
@@ -30,27 +30,19 @@ export default async function BountiesPage() {
         eyebrow="Bounties"
         title={
           <>
-            Complete tasks, <span className="text-gradient">win rewards</span>
+            Do stuff, <span className="text-primary">win stuff</span>
           </>
         }
-        description="Brands post challenges. Join one, submit your entry, and get paid straight to your wallet if you win."
+        description="brands post challenges — join one, submit your entry, and get paid straight to your wallet if you win!"
         image={cover}
         stats={[
-          {
-            icon: Target,
-            label: "Open bounties",
-            value: stats.open.toLocaleString("en-US"),
-          },
-          {
-            icon: Coins,
-            label: "Reward pool",
-            value: formatUsd(stats.poolUsd),
-          },
-          { icon: Trophy, label: "Paid instantly", value: "On-chain" },
+          { icon: Target, label: "Open bounties", value: stats.open.toLocaleString("en-US") },
+          { icon: Coins, label: "Reward pool", value: formatUsd(stats.poolUsd) },
+          { icon: Trophy, label: "Paid on-chain", value: "Instant" },
         ]}
       />
 
-      <PageBody wide className="pt-6">
+      <PageBody wide className="pt-4">
         <BountyBrowser initial={first.items} />
       </PageBody>
     </>

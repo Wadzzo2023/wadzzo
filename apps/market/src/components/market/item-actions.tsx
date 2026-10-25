@@ -7,7 +7,7 @@ import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
-/** Under the art: whether the viewer owns it (content unlocked or not), share, and the token on Stellar. */
+/** Under the art in the hero (always on a dark backdrop): whether the viewer owns it (content unlocked or not), share, and the token on Stellar. */
 export function ItemActions({
   assetId,
   name,
@@ -31,25 +31,27 @@ export function ItemActions({
   };
 
   const btn =
-    "glass flex size-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground";
+    "flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform hover:-rotate-12";
   return (
     <div className="flex items-center gap-2">
       <div
         className={cn(
-          "glass flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl px-3 text-sm",
-          owner && "border-primary/40",
+          "flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full border-2 px-4 text-sm font-semibold",
+          owner
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-white/25 text-white",
         )}
       >
         {owner ? (
-          <Unlock className="text-primary size-4 shrink-0" />
+          <Unlock className="size-4 shrink-0" strokeWidth={2.6} />
         ) : (
-          <Lock className="text-muted-foreground size-4 shrink-0" />
+          <Lock className="size-4 shrink-0 text-white/70" strokeWidth={2.6} />
         )}
         <span className="truncate">
           {owner ? (
-            <span className="text-primary font-semibold">You own this · content unlocked</span>
+            <span className="font-bold">You own this · content unlocked</span>
           ) : (
-            "Locked · own a copy to unlock the full content"
+            "Locked · own a copy to unlock it"
           )}
         </span>
       </div>

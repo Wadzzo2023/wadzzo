@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { FeedView } from "~/components/post/feed-view";
 import { serverApi } from "~/server/api/server";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {

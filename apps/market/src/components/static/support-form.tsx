@@ -3,9 +3,9 @@
 import { CheckCircle2, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { Button } from "@wadzzo/ui/components/button";
-import { Input } from "@wadzzo/ui/components/input";
-import { Textarea } from "@wadzzo/ui/components/textarea";
+import { Button } from "~/ui/skin/button";
+import { Input } from "~/ui/skin/fields";
+import { Textarea } from "~/ui/skin/fields";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
@@ -43,9 +43,9 @@ export function SupportForm() {
 
   if (send.isSuccess) {
     return (
-      <div className="glass space-y-3 rounded-2xl p-8 text-center">
+      <div className="glass space-y-3 rounded-[1.4rem] p-8 text-center">
         <CheckCircle2 className="text-primary mx-auto size-10" />
-        <p className="font-hud text-lg font-semibold">Message sent</p>
+        <p className="display text-3xl">Message sent</p>
         <p className="text-muted-foreground text-sm">
           We&apos;ll reply to {email} as soon as we can.
         </p>
@@ -54,8 +54,8 @@ export function SupportForm() {
   }
 
   return (
-    <form onSubmit={submit} className="glass space-y-4 rounded-2xl p-5">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} className="glass space-y-4 rounded-[1.4rem] p-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
         <label className="block space-y-1.5">
           <span className="text-sm font-semibold">Name</span>
           <Input
@@ -128,7 +128,7 @@ export function SupportForm() {
         <p className="tone-danger rounded-lg px-3 py-2 text-sm">{send.error.message}</p>
       )}
       <div className="flex justify-end">
-        <Button type="submit" className="rounded-xl px-6" disabled={send.isPending}>
+        <Button type="submit" className="px-6" disabled={send.isPending}>
           <Send className="size-4" /> {send.isPending ? "Sending…" : "Send message"}
         </Button>
       </div>

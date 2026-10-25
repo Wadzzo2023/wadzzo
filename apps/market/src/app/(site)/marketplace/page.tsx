@@ -7,8 +7,8 @@ import { MarketFilters } from "~/components/market/market-filters";
 import { Store } from "lucide-react";
 import type { ListingsInput } from "@wadzzo/api/market/routers/market";
 import { serverApi } from "~/server/api/server";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { PageBody, PageHeader } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { PageBody, PageHeader } from "~/ui/page-header";
 
 export const metadata: Metadata = {
   title: "Marketplace",
@@ -34,11 +34,11 @@ export default async function MarketplacePage({ searchParams }: PageProps<"/mark
   const first = await (await serverApi()).market.listings(input);
 
   return (
-    <PageBody wide className="space-y-5">
+    <PageBody wide className="space-y-8">
       <PageHeader
         eyebrow="Marketplace"
         title="Discover items"
-        description="Drops straight from creators — minted the moment you buy — and resales from other fans."
+        description="drops straight from creators — minted the moment you buy — and resales from other fans"
       />
       <MarketFilters current={input} />
       {first.items.length === 0 ? (

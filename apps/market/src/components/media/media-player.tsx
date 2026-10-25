@@ -95,7 +95,7 @@ function IconButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex size-8 items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur-sm transition-colors hover:bg-black/75"
+      className="flex size-8 items-center justify-center rounded-lg bg-black/55 text-white transition-colors hover:bg-black/75"
     >
       {children}
     </button>
@@ -104,7 +104,7 @@ function IconButton({
 
 function Chip({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <span className="flex h-8 items-center gap-1.5 rounded-lg bg-black/55 px-2.5 text-xs font-medium text-white backdrop-blur-sm">
+    <span className="flex h-8 items-center gap-1.5 rounded-lg bg-black/55 px-2.5 text-xs font-medium text-white">
       {children}
       {label}
     </span>
@@ -158,7 +158,7 @@ function AudioPlayer({
           src={poster}
           alt=""
           aria-hidden
-          className="absolute inset-0 size-full scale-125 object-cover opacity-50 blur-3xl"
+          className="absolute inset-0 size-full object-cover opacity-30"
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
@@ -182,7 +182,7 @@ function AudioPlayer({
       </div>
 
       <div className="relative w-full max-w-sm space-y-3">
-        <p className="font-hud truncate text-center text-lg font-semibold">{title}</p>
+        <p className="display truncate text-center text-3xl">{title}</p>
         <input
           type="range"
           min={0}
@@ -203,7 +203,7 @@ function AudioPlayer({
             type="button"
             onClick={toggle}
             aria-label={playing ? "Pause" : "Play"}
-            className="bg-primary text-primary-foreground flex size-14 items-center justify-center rounded-full shadow-[0_0_30px_-4px_hsl(var(--primary)/0.8)] transition-transform hover:scale-105 active:scale-95"
+            className="bg-primary text-primary-foreground flex size-14 items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95"
           >
             {playing ? <Pause className="size-6" /> : <Play className="ml-0.5 size-6" />}
           </button>

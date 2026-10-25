@@ -17,23 +17,23 @@ import toast from "react-hot-toast";
 
 import { RecentActivity } from "~/components/activity/activity-view";
 import { SignedIn } from "~/components/shell/sign-in-prompt";
-import { Button } from "@wadzzo/ui/components/button";
-import { useCurrency } from "~/hooks/use-currency";
+import { Button } from "~/ui/skin/button";
 import { useRequireAuth } from "~/hooks/use-require-auth";
 import { useSignAndConfirm } from "~/hooks/use-sign-and-confirm";
 import { isCustodialWallet } from "@wadzzo/wallet/shared";
 import { creatorHref } from "~/lib/creator";
 import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
-import { EmptyState } from "@wadzzo/ui/patterns/empty-state";
-import { ErrorState } from "@wadzzo/ui/patterns/error-state";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { EmptyState } from "~/ui/empty-state";
+import { ErrorState } from "~/ui/error-state";
+import { PageBody } from "~/ui/page-header";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { SendDialog, type SendableAsset } from "./send-dialog";
 import { GetTokensDialog, ReceiveDialog, SwapDialog } from "./wallet-dialogs";
+import { TokenCode } from "~/components/price/amount";
 
 type Balances = RouterOutputs["wallet"]["balances"];
 type Gift = RouterOutputs["wallet"]["gifts"][number];
@@ -111,8 +111,8 @@ function WalletView() {
       <h1 className="sr-only">Wallet</h1>
       {balances.isLoading ? (
         <>
-          <Skeleton className="h-60 rounded-3xl" />
-          <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="blob h-64" />
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
             <Skeleton className="h-44 rounded-2xl" />
             <Skeleton className="h-44 rounded-2xl" />
           </div>
@@ -122,7 +122,7 @@ function WalletView() {
       ) : balances.data ? (
         <>
           <BalanceHero b={balances.data} onAction={(k) => (k === "send" ? send() : setOpen(k))} />
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_24rem]">
             <AssetsCard assets={assets} balances={balances.data} onSend={send} />
             <div className="space-y-4">
               {balances.data.active ? <XlmCard xlm={balances.data.xlm} /> : <InactiveCard />}
@@ -168,7 +168,7 @@ function CopyAddress({ address, className }: { address: string; className?: stri
       onClick={copy}
       title={address}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 font-mono text-xs ring-1 ring-white/15 backdrop-blur-md transition-colors hover:bg-white/20",
+        "bg-side-ink text-side-mint inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs transition-transform hover:scale-105",
         className,
       )}
     >
@@ -179,93 +179,48 @@ function CopyAddress({ address, className }: { address: string; className?: stri
 
 function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) => void }) {
   const { session } = useRequireAuth();
-  const { currency } = useCurrency();
   // card top-ups are only for custodial (email/social) accounts
   const custodial = isCustodialWallet(session?.user.walletType);
   const actions = [
     ...(custodial ? [{ id: "get" as const, label: "Get tokens", icon: Plus, primary: true }] : []),
+    ...(b.active ? [{ id: "send" as const, label: "Send", icon: Send, primary: !custodial }] : []),
     ...(b.active
-      ? [
-          {
-            id: "send" as const,
-            label: "Send",
-            icon: Send,
-            primary: !custodial,
-          },
-        ]
+      ? [{ id: "swap" as const, label: "Swap", icon: ArrowLeftRight, primary: false }]
       : []),
-    ...(b.active
-      ? [
-          {
-            id: "swap" as const,
-            label: "Swap",
-            icon: ArrowLeftRight,
-            primary: false,
-          },
-        ]
-      : []),
-    {
-      id: "receive" as const,
-      label: "Receive",
-      icon: ArrowDownToLine,
-      primary: false,
-    },
+    { id: "receive" as const, label: "Receive", icon: ArrowDownToLine, primary: false },
   ];
   return (
-    <section className="ring-foreground/10 relative isolate overflow-hidden rounded-3xl bg-black p-6 text-white ring-1 sm:p-8">
-      <div
+    <section className="side-scope blob bg-side text-side-ink relative overflow-hidden p-6 sm:p-8">
+      <Wallet
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,hsl(var(--primary)/0.45),transparent_55%),radial-gradient(circle_at_90%_85%,hsl(190_90%_50%/0.3),transparent_55%),radial-gradient(circle_at_60%_0%,hsl(270_80%_60%/0.2),transparent_50%)]"
-      />
-      <div
-        aria-hidden
-        className="bg-primary/20 absolute -top-16 -right-16 -z-10 size-64 rounded-full blur-3xl"
+        className="text-side-ink/10 absolute -right-6 -bottom-8 size-48 rotate-12"
+        strokeWidth={1.6}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="label-caps text-[hsl(112_85%_62%)]">
-              {b.active ? `${b.platform.code} balance` : "Wallet"}
+            <p className="marker -rotate-2 text-base">
+              *{b.active ? `your ${b.platform.code} balance` : "your wallet"}*
             </p>
             <CopyAddress address={b.address} />
           </div>
           {b.active ? (
             <>
-              {currency === "USD" && b.platform.usd != null ? (
-                <>
-                  <p className="font-hud text-4xl leading-none font-bold tracking-tight break-all tabular-nums sm:text-6xl">
-                    {b.platform.usd.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    })}
-                  </p>
-                  <p className="text-sm text-white/70">
-                    {num(b.platform.balance)} {b.platform.code}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-hud text-4xl leading-none font-bold tracking-tight break-all tabular-nums sm:text-6xl">
-                    {num(b.platform.balance)}{" "}
-                    <span className="text-lg font-semibold text-white/60 sm:text-2xl">
-                      {b.platform.code}
-                    </span>
-                  </p>
-                  {b.platform.usd != null && (
-                    <p className="text-sm text-white/70">
-                      ≈{" "}
-                      {b.platform.usd.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                    </p>
-                  )}
-                </>
+              <p className="flex flex-wrap items-center gap-x-3 break-all">
+                <span className="display text-7xl tabular-nums sm:text-8xl">
+                  {num(b.platform.balance)}
+                </span>
+                <TokenCode code={b.platform.code} className="display text-4xl" />
+              </p>
+              {b.platform.usd != null && (
+                <p className="marker text-lg">
+                  ≈ {b.platform.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                </p>
               )}
             </>
           ) : (
-            <p className="max-w-md text-white/75">
+            <p className="text-side-ink/80 max-w-md font-semibold">
               Your Stellar account isn&apos;t active yet.{" "}
               {custodial
                 ? "Getting tokens activates it for you."
@@ -289,13 +244,12 @@ function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) =
               type="button"
               onClick={() => onAction(a.id)}
               className={cn(
-                "flex h-12 flex-col items-center justify-center gap-0.5 rounded-2xl px-4 text-xs font-semibold transition-all sm:flex-row sm:gap-2 sm:text-sm",
-                a.primary
-                  ? "bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.4),0_0_24px_-4px_hsl(var(--primary)/0.8)] hover:brightness-110"
-                  : "bg-white/10 ring-1 ring-white/15 backdrop-blur-md hover:bg-white/20",
+                "blob flex h-14 flex-col items-center justify-center gap-0.5 px-5 transition-transform duration-200 hover:-translate-y-0.5 sm:flex-row sm:gap-2",
+                a.primary ? "bg-side-ink text-side-mint" : "bg-side-mint text-side-ink",
               )}
             >
-              <a.icon className="size-4" /> {a.label}
+              <a.icon className="size-4" strokeWidth={2.6} />{" "}
+              <span className="marker text-xs sm:text-base">{a.label}</span>
             </button>
           ))}
         </div>
@@ -306,11 +260,7 @@ function BalanceHero({ b, onAction }: { b: Balances; onAction: (k: DialogKind) =
 
 function XlmCard({ xlm }: { xlm: Extract<Balances, { active: true }>["xlm"] }) {
   const rows = [
-    {
-      label: "Spendable",
-      value: xlm.spendable,
-      hint: "Available for fees and purchases",
-    },
+    { label: "Spendable", value: xlm.spendable, hint: "Available for fees and purchases" },
     {
       label: "Reserved",
       value: xlm.reserved,
@@ -318,10 +268,10 @@ function XlmCard({ xlm }: { xlm: Extract<Balances, { active: true }>["xlm"] }) {
     },
   ];
   return (
-    <section className="glass space-y-4 rounded-2xl p-5">
+    <section className="border-foreground/10 bg-surface space-y-4 rounded-[1.6rem] border-2 p-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-hud font-bold">XLM</h2>
-        <p className="font-hud text-2xl font-bold tabular-nums">
+        <h2 className="display text-3xl">XLM</h2>
+        <p className="display text-primary text-3xl tabular-nums">
           {num(xlm.total, 4)}{" "}
           <span className="text-muted-foreground text-sm font-medium">total</span>
         </p>
@@ -330,23 +280,21 @@ function XlmCard({ xlm }: { xlm: Extract<Balances, { active: true }>["xlm"] }) {
         {rows.map((r) => (
           <li
             key={r.label}
-            className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center justify-between gap-3 rounded-xl px-3.5 py-3 ring-1"
+            className="bg-surface-2 flex items-center justify-between gap-3 rounded-xl px-3.5 py-3"
           >
             <span className="min-w-0">
               <span className="block text-sm font-semibold">{r.label}</span>
               <span className="text-muted-foreground block truncate text-xs">{r.hint}</span>
             </span>
-            <span className="font-hud font-bold tabular-nums">{num(r.value, 4)}</span>
+            <span className="display text-xl tabular-nums">{num(r.value, 4)}</span>
           </li>
         ))}
       </ul>
       {xlm.total > 0 && (
-        <div className="bg-foreground/[0.08] h-2 overflow-hidden rounded-full" aria-hidden>
+        <div className="border-foreground/15 h-3 overflow-hidden rounded-full border-2" aria-hidden>
           <div
-            className="from-primary h-full rounded-full bg-gradient-to-r to-cyan-400"
-            style={{
-              width: `${Math.max(2, Math.min(100, (xlm.spendable / xlm.total) * 100))}%`,
-            }}
+            className="bg-primary h-full rounded-full"
+            style={{ width: `${Math.max(2, Math.min(100, (xlm.spendable / xlm.total) * 100))}%` }}
           />
         </div>
       )}
@@ -356,8 +304,8 @@ function XlmCard({ xlm }: { xlm: Extract<Balances, { active: true }>["xlm"] }) {
 
 function InactiveCard() {
   return (
-    <section className="glass space-y-2 rounded-2xl p-5">
-      <h2 className="font-hud font-bold">XLM</h2>
+    <section className="border-foreground/10 bg-surface space-y-2 rounded-[1.6rem] border-2 p-5">
+      <h2 className="display text-3xl">XLM</h2>
       <p className="text-muted-foreground text-sm">
         Stellar accounts need a small XLM reserve before they can hold anything.
       </p>
@@ -383,9 +331,9 @@ function AssetsCard({
     return item?.itemId ? `/item/${item.itemId}` : null;
   };
   return (
-    <section className="glass space-y-3 rounded-2xl p-5">
+    <section className="border-foreground/10 bg-surface space-y-3 rounded-[1.6rem] border-2 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-hud font-bold">Assets</h2>
+        <h2 className="display text-3xl">Assets</h2>
         <span className="text-muted-foreground text-xs">{assets.length} in your wallet</span>
       </div>
       {assets.length === 0 ? (
@@ -396,7 +344,7 @@ function AssetsCard({
           className="border-0 py-6"
         />
       ) : (
-        <ul className="divide-foreground/[0.06] divide-y">
+        <ul className="divide-foreground/10 divide-y-2 divide-dashed">
           {assets.map((a) => {
             const href = hrefFor(a);
             const body = (
@@ -432,13 +380,12 @@ function AssetsCard({
                 ) : (
                   <span className="flex min-w-0 flex-1 items-center gap-3">{body}</span>
                 )}
-                <span className="font-hud font-bold tabular-nums">
+                <span className="display text-xl tabular-nums">
                   {num(a.balance, a.code === "XLM" ? 4 : 2)}
                 </span>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="rounded-lg"
                   disabled={a.balance <= 0}
                   onClick={() => onSend(a)}
                   aria-label={`Send ${a.code}`}
@@ -457,12 +404,12 @@ function AssetsCard({
 function GiftsCard() {
   const gifts = api.wallet.gifts.useQuery();
   return (
-    <section className="glass space-y-3 rounded-2xl p-5">
+    <section className="border-foreground/10 bg-surface space-y-3 rounded-[1.6rem] border-2 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-hud flex items-center gap-2 font-bold">
+        <h2 className="display flex items-center gap-2 text-3xl">
           Pending gifts
           {!!gifts.data?.length && (
-            <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px] tabular-nums">
+            <span className="bg-pink text-side-ink rounded-full px-2 font-sans text-sm font-bold tabular-nums">
               {gifts.data.length}
             </span>
           )}
@@ -489,9 +436,7 @@ function GiftsCard() {
 }
 
 function GiftRow({ gift }: { gift: Gift }) {
-  const claim = api.wallet.claimGift.useMutation({
-    onError: (e) => toast.error(e.message),
-  });
+  const claim = api.wallet.claimGift.useMutation({ onError: (e) => toast.error(e.message) });
   const sign = useSignAndConfirm();
   const utils = api.useUtils();
   const accept = async () => {
@@ -502,13 +447,13 @@ function GiftRow({ gift }: { gift: Gift }) {
     }
   };
   return (
-    <li className="bg-foreground/[0.04] ring-foreground/[0.06] flex items-center gap-3 rounded-xl p-3 ring-1">
-      <span className="bg-primary/15 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl">
-        <Gift className="size-5" />
+    <li className="bg-surface-2 flex items-center gap-3 rounded-xl p-3">
+      <span className="blob bg-pink text-side-ink flex size-10 shrink-0 -rotate-6 items-center justify-center">
+        <Gift className="size-5" strokeWidth={2.4} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">
-          {num(gift.amount)} {gift.code}
+          {num(gift.amount)} <TokenCode code={gift.code} />
         </span>
         {gift.sponsor && (
           <span className="text-muted-foreground block truncate text-xs">
@@ -517,12 +462,7 @@ function GiftRow({ gift }: { gift: Gift }) {
         )}
         {sign.error && <span className="text-destructive block text-xs">{sign.error}</span>}
       </span>
-      <Button
-        size="sm"
-        className="rounded-lg"
-        disabled={claim.isPending || sign.busy}
-        onClick={() => void accept()}
-      >
+      <Button size="sm" disabled={claim.isPending || sign.busy} onClick={() => void accept()}>
         {sign.step === "signing"
           ? "Confirm…"
           : sign.step === "confirming"

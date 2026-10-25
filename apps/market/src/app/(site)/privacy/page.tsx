@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { StaticHeader } from "~/components/static/static-header";
-import { PageBody } from "@wadzzo/ui/patterns/page-header";
+import { PageBody } from "~/ui/page-header";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const SECTIONS = [
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 space-y-3">
-      <h2 className="font-hud text-2xl font-bold">{title}</h2>
+      <h2 className="display text-4xl">{title}</h2>
       {children}
     </section>
   );
@@ -52,9 +52,9 @@ export default function PrivacyPage() {
           </>
         }
       />
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <nav aria-label="Table of contents" className="lg:sticky lg:top-24 lg:self-start">
-          <div className="glass space-y-2 rounded-2xl p-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <nav aria-label="Table of contents" className="lg:sticky lg:top-8 lg:self-start">
+          <div className="glass space-y-2 rounded-[1.4rem] p-4">
             <h2 className="label-caps">Table of Contents</h2>
             <ul className="space-y-1.5 text-sm">
               {SECTIONS.map((s) => (
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           </div>
         </nav>
 
-        <article className="glass text-foreground/90 space-y-10 rounded-2xl p-6 leading-relaxed sm:p-8">
+        <article className="glass text-foreground/90 space-y-10 rounded-[1.4rem] p-6 leading-relaxed sm:p-8">
           <Section id="introduction" title="Introduction">
             <p>
               {platformBranding.name} is an innovative platform designed to transform the way people

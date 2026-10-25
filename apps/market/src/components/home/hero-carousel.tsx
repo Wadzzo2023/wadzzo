@@ -1,26 +1,30 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Eye, Zap } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { MEDIA_META } from "~/components/media/media-meta";
-import { usePriceText } from "~/components/price/price";
-import { Button } from "@wadzzo/ui/components/button";
+import { formatTokenNumber, formatTokenShort, formatUsdShort } from "~/lib/money";
+import { PLATFORM_ASSET } from "@wadzzo/wallet/config";
 import { cn } from "@wadzzo/ui/lib/cn";
 import type { ListingCard } from "@wadzzo/api/market/routers/market";
-import { Avatar } from "@wadzzo/ui/patterns/person";
+import { artChip } from "~/ui/styles";
+import { WadzzoMark } from "~/ui/wadzzo-mark";
 
-const INTERVAL_MS = 6000;
+const INTERVAL_MS = 7000;
+const ease = [0.2, 0.8, 0.2, 1] as const;
 
 /**
- * Featured drops as a full-width banner (about 40% of the screen): the art
- * fills the slide, the details sit over a gradient, and a thumbnail strip
- * jumps between slides. Advances on its own, pauses on hover, swipes on touch.
+ * Featured drops, FC88-style: a marker note, the name in giant condensed
+ * type, the price as a huge number with stacked words beside it, a
+ * hand-written line, chunky tilted buttons and the art as a tilted sticker.
+ * Tabs underneath jump between slides (a bar fills until the next one).
+ * Only opacity/transform animate, and only when the slide changes.
  */
 export function HeroCarousel({ slides }: { slides: ListingCard[] }) {
   const [i, setI] = useState(0);
-  const priceText = usePriceText();
   const [paused, setPaused] = useState(false);
   const [touchX, setTouchX] = useState<number | null>(null);
   const n = slides.length;
@@ -33,12 +37,18 @@ export function HeroCarousel({ slides }: { slides: ListingCard[] }) {
   }, [i, paused, n, go]);
 
   if (!n) return null;
+  const s = slides[i]!;
+  const a = s.asset;
+  const meta = MEDIA_META[a.mediaType];
+  const resale = s.placerId !== a.creatorId;
+  const href = resale ? `/item/${a.id}?listing=${s.id}` : `/item/${a.id}`;
+  const left = a.limit != null ? Math.max(0, a.limit - a.mintedCount) : null;
 
   return (
     <section
       aria-roledescription="carousel"
       aria-label="Featured drops"
-      className="relative h-[40svh] min-h-[300px] w-full overflow-hidden bg-black"
+      className="relative overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => setTouchX(e.touches[0]?.clientX ?? null)}
@@ -49,123 +59,175 @@ export function HeroCarousel({ slides }: { slides: ListingCard[] }) {
         setTouchX(null);
       }}
     >
-      {slides.map((s, idx) => {
-        const a = s.asset;
-        const meta = MEDIA_META[a.mediaType];
-        const active = idx === i;
-        return (
-          <div
-            key={s.id}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${idx + 1} of ${n}: ${a.name}`}
-            aria-hidden={!active}
-            className={cn(
-              "absolute inset-0 transition-opacity duration-700",
-              active ? "opacity-100" : "pointer-events-none opacity-0",
-            )}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={a.thumbnail}
-              alt=""
-              className={cn(
-                "absolute inset-0 size-full object-cover transition-transform duration-[6000ms] ease-linear",
-                active ? "scale-105" : "scale-100",
-              )}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-
-            <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-6 sm:px-6 sm:pb-8">
-              <div className="max-w-xl space-y-2.5 text-white sm:space-y-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm">
-                  <meta.icon className="size-3.5" /> Featured {meta.label.toLowerCase()}
+      <div className="mx-auto grid min-h-[min(84svh,760px)] max-w-[88rem] grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto] px-4 pt-8 sm:px-10 lg:pt-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-10 xl:gap-14">
+          {/* art sticker (first on phones) */}
+          <div className="relative order-first flex justify-center md:order-last">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, rotate: 8, y: 30 }}
+                animate={{ opacity: 1, rotate: 3, y: 0 }}
+                exit={{ opacity: 0, rotate: -4, y: -20 }}
+                transition={{ duration: 0.45, ease }}
+                className="relative w-[min(58vw,15rem)] sm:w-[18rem] md:w-full md:max-w-[27rem]"
+              >
+                <Link href={href} tabIndex={-1} className="group block">
+                  <div className="blob border-foreground bg-surface relative overflow-hidden border-[3px] shadow-[10px_12px_0_0_hsl(var(--primary))] transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-[-3deg]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={a.thumbnail}
+                      alt={a.name}
+                      className="aspect-square w-full object-cover"
+                    />
+                    <span className={cn(artChip, "absolute top-3 right-3")} title={meta.label}>
+                      <meta.icon className="size-3.5" /> {meta.label}
+                    </span>
+                  </div>
+                </Link>
+                <span className="marker bg-pink text-side-ink pointer-events-none absolute -top-5 -left-4 -rotate-12 rounded-lg px-2.5 py-1 text-sm sm:-left-8">
+                  {resale
+                    ? "fan resale!"
+                    : left === 0
+                      ? "sold out!"
+                      : left != null && left <= 10
+                        ? `only ${left} left!`
+                        : "fresh drop!"}
                 </span>
-                <h2 className="font-hud line-clamp-2 text-2xl leading-tight font-bold tracking-tight sm:text-4xl">
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* details */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={s.id}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              variants={{ show: { transition: { staggerChildren: 0.05 } } }}
+              className="min-w-0 space-y-6 pb-4"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${n}: ${a.name}`}
+            >
+              <Rise>
+                <h2 className="display line-clamp-3 text-5xl break-words sm:text-6xl lg:text-7xl xl:text-[5.6rem]">
                   {a.name}
                 </h2>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  {a.creator && (
-                    <span className="flex items-center gap-2 text-sm text-white/85">
-                      <Avatar
-                        src={a.creator.profileUrl}
-                        name={a.creator.name}
-                        className="size-6 text-[10px]"
-                      />{" "}
-                      {a.creator.name}
+              </Rise>
+
+              <Rise>
+                <div
+                  className="blob bg-primary text-primary-foreground inline-block -rotate-2 px-5 py-3"
+                  title={`${formatTokenNumber(s.price)} ${PLATFORM_ASSET.code}`}
+                >
+                  <p className="flex items-center gap-3">
+                    <span className="display text-5xl leading-[0.85] tabular-nums sm:text-[3.8rem] xl:text-[5rem]">
+                      {formatTokenShort(s.price, 10_000_000)}
                     </span>
-                  )}
-                  <Button asChild size="sm" tabIndex={active ? 0 : -1}>
-                    <Link href={`/item/${a.id}`}>Buy · {priceText(s.price, s.priceUSD)}</Link>
-                  </Button>
+                    <WadzzoMark className="h-9 sm:h-11 xl:h-14" />
+                    <span className="sr-only">{PLATFORM_ASSET.code}</span>
+                  </p>
+                  <p className="marker mt-1.5 text-sm sm:text-base">
+                    {s.priceUSD != null && `≈ ${formatUsdShort(s.priceUSD, 10_000_000)} · `}
+                    {resale ? "to buy it" : "to mint it"}
+                  </p>
                 </div>
-              </div>
+              </Rise>
+
+              <Rise className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={href}
+                  className="blob tilt-l bg-primary text-primary-foreground inline-flex h-14 items-center gap-2.5 px-7 transition-transform duration-200 hover:scale-[1.03] hover:rotate-0"
+                >
+                  {!resale && left === 0 ? (
+                    <Eye className="size-5" strokeWidth={2.6} />
+                  ) : (
+                    <Zap className="size-5 fill-current" />
+                  )}
+                  <span className="marker text-lg">
+                    {resale ? "Buy now" : left === 0 ? "View item" : "Mint now"}
+                  </span>
+                </Link>
+                <Link
+                  href="/marketplace"
+                  className="blob tilt-r bg-surface-3 inline-flex h-14 items-center gap-2.5 px-6 transition-transform duration-200 hover:scale-[1.03] hover:rotate-0"
+                >
+                  <span className="marker text-lg">Explore market</span>
+                  <ArrowRight className="size-5" strokeWidth={2.6} />
+                </Link>
+              </Rise>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* slide dots (the active one stretches and fills until the next slide) */}
+        {n > 1 && (
+          <div className="flex items-center justify-between gap-3 pt-6 pb-8">
+            <div className="flex items-center gap-2" role="tablist" aria-label="Featured drops">
+              {slides.map((t, idx) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  onClick={() => go(idx)}
+                  aria-label={`Show ${t.asset.name}`}
+                  aria-selected={idx === i}
+                  className={cn(
+                    "relative h-3 overflow-hidden rounded-full transition-[width,background-color] duration-300",
+                    idx === i
+                      ? "bg-foreground/20 w-12"
+                      : "bg-foreground/30 hover:bg-foreground/60 w-3",
+                  )}
+                >
+                  {idx === i && (
+                    <span
+                      key={`${i}-${paused}`}
+                      className={cn(
+                        "bg-primary absolute inset-0 origin-left rounded-full",
+                        paused ? "scale-x-100" : "animate-[hero-progress_7s_linear]",
+                      )}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="hidden gap-2 sm:flex">
+              <button
+                type="button"
+                onClick={() => go(i - 1)}
+                aria-label="Previous slide"
+                className="bg-foreground text-background flex size-12 items-center justify-center rounded-full transition-transform hover:-rotate-12"
+              >
+                <ChevronLeft className="size-6" strokeWidth={2.6} />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(i + 1)}
+                aria-label="Next slide"
+                className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full transition-transform hover:rotate-12"
+              >
+                <ChevronRight className="size-6" strokeWidth={2.6} />
+              </button>
             </div>
           </div>
-        );
-      })}
-
-      {n > 1 && (
-        <>
-          {/* thumbnail strip on wider screens, dots on phones */}
-          <div className="absolute right-4 bottom-6 hidden gap-2 sm:right-6 sm:bottom-8 md:flex">
-            {slides.map((s, idx) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => go(idx)}
-                aria-label={`Show ${s.asset.name}`}
-                aria-current={idx === i}
-                className={cn(
-                  "relative size-14 overflow-hidden rounded-lg ring-2 transition-all lg:size-16",
-                  idx === i ? "ring-white" : "opacity-60 ring-transparent hover:opacity-100",
-                )}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.asset.thumbnail} alt="" className="size-full object-cover" />
-                {idx === i && !paused && (
-                  <span
-                    key={i}
-                    className="bg-primary absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[hero-progress_6s_linear]"
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-          <div className="absolute top-4 right-4 flex gap-1.5 md:hidden">
-            {slides.map((s, idx) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => go(idx)}
-                aria-label={`Show slide ${idx + 1}`}
-                aria-current={idx === i}
-                className={cn(
-                  "h-1.5 rounded-full transition-all",
-                  idx === i ? "w-5 bg-white" : "w-1.5 bg-white/50",
-                )}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => go(i - 1)}
-            aria-label="Previous slide"
-            className="absolute top-1/2 left-3 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/60 sm:flex"
-          >
-            <ChevronLeft className="size-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => go(i + 1)}
-            aria-label="Next slide"
-            className="absolute top-1/2 right-3 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/60 sm:flex"
-          >
-            <ChevronRight className="size-5" />
-          </button>
-        </>
-      )}
+        )}
+      </div>
     </section>
+  );
+}
+
+function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 16 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
   );
 }
