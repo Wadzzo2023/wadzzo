@@ -218,6 +218,7 @@ async function createPins(job: Job): Promise<unknown> {
         link: base.url ?? null,
         multiPin: false,
         type: (base.type ?? "OTHER") as never,
+        approved: true,
         locations: { createMany: { data: allLocations } },
       },
     });
@@ -271,6 +272,7 @@ async function createPins(job: Job): Promise<unknown> {
                 link: pin.url ?? null,
                 multiPin: false,
                 type: (pin.type ?? "OTHER") as never,
+                approved: true,
                 locations: { createMany: { data: locations } },
               },
             });

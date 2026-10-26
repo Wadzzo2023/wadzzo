@@ -6,12 +6,15 @@ const db = {
     update: vi.fn(async () => ({})),
     updateMany: vi.fn(async () => ({ count: 1 })),
   },
-  locationTagCache: { findUnique: vi.fn(async () => ({ tags: ["park"] })) },
+  locationTagCache: {
+    findUnique: vi.fn(async () => ({ tags: ["park"] })),
+    upsert: vi.fn(async () => ({})),
+  },
   locationTag: { upsert: vi.fn(async () => ({ id: "t1", name: "park" })) },
+  locationGroupTag: { createMany: vi.fn(async () => ({ count: 1 })) },
+  locationGroup: { create: vi.fn(async () => ({ id: "lg_1" })) },
   creator: {
-    findUniqueOrThrow: vi.fn(async (): Promise<{ platformId: string }> =>
-      Promise.reject(new Error("database went away")),
-    ),
+    findUniqueOrThrow: vi.fn(),
   },
 };
 vi.mock("../src/lib/db", () => ({ db }));
@@ -57,6 +60,7 @@ const job = {
 
 describe("pin creation", () => {
   it("marks the brand's pin job failed when it crashes, so the card stops waiting", async () => {
+    db.creator.findUniqueOrThrow.mockRejectedValueOnce(new Error("database went away"));
     await expect(runCreatePinsJob(job as never)).rejects.toThrow("database went away");
     expect(db.locationGroupJob.updateMany).toHaveBeenCalledWith({
       where: {
@@ -66,5 +70,12 @@ describe("pin creation", () => {
       },
       data: { status: "failed", error: "database went away" },
     });
+  });
+
+  it("automatically accepts pins by setting approved: true upon creation", async () => {
+    db.creator.findUniqueOrThrow.mockResolvedValueOnce({ platformId: "wadzzo" });
+    await runCreatePinsJob(job as never);
+    const firstCall = db.locationGroup.create.mock.calls[0] as [{ data: { approved?: boolean } }] | undefined;
+    expect(firstCall?.[0]?.data.approved).toBe(true);
   });
 });
