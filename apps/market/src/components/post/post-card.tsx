@@ -1,10 +1,9 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import DOMPurify from "isomorphic-dompurify";
 import { BadgeCheck, Heart, Lock, MessageCircle, SendHorizontal, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { creatorHref } from "~/lib/creator";
@@ -22,16 +21,32 @@ export type PostData = RouterOutputs["post"]["feed"]["items"][number];
  * which stops lines wrapping, so those become plain spaces first.
  */
 export function RichText({ html, className }: { html: string; className?: string }) {
-  const clean = DOMPurify.sanitize(html.replace(/&nbsp;|\u00a0/g, " "));
-  return (
-    <div
-      className={cn(
-        "prose prose-sm dark:prose-invert prose-a:text-primary max-w-none break-words",
-        className,
-      )}
-      dangerouslySetInnerHTML={{ __html: clean }}
-    />
+  // Sanitized in the browser with plain DOMPurify: on the server it would need
+  // isomorphic-dompurify's jsdom, which fails to load on Vercel's Node runtime (ERR_REQUIRE_ESM).
+  // The server render and first paint show the text without markup (escaped by React).
+  const source = html.replace(/&nbsp;|\u00a0/g, " ");
+  const [clean, setClean] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    void import("dompurify").then(
+      ({ default: DOMPurify }) => live && setClean(DOMPurify.sanitize(source)),
+    );
+    return () => {
+      live = false;
+    };
+  }, [source]);
+  const box = cn(
+    "prose prose-sm dark:prose-invert prose-a:text-primary max-w-none break-words",
+    className,
   );
+  if (clean === null) {
+    const text = source
+      .replace(/<br\s*\/?>|<\/p>/gi, "\n")
+      .replace(/<[^>]*>/g, "")
+      .trim();
+    return <div className={cn(box, "whitespace-pre-line")}>{text}</div>;
+  }
+  return <div className={box} dangerouslySetInnerHTML={{ __html: clean }} />;
 }
 
 /** A post in a feed; members-only posts arrive locked and show what unlocks them. */
