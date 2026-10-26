@@ -36,9 +36,9 @@ export const clintonCountyBranding: PlatformBranding = {
     packDoneGlow: "hsl(46 62% 52% / 0.35)",
   },
   urls: {
-    arWeb: "https://web.clintoncounty-ia.gov",
-    brandPortal: "https://brand.clintoncounty-ia.gov",
-    fanApp: "https://web.clintoncounty-ia.gov",
+    arWeb: "https://clinton.wadzzo.com",
+    brandPortal: "https://clintonadmin.wadzzo.com",
+    fanApp: "https://app.wadzzo.com",
   },
   contact: { supportEmail: "support@wadzzo.com", supportUrl: "mailto:support@wadzzo.com" },
   toml: {

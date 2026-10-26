@@ -19,6 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <SessionProvider>
       <ThemeProvider
         attribute="class"
+        themes={["light", "dark", "contrast"]}
         defaultTheme="dark"
         enableSystem
         storageKey="wadzzo-theme"

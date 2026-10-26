@@ -64,8 +64,9 @@
   --radius: 8px;
 }
 
-/* The site has no dark mode; this is its palette on a charcoal page. */
-.dark {
+/* The site has no dark mode; this is its palette on a charcoal page, for both dark themes. */
+.dark,
+.contrast {
   --ar-void: 0 0% 5%;
   --ar-bg: 0 0% 8%;
   --ar-surface: 0 0% 12%;

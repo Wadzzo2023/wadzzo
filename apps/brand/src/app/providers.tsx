@@ -17,7 +17,13 @@ const WalletPopups = dynamic(
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeProvider
+        attribute="class"
+        themes={["light", "dark", "contrast"]}
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
         <TRPCReactProvider>
           {children}
           <WalletPopups className="font-sans" />

@@ -20,7 +20,7 @@ export const wadzzoBranding: PlatformBranding = {
     favicon: "/favicon.ico",
   },
   colors: {
-    portalThemeDark: "#0a100d",
+    portalThemeDark: "#10160e",
     portalThemeLight: "#f0f5f1",
     themeDark: "#06100a",
     themeLight: "#f5f9f7",
@@ -38,6 +38,7 @@ export const wadzzoBranding: PlatformBranding = {
     arWeb: "https://web.wadzzo.com",
     brandPortal: "https://brand.wadzzo.com",
     fanApp: "https://app.wadzzo.com",
+    appStore: "https://apps.apple.com/us/app/wadzzo/id1639649037",
   },
   contact: { supportEmail: "support@wadzzo.com", supportUrl: "https://app.wadzzo.com/support" },
   toml: {

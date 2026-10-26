@@ -41,14 +41,14 @@ export function NotificationBell({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          "text-muted-foreground hover:bg-accent hover:text-foreground relative flex size-9 items-center justify-center rounded-lg transition-colors",
+          "bg-side-ink text-side relative flex size-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-110",
           className,
         )}
         aria-label={unread ? `Notifications (${unread} unread)` : "Notifications"}
       >
-        <Bell className="size-5" />
+        <Bell className="size-[18px]" strokeWidth={2.6} />
         {unread > 0 && (
-          <span className="bg-primary text-primary-foreground absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
+          <span className="bg-pink text-side-ink ring-side absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ring-2">
             {unread > 9 ? "9+" : unread}
           </span>
         )}

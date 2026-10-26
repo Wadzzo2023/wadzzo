@@ -63,6 +63,9 @@ export interface PlatformBranding {
     readonly brandPortal: string;
     /** Where fans land (shared links) and where default images (`/images/loading.png`, avatar) are served from. */
     readonly fanApp: string;
+    /** Store pages for the platform's phone app; the "get the app" buttons only show the ones set. */
+    readonly appStore?: string;
+    readonly playStore?: string;
   };
   readonly contact: {
     readonly supportEmail: string;
