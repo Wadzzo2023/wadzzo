@@ -1,0 +1,7 @@
+# Secret scanning (CI and `gitleaks git .`). Extends the default rules.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Throwaway Stellar key the unit tests run with; it holds nothing."
+paths = ['''packages/(api|auth|wallet)/vitest\.config\.mts''']

@@ -18,15 +18,17 @@ The three web apps run on **Vercel**, the task server runs on **AWS (EC2)**. Eve
           Postgres (one database per environment) · S3 bucket · Firebase · Stellar
 ```
 
-| Piece                     | Where                          | Deployed by                            |
-| ------------------------- | ------------------------------ | -------------------------------------- |
-| Fan marketplace           | Vercel project `wadzzo-market` | Vercel Git integration                 |
-| Brand portal              | Vercel project `wadzzo-brand`  | Vercel Git integration                 |
-| AR collector + mobile API | Vercel project `wadzzo-ar`     | Vercel Git integration                 |
-| Task server               | AWS EC2, PM2, behind nginx     | `.github/workflows/deploy-express.yml` |
-| Mobile app                | App Store / Play (Expo)        | EAS, outside this guide                |
+| Piece                       | Where                                         | Deployed by                            |
+| --------------------------- | --------------------------------------------- | -------------------------------------- |
+| Fan marketplace             | Vercel project `wadzzo` (`apps/market`)       | Vercel Git integration                 |
+| Brand portal                | Vercel project `brand-wadzzo` (`apps/brand`)  | Vercel Git integration                 |
+| AR collector + mobile API   | Vercel project `ar-web-wadzzo` (`apps/ar`)    | Vercel Git integration                 |
+| Clinton County brand portal | Vercel project `brand-clinton` (`apps/brand`) | Vercel Git integration                 |
+| Clinton County AR collector | Vercel project `clinton-ar` (`apps/ar`)       | Vercel Git integration                 |
+| Task server                 | AWS EC2, PM2, behind nginx                    | `.github/workflows/deploy-express.yml` |
+| Mobile app                  | App Store / Play (Expo)                       | EAS, outside this guide                |
 
-The names `wadzzo-market`, `wadzzo-brand`, `wadzzo-ar` are suggestions; use whatever your Vercel account already has.
+All five Vercel projects (team `wadzzo2023s-projects`) are connected to this repository; each one's Root Directory picks the app, and `PLATFORM_SLUG` picks the platform. One push rebuilds only the projects whose app or packages changed (`ignoreCommand` in each `vercel.json`).
 
 ## 1. Environments
 
@@ -52,13 +54,13 @@ Rules that keep the environments apart:
 
 Vercel → **Add New… → Project** → import this repository, then:
 
-| Setting                                                | `wadzzo-market`         | `wadzzo-brand` | `wadzzo-ar` |
-| ------------------------------------------------------ | ----------------------- | -------------- | ----------- |
-| Framework preset                                       | Next.js                 | Next.js        | Next.js     |
-| **Root Directory**                                     | `apps/market`           | `apps/brand`   | `apps/ar`   |
-| **Include source files outside of the Root Directory** | on                      | on             | on          |
-| Node.js Version                                        | Vercel's default (22.x) | same           | same        |
-| Production Branch                                      | `main`                  | `main`         | `main`      |
+| Setting                                                | `wadzzo`                | `brand-wadzzo` | `ar-web-wadzzo` |
+| ------------------------------------------------------ | ----------------------- | -------------- | --------------- |
+| Framework preset                                       | Next.js                 | Next.js        | Next.js         |
+| **Root Directory**                                     | `apps/market`           | `apps/brand`   | `apps/ar`       |
+| **Include source files outside of the Root Directory** | on                      | on             | on              |
+| Node.js Version                                        | Vercel's default (22.x) | same           | same            |
+| Production Branch                                      | `main`                  | `main`         | `main`          |
 
 The remaining behaviour is committed in each app's `vercel.json`: build command (`pnpm run build`, which runs `sync:platform` first), the ignored-build step (a push that doesn't touch the app or a package it depends on does not rebuild it), `framework`, and a 60 s function limit.
 
@@ -74,11 +76,13 @@ Check the first build log for `pnpm 12.x`.
 
 Per project → **Settings → Domains**:
 
-| Project         | Production domain  | `develop` branch domain |
-| --------------- | ------------------ | ----------------------- |
-| `wadzzo-market` | `app.wadzzo.com`   | `dev-app.wadzzo.com`    |
-| `wadzzo-brand`  | `brand.wadzzo.com` | `dev-brand.wadzzo.com`  |
-| `wadzzo-ar`     | `web.wadzzo.com`   | `dev-web.wadzzo.com`    |
+| Project         | Production domain         | `develop` branch domain |
+| --------------- | ------------------------- | ----------------------- |
+| `wadzzo`        | `app.wadzzo.com`          | `dev-app.wadzzo.com`    |
+| `brand-wadzzo`  | `brand.wadzzo.com`        | `dev-brand.wadzzo.com`  |
+| `ar-web-wadzzo` | `web.wadzzo.com`          | `dev-web.wadzzo.com`    |
+| `brand-clinton` | `clintonadmin.wadzzo.com` |                         |
+| `clinton-ar`    | `clinton.wadzzo.com`      |                         |
 
 Add each domain, then for the dev ones choose **Git Branch → `develop`**. At your DNS provider create the record Vercel shows for each (a CNAME for subdomains). `www.wadzzo.com` should redirect to `app.wadzzo.com` (add it in the market project with "Redirect to").
 

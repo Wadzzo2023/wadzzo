@@ -26,6 +26,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Off until the EC2_* secrets exist: set the repository variable DEPLOY_EXPRESS=true.
+    if: vars.DEPLOY_EXPRESS == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:

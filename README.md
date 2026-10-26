@@ -29,6 +29,18 @@ tooling/
   local-db/         `pnpm db:local`: an embedded Postgres with the shared schema
 ```
 
+## Deployments
+
+| App                   | Wadzzo                                       | Clinton County                                             | Vercel project(s)               |
+| --------------------- | -------------------------------------------- | ---------------------------------------------------------- | ------------------------------- |
+| `apps/market`         | [app.wadzzo.com](https://app.wadzzo.com)     |                                                            | `wadzzo`                        |
+| `apps/brand`          | [brand.wadzzo.com](https://brand.wadzzo.com) | [clintonadmin.wadzzo.com](https://clintonadmin.wadzzo.com) | `brand-wadzzo`, `brand-clinton` |
+| `apps/ar`             | [web.wadzzo.com](https://web.wadzzo.com)     | [clinton.wadzzo.com](https://clinton.wadzzo.com)           | `ar-web-wadzzo`, `clinton-ar`   |
+| `apps/express-wadzzo` | EC2 (PM2), `deploy-express.yml`              | shared                                                     |                                 |
+| `apps/mobile`         | App Store / Play (EAS)                       |                                                            |                                 |
+
+A push to `main` rebuilds only the Vercel projects whose app or packages changed. Details: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 ## Quick start
 
 ```bash
@@ -50,3 +62,19 @@ pnpm dev:brand              # or dev:market, dev:ar
 Start with [docs/RUNBOOK.md](docs/RUNBOOK.md) to run and manage the repo, then [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit, [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) to deploy (Vercel for the web apps, AWS for the task server), [docs/PLATFORMS.md](docs/PLATFORMS.md) to add a white-label platform and [docs/MIGRATION.md](docs/MIGRATION.md) for what moved where.
 
 PDF copies of the runbook and the deployment guide are in `docs/pdf/` (regenerate with `node scripts/docs-to-pdf.mjs`).
+
+## History
+
+This repository replaces the separate repositories below, which are archived and read-only. Their full history was imported here (with leaked secrets removed).
+
+| Old repository                  | Now                                          |
+| ------------------------------- | -------------------------------------------- |
+| `Wadzzo2023/wadzz0`             | `apps/market`                                |
+| `Wadzzo2023/brand-wadzzo`       | `apps/brand`                                 |
+| `Wadzzo2023/brand-clinton`      | `apps/brand` + `PLATFORM_SLUG=clintoncounty` |
+| `Wadzzo2023/ARWebWadzzo`        | `apps/ar`                                    |
+| `Wadzzo2023/clintonAR`          | `apps/ar` + `PLATFORM_SLUG=clintoncounty`    |
+| `Wadzzo2023/wadzzoWebAR-public` | `apps/mobile`                                |
+| `Wadzzo2023/express-wadzzo`     | `apps/express-wadzzo`                        |
+
+`Wadzzo2023/connect_wallet` stays a separate repository. Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Security: [SECURITY.md](SECURITY.md).
