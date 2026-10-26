@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "~/components/ui/Text";
-import { cn } from "@wadzzo/utils/blank";
+import { cn } from "~/lib/utils";
 import { useColors } from "~/theme/theme";
 
 import { ProfileButton } from "./ProfileButton";

@@ -4,7 +4,7 @@ import { Pressable, View } from "react-native";
 
 import { RARITY_META, STATUS_META } from "~/lib/ar/rarity";
 import type { DetectionMethod, PinStatus, Rarity } from "~/lib/ar/types";
-import { cn } from "@wadzzo/utils/blank";
+import { cn } from "~/lib/utils";
 import { useColors } from "~/theme/theme";
 
 import { PulseDot } from "./PulseDot";

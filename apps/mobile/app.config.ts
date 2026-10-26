@@ -33,6 +33,10 @@ const LOCATION =
   "Wadzzo uses your location to show drops near you and to check you're close enough to collect one.";
 const PHOTOS =
   "Wadzzo uses your photos so you can attach them to bounty entries and set your profile picture.";
+// Never requested, but linked SDKs (Viro, expo-audio) reference the APIs, so
+// the keys must exist — and App Review rejects the generic Expo defaults.
+const SAVE_PHOTOS = "Wadzzo only saves an image to your photo library when you choose to.";
+const MICROPHONE = "Wadzzo doesn't record audio and never uses the microphone.";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -56,6 +60,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       NSCameraUsageDescription: CAMERA,
       NSLocationWhenInUseUsageDescription: LOCATION,
       NSPhotoLibraryUsageDescription: PHOTOS,
+      NSPhotoLibraryAddUsageDescription: SAVE_PHOTOS,
+      NSMicrophoneUsageDescription: MICROPHONE,
       NSMotionUsageDescription:
         "Wadzzo uses motion sensors to tilt the foil on your cards and to point the AR view the way you're facing.",
       ITSAppUsesNonExemptEncryption: false,
@@ -81,8 +87,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-asset",
     "expo-font",
     "expo-image",
-    "expo-secure-store",
-    "expo-audio",
+    // No biometric-gated items, so no Face ID purpose string.
+    ["expo-secure-store", { faceIDPermission: false }],
+    // SFX only, foreground only. The plugin defaults enableBackgroundPlayback
+    // to true, which adds `audio` to UIBackgroundModes — App Review rejected
+    // 6.0.1 for that (guideline 2.5.4).
+    [
+      "expo-audio",
+      { enableBackgroundPlayback: false, recordAudioAndroid: false, microphonePermission: MICROPHONE },
+    ],
     "expo-web-browser",
     "expo-sharing",
     "expo-status-bar",
@@ -109,15 +122,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // Foreground only (decided): "while using" permission, no background.
     [
       "expo-location",
-      { locationWhenInUsePermission: LOCATION, isIosBackgroundLocationEnabled: false },
+      {
+        locationWhenInUsePermission: LOCATION,
+        // Never requested; set so the plist doesn't carry the generic default.
+        locationAlwaysAndWhenInUsePermission: LOCATION,
+        locationAlwaysPermission: LOCATION,
+        isIosBackgroundLocationEnabled: false,
+      },
     ],
     [
       "expo-camera",
-      { cameraPermission: CAMERA, recordAudioAndroid: false, microphonePermission: false },
+      { cameraPermission: CAMERA, recordAudioAndroid: false, microphonePermission: MICROPHONE },
     ],
     [
       "expo-image-picker",
-      { photosPermission: PHOTOS, cameraPermission: CAMERA, microphonePermission: false },
+      { photosPermission: PHOTOS, cameraPermission: CAMERA, microphonePermission: MICROPHONE },
     ],
     [
       "@reactvision/react-viro",
@@ -128,8 +147,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           cameraUsagePermission: CAMERA,
           locationUsagePermission: LOCATION,
           photosPermission: PHOTOS,
-          savePhotosPermission: PHOTOS,
-          microphoneUsagePermission: "Wadzzo doesn't record audio.",
+          savePhotosPermission: SAVE_PHOTOS,
+          microphoneUsagePermission: MICROPHONE,
         },
         android: { xRMode: ["AR"] },
       },

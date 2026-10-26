@@ -2,7 +2,7 @@ import { Eye, EyeOff } from "lucide-react-native";
 import { forwardRef, useState } from "react";
 import { Pressable, TextInput, View, type TextInputProps } from "react-native";
 
-import { cn } from "@wadzzo/utils/blank";
+import { cn } from "~/lib/utils";
 import { useColors } from "~/theme/theme";
 
 import { Text } from "./Text";

@@ -7,7 +7,7 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "rea
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { Spinner } from "~/components/ui/Spinner";
-import { cn } from "@wadzzo/utils/blank";
+import { cn } from "~/lib/utils";
 import { useFeedbackSettings } from "~/lib/ar/feedback";
 import { useColors } from "~/theme/theme";
 
