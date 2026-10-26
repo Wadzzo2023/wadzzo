@@ -70,7 +70,9 @@ function SafeHTML({ html, className }: { html: string; className?: string }) {
   const [clean, setClean] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
-    void import("dompurify").then(({ default: DOMPurify }) => live && setClean(DOMPurify.sanitize(html)));
+    void import("dompurify").then(
+      ({ default: DOMPurify }) => live && setClean(DOMPurify.sanitize(html)),
+    );
     return () => {
       live = false;
     };
