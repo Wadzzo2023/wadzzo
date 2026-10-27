@@ -694,6 +694,9 @@ importers:
       server-only:
         specifier: 'catalog:'
         version: 0.0.1
+      sharp:
+        specifier: 'catalog:'
+        version: 0.35.5(@types/node@26.6.5)
       supercluster:
         specifier: ^9.1.0
         version: 9.1.0
