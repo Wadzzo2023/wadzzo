@@ -75,7 +75,8 @@ describe("pin creation", () => {
   it("automatically accepts pins by setting approved: true upon creation", async () => {
     db.creator.findUniqueOrThrow.mockResolvedValueOnce({ platformId: "wadzzo" });
     await runCreatePinsJob(job as never);
-    const firstCall = db.locationGroup.create.mock.calls[0] as [{ data: { approved?: boolean } }] | undefined;
+    const firstCall = db.locationGroup.create.mock.calls[0] as
+      [{ data: { approved?: boolean } }] | undefined;
     expect(firstCall?.[0]?.data.approved).toBe(true);
   });
 });
