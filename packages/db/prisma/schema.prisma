@@ -389,6 +389,7 @@ model User {
     signupPlatformId String         @default("wadzzo")
     signupPlatform   Platform       @relation("SignupPlatform", fields: [signupPlatformId], references: [id])
     platforms        UserPlatform[]
+    mcpTokens        McpToken[]
 }
 
 model VerificationToken {
@@ -1098,6 +1099,28 @@ model AgentJob {
 
 // ------------------------MAP AGENT (chat on the Pins map)-------------------------
 
+/// A personal access token for the brand portal's MCP server (/api/mcp), so an
+/// AI app can use the map agent as this person. Only the token's SHA-256 is
+/// stored; the token itself is shown once, when it's created. Works on the
+/// platform it was created on only.
+model McpToken {
+    id         String   @id @default(cuid())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    platformId String
+    platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+    name       String // what the person called it, e.g. "Claude Desktop"
+    tokenHash  String   @unique
+    prefix     String // the token's first characters, to tell tokens apart
+    walletType String // the session's wallet type when the token was made
+
+    lastUsedAt DateTime?
+    revokedAt  DateTime?
+    createdAt  DateTime  @default(now())
+
+    @@index([userId, platformId])
+}
+
 /// One chat between a person and the map agent, acting for one brand. Listed per
 /// brand AND per person, so an admin acting for a brand keeps their own chats.
 model AgentConversation {
@@ -1560,6 +1583,7 @@ model Platform {
     homeAreaName String?
 
     agentConversations AgentConversation[]
+    mcpTokens          McpToken[]
 
     signups            User[]         @relation("SignupPlatform")
     members            UserPlatform[]

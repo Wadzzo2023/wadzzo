@@ -12,6 +12,7 @@ import { s3Router } from "./routers/s3";
 import { widgetRouter } from "./routers/widget";
 import { qrRouter } from "./routers/qr";
 import { agentRouter } from "./routers/agent";
+import { mcpTokensRouter } from "./routers/mcp-tokens";
 import { aiRouter } from "./routers/ai";
 import { pinAgentRouter } from "./routers/pin-agent";
 import { tagRouter } from "./routers/tags";
@@ -37,6 +38,7 @@ export const appRouter = createTRPCRouter({
   widget: widgetRouter,
   qr: qrRouter,
   agent: agentRouter,
+  mcpTokens: mcpTokensRouter,
   pinAgent: pinAgentRouter,
   ai: aiRouter,
   tag: tagRouter,

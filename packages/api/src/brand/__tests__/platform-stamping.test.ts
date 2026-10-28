@@ -26,6 +26,7 @@ const STAMPED = [
   "qRItem",
   "redeem",
   "admin",
+  "mcpToken",
 ];
 
 /** Copies an existing row (which already carries its platformId). */

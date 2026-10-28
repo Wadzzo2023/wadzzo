@@ -64,6 +64,7 @@ catalog:
   "@trpc/react-query": "^11.19.0"
   "@trpc/server": "^11.19.0"
   "@huggingface/transformers": "4.3.1"
+  "@modelcontextprotocol/sdk": "^1.32.2"
   "@pinata/sdk": "^2.1.0"
   "@photostructure/tz-lookup": "^11.7.0"
   "@types/formidable": "^3.5.1"

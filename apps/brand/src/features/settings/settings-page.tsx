@@ -14,6 +14,7 @@ import {
   MapPinned,
   Package,
   Pencil,
+  Sparkles,
   Target,
   UserRound,
   Wallet,
@@ -56,12 +57,21 @@ import { useS3Upload } from "~/ui/upload/use-s3-upload";
 import { api, type RouterOutputs } from "~/utils/api";
 import { abbreviateAddress } from "@wadzzo/utils/address";
 
+import { AiConnectionsTab } from "./ai-connections-tab";
 import { PageAssetTab } from "./page-asset-tab";
 import { VANITY_HOST, VanityUrlTab } from "./vanity-url-tab";
 
 type Overview = NonNullable<RouterOutputs["fan"]["creator"]["profileOverview"]>;
 type Tab =
-  "pins" | "posts" | "bounties" | "store" | "page-asset" | "membership" | "vanity" | "home-area";
+  | "pins"
+  | "posts"
+  | "bounties"
+  | "store"
+  | "page-asset"
+  | "membership"
+  | "vanity"
+  | "home-area"
+  | "ai";
 const BIO_MAX = 100;
 
 /**
@@ -136,6 +146,7 @@ function Profile({ data }: { data: Overview }) {
     { id: "membership", label: "Membership", icon: Crown, gated: true },
     { id: "vanity", label: "Vanity URL", icon: Link2 },
     { id: "home-area", label: "Home area", icon: MapPinned },
+    { id: "ai", label: "AI connections", icon: Sparkles },
   ];
   const visible = tabs.filter((t) => !t.gated || navPermission);
   const param = search?.get("tab") as Tab | null;
@@ -316,6 +327,9 @@ function Profile({ data }: { data: Overview }) {
         )}
         <TabsContent value="home-area" className="mt-5">
           <HomeAreaTab />
+        </TabsContent>
+        <TabsContent value="ai" className="mt-5">
+          <AiConnectionsTab />
         </TabsContent>
         <TabsContent value="vanity" className="mt-5">
           <VanityUrlTab

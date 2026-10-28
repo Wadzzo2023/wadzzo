@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "catalog:",
+    "@modelcontextprotocol/sdk": "catalog:",
     "@photostructure/tz-lookup": "catalog:",
     "@pinata/sdk": "catalog:",
     "@stellar/stellar-sdk": "catalog:",
