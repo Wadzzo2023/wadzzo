@@ -260,7 +260,44 @@ export function createMcpServer(session: Session, platform: Platform) {
         "data: get the person's go-ahead first. Edits: for create_pins, `keep` limits it to some place keys and " +
         "`defaults` changes dates, type, radius and limits; for creating a hotspot, event or announcement, `draft` " +
         "changes fields of the draft. A rejected edit can be fixed and confirmed again.",
-      inputSchema: { actionId: z.string(), ...ActionEditsInput.shape, brandId },
+      inputSchema: {
+        actionId: z.string(),
+        ...ActionEditsInput.shape,
+        // The draft fields a hotspot, event or announcement can have, one type
+        // each, so every client can read the schema. They're checked by the same
+        // rules as the card when the proposal runs.
+        draft: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            body: z.string().describe("Announcement text"),
+            startDate: z.string().describe("YYYY-MM-DD or ISO date-time"),
+            endDate: z.string(),
+            expiresAt: z.string().describe("Announcement expiry"),
+            venueName: z.string(),
+            address: z.string(),
+            lat: z.number(),
+            lng: z.number(),
+            link: z.string(),
+            capacity: z.number(),
+            pinned: z.boolean(),
+            ctaLabel: z.string(),
+            ctaUrl: z.string(),
+            radiusMetres: z.number(),
+            type: z.string().describe("Pin type, e.g. LANDMARK or EVENT"),
+            dropEveryDays: z.number(),
+            pinDurationDays: z.number(),
+            pinNumber: z.number(),
+            collectionLimit: z.number(),
+            autoCollect: z.boolean(),
+          })
+          .partial()
+          .optional()
+          .describe(
+            "Changed fields of a hotspot, event or announcement draft. Only the ones to change.",
+          ),
+        brandId,
+      },
       annotations: { destructiveHint: true },
     },
     ({ actionId, keep, defaults, draft, brandId }) =>
