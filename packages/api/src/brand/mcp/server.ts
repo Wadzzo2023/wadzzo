@@ -34,16 +34,29 @@ const brandId = z
 
 const text = (s: string): CallToolResult => ({ content: [{ type: "text", text: s }] });
 
-/** Runs a tool, turning the procedures' errors into a message the AI can read. */
-async function safely(run: () => Promise<CallToolResult>): Promise<CallToolResult> {
+/** "GABC…WXYZ", so logs show who without the whole account id. */
+const shortId = (id: string) => (id.length > 12 ? `${id.slice(0, 4)}…${id.slice(-4)}` : id);
+
+/**
+ * Runs a tool, turning the procedures' errors into a message the AI can read,
+ * and logs one line per call: `[mcp] ask_agent GABC…WXYZ 12.4s ok`.
+ */
+async function runTool(
+  name: string,
+  userId: string,
+  run: () => Promise<CallToolResult>,
+): Promise<CallToolResult> {
+  const started = Date.now();
+  const took = () => `${((Date.now() - started) / 1000).toFixed(1)}s`;
   try {
-    return await run();
+    const result = await run();
+    console.info(`[mcp] ${name} ${shortId(userId)} ${took()} ${result.isError ? "error" : "ok"}`);
+    return result;
   } catch (err) {
+    const message = isKnownError(err) ? err.message : "Something went wrong.";
+    console.info(`[mcp] ${name} ${shortId(userId)} ${took()} error: ${message}`);
     if (!isKnownError(err)) console.error("[mcp]", err);
-    return {
-      isError: true,
-      content: [{ type: "text", text: isKnownError(err) ? err.message : "Something went wrong." }],
-    };
+    return { isError: true, content: [{ type: "text", text: message }] };
   }
 }
 
@@ -57,8 +70,15 @@ async function awaitReply(
   creatorId: string | undefined,
 ): Promise<CallToolResult> {
   const deadline = Date.now() + WAIT_MS;
+  const logged = new Set<string>();
   for (;;) {
     const job = await agent.poll({ jobId });
+    for (const step of job.steps) {
+      const key = `${step.id}:${step.status}`;
+      if (logged.has(key) || step.status === "running") continue;
+      logged.add(key);
+      console.info(`[mcp]   ${step.label} [${step.status}]${step.detail ? ` ${step.detail}` : ""}`);
+    }
     if (job.status === "failed")
       return { isError: true, ...text(job.error ?? "The agent failed.") };
     if (job.status === "completed") {
@@ -88,6 +108,8 @@ async function awaitReply(
 
 export function createMcpServer(session: Session, platform: Platform) {
   const agent = createAgentCaller(createInnerTrpcContext({ session, platform }));
+  const safely = (name: string, run: () => Promise<CallToolResult>) =>
+    runTool(name, session.user.id, run);
   const server = new McpServer(
     { name: `${platform.name} brand agent`, version: "1.0.0" },
     {
@@ -109,7 +131,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { readOnlyHint: true },
     },
     ({ brandId }) =>
-      safely(async () => {
+      safely("get_brand", async () => {
         const o = await agent.overview({ creatorId: brandId });
         return text(
           [
@@ -152,7 +174,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       },
     },
     (input) =>
-      safely(async () => {
+      safely("ask_agent", async () => {
         const sent = await agent.send({ ...input, creatorId: input.brandId });
         return awaitReply(agent, sent.jobId, sent.conversationId, input.brandId);
       }),
@@ -171,7 +193,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { readOnlyHint: true },
     },
     ({ jobId, conversationId, brandId }) =>
-      safely(() => awaitReply(agent, jobId, conversationId, brandId)),
+      safely("get_reply", () => awaitReply(agent, jobId, conversationId, brandId)),
   );
 
   server.registerTool(
@@ -183,7 +205,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { readOnlyHint: true },
     },
     ({ brandId }) =>
-      safely(async () => {
+      safely("list_conversations", async () => {
         const rows = await agent.conversations({ creatorId: brandId });
         if (rows.length === 0) return text("No conversations yet.");
         return text(
@@ -206,7 +228,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { readOnlyHint: true },
     },
     ({ conversationId, brandId }) =>
-      safely(async () => {
+      safely("get_conversation", async () => {
         const c = await agent.conversation({ id: conversationId, creatorId: brandId });
         return text(
           [`## ${c.title}`, ...c.messages.map((m) => formatMessage(m, c.actions))].join("\n\n"),
@@ -223,7 +245,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { destructiveHint: true, idempotentHint: true },
     },
     ({ conversationId, brandId }) =>
-      safely(async () => {
+      safely("delete_conversation", async () => {
         await agent.deleteConversation({ id: conversationId, creatorId: brandId });
         return text("Conversation deleted.");
       }),
@@ -242,7 +264,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { destructiveHint: true },
     },
     ({ actionId, keep, defaults, draft, brandId }) =>
-      safely(async () => {
+      safely("confirm_proposal", async () => {
         const result = await agent.confirm({
           actionId,
           creatorId: brandId,
@@ -266,7 +288,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { idempotentHint: true },
     },
     ({ actionId, brandId }) =>
-      safely(async () => {
+      safely("cancel_proposal", async () => {
         await agent.cancel({ actionId, creatorId: brandId });
         return text("Proposal cancelled.");
       }),
@@ -281,7 +303,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       annotations: { readOnlyHint: true },
     },
     ({ jobId }) =>
-      safely(async () => {
+      safely("get_pin_job", async () => {
         const job = await agent.pinJob({ jobId });
         return text(
           [
