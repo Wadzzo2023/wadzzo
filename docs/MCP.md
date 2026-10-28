@@ -31,24 +31,13 @@ The brand portal serves the map agent (the chat on the Pins map) as an MCP serve
 
 ## Connecting
 
-Claude Code:
+Settings → AI connections shows ready-to-paste setup, with the person's token filled in, for Claude Desktop (through `mcp-remote`), Claude Code, OpenAI Codex, the OpenAI API (Responses / Agents SDK hosted MCP tool), Antigravity, Cursor, VS Code, Gemini CLI, Windsurf and any other app that supports remote MCP servers with headers. The server name in every snippet is `wadzzo`; the setups live in `appSetups()` in `apps/brand/src/features/settings/ai-connections-tab.tsx`.
+
+The shortest one, Claude Code:
 
 ```bash
-claude mcp add --transport http wadzzo-brand https://brand.wadzzo.com/api/mcp \
+claude mcp add --transport http wadzzo https://brand.wadzzo.com/api/mcp \
   --header "Authorization: Bearer wz_mcp_…"
 ```
 
-Apps with an MCP config file (Cursor, Claude Desktop, …):
-
-```json
-{
-  "mcpServers": {
-    "wadzzo-brand": {
-      "url": "https://brand.wadzzo.com/api/mcp",
-      "headers": { "Authorization": "Bearer wz_mcp_…" }
-    }
-  }
-}
-```
-
-An app that can't send headers can go through `npx mcp-remote <url> --header "Authorization: Bearer wz_mcp_…"`. Web connectors that only support OAuth (claude.ai, ChatGPT) aren't supported yet.
+Web connectors that only support OAuth (claude.ai, ChatGPT) aren't supported yet.

@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 
 import { Button } from "@wadzzo/ui/poster/button";
 import { Input } from "@wadzzo/ui/poster/input";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Field } from "~/ui/form-page";
 import { api } from "~/utils/api";
 
@@ -74,7 +75,7 @@ export function AiConnectionsTab() {
               id="mcp-token-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Claude Desktop"
+              placeholder="Wadzzo MCP token"
               maxLength={60}
             />
           </Field>
@@ -98,33 +99,7 @@ export function AiConnectionsTab() {
         </div>
       )}
 
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold">Connect an app</h3>
-        <Snippet
-          title="Claude Code"
-          code={`claude mcp add --transport http wadzzo-brand ${endpoint} --header "Authorization: Bearer ${shownToken}"`}
-        />
-        <Snippet
-          title="Cursor, Claude Desktop and other apps (MCP config JSON)"
-          code={JSON.stringify(
-            {
-              mcpServers: {
-                "wadzzo-brand": {
-                  url: endpoint,
-                  headers: { Authorization: `Bearer ${shownToken}` },
-                },
-              },
-            },
-            null,
-            2,
-          )}
-        />
-        <p className="text-muted-foreground text-xs">
-          If an app can&rsquo;t send headers, run it through{" "}
-          <code>{`npx mcp-remote ${endpoint} --header "Authorization: Bearer ${shownToken}"`}</code>
-          .
-        </p>
-      </div>
+      <ConnectApp endpoint={endpoint} token={shownToken} />
 
       <div className="space-y-2">
         <h3 className="text-sm font-semibold">Your tokens</h3>
@@ -160,6 +135,133 @@ export function AiConnectionsTab() {
           </ul>
         )}
       </div>
+    </div>
+  );
+}
+
+const SERVER_NAME = "wadzzo";
+
+type AppSetup = { id: string; label: string; where: string; code: string };
+
+/** How each AI app is told about the server, with the token in its auth header. */
+function appSetups(url: string, token: string): AppSetup[] {
+  const auth = `Bearer ${token}`;
+  const json = (value: unknown) => JSON.stringify(value, null, 2);
+  const urlAndHeaders = (urlKey: string) =>
+    json({ mcpServers: { [SERVER_NAME]: { [urlKey]: url, headers: { Authorization: auth } } } });
+  return [
+    {
+      id: "claude-desktop",
+      label: "Claude Desktop",
+      where:
+        "Settings → Developer → Edit Config (claude_desktop_config.json), then restart Claude.",
+      code: json({
+        mcpServers: {
+          [SERVER_NAME]: {
+            command: "npx",
+            args: ["-y", "mcp-remote", url, "--header", "Authorization:${WADZZO_MCP_AUTH}"],
+            env: { WADZZO_MCP_AUTH: auth },
+          },
+        },
+      }),
+    },
+    {
+      id: "claude-code",
+      label: "Claude Code",
+      where: "Run in a terminal.",
+      code: `claude mcp add --transport http ${SERVER_NAME} ${url} --header "Authorization: ${auth}"`,
+    },
+    {
+      id: "codex",
+      label: "OpenAI Codex",
+      where: "Add to ~/.codex/config.toml.",
+      code: `[mcp_servers.${SERVER_NAME}]\nurl = "${url}"\nhttp_headers = { "Authorization" = "${auth}" }`,
+    },
+    {
+      id: "openai-api",
+      label: "OpenAI API",
+      where: "A tool in a Responses API request (or the Agents SDK's hosted MCP tool).",
+      code: json({
+        type: "mcp",
+        server_label: SERVER_NAME,
+        server_url: url,
+        headers: { Authorization: auth },
+        require_approval: "always",
+      }),
+    },
+    {
+      id: "antigravity",
+      label: "Antigravity",
+      where:
+        "Agent panel → … → MCP Servers → Manage MCP Servers → View raw config (mcp_config.json).",
+      code: urlAndHeaders("serverUrl"),
+    },
+    {
+      id: "cursor",
+      label: "Cursor",
+      where: "~/.cursor/mcp.json (or .cursor/mcp.json in a project).",
+      code: urlAndHeaders("url"),
+    },
+    {
+      id: "vscode",
+      label: "VS Code",
+      where: ".vscode/mcp.json in a workspace (GitHub Copilot agent mode).",
+      code: json({
+        servers: { [SERVER_NAME]: { type: "http", url, headers: { Authorization: auth } } },
+      }),
+    },
+    {
+      id: "gemini",
+      label: "Gemini CLI",
+      where: "~/.gemini/settings.json.",
+      code: urlAndHeaders("httpUrl"),
+    },
+    {
+      id: "windsurf",
+      label: "Windsurf",
+      where: "~/.codeium/windsurf/mcp_config.json.",
+      code: urlAndHeaders("serverUrl"),
+    },
+    {
+      id: "other",
+      label: "Other",
+      where:
+        "Any app that supports remote (Streamable HTTP) MCP servers with headers. One that can't send headers can run it through mcp-remote.",
+      code: `${urlAndHeaders("url")}\n\n# Without header support:\nnpx -y mcp-remote ${url} --header "Authorization: ${auth}"`,
+    },
+  ];
+}
+
+function ConnectApp({ endpoint, token }: { endpoint: string; token: string }) {
+  const setups = appSetups(endpoint, token);
+  const [appId, setAppId] = useState(setups[0]!.id);
+  const app = setups.find((a) => a.id === appId) ?? setups[0]!;
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold">Connect an app</h3>
+      <div className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1" role="tablist">
+        {setups.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            role="tab"
+            aria-selected={a.id === app.id}
+            onClick={() => setAppId(a.id)}
+            className={cn(
+              "flex-none rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-colors",
+              a.id === app.id
+                ? "border-primary bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground border-foreground/15",
+            )}
+          >
+            {a.label}
+          </button>
+        ))}
+      </div>
+      <Snippet title={app.where} code={app.code} />
+      <p className="text-muted-foreground text-xs">
+        ChatGPT and claude.ai web connectors need OAuth sign-in, which isn&rsquo;t available yet.
+      </p>
     </div>
   );
 }

@@ -36,7 +36,7 @@ import {
   DialogTitle,
 } from "@wadzzo/ui/poster/dialog";
 import { Input } from "@wadzzo/ui/poster/input";
-import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs";
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { AiTextButton } from "~/ui/ai/ai-text";
@@ -117,29 +117,25 @@ function Profile({ data }: { data: Overview }) {
     id: Tab;
     label: string;
     icon: typeof MapPin;
-    count?: number;
     gated?: boolean;
   }[] = [
-    { id: "pins", label: "Pins", icon: MapPin, count: data.counts.pins },
+    { id: "pins", label: "Pins", icon: MapPin },
     {
       id: "posts",
       label: "Posts",
       icon: FileText,
-      count: data.counts.posts,
       gated: true,
     },
     {
       id: "bounties",
       label: "Bounties",
       icon: Target,
-      count: data.counts.bounties,
       gated: true,
     },
     {
       id: "store",
       label: "Store items",
       icon: Package,
-      count: data.counts.storeItems,
       gated: true,
     },
     { id: "page-asset", label: "Page asset", icon: Coins },
@@ -290,11 +286,13 @@ function Profile({ data }: { data: Overview }) {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="mt-8">
-        <TabsList variant="line">
+        <TabsList
+          variant="line"
+          className="no-scrollbar w-full justify-start overflow-x-auto overflow-y-hidden"
+        >
           {visible.map((t) => (
-            <TabsTrigger key={t.id} value={t.id}>
+            <TabsTrigger key={t.id} value={t.id} className="flex-none">
               <t.icon /> {t.label}
-              {t.count !== undefined && <TabCount n={t.count} />}
             </TabsTrigger>
           ))}
         </TabsList>
