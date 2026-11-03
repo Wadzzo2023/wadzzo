@@ -417,12 +417,11 @@ export default function MapScreen() {
             className="pointer-events-auto mr-auto"
           />
 
-          {/* Events, then Bounty, under the avatar, each with its name. */}
+          {/* Events, then Bounty, under the avatar: icon and name on one line. */}
           <div className="relative">
             {/* Balance and avatar in one capsule (signed in), opening the profile. */}
             <ProfileButton balance className="pointer-events-auto" />
-            {/* A 36px column under the avatar end of the capsule; wider labels overflow evenly. */}
-            <div className="pointer-events-auto absolute top-[calc(100%+8px)] right-0 flex w-9 flex-col items-center gap-2">
+            <div className="pointer-events-auto absolute top-[calc(100%+8px)] right-0 flex flex-col items-end gap-1.5">
               <HudShortcut
                 icon={CalendarDays}
                 label="Events"
@@ -547,7 +546,7 @@ export default function MapScreen() {
   );
 }
 
-/** A labelled round shortcut under the avatar (Events, Bounty). */
+/** A shortcut pill under the avatar (Events, Bounty): icon and name on one line. */
 function HudShortcut({
   icon: Icon,
   label,
@@ -563,23 +562,21 @@ function HudShortcut({
   return (
     <motion.button
       type="button"
-      whileTap={{ scale: 0.92 }}
+      whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-label={dot ? `${label} (needs you)` : label}
-      className="group flex flex-col items-center gap-1"
+      className="ar-glass group text-ar-dim hover:text-ar-text relative flex h-8 items-center gap-1.5 rounded-full pr-3 pl-2.5 transition-colors"
     >
-      <span className="ar-glass text-ar-dim group-hover:text-ar-text relative flex h-9 w-9 items-center justify-center rounded-full transition-colors">
-        <Icon size={17} strokeWidth={2.1} />
-        {dot && (
-          <span
-            aria-hidden
-            className="bg-ar-green-hot absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
-          />
-        )}
-      </span>
-      <span className="ar-glass font-hud text-ar-text rounded-full px-1.5 py-[3px] text-[8.5px] leading-none font-semibold tracking-[0.12em] uppercase">
+      <Icon size={15} strokeWidth={2.2} className="shrink-0" />
+      <span className="font-hud text-ar-text text-[10px] leading-none font-semibold tracking-[0.12em] uppercase">
         {label}
       </span>
+      {dot && (
+        <span
+          aria-hidden
+          className="bg-ar-green-hot absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+        />
+      )}
     </motion.button>
   );
 }

@@ -35,65 +35,67 @@ export function MapControls({
   mapMode?: MapMode;
   onToggleMapMode?: () => void;
 }) {
+  const key = "relative flex h-11 w-11 items-center justify-center transition-colors";
+  const lit = "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]";
+  const idle = "text-ar-dim hover:text-ar-text";
   return (
-    <div className="pointer-events-none absolute top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
-      {/* ── Recenter + refresh ───────────────────────────────────────── */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={onRecenter}
-        aria-label={
-          refetching
-            ? "Refreshing pins"
-            : following
-              ? "Following your location — tap to refresh pins"
-              : "Recenter on your location and refresh pins"
-        }
-        aria-pressed={following}
-        aria-busy={refetching}
-        className={cn(
-          "ar-glass pointer-events-auto relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
-          following
-            ? "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
-            : "text-ar-dim hover:text-ar-text",
-        )}
-      >
-        {refetching && (
-          <motion.span
-            aria-hidden
-            animate={{ rotate: 360 }}
-            transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
-            className="border-t-ar-green-hot absolute inset-[3px] rounded-full border-2 border-transparent"
-          />
-        )}
-        <Crosshair size={19} strokeWidth={2.1} />
-      </motion.button>
+    <div className="pointer-events-none absolute top-1/2 right-3.5 z-30 -translate-y-1/2">
+      {/* One glass capsule: recenter (+ refresh), compass map, 2D/3D. */}
+      <div className="ar-glass pointer-events-auto flex flex-col overflow-hidden rounded-full">
+        {/* ── Recenter + refresh ─────────────────────────────────────── */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onRecenter}
+          aria-label={
+            refetching
+              ? "Refreshing pins"
+              : following
+                ? "Following your location — tap to refresh pins"
+                : "Recenter on your location and refresh pins"
+          }
+          aria-pressed={following}
+          aria-busy={refetching}
+          className={cn(key, following ? lit : idle)}
+        >
+          {refetching && (
+            <motion.span
+              aria-hidden
+              animate={{ rotate: 360 }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+              className="border-t-ar-green-hot absolute inset-[3px] rounded-full border-2 border-transparent"
+            />
+          )}
+          <Crosshair size={19} strokeWidth={2.1} />
+        </motion.button>
 
-      {/* ── Compass map ─────────────────────────────────────────────────
-          Turns the map to your heading instead of holding north up. Lives
-          here rather than in the profile's settings list because this is
-          where it's used and — on iOS — where it can legally be switched on
-          at all: device-orientation permission is only granted from inside a
-          user gesture, so the tap that enables it has to be the tap that
-          asks. Switching it off returns the map to north. */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={onToggleCompass}
-        aria-label={
-          compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"
-        }
-        aria-pressed={compassMode}
-        className={cn(
-          "ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full transition-colors",
-          compassMode
-            ? "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
-            : "text-ar-dim hover:text-ar-text",
-        )}
-      >
-        <Compass size={18} strokeWidth={2.1} />
-      </motion.button>
+        <span aria-hidden className="bg-ar-line mx-2.5 h-px" />
 
-      {/* ── 2D / 3D ─────────────────────────────────────────────────── */}
-      {mapMode && onToggleMapMode && <MapModeButton mode={mapMode} onToggle={onToggleMapMode} />}
+        {/* ── Compass map ───────────────────────────────────────────────
+            Turns the map to your heading instead of holding north up. Lives
+            here rather than in the profile's settings because on iOS
+            device-orientation permission is only granted from inside a user
+            gesture, so the tap that enables it has to be the tap that asks.
+            Switching it off returns the map to north. */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onToggleCompass}
+          aria-label={
+            compassMode ? "Compass map on — switch to north up" : "Turn the map to your heading"
+          }
+          aria-pressed={compassMode}
+          className={cn(key, compassMode ? lit : idle)}
+        >
+          <Compass size={18} strokeWidth={2.1} />
+        </motion.button>
+
+        {/* ── 2D / 3D ───────────────────────────────────────────────── */}
+        {mapMode && onToggleMapMode && (
+          <>
+            <span aria-hidden className="bg-ar-line mx-2.5 h-px" />
+            <MapModeButton bare mode={mapMode} onToggle={onToggleMapMode} />
+          </>
+        )}
+      </div>
     </div>
   );
 }
