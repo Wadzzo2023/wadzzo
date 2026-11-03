@@ -448,7 +448,7 @@ export default function MapScreen() {
         />
 
         {/* ── Nearby rail ──────────────────────────────────────────── */}
-        <div className="absolute inset-x-0 bottom-0 z-30 pb-2">
+        <div className="absolute inset-x-0 bottom-[var(--ar-tabbar-space)] z-30">
           <NearbyStrip
             items={nearby}
             selectedId={selectedId}

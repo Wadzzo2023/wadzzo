@@ -44,7 +44,7 @@ export function FormPage({
         {aside && <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">{aside}</aside>}
       </div>
       {/* Phone: actions stay reachable above the tab bar. */}
-      <div className="bg-card fixed inset-x-0 bottom-[calc(4.75rem+var(--safe-bottom))] z-30 flex items-center justify-end gap-2 border-t-2 px-4 py-3 lg:hidden">
+      <div className="bg-card fixed inset-x-0 bottom-[calc(3.375rem+max(0.375rem,var(--safe-bottom)))] z-30 flex items-center justify-end gap-2 border-t-2 px-4 py-3 lg:hidden">
         {actions}
       </div>
     </form>

@@ -6,6 +6,10 @@ import "~/styles/platform-theme.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { sharedThemeSeedScript } from "@wadzzo/ui/lib/shared-theme";
+
+import { THEME_STORAGE_KEY } from "~/components/shell/theme-storage-key";
+
 import { Providers } from "./providers";
 import { platformBranding } from "@wadzzo/platform/branding";
 
@@ -38,6 +42,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning: next-themes sets the class before hydration.
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* The theme shared across Wadzzo sites, copied in before next-themes reads its key. */}
+        <script dangerouslySetInnerHTML={{ __html: sharedThemeSeedScript(THEME_STORAGE_KEY) }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

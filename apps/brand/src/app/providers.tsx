@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
 import { DialogProfileSync } from "~/components/shell/dialog-profile-sync";
+import { SharedThemeSync, THEME_STORAGE_KEY } from "~/components/shell/shared-theme-sync";
 import { TRPCReactProvider } from "~/trpc/provider";
 
 // The wallet package's global dialogs (connect wallet, toasts). Browser-only.
@@ -22,8 +23,10 @@ export function Providers({ children }: { children: ReactNode }) {
         themes={["light", "dark", "contrast"]}
         defaultTheme="dark"
         enableSystem
+        storageKey={THEME_STORAGE_KEY}
         disableTransitionOnChange
       >
+        <SharedThemeSync />
         <TRPCReactProvider>
           {children}
           <WalletPopups className="font-sans" />

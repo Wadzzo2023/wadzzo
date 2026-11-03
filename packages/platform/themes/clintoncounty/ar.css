@@ -52,3 +52,18 @@
 .dark {
   --hero-panel-start: hsl(346 52% 56%);
 }
+
+/* High contrast (the shared theme choice): a pure black page with white type, as Clinton's
+   marketplace and brand portal contrast theme. Neutrals only; the county accents stay. */
+.dark.contrast {
+  --ar-void: 0 0% 0%;
+  --ar-bg: 0 0% 2%;
+  --ar-surface: 0 0% 7%;
+  --ar-surface-2: 0 0% 10%;
+  --ar-surface-3: 0 0% 14%;
+  --ar-line: 0 0% 38%;
+  --ar-line-bright: 0 0% 62%;
+  --ar-text: 0 0% 100%;
+  --ar-text-dim: 0 0% 88%;
+  --ar-text-faint: 0 0% 72%;
+}

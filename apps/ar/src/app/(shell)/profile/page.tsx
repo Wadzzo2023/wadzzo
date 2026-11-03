@@ -14,6 +14,7 @@ import {
   Zap,
   Users,
   Frame,
+  Contrast,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -46,6 +47,7 @@ const THEME_OPTIONS: {
   { value: "auto", icon: MonitorSmartphone, label: "System" },
   { value: "light", icon: Sun, label: "Light" },
   { value: "dark", icon: Moon, label: "Dark" },
+  { value: "contrast", icon: Contrast, label: "Contrast" },
 ];
 
 /**
@@ -337,7 +339,8 @@ export default function ProfileScreen() {
               <span className="text-ar-faint mt-1 block text-[11.5px] leading-relaxed">
                 {theme.preference === "auto"
                   ? `Follows your device — currently ${theme.resolved}.`
-                  : "Set manually, independent of your device."}
+                  : "Set manually, independent of your device."}{" "}
+                Shared with the {platformBranding.name} marketplace and brand portal.
               </span>
 
               {/* A 3-way choice, not a boolean — the `Switch` used below
@@ -346,7 +349,7 @@ export default function ProfileScreen() {
               <div
                 role="radiogroup"
                 aria-label="Theme"
-                className="ar-key mt-3 grid grid-cols-3 gap-1 rounded-[12px] p-1"
+                className="ar-key mt-3 grid grid-cols-4 gap-1 rounded-[12px] p-1"
               >
                 {THEME_OPTIONS.map(({ value, icon: Icon, label }) => {
                   const active = theme.preference === value;
@@ -357,11 +360,11 @@ export default function ProfileScreen() {
                       aria-checked={active}
                       onClick={() => theme.setPreference(value)}
                       className={cn(
-                        "font-hud flex items-center justify-center gap-1.5 rounded-[9px] py-2 text-[10px] font-bold tracking-[0.08em] uppercase transition-colors",
+                        "font-hud flex min-w-0 flex-col items-center justify-center gap-1 rounded-[9px] py-2 text-[9.5px] leading-none font-bold tracking-[0.06em] uppercase transition-colors",
                         active ? "bg-ar-green/18 text-ar-green-hot" : "text-ar-faint",
                       )}
                     >
-                      <Icon size={13} strokeWidth={2.4} />
+                      <Icon size={14} strokeWidth={2.4} />
                       {label}
                     </button>
                   );

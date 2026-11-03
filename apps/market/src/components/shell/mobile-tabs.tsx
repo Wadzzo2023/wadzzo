@@ -60,9 +60,10 @@ export function MobileTabs() {
   return (
     <nav
       aria-label="Sections"
-      className="fixed inset-x-3 bottom-[max(0.75rem,var(--safe-bottom))] z-40 md:hidden"
+      className="side-scope bg-side text-side-ink fixed inset-x-0 bottom-0 z-40 rounded-t-[1.5rem] px-1.5 pt-1.5 pb-[max(0.375rem,var(--safe-bottom))] shadow-[0_-10px_28px_-14px_hsl(0_0%_0%/0.55)] md:hidden"
     >
-      <div className="side-scope blob bg-side text-side-ink mx-auto flex max-w-md items-center gap-1 p-1.5 shadow-[0_14px_30px_-12px_hsl(0_0%_0%/0.6)]">
+      {/* Flush with the bottom and both sides, rounded on top only — same as the AR app's bar. */}
+      <div className="mx-auto flex max-w-md items-center gap-1">
         {left.map(link)}
         <ArTabButton href={platformBranding.urls.arWeb} className="text-side-ink" />
         {right.map(link)}

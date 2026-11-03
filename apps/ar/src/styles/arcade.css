@@ -179,6 +179,24 @@
   --ar-locked: 220 8% 48%;
 }
 
+/* High contrast: the dark theme with stronger neutrals, based on the marketplace and
+   brand portal's "High contrast" (packages/ui poster.css), since the choice is shared across the
+   Wadzzo sites. `.dark` stays on underneath, so maps and native controls stay dark. Only
+   neutrals and type change: each platform keeps its own accent colours. */
+.dark.contrast {
+  --ar-void: 150 6% 8%;
+  --ar-bg: 150 5% 11%;
+  --ar-surface: 150 5% 14.5%;
+  --ar-surface-2: 150 5% 17.5%;
+  --ar-surface-3: 150 4% 22%;
+  --ar-line: 150 4% 30%;
+  --ar-line-bright: 150 5% 42%;
+
+  --ar-text: 100 45% 91%;
+  --ar-text-dim: 110 10% 74%;
+  --ar-text-faint: 120 6% 58%;
+}
+
 /* Matches StatusBar's h-[52px]; both are `lg:` only. Theme-agnostic, so
    unconditional on `:root` rather than duplicated per palette. */
 @media (min-width: 1024px) {
@@ -400,11 +418,9 @@ body {
  * Deliberately has **no `backdrop-filter`**, unlike `.ar-glass` above, for two
  * independent reasons:
  *
- *  1. There is nothing behind it to blur. `<main>` reserves the bar's full
- *     height as `pb-[80px]` (see `AppShell.tsx`), so screen content stops
- *     *above* the bar rather than scrolling under it — measured at the DOM
- *     level: content ends at the same y the bar begins. A blur with nothing
- *     behind it costs a compositing layer and buys nothing.
+ *  1. Cost. Screen content now scrolls under the bar (`.ar-tabbed`), but the
+ *     fill is solid (see-through, card text bled through the tab labels), so a
+ *     blur would never show and would still cost a compositing layer.
  *
  *  2. It actively broke the bar's rounded top corners. WebKit does not clip a
  *     `backdrop-filter` element to a rounded corner — not to its own
@@ -418,7 +434,7 @@ body {
  * rounds correctly.
  */
 .ar-tabbar-surface {
-  background: hsl(var(--ar-surface) / 0.92);
+  background: hsl(var(--ar-surface));
   border: 1px solid hsl(var(--ar-line) / 0.7);
   box-shadow:
     inset 0 1px 0 0 hsl(0 0% 100% / 0.08),
@@ -1358,6 +1374,20 @@ body {
 }
 .ar-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* Screens with the tab bar: content runs underneath it (no reserved strip of
+   page background behind the bar), so each screen's outer scroll pane ends with
+   a spacer the bar's height, letting its last row scroll clear of the bar.
+   Nested panes don't get one. */
+.ar-tabbed {
+  --ar-tabbar-space: calc(72px + max(12px, var(--ar-safe-bottom)));
+}
+.ar-tabbed .ar-scroll:not(.ar-scroll .ar-scroll)::after {
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  height: var(--ar-tabbar-space);
 }
 
 .ar-scroll-x {

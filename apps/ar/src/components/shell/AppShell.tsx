@@ -29,8 +29,11 @@ export function AppShell({
       <main
         className={cn(
           "relative flex-1 overflow-hidden",
-          // Leave room for the console plus the raised AR launcher above it.
-          tabs && "pb-[80px]",
+          // Content runs under the tab bar — only the bar paints a background
+          // there. Scroll panes end with a spacer the bar's height instead
+          // (`.ar-tabbed .ar-scroll::after`, arcade.css), so the last card can
+          // still scroll clear of it.
+          tabs && "ar-tabbed",
         )}
       >
         {children}

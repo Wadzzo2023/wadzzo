@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { platformBranding } from "@wadzzo/platform/branding";
+import {
+  onTabReturn,
+  readSharedTheme,
+  writeSharedTheme,
+  type SharedTheme,
+} from "@wadzzo/ui/lib/shared-theme";
 
 /**
  * ── Theme ──────────────────────────────────────────────────────────────────
@@ -18,7 +24,8 @@ import { platformBranding } from "@wadzzo/platform/branding";
  * step dedicated to it, which is a lot of machinery for four lines of logic.
  */
 
-export type ThemePreference = "auto" | "light" | "dark";
+/** "contrast" is High contrast: the dark theme with stronger neutrals (`.dark.contrast` in arcade.css). */
+export type ThemePreference = "auto" | "light" | "dark" | "contrast";
 export type ResolvedTheme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "wadzzo-ar-theme";
@@ -113,8 +120,15 @@ export function useMapMode(): MapMode {
 }
 
 function isThemePreference(value: unknown): value is ThemePreference {
-  return value === "auto" || value === "light" || value === "dark";
+  return value === "auto" || value === "light" || value === "dark" || value === "contrast";
 }
+
+/**
+ * The theme is shared with the other Wadzzo sites through a cookie (`@wadzzo/ui/lib/shared-theme`),
+ * whose word for "auto" is "system".
+ */
+const toShared = (pref: ThemePreference): SharedTheme => (pref === "auto" ? "system" : pref);
+const fromShared = (theme: SharedTheme): ThemePreference => (theme === "system" ? "auto" : theme);
 
 /** Safe against SSR (no `window`) and a disabled/unavailable localStorage. */
 export function readStoredPreference(): ThemePreference {
@@ -128,6 +142,7 @@ export function readStoredPreference(): ThemePreference {
 }
 
 function writeStoredPreference(pref: ThemePreference) {
+  writeSharedTheme(toShared(pref));
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, pref);
   } catch {
@@ -145,8 +160,9 @@ function systemPrefersLight(): boolean {
   );
 }
 
-/** "auto" resolved against the OS preference; "light"/"dark" pass through. */
+/** "auto" resolved against the OS preference; "contrast" is dark underneath; "light"/"dark" pass through. */
 export function resolveTheme(pref: ThemePreference): ResolvedTheme {
+  if (pref === "contrast") return "dark";
   if (pref === "light" || pref === "dark") return pref;
   return systemPrefersLight() ? "light" : "dark";
 }
@@ -155,9 +171,10 @@ export function resolveTheme(pref: ThemePreference): ResolvedTheme {
  * `theme-color` meta tag, the two things a plain CSS rule can't reach for
  * itself. Everything else repaints on its own once the class changes,
  * because every color in the app is one `--ar-*` token away from `.dark`. */
-export function applyTheme(theme: ResolvedTheme) {
+export function applyTheme(theme: ResolvedTheme, contrast = false) {
   if (typeof document === "undefined") return;
   document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.classList.toggle("contrast", contrast);
 
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", THEME_COLOR[theme]);
@@ -235,7 +252,20 @@ export function useTheme() {
     writeStoredPreference(pref);
     const next = resolveTheme(pref);
     setResolved(next);
-    applyTheme(next);
+    applyTheme(next, pref === "contrast");
+  }, []);
+
+  // A change picked up from another Wadzzo site (see `useSharedThemeSync`).
+  useEffect(() => {
+    const onChange = () => {
+      const pref = readStoredPreference();
+      setPreferenceState(pref);
+      setResolved(resolveTheme(pref));
+    };
+    themeListeners.add(onChange);
+    return () => {
+      themeListeners.delete(onChange);
+    };
   }, []);
 
   // Follow the OS live while — and only while — nothing's been chosen
@@ -256,4 +286,31 @@ export function useTheme() {
   }, [preference]);
 
   return { preference, resolved, setPreference };
+}
+
+const themeListeners = new Set<() => void>();
+
+/**
+ * Keeps the theme in step with the other Wadzzo sites (mounted once, in the root layout). The
+ * boot script already applied the shared cookie on load; this takes over afterwards: the stored
+ * choice is written to the cookie once (an older device that only had it in localStorage), and
+ * when the tab comes back into view a change made on another site is applied here.
+ */
+export function useSharedThemeSync() {
+  useEffect(() => {
+    if (!readSharedTheme()) writeSharedTheme(toShared(readStoredPreference()));
+    return onTabReturn(() => {
+      const shared = readSharedTheme();
+      if (!shared) return;
+      const pref = fromShared(shared);
+      if (pref === readStoredPreference()) return;
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, pref);
+      } catch {
+        // storage blocked: still apply it for this page
+      }
+      applyTheme(resolveTheme(pref), pref === "contrast");
+      themeListeners.forEach((l) => l());
+    });
+  }, []);
 }

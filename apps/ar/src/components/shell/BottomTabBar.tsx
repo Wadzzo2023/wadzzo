@@ -37,16 +37,10 @@ const RIGHT: Tab[] = [
  * its own plinth with a rotating conic ring, because it's the one action the
  * whole app exists to deliver and it should never look like a peer of "You".
  *
- * Used to be a floating pill with margin on all four sides. That margin was
- * never part of the bar — it was `<main>`'s own `pb-[80px]` reservation
- * (`AppShell.tsx`) showing through underneath: screen content stops above the
- * bar rather than scrolling under it, so there was never anything back there
- * to see, and the pill read as flat color around its edges no matter how it
- * was styled. Extending the bar to fill that whole reserved strip — corner to
- * corner, edge to the safe-area bottom — removes the gap rather than trying to
- * dress it up: everything inside the reservation is now the bar's own surface,
- * drawn once, instead of a floating shape over an exposed strip of page
- * background.
+ * Nothing is reserved behind it: screen content runs under the bar (see
+ * `.ar-tabbed` in arcade.css), so past its rounded corners you see the screen
+ * itself, never a square strip of page background. Scroll panes end with a
+ * spacer the bar's height so their last row can scroll clear of it.
  *
  * The active plate is a shared `layoutId`, so switching tabs slides one lit
  * cap across the bar instead of cross-fading two.

@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import { fontVariables } from "~/lib/fonts";
 import { TRPCReactProvider } from "~/trpc/provider";
 import { platformBranding } from "@wadzzo/platform/branding";
+import { SHARED_THEME_COOKIE } from "@wadzzo/ui/lib/shared-theme";
 
 export const metadata: Metadata = {
   title: `${platformBranding.name} AR — Collect the real world`,
@@ -54,8 +55,14 @@ export const viewport: Viewport = {
 const themeBootScript = `
 (function () {
   try {
+    // The theme shared by every Wadzzo site (cookie, see @wadzzo/ui/lib/shared-theme) wins over
+    // this site's own copy; "system" is this app's "auto".
+    var m = document.cookie.match(/(?:^|;\\s*)${SHARED_THEME_COOKIE}=(light|dark|contrast|system)(?:;|$)/);
+    if (m) localStorage.setItem("wadzzo-ar-theme", m[1] === "system" ? "auto" : m[1]);
     var v = localStorage.getItem("wadzzo-ar-theme");
-    var pref = v === "light" || v === "dark" ? v : "auto";
+    var pref = v === "light" || v === "dark" || v === "contrast" ? v : "auto";
+    // High contrast is the dark theme plus the .contrast class.
+    if (pref === "contrast") document.documentElement.classList.add("contrast");
     var light =
       pref === "light" ||
       (pref === "auto" &&
@@ -64,7 +71,7 @@ const themeBootScript = `
     if (light) {
       document.documentElement.classList.remove("dark");
       var meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute("content", platformBranding.colors.themeLight);
+      if (meta) meta.setAttribute("content", ${JSON.stringify(platformBranding.colors.themeLight)});
     }
   } catch (e) {}
 })();
