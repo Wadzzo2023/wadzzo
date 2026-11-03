@@ -30,6 +30,9 @@ import type {
   Entry,
   EventComment,
   EventPage,
+  MarketItem,
+  MarketPage,
+  MarketRelated,
   PinPage,
   Profile,
   ThreadMessage,
@@ -69,6 +72,9 @@ export const qk = {
   announcements: (uid: string | null, following: boolean) => ["announcements", uid, following] as const,
   announcement: (id: string) => ["announcement", id] as const,
   eventComments: (kind: string, id: string, uid: string | null) => ["eventComments", kind, id, uid] as const,
+  marketListings: (kind: string, search: string) => ["marketListings", kind, search] as const,
+  marketItem: (id: number) => ["marketItem", id] as const,
+  marketRelated: (id: number) => ["marketRelated", id] as const,
 };
 
 // ── Pins ─────────────────────────────────────────────────────────────────
@@ -420,5 +426,41 @@ export function useRsvp(eventId: string) {
         qc.invalidateQueries({ queryKey: ["event", eventId] }),
         qc.invalidateQueries({ queryKey: ["events"] }),
       ]),
+  });
+}
+
+// ── Marketplace (read-only) ──────────────────────────────────────────────
+
+export function useMarketListings(kind: "all" | "drops" | "resale", search: string) {
+  const q = useInfiniteQuery({
+    queryKey: qk.marketListings(kind, search),
+    queryFn: ({ pageParam, signal }) =>
+      api<MarketPage>("/market/listings", {
+        query: { kind, search: search || undefined, sort: "new", limit: 24, cursor: pageParam ?? undefined },
+        signal,
+      }),
+    initialPageParam: null as number | null,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    staleTime: 60_000,
+  });
+  const items = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data]);
+  return { ...q, items };
+}
+
+export function useMarketItem(id: number) {
+  return useQuery({
+    queryKey: qk.marketItem(id),
+    queryFn: () => api<MarketItem>(`/market/items/${id}`),
+    enabled: Number.isInteger(id),
+    retry: false,
+  });
+}
+
+export function useMarketRelated(id: number, enabled: boolean) {
+  return useQuery({
+    queryKey: qk.marketRelated(id),
+    queryFn: () => api<MarketRelated>(`/market/items/${id}/related`),
+    enabled: Number.isInteger(id) && enabled,
+    staleTime: 60_000,
   });
 }

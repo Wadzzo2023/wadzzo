@@ -2,7 +2,7 @@ import { Canvas, Circle, SweepGradient, vec } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { usePathname } from "expo-router";
 import { TabTrigger } from "expo-router/ui";
-import { LayoutGrid, Map as MapIcon, Store, Trophy, type LucideIcon } from "lucide-react-native";
+import { LayoutGrid, Map as MapIcon, ShoppingBag, Store, type LucideIcon } from "lucide-react-native";
 import { forwardRef, useEffect, useState } from "react";
 import { Pressable, StyleSheet, View, type PressableProps } from "react-native";
 import Animated, {
@@ -22,21 +22,21 @@ import { useCameraLauncher } from "~/lib/camera/launcher";
 import { PackRing } from "~/components/murals/PackRing";
 import { PulseRing } from "~/components/ui/PulseDot";
 import { Text } from "~/components/ui/Text";
-import { useBountyAttention } from "~/lib/api/queries";
 import { useFeedback } from "~/lib/ar/feedback";
 import { useDecorativeMotion } from "~/lib/motion";
 import { useColors } from "~/theme/theme";
 
-type Tab = { name: string; href: "/map" | "/collection" | "/bounty" | "/brands"; label: string; icon: LucideIcon };
+type Tab = { name: string; href: "/map" | "/collection" | "/marketplace" | "/brands"; label: string; icon: LucideIcon };
 
 export const LEFT_TABS: Tab[] = [
   { name: "map", href: "/map", label: "Map", icon: MapIcon },
   { name: "collection", href: "/collection", label: "Collection", icon: LayoutGrid },
 ];
-// Profile is not a tab — it's the avatar in each header (ProfileButton),
-// which freed this slot for Bounty. Same as the web.
+// Profile is not a tab — it's the avatar in each header (ProfileButton).
+// Bounty moved to the map (under Events), which freed this slot for the
+// marketplace. Same as the web.
 export const RIGHT_TABS: Tab[] = [
-  { name: "bounty", href: "/bounty", label: "Bounty", icon: Trophy },
+  { name: "marketplace", href: "/marketplace", label: "Market", icon: ShoppingBag },
   { name: "brands", href: "/brands", label: "Brands", icon: Store },
 ];
 
@@ -74,7 +74,6 @@ export function BottomTabBar() {
   const { c, theme } = useColors();
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
-  const { count: bountyAlerts } = useBountyAttention();
   const [slots, setSlots] = useState<Record<string, { x: number; w: number }>>({});
 
   const all = [...LEFT_TABS, ...RIGHT_TABS];
@@ -114,7 +113,7 @@ export function BottomTabBar() {
   const renderTab = (tab: Tab) => (
     <View key={tab.name} style={{ flex: 1 }} onLayout={measure(tab.name)}>
       <TabTrigger name={tab.name} href={tab.href} asChild>
-        <TabButton tab={tab} dot={tab.name === "bounty" && bountyAlerts > 0} />
+        <TabButton tab={tab} />
       </TabTrigger>
     </View>
   );

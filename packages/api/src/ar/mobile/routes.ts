@@ -55,6 +55,8 @@ const idParam = (ctx: Ctx, key: string) => {
 const ip = clientIp;
 
 const collectBody = z.object({ lat: z.number(), lng: z.number() });
+const marketKind = z.enum(["all", "drops", "resale"]);
+const marketSort = z.enum(["new", "price_asc", "price_desc"]);
 const followBody = z.object({ signedXdr: z.string().min(1).optional() }).optional();
 const uploadBody = z.object({
   kind: z.enum(["avatar", "cover"]),
@@ -225,6 +227,35 @@ export const ROUTES: Route[] = [
       rateLimit(`collect:${session!.user.id}`, 30, 60_000);
       return caller.pins.collectByQr({ locationId: params.id! });
     },
+  },
+
+  // ── Marketplace (read-only: buying happens in the marketplace app) ───────
+  {
+    method: "GET",
+    path: "/market/listings",
+    auth: "none",
+    handler: ({ caller, query }) =>
+      caller.market.listings({
+        kind: marketKind.parse(query.kind ?? "all"),
+        sort: marketSort.parse(query.sort ?? "new"),
+        search: query.search?.trim() ? query.search.trim().slice(0, 80) : undefined,
+        limit: num(query.limit),
+        cursor: num(query.cursor),
+      }),
+  },
+  {
+    method: "GET",
+    path: "/market/items/:id",
+    auth: "none",
+    handler: ({ caller, ...ctx }) =>
+      caller.market.item({ assetId: idParam({ caller, ...ctx }, "id") }),
+  },
+  {
+    method: "GET",
+    path: "/market/items/:id/related",
+    auth: "none",
+    handler: ({ caller, ...ctx }) =>
+      caller.market.related({ assetId: idParam({ caller, ...ctx }, "id") }),
   },
 
   // ── Brands ──────────────────────────────────────────────────────────────

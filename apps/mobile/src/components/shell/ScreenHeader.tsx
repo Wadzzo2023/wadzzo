@@ -60,7 +60,7 @@ export function BackButton({
   onPress,
 }: {
   className?: string;
-  fallback?: "/map" | "/bounty" | "/brands" | "/collection" | "/events";
+  fallback?: "/map" | "/bounty" | "/brands" | "/collection" | "/events" | "/marketplace";
   onPress?: () => void;
 }) {
   const { c } = useColors();

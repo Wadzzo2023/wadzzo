@@ -228,3 +228,62 @@ export interface AnnouncementPage {
   items: ArAnnouncement[];
   nextCursor: string | null;
 }
+
+// ── Marketplace (GET /market/…; read-only — buying is in the marketplace app) ──
+
+export type MarketMediaType = "IMAGE" | "MUSIC" | "VIDEO" | "THREE_D";
+
+export interface MarketListing {
+  id: number;
+  price: number;
+  priceUSD: number | null;
+  privacy: string;
+  placedAt: string | null;
+  placerId: string | null;
+  placer: { id: string; name: string | null; profileUrl: string | null } | null;
+  asset: {
+    id: number;
+    name: string;
+    code: string;
+    thumbnail: string;
+    mediaType: MarketMediaType;
+    limit: number | null;
+    mintedCount: number;
+    royaltyPercent: number;
+    creatorId: string | null;
+    creator: { id: string; name: string; profileUrl: string | null; vanityURL: string | null } | null;
+    tier: { id: number; name: string } | null;
+  };
+}
+
+export interface MarketPage {
+  items: MarketListing[];
+  nextCursor: number | null;
+}
+
+type MarketItemListing = Pick<MarketListing, "id" | "price" | "priceUSD" | "privacy" | "placedAt" | "placerId" | "placer">;
+
+export interface MarketItem {
+  id: number;
+  name: string;
+  description: string | null;
+  code: string;
+  issuer: string;
+  mediaType: MarketMediaType;
+  thumbnail: string;
+  privacy: string;
+  limit: number | null;
+  mintedCount: number;
+  royaltyPercent: number;
+  creatorId: string | null;
+  creator: { id: string; name: string; bio: string | null; profileUrl: string | null; vanityURL: string | null } | null;
+  tier: { id: number; name: string; price: number } | null;
+  original: MarketItemListing | null;
+  resales: MarketItemListing[];
+}
+
+export interface MarketRelated {
+  resales: MarketListing[];
+  moreFromCreator: MarketListing[];
+  similar: MarketListing[];
+}

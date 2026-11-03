@@ -1,5 +1,5 @@
 import { router, useIsFocused, useLocalSearchParams } from "expo-router";
-import { CalendarDays, MapPinOff } from "lucide-react-native";
+import { CalendarDays, MapPinOff, Trophy, type LucideIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Linking, Pressable, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,7 +8,7 @@ import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
 import { MapControls } from "~/components/map/MapControls";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
-import { GpsPill, MapToast } from "~/components/map/MapHud";
+import { MapToast } from "~/components/map/MapHud";
 import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { MuralSheet } from "~/components/map/MuralSheet";
 import { PinSheet } from "~/components/map/PinSheet";
@@ -18,8 +18,7 @@ import { ProfileButton } from "~/components/shell/ProfileButton";
 import { useTabBarHeight } from "~/components/shell/BottomTabBar";
 import { Glass } from "~/components/ui/surfaces";
 import { Text } from "~/components/ui/Text";
-import { ArIconButton } from "~/components/ui/ArButton";
-import { useBrandsQuery, useCollectPin } from "~/lib/api/queries";
+import { useBountyAttention, useBrandsQuery, useCollectPin } from "~/lib/api/queries";
 import { useFeedback, useSettings } from "~/lib/ar/feedback";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { warmArTextures } from "~/lib/ar/arTexture";
@@ -29,13 +28,15 @@ import { pinStatus } from "~/lib/ar/rarity";
 import type { ArPin, Coords, TravelMode } from "~/lib/ar/types";
 import { useSession } from "~/lib/auth/session";
 import { useMuralsInArea } from "~/lib/murals/api";
+import { useMuralLayer } from "~/lib/murals/layer";
 import { useColors, useMapMode } from "~/theme/theme";
 
 /**
  * ── /map ───────────────────────────────────────────────────────────────────
  *
- * Port of wadzzoAR's map screen: full-bleed map, GPS pill + filter chips +
- * avatar across the top, the control rail on the right, the nearby rail at
+ * Port of wadzzoAR's map screen: full-bleed map, the filter + search on the
+ * left and the balance + avatar capsule on the right across the top (Events
+ * and Bounty under it), the control rail on the right, the nearby rail at
  * the bottom, and the pin sheet. Auto-collect claims in-range pins while the
  * app is open (foreground only, decided); a blip + haptic marks each pin
  * coming into range.
@@ -104,6 +105,7 @@ export default function MapScreen() {
   const headingUp = settings.compassMode ? heading : null;
   const requireAuth = useSession((s) => s.requireAuth);
   const signedIn = useSession((s) => Boolean(s.user));
+  const { count: bountyAlerts } = useBountyAttention();
 
   const mapRef = useRef<MapCanvasHandle>(null);
   const { mode: mapMode, is3d, toggle: toggleMapMode } = useMapMode();
@@ -130,7 +132,8 @@ export default function MapScreen() {
   const [searchPin, setSearchPin] = useState<ArPin | null>(null);
 
   // ── Murals layer (wadzzoAR docs/murals/plan.md §7) ───────────────────────
-  const [muralLayer, setMuralLayer] = useState<"all" | "verified" | "off">("all");
+  // All / verified only / hidden: Profile › Settings › Murals on map.
+  const muralLayer = useMuralLayer((s) => s.layer);
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
   const [muralBounds, setMuralBounds] = useState<{ n: number; s: number; e: number; w: number } | null>(null);
   // ~1 km grid so small pans reuse the cached area.
@@ -201,17 +204,16 @@ export default function MapScreen() {
     mapRef.current?.flyToPin(pin);
   }, [focus, pins]);
 
+  // One button, "put me back and tell me what's here": recenter on you and refetch the pins.
   const handleRecenter = useCallback(() => {
     setFollowing(true);
     mapRef.current?.recenter(fix ?? FALLBACK_CENTER);
-  }, [fix]);
-
-  const handleRefetch = useCallback(() => {
+    if (refetching) return;
     setRefetching(true);
     void refetch()
       .then((r) => setToast(r.isError ? "Couldn't reach the drop server" : "Pins up to date"))
       .finally(() => setRefetching(false));
-  }, [refetch]);
+  }, [fix, refetch, refetching]);
 
   // Stable across pin refetches (reads the latest list from a ref): every
   // memoized marker takes this as a prop, so a new function each refetch
@@ -331,17 +333,15 @@ export default function MapScreen() {
           <FilterMenu filters={filters} value={filter} onChange={setFilter} />
           <MapSearchButton onPress={() => setSearchOpen(true)} />
         </View>
-        {/* Live status and profile share one capsule, top-right. */}
-        <Glass style={{ borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 2, paddingLeft: 6, paddingRight: 3, paddingVertical: 3 }}>
-          <GpsPill bare status={status} reason={reason} onExplain={setToast} />
-          <ProfileButton />
-        </Glass>
+        {/* Balance and avatar in one capsule (signed in), opening the profile. */}
+        <ProfileButton balance />
       </View>
 
-      {/* Events, centred under the avatar (capsule's 3pt inset + 36pt avatar). */}
+      {/* Events, then Bounty, under the avatar capsule: icon and name on one line, right-aligned. */}
       {hudHeight > 0 && (
-        <View pointerEvents="box-none" style={{ position: "absolute", top: hudHeight + 8, right: 19, zIndex: 30 }}>
-          <ArIconButton icon={CalendarDays} label="Events" size={36} onPress={() => router.push("/events")} />
+        <View pointerEvents="box-none" style={{ position: "absolute", top: hudHeight + 8, right: 16, alignItems: "flex-end", gap: 6, zIndex: 30 }}>
+          <HudShortcut icon={CalendarDays} label="Events" onPress={() => router.push("/events")} />
+          <HudShortcut icon={Trophy} label="Bounty" dot={bountyAlerts > 0} onPress={() => router.push("/bounty")} />
         </View>
       )}
 
@@ -353,7 +353,6 @@ export default function MapScreen() {
             setToast(is3d ? "2D map" : "3D map");
           }}
           onRecenter={handleRecenter}
-          onRefetch={handleRefetch}
           compassMode={settings.compassMode}
           onToggleCompass={() => {
             const turningOn = !settings.compassMode;
@@ -368,23 +367,6 @@ export default function MapScreen() {
           // after panning/zooming, and background refreshes.
           refetching={refetching || isFetching}
           following={following}
-          muralLayer={muralLayer}
-          onCycleMuralLayer={() => {
-            const next = muralLayer === "all" ? "verified" : muralLayer === "verified" ? "off" : "all";
-            setMuralLayer(next);
-            setSelectedMuralId(null);
-            setToast(next === "all" ? "Murals: all, incl. unverified" : next === "verified" ? "Murals: verified only" : "Murals hidden");
-          }}
-          autoCollect={settings.autoCollect}
-          onToggleAutoCollect={() => {
-            const toggle = () => {
-              const on = !useSettings.getState().autoCollect;
-              useSettings.getState().toggle("autoCollect");
-              setToast(on ? "Auto-collect on — nearby drops claim themselves" : "Auto-collect off");
-            };
-            if (!requireAuth("settings", toggle)) return;
-            toggle();
-          }}
         />
       )}
 
@@ -418,5 +400,19 @@ export default function MapScreen() {
       <MuralSheet mural={selectedMural} dailyLimit={muralsQuery.data?.dailyLimit ?? 3} fix={fix} onClose={() => setSelectedMuralId(null)} />
       <PinSheet pin={selected} fix={fix} onClose={closeSheet} onCapture={handleCapture} onDirections={handleDirections} />
     </View>
+  );
+}
+
+/** A shortcut pill under the avatar (Events, Bounty): icon and name on one line, as on the web. */
+function HudShortcut({ icon: Icon, label, onPress, dot = false }: { icon: LucideIcon; label: string; onPress: () => void; dot?: boolean }) {
+  const { c } = useColors();
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={dot ? `${label}, needs you` : label}>
+      <Glass style={{ height: 32, borderRadius: 16, flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 10, paddingRight: 12 }}>
+        <Icon size={15} strokeWidth={2.2} color={c("ar-text-dim")} />
+        <Text className="font-hud text-[10px] font-semibold uppercase tracking-[1.2px] text-ar-text">{label}</Text>
+        {dot && <View style={{ position: "absolute", top: -2, right: -2, width: 10, height: 10, borderRadius: 5, backgroundColor: c("ar-green-hot") }} />}
+      </Glass>
+    </Pressable>
   );
 }

@@ -104,6 +104,18 @@ app it collapses to one call for custodial accounts:
    sign it (`tx` intent), then calls `POST /brands/:id/follow` again with
    `{ signedXdr }`; the server submits and writes the row.
 
+## Marketplace (read-only)
+
+The app lists the fan marketplace but doesn't sell: "Go to Marketplace" opens
+the item in the marketplace web app (`EXPO_PUBLIC_MARKETPLACE_URL`, default
+`https://app.wadzzo.com`), where buying, wallets and resales happen.
+
+| Method | Path | Auth | → tRPC |
+|---|---|---|---|
+| GET | `/market/listings?kind=all\|drops\|resale&sort=new\|price_asc\|price_desc&search=&limit=&cursor=` | — | `market.listings` → `{ items, nextCursor }` |
+| GET | `/market/items/:id` | — | `market.item` (asset id) → the item, `original` listing and `resales` |
+| GET | `/market/items/:id/related` | — | `market.related` → `{ resales, moreFromCreator, similar }` |
+
 ## Bounty
 
 Mirrors `bounty.*` one-to-one.

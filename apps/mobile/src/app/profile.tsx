@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Camera, Coins, Footprints, LogOut, MonitorSmartphone, Moon, Pencil, Sun, Trash2, Users, Vibrate, Volume2, Wallet, Zap, type LucideIcon } from "lucide-react-native";
+import { Camera, Coins, Footprints, Frame, LogOut, MonitorSmartphone, Moon, Pencil, Sun, Trash2, Users, Vibrate, Volume2, Wallet, Zap, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +21,7 @@ import { api } from "~/lib/api/client";
 import { useBalanceQuery, useCollectedQuery, useProfileQuery } from "~/lib/api/queries";
 import { uploadProfileImage } from "~/lib/api/upload";
 import { useSettings } from "~/lib/ar/feedback";
+import { useMuralLayer, type MuralLayer } from "~/lib/murals/layer";
 import { RARITY_META, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArSettings } from "~/lib/ar/types";
 import { useSession } from "~/lib/auth/session";
@@ -210,6 +211,7 @@ function SignedIn() {
                 </Pressable>
               );
             })}
+            <MuralLayerSetting />
           </Bevel>
         </Section>
 
@@ -229,6 +231,40 @@ function SignedIn() {
 
       <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} />
       <DeleteAccountSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} />
+    </View>
+  );
+}
+
+const MURAL_OPTIONS: { value: MuralLayer; label: string; body: string }[] = [
+  { value: "all", label: "All", body: "Every mural on the map, unverified ones included." },
+  { value: "verified", label: "Verified", body: "Only murals that have been verified." },
+  { value: "off", label: "Off", body: "No murals on the map." },
+];
+
+/** Which murals the map shows (was a button on the map). Three-way, so a segmented control like Theme's. */
+function MuralLayerSetting() {
+  const { c } = useColors();
+  const layer = useMuralLayer((s) => s.layer);
+  const setLayer = useMuralLayer((s) => s.setLayer);
+  const current = MURAL_OPTIONS.find((o) => o.value === layer) ?? MURAL_OPTIONS[0]!;
+  return (
+    <View className="flex-row items-start gap-3 p-3.5" style={{ borderTopWidth: 1, borderColor: c("ar-line") }}>
+      <IconTile icon={Frame} on={layer !== "off"} />
+      <View className="min-w-0 flex-1">
+        <Text className="font-hud text-[12.5px] font-bold uppercase tracking-[1.2px] text-ar-text">Murals on map</Text>
+        <Text className="mt-1 text-[11.5px] leading-5 text-ar-faint">{current.body}</Text>
+        <View className="mt-3 flex-row gap-1 rounded-[12px] border border-ar-line-bright bg-ar-surface-3 p-1" accessibilityRole="radiogroup" accessibilityLabel="Murals on map">
+          {MURAL_OPTIONS.map(({ value, label }) => {
+            const active = layer === value;
+            const fg = active ? c("ar-green-hot") : c("ar-text-faint");
+            return (
+              <Pressable key={value} onPress={() => setLayer(value)} accessibilityRole="radio" accessibilityState={{ checked: active }} className="flex-1 items-center justify-center rounded-[9px] py-2" style={{ backgroundColor: active ? c("ar-green", 0.2) : "transparent" }}>
+                <Text className="font-hud text-[10px] font-bold uppercase tracking-[0.8px]" style={{ color: fg }}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 }
