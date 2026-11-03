@@ -20,7 +20,8 @@ export function MarketTicker() {
   const items = listings.data?.items ?? [];
   const row = [...items, ...items];
   return (
-    <div className="bg-side-ink text-side-mint relative flex h-11 items-center overflow-hidden">
+    // Phones (below md, where the phone header and tab bar take over) don't show the ticker.
+    <div className="bg-side-ink text-side-mint relative hidden h-11 items-center overflow-hidden md:flex">
       <span className="flex h-full shrink-0 items-center gap-2 pr-3 pl-4 text-sm font-bold">
         <Diamond className="fill-side text-side size-3.5" /> On the market
       </span>

@@ -37,10 +37,11 @@ export const ACCOUNT: NavItem[] = [
   { href: "/settings", label: "Settings", icon: Settings, authOnly: true },
 ];
 
+/** Phone tab bar order: Home · Collection · [AR] · Market · Search (the first two sit left of AR). */
 export const TABS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/marketplace", label: "Market", icon: Store, match: ["/item"] },
   { href: "/collection", label: "Collection", icon: Layers },
+  { href: "/marketplace", label: "Market", icon: Store, match: ["/item"] },
 ];
 
 /** Info pages, listed at the bottom of the sidebar. */

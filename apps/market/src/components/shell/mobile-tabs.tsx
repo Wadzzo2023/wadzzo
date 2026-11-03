@@ -19,15 +19,15 @@ import { openSearch } from "./search-dialog";
 import { SidebarBody } from "./sidebar";
 
 const tab =
-  "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9.5px] font-bold uppercase transition-colors";
+  "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[8.5px] font-bold uppercase transition-colors";
 
 const headerIcon =
   "relative flex size-9 shrink-0 items-center justify-center rounded-full bg-side-ink text-side transition-transform duration-200 active:scale-95";
 
 /**
  * Phones have no sidebar. A green header carries the logo, notifications, your profile and the
- * Menu (the whole sidebar as a drawer); a floating green tab bar below has Home · Market ·
- * [Go to AR, raised] · Collection · Search. The active tab gets a gliding ink capsule.
+ * Menu (the whole sidebar as a drawer); a floating green tab bar below has Home · Collection ·
+ * [Go to AR, raised] · Market · Search. The active tab gets a gliding ink capsule.
  */
 export function MobileTabs() {
   const pathname = usePathname() ?? "";

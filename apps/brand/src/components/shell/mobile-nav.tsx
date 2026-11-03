@@ -171,7 +171,7 @@ export function MobileTopBar({
 }
 
 const tab =
-  "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9.5px] font-bold uppercase transition-colors";
+  "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[8.5px] font-bold uppercase transition-colors";
 
 /**
  * Phone tab bar, the same floating green bar as the marketplace's: Map · Stores · [AR, raised] ·

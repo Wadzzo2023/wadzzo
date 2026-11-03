@@ -6,3 +6,25 @@
 @import "@fontsource-variable/sora";
 @import "@fontsource/anton/400.css";
 @import "@fontsource/permanent-marker/400.css";
+
+/* Light mode uses the dark theme's sidebar colours everywhere poster.css would paint light-mode
+   blocks dark ink: the lime slab with deep green type for the sidebar, phone header, tab bar and
+   drawers (.side-scope reads these through --ink), the .ink-tile stickers and the .ink-cover
+   placeholders. The sidebar tokens outside the blocks match the dark theme too. */
+:root:not(.dark, .contrast) {
+  --side-bg: 96 49% 54%;
+  --side-ink: 110 60% 9%;
+  --side-mint: 96 45% 84%;
+  --ink: 96 49% 54%;
+  --ink-fg: 110 60% 9%;
+  --ink-mint: 96 45% 84%;
+}
+/* On a lime tile the icon circle is a deep green chip with a lime icon (as the sidebar's chips),
+   and anything drawn on a lime cover is deep green, not green on green. */
+:root:not(.dark, .contrast) .ink-tile .ink-dot {
+  background-color: hsl(var(--ink-fg));
+  color: hsl(var(--ink));
+}
+:root:not(.dark, .contrast) .ink-cover {
+  color: hsl(var(--ink-fg));
+}
