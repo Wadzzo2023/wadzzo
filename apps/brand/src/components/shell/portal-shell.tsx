@@ -7,12 +7,9 @@ import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
 import { AdminGate, CreatorGate, OnboardingGate, SignInScreen } from "./gates";
 import { MobileTabBar, MobileTopBar } from "./mobile-nav";
-import { ADMIN_NAV, BRAND_NAV, isActive } from "./nav";
-import { Sidebar } from "./sidebar";
+import { PortalMark, Sidebar } from "./sidebar";
 import { usePortalAccess } from "./use-portal-access";
 import { UserMenu } from "./user-menu";
-import { platformBranding } from "@wadzzo/platform/branding";
-import { WadzzoMark } from "~/ui/wadzzo-mark";
 
 const COLLAPSE_KEY = "wadzzo.sidebar.collapsed";
 /** The saved choice only changes through our own toggle, so there's nothing to subscribe to. */
@@ -66,15 +63,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
     return (
       <div className="bg-background flex min-h-dvh flex-col">
         <header className="side-scope bg-side text-side-ink sticky top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-2.5">
-            <span className="bg-side-ink text-side flex size-10 -rotate-3 items-center justify-center rounded-xl">
-              <WadzzoMark className="h-5" />
-            </span>
-            <span className="leading-none">
-              <span className="display block text-[1.7rem]">{platformBranding.name}</span>
-              <span className="marker mt-0.5 block text-[11px] opacity-75">brand onboarding</span>
-            </span>
-          </div>
+          <PortalMark href="/onboarding" tagline="brand onboarding" />
           <UserMenu compact />
         </header>
         <main className="min-w-0 flex-1">
@@ -83,10 +72,6 @@ export function PortalShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
-
-  const title = [...BRAND_NAV.flatMap((g) => g.items), ...ADMIN_NAV.items].find((i) =>
-    isActive(pathname, i),
-  )?.label;
 
   const page = isAdminRoute ? (
     <AdminGate access={access}>{children}</AdminGate>
@@ -110,7 +95,15 @@ export function PortalShell({ children }: { children: ReactNode }) {
         brandEntry={access.brandEntry}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <MobileTopBar title={title} homeHref={homeHref} showBell={access.approved} />
+        <MobileTopBar
+          homeHref={homeHref}
+          showBell={access.approved}
+          isAdmin={access.isAdmin}
+          navPermission={access.navPermission}
+          isApprovedCreator={access.approved}
+          isSuperAdmin={access.isSuperAdmin}
+          brandEntry={access.brandEntry}
+        />
         <main className="min-w-0 flex-1">{page}</main>
       </div>
       <MobileTabBar

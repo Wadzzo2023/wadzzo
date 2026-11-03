@@ -3,7 +3,6 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@wadzzo/ui/poster/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +10,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@wadzzo/ui/poster/dropdown-menu";
-import { cn } from "@wadzzo/ui/lib/cn";
 
 import { CREATE_ACTIONS } from "./nav";
 
-/** Desktop "Create" button: every new-thing flow in one menu. */
+/** Desktop "Create": a round + in the sidebar header (beside the bell), every new-thing flow in one menu. */
 export function CreateMenu({
   navPermission,
   collapsed = false,
@@ -27,13 +25,14 @@ export function CreateMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          className={cn("bg-side-ink text-side hover:bg-side-ink w-full", collapsed && "px-0")}
+        <button
+          type="button"
+          title="Create"
           aria-label="Create"
+          className="bg-side-ink text-side relative flex size-10 shrink-0 items-center justify-center rounded-full transition-transform duration-200 hover:scale-110 data-[state=open]:scale-110"
         >
-          <Plus />
-          {!collapsed && "Create"}
-        </Button>
+          <Plus className="size-5" strokeWidth={2.8} />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side={collapsed ? "right" : "bottom"} className="w-72">
         <DropdownMenuLabel className="font-hud text-muted-foreground text-[11px] tracking-wider uppercase">

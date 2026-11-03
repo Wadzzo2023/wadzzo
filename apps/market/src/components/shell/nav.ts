@@ -13,7 +13,7 @@ import {
 /**
  * Sidebar navigation (the app has no header: the sidebar holds everything).
  * `EXPLORE` is browsing, `ACCOUNT` is the signed-in wallet's own pages;
- * `authOnly` items are hidden when signed out. `TABS` are the phone tab bar's links (it adds Search and Menu).
+ * `authOnly` items are hidden when signed out. `TABS` are the phone tab bar's links (it adds the raised Go to AR key and Search; Menu is in the phone header).
  */
 export type NavItem = {
   href: string;

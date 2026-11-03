@@ -632,3 +632,49 @@ body {
     transform: rotate(1deg) translateY(-1px);
   }
 }
+
+/* Phone tab bar AR key (market and brand): a hop and a wiggle for about a second, then still for
+   ~4.5s, on repeat. The sonar ring goes out with the hop; the inner arc spins all the time. */
+@keyframes ar-hop {
+  0%,
+  22%,
+  100% {
+    transform: none;
+  }
+  4% {
+    transform: translateY(-7px) scale(1.07);
+  }
+  8% {
+    transform: translateY(0) scale(0.96) rotate(-7deg);
+  }
+  12% {
+    transform: rotate(6deg);
+  }
+  16% {
+    transform: rotate(-3deg);
+  }
+  20% {
+    transform: rotate(1deg);
+  }
+}
+@keyframes ar-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  22%,
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+@keyframes ar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ar-tab-motion {
+    animation: none !important;
+  }
+}

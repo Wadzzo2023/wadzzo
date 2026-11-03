@@ -177,13 +177,16 @@ export function adminNavFor(isSuperAdmin: boolean): NavGroup {
   };
 }
 
-/** Phone tab bar: Map · Stores · [+] · Bounties · More (decided). */
+/** Phone tab bar: Map · Stores · [AR] · Bounties · Pins (decided; Create and Menu are in the header). */
 export const MOBILE_TABS: { left: NavItem[]; right: NavItem[] } = {
   left: [
-    { href: "/pins", label: "Map", icon: Map },
+    { href: "/pins", label: "Map", icon: Map, exclude: ["/pins/manage"] },
     { href: "/stores", label: "Stores", icon: Store, gated: true },
   ],
-  right: [{ href: "/bounties", label: "Bounties", icon: Target, gated: true }],
+  right: [
+    { href: "/bounties", label: "Bounties", icon: Target, gated: true },
+    { href: "/pins/manage", label: "Pin management", shortLabel: "Pins", icon: MapPin },
+  ],
 };
 
 /** What the "+ Create" button (phone) / "Create" menu (desktop) offers. */

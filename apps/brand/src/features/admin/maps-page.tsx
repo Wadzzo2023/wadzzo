@@ -185,7 +185,7 @@ export default function AdminMapsPage() {
   const nothing = Boolean(brand) && !loading && !pins.data?.length && !hotspots.data?.length;
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem-4rem-var(--safe-bottom))] w-full overflow-hidden lg:h-dvh">
+    <div className="relative h-[calc(100dvh-4rem-4rem-var(--safe-bottom))] w-full overflow-hidden lg:h-dvh">
       <BaseMap
         ref={map}
         controlsPosition="bottom-left"
