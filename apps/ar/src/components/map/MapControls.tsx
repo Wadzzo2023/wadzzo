@@ -9,9 +9,9 @@ import { MapModeButton } from "./MapModeButton";
 /**
  * ── MapControls ────────────────────────────────────────────────────────────
  *
- * The right-hand rail: recenter, compass map and 2D/3D. (Refresh, auto-collect and the murals
- * layer used to live here too; pins refresh on their own, auto-collect is a profile setting, and
- * murals always show.)
+ * The right-hand rail: recenter, compass map and 2D/3D. Recenter also refreshes the pins (they
+ * used to be two buttons in one capsule: the same gesture in a collector's head, "put me back and
+ * tell me what's here"). Auto-collect and the murals layer are profile settings now.
  *
  * The rail sits above the nearby strip and below the filter row, on the right edge — these are
  * all cheap and reversible, so reach wins.
@@ -21,6 +21,7 @@ export function MapControls({
   compassMode,
   onToggleCompass,
   following,
+  refetching = false,
   mapMode,
   onToggleMapMode,
 }: {
@@ -28,25 +29,42 @@ export function MapControls({
   compassMode: boolean;
   onToggleCompass: () => void;
   following: boolean;
+  /** The pins are being refreshed (a ring spins round the recenter button). */
+  refetching?: boolean;
   /** Flat 2D or tilted 3D basemap. */
   mapMode?: MapMode;
   onToggleMapMode?: () => void;
 }) {
   return (
     <div className="pointer-events-none absolute top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-end gap-2.5">
-      {/* ── Recenter ────────────────────────────────────────────────── */}
+      {/* ── Recenter + refresh ───────────────────────────────────────── */}
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={onRecenter}
-        aria-label={following ? "Following your location" : "Recenter on your location"}
+        aria-label={
+          refetching
+            ? "Refreshing pins"
+            : following
+              ? "Following your location — tap to refresh pins"
+              : "Recenter on your location and refresh pins"
+        }
         aria-pressed={following}
+        aria-busy={refetching}
         className={cn(
-          "ar-glass pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+          "ar-glass pointer-events-auto relative flex h-11 w-11 items-center justify-center rounded-full transition-colors",
           following
             ? "text-ar-green-hot drop-shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
             : "text-ar-dim hover:text-ar-text",
         )}
       >
+        {refetching && (
+          <motion.span
+            aria-hidden
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+            className="border-t-ar-green-hot absolute inset-[3px] rounded-full border-2 border-transparent"
+          />
+        )}
         <Crosshair size={19} strokeWidth={2.1} />
       </motion.button>
 

@@ -166,6 +166,21 @@ export const useSettings = create<SettingsState>()(
   ),
 );
 
+// ─── Murals layer ────────────────────────────────────────────────────────────
+
+/** Which murals the map shows: every one, verified only, or none. */
+export type MuralLayer = "all" | "verified" | "off";
+
+/**
+ * Kept apart from `ArSettings` (shared with the mobile app in `@wadzzo/ar-core`, all on/off
+ * switches): this one has three states. Set in Profile › Settings, read by the map.
+ */
+export const useMuralLayer = create<{ layer: MuralLayer; setLayer: (l: MuralLayer) => void }>()(
+  persist((set) => ({ layer: "all", setLayer: (layer) => set({ layer }) }), {
+    name: "wadzzo-ar-mural-layer",
+  }),
+);
+
 // ─── Session-scoped UI state ─────────────────────────────────────────────────
 
 export type PinFilter = "all" | "following" | "collectible" | "collected";

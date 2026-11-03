@@ -13,6 +13,7 @@ import {
   Wallet,
   Zap,
   Users,
+  Frame,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -28,7 +29,7 @@ import { StatBlock } from "~/components/ui/Badges";
 import { formatDistance } from "@wadzzo/ar-core/ar/geo";
 import { CHIME_NOTE_MS, useFeedback, type FeedbackReport } from "~/lib/ar/feedback";
 import { RARITY_META, RARITY_ORDER } from "@wadzzo/ar-core/ar/rarity";
-import { useAuth, useSettings } from "~/lib/ar/store";
+import { useAuth, useMuralLayer, useSettings, type MuralLayer } from "~/lib/ar/store";
 import { api } from "~/utils/api";
 import { type ThemePreference, useTheme } from "~/lib/ar/theme";
 import type { ArSettings } from "@wadzzo/ar-core/ar/types";
@@ -54,6 +55,12 @@ const THEME_OPTIONS: {
  * something a viewer needs to see on every visit to Settings.
  */
 const SHOW_FEEDBACK_TEST = false;
+
+const MURAL_OPTIONS: { value: MuralLayer; label: string; body: string }[] = [
+  { value: "all", label: "All", body: "Every mural on the map, unverified ones included." },
+  { value: "verified", label: "Verified", body: "Only murals that have been verified." },
+  { value: "off", label: "Off", body: "No murals on the map." },
+];
 
 const TOGGLES: {
   key: keyof ArSettings;
@@ -404,6 +411,8 @@ export default function ProfileScreen() {
               );
             })}
 
+            <MuralLayerSetting />
+
             {SHOW_FEEDBACK_TEST && <FeedbackTest />}
           </div>
         </section>
@@ -629,5 +638,62 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+/**
+ * Which murals the map shows (it used to be a button on the map that cycled through these). A
+ * three-way choice, so a small segmented control like the theme's rather than a switch.
+ */
+function MuralLayerSetting() {
+  const layer = useMuralLayer((s) => s.layer);
+  const setLayer = useMuralLayer((s) => s.setLayer);
+  const current = MURAL_OPTIONS.find((o) => o.value === layer) ?? MURAL_OPTIONS[0]!;
+  const on = layer !== "off";
+  return (
+    <div className="flex w-full items-start gap-3 p-3.5">
+      <span
+        className={cn(
+          "mt-[1px] flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border transition-colors",
+          on
+            ? "border-ar-green/50 bg-ar-green/14 text-ar-green-hot"
+            : "border-ar-line text-ar-faint bg-white/[0.04]",
+        )}
+      >
+        <Frame size={15} strokeWidth={2.2} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <span className="font-hud text-ar-text block text-[12.5px] font-bold tracking-[0.1em] uppercase">
+          Murals on map
+        </span>
+        <span className="text-ar-faint mt-1 block text-[11.5px] leading-relaxed">
+          {current.body}
+        </span>
+        <div
+          role="radiogroup"
+          aria-label="Murals on map"
+          className="ar-key mt-3 grid grid-cols-3 gap-1 rounded-[12px] p-1"
+        >
+          {MURAL_OPTIONS.map(({ value, label }) => {
+            const active = layer === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setLayer(value)}
+                className={cn(
+                  "font-hud rounded-[9px] py-2 text-[10px] font-bold tracking-[0.08em] uppercase transition-colors",
+                  active ? "bg-ar-green/18 text-ar-green-hot" : "text-ar-faint",
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }

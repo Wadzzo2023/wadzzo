@@ -23,7 +23,7 @@ import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { useFeedback } from "~/lib/ar/feedback";
 import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
-import { useAuth, useSettings } from "~/lib/ar/store";
+import { useAuth, useMuralLayer, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "@wadzzo/ar-core/ar/types";
 import { useGeolocation } from "~/lib/ar/useGeolocation";
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
@@ -62,7 +62,7 @@ export default function MapScreen() {
   const { fix, center, status, reason: geoReason, retry: retryLocation } = useGeolocation();
 
   // Discovery surface: respects the viewer's "Following only" preference.
-  const { pins, isLoading: pinsLoading } = useDiscoveryPinsQuery();
+  const { pins, isLoading: pinsLoading, refetch: refetchPins } = useDiscoveryPinsQuery();
   const brands = useBrands();
   const collectPin = useCollectPin();
 
@@ -102,6 +102,7 @@ export default function MapScreen() {
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
+  const [refetching, setRefetching] = useState(false);
   const [celebrating, setCelebrating] = useState<ArPin | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -253,14 +254,21 @@ export default function MapScreen() {
   }, [toast]);
 
   // ── Controls ───────────────────────────────────────────────────────────
+  // One button, "put me back and tell me what's here": recenter on you and refetch the pins.
   const handleRecenter = useCallback(() => {
     setFollowing(true);
     mapRef.current?.recenter(fix ?? center ?? FALLBACK_CENTER);
-  }, [fix, center]);
+    if (refetching) return;
+    setRefetching(true);
+    void refetchPins()
+      .then(() => setToast("Pins up to date"))
+      .catch(() => setToast("Couldn't reach the drop server"))
+      .finally(() => setRefetching(false));
+  }, [fix, center, refetching, refetchPins]);
 
   // ── Murals layer (docs/murals/plan.md §7) ────────────────────────────────
-  // Every mural, unverified included (the map no longer has a layer toggle).
-  const muralLayer = "all" as "all" | "verified" | "off";
+  // All / verified only / hidden: Profile › Settings › Murals.
+  const muralLayer = useMuralLayer((s) => s.layer);
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<{
     north: number;
@@ -411,8 +419,10 @@ export default function MapScreen() {
 
           {/* Events, then Bounty, under the avatar, each with its name. */}
           <div className="relative">
-            <ProfileButton className="pointer-events-auto" />
-            <div className="pointer-events-auto absolute top-[calc(100%+8px)] left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
+            {/* Balance and avatar in one capsule (signed in), opening the profile. */}
+            <ProfileButton balance className="pointer-events-auto" />
+            {/* A 36px column under the avatar end of the capsule; wider labels overflow evenly. */}
+            <div className="pointer-events-auto absolute top-[calc(100%+8px)] right-0 flex w-9 flex-col items-center gap-2">
               <HudShortcut
                 icon={CalendarDays}
                 label="Events"
@@ -433,6 +443,7 @@ export default function MapScreen() {
           compassMode={settings.compassMode}
           onToggleCompass={handleToggleCompass}
           following={following}
+          refetching={refetching}
           mapMode={mapMode}
           onToggleMapMode={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
         />
