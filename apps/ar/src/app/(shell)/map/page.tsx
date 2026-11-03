@@ -2,7 +2,7 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, HelpCircle, Satellite } from "lucide-react";
+import { CalendarDays, Trophy, type LucideIcon } from "lucide-react";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -15,7 +15,6 @@ import { NearbyStrip } from "~/components/map/NearbyStrip";
 import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
-import { ArIconButton } from "~/components/ui/ArButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { LocationGate } from "~/components/shell/LocationGate";
@@ -26,7 +25,8 @@ import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "@wadzzo/ar-core/ar/types";
-import { GEO_REASON_TEXT, useGeolocation, type GeoReason } from "~/lib/ar/useGeolocation";
+import { useGeolocation } from "~/lib/ar/useGeolocation";
+import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import {
   filterPins,
   PIN_FILTERS,
@@ -43,8 +43,8 @@ import { api } from "~/utils/api";
  * ── Map ────────────────────────────────────────────────────────────────────
  *
  * The home screen. A live, pitched Mapbox view that follows you while you
- * move, the nearest drops as a thumb rail, and one welded recenter/refetch
- * control.
+ * move, the nearest drops as a thumb rail, and a small control rail
+ * (recenter, compass, 2D/3D).
  *
  * Two behaviours carry the "it's alive" feeling:
  *
@@ -62,7 +62,7 @@ export default function MapScreen() {
   const { fix, center, status, reason: geoReason, retry: retryLocation } = useGeolocation();
 
   // Discovery surface: respects the viewer's "Following only" preference.
-  const { pins, isLoading: pinsLoading, refetch: refetchPins } = useDiscoveryPinsQuery();
+  const { pins, isLoading: pinsLoading } = useDiscoveryPinsQuery();
   const brands = useBrands();
   const collectPin = useCollectPin();
 
@@ -94,6 +94,7 @@ export default function MapScreen() {
   }, [settings.compassMode, compass]);
 
   const requireAuth = useAuth((s) => s.requireAuth);
+  const { count: bountyAlerts } = useBountyAttention();
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const mapRef = useRef<MapCanvasHandle>(null);
@@ -101,7 +102,6 @@ export default function MapScreen() {
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
-  const [refetching, setRefetching] = useState(false);
   const [celebrating, setCelebrating] = useState<ArPin | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -258,16 +258,9 @@ export default function MapScreen() {
     mapRef.current?.recenter(fix ?? center ?? FALLBACK_CENTER);
   }, [fix, center]);
 
-  const handleRefetch = useCallback(() => {
-    setRefetching(true);
-    void refetchPins()
-      .then(() => setToast("Pins up to date"))
-      .catch(() => setToast("Couldn't reach the drop server"))
-      .finally(() => setRefetching(false));
-  }, [refetchPins]);
-
   // ── Murals layer (docs/murals/plan.md §7) ────────────────────────────────
-  const [muralLayer, setMuralLayer] = useState<"all" | "verified" | "off">("all");
+  // Every mural, unverified included (the map no longer has a layer toggle).
+  const muralLayer = "all" as "all" | "verified" | "off";
   const [selectedMuralId, setSelectedMuralId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<{
     north: number;
@@ -321,19 +314,6 @@ export default function MapScreen() {
     }, 0);
     return () => clearTimeout(t);
   }, [focusMural, murals, selectMural]);
-
-  const cycleMuralLayer = useCallback(() => {
-    const next = muralLayer === "all" ? "verified" : muralLayer === "verified" ? "off" : "all";
-    setMuralLayer(next);
-    setToast(
-      next === "all"
-        ? "Murals: all, incl. unverified"
-        : next === "verified"
-          ? "Murals: verified only"
-          : "Murals hidden",
-    );
-    setSelectedMuralId(null);
-  }, [muralLayer]);
 
   const handleSelect = useCallback(
     (id: string | null) => {
@@ -409,61 +389,52 @@ export default function MapScreen() {
         {!fix && <LocationGate status={status} reason={geoReason} onRetry={retryLocation} />}
 
         {/* ── Top HUD ──────────────────────────────────────────────────
-            GPS status and the filter chips share one row rather than the
-            status pill getting a full-width strip of its own above them —
-            on its own line it read as a stray badge floating in empty
-            space, isolated from everything else in the HUD. The auto-collect
-            "Auto" badge that used to sit opposite it is gone entirely rather
-            than moved: the lightning-bolt toggle in the side rail already
-            glows and pulses while it's on, so a second "Auto" label was
-            confirming information the icon already gives. */}
+            The All / Following filter leads the row (where the GPS "Live"
+            pill used to be: with no fix the location gate covers the map
+            anyway, so the pill only ever said "Live"), then search, and the
+            avatar on the right with Events and Bounty stacked under it. */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-2 px-4"
           style={{ paddingTop: "calc(var(--ar-top-inset) + 14px)" }}
         >
-          <GpsPill status={status} reason={geoReason} onExplain={setToast} />
-
-          <MapSearchButton onClick={() => setSearchOpen(true)} className="pointer-events-auto" />
-
           <FilterMenu
             filters={filters}
             value={filter}
             onChange={setFilter}
+            className="pointer-events-auto"
+          />
+
+          <MapSearchButton
+            onClick={() => setSearchOpen(true)}
             className="pointer-events-auto mr-auto"
           />
 
-          {/* Events sits just under the avatar, centred on it. */}
+          {/* Events, then Bounty, under the avatar, each with its name. */}
           <div className="relative">
             <ProfileButton className="pointer-events-auto" />
-            <ArIconButton
-              icon={CalendarDays}
-              label="Events"
-              onClick={() => void router.push("/events")}
-              className="pointer-events-auto absolute top-[calc(100%+8px)] right-0 h-9 w-9"
-            />
+            <div className="pointer-events-auto absolute top-[calc(100%+8px)] left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
+              <HudShortcut
+                icon={CalendarDays}
+                label="Events"
+                onClick={() => void router.push("/events")}
+              />
+              <HudShortcut
+                icon={Trophy}
+                label="Bounty"
+                dot={bountyAlerts > 0}
+                onClick={() => void router.push("/bounty")}
+              />
+            </div>
           </div>
         </div>
 
         <MapControls
           onRecenter={handleRecenter}
-          onRefetch={handleRefetch}
           compassMode={settings.compassMode}
           onToggleCompass={handleToggleCompass}
-          refetching={refetching}
           following={following}
-          autoCollect={settings.autoCollect}
-          muralLayer={muralLayer}
-          onCycleMuralLayer={cycleMuralLayer}
           mapMode={mapMode}
           onToggleMapMode={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
-          onToggleAutoCollect={() => {
-            if (!requireAuth("settings")) return;
-            const turningOn = !settings.autoCollect;
-            settings.toggle("autoCollect");
-            setToast(
-              turningOn ? "Auto-collect on — nearby drops claim themselves" : "Auto-collect off",
-            );
-          }}
         />
 
         {/* ── Nearby rail ──────────────────────────────────────────── */}
@@ -565,65 +536,39 @@ export default function MapScreen() {
   );
 }
 
-/**
- * Says whether the puck is real. When it isn't, the pill becomes tappable and
- * explains itself — "Demo walk" on its own prompts exactly one question, and
- * the answer differs by cause: a blocked permission is fixed in the browser, a
- * missing fix is fixed in the OS.
- */
-function GpsPill({
-  status,
-  reason,
-  onExplain,
+/** A labelled round shortcut under the avatar (Events, Bounty). */
+function HudShortcut({
+  icon: Icon,
+  label,
+  onClick,
+  dot = false,
 }: {
-  status: string;
-  reason: GeoReason | null;
-  onExplain: (text: string) => void;
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+  /** Something behind it needs you (a bounty win or reply). */
+  dot?: boolean;
 }) {
-  const live = status === "tracking";
-  const label =
-    status === "tracking"
-      ? "Live"
-      : status === "prompting"
-        ? "Locating…"
-        : status === "denied"
-          ? "Location off"
-          : "No signal";
-
-  const explanation = reason ? GEO_REASON_TEXT[reason] : null;
-
-  const content = (
-    <>
-      <Satellite
-        size={11}
-        strokeWidth={2.6}
-        className={live ? "text-ar-green-hot" : "text-ar-faint"}
-      />
-      <span
-        className={`font-hud text-[9.5px] font-semibold tracking-[0.14em] uppercase ${
-          live ? "text-ar-text" : "text-ar-dim"
-        }`}
-      >
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ scale: 0.92 }}
+      onClick={onClick}
+      aria-label={dot ? `${label} (needs you)` : label}
+      className="group flex flex-col items-center gap-1"
+    >
+      <span className="ar-glass text-ar-dim group-hover:text-ar-text relative flex h-9 w-9 items-center justify-center rounded-full transition-colors">
+        <Icon size={17} strokeWidth={2.1} />
+        {dot && (
+          <span
+            aria-hidden
+            className="bg-ar-green-hot absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full shadow-[0_0_8px_hsl(var(--ar-green)/0.9)]"
+          />
+        )}
+      </span>
+      <span className="ar-glass font-hud text-ar-text rounded-full px-1.5 py-[3px] text-[8.5px] leading-none font-semibold tracking-[0.12em] uppercase">
         {label}
       </span>
-      {explanation && <HelpCircle size={10} strokeWidth={2.6} className="text-ar-faint" />}
-    </>
-  );
-
-  const className =
-    "ar-glass pointer-events-auto flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5";
-
-  if (!explanation) return <span className={className}>{content}</span>;
-
-  return (
-    <button
-      type="button"
-      className={className}
-      title={explanation}
-      aria-label={`${label}. Tap to find out why.`}
-      onClick={() => onExplain(explanation)}
-    >
-      {content}
-    </button>
+    </motion.button>
   );
 }

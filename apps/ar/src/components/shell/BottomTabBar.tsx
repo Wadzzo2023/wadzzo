@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LayoutGrid, Map as MapIcon, Store, Trophy } from "lucide-react";
+import { LayoutGrid, Map as MapIcon, ShoppingBag, Store } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "~/lib/navigation";
 import { useState } from "react";
@@ -7,7 +7,6 @@ import { useState } from "react";
 import { CameraLauncher } from "~/components/camera/CameraLauncher";
 import { PackRing } from "~/components/murals/PackRing";
 
-import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 type Tab = {
@@ -22,9 +21,10 @@ const LEFT: Tab[] = [
 ];
 
 // Profile is not a tab — it's the avatar in each screen's header
-// (`ProfileButton`), which freed this slot for Bounty.
+// (`ProfileButton`). Bounty moved to the map (under Events), which freed this
+// slot for the marketplace.
 const RIGHT: Tab[] = [
-  { href: "/bounty", label: "Bounty", icon: Trophy },
+  { href: "/marketplace", label: "Market", icon: ShoppingBag },
   { href: "/brands", label: "Brands", icon: Store },
 ];
 
@@ -56,7 +56,6 @@ export function BottomTabBar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   // QR is a mode of the same camera screen, reached from the AR tab.
   const arActive = isActive("/ar") || isActive("/scan");
-  const { count: bountyAlerts } = useBountyAttention();
   // The AR button opens the camera launcher (AR · QR · Murals), same as the
   // mobile app, instead of going straight to /ar.
   const [launcherOpen, setLauncherOpen] = useState(false);
@@ -133,12 +132,7 @@ export function BottomTabBar() {
               <div aria-hidden className="w-[74px] shrink-0" />
 
               {RIGHT.map((tab) => (
-                <TabButton
-                  key={tab.href}
-                  tab={tab}
-                  active={isActive(tab.href)}
-                  dot={tab.href === "/bounty" && bountyAlerts > 0}
-                />
+                <TabButton key={tab.href} tab={tab} active={isActive(tab.href)} />
               ))}
             </div>
           </div>
