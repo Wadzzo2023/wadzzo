@@ -38,7 +38,7 @@ type Access = {
 };
 
 const headerIcon =
-  "relative flex size-9 shrink-0 items-center justify-center rounded-full bg-side-ink text-side transition-transform duration-200 active:scale-95";
+  "relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-200 active:scale-95";
 
 /**
  * Phone header, as in the marketplace: logo and wordmark, then Create, notifications, your
@@ -64,8 +64,9 @@ export function MobileTopBar({
 
   return (
     <>
-      <header className="side-scope bg-side text-side-ink sticky top-0 z-30 flex h-16 items-center gap-2 pr-3 pl-4 lg:hidden">
+      <header className="bg-background text-foreground sticky top-0 z-30 flex h-16 items-center gap-2 pr-3 pl-4 lg:hidden">
         <PortalMark
+          plain
           href={homeHref}
           tagline={isPureAdmin ? "admin portal" : "brand portal"}
           className="flex-1 [&_.display]:text-[1.8rem]"
@@ -80,7 +81,7 @@ export function MobileTopBar({
             <Plus className="size-5" strokeWidth={2.8} />
           </button>
         )}
-        {showBell && <NotificationBell />}
+        {showBell && <NotificationBell className="bg-primary text-primary-foreground" />}
         <UserMenu compact />
         <button
           type="button"

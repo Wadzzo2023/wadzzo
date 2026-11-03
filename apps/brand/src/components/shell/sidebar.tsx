@@ -32,11 +32,14 @@ export function PortalMark({
   href,
   tagline,
   compact = false,
+  plain = false,
   className,
 }: {
   href: string;
   tagline: string;
   compact?: boolean;
+  /** The wordmark in the page's own colours (the phone header, which has no green block). */
+  plain?: boolean;
   className?: string;
 }) {
   return (
@@ -57,11 +60,16 @@ export function PortalMark({
         />
       </span>
       {!compact && (
-        <span className="text-side-ink min-w-0 leading-none">
+        <span className={cn("min-w-0 leading-none", plain ? "text-foreground" : "text-side-ink")}>
           <span className="display block truncate text-[length:var(--side-title-size,2.1rem)]">
             {platformBranding.name}
           </span>
-          <span className="marker text-side-ink/75 block -rotate-2 text-[10px] whitespace-nowrap">
+          <span
+            className={cn(
+              "marker block -rotate-2 text-[10px] whitespace-nowrap",
+              plain ? "text-primary" : "text-side-ink/75",
+            )}
+          >
             {tagline}
           </span>
         </span>

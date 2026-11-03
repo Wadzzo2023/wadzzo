@@ -4,12 +4,17 @@ import Link from "next/link";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { platformBranding } from "@wadzzo/platform/branding";
 
-/** Logo on an ink badge + the stacked condensed wordmark, FC88-style. `compact` is the badge alone. */
+/**
+ * Logo on an ink badge + the stacked condensed wordmark, FC88-style. `compact` is the badge alone.
+ * `plain` sets the wordmark in the page's own colours (the phone header, which has no green block).
+ */
 export function BrandMark({
   compact = false,
+  plain = false,
   className,
 }: {
   compact?: boolean;
+  plain?: boolean;
   className?: string;
 }) {
   return (
@@ -30,9 +35,14 @@ export function BrandMark({
         />
       </span>
       {!compact && (
-        <span className="text-side-ink leading-none">
+        <span className={cn("leading-none", plain ? "text-foreground" : "text-side-ink")}>
           <span className="display block text-[2.1rem]">{platformBranding.name}</span>
-          <span className="marker text-side-ink/75 block -rotate-2 text-[10px] whitespace-nowrap">
+          <span
+            className={cn(
+              "marker block -rotate-2 text-[10px] whitespace-nowrap",
+              plain ? "text-primary" : "text-side-ink/75",
+            )}
+          >
             collect · trade · play
           </span>
         </span>

@@ -22,7 +22,7 @@ const tab =
   "relative flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[8.5px] font-bold uppercase transition-colors";
 
 const headerIcon =
-  "relative flex size-9 shrink-0 items-center justify-center rounded-full bg-side-ink text-side transition-transform duration-200 active:scale-95";
+  "relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform duration-200 active:scale-95";
 
 /**
  * Phones have no sidebar. A green header carries the logo, notifications, your profile and the
@@ -89,8 +89,8 @@ export function MobileHeader() {
 
   return (
     <>
-      <header className="side-scope bg-side text-side-ink sticky top-0 z-30 flex h-16 items-center gap-2 pr-3 pl-4 md:hidden">
-        <BrandMark className="min-w-0 flex-1 [&_.display]:text-[1.8rem]" />
+      <header className="bg-background text-foreground sticky top-0 z-30 flex h-16 items-center gap-2 pr-3 pl-4 md:hidden">
+        <BrandMark plain className="min-w-0 flex-1 [&_.display]:text-[1.8rem]" />
         {signedIn && (
           <Link
             href="/notifications"
@@ -99,7 +99,7 @@ export function MobileHeader() {
           >
             <Bell className="size-[18px]" strokeWidth={2.6} />
             {count > 0 && (
-              <span className="bg-pink text-side-ink ring-side absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ring-2">
+              <span className="bg-pink text-side-ink ring-background absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ring-2">
                 {count > 9 ? "9+" : count}
               </span>
             )}
@@ -118,7 +118,7 @@ export function MobileHeader() {
                 <img
                   src={image}
                   alt=""
-                  className="border-side-ink size-9 rounded-full border-2 object-cover"
+                  className="border-primary size-9 rounded-full border-2 object-cover"
                 />
               ) : (
                 <span className={headerIcon}>
