@@ -111,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       brand_name: location.locationGroup.creator.name,
       image_url:
         location.locationGroup.image ?? location.locationGroup.creator.profileUrl ?? WadzzoIconURL,
-      url: location.locationGroup.link ?? "https://app.wadzzo.com/",
+      url: location.locationGroup.link ?? "https://web.wadzzo.com/",
       redeemCode: location.consumers.find((c) => c.userId === userId)?.redeemCode ?? null,
       isRedeemed: location.consumers.find((c) => c.userId === userId)?.isRedeemed ?? null,
       claimedAt: location.consumers.find((c) => c.userId === userId)?.claimedAt ?? null,
@@ -135,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   //     collection_limit_remaining: location.limit - location._count.consumers,
   //     brand_name: location.creator.name,
   //     image_url: location.image ?? location.creator.profileUrl ?? WadzzoIconURL,
-  //     url: location.link ?? "https://app.wadzzo.com/",
+  //     url: location.link ?? "https://web.wadzzo.com/",
   //   };
   // });
 

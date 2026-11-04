@@ -8,7 +8,7 @@ The three web apps run on **Vercel**, the task server runs on **AWS (EC2)**. Eve
                         │                        │
        ┌────────────────┼──────────────┐         │   (same projects, dev domains)
        ▼                ▼              ▼         ▼
- app.wadzzo.com  brand.wadzzo.com  web.wadzzo.com        Vercel: 3 projects
+ web.wadzzo.com  brand.wadzzo.com  app.wadzzo.com        Vercel: 3 projects
  (apps/market)   (apps/brand)      (apps/ar)
                         │               │
                         │ server-to-server (X-Task-Secret)
@@ -34,8 +34,8 @@ All five Vercel projects (team `wadzzo2023s-projects`) are connected to this rep
 
 | Environment     | Git branch | Web apps (domains)                                                 | Network | Database                    | Task server                                      |
 | --------------- | ---------- | ------------------------------------------------------------------ | ------- | --------------------------- | ------------------------------------------------ |
-| **Production**  | `main`     | `app.wadzzo.com`, `brand.wadzzo.com`, `web.wadzzo.com`             | mainnet | production Postgres         | AWS EC2 (this guide)                             |
-| **Development** | `develop`  | `dev-app.wadzzo.com`, `dev-brand.wadzzo.com`, `dev-web.wadzzo.com` | testnet | development Postgres        | a development task server, or none               |
+| **Production**  | `main`     | `web.wadzzo.com`, `brand.wadzzo.com`, `app.wadzzo.com`             | mainnet | production Postgres         | AWS EC2 (this guide)                             |
+| **Development** | `develop`  | `dev-web.wadzzo.com`, `dev-brand.wadzzo.com`, `dev-app.wadzzo.com` | testnet | development Postgres        | a development task server, or none               |
 | Preview         | any other  | `*.vercel.app` (one per push)                                      | testnet | development Postgres        | none: set `EXPRESS_SERVER_URL` to a dead address |
 | Local           | -          | `localhost:3000/3001/3002`                                         | testnet | `pnpm db:local` or a dev DB | `pnpm --filter @wadzzo/express dev`              |
 
@@ -78,13 +78,13 @@ Per project → **Settings → Domains**:
 
 | Project         | Production domain         | `develop` branch domain |
 | --------------- | ------------------------- | ----------------------- |
-| `wadzzo`        | `app.wadzzo.com`          | `dev-app.wadzzo.com`    |
+| `wadzzo`        | `web.wadzzo.com`          | `dev-web.wadzzo.com`    |
 | `brand-wadzzo`  | `brand.wadzzo.com`        | `dev-brand.wadzzo.com`  |
-| `ar-web-wadzzo` | `web.wadzzo.com`          | `dev-web.wadzzo.com`    |
+| `ar-web-wadzzo` | `app.wadzzo.com`          | `dev-app.wadzzo.com`    |
 | `brand-clinton` | `clintonadmin.wadzzo.com` |                         |
 | `clinton-ar`    | `clinton.wadzzo.com`      |                         |
 
-Add each domain, then for the dev ones choose **Git Branch → `develop`**. At your DNS provider create the record Vercel shows for each (a CNAME for subdomains). `www.wadzzo.com` should redirect to `app.wadzzo.com` (add it in the market project with "Redirect to").
+Add each domain, then for the dev ones choose **Git Branch → `develop`**. At your DNS provider create the record Vercel shows for each (a CNAME for subdomains). `www.wadzzo.com` should redirect to `web.wadzzo.com` (add it in the market project with "Redirect to").
 
 Create the `develop` branch once: `git switch -c develop && git push -u origin develop`.
 
@@ -107,7 +107,7 @@ Values that differ between Production and Development:
 | `NEXT_PUBLIC_STELLAR_NETWORK`           | `mainnet`                               | `testnet`                                 |
 | `NEXT_PUBLIC_STAGE`                     | `prod` (real network and platform fees) | `dev`                                     |
 | `NEXT_PUBLIC_ASSET_CODE` / `_ISSUER`    | the mainnet platform token              | a testnet token                           |
-| `NEXT_PUBLIC_HOME_DOMAIN`               | `app.wadzzo.com`                        | `dev-app.wadzzo.com`                      |
+| `NEXT_PUBLIC_HOME_DOMAIN`               | `web.wadzzo.com`                        | `dev-web.wadzzo.com`                      |
 | `MOTHER_SECRET`, `STORAGE_SECRET`       | mainnet accounts                        | funded **testnet** accounts               |
 | `ISSUER_ENCRYPTION_KEY`                 | production key                          | **a different key**                       |
 | `DATABASE_URL`                          | production Postgres                     | development Postgres                      |
@@ -116,7 +116,7 @@ Values that differ between Production and Development:
 | `NEXTAUTH_SECRET`                       | production secret                       | a different secret                        |
 | `SQUARE_*`, `NEXT_PUBLIC_SQUARE_*`      | production credentials                  | **sandbox** credentials                   |
 | `EXPRESS_SERVER_URL` (brand)            | the production task server              | a development task server, **always set** |
-| `NEXT_PUBLIC_WADZZO_AR_URL` (brand)     | `https://web.wadzzo.com`                | `https://dev-web.wadzzo.com`              |
+| `NEXT_PUBLIC_WADZZO_AR_URL` (brand)     | `https://app.wadzzo.com`                | `https://dev-app.wadzzo.com`              |
 | `NEXT_PUBLIC_BRAND_PORTAL_URL` (market) | `https://brand.wadzzo.com`              | `https://dev-brand.wadzzo.com`            |
 | `BRAND_APP_ORIGINS` (ar)                | `https://brand.wadzzo.com`              | `https://dev-brand.wadzzo.com`            |
 
@@ -277,9 +277,9 @@ The Development environment needs `EXPRESS_SERVER_URL` set explicitly. Options, 
 
 | Check                                                   | Expect                                                 |
 | ------------------------------------------------------- | ------------------------------------------------------ |
-| `https://app.wadzzo.com/.well-known/stellar.toml`       | the platform's organisation and currencies             |
-| `https://app.wadzzo.com` and `https://brand.wadzzo.com` | pages render with the right branding                   |
-| `https://web.wadzzo.com/api/mobile/v1/bounties`         | `200` JSON                                             |
+| `https://web.wadzzo.com/.well-known/stellar.toml`       | the platform's organisation and currencies             |
+| `https://web.wadzzo.com` and `https://brand.wadzzo.com` | pages render with the right branding                   |
+| `https://app.wadzzo.com/api/mobile/v1/bounties`         | `200` JSON                                             |
 | Sign in with email, then with a wallet                  | a session, no redirect loop                            |
 | Brand portal → create a drop with an image              | the upload succeeds (bucket + keys)                    |
 | Brand portal → map agent                                | a job starts and streams (task server + shared secret) |

@@ -203,7 +203,7 @@ function boundingBox({ lat, lng, radiusKm }: { lat: number; lng: number; radiusK
  */
 const liveGroupWhere = (ctx: PlatformContext) =>
   ({
-    // This platform's drops; the root platform (web.wadzzo.com) shows every platform's.
+    // This platform's drops; the root platform (app.wadzzo.com) shows every platform's.
     ...platformScope(ctx),
     // Everyone sees every gated drop — an anonymous viewer gets the same
     // map, with the gated ones locked.
@@ -330,7 +330,7 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
   });
 
   const group = location?.locationGroup;
-  // Another platform's drop can't be claimed here (web.wadzzo.com may claim any).
+  // Another platform's drop can't be claimed here (app.wadzzo.com may claim any).
   if (!location || !group || location.hidden || !isInPlatformScope(ctx, group.platformId)) {
     throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Pin not found" });
   }
@@ -890,7 +890,7 @@ export const pinsRouter = createTRPCRouter({
         // drop behind it — no title, no art, no brand. Such a claim has
         // nothing to render as a card, so it is excluded here rather than
         // silently becoming an "Unknown brand" blank in someone's binder.
-        // Only this platform's cards (every platform's on web.wadzzo.com).
+        // Only this platform's cards (every platform's on app.wadzzo.com).
         where: {
           userId,
           location: {

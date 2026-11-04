@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   The "poster" look shared by the marketplace and the brand portal (app.wadzzo):
+   The "poster" look shared by the marketplace and the brand portal (web.wadzzo, brand.wadzzo):
    tokens, fonts, base layer and the utilities the @wadzzo/ui/poster components use.
    Import it right after Tailwind in the app's globals.css. Platform themes
    (packages/platform/themes/<slug>/*.css) override the tokens, never the rules.

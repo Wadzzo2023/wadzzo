@@ -21,7 +21,7 @@ that you can join and submit entries to.
 | Topic | Decision |
 |---|---|
 | Access | **Browse freely signed out**, exactly like wadzzoAR. Sign-in is asked for only at the moment of an action: collect, follow, join/enter a bounty, chat, comment, profile. |
-| Backend | **wadzzoAR is the server.** New REST endpoints under `/api/mobile/v1/*` on wadzzoAR, Bearer-token auth. The app never calls `app.wadzzo.com/api/game/*`. |
+| Backend | **wadzzoAR is the server.** New REST endpoints under `/api/mobile/v1/*` on wadzzoAR, Bearer-token auth. The app never calls `web.wadzzo.com/api/game/*`. |
 | Sign-in | Email + password (with register, email verification, forgot password), Google, Apple, Albedo wallet. |
 | UI/UX | Same to same as wadzzoAR: palette, fonts, radii, motion, loading skeletons, boot sequence, celebration, tab bar with raised AR launcher, AR \| QR switch. |
 | Map | Mapbox (`@rnmapbox/maps`), `light-v11` / `dark-v11` styles to match the web. |

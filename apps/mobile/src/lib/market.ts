@@ -7,7 +7,7 @@ import type { MarketMediaType } from "~/lib/api/types";
  * The app shows the marketplace but doesn't sell: buying, wallets and resales happen in the
  * marketplace web app. These build the links there (same as the AR web app's "Go to Marketplace").
  */
-export const MARKETPLACE_URL = (process.env.EXPO_PUBLIC_MARKETPLACE_URL ?? "https://app.wadzzo.com").replace(/\/$/, "");
+export const MARKETPLACE_URL = (process.env.EXPO_PUBLIC_MARKETPLACE_URL ?? "https://web.wadzzo.com").replace(/\/$/, "");
 
 /** The item's page in the marketplace, opened on one fan resale when `listingId` is given. */
 export function marketplaceItemUrl(assetId: number, listingId?: number | null) {

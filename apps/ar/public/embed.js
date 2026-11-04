@@ -3,7 +3,7 @@
  * Wadzzo map embed loader.
  *
  *   <div data-wadzzo-embed="EMBED_ID" style="height:520px"></div>
- *   <script async src="https://web.wadzzo.com/embed.js"></script>
+ *   <script async src="https://app.wadzzo.com/embed.js"></script>
  *
  * Turns every [data-wadzzo-embed] element into the embed's iframe, sized to
  * fill the element. Several maps per page are fine, and elements added later

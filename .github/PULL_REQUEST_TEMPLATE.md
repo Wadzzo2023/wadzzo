@@ -4,9 +4,9 @@
 
 ## Apps affected
 
-- [ ] market (app.wadzzo.com)
+- [ ] market (web.wadzzo.com)
 - [ ] brand (brand.wadzzo.com, clintonadmin.wadzzo.com)
-- [ ] ar (web.wadzzo.com, clinton.wadzzo.com)
+- [ ] ar (app.wadzzo.com, clinton.wadzzo.com)
 - [ ] express-wadzzo (task server)
 - [ ] mobile
 - [ ] shared packages only

@@ -45,7 +45,7 @@ import { useDropQRs } from "./use-drop-qrs";
  * in a basement, on a market stall with no signal, or for someone who has never
  * heard of Wadzzo before today.
  *
- * One pin, one code. It encodes `web.wadzzo.com/scan?pin=<locationId>`, and the
+ * One pin, one code. It encodes `app.wadzzo.com/scan?pin=<locationId>`, and the
  * consumer side already claims from exactly that (`pins.collectByQr`), so nothing
  * here has to be kept in step with it beyond the payload itself.
  *

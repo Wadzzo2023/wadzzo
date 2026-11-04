@@ -181,8 +181,8 @@ export default function PrivacyPage() {
               </a>
               <br />
               <strong>Website:</strong>{" "}
-              <a href="https://app.wadzzo.com" className="text-primary hover:underline">
-                app.wadzzo.com
+              <a href="https://web.wadzzo.com" className="text-primary hover:underline">
+                web.wadzzo.com
               </a>
             </p>
             <p>

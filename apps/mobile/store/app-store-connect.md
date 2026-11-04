@@ -9,7 +9,7 @@ Everything to paste into App Store Connect for this release, plus what to check 
 | # | Issue | Why it matters | What to do |
 | - | ----- | -------------- | ---------- |
 | 1 | **No way to report content or block users** in the app, but users post comments, bounty entries and chat messages that other people see | App Review Guideline 1.2 (user-generated content) is a common rejection: it needs content reporting, blocking abusive users, a filter or moderation process, and published contact details | Add "Report" and "Block" to comments, entries and chat, and a moderation path you can describe in the review notes (section 7, item 8). Do not describe moderation that is not in the build. |
-| 2 | **No Terms of Use / EULA** page exists (only Privacy, FAQ, About, Support on app.wadzzo.com) | UGC apps are expected to have terms that forbid objectionable content | Publish `/terms`, or rely on Apple's standard EULA and say so in the description. |
+| 2 | **No Terms of Use / EULA** page exists (only Privacy, FAQ, About, Support on web.wadzzo.com) | UGC apps are expected to have terms that forbid objectionable content | Publish `/terms`, or rely on Apple's standard EULA and say so in the description. |
 | 3 | **The privacy policy does not mention** camera, photos, user content (comments, entries, chat), sign-in providers (Google, Apple, Firebase), wallet creation, retention or how to delete the account | Apple compares the policy with your privacy answers (section 5) | Update `apps/market/src/app/(site)/privacy/page.tsx` to match section 5 before submitting. |
 | 4 | **Icon has an alpha channel** (`assets/icon.png` is 1024x1024 with alpha) | App Store Connect rejects a marketing icon with transparency (ITMS-90717). Expo normally flattens it for iOS, but check | Inspect the icon in the built archive, or export the PNG without alpha and rebuild. |
 | 5 | **Version number** | The app config says `6.0.1`. It must be higher than the version now live in App Store Connect | Check App Store Connect > App Store > the live version, and raise `version` in `app.config.ts` if needed. Build numbers are automatic (EAS). |
@@ -28,9 +28,9 @@ Also worth a look: if the built `Info.plist` lists `arkit` under `UIRequiredDevi
 | Subtitle alternatives | `Scan and collect real drops` (27), `Treasure hunt with brands` (25) | |
 | **Primary category** | Keep what the live listing has. If you are free to choose: **Lifestyle** | |
 | Secondary category | Entertainment | |
-| **Support URL** | https://app.wadzzo.com/support | |
-| **Marketing URL** | https://app.wadzzo.com | |
-| **Privacy Policy URL** | https://app.wadzzo.com/privacy | |
+| **Support URL** | https://web.wadzzo.com/support | |
+| **Marketing URL** | https://web.wadzzo.com | |
+| **Privacy Policy URL** | https://web.wadzzo.com/privacy | |
 | **Copyright** | `2026 [FILL: legal entity that owns the app]` | |
 | Version | `6.0.1` (see item 5 above) | |
 | Bundle ID | `com.thebillboardapp.wadzzo` | |
@@ -74,8 +74,8 @@ Wadzzo uses your location only while the app is open, to show drops near you and
 
 Wadzzo is free to use. Drops, events and bounty rewards are provided by participating brands, and what you see depends on where you are.
 
-Privacy Policy: https://app.wadzzo.com/privacy
-Support: https://app.wadzzo.com/support
+Privacy Policy: https://web.wadzzo.com/privacy
+Support: https://web.wadzzo.com/support
 ```
 
 ## 4. Keywords (97/100) and What's New

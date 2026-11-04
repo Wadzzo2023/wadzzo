@@ -38,7 +38,7 @@ export const clintonCountyBranding: PlatformBranding = {
   urls: {
     arWeb: "https://clinton.wadzzo.com",
     brandPortal: "https://clintonadmin.wadzzo.com",
-    fanApp: "https://app.wadzzo.com",
+    fanApp: "https://web.wadzzo.com",
   },
   contact: { supportEmail: "support@wadzzo.com", supportUrl: "mailto:support@wadzzo.com" },
   toml: {

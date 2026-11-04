@@ -2,7 +2,7 @@ import type { EmbedGesture, EmbedPinSource, EmbedTheme, PinType } from "@wadzzo/
 import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
- * Where the embedded map is served from — the AR app (web.wadzzo.com), not this
+ * Where the embedded map is served from — the AR app (app.wadzzo.com), not this
  * app. NEXT_PUBLIC_WADZZO_AR_URL sets it per environment; the fallback keeps
  * production snippets pointing at the real host even if the variable is missing.
  */

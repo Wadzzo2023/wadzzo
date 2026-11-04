@@ -6,7 +6,7 @@ import { WADZZO_AR_URL } from "@wadzzo/schemas/embed";
  * ── QR generation ────────────────────────────────────────────────────────────
  *
  * One QR encodes one thing: the URL that opens the consumer app's scanner on a
- * specific pin — `https://web.wadzzo.com/scan?pin=<locationId>`. That is the
+ * specific pin — `https://app.wadzzo.com/scan?pin=<locationId>`. That is the
  * whole contract, and it is the same origin the map embed already points fans
  * at (`WADZZO_AR_URL` in `~/lib/embed`), so a sticker and an embed on the same
  * drop land a visitor in the same place.

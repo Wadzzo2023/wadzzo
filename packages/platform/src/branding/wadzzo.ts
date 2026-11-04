@@ -35,12 +35,12 @@ export const wadzzoBranding: PlatformBranding = {
     packDoneGlow: "hsl(150 80% 55% / 0.35)",
   },
   urls: {
-    arWeb: "https://web.wadzzo.com",
+    arWeb: "https://app.wadzzo.com",
     brandPortal: "https://brand.wadzzo.com",
-    fanApp: "https://app.wadzzo.com",
+    fanApp: "https://web.wadzzo.com",
     appStore: "https://apps.apple.com/us/app/wadzzo/id1639649037",
   },
-  contact: { supportEmail: "support@wadzzo.com", supportUrl: "https://app.wadzzo.com/support" },
+  contact: { supportEmail: "support@wadzzo.com", supportUrl: "https://web.wadzzo.com/support" },
   toml: {
     orgName: "Wadzzo",
     orgUrl: "https://wadzzo.com/",

@@ -90,7 +90,7 @@ export default function RegisterScreen() {
         </ArButton>
         <Text className="text-center text-[11.5px] leading-5 text-ar-faint">
           By continuing you agree to Wadzzo's{" "}
-          <Text className="text-ar-dim underline" onPress={() => void Linking.openURL("https://app.wadzzo.com/privacy")}>
+          <Text className="text-ar-dim underline" onPress={() => void Linking.openURL("https://web.wadzzo.com/privacy")}>
             Privacy Policy
           </Text>
           .

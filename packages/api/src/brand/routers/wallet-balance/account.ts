@@ -39,7 +39,7 @@ export const WBalanceRouter = createTRPCRouter({
       const assetCode = PLATFORM_ASSET.code.toLowerCase();
       const homeDomain =
         assetCode === "wadzzo"
-          ? "app.wadzzo.com"
+          ? "web.wadzzo.com"
           : assetCode === "bandcoin"
             ? "bandcoin.io"
             : env.NEXT_PUBLIC_HOME_DOMAIN;

@@ -33,9 +33,9 @@ tooling/
 
 | App                   | Wadzzo                                       | Clinton County                                             | Vercel project(s)               |
 | --------------------- | -------------------------------------------- | ---------------------------------------------------------- | ------------------------------- |
-| `apps/market`         | [app.wadzzo.com](https://app.wadzzo.com)     |                                                            | `wadzzo`                        |
+| `apps/market`         | [web.wadzzo.com](https://web.wadzzo.com)     |                                                            | `wadzzo`                        |
 | `apps/brand`          | [brand.wadzzo.com](https://brand.wadzzo.com) | [clintonadmin.wadzzo.com](https://clintonadmin.wadzzo.com) | `brand-wadzzo`, `brand-clinton` |
-| `apps/ar`             | [web.wadzzo.com](https://web.wadzzo.com)     | [clinton.wadzzo.com](https://clinton.wadzzo.com)           | `ar-web-wadzzo`, `clinton-ar`   |
+| `apps/ar`             | [app.wadzzo.com](https://app.wadzzo.com)     | [clinton.wadzzo.com](https://clinton.wadzzo.com)           | `ar-web-wadzzo`, `clinton-ar`   |
 | `apps/express-wadzzo` | EC2 (PM2), `deploy-express.yml`              | shared                                                     |                                 |
 | `apps/mobile`         | App Store / Play (EAS)                       |                                                            |                                 |
 

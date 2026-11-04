@@ -25,7 +25,7 @@ const PRICE = isWadzzo ? { set: 200, change: 500 } : { set: 300000, change: 7500
 export const VANITY_HOST = env.NEXT_PUBLIC_FAN_APP_URL
   ? new URL(env.NEXT_PUBLIC_FAN_APP_URL).host
   : env.NEXT_PUBLIC_ASSET_CODE.toLowerCase() === "wadzzo"
-    ? "app.wadzzo.com"
+    ? "web.wadzzo.com"
     : "bandcoin.io";
 const VANITY_RE = /^[a-z0-9_-]+$/;
 const money = (n: number) => `${n.toLocaleString()} ${PLATFORM_ASSET.code}`;

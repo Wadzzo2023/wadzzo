@@ -108,7 +108,7 @@ app it collapses to one call for custodial accounts:
 
 The app lists the fan marketplace but doesn't sell: "Go to Marketplace" opens
 the item in the marketplace web app (`EXPO_PUBLIC_MARKETPLACE_URL`, default
-`https://app.wadzzo.com`), where buying, wallets and resales happen.
+`https://web.wadzzo.com`), where buying, wallets and resales happen.
 
 | Method | Path | Auth | → tRPC |
 |---|---|---|---|

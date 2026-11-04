@@ -189,7 +189,7 @@ async function loadForViewer(db: Db, bountyId: number, userId: string, ctx: Plat
     include: { participants: { where: { userId }, select: { id: true } } },
   });
   const joined = Boolean(bounty?.participants.length);
-  // Another platform's bounty doesn't exist here (web.wadzzo.com sees all).
+  // Another platform's bounty doesn't exist here (app.wadzzo.com sees all).
   if (
     !bounty ||
     !isInPlatformScope(ctx, bounty.platformId) ||

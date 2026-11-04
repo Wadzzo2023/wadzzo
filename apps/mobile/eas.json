@@ -13,12 +13,12 @@
     "preview": {
       "distribution": "internal",
       "environment": "preview",
-      "env": { "EXPO_PUBLIC_API_URL": "https://web.wadzzo.com" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://app.wadzzo.com" }
     },
     "production": {
       "autoIncrement": true,
       "environment": "production",
-      "env": { "EXPO_PUBLIC_API_URL": "https://web.wadzzo.com" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://app.wadzzo.com" }
     }
   },
   "submit": {

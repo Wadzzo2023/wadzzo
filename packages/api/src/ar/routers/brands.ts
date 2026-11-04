@@ -159,7 +159,7 @@ export const brandsRouter = createTRPCRouter({
     const userId = ctx.session?.user.id ?? null;
 
     const creators = await ctx.db.creator.findMany({
-      // this platform's brands; every platform's on web.wadzzo.com
+      // this platform's brands; every platform's on app.wadzzo.com
       where: { pageAsset: { isNot: null }, ...platformScope(ctx) },
       select: brandSelect,
       orderBy: { joinedAt: "desc" },
