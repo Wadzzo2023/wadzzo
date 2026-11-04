@@ -29,6 +29,7 @@ import { AiTextButton } from "~/ui/ai/ai-text";
 import { htmlToText } from "~/ui/ai/shared";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 
 const MAX_IMAGES = 4;
@@ -166,7 +167,7 @@ export default function NewBountyPage() {
     }),
   );
   // The page's submit validates, then asks how to pay.
-  const onSubmit = handleSubmit(() => setIsOpen(true));
+  const onSubmit = handleSubmit(() => setIsOpen(true), toastFormErrors);
 
   const setPrizeUsd = (raw: string) => {
     const usd = Number(raw) || 0;

@@ -33,6 +33,7 @@ import {
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useSelectCreatorStore } from "~/components/store/creator-selection-store";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 import { BrandPicker } from "~/features/admin/brand-picker";
 import { AiFillCard } from "~/ui/ai/ai-fill";
@@ -149,7 +150,7 @@ export default function AdminNewPinPage() {
       autoCollect: collectionMode === "auto",
       tags: data.tags ?? [],
     });
-  });
+  }, toastFormErrors);
 
   const lat = watch("lat");
   const lng = watch("lng");

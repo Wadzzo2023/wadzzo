@@ -32,6 +32,7 @@ import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
 
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";
+import { toastFormErrors } from "~/utils/form-errors";
 
 type UpdateForm = z.infer<typeof updateHotspotFormSchema>;
 type Hotspot = NonNullable<RouterOutputs["maps"]["pin"]["hotspotForEdit"]>;
@@ -124,6 +125,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       setError("hotspotEndDate", {
         message: "End date must be after start date",
       });
+      toast.error("End date must be after start date");
       return;
     }
 
@@ -168,7 +170,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       description="Update the drop schedule, collection rules, or pin template."
       back={{ href: "/pins/manage?tab=hotspot", label: "Hotspots" }}
       actions={actions}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, toastFormErrors)}
       aside={
         <aside className="space-y-4">
           {feature && (

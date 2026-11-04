@@ -33,6 +33,7 @@ import {
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { cn } from "@wadzzo/ui/lib/cn";
 import { useMapInteractionStore } from "~/store/map-stores";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
@@ -135,6 +136,7 @@ export default function NewPinPage() {
       setError("pinCollectionLimit", {
         message: "Collection limit can't be more than your token balance",
       });
+      toast.error("Collection limit can't be more than your token balance");
       return;
     }
     create.mutate({
@@ -142,7 +144,7 @@ export default function NewPinPage() {
       autoCollect: collectionMode === "auto",
       description: data.description ?? "",
     });
-  });
+  }, toastFormErrors);
 
   const lat = watch("lat");
   const lng = watch("lng");

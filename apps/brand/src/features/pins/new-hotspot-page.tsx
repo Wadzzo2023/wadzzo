@@ -40,6 +40,7 @@ import { fromLocal } from "~/ui/ai/shared";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 
 type HotspotForm = z.infer<typeof createHotspotFormSchema>;
@@ -157,12 +158,14 @@ function HotspotForm({
   const onSubmit = handleSubmit((data) => {
     if (data.hotspotEndDate <= data.hotspotStartDate) {
       setError("hotspotEndDate", { message: "Must be after the start" });
+      toast.error("Must be after the start");
       return;
     }
     if (selectedToken && data.pinCollectionLimit > selectedToken.bal) {
       setError("pinCollectionLimit", {
         message: "Collection limit can't be more than your token balance",
       });
+      toast.error("Collection limit can't be more than your token balance");
       return;
     }
     create.mutate({
@@ -172,7 +175,7 @@ function HotspotForm({
       url: data.url ?? "",
       geoJson: feature,
     });
-  });
+  }, toastFormErrors);
 
   const drops = (() => {
     const s = values.hotspotStartDate?.getTime();

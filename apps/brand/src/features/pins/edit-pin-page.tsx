@@ -29,6 +29,7 @@ import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
+import { toastFormErrors } from "~/utils/form-errors";
 
 type EditForm = z.infer<typeof updateMapFormSchema>;
 type Pin = RouterOutputs["maps"]["pin"]["myPinForEdit"];
@@ -111,12 +112,14 @@ function EditPinForm({ pin }: { pin: Pin }) {
     onError: (e) => toast.error(e.message),
   });
 
-  const onSubmit = handleSubmit((data) =>
-    update.mutate({
-      ...data,
-      description: data.description ?? "",
-      url: data.url ?? undefined,
-    }),
+  const onSubmit = handleSubmit(
+    (data) =>
+      update.mutate({
+        ...data,
+        description: data.description ?? "",
+        url: data.url ?? undefined,
+      }),
+    toastFormErrors,
   );
 
   const actions = (

@@ -46,6 +46,7 @@ import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { fromLocal } from "~/ui/ai/shared";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 import { BrandPicker } from "~/features/admin/brand-picker";
 
@@ -217,12 +218,14 @@ function HotspotForm({
     }
     if (data.hotspotEndDate <= data.hotspotStartDate) {
       setError("hotspotEndDate", { message: "Must be after the start" });
+      toast.error("Must be after the start");
       return;
     }
     if (selectedToken && data.pinCollectionLimit > selectedToken.bal) {
       setError("pinCollectionLimit", {
         message: "Collection limit can't be more than your token balance",
       });
+      toast.error("Collection limit can't be more than your token balance");
       return;
     }
     create.mutate({
@@ -234,7 +237,7 @@ function HotspotForm({
       image: data.image ?? undefined,
       geoJson: feature,
     });
-  });
+  }, toastFormErrors);
 
   const drops = (() => {
     const s = values.hotspotStartDate?.getTime();

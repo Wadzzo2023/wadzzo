@@ -42,6 +42,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import type { UploadEndpoint } from "@wadzzo/storage";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { Dropzone } from "~/ui/upload/dropzone";
+import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 
 type PostForm = z.infer<typeof PostSchema>;
@@ -104,7 +105,10 @@ export default function NewPostPage() {
     onError: (e) => toast.error(e.message),
   });
 
-  const onSubmit = handleSubmit((data) => create.mutate({ ...data, medias: media }));
+  const onSubmit = handleSubmit(
+    (data) => create.mutate({ ...data, medias: media }),
+    toastFormErrors,
+  );
 
   const values = watch();
   const tierLabel = (id?: string) => {
