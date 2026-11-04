@@ -27,6 +27,10 @@ import {
 
 export { MAP_STYLE_2D, MAP_STYLE_3D } from "./map-mode";
 
+/** How far the 3D map is tilted by default, and the most it can be tilted. */
+const TILT_3D = 45;
+const MAX_PITCH_3D = 62;
+
 export const WORLD_VIEW = { latitude: 22.55, longitude: 0, zoom: 2.4 };
 
 /**
@@ -56,7 +60,12 @@ function ApplyMapMode({ mode }: { mode: MapMode }) {
       first.current = false;
       return;
     }
-    current?.easeTo({ pitch: mode === "3d" ? 45 : 0, duration: 500 });
+    const map = current?.getMap();
+    if (!map) return;
+    // The map's maxPitch prop only catches up after this effect, and a flat
+    // map clamps any tilt to 0 — raise the limit first.
+    map.setMaxPitch(mode === "3d" ? MAX_PITCH_3D : 0);
+    map.easeTo({ pitch: mode === "3d" ? TILT_3D : 0, duration: 500 });
   }, [current, mode]);
   return null;
 }
@@ -73,6 +82,10 @@ class MapModeControl implements IControl {
     button.type = "button";
     button.style.fontSize = "11px";
     button.style.fontWeight = "700";
+    // Mapbox's control buttons are white in both themes; the page's light text
+    // colour would vanish on them.
+    button.style.color = "#111";
+    button.style.letterSpacing = "0.02em";
     button.addEventListener("click", () => setMapMode(readMapMode() === "3d" ? "2d" : "3d"));
     el.appendChild(button);
     this.el = el;
@@ -146,9 +159,13 @@ export const BaseMap = forwardRef<
         minZoom={1.5}
         maxZoom={20}
         initialViewState={
-          initialViewState && !is3d ? { ...initialViewState, pitch: 0 } : initialViewState
+          initialViewState
+            ? is3d
+              ? { pitch: TILT_3D, ...initialViewState }
+              : { ...initialViewState, pitch: 0 }
+            : undefined
         }
-        maxPitch={is3d ? maxPitch : 0}
+        maxPitch={is3d ? (maxPitch ?? MAX_PITCH_3D) : 0}
         {...rest}
       >
         <FollowContainerSize />

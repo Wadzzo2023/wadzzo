@@ -100,6 +100,7 @@ export function CollectionInputs({
 
   selectedToken,
   remainingBalance,
+  showRadius = true,
 }: {
   setSelectedToken: (asset: (AssetType & { bal: number }) | undefined) => void;
   setRemainingBalance: (balance: number) => void;
@@ -117,6 +118,12 @@ export function CollectionInputs({
 
   selectedToken: (AssetType & { bal: number }) | undefined;
   remainingBalance: number;
+  /**
+   * Show the radius input. Turn it off where the page already has one beside
+   * the map: two inputs registered to the same field only keep the last one's
+   * element in sync, so the first stops reflecting edits.
+   */
+  showRadius?: boolean;
 }) {
   const {
     control,
@@ -207,22 +214,23 @@ export function CollectionInputs({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="radius" className="text-sm font-medium">
-            Radius (meters)
-          </Label>
-          <Input
-            type="number"
-            id="radius"
-            min={0}
-            {...register("radius", { valueAsNumber: true })}
-            className="bg-card border-border focus:ring-ring"
-            placeholder="50"
-          />
-          {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
-        </div>
-
+      <div className={showRadius ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-4"}>
+        {showRadius && (
+          <div className="space-y-2">
+            <Label htmlFor="radius" className="text-sm font-medium">
+              Radius (meters)
+            </Label>
+            <Input
+              type="number"
+              id="radius"
+              min={0}
+              {...register("radius", { valueAsNumber: true })}
+              className="bg-card border-border focus:ring-ring"
+              placeholder="50"
+            />
+            {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="pinNumber" className="text-sm font-medium">
             Number of Pins

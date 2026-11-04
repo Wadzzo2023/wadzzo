@@ -29,15 +29,21 @@ export function PlaceSearch({
   placeholder = "Search a place or paste coordinates",
   className,
   proximity,
+  initialQuery = "",
+  onClear,
 }: {
   onSelect: (place: Place) => void;
+  /** Text to start with, e.g. the place picked before leaving the page. */
+  initialQuery?: string;
+  /** Called when the box is cleared with its × button. */
+  onClear?: () => void;
   placeholder?: string;
   className?: string;
   /** Bias results near here (e.g. the map centre). */
   proximity?: LatLng;
 }) {
   const listId = useId();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Place[]>([]);
@@ -137,7 +143,7 @@ export function PlaceSearch({
         {q && !loading && (
           <button
             type="button"
-            onClick={() => (setQ(""), setResults([]))}
+            onClick={() => (setQ(""), setResults([]), onClear?.())}
             aria-label="Clear search"
             className="text-muted-foreground hover:text-foreground"
           >

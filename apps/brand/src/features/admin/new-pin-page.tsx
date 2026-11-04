@@ -411,6 +411,7 @@ export default function AdminNewPinPage() {
               assetsQuery={assetsQuery as Parameters<typeof CollectionInputs>[0]["assetsQuery"]}
               selectedToken={selectedToken}
               remainingBalance={remainingBalance}
+              showRadius={false}
             />
           )}
         </FormSection>

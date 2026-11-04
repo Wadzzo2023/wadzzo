@@ -209,3 +209,35 @@ export const useMapInteractionStore = create<IMapInteractionStore>((set) => ({
     })),
   copiedPinData: null, // Initialize copiedPinData
 }));
+
+/** Where the camera was on a map, so coming back to it doesn't start over. */
+export type SavedMapView = {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+  pitch: number;
+  bearing: number;
+};
+
+/** A place picked from the map's search box. */
+export type SearchedPlace = LatLng & { name: string; address?: string };
+
+interface PinsMapViewState {
+  /** The /pins map's camera, null until the brand has looked around. */
+  view: SavedMapView | null;
+  /** The place last picked in the search box, marked on the map until cleared. */
+  place: SearchedPlace | null;
+  setView: (view: SavedMapView) => void;
+  setPlace: (place: SearchedPlace | null) => void;
+}
+
+/**
+ * Lives for the browser session (module state), so going to /pins/new and
+ * back lands on the same view with the searched place still marked.
+ */
+export const usePinsMapViewStore = create<PinsMapViewState>((set) => ({
+  view: null,
+  place: null,
+  setView: (view) => set({ view }),
+  setPlace: (place) => set({ place }),
+}));

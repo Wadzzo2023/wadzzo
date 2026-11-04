@@ -12,6 +12,7 @@ import { toMapboxFeature, type DrawShape, type StoredFeature } from "@wadzzo/geo
 import { HotspotLayer } from "~/components/map-kit/hotspot-layer";
 import { PinLegend, PinMarker } from "~/components/map-kit/pin-marker";
 import { PlaceSearch } from "~/components/map-kit/place-search";
+import { SearchedPlaceMarker } from "~/components/map-kit/searched-place-marker";
 import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
 import HotspotDetailModal from "~/components/modals/hotspot-details-modal";
@@ -23,7 +24,11 @@ import { AgentChat } from "~/features/agent/agent-chat";
 import { AgentMapLayer } from "~/features/agent/agent-map";
 import { useCopyCutModalStore } from "~/store/copy-cut-modal-store";
 import { useHotspotDraft } from "~/store/hotspot-draft";
-import { useMapInteractionStore, useNearbyPinsStore } from "~/store/map-stores";
+import {
+  useMapInteractionStore,
+  useNearbyPinsStore,
+  usePinsMapViewStore,
+} from "~/store/map-stores";
 import { getPinIcon } from "~/utils/map-helpers";
 import { api } from "~/utils/api";
 
@@ -56,6 +61,14 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     if (search?.get("draw") === "1") router.replace("/pins", { scroll: false });
   }, [search, router]);
   const [hotspotId, setHotspotId] = useState<string | null>(null);
+
+  // Coming back from /pins/new (or anywhere) restores the camera and the
+  // searched place instead of re-fitting all the pins. Read once: the view is
+  // saved on every move, and subscribing would re-render the map each time.
+  const [savedView] = useState(() => usePinsMapViewStore.getState().view);
+  const saveView = usePinsMapViewStore((s) => s.setView);
+  const place = usePinsMapViewStore((s) => s.place);
+  const setPlace = usePinsMapViewStore((s) => s.setPlace);
 
   const { setPosition, openPinDetailModal, isPinCopied, isPinCut, setIsAutoCollect } =
     useMapInteractionStore();
@@ -117,6 +130,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     if (centred.current || !pins.data || !hotspots.data || !map.current) return;
     centred.current = true;
     if (search?.get("hotspot")) return; // the deep link frames its own area
+    if (savedView) return; // the brand was already looking somewhere
     // Every pin plus every hotspot corner.
     const points = [
       ...pins.data.map((p) => [p.longitude, p.latitude] as const),
@@ -146,7 +160,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         }),
       );
     }
-  }, [pins.data, hotspots.data, search]);
+  }, [pins.data, hotspots.data, search, savedView]);
 
   const flyTo = (c: { lat: number; lng: number }, zoom = 15) =>
     map.current?.flyTo({ center: [c.lng, c.lat], zoom, duration: 700 });
@@ -175,7 +189,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       <BaseMap
         ref={map}
         controlsPosition="bottom-left"
-        initialViewState={WORLD_VIEW}
+        initialViewState={savedView ?? WORLD_VIEW}
         onClick={(e) => {
           // A click on a hotspot area opens that hotspot (HotspotLayer handles
           // it) — it must not also start a new pin underneath.
@@ -188,7 +202,17 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
             return;
           onMapClick(e.lngLat.lat, e.lngLat.lng);
         }}
-        onMoveEnd={refreshInView}
+        onMoveEnd={(e) => {
+          refreshInView();
+          const v = e.viewState;
+          saveView({
+            longitude: v.longitude,
+            latitude: v.latitude,
+            zoom: v.zoom,
+            pitch: v.pitch,
+            bearing: v.bearing,
+          });
+        }}
         onLoad={refreshInView}
         cursor={drawing ? "crosshair" : isPinCopied || isPinCut ? "copy" : "pointer"}
       >
@@ -222,6 +246,13 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
               />
             );
           })}
+        {!drawing && place && (
+          <SearchedPlaceMarker
+            place={place}
+            onClear={() => setPlace(null)}
+            onDrop={(p) => router.push(`/pins/new?lat=${p.lat.toFixed(6)}&lng=${p.lng.toFixed(6)}`)}
+          />
+        )}
         {!drawing && <AgentMapLayer />}
         {drawing && (
           <DrawTool initialShape={drawShape} onDone={onDrawn} onCancel={() => setDrawing(false)} />
@@ -233,7 +264,12 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-2 lg:inset-x-4 lg:top-4">
           <PlaceSearch
             className="pointer-events-auto w-full sm:w-80"
-            onSelect={(p) => flyTo(p, 14)}
+            initialQuery={place?.name}
+            onSelect={(p) => {
+              setPlace(p);
+              flyTo(p, 14);
+            }}
+            onClear={() => setPlace(null)}
           />
           <div className="bg-card pointer-events-auto flex h-10 items-center gap-2 rounded-lg border px-3 shadow-sm">
             <Switch id="show-expired" checked={showExpired} onCheckedChange={setShowExpired} />

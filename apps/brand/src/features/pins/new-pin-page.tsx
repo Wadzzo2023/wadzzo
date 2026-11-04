@@ -388,6 +388,7 @@ export default function NewPinPage() {
             assetsQuery={assetsQuery}
             selectedToken={selectedToken}
             remainingBalance={remainingBalance}
+            showRadius={false}
           />
         </FormSection>
 
