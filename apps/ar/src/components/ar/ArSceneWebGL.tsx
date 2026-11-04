@@ -157,8 +157,14 @@ export function ArSceneWebGL({
    * isn't set yet. Pins can easily be ready before the first fix lands, so
    * the pins-sync effect below must never call `add()` until this flips
    * true, no matter which effect happens to run first on a given commit.
+   *
+   * It holds the engine that has an origin, not a boolean: the engine is
+   * rebuilt (fresh `LocationBased`, no origin) when the camera's video node
+   * attaches, and a flag left `true` by the previous engine would let the
+   * pins-sync effect call `add()` on the new one a commit before its fix
+   * arrives — an uncaught throw that unmounts the whole page.
    */
-  const [originReady, setOriginReady] = useState(false);
+  const [originFor, setOriginFor] = useState<InstanceType<typeof LocationBased> | null>(null);
 
   // Mutable engine handles — imperative by nature (Three.js owns its own
   // object graph), kept in refs rather than state so the render loop never
@@ -433,10 +439,12 @@ export function ArSceneWebGL({
   // ── Keep pins in sync with the live query ────────────────────────────────
   useEffect(() => {
     const locar = locarRef.current;
-    // `originReady` gates this on top of the null check: the engine can
+    // `originFor` gates this on top of the null check: the engine can
     // exist before it has a GPS-derived world origin, and `locar.add()`
-    // throws if called that early (see the `originReady` doc comment above).
-    if (!locar || !originReady) return;
+    // throws if called that early (see the `originFor` doc comment above).
+    // Compared against the live engine, so an origin the previous engine had
+    // doesn't count for this one.
+    if (!locar || originFor !== locar) return;
 
     const scoped = focusPinId ? pins.filter((p) => p.id === focusPinId) : pins;
     const nextIds = new Set(scoped.map((p) => p.id));
@@ -482,7 +490,7 @@ export function ArSceneWebGL({
       locar.add(obj.getMesh(), lng, lat, PIN_FLOAT_HEIGHT_M);
       existing.set(pin.id, obj);
     }
-    // `videoElement`, `originReady` and `fix` aren't read for their own sake
+    // `videoElement`, `originFor` and `fix` aren't read for their own sake
     // here — they're re-sync triggers, not new inputs to the diffing logic
     // above `nextIds` already uses. `locarRef` only exists once the engine
     // effect above has run, and it only has a world origin once the GPS
@@ -500,7 +508,7 @@ export function ArSceneWebGL({
     // already exists — `existing.has(pin.id)` skips it, so a view-only pin's
     // virtual placement is computed once and then held still rather than
     // drifting with the viewer's own GPS noise.
-  }, [pins, focusPinId, videoElement, originReady, fix, ignoreRange]);
+  }, [pins, focusPinId, videoElement, originFor, fix, ignoreRange]);
 
   // ── Feed GPS fixes from the parent's own geolocation hook ───────────────
   // `LocationBased` can watch position itself, but the parent already runs
@@ -515,7 +523,7 @@ export function ArSceneWebGL({
     const locar = locarRef.current;
     // Bail rather than optional-chain past this: a location fix routinely
     // arrives before the engine does (geolocation tends to resolve faster
-    // than the video element attaches), and only setting `originReady` once
+    // than the video element attaches), and only setting `originFor` once
     // `fakeGps` has *actually* run against a real `locar` is what keeps the
     // pins-sync effect from racing ahead of a `locar` that has no origin
     // yet. This effect fires again on its own once `videoElement` flips to
@@ -523,7 +531,7 @@ export function ArSceneWebGL({
     // the engine-setup effect above runs first in that same commit.
     if (!locar) return;
     locar.fakeGps(fix.lng, fix.lat);
-    setOriginReady(true);
+    setOriginFor(locar);
   }, [fix, videoElement]);
 
   const pin = targetPin;
