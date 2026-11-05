@@ -189,6 +189,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       <BaseMap
         ref={map}
         controlsPosition="bottom-left"
+        locate
         initialViewState={savedView ?? WORLD_VIEW}
         onClick={(e) => {
           // A click on a hotspot area opens that hotspot (HotspotLayer handles

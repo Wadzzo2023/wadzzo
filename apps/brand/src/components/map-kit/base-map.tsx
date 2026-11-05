@@ -14,6 +14,7 @@ import MapGL, {
 } from "react-map-gl/mapbox";
 
 import { env } from "~/env";
+import { UserLocationLayer } from "./user-location";
 import { cn } from "@wadzzo/ui/lib/cn";
 
 import {
@@ -133,10 +134,19 @@ export const BaseMap = forwardRef<
     children?: ReactNode;
     className?: string;
     controls?: boolean;
+    /** Add a "show my location" button and the blue puck at the viewer's position. */
+    locate?: boolean;
     controlsPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   }
 >(function BaseMap(
-  { children, className, controls = true, controlsPosition = "bottom-right", ...props },
+  {
+    children,
+    className,
+    controls = true,
+    locate = false,
+    controlsPosition = "bottom-right",
+    ...props
+  },
   ref,
 ) {
   const { resolvedTheme } = useTheme();
@@ -172,6 +182,8 @@ export const BaseMap = forwardRef<
         <ApplyMapMode mode={mode} />
         {controls && <NavigationControl position={controlsPosition} showCompass={false} />}
         {controls && <MapModeToggle mode={mode} position={controlsPosition} />}
+        {/* After the mode toggle: the corner stacks later controls on top, so locate sits above 2D/3D. */}
+        {locate && <UserLocationLayer position={controlsPosition} />}
         {children}
       </MapGL>
     </div>
