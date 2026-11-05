@@ -5,6 +5,9 @@ const mocks = vi.hoisted(() => ({
   verifyFirebaseIdToken: vi.fn(),
   getOrCreateFirebaseUserFromApple: vi.fn(),
   axiosGet: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
+  sendEmailVerification: vi.fn(),
+  branding: { auth: { requireEmailVerification: true } },
   db: {
     user: {
       findUnique: vi.fn(),
@@ -16,9 +19,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("axios", () => ({ default: { get: mocks.axiosGet } }));
 vi.mock("firebase/auth", () => ({
-  sendEmailVerification: vi.fn(),
-  signInWithEmailAndPassword: vi.fn(),
+  sendEmailVerification: mocks.sendEmailVerification,
+  signInWithEmailAndPassword: mocks.signInWithEmailAndPassword,
 }));
+vi.mock("@wadzzo/platform/branding", () => ({ platformBranding: mocks.branding }));
 vi.mock("@albedo-link/signature-verification", () => ({ verifyMessageSignature: () => false }));
 vi.mock("@wadzzo/db/server", () => ({ db: mocks.db }));
 vi.mock("@wadzzo/platform/server", () => ({
@@ -39,9 +43,46 @@ const PUBLIC_KEY = "G".padEnd(56, "A");
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mocks.branding.auth.requireEmailVerification = true;
   mocks.db.user.findUnique.mockResolvedValue({ id: PUBLIC_KEY, email: "x@x.com" });
   mocks.axiosGet.mockResolvedValue({
     data: { publicKey: PUBLIC_KEY, extra: { isAccActive: true } },
+  });
+});
+
+describe("authorizeCredentials: email and password", () => {
+  const credential = { walletType: "emailPass", email: "x@x.com", password: "password-1" };
+
+  it("turns an unverified account away, and sends the verification email again", async () => {
+    mocks.signInWithEmailAndPassword.mockResolvedValue({
+      user: { uid: "u1", emailVerified: false },
+    });
+    const error = await authorizeCredentials(credential).catch((e: unknown) => e);
+    expect(error).toMatchObject({ code: "WALLET_AUTH_FAILED" });
+    expect((error as Error).message).toContain("unverified-email");
+    expect(mocks.sendEmailVerification).toHaveBeenCalledTimes(1);
+  });
+
+  it("signs a verified account in", async () => {
+    mocks.signInWithEmailAndPassword.mockResolvedValue({
+      user: { uid: "u1", emailVerified: true },
+    });
+    await expect(authorizeCredentials(credential)).resolves.toMatchObject({
+      emailVerified: true,
+    });
+    expect(mocks.sendEmailVerification).not.toHaveBeenCalled();
+  });
+
+  it("lets an unverified account in, as verified, where the platform doesn't require it", async () => {
+    mocks.branding.auth.requireEmailVerification = false;
+    mocks.signInWithEmailAndPassword.mockResolvedValue({
+      user: { uid: "u1", emailVerified: false },
+    });
+    await expect(authorizeCredentials(credential)).resolves.toMatchObject({
+      id: PUBLIC_KEY,
+      emailVerified: true,
+    });
+    expect(mocks.sendEmailVerification).not.toHaveBeenCalled();
   });
 });
 

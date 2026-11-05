@@ -83,4 +83,13 @@ export interface PlatformBranding {
     readonly principals: readonly { name: string; twitter?: string; github?: string }[];
   };
   readonly calendar: { readonly productId: string; readonly uidDomain: string };
+  /** How people sign in on this platform. */
+  readonly auth: {
+    /**
+     * Whether an email sign-up must be verified (a link sent to the mailbox) before the
+     * account can sign in. When false, sign-up creates the account and signs the person
+     * straight in, and existing unverified email accounts can sign in too.
+     */
+    readonly requireEmailVerification: boolean;
+  };
 }

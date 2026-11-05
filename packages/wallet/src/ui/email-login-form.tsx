@@ -7,12 +7,10 @@ import { useMutation } from "@tanstack/react-query";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
-import { firebaseAuth } from "../firebase/client";
-import { WalletType } from "../wallet-type";
+import { signInWithEmailPassword } from "../session/sign-in-with-credentials";
 import { showFirebaseAuthError } from "./firebase-error-toast";
 import { clearAuthNotice, showAuthError } from "./auth-notice";
 import { Button } from "@wadzzo/ui/components/button";
@@ -68,15 +66,7 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
     },
   });
 
-  async function loginUser(email: string, password: string) {
-    await firebaseAuth.signOut();
-    return await signIn("credentials", {
-      redirect: false,
-      password,
-      email,
-      walletType: WalletType.emailPass,
-    });
-  }
+  const loginUser = signInWithEmailPassword;
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     loginMutation.mutate(data);

@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { DialogProfileSync } from "~/components/shell/dialog-profile-sync";
 import { SharedThemeSync, THEME_STORAGE_KEY } from "~/components/shell/shared-theme-sync";
 import { TRPCReactProvider } from "~/trpc/provider";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 // the wallet package's global dialogs (sign-in, wallet connect) and the toast container. Browser-only.
 const WalletPopups = dynamic(
@@ -29,7 +30,10 @@ export function Providers({ children }: { children: ReactNode }) {
         <SharedThemeSync />
         <TRPCReactProvider>
           {children}
-          <WalletPopups className="font-sans" />
+          <WalletPopups
+            className="font-sans"
+            requireEmailVerification={platformBranding.auth.requireEmailVerification}
+          />
           <DialogProfileSync />
         </TRPCReactProvider>
       </ThemeProvider>

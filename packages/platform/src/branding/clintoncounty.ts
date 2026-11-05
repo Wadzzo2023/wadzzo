@@ -46,5 +46,7 @@ export const clintonCountyBranding: PlatformBranding = {
     orgUrl: "https://www.clintoncounty-ia.gov/",
     principals: [],
   },
+  // For now Clinton County accounts are created and signed in without confirming the email.
+  auth: { requireEmailVerification: false },
   calendar: { productId: "Clinton County", uidDomain: "clintoncounty-ia.gov" },
 };

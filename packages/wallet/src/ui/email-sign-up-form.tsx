@@ -9,6 +9,7 @@ import {
 import { useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, Mail } from "lucide-react";
@@ -16,6 +17,8 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { clearAuthNotice, showAuthError, showAuthSuccess } from "./auth-notice";
 import { z } from "zod";
 import { firebaseAuth } from "../firebase/client";
+import { signInWithEmailPassword } from "../session/sign-in-with-credentials";
+import { showFirebaseAuthError } from "./firebase-error-toast";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 const formSchema = z
@@ -33,9 +36,17 @@ type FormInputs = z.infer<typeof formSchema>;
 
 interface EmailSignUpFormProps {
   onSuccess?: () => void;
+  /**
+   * Whether the new account must confirm its email before signing in (the default). When false,
+   * no verification email is sent and the person is signed in as soon as the account exists.
+   */
+  requireEmailVerification?: boolean;
 }
 
-export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
+export function EmailSignUpForm({
+  onSuccess,
+  requireEmailVerification = true,
+}: EmailSignUpFormProps) {
   const [emailSent, setEmailSent] = useState(false);
 
   const {
@@ -52,15 +63,29 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
     mutationFn: async (data: FormInputs) => {
       const cred = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password);
       const user = cred.user;
+      if (!requireEmailVerification) {
+        // Nothing to confirm: sign straight in. The connect dialog closes itself when the session appears.
+        return { signedIn: await signInWithEmailPassword(data.email, data.password) };
+      }
       if (!user.emailVerified) {
         await sendEmailVerification(user);
       }
-      return user;
+      return { signedIn: null };
     },
-    onSuccess: () => {
+    onSuccess: ({ signedIn }) => {
+      reset();
+      if (!requireEmailVerification) {
+        if (signedIn?.error) {
+          // The account exists but the sign-in failed: say why, and leave them on the login form.
+          void showFirebaseAuthError({ error: signedIn.error });
+          onSuccess?.();
+        } else {
+          toast.success("Account created. You're signed in.");
+        }
+        return;
+      }
       showAuthSuccess("Account created! Please check your email to verify.");
       setEmailSent(true);
-      reset();
       // Optionally navigate back to login after successful signup
       setTimeout(() => {
         onSuccess?.();

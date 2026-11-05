@@ -11,7 +11,14 @@ const Toaster = dynamic(() => import("react-hot-toast").then((mod) => mod.Toaste
  * Mount once near the app root: the toast container, the connect-wallet dialog
  * and the element WalletConnect's modal renders into.
  */
-export function ConnectWalletPopups({ className }: { className: string }) {
+export function ConnectWalletPopups({
+  className,
+  requireEmailVerification = true,
+}: {
+  className: string;
+  /** See `ConnectWalletDialog`. */
+  requireEmailVerification?: boolean;
+}) {
   const isWalletConnectOpen = useWalletConnectModalStore((state) => state.isOpen);
 
   return (
@@ -22,7 +29,7 @@ export function ConnectWalletPopups({ className }: { className: string }) {
           className: "!rounded-xl !border !border-border !bg-card !text-card-foreground !shadow-lg",
         }}
       />
-      <ConnectWalletDialog />
+      <ConnectWalletDialog requireEmailVerification={requireEmailVerification} />
       {isWalletConnectOpen ? <w3m-modal /> : null}
     </>
   );

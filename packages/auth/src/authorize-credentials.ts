@@ -4,6 +4,7 @@ import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth
 
 import { db } from "@wadzzo/db/server";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { platformBranding } from "@wadzzo/platform/branding";
 import { getCurrentPlatform, getPlatformSlug, recordUserPlatform } from "@wadzzo/platform/server";
 import { truncateMiddle } from "@wadzzo/utils/string";
 import { PLATFORM_ASSET, USER_ACCOUNT_URL } from "@wadzzo/wallet/config";
@@ -65,7 +66,9 @@ export async function authorizeCredentials(input: unknown): Promise<Authenticate
       const { email, password, fromAppSign } = credential;
       const { user } = await signInWithEmailAndPassword(firebaseAuth, email, password);
 
-      if (!user.emailVerified) {
+      // Platforms that don't require it (Clinton County, for now) let an unverified email account in.
+      const verified = user.emailVerified || !platformBranding.auth.requireEmailVerification;
+      if (!verified) {
         await sendEmailVerification(user);
         throw new AppError(ErrorCodes.WALLET_AUTH_FAILED, {
           message: "Firebase: Error (auth/unverified-email).",
@@ -82,7 +85,7 @@ export async function authorizeCredentials(input: unknown): Promise<Authenticate
         ...dbUser,
         walletType: WalletType.emailPass,
         email,
-        emailVerified: user.emailVerified,
+        emailVerified: verified,
       };
     }
 

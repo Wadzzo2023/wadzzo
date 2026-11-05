@@ -10,6 +10,7 @@ import { useState, type ReactNode } from "react";
 // own zustand store (`useConnectWalletDialogStore`), which `useAuth().signIn()` opens —
 // see the note in lib/ar/store.ts. Mounted once here so it exists regardless
 // of which screen triggered the sign-in.
+import { platformBranding } from "@wadzzo/platform/branding";
 import { ConnectWalletDialog as ConnectDialog } from "@wadzzo/wallet";
 
 import { AuthGate } from "~/components/auth/AuthGate";
@@ -122,7 +123,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
           that `useAuth().signIn()` opens; mounted once here, outside
           `DeviceFrame`, because its dialog is not constrained to the phone
           frame and renders as a normal centred desktop modal. */}
-      <ConnectDialog />
+      <ConnectDialog requireEmailVerification={platformBranding.auth.requireEmailVerification} />
     </SessionProvider>
   );
 }

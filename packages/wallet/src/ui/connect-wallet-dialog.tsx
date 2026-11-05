@@ -141,7 +141,15 @@ const WALLET_BUTTON_ART: Partial<
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function ConnectWalletDialog() {
+export function ConnectWalletDialog({
+  requireEmailVerification = true,
+}: {
+  /**
+   * Whether an email sign-up has to be confirmed from the mailbox before it can sign in. The app
+   * passes its platform's setting; when false, signing up also signs the person in.
+   */
+  requireEmailVerification?: boolean;
+}) {
   const [authView, setAuthView] = useState<AuthView>("login");
   const [activeTab, setActiveTab] = useState<"action" | "stellar">("action");
   const [isAccountActivate, setAccountActivate] = useState(false);
@@ -522,7 +530,10 @@ export function ConnectWalletDialog() {
             >
               <ArrowLeft className="h-4 w-4" /> Back to login
             </button>
-            <EmailSignUpForm onSuccess={() => setAuthView("login")} />
+            <EmailSignUpForm
+              onSuccess={() => setAuthView("login")}
+              requireEmailVerification={requireEmailVerification}
+            />
           </>
         )}
 
