@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "react-hot-toast";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
@@ -67,6 +68,40 @@ export function AppFrame({ children }: { children: ReactNode }) {
 
         {/* Mural pack: background install + HUD pill + ready toast. */}
         <MuralPackHud />
+
+        {/* The toast container for everything outside the connect dialog — the wallet
+            package reports sign-in results through `react-hot-toast`, and with no
+            container mounted those messages were silently dropped. It lives inside the
+            phone (`absolute`, not the library's default `fixed` to the browser window),
+            so on a laptop the toasts appear on the screen, not beside it, and it sits
+            where the map's own error pill does, below the top bar. */}
+        <Toaster
+          position="top-center"
+          containerStyle={{
+            position: "absolute",
+            // Four edges, not `inset`: the library's defaults set each edge, and the shorthand
+            // would be applied after them and win over `top`.
+            top: "calc(var(--ar-top-inset, 0px) + 64px)",
+            left: 12,
+            right: 12,
+            bottom: 12,
+          }}
+          toastOptions={{
+            duration: 4000,
+            style: {
+              maxWidth: "min(86%, 23rem)",
+              padding: "10px 14px",
+              borderRadius: 16,
+              fontSize: 12,
+              fontWeight: 600,
+              lineHeight: 1.45,
+              color: "hsl(var(--ar-text))",
+              background: "hsl(var(--ar-surface) / 0.94)",
+              border: "1px solid hsl(var(--ar-line))",
+              boxShadow: "0 12px 32px -12px hsl(0 0% 0% / 0.9)",
+            },
+          }}
+        />
 
         {/* No presence wrapper needed: BootSequence has no `exit` prop — it
             plays its own iris-open inside `animate` and then unmounts itself
