@@ -1,5 +1,6 @@
 import albedo, { type PublicKeyIntentResult } from "@albedo-link/intent";
 import toast from "react-hot-toast";
+import { showAuthError } from "../../ui/auth-notice";
 
 import { stellarNetwork } from "../../config/stellar-network";
 import { StellarTransactionError } from "../../errors/stellar-transaction-error";
@@ -26,10 +27,10 @@ export const albedoProvider: WalletProvider = {
       intent = await albedo.publicKey({ token });
     } catch (error) {
       console.error("[Albedo] publicKey failed", error);
-      return void toast.error(LOGIN_RETRY_MESSAGE);
+      return void showAuthError(LOGIN_RETRY_MESSAGE);
     }
 
-    if (isInvalidPublicKey(intent.pubkey)) return void toast.error(LOGIN_RETRY_MESSAGE);
+    if (isInvalidPublicKey(intent.pubkey)) return void showAuthError(LOGIN_RETRY_MESSAGE);
 
     const result = await toast.promise(
       signInWithAlbedo({
@@ -42,7 +43,7 @@ export const albedoProvider: WalletProvider = {
     );
 
     if (result?.ok) toast.success("Public Key : " + abbreviateAddress(intent.pubkey, 10));
-    if (result?.error) toast.error(result.error);
+    if (result?.error) showAuthError(result.error);
   },
 
   async signAndSubmit(xdr, publicKey) {

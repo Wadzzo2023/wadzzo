@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { showAuthError } from "../ui/auth-notice";
 
 import { isAppError } from "@wadzzo/errors";
 
@@ -23,7 +24,7 @@ async function fetchLoginChallenge(publicKey: string): Promise<string | null> {
 }
 
 const toastError = (error: unknown, fallback: string): void => {
-  toast.error(isAppError(error) ? error.message : fallback);
+  showAuthError(isAppError(error) ? error.message : fallback);
 };
 
 /** The sign-in flow every extension wallet shares: connect → challenge → sign → session. */
@@ -42,7 +43,7 @@ export function createExtensionProvider(wallet: ExtensionWallet): WalletProvider
       }
 
       if (isInvalidPublicKey(publicKey)) {
-        return void toast.error(LOGIN_RETRY_MESSAGE);
+        return void showAuthError(LOGIN_RETRY_MESSAGE);
       }
 
       const challenge = await fetchLoginChallenge(publicKey);
@@ -67,7 +68,7 @@ export function createExtensionProvider(wallet: ExtensionWallet): WalletProvider
         toast.success("Login successful");
         toast.success("Public Key: " + abbreviateAddress(publicKey, 10));
       }
-      if (result?.error) toast.error(result.error);
+      if (result?.error) showAuthError(result.error);
     },
 
     async signAndSubmit(xdr, publicKey) {

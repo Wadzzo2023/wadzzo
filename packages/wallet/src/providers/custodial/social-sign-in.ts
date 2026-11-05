@@ -6,6 +6,7 @@ import {
   type UserCredential,
 } from "firebase/auth";
 import toast from "react-hot-toast";
+import { showAuthError } from "../../ui/auth-notice";
 
 import { firebaseAuth } from "../../firebase/client";
 import { signInWithApple, signInWithSocialProvider } from "../../session/sign-in-with-credentials";
@@ -26,7 +27,7 @@ async function startSessionAndProvisionAccount(
   const { user } = credential;
   const result = await toast.promise(user.getIdToken().then(signIn), LOGIN_PENDING);
 
-  if (result?.error) toast.error(result.error);
+  if (result?.error) showAuthError(result.error);
   if (!result?.ok) return;
   toast.success("Login Successfully");
 
@@ -50,7 +51,7 @@ export const googleProvider: WalletProvider = {
     try {
       const credential = await signInWithPopup(firebaseAuth, provider);
       const email = credential.user.providerData[0]?.email;
-      if (!email) return void toast.error("Email dont exist");
+      if (!email) return void showAuthError("Email dont exist");
 
       await startSessionAndProvisionAccount(
         credential,
@@ -79,7 +80,7 @@ export const appleProvider: WalletProvider = {
       const credential = await signInWithPopup(firebaseAuth, provider);
       const email = credential.user.email;
       if (!email) {
-        return void toast.error("Please share you email with us. without we can't proceed");
+        return void showAuthError("Please share you email with us. without we can't proceed");
       }
 
       await startSessionAndProvisionAccount(
@@ -108,7 +109,7 @@ export const facebookProvider: WalletProvider = {
     try {
       const credential = await signInWithPopup(firebaseAuth, provider);
       const email = credential.user.providerData[0]?.email;
-      if (!email) return void toast.error("Email dont exist");
+      if (!email) return void showAuthError("Email dont exist");
 
       const idToken = await credential.user.getIdToken();
       await signInWithSocialProvider({ email, token: idToken, walletType: WalletType.facebook });

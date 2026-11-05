@@ -4,6 +4,7 @@ import { ConfigCtrl, ModalCtrl } from "@web3modal/core";
 import { Web3Modal } from "@web3modal/standalone";
 import { type W3mModal } from "@web3modal/ui";
 import toast from "react-hot-toast";
+import { showAuthError } from "../../ui/auth-notice";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
@@ -92,7 +93,9 @@ async function login(): Promise<void> {
 
     const publicKey = publicKeyOfSession(session);
     if (isInvalidPublicKey(publicKey)) {
-      return void toast.error("Login failed. Please try to login again after refreshing the page.");
+      return void showAuthError(
+        "Login failed. Please try to login again after refreshing the page.",
+      );
     }
 
     const toastId = toast.loading("Please wait");
@@ -109,7 +112,7 @@ async function login(): Promise<void> {
       ModalCtrl.close();
 
       if (!signed.signedXDR) {
-        return void toast.error(
+        return void showAuthError(
           "Internal error, please try again later or contact an admin for help",
         );
       }
@@ -123,14 +126,14 @@ async function login(): Promise<void> {
         toast.success("Login successful");
         toast.success("Public Key : " + abbreviateAddress(publicKey, 10));
       }
-      if (result?.error) toast.error(result.error);
+      if (result?.error) showAuthError(result.error);
     } catch (error) {
       console.error("[WalletConnect] login failed", error);
     } finally {
       toast.dismiss(toastId);
     }
   } catch {
-    toast.error("Reject");
+    showAuthError("Reject");
   } finally {
     ModalCtrl.close();
     toast("WalletConnect session ended");

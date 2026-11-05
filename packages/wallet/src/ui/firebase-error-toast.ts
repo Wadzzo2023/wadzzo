@@ -1,5 +1,5 @@
 import { AuthErrorCodes } from "firebase/auth";
-import toast from "react-hot-toast";
+import { showAuthError } from "./auth-notice";
 
 const AuthErrorMessages = {
   ARGUMENT_ERROR:
@@ -212,12 +212,7 @@ export const showFirebaseAuthError = async ({
     } else if (errorKey === "UNVERIFIED_EMAIL") {
       setVerifyEmail?.(true);
     }
-    return toast(errorMessage, { ...commonToastStyles });
+    return showAuthError(errorMessage);
   }
-  return toast("Unknown error. Please contact support.", { ...commonToastStyles });
-};
-
-const commonToastStyles = {
-  duration: 3000,
-  icon: "❌",
+  return showAuthError("Unknown error. Please contact support.");
 };

@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Mail, CheckCircle } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { clearAuthNotice, showAuthError, showAuthSuccess } from "./auth-notice";
 import { z } from "zod";
 import { type AuthError, sendPasswordResetEmail } from "firebase/auth";
 
@@ -45,14 +45,15 @@ export function ForgotPasswordForm() {
   }, [updateCooldownRemaining]);
 
   const resetMutation = useMutation({
+    onMutate: () => clearAuthNotice(),
     mutationFn: ({ email }: { email: string }) => sendPasswordResetEmail(firebaseAuth, email),
     onSuccess: () => {
-      toast.success("Password reset email sent!");
+      showAuthSuccess("Password reset email sent!");
       setEmailSent(true);
       startCooldown(COOLDOWN_SECONDS);
     },
     onError: (error: AuthError) => {
-      toast.error(error.message);
+      showAuthError(error.message);
     },
   });
 

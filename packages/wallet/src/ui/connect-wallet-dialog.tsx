@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { DocumentDuplicateIcon, SignalSlashIcon } from "@heroicons/react/24/solid";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowUpCircle,
   CheckCircle2,
@@ -11,6 +12,7 @@ import {
   QrCodeIcon,
   RefreshCcw,
   Wallet,
+  X,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import clsx from "clsx";
@@ -199,8 +201,24 @@ export function ConnectWalletDialog() {
     if (dialogModalState.isOpen) {
       setAuthView("login");
       setActiveTab("action");
+      useConnectWalletDialogStore.getState().setNotice(null);
     }
   }, [dialogModalState.isOpen]);
+
+  // A failed attempt's message belongs to the form it came from: drop it when the user moves to
+  // another tab or view. (A success note, e.g. "check your email", outlives the switch back to login.)
+  useEffect(() => {
+    const { notice, setNotice } = useConnectWalletDialogStore.getState();
+    if (notice?.type === "error") setNotice(null);
+  }, [activeTab, authView]);
+
+  // The message is the answer to what they just did, so make sure it is on screen even when the
+  // form has been scrolled (a phone shows only part of this dialog at a time).
+  const noticeRef = useRef<HTMLDivElement>(null);
+  const notice = dialogModalState.notice;
+  useEffect(() => {
+    if (notice) noticeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [notice]);
 
   const authUser =
     session.status === "authenticated" && !!session.data?.user.emailVerified && isAccountActivate;
@@ -456,6 +474,9 @@ export function ConnectWalletDialog() {
   }
 
   // ── Action tab content ──
+  // Called as a function, not rendered as `<ActionTabContent />`: a component defined inside this
+  // one is a new type on every render, so React would remount the form (and wipe what the user
+  // typed) whenever anything in the dialog changes, e.g. an error message appearing.
   function ActionTabContent() {
     return (
       <div className="flex flex-col gap-4">
@@ -628,7 +649,7 @@ export function ConnectWalletDialog() {
             )}
 
             {/* Profile card */}
-            {authUser && <ProfileCard />}
+            {authUser && ProfileCard()}
 
             {/* Header */}
             <div className={isFramedHost ? "pr-9" : "pr-9 lg:pr-0"}>
@@ -639,6 +660,35 @@ export function ConnectWalletDialog() {
               </DialogTitle>
               <p className="marker text-primary mt-2 -rotate-1 text-sm">{subtitle}</p>
             </div>
+
+            {/* What happened to the last attempt (wrong password, check your email…) */}
+            {notice && (
+              <div
+                ref={noticeRef}
+                role={notice.type === "error" ? "alert" : "status"}
+                className={clsx(
+                  "flex items-start gap-2.5 rounded-xl border-2 px-3 py-2.5 text-sm font-semibold",
+                  notice.type === "error"
+                    ? "border-destructive bg-destructive text-destructive-foreground"
+                    : "border-primary bg-primary text-primary-foreground",
+                )}
+              >
+                {notice.type === "error" ? (
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                )}
+                <p className="min-w-0 flex-1 break-words">{notice.text}</p>
+                <button
+                  type="button"
+                  onClick={() => dialogModalState.setNotice(null)}
+                  aria-label="Dismiss message"
+                  className="-m-1 shrink-0 rounded-full p-1 opacity-80 hover:opacity-100"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            )}
 
             {/* Tabs — controlled so switching is stable */}
             <Tabs
@@ -661,10 +711,10 @@ export function ConnectWalletDialog() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="action" className={authUser ? "mt-2" : "mt-4"}>
-                <ActionTabContent />
+                {ActionTabContent()}
               </TabsContent>
               <TabsContent value="stellar" className={authUser ? "mt-2" : "mt-4"}>
-                <StellarTabContent />
+                {StellarTabContent()}
               </TabsContent>
             </Tabs>
           </div>

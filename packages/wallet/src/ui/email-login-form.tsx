@@ -14,6 +14,7 @@ import { z } from "zod";
 import { firebaseAuth } from "../firebase/client";
 import { WalletType } from "../wallet-type";
 import { showFirebaseAuthError } from "./firebase-error-toast";
+import { clearAuthNotice, showAuthError } from "./auth-notice";
 import { Button } from "@wadzzo/ui/components/button";
 import { Input } from "@wadzzo/ui/components/input";
 
@@ -43,6 +44,7 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
   });
 
   const loginMutation = useMutation({
+    onMutate: () => clearAuthNotice(),
     mutationFn: (data: FormInputs) => loginUser(data.email, data.password),
     onSuccess: async (res) => {
       if (res?.ok) {
@@ -59,9 +61,9 @@ export function EmailLoginForm({ onForgotPassword }: EmailLoginFormProps) {
     onError: (error: AuthError) => {
       const errorCode = error.code;
       if (errorCode === AuthErrorCodes.INVALID_PASSWORD) {
-        toast.error("Invalid credentials");
+        showAuthError("Invalid credentials");
       } else {
-        toast.error(error.message);
+        showAuthError(error.message);
       }
     },
   });

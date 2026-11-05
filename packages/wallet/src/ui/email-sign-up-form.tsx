@@ -13,7 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { clearAuthNotice, showAuthError, showAuthSuccess } from "./auth-notice";
 import { z } from "zod";
 import { firebaseAuth } from "../firebase/client";
 import { Button } from "@wadzzo/ui/components/button";
@@ -48,6 +48,7 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
   });
 
   const registerMutation = useMutation({
+    onMutate: () => clearAuthNotice(),
     mutationFn: async (data: FormInputs) => {
       const cred = await createUserWithEmailAndPassword(firebaseAuth, data.email, data.password);
       const user = cred.user;
@@ -57,7 +58,7 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
       return user;
     },
     onSuccess: () => {
-      toast.success("Account created! Please check your email to verify.");
+      showAuthSuccess("Account created! Please check your email to verify.");
       setEmailSent(true);
       reset();
       // Optionally navigate back to login after successful signup
@@ -67,9 +68,9 @@ export function EmailSignUpForm({ onSuccess }: EmailSignUpFormProps) {
     },
     onError: (error: AuthError) => {
       if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
-        toast.error("An account with this email already exists");
+        showAuthError("An account with this email already exists");
       } else {
-        toast.error(error.message);
+        showAuthError(error.message);
       }
     },
   });
