@@ -43,10 +43,13 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeClassName,
   portalContainer,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /** Extra classes for the close button, e.g. to put it on a solid disc over a cover image. */
+  closeClassName?: string;
   /** Render into this element instead of `document.body` (for hosts that draw their own device frame). */
   portalContainer?: HTMLElement | null;
 }) {
@@ -67,7 +70,12 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            // A 40px target on phones (32px from `sm`), centred where the 16px icon always sat
+            // (24px from the corner), so a thumb can hit it and no dialog's layout moves.
+            className={cn(
+              "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-1 right-1 flex size-10 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none sm:top-2 sm:right-2 sm:size-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+              closeClassName,
+            )}
           >
             <XIcon />
             <span className="sr-only">Close</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { DocumentDuplicateIcon, SignalSlashIcon } from "@heroicons/react/24/solid";
 import {
@@ -43,6 +43,13 @@ import rabetLogo from "./assets/rabet.png";
 import xbullLogo from "./assets/xbull-dark.svg";
 
 type AuthView = "login" | "signup" | "forgot-password";
+
+/**
+ * The dialog's close button: a solid dark disc with a white X, so it reads over the plain card and
+ * over the signed-in profile's cover photo alike, and `z-20` so scrolling content never covers it.
+ */
+const CLOSE_BUTTON_CLASS =
+  "z-20 bg-black/55 text-white opacity-100 hover:bg-black/75 data-[state=open]:bg-black/55 data-[state=open]:text-white";
 function getWalletLabel(walletType: WalletType): string {
   switch (walletType) {
     case WalletType.freighter:
@@ -137,6 +144,8 @@ export function ConnectWalletDialog() {
   const [activeTab, setActiveTab] = useState<"action" | "stellar">("action");
   const [isAccountActivate, setAccountActivate] = useState(false);
   const [isAccountActivateLoading, setAccountActivateLoading] = useState(false);
+  /** The account `isAccountActivate` was last worked out for, so a stale answer for another user is ignored. */
+  const [activityCheckedFor, setActivityCheckedFor] = useState<string | null>(null);
   const dialogModalState = useConnectWalletDialogStore();
   const [selectedWallet, setSelectedWallet] = useState(WalletType.none);
   const isIosFBuser = useFacebookIosUserAgent();
@@ -155,6 +164,7 @@ export function ConnectWalletDialog() {
     setAccountActivateLoading(true);
     const isActive = await isStellarAccountActive(publicKey);
     setAccountActivate(isActive);
+    setActivityCheckedFor(publicKey);
     setAccountActivateLoading(false);
   }, []);
 
@@ -194,6 +204,39 @@ export function ConnectWalletDialog() {
 
   const authUser =
     session.status === "authenticated" && !!session.data?.user.emailVerified && isAccountActivate;
+
+  // Close by itself once someone signs in. The dialog also opens for a signed-in user (account
+  // menu: "Switch account"), so being signed in is not the signal: a *different* user than the
+  // one who was signed in when it opened is. A login that still needs something from the user
+  // (verify the email, fund the account) keeps it open, since the dialog is where that is shown.
+  const signedInUserId =
+    session.status === "authenticated" ? (session.data?.user.id ?? null) : null;
+  const openedAsRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!dialogModalState.isOpen) {
+      openedAsRef.current = undefined;
+      return;
+    }
+    if (session.status === "loading") return;
+    if (openedAsRef.current === undefined) {
+      openedAsRef.current = signedInUserId;
+      return;
+    }
+    const justSignedIn =
+      signedInUserId !== null &&
+      signedInUserId !== openedAsRef.current &&
+      authUser &&
+      !isAccountActivateLoading &&
+      activityCheckedFor === signedInUserId;
+    if (justSignedIn) dialogModalState.setIsOpen(false);
+  }, [
+    dialogModalState,
+    session.status,
+    signedInUserId,
+    authUser,
+    isAccountActivateLoading,
+    activityCheckedFor,
+  ]);
 
   const title = authUser
     ? "Switch account"
@@ -251,7 +294,7 @@ export function ConnectWalletDialog() {
             />
           )}
           {/* how they signed in, as a badge on the cover */}
-          <span className="label-caps absolute top-3 right-4 rounded-full bg-black/55 px-2.5 py-1 text-[10px] text-white">
+          <span className="label-caps absolute top-3 left-4 rounded-full bg-black/55 px-2.5 py-1 text-[10px] text-white">
             {walletLabel}
           </span>
         </div>
@@ -523,7 +566,11 @@ export function ConnectWalletDialog() {
       session.data?.user.emailVerified &&
       !isAccountActivateLoading &&
       !isAccountActivate ? (
-        <DialogContent portalContainer={frameContainer} className="max-w-sm rounded-2xl p-6">
+        <DialogContent
+          portalContainer={frameContainer}
+          closeClassName={CLOSE_BUTTON_CLASS}
+          className="max-w-sm rounded-2xl p-6"
+        >
           <DialogTitle className="sr-only">Account Status</DialogTitle>
           <NotActivatedUser />
           <div className="mt-4">
@@ -541,6 +588,7 @@ export function ConnectWalletDialog() {
            and cram a 280px side panel into a ~400px box. */
         <DialogContent
           portalContainer={frameContainer}
+          closeClassName={CLOSE_BUTTON_CLASS}
           className={
             isFramedHost
               ? clsx(
@@ -583,7 +631,7 @@ export function ConnectWalletDialog() {
             {authUser && <ProfileCard />}
 
             {/* Header */}
-            <div>
+            <div className={isFramedHost ? "pr-9" : "pr-9 lg:pr-0"}>
               <DialogTitle
                 className={clsx("display text-foreground", authUser ? "text-3xl" : "text-[2.6rem]")}
               >
