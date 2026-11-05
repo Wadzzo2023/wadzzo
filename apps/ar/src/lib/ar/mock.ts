@@ -445,7 +445,9 @@ export const MOCK_PINS: ArPin[] = projectPinsAround(FALLBACK_CENTER);
 export const rarityOf = (pin: ArPin) => pin.rarity;
 
 export const DEFAULT_SETTINGS: ArSettings = {
-  autoCollect: false,
+  // On by default on every platform (Wadzzo and Clinton County): a drop flagged auto-collect is
+  // claimed as you walk up to it. Still needs a signed-in viewer, and it's a switch in Profile.
+  autoCollect: true,
   followingOnly: false,
   haptics: true,
   sound: true,
