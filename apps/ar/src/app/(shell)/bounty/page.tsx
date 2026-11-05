@@ -13,6 +13,7 @@ import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { useAuth } from "~/lib/ar/store";
 import { useBountyAttention } from "~/lib/ar/useBountyAttention";
 import { api } from "~/utils/api";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 type Segment = "explore" | "mine";
 type Filter = "open" | "ending" | "top";
@@ -209,7 +210,7 @@ export default function BountyScreen() {
                 className="mt-5"
                 onClick={() => requireAuth("bounty")}
               >
-                Connect wallet
+                {platformBranding.auth.signInLabel}
               </ArButton>
             </div>
           ) : (

@@ -632,7 +632,7 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
 
           <div className="mt-7 space-y-2">
             <ArButton variant="primary" size="lg" block icon={Wallet} onClick={onSignIn}>
-              Connect wallet
+              {platformBranding.auth.signInLabel}
             </ArButton>
             <ArLinkButton href="/map" variant="ghost" size="md" block>
               Keep browsing

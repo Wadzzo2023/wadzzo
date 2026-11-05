@@ -91,5 +91,7 @@ export interface PlatformBranding {
      * straight in, and existing unverified email accounts can sign in too.
      */
     readonly requireEmailVerification: boolean;
+    /** The text of the button that opens the sign-in dialog. */
+    readonly signInLabel: string;
   };
 }

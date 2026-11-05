@@ -4,6 +4,7 @@ import { Wallet } from "lucide-react";
 import { GATE_COPY, useAuth } from "~/lib/ar/store";
 import { ArButton } from "~/components/ui/ArButton";
 import { BottomSheet } from "~/components/ui/BottomSheet";
+import { platformBranding } from "@wadzzo/platform/branding";
 
 /**
  * ── AuthGate ───────────────────────────────────────────────────────────────
@@ -88,7 +89,7 @@ export function AuthGate() {
 
           <div className="mt-6 space-y-2.5">
             <ArButton variant="primary" size="lg" block icon={Wallet} onClick={signIn}>
-              Connect wallet
+              {platformBranding.auth.signInLabel}
             </ArButton>
             <ArButton variant="ghost" size="md" block onClick={closeGate}>
               Keep looking around

@@ -51,6 +51,6 @@ export const wadzzoBranding: PlatformBranding = {
     orgEmail: "support@wadzzo.com",
     principals: [{ name: "Arnob Dey", twitter: "ArnobDey_Dev", github: "arnob016" }],
   },
-  auth: { requireEmailVerification: true },
+  auth: { requireEmailVerification: true, signInLabel: "Connect wallet" },
   calendar: { productId: "Wadzzo", uidDomain: "wadzzo.com" },
 };
