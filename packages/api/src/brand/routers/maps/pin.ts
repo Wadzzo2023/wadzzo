@@ -2044,13 +2044,13 @@ export const pinRouter = createTRPCRouter({
     const creatorId = ctx.session.user.id;
     const [general, landmark, event, hotspot] = await Promise.all([
       ctx.db.locationGroup.count({
-        where: { creatorId, hotspotId: null, type: PinType.OTHER },
+        where: { creatorId, hidden: false, hotspotId: null, type: PinType.OTHER },
       }),
       ctx.db.locationGroup.count({
-        where: { creatorId, hotspotId: null, type: PinType.LANDMARK },
+        where: { creatorId, hidden: false, hotspotId: null, type: PinType.LANDMARK },
       }),
       ctx.db.locationGroup.count({
-        where: { creatorId, hotspotId: null, type: PinType.EVENT },
+        where: { creatorId, hidden: false, hotspotId: null, type: PinType.EVENT },
       }),
       ctx.db.hotspot.count({ where: { creatorId, hidden: false } }),
     ]);
@@ -2104,12 +2104,16 @@ export const pinRouter = createTRPCRouter({
       const groups = await ctx.db.locationGroup.findMany({
         where: {
           creatorId: ctx.session.user.id,
+          hidden: false,
           hotspotId: null,
           type: pinTypeMap[input.type],
           ...(input.search ? { title: { contains: input.search, mode: "insensitive" } } : {}),
         },
         include: {
-          locations: { include: { _count: { select: { consumers: true } } } },
+          locations: {
+            where: { hidden: false },
+            include: { _count: { select: { consumers: true } } },
+          },
         },
         orderBy: { createdAt: "desc" },
         take: input.limit + 1,
@@ -2286,6 +2290,7 @@ export const pinRouter = createTRPCRouter({
               remaining: true,
               hidden: true,
               locations: {
+                where: { hidden: false },
                 select: {
                   id: true,
                   latitude: true,
