@@ -13,6 +13,14 @@ ENV_FILE="${ENV_FILE:-$HOME/wadzzo/express.env}"
 HOST_PORT="${HOST_PORT:-4000}"
 WAIT_SECONDS="${WAIT_SECONDS:-90}"
 
+# Staging: the image is already on the server (the workflow loaded it); don't start anything.
+# Used before a cutover, so the new server isn't running beside the old one.
+if [ "${LOAD_ONLY:-0}" = 1 ]; then
+  docker image inspect "${IMAGE}:${TAG}" > /dev/null
+  echo "Image ${IMAGE}:${TAG} is on the server. Not started (LOAD_ONLY=1)."
+  exit 0
+fi
+
 [ -f "$ENV_FILE" ] || { echo "Missing $ENV_FILE: create it from apps/worker/.env.example first." >&2; exit 1; }
 
 run() {

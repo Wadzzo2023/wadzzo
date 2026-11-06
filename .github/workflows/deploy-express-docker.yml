@@ -22,6 +22,11 @@ on:
       - "scripts/deploy-express.sh"
       - ".github/workflows/deploy-express-docker.yml"
   workflow_dispatch:
+    inputs:
+      stage_only:
+        description: "Build and load the image on the server but do not start it (before a cutover)"
+        type: boolean
+        default: false
 
 # Two deploys at once would restart the one container twice and drop its job twice.
 concurrency:
@@ -85,9 +90,10 @@ jobs:
       - name: Swap the container, wait for /health, go back if it fails
         run: |
           ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-            "NAME=wadzzo-express IMAGE=wadzzo-express HOST_PORT=4000 bash -s -- ${TAG}" < scripts/deploy-express.sh
+            "NAME=wadzzo-express IMAGE=wadzzo-express HOST_PORT=4000 LOAD_ONLY=${{ inputs.stage_only && 1 || 0 }} bash -s -- ${TAG}" < scripts/deploy-express.sh
 
-      - name: Keep the watchdog current
+      # The scripts stay on the server too, so a cutover can start the staged image in seconds.
+      - name: Keep the scripts current
         run: |
-          scp -i ~/.ssh/deploy_key.pem scripts/express-watchdog.sh \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:wadzzo/express-watchdog.sh
+          scp -i ~/.ssh/deploy_key.pem scripts/express-watchdog.sh scripts/deploy-express.sh \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:wadzzo/
