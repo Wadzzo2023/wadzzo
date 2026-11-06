@@ -13,7 +13,7 @@ The three web apps run on **Vercel**, the task server runs on **AWS (EC2)**. Eve
                         │               │
                         │ server-to-server (X-Task-Secret)
                         ▼
-              portal.actn.xyz/wadzzo/api/               AWS EC2: nginx → PM2 → apps/express-wadzzo
+              wadzzo.54-69-28-110.sslip.io              AWS EC2: Caddy → Docker → apps/express-wadzzo
                         │
           Postgres (one database per environment) · S3 bucket · Firebase · Stellar
 ```
@@ -163,6 +163,24 @@ Pushes to `main` promote to Production; pushes to `develop` update the `dev-*` d
 
 ## 4. Task server on AWS
 
+> **Current production (2026-11-06):** the task server runs as a **Docker container** (`wadzzo-express`)
+> on the `bandcoin-worker` EC2 instance (us-west-2, Elastic IP `54.69.28.110`), next to the Bandcoin
+> worker, behind **Caddy** at **`https://wadzzo.54-69-28-110.sslip.io`**. The brand app must call that
+> address directly: set `EXPRESS_SERVER_URL=https://wadzzo.54-69-28-110.sslip.io` on the brand project
+> (it is also the built-in production default). The old `portal.actn.xyz/wadzzo/api/` route is retired.
+>
+> It is built and deployed by `.github/workflows/deploy-express-docker.yml` (Dockerfile at
+> `apps/express-wadzzo/Dockerfile`, scripts in `scripts/deploy-express.sh` and
+> `scripts/express-watchdog.sh`): the runner tests, builds the image and streams it to the server; the
+> script swaps the container and waits for `/health`, going back to the previous image if it never
+> answers. The workflow runs only when the repository variable `DEPLOY_EXPRESS_DOCKER` is `true`; run it
+> by hand with **stage_only** to load an image without starting it. The server's env file is
+> `~/wadzzo/express.env` (never in git). Secrets: `EC2_SSH_KEY`, `EC2_HOST`, `EC2_USER`. The older PM2
+> workflow (`deploy-express.yml`, variable `DEPLOY_EXPRESS`) is retired: leave it off, since `EC2_HOST`
+> now points at the new server.
+>
+> The sections below describe the earlier PM2 and nginx setup, kept for reference.
+
 The task server (`apps/express-wadzzo`) is **one long-running Node process**. It keeps job state, server-sent-event streams and hotspot schedules in memory, so it must run as **exactly one instance** on an always-on machine; it cannot run on Vercel or any serverless platform, and a restart drops in-flight jobs (deploy when `GET /health` reports no `processing` jobs).
 
 ### 4.1 Machine
@@ -212,7 +230,7 @@ sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d portal.actn.xyz        # adds HTTPS and auto-renewal
 ```
 
-The config serves the task server at `https://portal.actn.xyz/wadzzo/api/`, strips the prefix, turns buffering off for the SSE stream and allows 50 MB bodies. That URL is also the production default inside the brand app, so you don't have to set `EXPRESS_SERVER_URL` in Production, but **do set it anyway** so it is visible and explicit.
+The config serves the task server at `https://portal.actn.xyz/wadzzo/api/` (the earlier setup), strips the prefix, turns buffering off for the SSE stream and allows 50 MB bodies. Set `EXPRESS_SERVER_URL` in Production so the address is visible and explicit (the built-in default is now `https://wadzzo.54-69-28-110.sslip.io`).
 
 ### 4.4 First start
 
@@ -256,7 +274,7 @@ GitHub's runners connect from changing addresses, so port 22 has to accept them.
 | Roll back             | revert the commit on `main`; the workflow redeploys the previous build                                        |
 | Rotate the shared key | change `NEXTAUTH_SECRET` in the brand project **and** in `.env` here, redeploy both                           |
 
-Uptime monitoring: point any checker at `https://portal.actn.xyz/wadzzo/api/health`. It is unauthenticated and returns uptime, memory and job counts; restrict it in nginx if you don't want that public.
+Uptime monitoring: point any checker at `https://wadzzo.54-69-28-110.sslip.io/health`. It is unauthenticated and returns uptime, memory and job counts; restrict it in nginx if you don't want that public.
 
 ### 4.7 A development task server (optional)
 

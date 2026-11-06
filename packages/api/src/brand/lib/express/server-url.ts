@@ -2,7 +2,7 @@ import { taskServerKey } from "@wadzzo/agent-contract/task-server-key";
 import { env } from "../../../env";
 import { AppError, ErrorCodes, isProductionDeployment } from "@wadzzo/errors";
 
-const PRODUCTION_URL = "https://portal.actn.xyz/wadzzo/api/";
+const PRODUCTION_URL = "https://wadzzo.54-69-28-110.sslip.io";
 
 /**
  * Base URL of the Express task server. The production deployment falls back to

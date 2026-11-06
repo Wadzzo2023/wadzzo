@@ -17,9 +17,9 @@ describe("taskServerUrl", () => {
 
   it("falls back to the live server on the production deployment only", () => {
     set({ VERCEL_ENV: "production", NODE_ENV: "production" });
-    expect(taskServerUrl()).toMatch(/^https:\/\/portal\.actn\.xyz/);
+    expect(taskServerUrl()).toBe("https://wadzzo.54-69-28-110.sslip.io");
     set({ NODE_ENV: "production" }); // self-hosted production
-    expect(taskServerUrl()).toMatch(/^https:\/\/portal\.actn\.xyz/);
+    expect(taskServerUrl()).toBe("https://wadzzo.54-69-28-110.sslip.io");
   });
 
   it("never falls back to production from a preview or the dev domain", () => {

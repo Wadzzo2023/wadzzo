@@ -182,7 +182,7 @@ Test account: Fyron (GAP4E5…EZH) on the **dev DB** (`ep-winter-art`), granted 
 ## Task server (express-wadzzo) — findings from the hotspot check (2026-09-30)
 
 - **Local dev:** the portal reads `EXPRESS_SERVER_URL` (server env). Production falls back to
-  `https://portal.actn.xyz/wadzzo/api/`; anywhere else it must be set, so local testing never
+  `https://wadzzo.54-69-28-110.sslip.io`; anywhere else it must be set, so local testing never
   writes to production. Locally: `apps/express-wadzzo` → `pnpm build && node dist/index.js`
   (port 4000, `.env` with the **dev** DATABASE_URL), and `EXPRESS_SERVER_URL=http://localhost:4000`
   in `.env.development`. `pnpm dev` (tsx watch) fails on Node 24 — fix in the `upgrade` branch.
