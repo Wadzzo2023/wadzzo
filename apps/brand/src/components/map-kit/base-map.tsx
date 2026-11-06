@@ -3,17 +3,12 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useTheme } from "next-themes";
-import type { IControl } from "mapbox-gl";
 import { forwardRef, useEffect, useRef, type ReactNode } from "react";
-import MapGL, {
-  NavigationControl,
-  useControl,
-  useMap,
-  type MapProps,
-  type MapRef,
-} from "react-map-gl/mapbox";
+import MapGL, { useControl, useMap, type MapProps, type MapRef } from "react-map-gl/mapbox";
 
 import { env } from "~/env";
+import { MapControlStack } from "./map-control-stack";
+import { MapControlStackContext } from "./map-control-stack-context";
 import { UserLocationLayer } from "./user-location";
 import { cn } from "@wadzzo/ui/lib/cn";
 
@@ -71,55 +66,60 @@ function ApplyMapMode({ mode }: { mode: MapMode }) {
   return null;
 }
 
-/** A small "2D / 3D" button in the map's corner, next to the zoom buttons. */
-class MapModeControl implements IControl {
-  private el?: HTMLDivElement;
-  private button?: HTMLButtonElement;
-
-  onAdd() {
-    const el = document.createElement("div");
-    el.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
-    const button = document.createElement("button");
-    button.type = "button";
-    button.style.fontSize = "11px";
-    button.style.fontWeight = "700";
-    // Mapbox's control buttons are white in both themes; the page's light text
-    // colour would vanish on them.
-    button.style.color = "#111";
-    button.style.letterSpacing = "0.02em";
-    button.addEventListener("click", () => setMapMode(readMapMode() === "3d" ? "2d" : "3d"));
-    el.appendChild(button);
-    this.el = el;
-    this.button = button;
-    return el;
-  }
-
-  onRemove() {
-    this.el?.remove();
-  }
-
-  /** Shows the mode a click switches to, the way map apps do. */
-  show(mode: MapMode) {
-    if (!this.button) return;
-    const next = mode === "3d" ? "2D" : "3D";
-    this.button.textContent = next;
-    this.button.title = `Switch to the ${next} map`;
-    this.button.setAttribute("aria-label", `Switch to the ${next} map`);
-  }
-}
-
-function MapModeToggle({
+/**
+ * The corner buttons as one box: [locate, from a child layer] 2D/3D, zoom in, zoom out.
+ * `children` are rendered with the stack available through `useMapControlStack`.
+ */
+function MapControls({
   mode,
   position,
+  children,
 }: {
   mode: MapMode;
   position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  children?: ReactNode;
 }) {
-  const control = useControl<MapModeControl>(() => new MapModeControl(), {
-    position,
-  });
-  useEffect(() => control.show(mode), [control, mode]);
-  return null;
+  const { current } = useMap();
+  const stack = useControl<MapControlStack>(() => new MapControlStack(), { position });
+
+  // Shows the mode a click switches to, the way map apps do.
+  useEffect(() => {
+    const next = mode === "3d" ? "2D" : "3D";
+    stack.set("mode", {
+      label: `Switch to the ${next} map`,
+      html: `<span style="font-size:11px;font-weight:700;letter-spacing:0.02em">${next}</span>`,
+      onPress: () => setMapMode(readMapMode() === "3d" ? "2d" : "3d"),
+    });
+  }, [stack, mode]);
+
+  useEffect(() => {
+    const map = current?.getMap();
+    const icon = '<span class="mapboxgl-ctrl-icon" aria-hidden="true"></span>';
+    const update = () => {
+      stack.set("zoomIn", {
+        label: "Zoom in",
+        html: icon,
+        className: "mapboxgl-ctrl-zoom-in",
+        onPress: () => map?.zoomIn(),
+        disabled: map ? map.getZoom() >= map.getMaxZoom() : false,
+      });
+      stack.set("zoomOut", {
+        label: "Zoom out",
+        html: icon,
+        className: "mapboxgl-ctrl-zoom-out",
+        onPress: () => map?.zoomOut(),
+        disabled: map ? map.getZoom() <= map.getMinZoom() : false,
+      });
+    };
+    update();
+    // Zoom buttons switch off at the ends of the zoom range, as Mapbox's own do.
+    map?.on("zoomend", update);
+    return () => void map?.off("zoomend", update);
+  }, [stack, current]);
+
+  return (
+    <MapControlStackContext.Provider value={stack}>{children}</MapControlStackContext.Provider>
+  );
 }
 
 /**
@@ -180,10 +180,13 @@ export const BaseMap = forwardRef<
       >
         <FollowContainerSize />
         <ApplyMapMode mode={mode} />
-        {controls && <NavigationControl position={controlsPosition} showCompass={false} />}
-        {controls && <MapModeToggle mode={mode} position={controlsPosition} />}
-        {/* After the mode toggle: the corner stacks later controls on top, so locate sits above 2D/3D. */}
-        {locate && <UserLocationLayer position={controlsPosition} />}
+        {controls ? (
+          <MapControls mode={mode} position={controlsPosition}>
+            {locate && <UserLocationLayer />}
+          </MapControls>
+        ) : (
+          locate && <UserLocationLayer />
+        )}
         {children}
       </MapGL>
     </div>

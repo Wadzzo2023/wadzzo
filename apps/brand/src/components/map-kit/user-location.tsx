@@ -1,11 +1,12 @@
 "use client";
 
-import type { IControl } from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Layer, Marker, Source, useControl, useMap } from "react-map-gl/mapbox";
+import { Layer, Marker, Source, useMap } from "react-map-gl/mapbox";
 
 import { circleFeature, toMapboxFeature } from "@wadzzo/geo/map-geometry";
+
+import { useMapControlStack } from "./map-control-stack-context";
 
 type Fix = { lat: number; lng: number; accuracy: number };
 type Status = "idle" | "locating" | "located" | "denied";
@@ -18,65 +19,15 @@ const ICON_PATHS = `
   <circle cx="12" cy="12" r="7"></circle>
   <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"></path>`;
 
-/** A button in the map's corner, next to the zoom buttons, that flies to the viewer's location. */
-class LocateControl implements IControl {
-  private el?: HTMLDivElement;
-  private button?: HTMLButtonElement;
-  private onPress: () => void = () => undefined;
-
-  /** The React side's handler for a press of the button. */
-  setOnPress(handler: () => void) {
-    this.onPress = handler;
-  }
-
-  onAdd() {
-    const el = document.createElement("div");
-    el.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
-    const button = document.createElement("button");
-    button.type = "button";
-    button.style.color = "#111";
-    button.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">${ICON_PATHS}</svg>`;
-    button.addEventListener("click", () => this.onPress());
-    el.appendChild(button);
-    this.el = el;
-    this.button = button;
-    this.show("idle");
-    return el;
-  }
-
-  onRemove() {
-    this.el?.remove();
-  }
-
-  show(status: Status) {
-    if (!this.button) return;
-    const label =
-      status === "denied"
-        ? "Location is blocked — allow it in your browser settings"
-        : status === "locating"
-          ? "Finding your location…"
-          : "Show my location";
-    this.button.title = label;
-    this.button.setAttribute("aria-label", label);
-    // Blue once there is a fix, dimmed when the browser refused, pulsing while waiting.
-    this.button.style.color = status === "located" ? "#2f7cf6" : "#111";
-    this.button.style.opacity = status === "denied" ? "0.45" : "1";
-    this.button.style.animation = status === "locating" ? "pulse 1.2s ease-in-out infinite" : "";
-  }
-}
-
 /**
  * "Where am I" for a map: the blue puck at the viewer's position (with its accuracy circle) and a
  * button that flies to it. The button is the one that asks the browser for permission; if it was
  * already granted the puck shows by itself, without moving the camera, so a map the brand has
  * positioned stays where they left it.
  */
-export function UserLocationLayer({
-  position,
-}: {
-  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
-}) {
+export function UserLocationLayer() {
   const { current: map } = useMap();
+  const stack = useMapControlStack();
   const [fix, setFix] = useState<Fix | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const watchId = useRef<number | null>(null);
@@ -152,23 +103,38 @@ export function UserLocationLayer({
     };
   }, [startWatching, stopWatching]);
 
-  const control = useControl<LocateControl>(() => new LocateControl(), { position });
+  // The button joins the map's corner stack (above 2D/3D); the map without one just gets the puck.
   useEffect(() => {
-    control.setOnPress(() => {
-      if (fixRef.current) {
-        flyTo(fixRef.current);
-        return;
-      }
-      if (status === "denied") {
-        toast.error("Location is blocked. Allow it in your browser's site settings to use this.");
-        return;
-      }
-      flyOnFix.current = true;
-      setStatus("locating");
-      startWatching();
+    if (!stack) return;
+    const label =
+      status === "denied"
+        ? "Location is blocked — allow it in your browser settings"
+        : status === "locating"
+          ? "Finding your location…"
+          : "Show my location";
+    stack.set("locate", {
+      label,
+      html: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:block">${ICON_PATHS}</svg>`,
+      // Blue once there is a fix, dimmed when the browser refused, fading in and out while waiting.
+      color: status === "located" ? "#2f7cf6" : "#111",
+      opacity: status === "denied" ? 0.45 : undefined,
+      pulse: status === "locating",
+      onPress: () => {
+        if (fixRef.current) {
+          flyTo(fixRef.current);
+          return;
+        }
+        if (status === "denied") {
+          toast.error("Location is blocked. Allow it in your browser's site settings to use this.");
+          return;
+        }
+        flyOnFix.current = true;
+        setStatus("locating");
+        startWatching();
+      },
     });
-  }, [control, flyTo, startWatching, status]);
-  useEffect(() => control.show(status), [control, status]);
+    return () => stack.remove("locate");
+  }, [stack, status, flyTo, startWatching]);
 
   const accuracy = useMemo(
     () =>
