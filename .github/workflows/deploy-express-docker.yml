@@ -1,0 +1,93 @@
+name: Deploy task server (AWS EC2, Docker)
+
+# The web apps deploy through Vercel. Only the task server (jobs API, server-sent events,
+# hotspot schedules) runs on the server, as one Docker container.
+# Off until cutover: the server restores its hotspot schedules from the database when it
+# starts, so it must never run next to the old copy. Set the repository variable
+# DEPLOY_EXPRESS_DOCKER=true and add the secrets EC2_SSH_KEY, EC2_HOST and EC2_USER.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/express-wadzzo/**"
+      - "packages/agent-contract/**"
+      - "packages/errors/**"
+      - "packages/geo/**"
+      - "packages/storage/**"
+      - "packages/db/prisma/schema.prisma"
+      - "tooling/typescript/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "scripts/deploy-express.sh"
+      - ".github/workflows/deploy-express-docker.yml"
+  workflow_dispatch:
+
+# Two deploys at once would restart the one container twice and drop its job twice.
+concurrency:
+  group: deploy-express-docker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: vars.DEPLOY_EXPRESS_DOCKER == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The image is large and Docker keeps a copy
+      # of each layer, so the runner's default free space is not enough. Remove tools this job
+      # never uses.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h / | tail -1
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Test the task server
+        run: pnpm --filter @wadzzo/express test
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/express-wadzzo/Dockerfile
+          load: true
+          tags: wadzzo-express:${{ github.sha }}
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      # The image is built here, so the server never compiles anything: it only loads it.
+      - name: Send the image to the server
+        run: |
+          docker save wadzzo-express:${TAG} | gzip \
+            | ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'gunzip | docker load'
+
+      - name: Swap the container, wait for /health, go back if it fails
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "NAME=wadzzo-express IMAGE=wadzzo-express HOST_PORT=4000 bash -s -- ${TAG}" < scripts/deploy-express.sh
+
+      - name: Keep the watchdog current
+        run: |
+          scp -i ~/.ssh/deploy_key.pem scripts/express-watchdog.sh \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:wadzzo/express-watchdog.sh
