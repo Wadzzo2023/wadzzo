@@ -30,6 +30,12 @@ export type StackButton = {
  */
 export class MapControlStack implements IControl {
   private el?: HTMLDivElement;
+  /**
+   * What each button should be. Kept apart from the DOM because Mapbox only calls `onAdd` once the
+   * map has the control, which can be after React effects have already registered buttons: those
+   * must not be lost, so `onAdd` draws whatever was registered by then.
+   */
+  private readonly specs = new Map<StackButtonId, StackButton>();
   private readonly buttons = new Map<StackButtonId, HTMLButtonElement>();
   private readonly handlers = new Map<StackButtonId, () => void>();
   private readonly pulses = new Map<StackButtonId, Animation>();
@@ -38,6 +44,7 @@ export class MapControlStack implements IControl {
     const el = document.createElement("div");
     el.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
     this.el = el;
+    this.specs.forEach((spec, id) => this.draw(id, spec));
     return el;
   }
 
@@ -50,8 +57,13 @@ export class MapControlStack implements IControl {
     this.el = undefined;
   }
 
-  /** Adds the button, or updates it if it is already there. */
+  /** Adds the button, or updates it if it is already there. Safe to call before the map has the control. */
   set(id: StackButtonId, spec: StackButton) {
+    this.specs.set(id, spec);
+    this.draw(id, spec);
+  }
+
+  private draw(id: StackButtonId, spec: StackButton) {
     const el = this.el;
     if (!el) return;
     let button = this.buttons.get(id);
@@ -90,6 +102,7 @@ export class MapControlStack implements IControl {
   }
 
   remove(id: StackButtonId) {
+    this.specs.delete(id);
     this.pulses.get(id)?.cancel();
     this.pulses.delete(id);
     this.buttons.get(id)?.remove();
