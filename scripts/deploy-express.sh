@@ -7,8 +7,8 @@
 set -euo pipefail
 
 TAG="${1:?usage: deploy-express.sh <image tag>}"
-NAME="${NAME:-wadzzo-express}"
-IMAGE="${IMAGE:-wadzzo-express}"
+NAME="${NAME:-wadzzo-worker}"
+IMAGE="${IMAGE:-wadzzo-worker}"
 ENV_FILE="${ENV_FILE:-$HOME/wadzzo/express.env}"
 HOST_PORT="${HOST_PORT:-4000}"
 WAIT_SECONDS="${WAIT_SECONDS:-90}"

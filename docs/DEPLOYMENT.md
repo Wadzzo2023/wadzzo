@@ -163,7 +163,7 @@ Pushes to `main` promote to Production; pushes to `develop` update the `dev-*` d
 
 ## 4. Task server on AWS
 
-> **Current production (2026-11-06):** the task server runs as a **Docker container** (`wadzzo-express`)
+> **Current production (2026-11-06):** the task server runs as a **Docker container** (`wadzzo-worker`)
 > on the `bandcoin-worker` EC2 instance (us-west-2, Elastic IP `54.69.28.110`), next to the Bandcoin
 > worker, behind **Caddy** at **`https://wadzzo.54-69-28-110.sslip.io`**. The brand app must call that
 > address directly: set `EXPRESS_SERVER_URL=https://wadzzo.54-69-28-110.sslip.io` on the brand project

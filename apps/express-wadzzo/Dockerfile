@@ -1,8 +1,8 @@
 # The Wadzzo task server (jobs API, server-sent events, hotspot schedules).
 # Build from the repo root:
-#   docker build -f apps/express-wadzzo/Dockerfile -t wadzzo-express .
+#   docker build -f apps/express-wadzzo/Dockerfile -t wadzzo-worker .
 # Run with the variables in apps/express-wadzzo/.env.example:
-#   docker run --env-file apps/express-wadzzo/.env -p 4000:8080 wadzzo-express
+#   docker run --env-file apps/express-wadzzo/.env -p 4000:8080 wadzzo-worker
 
 FROM node:24-slim AS base
 RUN corepack enable

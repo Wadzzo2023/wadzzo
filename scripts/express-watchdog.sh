@@ -3,7 +3,7 @@
 # a worker that is running but stuck (its health check says unhealthy) or was left stopped.
 #   * * * * * /home/ubuntu/wadzzo/express-watchdog.sh >> /home/ubuntu/wadzzo/watchdog.log 2>&1
 set -euo pipefail
-NAME="${NAME:-wadzzo-express}"
+NAME="${NAME:-wadzzo-worker}"
 
 docker inspect "$NAME" > /dev/null 2>&1 || exit 0   # not deployed yet
 state="$(docker inspect --format '{{.State.Status}}' "$NAME")"

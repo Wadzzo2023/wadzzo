@@ -72,7 +72,7 @@ jobs:
           context: .
           file: apps/express-wadzzo/Dockerfile
           load: true
-          tags: wadzzo-express:${{ github.sha }}
+          tags: wadzzo-worker:${{ github.sha }}
 
       - name: Set up SSH
         run: |
@@ -84,13 +84,13 @@ jobs:
       # The image is built here, so the server never compiles anything: it only loads it.
       - name: Send the image to the server
         run: |
-          docker save wadzzo-express:${TAG} | gzip \
+          docker save wadzzo-worker:${TAG} | gzip \
             | ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'gunzip | docker load'
 
       - name: Swap the container, wait for /health, go back if it fails
         run: |
           ssh -i ~/.ssh/deploy_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-            "NAME=wadzzo-express IMAGE=wadzzo-express HOST_PORT=4000 LOAD_ONLY=${{ inputs.stage_only && 1 || 0 }} bash -s -- ${TAG}" < scripts/deploy-express.sh
+            "NAME=wadzzo-worker IMAGE=wadzzo-worker HOST_PORT=4000 LOAD_ONLY=${{ inputs.stage_only && 1 || 0 }} bash -s -- ${TAG}" < scripts/deploy-express.sh
 
       # The scripts stay on the server too, so a cutover can start the staged image in seconds.
       - name: Keep the scripts current
