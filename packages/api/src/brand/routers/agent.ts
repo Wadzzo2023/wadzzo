@@ -21,7 +21,7 @@ import type {
   ActionStatus,
   ProposedAction,
 } from "@wadzzo/agent-contract";
-import { taskClient } from "../lib/express/taskClient-sdk";
+import { jobQueue } from "../lib/jobs";
 import { ActionEditsInput, executeAction } from "../server/agent/actions";
 import { withAiQuota } from "../server/ai/openai";
 import { resolveActingBrand } from "../access";
@@ -229,7 +229,7 @@ export const agentRouter = createTRPCRouter({
           timeZone: input.timeZone,
         };
         // One attempt: the person can simply ask again, and a retry could answer twice.
-        const { jobId } = await taskClient.enqueue("agent_run", brand.creatorId, payload, 1);
+        const { jobId } = await jobQueue(ctx.db).enqueue("agent_run", brand.creatorId, payload, 1);
         return {
           conversationId: conversation.id,
           jobId,
@@ -243,7 +243,9 @@ export const agentRouter = createTRPCRouter({
    * Only someone who may act for the job's brand sees it.
    */
   poll: protectedProcedure.input(z.object({ jobId: z.string() })).query(async ({ ctx, input }) => {
-    const job = await taskClient.poll(input.jobId).catch(() => null);
+    const job = await jobQueue(ctx.db)
+      .poll(input.jobId)
+      .catch(() => null);
     if (!job || !(await mayActFor(ctx, job.creatorId)))
       throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Job not found" });
 

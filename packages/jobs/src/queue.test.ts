@@ -1,7 +1,4 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-import { PGlite, types } from "@electric-sql/pglite";
+import type { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -18,30 +15,13 @@ import {
   setJobProgress,
   type SqlDb,
 } from "./queue";
+import { JOB_TABLE_SQL, testDb } from "./test-db";
 
-/**
- * The real queue SQL, run on a real Postgres (PGlite, in this process) with the very file the
- * deploy applies to the database, so the table and the statements are tested together.
- */
 let pg: PGlite;
 let db: SqlDb;
 
 beforeAll(async () => {
-  // `timestamp` has no zone; Prisma reads it as UTC, so do the same here whatever this machine's zone is.
-  pg = new PGlite({
-    parsers: { [types.TIMESTAMP]: (value: string) => new Date(`${value.replace(" ", "T")}Z`) },
-  });
-  const ddl = readFileSync(
-    join(import.meta.dirname, "../../db/prisma/sql/2026-11-07-job-queue.sql"),
-    "utf8",
-  );
-  await pg.exec(ddl);
-  db = {
-    $queryRawUnsafe: async <T>(sql: string, ...values: unknown[]) =>
-      (await pg.query(sql, values)).rows as T,
-    $executeRawUnsafe: async (sql: string, ...values: unknown[]) =>
-      (await pg.query(sql, values)).affectedRows ?? 0,
-  };
+  ({ pg, db } = await testDb());
 });
 
 afterAll(async () => {
@@ -57,12 +37,8 @@ const later = (ms: number) => new Date(T0.getTime() + ms);
 
 describe("the table file", () => {
   it("can be run twice (the deploy runs it every time)", async () => {
-    const ddl = readFileSync(
-      join(import.meta.dirname, "../../db/prisma/sql/2026-11-07-job-queue.sql"),
-      "utf8",
-    );
-    await pg.exec(ddl);
-    await pg.exec(ddl);
+    await pg.exec(JOB_TABLE_SQL);
+    await pg.exec(JOB_TABLE_SQL);
   });
 });
 

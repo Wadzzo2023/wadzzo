@@ -27,6 +27,7 @@
     "@wadzzo/db": "workspace:*",
     "@wadzzo/errors": "workspace:*",
     "@wadzzo/geo": "workspace:*",
+    "@wadzzo/jobs": "workspace:*",
     "@wadzzo/platform": "workspace:*",
     "@wadzzo/schemas": "workspace:*",
     "@wadzzo/stellar": "workspace:*",

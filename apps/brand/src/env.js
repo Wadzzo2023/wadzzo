@@ -11,8 +11,6 @@ export const env = createEnv({
       .string()
       .regex(/^[a-z0-9-]+$/)
       .default("wadzzo"),
-    /** The Express task server (apps/express-wadzzo). Required outside production. */
-    EXPRESS_SERVER_URL: z.string().url().optional(),
     DATABASE_URL: z
       .string()
       .url()
@@ -94,7 +92,6 @@ export const env = createEnv({
    */ runtimeEnv: {
     PLATFORM_SLUG: process.env.PLATFORM_SLUG,
     NEXT_PUBLIC_FAN_APP_URL: process.env.NEXT_PUBLIC_FAN_APP_URL,
-    EXPRESS_SERVER_URL: process.env.EXPRESS_SERVER_URL,
     NEXT_PUBLIC_SITE: process.env.NEXT_PUBLIC_SITE,
     NEXT_PUBLIC_PLATFORM_CREATOR_TERM: process.env.NEXT_PUBLIC_PLATFORM_CREATOR_TERM,
     NEXT_PUBLIC_DESC: process.env.NEXT_PUBLIC_DESC,

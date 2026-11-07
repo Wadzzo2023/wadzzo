@@ -6,7 +6,7 @@ vi.mock("@wadzzo/db/server", () => ({ db: {} }));
 vi.mock("../../env", () => ({ env: { PLATFORM_SLUG: "wadzzo" } }));
 
 const taskClient = { enqueue: vi.fn(), poll: vi.fn() };
-vi.mock("../lib/express/taskClient-sdk", () => ({ taskClient }));
+vi.mock("../lib/jobs", () => ({ jobQueue: () => taskClient }));
 const executeAction = vi.fn();
 vi.mock("../server/agent/actions", async (orig) => ({
   ...(await orig<object>()),

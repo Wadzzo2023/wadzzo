@@ -9,8 +9,8 @@ import { PinType } from "@wadzzo/db";
 import { z } from "zod";
 
 import { circleAround } from "@wadzzo/geo/map-geometry";
-import { hotspotClient } from "../../lib/express/hotspotClient-sdk";
-import { taskClient } from "../../lib/express/taskClient-sdk";
+import { jobQueue } from "../../lib/jobs";
+import { hotspots } from "../hotspots";
 import {
   UNLIMITED_COLLECTIONS,
   type ActionEdits,
@@ -92,7 +92,7 @@ export async function executeAction(
     case "update_hotspot": {
       await ownHotspot(db, brand, action.hotspot.id);
       const c = action.changes;
-      await hotspotClient.update(brand.creatorId, action.hotspot.id, {
+      await hotspots(db).update(brand.creatorId, action.hotspot.id, {
         hotspotStartDate: c.startDate && new Date(c.startDate).toISOString(),
         hotspotEndDate: c.endDate && new Date(c.endDate).toISOString(),
         dropEveryDays: c.dropEveryDays,
@@ -103,7 +103,7 @@ export async function executeAction(
       return { message: `Updated hotspot “${action.hotspot.title}”.` };
     }
     case "create_hotspot":
-      return createHotspot(brand, {
+      return createHotspot(db, brand, {
         ...action.hotspot,
         ...(edits.draft as object),
       });
@@ -201,7 +201,7 @@ async function createPins(
     select: { id: true },
   });
   // One attempt: a retry after a partial run would create duplicate pins.
-  await taskClient.enqueue(
+  await jobQueue(db).enqueue(
     "create_pins",
     brand.creatorId,
     {
@@ -299,9 +299,9 @@ async function hotspotState(
   op: "pause" | "resume" | "delete",
 ): Promise<ActionResult> {
   await ownHotspot(db, brand, id);
-  if (op === "pause") await hotspotClient.pause(brand.creatorId, id);
-  else if (op === "resume") await hotspotClient.resume(brand.creatorId, id);
-  else await hotspotClient.delete(brand.creatorId, id);
+  if (op === "pause") await hotspots(db).pause(brand.creatorId, id);
+  else if (op === "resume") await hotspots(db).resume(brand.creatorId, id);
+  else await hotspots(db).delete(brand.creatorId, id);
   return {
     message: {
       pause: "Hotspot paused.",
@@ -332,9 +332,9 @@ const HotspotDraftInput = z
   })
   .refine((h) => !bad(h.title), { message: "That title isn't allowed" });
 
-async function createHotspot(brand: ActingBrand, raw: unknown): Promise<ActionResult> {
+async function createHotspot(db: Db, brand: ActingBrand, raw: unknown): Promise<ActionResult> {
   const h = parse(HotspotDraftInput, raw);
-  const { hotspotId } = await hotspotClient.create(brand.creatorId, {
+  const { hotspotId } = await hotspots(db).create(brand.creatorId, {
     title: h.title,
     description: h.description,
     type: h.type,

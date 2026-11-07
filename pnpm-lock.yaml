@@ -1161,24 +1161,18 @@ importers:
       '@wadzzo/geo':
         specifier: workspace:*
         version: link:../../packages/geo
+      '@wadzzo/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       '@wadzzo/storage':
         specifier: workspace:*
         version: link:../../packages/storage
-      cors:
-        specifier: ^2.8.6
-        version: 2.8.6
-      cron-parser:
-        specifier: ^5.10.2
-        version: 5.10.2
       dotenv:
         specifier: 'catalog:'
         version: 18.0.7
       express:
         specifier: ^5.3.0
         version: 5.3.0(supports-color@7.2.0)
-      express-rate-limit:
-        specifier: ^8.7.1
-        version: 8.7.1(express@5.3.0(supports-color@7.2.0))(supports-color@7.2.0)
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
@@ -1188,9 +1182,6 @@ importers:
       morgan:
         specifier: ^1.12.1
         version: 1.12.1(supports-color@7.2.0)
-      node-cron:
-        specifier: ^4.6.0
-        version: 4.6.0
       pg:
         specifier: 'catalog:'
         version: 8.23.1
@@ -1210,9 +1201,6 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -1580,6 +1568,9 @@ importers:
       '@wadzzo/geo':
         specifier: workspace:*
         version: link:../geo
+      '@wadzzo/jobs':
+        specifier: workspace:*
+        version: link:../jobs
       '@wadzzo/platform':
         specifier: workspace:*
         version: link:../platform
@@ -5439,9 +5430,6 @@ packages:
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
 
-  '@types/cors@2.8.19':
-    resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
-
   '@types/d3-array@3.0.3':
     resolution: {integrity: sha512-Reoy+pKnvsksN0lQUlcH6dOGjRZ/3WRwXR//m+/8lt1BXeI4xyaUZoqULNjyXXRuh0Mj4LNpkCvhUpQlY3X5xQ==}
 
@@ -6470,10 +6458,6 @@ packages:
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
     engines: {node: '>= 0.10'}
-
-  cron-parser@5.10.2:
-    resolution: {integrity: sha512-JfAYMY0LZaWQTuict8PhtF/ksSnq8xefSDmQUnnoqvkPYkU/y3UP0DTWzJKFBz0P1IXsDG8q0vY3zHkoFZOhvw==}
-    engines: {node: '>=18'}
 
   cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -8162,10 +8146,6 @@ packages:
       '@types/react':
         optional: true
 
-  luxon@3.7.2:
-    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
-    engines: {node: '>=12'}
-
   maath@0.10.8:
     resolution: {integrity: sha512-tRvbDF0Pgqz+9XUa4jjfgAQ8/aPKmQdWXilFu2tMy4GWj4NOsx99HlULO4IeREfbO3a0sA145DZYyvXPkybm0g==}
     peerDependencies:
@@ -8445,10 +8425,6 @@ packages:
 
   node-addon-api@5.1.0:
     resolution: {integrity: sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==}
-
-  node-cron@4.6.0:
-    resolution: {integrity: sha512-Si/bzYiKRHOB8/a99T2+SDGN582ONDMSTlJr5oCkT6GtnqPjZ2s10eoQRYkW9ZHwjVxONL+W8Fb+qR0AHMQsdg==}
-    engines: {node: '>=20'}
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -13757,10 +13733,6 @@ snapshots:
     dependencies:
       '@types/node': 26.6.5
 
-  '@types/cors@2.8.19':
-    dependencies:
-      '@types/node': 26.6.5
-
   '@types/d3-array@3.0.3': {}
 
   '@types/d3-color@3.1.0': {}
@@ -15134,10 +15106,6 @@ snapshots:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
-
-  cron-parser@5.10.2:
-    dependencies:
-      luxon: 3.7.2
 
   cross-env@7.0.3:
     dependencies:
@@ -17145,8 +17113,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  luxon@3.7.2: {}
-
   maath@0.10.8(@types/three@0.186.0)(three@0.186.1):
     dependencies:
       '@types/three': 0.186.0
@@ -17461,8 +17427,6 @@ snapshots:
       - babel-plugin-macros
 
   node-addon-api@5.1.0: {}
-
-  node-cron@4.6.0: {}
 
   node-domexception@1.0.0: {}
 

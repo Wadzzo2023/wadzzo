@@ -3,11 +3,9 @@
 // tRPC router for pin + hotspot management.
 //
 // Architecture:
-//   Hotspot mutations  → hotspotClient  → Express /hotspots  → node-cron scheduler
-//   Pin mutations      → Prisma DB directly (unchanged)
-//   Agent queries      → taskClient.enqueue("agent_run", ...) → Express job queue
-//
-// QStash has been removed entirely.
+//   Hotspot mutations → server/hotspots.ts → the database; the worker's look makes the drops
+//   Pin mutations     → Prisma DB directly
+//   Agent queries     → the worker's job queue (see ../agent.ts)
 
 import { ItemPrivacy } from "@wadzzo/db";
 import { PinType } from "@wadzzo/db";
@@ -19,7 +17,8 @@ import { assertInPlatformScope, platformScope, relationScope } from "@wadzzo/pla
 import { createOptimizedImage } from "@wadzzo/storage";
 import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
-import { hotspotClient } from "../../lib/express/hotspotClient-sdk";
+import { hotspotSchedule, isPendingFirstDrop } from "@wadzzo/geo/hotspot-schedule";
+import { hotspots } from "../../server/hotspots";
 import { buildPinScanUrl, renderPinQR } from "../../lib/qr-generator";
 
 import {
@@ -184,11 +183,10 @@ const reviewSelect = {
 } as const;
 
 export const pinRouter = createTRPCRouter({
-  // ─── Hotspot mutations → Express task server ────────────────────────────────
+  // ─── Hotspot mutations ───────────────────────────────────────────────────────
   //
-  // These no longer touch QStash or the cron scheduler directly.
-  // They call hotspotClient which POSTs to the Express /hotspots API.
-  // The Express server owns the node-cron scheduler lifecycle.
+  // They write the hotspot rows (server/hotspots.ts). The worker looks at every active hotspot
+  // every few minutes and makes the drops that are due, so there is no schedule to start or stop.
 
   createHotspot: creatorProcedure
     .input(createHotspotFormSchema.extend({ creatorId: z.string().optional() }))
@@ -202,7 +200,7 @@ export const pinRouter = createTRPCRouter({
         });
 
       try {
-        const result = await hotspotClient.create(creatorId, {
+        const result = await hotspots(ctx.db).create(creatorId, {
           title: input.title,
           description: input.description,
           image: input.image ?? undefined,
@@ -314,19 +312,16 @@ export const pinRouter = createTRPCRouter({
       if (!hotspot) return null;
       await assertOwnerOrAdmin(ctx, hotspot.creatorId);
 
-      let scheduleState = {
-        hasSchedule: false,
-        nextRunTime: null as string | null,
+      // The first drop of a hotspot that starts later is hidden, so it isn't in the list above.
+      const waiting = await ctx.db.locationGroup.findMany({
+        where: { hotspotId: hotspot.id, hidden: true },
+        select: { hidden: true, startDate: true, createdAt: true },
+      });
+      const schedule = hotspotSchedule(hotspot, waiting.some(isPendingFirstDrop), new Date());
+      const scheduleState = {
+        hasSchedule: schedule.hasSchedule,
+        nextRunTime: schedule.nextRunTime?.toISOString() ?? null,
       };
-      try {
-        const expressData = await hotspotClient.get(hotspot.creatorId, input.hotspotId);
-        scheduleState = {
-          hasSchedule: expressData.hasSchedule,
-          nextRunTime: expressData.nextRunTime ?? null,
-        };
-      } catch {
-        // Express server unavailable — return hotspot without schedule state
-      }
 
       return { ...hotspot, ...scheduleState };
     }),
@@ -427,7 +422,7 @@ export const pinRouter = createTRPCRouter({
       const hasSettings = Object.values(settings).some((v) => v !== undefined);
       if (hasSettings) {
         try {
-          await hotspotClient.update(h.creatorId, hotspotId, {
+          await hotspots(ctx.db).update(h.creatorId, hotspotId, {
             ...settings,
             hotspotStartDate: settings.hotspotStartDate?.toISOString(),
             hotspotEndDate: settings.hotspotEndDate?.toISOString(),
@@ -486,7 +481,7 @@ export const pinRouter = createTRPCRouter({
       const h = await manageableHotspot(ctx, input.hotspotId);
 
       try {
-        return await hotspotClient.pause(h.creatorId, input.hotspotId);
+        return await hotspots(ctx.db).pause(h.creatorId, input.hotspotId);
       } catch (err) {
         throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to pause hotspot",
@@ -500,7 +495,7 @@ export const pinRouter = createTRPCRouter({
       const h = await manageableHotspot(ctx, input.hotspotId);
 
       try {
-        return await hotspotClient.resume(h.creatorId, input.hotspotId);
+        return await hotspots(ctx.db).resume(h.creatorId, input.hotspotId);
       } catch (err) {
         throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to resume hotspot",
@@ -514,7 +509,7 @@ export const pinRouter = createTRPCRouter({
       const h = await manageableHotspot(ctx, input.hotspotId);
 
       try {
-        return await hotspotClient.delete(h.creatorId, input.hotspotId);
+        return await hotspots(ctx.db).delete(h.creatorId, input.hotspotId);
       } catch (err) {
         throw new AppError(ErrorCodes.INTERNAL, {
           message: err instanceof Error ? err.message : "Failed to delete hotspot",
@@ -2321,9 +2316,9 @@ export const pinRouter = createTRPCRouter({
 
       try {
         if (hotspot.isActive) {
-          return await hotspotClient.pause(hotspot.creatorId, input.id);
+          return await hotspots(ctx.db).pause(hotspot.creatorId, input.id);
         } else {
-          return await hotspotClient.resume(hotspot.creatorId, input.id);
+          return await hotspots(ctx.db).resume(hotspot.creatorId, input.id);
         }
       } catch (err) {
         throw new AppError(ErrorCodes.INTERNAL, {

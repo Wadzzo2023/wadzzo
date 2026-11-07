@@ -152,6 +152,7 @@ export async function runAgent(jobId: string, payload: AgentRunPayload): Promise
         ? "Here's what I found."
         : "Done.";
   const messageId = await saveAnswer(run, answer);
+  await run.flush();
   return { messageId };
 }
 

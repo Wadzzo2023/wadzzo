@@ -5,7 +5,9 @@
 // job — nothing here is shared between brands or runs.
 
 import { randomUUID } from "crypto";
-import { setSteps } from "../lib/job-store";
+import { setJobProgress } from "@wadzzo/jobs";
+import { db } from "../lib/db";
+import { logger } from "../lib/logger";
 import type {
   AgentBlock,
   AgentStep,
@@ -74,11 +76,19 @@ export class Run {
     this.publish();
   }
 
+  /** Writes go one after another, so the brand app never sees an older list after a newer one. */
+  private writes: Promise<unknown> = Promise.resolve();
+
   private publish() {
-    setSteps(
-      this.jobId,
-      this.steps.map((s) => ({ ...s })),
-    );
+    const steps = this.steps.map((s) => ({ ...s }));
+    this.writes = this.writes
+      .then(() => setJobProgress(db, this.jobId, { steps }))
+      .catch((error: unknown) => logger.warn(`[agent] couldn't save progress: ${String(error)}`));
+  }
+
+  /** Waits until every step written so far is saved. */
+  flush() {
+    return this.writes;
   }
 
   // ── Results ────────────────────────────────────────────────────────────

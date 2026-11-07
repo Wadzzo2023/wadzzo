@@ -96,16 +96,6 @@ for (const mode of modes) {
   if (problems === before)
     ok("shared secrets, database, bucket and token settings agree across apps");
 
-  // 2. the task server must derive the same key as the brand portal
-  if (express.NEXTAUTH_SECRET && env.brand.NEXTAUTH_SECRET) {
-    if (express.NEXTAUTH_SECRET === env.brand.NEXTAUTH_SECRET)
-      ok("brand and task server share NEXTAUTH_SECRET");
-    else
-      bad(
-        "brand NEXTAUTH_SECRET differs from the task server's (task-server calls will be rejected)",
-      );
-  }
-
   // 3. URLs: each app's own URL, and the links between apps (Wadzzo platform only)
   if (mode !== "production") continue;
   for (const [app, e] of Object.entries(env)) {

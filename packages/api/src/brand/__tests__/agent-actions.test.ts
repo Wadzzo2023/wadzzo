@@ -10,7 +10,7 @@ vi.mock("~/server/image-optimizer", () => ({
   createOptimizedImage: vi.fn(async () => "optimized"),
 }));
 const taskClient = { enqueue: vi.fn(async () => ({ jobId: "task-1" })) };
-vi.mock("../lib/express/taskClient-sdk", () => ({ taskClient }));
+vi.mock("../lib/jobs", () => ({ jobQueue: () => taskClient }));
 const hotspotClient = {
   pause: vi.fn(),
   resume: vi.fn(),
@@ -18,7 +18,7 @@ const hotspotClient = {
   update: vi.fn(),
   create: vi.fn(async () => ({ hotspotId: "h_new" })),
 };
-vi.mock("../lib/express/hotspotClient-sdk", () => ({ hotspotClient }));
+vi.mock("../server/hotspots", () => ({ hotspots: () => hotspotClient }));
 
 type Exec = typeof Actions.executeAction;
 let executeAction: Exec;

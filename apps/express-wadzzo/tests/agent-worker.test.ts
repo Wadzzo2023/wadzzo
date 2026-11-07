@@ -21,6 +21,11 @@ const db = {
   $queryRaw: vi.fn(),
 };
 vi.mock("../src/lib/db", () => ({ db }));
+// Progress goes to the jobs table; here it is just recorded.
+const setJobProgress = vi.fn(
+  async (_db: unknown, _id: string, _update: { steps?: unknown[] }) => {},
+);
+vi.mock("@wadzzo/jobs", () => ({ setJobProgress }));
 vi.mock("../src/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
@@ -37,7 +42,6 @@ vi.mock("../src/agent/google", () => ({
 const { Run } = await import("../src/agent/run");
 const { inArea, inRing, tiles, areaFromFeature, searchBoxes } = await import("../src/agent/area");
 const { AGENT_TOOLS } = await import("../src/agent/tools");
-const { createJob } = await import("../src/lib/job-store");
 
 type RunT = InstanceType<typeof Run>;
 const tool = (name: string) => AGENT_TOOLS.find((t: { name: string }) => t.name === name)!;
@@ -86,8 +90,7 @@ function brand(homeArea: unknown = CLINTON_AREA) {
     habits: null,
   };
 }
-const newRun = (b = brand()) =>
-  new Run(createJob({ type: "agent_run", creatorId: "BRAND_A", payload: {} }).id, b, "conv_1");
+const newRun = (b = brand()) => new Run("job_1", b, "conv_1");
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -339,13 +342,7 @@ describe("the agent loop", () => {
     ]);
 
     const { runAgent } = await import("../src/agent/agent");
-    const { createJob: create, getJob: get } = await import("../src/lib/job-store");
-    const job = create({
-      type: "agent_run",
-      creatorId: "BRAND_A",
-      payload: {},
-    });
-    const result = await runAgent(job.id, {
+    const result = await runAgent("job_1", {
       conversationId: "conv_1",
       creatorId: "BRAND_A",
       platformId: "clintoncounty",
@@ -360,8 +357,12 @@ describe("the agent loop", () => {
         detail: "Found 1 place",
       },
     ]);
-    // The steps were published on the job for the brand app to poll.
-    expect(get(job.id)?.steps).toHaveLength(2);
+    // The steps were published on the job for the brand app to poll, in order, and all of them
+    // were written by the time the run returned.
+    const published = setJobProgress.mock.calls.map((call) => call[2].steps?.length ?? 0);
+    expect(setJobProgress.mock.calls.every((call) => call[1] === "job_1")).toBe(true);
+    expect(published).toEqual([...published].sort((a, b) => a - b));
+    expect(published.at(-1)).toBe(2);
     const run = saveAnswer.mock.calls[0]![0];
     expect(run.blocks).toMatchObject([{ kind: "places", items: [{ title: "Eagle Point Park" }] }]);
     expect(saveAnswer.mock.calls[0]![1]).toBe("I found 1 park in Clinton County.");

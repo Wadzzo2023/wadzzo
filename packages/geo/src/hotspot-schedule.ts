@@ -88,3 +88,22 @@ export function hotspotAction(
     return "none";
   return "drop";
 }
+
+/** The next drop, for the hotspot's page. Nothing while it is paused or once it has run out. */
+export function hotspotSchedule(
+  hotspot: {
+    isActive: boolean;
+    dropEveryDays: number;
+    hotspotStartDate: Date;
+    hotspotEndDate: Date;
+    createdAt: Date;
+  },
+  pendingFirstDrop: boolean,
+  now: Date,
+): { hasSchedule: boolean; nextRunTime: Date | null } {
+  const none = { hasSchedule: false, nextRunTime: null };
+  if (!hotspot.isActive || now > hotspot.hotspotEndDate) return none;
+  if (pendingFirstDrop) return { hasSchedule: true, nextRunTime: hotspot.hotspotStartDate };
+  const next = nextSlot(dropAnchor(hotspot), hotspot.dropEveryDays, now);
+  return next <= hotspot.hotspotEndDate ? { hasSchedule: true, nextRunTime: next } : none;
+}

@@ -5,6 +5,7 @@ import {
   START_TOLERANCE_MS,
   dropAnchor,
   hotspotAction,
+  hotspotSchedule,
   isPendingFirstDrop,
   lastDueSlot,
   nextSlot,
@@ -180,5 +181,43 @@ describe("hotspotAction: what the worker should do for one hotspot right now", (
 
   it("DAY_MS is a day", () => {
     expect(DAY_MS).toBe(86_400_000);
+  });
+});
+
+describe("hotspotSchedule: what the hotspot page shows as the next drop", () => {
+  const hotspot = {
+    isActive: true,
+    dropEveryDays: 2,
+    hotspotStartDate: at("2026-11-01T00:00:00Z"),
+    hotspotEndDate: at("2026-11-30T00:00:00Z"),
+    createdAt: at("2026-11-01T00:00:00Z"),
+  };
+
+  it("is the next slot while the hotspot runs", () => {
+    expect(hotspotSchedule(hotspot, false, at("2026-11-02T00:00:00Z"))).toEqual({
+      hasSchedule: true,
+      nextRunTime: at("2026-11-03T00:00:00Z"),
+    });
+  });
+
+  it("is the start date while the first drop is still waiting", () => {
+    const later = {
+      ...hotspot,
+      hotspotStartDate: at("2026-12-01T00:00:00Z"),
+      hotspotEndDate: at("2026-12-31T00:00:00Z"),
+    };
+    expect(hotspotSchedule(later, true, at("2026-11-02T00:00:00Z"))).toEqual({
+      hasSchedule: true,
+      nextRunTime: at("2026-12-01T00:00:00Z"),
+    });
+  });
+
+  it("is nothing for a paused hotspot, an ended one, or when the next slot is past the end", () => {
+    const none = { hasSchedule: false, nextRunTime: null };
+    expect(
+      hotspotSchedule({ ...hotspot, isActive: false }, false, at("2026-11-02T00:00:00Z")),
+    ).toEqual(none);
+    expect(hotspotSchedule(hotspot, false, at("2026-12-02T00:00:00Z"))).toEqual(none);
+    expect(hotspotSchedule(hotspot, false, at("2026-11-29T12:00:00Z"))).toEqual(none);
   });
 });

@@ -1,36 +1,28 @@
 /**
  * src/lib/hotspot-drop.ts
  *
- * Pure DB function that executes one drop cycle for a hotspot.
- * No QStash, no HTTP — just Prisma writes.
- * Called by hotspot-scheduler on each cron tick.
- *
- * Extracted from the original pin.ts `dropPinsForHotspot` export.
+ * Hotspot drops, done from the database alone. The worker's `hotspot_drop` job calls
+ * `dropDueHotspots` every few minutes: it looks at each active hotspot, asks `hotspotAction`
+ * (packages/geo) what is due, and does it. Nothing is kept in memory, so a restart, or a worker
+ * that was down for an hour, simply catches up on the next look.
  */
 
 import type { PrismaClient } from "@prisma/client";
-import { db } from "./db";
 import { generateRandomLocations } from "@wadzzo/geo";
+import {
+  START_TOLERANCE_MS,
+  hotspotAction,
+  isPendingFirstDrop,
+} from "@wadzzo/geo/hotspot-schedule";
 import { logger } from "./logger";
 import type * as GeoJSON from "geojson";
+
+export { isPendingFirstDrop };
 
 // ─── Return shapes ────────────────────────────────────────────────────────────
 
 export type DropResult =
   { skipped: true; reason?: string } | { expired: true } | { droppedAt: string; count: number };
-
-/** Cron ticks can fire a little early or late. */
-const START_TOLERANCE_MS = 60_000;
-
-/**
- * A hotspot that starts in the future gets its first drop created up front,
- * hidden, dated for the start (it carries the title/image/etc. every later drop
- * copies). It's recognisable because it was created well before its start;
- * once released, startDate and createdAt are both reset to the release time.
- */
-export function isPendingFirstDrop(group: { hidden: boolean; startDate: Date; createdAt: Date }) {
-  return group.hidden && group.startDate.getTime() - group.createdAt.getTime() > START_TOLERANCE_MS;
-}
 
 async function findPendingFirstDrop(prisma: PrismaClient, hotspotId: string) {
   const hidden = await prisma.locationGroup.findMany({
@@ -50,7 +42,7 @@ async function findPendingFirstDrop(prisma: PrismaClient, hotspotId: string) {
 // ─── Core drop function ───────────────────────────────────────────────────────
 
 /**
- * Executes one pin-drop cycle for the given hotspot.
+ * Executes one pin drop for the given hotspot (the caller decided it is due).
  *
  * Flow:
  *  1. Fetch hotspot — bail if not found or inactive
@@ -59,14 +51,14 @@ async function findPendingFirstDrop(prisma: PrismaClient, hotspotId: string) {
  *  4. Generate fresh random pin coordinates inside the hotspot shape
  *  5. Write a new LocationGroup + Locations to DB
  *
- * @param prisma  Prisma client instance (pass `db` from lib/db.ts)
+ * @param prisma  Prisma client instance
  * @param hotspotId  The hotspot to drop for
  */
 export async function dropPinsForHotspot(
   prisma: PrismaClient,
   hotspotId: string,
-  /** `force` skips the one-drop-per-cycle guard (manual drops). */
-  options: { force?: boolean } = {},
+  /** `force` skips the one-drop-per-cycle guard (the worker's look has already checked the slot). */
+  options: { force?: boolean; now?: Date } = {},
 ): Promise<DropResult> {
   // ── Step 1: Load hotspot ───────────────────────────────────────────────────
   const hotspot = await prisma.hotspot.findUnique({
@@ -83,7 +75,7 @@ export async function dropPinsForHotspot(
     return { skipped: true, reason: "hotspot inactive" };
   }
 
-  const now = new Date();
+  const now = options.now ?? new Date();
 
   // ── Step 2: Check expiry ───────────────────────────────────────────────────
   if (now > new Date(hotspot.hotspotEndDate)) {
@@ -118,8 +110,7 @@ export async function dropPinsForHotspot(
   }
 
   // ── Step 2d: One drop per cycle ────────────────────────────────────────────
-  // The cron tick and the first-drop timer (or a restart) can fire within
-  // moments of each other; only the first of them drops.
+  // Two looks within a cycle of each other must not both drop.
   if (!options.force) {
     const latest = await prisma.locationGroup.findFirst({
       where: { hotspotId, hidden: false },
@@ -195,4 +186,86 @@ export async function dropPinsForHotspot(
   logger.info(`[hotspot-drop] Dropped ${locations.length} pins for hotspot=${hotspotId}`);
 
   return { droppedAt: now.toISOString(), count: locations.length };
+}
+
+// ─── The worker's look ───────────────────────────────────────────────────────
+
+export type DropSummary = {
+  checked: number;
+  dropped: number;
+  released: number;
+  ended: number;
+  failed: number;
+  errors: string[];
+};
+
+/**
+ * Looks at every active hotspot and does what is due: release a first drop that waited for the
+ * start date, drop for a slot that has come, or close a hotspot that has ended. One hotspot failing
+ * does not stop the others; it is reported in the summary and the job is then failed so it shows.
+ */
+export async function dropDueHotspots(
+  prisma: PrismaClient,
+  now = new Date(),
+): Promise<DropSummary> {
+  const summary: DropSummary = {
+    checked: 0,
+    dropped: 0,
+    released: 0,
+    ended: 0,
+    failed: 0,
+    errors: [],
+  };
+  const hotspots = await prisma.hotspot.findMany({
+    where: { isActive: true, hidden: false },
+    select: {
+      id: true,
+      isActive: true,
+      dropEveryDays: true,
+      hotspotStartDate: true,
+      hotspotEndDate: true,
+      createdAt: true,
+    },
+  });
+
+  for (const hotspot of hotspots) {
+    summary.checked++;
+    try {
+      const groups = await prisma.locationGroup.findMany({
+        where: { hotspotId: hotspot.id },
+        select: { hidden: true, startDate: true, createdAt: true },
+      });
+      const visible = groups.filter((g) => !g.hidden);
+      const latest = visible.reduce<Date | null>(
+        (best, g) => (!best || g.startDate > best ? g.startDate : best),
+        null,
+      );
+      const action = hotspotAction(
+        hotspot,
+        { latestDropStart: latest, pendingFirstDrop: groups.some(isPendingFirstDrop) },
+        now,
+      );
+      if (action === "none") continue;
+
+      if (action === "end") {
+        await prisma.hotspot.update({ where: { id: hotspot.id }, data: { isActive: false } });
+        summary.ended++;
+        continue;
+      }
+
+      const result = await dropPinsForHotspot(prisma, hotspot.id, { force: true, now });
+      if ("expired" in result) summary.ended++;
+      else if ("skipped" in result)
+        logger.warn(`[hotspot-drop] ${hotspot.id} skipped: ${result.reason}`);
+      else if (action === "release") summary.released++;
+      else summary.dropped++;
+    } catch (error) {
+      summary.failed++;
+      summary.errors.push(
+        `${hotspot.id}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      logger.error(`[hotspot-drop] ${hotspot.id} failed: ${String(error)}`);
+    }
+  }
+  return summary;
 }

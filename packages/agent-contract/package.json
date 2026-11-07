@@ -3,10 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The contract between the brand portal's map agent UI and the task server's agent worker: block, step and action shapes.",
+  "description": "The contract between the brand portal's map agent UI and the worker's agent: block, step and action shapes.",
   "exports": {
-    ".": "./src/index.ts",
-    "./task-server-key": "./src/task-server-key.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
