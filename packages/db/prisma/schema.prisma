@@ -1097,6 +1097,36 @@ model AgentJob {
     @@index([creatorId, createdAt])
 }
 
+/// The background job queue (see packages/jobs). The brand apps add rows; the worker
+/// (apps/express-wadzzo) takes them one at a time with FOR UPDATE SKIP LOCKED.
+/// Created by prisma/sql/2026-11-07-job-queue.sql.
+model Job {
+    id          String    @id @default(cuid())
+    /// "agent_run", "create_pins" or "hotspot_drop"
+    type        String
+    /// The brand a job runs for, so the app can check who may see it.
+    creatorId   String?
+    payload     Json      @default("{}")
+    /// QUEUED, RUNNING, SUCCEEDED, FAILED
+    status      String    @default("QUEUED")
+    attempts    Int       @default(0)
+    maxAttempts Int       @default(1)
+    runAt       DateTime  @default(now())
+    lockedAt    DateTime?
+    lockedBy    String?
+    lastError   String?
+    result      Json?
+    progress    Int       @default(0)
+    /// What the map agent is doing, shown live in the chat.
+    steps       Json?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([status, runAt])
+    @@index([type, createdAt])
+    @@map("jobs")
+}
+
 // ------------------------MAP AGENT (chat on the Pins map)-------------------------
 
 /// A personal access token for the brand portal's MCP server (/api/mcp), so an
