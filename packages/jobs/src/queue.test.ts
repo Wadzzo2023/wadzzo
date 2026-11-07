@@ -167,8 +167,14 @@ describe("a worker that dies mid-job", () => {
   it("a job nobody has touched for a while goes back if it has attempts left", async () => {
     await enqueueJob(db, { type: "hotspot_drop", payload: {}, maxAttempts: 3 }, T0);
     await claimJob(db, "dead", ["hotspot_drop"], T0);
-    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS - 1000))).toBe(0);
-    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000))).toBe(1);
+    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS - 1000))).toEqual({
+      requeued: 0,
+      failed: [],
+    });
+    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000))).toEqual({
+      requeued: 1,
+      failed: [],
+    });
     expect(
       await claimJob(db, "alive", ["hotspot_drop"], later(STALE_AFTER_MS + 1000)),
     ).toMatchObject({
@@ -179,7 +185,10 @@ describe("a worker that dies mid-job", () => {
   it("a job meant to run once is failed, never run a second time (it may have made pins)", async () => {
     const queued = await enqueueJob(db, { type: "create_pins", payload: {}, maxAttempts: 1 }, T0);
     await claimJob(db, "dead", ["create_pins"], T0);
-    await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000));
+    const released = await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000));
+    // The caller is told which jobs were given up on, so it can close their own records.
+    expect(released.failed.map((job) => job.id)).toEqual([queued.id]);
+    expect(released.requeued).toBe(0);
     const job = (await getJob(db, queued.id))!;
     expect(job.status).toBe("FAILED");
     expect(job.lastError).toMatch(/stopped/i);
@@ -190,7 +199,10 @@ describe("a worker that dies mid-job", () => {
     await enqueueJob(db, { type: "create_pins", payload: {}, maxAttempts: 1 }, T0);
     const job = (await claimJob(db, "w", ["create_pins"], T0))!;
     await heartbeatJob(db, job.id, later(STALE_AFTER_MS - 1000));
-    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000))).toBe(0);
+    expect(await releaseStaleJobs(db, later(STALE_AFTER_MS + 1000))).toEqual({
+      requeued: 0,
+      failed: [],
+    });
     expect((await getJob(db, job.id))!.status).toBe("RUNNING");
   });
 });

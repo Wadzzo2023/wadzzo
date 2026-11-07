@@ -121,7 +121,11 @@ export function startWorker(db: SqlDb, options: WorkerOptions) {
   };
 
   const tidy = () =>
-    void releaseStaleJobs(db, new Date(), STALE_AFTER_MS).catch((error: unknown) => onError(error));
+    void releaseStaleJobs(db, new Date(), STALE_AFTER_MS)
+      .then(async ({ failed }) => {
+        for (const job of failed) await options.onGaveUp?.(job, job.lastError ?? "");
+      })
+      .catch((error: unknown) => onError(error));
   tidy();
   const maintenance = setInterval(tidy, options.maintenanceMs ?? 30_000);
 

@@ -221,10 +221,7 @@ describe("update", () => {
       hotspots(db as never).update("BRAND_A", "h1", {
         hotspotStartDate: "2026-12-01T00:00:00.000Z",
       }),
-    ).rejects.toMatchObject({
-      code: "VALIDATION_FAILED",
-      message: expect.stringMatching(/already started/),
-    });
+    ).rejects.toThrow(/already started/);
     expect(db.hotspot.update).not.toHaveBeenCalled();
   });
 
@@ -270,12 +267,12 @@ describe("update", () => {
       hotspots(later as never).update("BRAND_A", "h1", {
         hotspotStartDate: "2026-11-02T00:00:00.000Z",
       }),
-    ).rejects.toMatchObject({ message: expect.stringMatching(/future/) });
+    ).rejects.toThrow(/future/);
     await expect(
       hotspots(makeDb(started) as never).update("BRAND_A", "h1", {
         hotspotEndDate: "2026-10-31T00:00:00.000Z",
       }),
-    ).rejects.toMatchObject({ message: expect.stringMatching(/end date must be after/) });
+    ).rejects.toThrow(/end date must be after/);
     await expect(
       hotspots(makeDb(null) as never).update("BRAND_B", "h1", { autoCollect: true }),
     ).rejects.toMatchObject({

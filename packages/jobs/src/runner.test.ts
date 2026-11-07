@@ -193,4 +193,29 @@ describe("startWorker", () => {
     await waitFor(async () => (await getJob(db, queued.id))!.status === "SUCCEEDED");
     await worker.stop();
   });
+
+  it("a job meant to run once, whose worker died, is given up on and its owner is told", async () => {
+    const queued = await enqueueJob(db, { type: "create_pins", payload: {}, maxAttempts: 1 });
+    await pg.query(
+      `UPDATE jobs SET status = 'RUNNING', attempts = 1, "lockedBy" = 'dead',
+              "lockedAt" = $2::timestamp WHERE id = $1`,
+      [queued.id, new Date(Date.now() - 3_600_000).toISOString()],
+    );
+    const told: string[] = [];
+    const worker = startWorker(db, {
+      workerId: "w",
+      handlers: { agent_run: () => Promise.resolve("ok") },
+      concurrency: 1,
+      idleMs: 10,
+      maintenanceMs: 20,
+      onGaveUp: (job, message) => {
+        told.push(`${job.type}:${/stopped/i.test(message)}`);
+        return Promise.resolve();
+      },
+    });
+    await waitFor(() => told.length > 0);
+    await worker.stop();
+    expect(told).toEqual(["create_pins:true"]);
+    expect((await getJob(db, queued.id))!.status).toBe("FAILED");
+  });
 });

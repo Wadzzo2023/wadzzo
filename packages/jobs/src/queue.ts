@@ -185,28 +185,37 @@ export async function setJobProgress(
   );
 }
 
+const STOPPED = "The worker stopped while this was running. It isn't run again automatically.";
+
 /**
  * Deals with jobs whose worker stopped mid-run, so none stays RUNNING for ever: one with attempts
  * left goes back in the queue; one that has used them all (a job meant to run once, like making
- * pins) is marked FAILED and never run a second time.
+ * pins) is marked FAILED and never run a second time. The failed ones are returned, so whoever owns
+ * their records (a pin batch's card) can close them too.
  */
-export async function releaseStaleJobs(db: SqlDb, now = new Date(), staleAfterMs = STALE_AFTER_MS) {
+export async function releaseStaleJobs(
+  db: SqlDb,
+  now = new Date(),
+  staleAfterMs = STALE_AFTER_MS,
+): Promise<{ requeued: number; failed: Job[] }> {
   const cutoff = iso(new Date(now.getTime() - staleAfterMs));
-  const spent = await db.$executeRawUnsafe(
+  const failed = await db.$queryRawUnsafe<Job[]>(
     `UPDATE jobs SET status = 'FAILED', "lockedAt" = NULL, "lockedBy" = NULL, "updatedAt" = $2::timestamp,
-            "lastError" = 'The worker stopped while this was running. It isn''t run again automatically.'
-     WHERE status = 'RUNNING' AND "lockedAt" < $1::timestamp AND attempts >= "maxAttempts"`,
+            "lastError" = $3
+     WHERE status = 'RUNNING' AND "lockedAt" < $1::timestamp AND attempts >= "maxAttempts"
+     RETURNING *`,
     cutoff,
     iso(now),
+    STOPPED,
   );
-  const again = await db.$executeRawUnsafe(
+  const requeued = await db.$executeRawUnsafe(
     `UPDATE jobs SET status = 'QUEUED', "lockedAt" = NULL, "lockedBy" = NULL, "runAt" = $2::timestamp,
             "updatedAt" = $2::timestamp
      WHERE status = 'RUNNING' AND "lockedAt" < $1::timestamp AND attempts < "maxAttempts"`,
     cutoff,
     iso(now),
   );
-  return spent + again;
+  return { requeued, failed };
 }
 
 /** How many jobs are in each state, for the health check. */
