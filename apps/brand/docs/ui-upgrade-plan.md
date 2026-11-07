@@ -35,7 +35,7 @@ fan apps (the AR app web + mobile), mobile-responsive, and brings it up to date.
 - **26 pages**, several huge: `create` 2,283 lines, `admin/collection-report` 1,675, `report` 1,637, `pin-manage` 1,120, `redeem` 1,047.
 - **19 modals, ~11,600 lines**; the six biggest (1,000–1,300 lines each) are the create-pin, admin-pin, pin-detail, bounty, NFT and hotspot modals.
 - Three separate layouts (root / creator / admin), nav defined in `components/common/navlinks.tsx`.
-- Submodules: `@wadzzo/wallet` (used in 27 files, uses `next/router` in its connect dialog) and `apps/express-wadzzo` (Express task server called over HTTP via `TASK_SERVER_URL` for hotspots and jobs).
+- Submodules: `@wadzzo/wallet` (used in 27 files, uses `next/router` in its connect dialog) and `apps/express-wadzzo` (the worker; since 2026-11-07 the portal adds jobs to the `jobs` table instead of calling it over HTTP).
 - 23 routes under `pages/api/game` (used by clients outside this app — kept, moved to route handlers).
 
 ---

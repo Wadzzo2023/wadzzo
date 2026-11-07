@@ -2,7 +2,7 @@
 
 ## One database, one schema
 
-`packages/db/prisma/schema.prisma` is the only copy of the schema. Every app and the task server generate their client from it.
+`packages/db/prisma/schema.prisma` is the only copy of the schema. Every app and the worker generate their client from it.
 
 - Import models, enums and `Prisma` from `@wadzzo/db` (safe in the browser).
 - Import the client from `@wadzzo/db/server` (`db`); it opens connections and must not reach a client bundle.
@@ -13,7 +13,8 @@
 - `@wadzzo/api`: one tRPC context (`session`, `platform`, `db`), `publicProcedure` / `protectedProcedure`, and routers shared by several apps (`fan-bounty`). Apps add their own admin/creator procedures on top.
 - `@wadzzo/auth`: `authorizeCredentials` (wallet signature, Firebase token, email + password) and `authOptions` for NextAuth; the mobile API calls the same function.
 - `@wadzzo/storage`: the one S3 bucket: `publicS3Url`, `signEntryUpload`, `uploadBufferToS3`, `createOptimizedImage`, upload rules.
-- The task server (`apps/express-wadzzo`) is bundled with tsup so it can import these workspace packages.
+- `@wadzzo/jobs`: the `jobs` table queue. The brand app adds a job (map agent, bulk pins) and reads its progress; the worker takes it with `FOR UPDATE SKIP LOCKED`. The database is the only link between them, so no address or shared secret is needed.
+- The worker (`apps/express-wadzzo`) is bundled with tsup so it can import these workspace packages.
 
 ## One network per deployment
 

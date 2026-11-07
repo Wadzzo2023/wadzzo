@@ -6,7 +6,7 @@
 feature branch ─PR─▶ develop ─(check the dev-* domains)─▶ main ─▶ production
 ```
 
-- `main` is production. Every push to it deploys the web apps on Vercel (only the projects whose app or packages changed) and, when the task server changed, `apps/express-wadzzo` to EC2.
+- `main` is production. Every push to it deploys the web apps on Vercel (only the projects whose app or packages changed) and, when the worker changed, `apps/express-wadzzo` to EC2 (a Docker container; it also creates the `jobs` table if missing).
 - `develop` is the shared staging branch (testnet, development database).
 - Work on a short-lived branch named `<type>/<what>`, for example `fix/bounty-crash` or `feat/market-search`, and open a pull request.
 
@@ -37,6 +37,6 @@ CI runs the same checks plus a secret scan, and `main` / `develop` only accept a
 - **White-label platforms are configuration** (`packages/platform`). Never branch on a platform name in app code; read the platform's config instead.
 - **Errors** are `AppError` with a code from `@wadzzo/errors`.
 - **Env vars**: add new ones to the app's `.env.example` (with a comment) and to every Vercel project that runs the app. Real `.env*` files are never committed.
-- **Database**: the schema is `packages/db/prisma/schema.prisma`, shared by every app and the task server. Say in the pull request how the change reaches each database.
+- **Database**: the schema is `packages/db/prisma/schema.prisma`, shared by every app and the worker. Say in the pull request how the change reaches each database.
 
 See [docs/RUNBOOK.md](docs/RUNBOOK.md) for day-to-day commands and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit.

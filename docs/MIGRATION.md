@@ -2,7 +2,7 @@
 
 Everything that moved when the six separate repositories became this one, what to do on the hosting side, and what behaves differently now. The original repositories are untouched and stay available for rollback.
 
-Read [DEPLOYMENT.md](DEPLOYMENT.md) alongside this: it is the target setup (Vercel for the three web apps, AWS for the task server).
+Read [DEPLOYMENT.md](DEPLOYMENT.md) alongside this: it is the target setup (Vercel for the three web apps, AWS for the worker).
 
 ## 1. What moved where
 
@@ -85,7 +85,7 @@ Web apps: move the DNS record back (the old server is still there), or in Vercel
 ### Things to expect on Vercel that the old servers didn't have
 
 - Many short-lived function instances instead of one long process: set `DATABASE_POOL_MAX=1` and put PgBouncer in front of Postgres ([DEPLOYMENT.md §3](DEPLOYMENT.md#3-database)).
-- A function time limit (`maxDuration` in each `vercel.json`). Long work belongs on the task server.
+- A function time limit (`maxDuration` in each `vercel.json`). Long work belongs on the worker, as a job.
 - Previews and the `dev-*` domains also run `NODE_ENV=production`; the code now uses `VERCEL_ENV` to tell them from production.
 
 ## 4. Behaviour changes
@@ -121,7 +121,7 @@ Some of these are deliberate fixes of problems that existed in the original repo
 - **Albedo login** signs a token the client chooses, so a captured signature can be replayed. Fixing it needs a server-issued nonce, which changes the mobile contract.
 - **Custodial accounts on testnet.** The central accounts service funds and creates accounts on mainnet only. A custodial user's key still signs testnet transactions, but their account must be funded on testnet separately.
 - **`apps/mobile`** is not a workspace member and keeps hand-copied versions of the AR types, geometry and rarity modules; they have drifted from `@wadzzo/ar-core`. Making it consume the shared package is the next planned change.
-- **Not exercised in a live environment:** the task server (Express 5, helmet 8, express-rate-limit 8, Prisma 7) and the Vercel deployments themselves. Do steps 1 and 2 of section 3 before trusting production to them.
+- **Not exercised in a live environment:** the worker (Express 5, helmet 8, Prisma 7) and the Vercel deployments themselves. Do steps 1 and 2 of section 3 before trusting production to them.
 - **Duplicated logic that now sits side by side** but isn't merged yet: issuer-key encryption (three copies), the follow-creator transactions, and the user profile update/balance logic in market and AR.
 
 ## 6. Checks to run

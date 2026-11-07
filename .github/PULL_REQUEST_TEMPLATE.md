@@ -7,7 +7,7 @@
 - [ ] market (web.wadzzo.com)
 - [ ] brand (brand.wadzzo.com, clintonadmin.wadzzo.com)
 - [ ] ar (app.wadzzo.com, clinton.wadzzo.com)
-- [ ] express-wadzzo (task server)
+- [ ] express-wadzzo (worker)
 - [ ] mobile
 - [ ] shared packages only
 

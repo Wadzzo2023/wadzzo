@@ -1,13 +1,13 @@
 # Wadzzo
 
-One repository for everything Wadzzo runs: the brand portal, the fan marketplace, the AR collector, the task server, the mobile app and the packages they share. White-label partners (Clinton County) are **configuration of the same code**, not forks.
+One repository for everything Wadzzo runs: the brand portal, the fan marketplace, the AR collector, the worker, the mobile app and the packages they share. White-label partners (Clinton County) are **configuration of the same code**, not forks.
 
 ```
 apps/
   brand/            Brand portal (create drops, stores, posts, bounties, events)     Next 16
   market/           Fan marketplace (buy assets, collections, creators, feed)        Next 16
   ar/               AR collector web app + /api/mobile/v1 for the native app         Next 16
-  express-wadzzo/   Task server (map agent, job queue, hotspot drops)                Express 5
+  express-wadzzo/   Worker (takes map agent, bulk pin and hotspot jobs from the DB queue)                Express 5
   mobile/           Native app (Expo). Not a workspace member: it installs with npm  Expo
 packages/
   api/              Every API: brand/, market/, ar/ routers, server code and REST handlers; shared/ for what several apps use
@@ -22,8 +22,9 @@ packages/
   wallet/           Connect wallets (extension + custodial), sign, testnet/mainnet config
   schemas/          Zod schemas shared by forms and procedures
   ar-core/          Pure AR domain code (types, distance, rarity, murals)
-  agent-contract/   Types shared by the brand portal's agent UI and the task server
-  geo/              Random-location helpers shared by the portal and the task server
+  agent-contract/   Types shared by the brand portal's agent UI and the worker
+  geo/              Random-location helpers and the hotspot drop schedule, shared by the portal and the worker
+  jobs/             The database job queue: the portal adds jobs, the worker takes them
 tooling/
   eslint/ prettier/ typescript/ vitest/    One setup shared by every package
   local-db/         `pnpm db:local`: an embedded Postgres with the shared schema
@@ -59,7 +60,7 @@ pnpm dev:brand              # or dev:market, dev:ar
 | `pnpm db:generate`                                  | Re-generate the Prisma client after editing `packages/db/prisma/schema.prisma` |
 | `CONFIRM_DB_PUSH=yes pnpm --filter @wadzzo/db push` | `prisma db push` (guarded: it can drop data on the shared DB)                  |
 
-Start with [docs/RUNBOOK.md](docs/RUNBOOK.md) to run and manage the repo, then [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit, [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) to deploy (Vercel for the web apps, AWS for the task server), [docs/PLATFORMS.md](docs/PLATFORMS.md) to add a white-label platform and [docs/MIGRATION.md](docs/MIGRATION.md) for what moved where.
+Start with [docs/RUNBOOK.md](docs/RUNBOOK.md) to run and manage the repo, then [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit, [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) to deploy (Vercel for the web apps, AWS for the worker), [docs/PLATFORMS.md](docs/PLATFORMS.md) to add a white-label platform and [docs/MIGRATION.md](docs/MIGRATION.md) for what moved where.
 
 PDF copies of the runbook and the deployment guide are in `docs/pdf/` (regenerate with `node scripts/docs-to-pdf.mjs`).
 
