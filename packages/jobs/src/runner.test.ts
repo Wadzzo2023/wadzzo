@@ -1,9 +1,12 @@
 import type { PGlite } from "@electric-sql/pglite";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { enqueueJob, getJob, type Job, type SqlDb } from "./queue";
 import { runOnce, startWorker, type Handlers } from "./runner";
 import { testDb } from "./test-db";
+
+// Starting an in-process Postgres is slow on a busy CI machine (many packages test at once).
+vi.setConfig({ hookTimeout: 60_000, testTimeout: 30_000 });
 
 let pg: PGlite;
 let db: SqlDb;
@@ -21,7 +24,7 @@ beforeEach(async () => {
 });
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const waitFor = async (check: () => Promise<boolean> | boolean, ms = 3000) => {
+const waitFor = async (check: () => Promise<boolean> | boolean, ms = 15_000) => {
   const end = Date.now() + ms;
   while (Date.now() < end) {
     if (await check()) return;

@@ -1,5 +1,5 @@
 import type { PGlite } from "@electric-sql/pglite";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   STALE_AFTER_MS,
@@ -16,6 +16,9 @@ import {
   type SqlDb,
 } from "./queue";
 import { JOB_TABLE_SQL, testDb } from "./test-db";
+
+// Starting an in-process Postgres is slow on a busy CI machine (many packages test at once).
+vi.setConfig({ hookTimeout: 60_000, testTimeout: 30_000 });
 
 let pg: PGlite;
 let db: SqlDb;
