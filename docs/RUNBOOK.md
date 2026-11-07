@@ -11,7 +11,7 @@ pnpm db:local                          # embedded Postgres with the shared schem
 pnpm --filter @wadzzo/ar     dev -p 3000     # AR collector
 pnpm --filter @wadzzo/brand  dev -p 3001     # brand portal
 pnpm --filter @wadzzo/market dev -p 3002     # fan marketplace
-pnpm --filter @wadzzo/express dev            # task server on :4000
+pnpm --filter @wadzzo/express dev            # worker on :4000 (health only)
 
 pnpm typecheck && pnpm lint && pnpm test && pnpm format:check    # the CI gate
 pnpm env:check                                                    # env files agree
@@ -73,14 +73,14 @@ Use fixed ports so the URLs in `.env.example` line up:
 | AR (`web`)      | `pnpm --filter @wadzzo/ar dev -p 3000`     | 3000 | `NEXT_PUBLIC_URL`, `NEXTAUTH_URL` = `http://localhost:3000`                                                       |
 | Brand (`brand`) | `pnpm --filter @wadzzo/brand dev -p 3001`  | 3001 | `NEXT_PUBLIC_URL`, `NEXTAUTH_URL` = `http://localhost:3001`; `NEXT_PUBLIC_WADZZO_AR_URL=http://localhost:3000`    |
 | Market (`app`)  | `pnpm --filter @wadzzo/market dev -p 3002` | 3002 | `NEXT_PUBLIC_URL`, `NEXTAUTH_URL` = `http://localhost:3002`; `NEXT_PUBLIC_BRAND_PORTAL_URL=http://localhost:3001` |
-| Task server     | `pnpm --filter @wadzzo/express dev`        | 4000 | brand: `EXPRESS_SERVER_URL=http://localhost:4000`, same `NEXTAUTH_SECRET` on both                                 |
+| Worker          | `pnpm --filter @wadzzo/express dev`        | 4000 | `DATABASE_URL`: the same database as the brand (its jobs table is how the two find each other)                    |
 
 Notes:
 
 - `pnpm dev` (everything at once) works, but the apps then take whatever ports are free. Prefer the explicit commands above.
 - Each app's `predev` hook runs `sync:platform`, which writes `src/styles/platform-theme.css` and `public/platform/**` for the current `PLATFORM_SLUG`. They are generated and git-ignored.
 - AR runs on webpack (`--webpack`, already in its script); brand and market use Turbopack.
-- Outside production the brand app **requires** `EXPRESS_SERVER_URL` for the map agent and hotspot drops. It will not guess, so testing never reaches the production task server.
+- The map agent, bulk pins and hotspot drops run in the worker. The brand app only adds jobs to the `jobs` table, so start the worker against the **same database** as the brand, or those jobs just wait. (Apply `packages/db/prisma/sql/2026-11-07-job-queue.sql` to a database that doesn't have the table yet.)
 
 ### 3.3 Another platform (Clinton County)
 
@@ -147,18 +147,18 @@ pnpm env:check            # both modes
 pnpm env:check production
 ```
 
-It never prints secrets (it compares hashes). It fails when something that must be identical across the apps differs (database, issuer key, platform wallets, bucket, Firebase), when the task server's `NEXTAUTH_SECRET` differs from brand's, or when a production URL doesn't match the app's domain.
+It never prints secrets (it compares hashes). It fails when something that must be identical across the apps differs (database, issuer key, platform wallets, bucket, Firebase), or when a production URL doesn't match the app's domain.
 
 **Adding an environment variable**
 
 1. Read it through the right door: API code via `packages/api/src/env.ts` (add the name to `REQUIRED` or `OPTIONAL`; it is read on first use, never at import); app code via the app's `src/env.js`.
 2. Add it to every affected `apps/<app>/.env.example` with a one-line description.
 3. If the apps must agree on it, add it to `MUST_MATCH` in `scripts/check-env.mjs`.
-4. Set it in the Vercel projects / on the task server ([DEPLOYMENT.md](DEPLOYMENT.md)).
+4. Set it in the Vercel projects / on the worker ([DEPLOYMENT.md](DEPLOYMENT.md)).
 
 ## 6. Database
 
-- The schema lives **only** in `packages/db/prisma/schema.prisma`; every app and the task server generate their client from it.
+- The schema lives **only** in `packages/db/prisma/schema.prisma`; every app and the worker generate their client from it.
 - Import models and enums from `@wadzzo/db` (browser-safe) and the client `db` from `@wadzzo/db/server`.
 - **Never** run `prisma db push` by habit. It can drop data on a shared database, so the script refuses unless you say so:
 
@@ -239,7 +239,7 @@ Read this first:
 - The market build prerenders `/sitemap.xml`, which queries the database. Without a reachable database it stops there after 18 of 19 pages; that is expected.
 - `next build` and `next dev` in the same app share `.next`. Stop the dev server of that app first, or build in a separate checkout.
 
-The task server builds with `pnpm --filter @wadzzo/express build` (tsup) and starts with `node dist/index.js`.
+The worker builds with `pnpm --filter @wadzzo/express build` (tsup) and starts with `node dist/index.js`.
 
 ## 10. Keeping dependencies healthy
 
@@ -261,9 +261,9 @@ TypeScript 6 does not include `@types/*` implicitly: a package that uses Node gl
 
 ## 11. Releasing and operating
 
-- Branches: `main` (production), `develop` (development environment). Web apps deploy from Vercel on push; the task server from `.github/workflows/deploy-express.yml`. Details, rollbacks and the checks after a deploy are in [DEPLOYMENT.md](DEPLOYMENT.md).
+- Branches: `main` (production), `develop` (development environment). Web apps deploy from Vercel on push; the worker from `.github/workflows/deploy-express-docker.yml`. Details, rollbacks and the checks after a deploy are in [DEPLOYMENT.md](DEPLOYMENT.md).
 - Before a release: CI green, `pnpm env:check production`, and for schema changes the SQL applied first.
-- Secrets rotation: a value used by several apps (`ISSUER_ENCRYPTION_KEY`, `MOTHER_SECRET`, `NEXTAUTH_SECRET`, the database password) changes in **every** project and the task server in one window, then `pnpm env:check`.
+- Secrets rotation: a value used by several apps (`ISSUER_ENCRYPTION_KEY`, `MOTHER_SECRET`, `NEXTAUTH_SECRET`, the database password) changes in **every** project and on the worker in one window, then `pnpm env:check`.
 
 ## 12. Troubleshooting
 
@@ -273,7 +273,7 @@ TypeScript 6 does not include `@types/*` implicitly: a package that uses Node gl
 | `CONFIG_MISSING` naming a variable                              | That setting isn't set for this app; compare with its `.env.example` (API settings are read on first use, so it appears when a feature is used)           |
 | `Invalid environment variables` at start                        | The app's `src/env.js` rejected a value; the message names the variable                                                                                   |
 | `This module cannot be imported from a Client Component module` | an `import "server-only"` reached a pages-router route; remove it from package code                                                                       |
-| "The task server isn't configured for this environment"         | `EXPRESS_SERVER_URL` is unset outside production (by design); set it                                                                                      |
+| The map agent or a pin batch never answers                      | the worker isn't running, or it uses a different `DATABASE_URL` than the brand                                                                            |
 | Port already in use                                             | something is listening there; find it with `lsof -nP -iTCP:3001 -sTCP:LISTEN` and check before killing: it may be a teammate's or your own other terminal |
 | Prisma connection errors with `pnpm db:local`                   | it accepts one connection: one app at a time, `DATABASE_POOL_MAX=1`                                                                                       |
 | `tsc` says `Cannot find name 'process'` in a package            | add `@types/node` and `"types": ["node"]` to that package (TypeScript 6)                                                                                  |
@@ -290,5 +290,5 @@ TypeScript 6 does not include `@types/*` implicitly: a package that uses Node gl
 3. **Do not run the e2e tests, seeds or `db push` against production**. They are for development databases.
 4. **Do not change `/api/mobile/v1` contracts** (routes, parameters, response shapes, the `{ error: { code, message } }` body). Add routes instead; the shipped mobile app depends on them.
 5. **One network per deployment**: mainnet and testnet are never mixed in one environment.
-6. **The task server runs as one instance.** Deploy it when its queue is idle (`GET /health`).
+6. **Deploy the worker when no pin batch is running** (`GET /health` → `jobs.running`). A job in hand is finished before the old container stops, but a very long batch can outlast the 120 s wait.
 7. **Do not kill processes you didn't start.** A busy port is often someone's dev server.

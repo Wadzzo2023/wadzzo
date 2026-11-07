@@ -181,13 +181,11 @@ Test account: Fyron (GAP4E5…EZH) on the **dev DB** (`ep-winter-art`), granted 
 
 ## Task server (express-wadzzo) — findings from the hotspot check (2026-09-30)
 
-- **Local dev:** the portal reads `EXPRESS_SERVER_URL` (server env). Production falls back to
-  `https://wadzzo.54-69-28-110.sslip.io`; anywhere else it must be set, so local testing never
-  writes to production. Locally: `apps/express-wadzzo` → `pnpm build && node dist/index.js`
-  (port 4000, `.env` with the **dev** DATABASE_URL), and `EXPRESS_SERVER_URL=http://localhost:4000`
-  in `.env.development`. `pnpm dev` (tsx watch) fails on Node 24 — fix in the `upgrade` branch.
-- **No auth on `/hotspots`** (deferred by decision): anyone who can reach the server can create,
-  pause or delete any brand's hotspots by passing a creatorId. Fix later with a shared-secret header.
+- **Update (2026-11-07):** the portal no longer calls the worker. The agent, bulk pins and hotspot
+  drops are jobs in the database's `jobs` table (see docs/DEPLOYMENT.md §4), so there is no
+  `EXPRESS_SERVER_URL`; start `apps/express-wadzzo` against the same dev `DATABASE_URL`. Hotspot
+  create/pause/delete are database writes done by the portal, scoped to the signed-in brand, so the
+  old "no auth on `/hotspots`" finding no longer applies.
 - **First drop ignores the start date:** the first location group is created with
   `startDate: now` even when `hotspotStartDate` is in the future.
 - **Hotspot drops skip review:** location groups are created `approved: true`, unlike normal pins.

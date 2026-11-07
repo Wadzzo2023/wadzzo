@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs ON THE SERVER (the deploy workflow pipes it over SSH): swaps the task-server container
+# Runs ON THE SERVER (the deploy workflow pipes it over SSH): swaps the worker container
 # for the image tagged $1, waits for /health, and goes back to the previous image if the
 # new one doesn't come up. The env file lives only on the server and is never in git.
 #
@@ -21,7 +21,7 @@ if [ "${LOAD_ONLY:-0}" = 1 ]; then
   exit 0
 fi
 
-[ -f "$ENV_FILE" ] || { echo "Missing $ENV_FILE: create it from apps/worker/.env.example first." >&2; exit 1; }
+[ -f "$ENV_FILE" ] || { echo "Missing $ENV_FILE: create it from apps/express-wadzzo/.env.example first." >&2; exit 1; }
 
 run() {
   # A stop gives the worker time to finish the job in hand (it exits on SIGTERM when done).
@@ -52,7 +52,7 @@ fi
 
 run "${IMAGE}:${TAG}"
 if healthy; then
-  echo "Task server ${TAG} is healthy."
+  echo "Worker ${TAG} is healthy."
   docker tag "${IMAGE}:${TAG}" "${IMAGE}:current"
   # Keep the last few images, drop the rest.
   docker images "$IMAGE" --format '{{.Tag}} {{.CreatedAt}}' \
@@ -61,7 +61,7 @@ if healthy; then
   exit 0
 fi
 
-echo "Task server ${TAG} did not become healthy. Last logs:" >&2
+echo "Worker ${TAG} did not become healthy. Last logs:" >&2
 docker logs --tail 60 "$NAME" >&2 || true
 docker rm -f "$NAME" > /dev/null 2>&1 || true
 if docker image inspect "${IMAGE}:previous" > /dev/null 2>&1; then

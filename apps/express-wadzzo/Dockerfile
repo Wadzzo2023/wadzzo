@@ -1,4 +1,5 @@
-# The Wadzzo task server (jobs API, server-sent events, hotspot schedules).
+# The Wadzzo worker: takes the map agent, bulk pin creation and hotspot drops from the database's
+# jobs table, and serves /health.
 # Build from the repo root:
 #   docker build -f apps/express-wadzzo/Dockerfile -t wadzzo-worker .
 # Run with the variables in apps/express-wadzzo/.env.example:
