@@ -64,7 +64,7 @@ The code can run both ways, so the move is a DNS switch with the old servers kep
 ### Order
 
 1. **Development first.** Create the three Vercel projects, `develop` branch, `dev-*` domains and the development environment variables ([DEPLOYMENT.md §2](DEPLOYMENT.md#2-vercel-one-project-per-app)). Verify against a development database on testnet.
-2. **Task server.** Bring up the monorepo's task server **next to** the running one, on port 4001, with the production `.env`, and compare `GET /health` and one agent job. Then point nginx's `/wadzzo/api/` at 4001 (or swap the PM2 app) and stop the old process. The brand app needs no change: it calls the same URL with the same derived key.
+2. **Worker.** (Done 2026-11-06/07.) The task server moved to a Docker container on the `bandcoin-worker` instance behind Caddy, and then to the database job queue: the brand app no longer calls it, so there is no URL to switch (see [DEPLOYMENT.md §4](DEPLOYMENT.md#4-the-worker-on-aws)).
 3. **Production web apps, one at a time**, in this order: `ar` (smallest blast radius, has a health-style endpoint), `market`, `brand`:
    1. Create the Vercel project, add the production variables, deploy to the `*.vercel.app` URL, and run the checks in [DEPLOYMENT.md §5](DEPLOYMENT.md#checks-after-any-deployment) against it.
    2. Lower the DNS TTL of the real domain a day before.
@@ -80,7 +80,7 @@ The code can run both ways, so the move is a DNS switch with the old servers kep
 
 ### Rollback
 
-Web apps: move the DNS record back (the old server is still there), or in Vercel promote the previous deployment. Task server: `pm2 restart` the old PM2 app and re-point nginx. Nothing in the database has changed, so there is nothing to undo there.
+Web apps: move the DNS record back (the old server is still there), or in Vercel promote the previous deployment. Worker: the deploy script goes back to the previous image by itself if the new one doesn't answer. Nothing in the database has changed, so there is nothing to undo there.
 
 ### Things to expect on Vercel that the old servers didn't have
 

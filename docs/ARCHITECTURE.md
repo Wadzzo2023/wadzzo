@@ -87,7 +87,7 @@ The S3 settings are read as `AWS_*` and, if those are unset, as the web apps' ol
 ## Deploying
 
 - Web apps: one Vercel project per app (`app.wadzzo.com`, `brand.wadzzo.com`, `web.wadzzo.com`), Root Directory `apps/<app>`, deployed by Vercel's Git integration; `main` is production, `develop` the development domains.
-- `apps/express-wadzzo`: bundled with `tsup`, one PM2 process behind nginx on AWS EC2, deployed by `.github/workflows/deploy-express.yml`.
+- `apps/express-wadzzo`: the worker (map agent, bulk pins, hotspot drops from the `jobs` table), bundled with `tsup` and run as one Docker container on the `bandcoin-worker` EC2 instance behind Caddy (health only), deployed by `.github/workflows/deploy-express-docker.yml`.
 - `.github/workflows`: `ci.yml` (format, typecheck, lint, test) and `deploy-express.yml`.
 
 Full steps, environment variables per environment and troubleshooting: [DEPLOYMENT.md](DEPLOYMENT.md).
