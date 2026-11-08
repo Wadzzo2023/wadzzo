@@ -8,6 +8,9 @@ import type { Db } from "@wadzzo/db";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { generateRandomLocations } from "@wadzzo/geo";
 import { DAY_MS, START_TOLERANCE_MS, isPendingFirstDrop } from "@wadzzo/geo/hotspot-schedule";
+import type { PinLookColumns } from "@wadzzo/schemas/pin-look";
+
+import { lookData } from "./pin-look";
 
 /** A token value that means "the brand's page asset" rather than an asset id. */
 const PAGE_ASSET_NUM = -10;
@@ -31,6 +34,8 @@ export interface CreateHotspotInput {
   token?: number;
   tier?: string;
   creatorId: string;
+  /** Pin look for every drop (already checked; see lookColumnsFor). Default look when left out. */
+  look?: PinLookColumns;
 }
 
 export interface UpdateHotspotInput {
@@ -42,6 +47,8 @@ export interface UpdateHotspotInput {
   multiPin?: boolean;
   /** Which existing drops the collection settings apply to. */
   scope?: "future_drops" | "all_drops";
+  /** New pin look; applies to every drop, past and future (it's only how they're drawn). */
+  look?: PinLookColumns;
 }
 
 export interface HotspotActionResult {
@@ -111,6 +118,7 @@ export function hotspots(db: Db) {
           shape: input.hotspotShape,
           geoJson: (input.geoJson as Prisma.InputJsonValue | undefined) ?? Prisma.JsonNull,
           isActive: true,
+          ...(input.look ? lookData(input.look) : {}),
           locationGroups: {
             create: {
               creatorId,
@@ -134,6 +142,7 @@ export function hotspots(db: Db) {
               endDate: firstDropEnd,
               hidden: startsLater,
               approved: true,
+              ...(input.look ? lookData(input.look) : {}),
               locations: {
                 createMany: {
                   data: generateRandomLocations(
@@ -216,8 +225,14 @@ export function hotspots(db: Db) {
           pinDurationDays: input.pinDurationDays,
           autoCollect: input.autoCollect,
           multiPin: input.multiPin,
+          ...(input.look ? lookData(input.look) : {}),
         },
       });
+      if (input.look)
+        await db.locationGroup.updateMany({
+          where: { hotspotId: hotspot.id },
+          data: lookData(input.look),
+        });
 
       // The first drop is waiting for the start: keep it dated for the (new) start.
       if (pending && (input.hotspotStartDate || input.pinDurationDays)) {

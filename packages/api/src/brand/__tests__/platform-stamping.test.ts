@@ -27,6 +27,8 @@ const STAMPED = [
   "redeem",
   "admin",
   "mcpToken",
+  "pinTemplate",
+  "pinShape",
 ];
 
 /** Copies an existing row (which already carries its platformId). */

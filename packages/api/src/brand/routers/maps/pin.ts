@@ -17,6 +17,8 @@ import { assertInPlatformScope, platformScope, relationScope } from "@wadzzo/pla
 import { createOptimizedImage } from "@wadzzo/storage";
 import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
+import { columnsToLook, pinLookInputSchema } from "@wadzzo/schemas/pin-look";
+import { lookColumnsFor, lookData } from "../../server/pin-look";
 import { hotspotSchedule, isPendingFirstDrop } from "@wadzzo/geo/hotspot-schedule";
 import { hotspots } from "../../server/hotspots";
 import { buildPinScanUrl, renderPinQR } from "../../lib/qr-generator";
@@ -79,7 +81,26 @@ export const createPinFormSchema = z.object({
   multiPin: z.boolean().optional(),
   creatorId: z.string().optional(),
   tags: z.array(z.string()).default([]),
+  /** Shape, fill, colour, image fit and badge (see @wadzzo/schemas/pin-look). */
+  look: pinLookInputSchema.optional(),
 });
+
+/**
+ * Links tags to a new drop. Ids that no longer exist (a tag deleted since a
+ * template was saved) are skipped instead of failing the whole create.
+ */
+async function attachTags(db: Db, locationGroupId: string, tagIds: string[] | undefined) {
+  if (!tagIds?.length) return;
+  const existing = await db.locationTag.findMany({
+    where: { id: { in: tagIds } },
+    select: { id: true },
+  });
+  if (!existing.length) return;
+  await db.locationGroupTag.createMany({
+    data: existing.map((t) => ({ locationGroupId, tagId: t.id })),
+    skipDuplicates: true,
+  });
+}
 
 export const PAGE_ASSET_NUM = -10;
 export const NO_ASSET = -99;
@@ -148,6 +169,7 @@ export const createAdminPinFormSchema = z.object({
   multiPin: z.boolean().optional(),
   creatorId: z.string(),
   tags: z.array(z.string()).default([]),
+  look: pinLookInputSchema.optional(),
 });
 
 type AuthCtx = Parameters<typeof assertOwnerOrAdmin>[0];
@@ -180,6 +202,43 @@ const reviewSelect = {
   // No `locations` here, deliberately. Bulk QR work addresses a drop by its group
   // id, and the one place that needs a concrete location id (the preview drawer)
   // fetches the full list itself via `getReviewGroup`.
+} as const;
+
+/**
+ * What the map needs to draw a pin, and nothing else: its place, how it is drawn (shape,
+ * image, colour, state) and its totals. No description, link or tags, so a map with
+ * thousands of pins stays small; `getPinDetail` fetches the whole pin when one is opened.
+ */
+const MAP_PIN_SELECT = {
+  id: true,
+  latitude: true,
+  longitude: true,
+  autoCollect: true,
+  hidden: true,
+  _count: { select: { consumers: true } },
+  locationGroup: {
+    select: {
+      id: true,
+      title: true,
+      image: true,
+      optimizedImage: true,
+      type: true,
+      startDate: true,
+      endDate: true,
+      limit: true,
+      remaining: true,
+      approved: true,
+      hotspotId: true,
+      markerShape: true,
+      pinShapeId: true,
+      markerFill: true,
+      markerColor: true,
+      markerImageFit: true,
+      markerAutoBadge: true,
+      creator: { select: { profileUrl: true } },
+      pinShape: { select: { path: true, anchor: true } },
+    },
+  },
 } as const;
 
 export const pinRouter = createTRPCRouter({
@@ -220,6 +279,7 @@ export const pinRouter = createTRPCRouter({
           token: input.token,
           tier: input.tier,
           creatorId,
+          look: await lookColumnsFor(ctx.db, creatorId, input.look),
         });
 
         return { hotspotId: result.hotspotId };
@@ -344,6 +404,12 @@ export const pinRouter = createTRPCRouter({
         multiPin: true,
         createdAt: true,
         creator: { select: { name: true, profileUrl: true } },
+        markerShape: true,
+        pinShapeId: true,
+        markerFill: true,
+        markerColor: true,
+        markerImageFit: true,
+        markerAutoBadge: true,
       },
     });
     if (!h) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Hotspot not found" });
@@ -388,7 +454,13 @@ export const pinRouter = createTRPCRouter({
     const started =
       !pendingGroups.some((g) => g.startDate.getTime() - g.createdAt.getTime() > 60_000) &&
       h.hotspotStartDate <= now;
-    return { ...h, template, stats: { drops, live, collected }, started };
+    return {
+      ...h,
+      look: columnsToLook(h),
+      template,
+      stats: { drops, live, collected },
+      started,
+    };
   }),
 
   /** Change a hotspot: schedule and collection go through the task server (it reschedules); pin details edit the drops. */
@@ -403,6 +475,8 @@ export const pinRouter = createTRPCRouter({
         pinDurationDays: z.number().int().min(1).optional(),
         autoCollect: z.boolean().optional(),
         multiPin: z.boolean().optional(),
+        /** New pin look for every drop; left out = unchanged. */
+        look: pinLookInputSchema.optional(),
         details: z
           .object({
             title: z.string().trim().min(3).max(120),
@@ -417,9 +491,10 @@ export const pinRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const h = await manageableHotspot(ctx, input.hotspotId);
-      const { hotspotId, scope, details, ...settings } = input;
+      const { hotspotId, scope, details, look: lookInput, ...settings } = input;
+      const look = await lookColumnsFor(ctx.db, h.creatorId, lookInput);
 
-      const hasSettings = Object.values(settings).some((v) => v !== undefined);
+      const hasSettings = Object.values(settings).some((v) => v !== undefined) || Boolean(look);
       if (hasSettings) {
         try {
           await hotspots(ctx.db).update(h.creatorId, hotspotId, {
@@ -427,6 +502,7 @@ export const pinRouter = createTRPCRouter({
             hotspotStartDate: settings.hotspotStartDate?.toISOString(),
             hotspotEndDate: settings.hotspotEndDate?.toISOString(),
             scope,
+            look,
           });
         } catch (err) {
           throw new AppError(ErrorCodes.VALIDATION_FAILED, {
@@ -559,10 +635,12 @@ export const pinRouter = createTRPCRouter({
       select: { platformId: true },
     });
 
+    const look = await lookColumnsFor(ctx.db, targetCreatorId, input.look);
     const locationGroup = await ctx.db.locationGroup.create({
       data: {
         creatorId: targetCreatorId,
         platformId: target.platformId,
+        ...(look ? lookData(look) : {}),
         endDate: input.endDate,
         startDate: input.startDate,
         title: input.title,
@@ -584,15 +662,7 @@ export const pinRouter = createTRPCRouter({
         approved: true,
       },
     });
-    if (input.tags && input.tags.length > 0) {
-      await ctx.db.locationGroupTag.createMany({
-        data: input.tags.map((tagId) => ({
-          locationGroupId: locationGroup.id,
-          tagId,
-        })),
-        skipDuplicates: true,
-      });
-    }
+    await attachTags(ctx.db, locationGroup.id, input.tags);
     return locationGroup;
   }),
 
@@ -639,10 +709,12 @@ export const pinRouter = createTRPCRouter({
         ? await createOptimizedImage(input.image).catch(() => null)
         : null;
 
+      const look = await lookColumnsFor(ctx.db, creatorId, input.look);
       const locationGroup = await ctx.db.locationGroup.create({
         data: {
           creatorId,
           platformId: creator.platformId,
+          ...(look ? lookData(look) : {}),
           endDate: input.endDate,
           startDate: input.startDate,
           title: input.title,
@@ -664,15 +736,7 @@ export const pinRouter = createTRPCRouter({
           approved: true,
         },
       });
-      if (input.tags && input.tags.length > 0) {
-        await ctx.db.locationGroupTag.createMany({
-          data: input.tags.map((tagId) => ({
-            locationGroupId: locationGroup.id,
-            tagId,
-          })),
-          skipDuplicates: true,
-        });
-      }
+      await attachTags(ctx.db, locationGroup.id, input.tags);
       return locationGroup;
     }),
 
@@ -768,6 +832,7 @@ export const pinRouter = createTRPCRouter({
               select: {
                 id: true,
                 name: true,
+                profileUrl: true,
               },
             },
           },
@@ -796,6 +861,8 @@ export const pinRouter = createTRPCRouter({
       lat: pin.latitude,
       lng: pin.longitude,
       approved: g.approved,
+      look: columnsToLook(g),
+      brandImage: g.creator?.profileUrl ?? null,
     };
   }),
 
@@ -813,6 +880,7 @@ export const pinRouter = createTRPCRouter({
       pinRemainingLimit,
       autoCollect,
       multiPin,
+      look: lookInput,
     } = input;
 
     try {
@@ -842,6 +910,7 @@ export const pinRouter = createTRPCRouter({
         updatedRemainingLimit = pinRemainingLimit;
       }
 
+      const look = await lookColumnsFor(ctx.db, findLocation.locationGroup.creatorId, lookInput);
       const imageChanged = image !== undefined && image !== findLocation.locationGroup.image;
       const optimizedImage = imageChanged
         ? await createOptimizedImage(image).catch(() => null)
@@ -860,6 +929,7 @@ export const pinRouter = createTRPCRouter({
           remaining: updatedRemainingLimit,
           link: url,
           multiPin,
+          ...(look ? lookData(look) : {}),
         },
       });
     } catch (e) {
@@ -889,41 +959,7 @@ export const pinRouter = createTRPCRouter({
           },
           hidden: false,
         },
-        include: {
-          _count: { select: { consumers: true } },
-          locationGroup: {
-            include: {
-              creator: {
-                select: { profileUrl: true, name: true, coverUrl: true },
-              },
-              locations: {
-                select: {
-                  locationGroup: {
-                    select: {
-                      endDate: true,
-                      startDate: true,
-                      limit: true,
-                      image: true,
-                      description: true,
-                      title: true,
-                      link: true,
-                      multiPin: true,
-                      subscriptionId: true,
-                      pageAsset: true,
-                      privacy: true,
-                      remaining: true,
-                      assetId: true,
-                    },
-                  },
-                  latitude: true,
-                  longitude: true,
-                  id: true,
-                  autoCollect: true,
-                },
-              },
-            },
-          },
-        },
+        select: MAP_PIN_SELECT,
       });
     }),
 
@@ -945,42 +981,31 @@ export const pinRouter = createTRPCRouter({
           },
           hidden: false,
         },
+        select: MAP_PIN_SELECT,
+      });
+    }),
+
+  /** One pin in full, for its details window (the map lists carry only what is needed to draw them). */
+  getPinDetail: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const pin = await ctx.db.location.findUnique({
+        where: { id: input.id },
         include: {
           _count: { select: { consumers: true } },
           locationGroup: {
             include: {
-              creator: {
-                select: { profileUrl: true, name: true, coverUrl: true },
-              },
-              locations: {
-                select: {
-                  locationGroup: {
-                    select: {
-                      endDate: true,
-                      startDate: true,
-                      limit: true,
-                      image: true,
-                      description: true,
-                      title: true,
-                      link: true,
-                      multiPin: true,
-                      subscriptionId: true,
-                      pageAsset: true,
-                      privacy: true,
-                      remaining: true,
-                      assetId: true,
-                    },
-                  },
-                  latitude: true,
-                  longitude: true,
-                  id: true,
-                  autoCollect: true,
-                },
-              },
+              creator: { select: { profileUrl: true, name: true, coverUrl: true } },
+              pinShape: { select: { path: true, anchor: true } },
             },
           },
         },
       });
+      if (!pin?.locationGroup || pin.hidden)
+        throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "That pin no longer exists" });
+      assertInPlatformScope(ctx, pin.locationGroup.platformId);
+      await assertOwnerOrAdmin(ctx, pin.locationGroup.creatorId);
+      return pin;
     }),
 
   getRangePins: creatorProcedure
@@ -1013,6 +1038,7 @@ export const pinRouter = createTRPCRouter({
               creator: {
                 select: { profileUrl: true, name: true, coverUrl: true },
               },
+              pinShape: { select: { path: true, anchor: true } },
             },
           },
         },

@@ -1,6 +1,8 @@
 import { createTRPCRouter } from "../../trpc";
 import { pinRouter } from "./pin";
 import { reportRouter } from "./report";
+import { shapeRouter } from "./shape";
+import { templateRouter } from "./template";
 import { trxRouter } from "./transactions";
 
 /**
@@ -11,6 +13,8 @@ import { trxRouter } from "./transactions";
 export const mapsRouter = createTRPCRouter({
   pin: pinRouter,
   report: reportRouter,
+  shape: shapeRouter,
+  template: templateRouter,
   trx: trxRouter,
 });
 
