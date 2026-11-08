@@ -2,6 +2,7 @@ import { PinType as PinTypeEnum } from "@wadzzo/db";
 import { z } from "zod";
 
 import { BADWORDS } from "./banned-word";
+import { pinLookInputSchema } from "./pin-look";
 
 /** Editing a pin: shared by the edit page and the API. */
 export const updateMapFormSchema = z.object({
@@ -41,4 +42,6 @@ export const updateMapFormSchema = z.object({
   multiPin: z.boolean().optional(),
   pinRemainingLimit: z.number().optional(),
   type: z.enum(PinTypeEnum).default(PinTypeEnum.OTHER), // Added new type field
+  /** New pin look; left out = unchanged. */
+  look: pinLookInputSchema.optional(),
 });

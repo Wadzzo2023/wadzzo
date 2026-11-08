@@ -3,6 +3,7 @@ import type { Feature } from "geojson";
 import { z } from "zod";
 
 import { BADWORDS } from "./banned-word";
+import { pinLookInputSchema } from "./pin-look";
 
 export type HotspotShape = "circle" | "rectangle" | "polygon";
 
@@ -34,6 +35,8 @@ export const createHotspotFormSchema = z.object({
   hotspotStartDate: z.date(),
   hotspotEndDate: z.date(),
   geoJson: z.custom<Feature | null>((val) => val === null || typeof val === "object").optional(),
+  /** Shape, fill, colour, image fit and badge for every drop. */
+  look: pinLookInputSchema.optional(),
 });
 
 export const updateHotspotFormSchema = z.object({
