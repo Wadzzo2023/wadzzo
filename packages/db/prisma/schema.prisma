@@ -251,6 +251,8 @@ model Creator {
     pinAgentMessages   PinAgentChatHistory[] @relation("pinAgentMessages")
     createdAt          DateTime              @default(now())
     hotspots           Hotspot[]
+    pinTemplates       PinTemplate[]
+    pinShapes          PinShape[]
     locationGroupJobs  LocationGroupJob[]
     agentJobs          AgentJob[]
     locationTags       LocationTag[]
@@ -687,6 +689,16 @@ model Hotspot {
     shape   String // "circle" | "square" | "polygon"
     geoJson Json // GeoJSON Feature
 
+    // Pin look (see @wadzzo/schemas/pin-look): a built-in shape or one of the brand's own,
+    // what fills it, its colour, how the image sits, and the auto-collect badge.
+    markerShape     String?
+    pinShapeId      String?
+    pinShape        PinShape? @relation(fields: [pinShapeId], references: [id], onDelete: SetNull)
+    markerFill      String    @default("BRAND") // BRAND | PIN | NONE
+    markerColor     String?
+    markerImageFit  Json?
+    markerAutoBadge Boolean   @default(true)
+
     // QStash
     qstashScheduleId String?
     isActive         Boolean  @default(true)
@@ -709,6 +721,57 @@ model LocationTag {
     creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
     locationGroups LocationGroupTag[]
+}
+
+/// A brand's own pin shape: one outline in a 100×100 box (checked by
+/// `checkShapePath` in @wadzzo/schemas/pin-look before it is stored). A shape
+/// in use is archived rather than deleted, so pins keep drawing it.
+model PinShape {
+    id        String  @id @default(cuid())
+    creatorId String
+    creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+    name     String
+    path     String
+    anchor   String  @default("center") // center | bottom
+    archived Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    locationGroups LocationGroup[]
+    hotspots       Hotspot[]
+
+    // white-label platform this row belongs to (see model Platform)
+    platformId String   @default("wadzzo")
+    platform   Platform @relation(fields: [platformId], references: [id])
+    @@index([platformId])
+    @@index([creatorId, archived])
+}
+
+/// A brand's saved pin or hotspot setup, reused to drop new ones. `data` is the
+/// form's values in the shape `@wadzzo/schemas/pin-template` reads (versioned by
+/// `schemaVersion`); dates are kept as durations so a template never goes stale.
+model PinTemplate {
+    id        String  @id @default(cuid())
+    creatorId String
+    creator   Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+    name          String
+    formType      String // "PIN" | "HOTSPOT"
+    data          Json
+    schemaVersion Int     @default(1)
+    // whether `data` carries a location (pin) or a drawn area (hotspot)
+    hasLocation   Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // white-label platform this row belongs to (see model Platform)
+    platformId String   @default("wadzzo")
+    platform   Platform @relation(fields: [platformId], references: [id])
+    @@index([platformId])
+    @@index([creatorId, formType, updatedAt])
 }
 
 model LocationGroupTag {
@@ -769,6 +832,16 @@ model LocationGroup {
     multiPin Boolean @default(false)
     type     PinType @default(OTHER) // EVENT, LANDMARK, BOUNTY, EXPERIENCE, LAUNCH, OTHER
 
+    // Pin look (see @wadzzo/schemas/pin-look): a built-in shape or one of the brand's own,
+    // what fills it, its colour, how the image sits, and the auto-collect badge.
+    markerShape     String?
+    pinShapeId      String?
+    pinShape        PinShape? @relation(fields: [pinShapeId], references: [id], onDelete: SetNull)
+    markerFill      String    @default("BRAND") // BRAND | PIN | NONE
+    markerColor     String?
+    markerImageFit  Json?
+    markerAutoBadge Boolean   @default(true)
+
     locations         Location[]
     hotspot           Hotspot?           @relation(fields: [hotspotId], references: [id])
     hotspotId         String?
@@ -778,6 +851,7 @@ model LocationGroup {
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
     @@index([platformId])
+    @@index([creatorId, endDate])
 }
 
 model Location {
@@ -792,6 +866,8 @@ model Location {
     locationGroup   LocationGroup? @relation(fields: [locationGroupId], references: [id], onDelete: Cascade)
 
     consumers LocationConsumer[]
+
+    @@index([locationGroupId])
 }
 
 model LocationConsumer {
@@ -819,6 +895,7 @@ model LocationConsumer {
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
     @@index([platformId])
+    @@index([locationId])
 }
 
 model Bounty {
@@ -1635,6 +1712,8 @@ model Platform {
     mapEmbeds          MapEmbed[]
     qrItems            QRItem[]
     redeems            Redeem[]
+    pinTemplates       PinTemplate[]
+    pinShapes          PinShape[]
     admins             Admin[]
     coinBalances       CoinBalance[]
     assetTransactions  AssetTransaction[]
