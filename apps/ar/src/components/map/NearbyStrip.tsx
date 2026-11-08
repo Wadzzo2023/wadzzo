@@ -8,6 +8,7 @@ import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
 import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { PinGlyph } from "@wadzzo/ui/patterns/pin-glyph";
 
 export interface NearbyPin {
   pin: ArPin;
@@ -108,21 +109,25 @@ export function NearbyStrip({
             )}
             style={active ? { boxShadow: `0 0 22px -6px hsl(${meta.hsl} / 0.9)` } : undefined}
           >
-            <div
-              className="relative h-[46px] w-[34px] shrink-0 overflow-hidden rounded-[8px] border"
-              style={{ borderColor: `hsl(${meta.hsl} / 0.55)` }}
+            {/* The pin as the map draws it: its shape, picture or colour, outlined by rarity. */}
+            <span
+              className={cn(
+                "relative flex h-[46px] w-[42px] shrink-0 items-center justify-center",
+                status !== "collectible" && "brightness-[0.6] saturate-0",
+              )}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={pin.imageUrl}
-                alt=""
-                loading="lazy"
-                className={cn(
-                  "h-full w-full object-cover",
-                  status !== "collectible" && "brightness-[0.6] saturate-0",
-                )}
+              <PinGlyph
+                path={pin.look?.path}
+                size={42}
+                color={pin.look?.color}
+                defaultColor="hsl(var(--ar-surface-3))"
+                imageUrl={pin.look ? pin.look.imageUrl : pin.brandImageUrl}
+                imageFit={pin.look?.imageFit}
+                ringColor={`hsl(${meta.hsl})`}
+                ringWidth={2}
+                className="[--pin-glyph-under:hsl(var(--ar-void))]"
               />
-            </div>
+            </span>
 
             <div className="min-w-0 flex-1">
               <p className="font-hud text-ar-text truncate text-[11.5px] leading-tight font-bold">
