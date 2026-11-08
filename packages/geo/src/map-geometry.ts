@@ -171,3 +171,32 @@ export function parseCoordinates(text: string): LatLng | null {
   const lng = Number(m[2]);
   return Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : null;
 }
+
+const RAD = Math.PI / 180;
+/** Web maps stop near ±85°; keep moved points on the map. */
+const MAX_LAT = 85;
+
+/**
+ * The same area moved so its centre lands on `to`. Each corner keeps its
+ * distance and direction from the centre in metres (not in degrees), so the
+ * area keeps its real size and shape when moved north or south. A circle keeps
+ * its radius and is rebuilt around the new centre.
+ */
+export function moveArea(f: StoredFeature, to: LatLng): StoredFeature {
+  const radius = f.properties?.radiusMetres;
+  if (f.properties?.center && radius && radius > 0) return circleAround(to, radius);
+
+  const from = featureCenter(f);
+  const cosFrom = Math.cos(from.lat * RAD);
+  const cosTo = Math.cos(to.lat * RAD);
+  const ring = f.geometry.coordinates[0]!.slice(0, -1).map(([lat, lng]) => {
+    // offset from the centre in metres (east, north)
+    const east = (lng! - from.lng) * RAD * EARTH_R * cosFrom;
+    const north = (lat! - from.lat) * RAD * EARTH_R;
+    return {
+      lat: Math.max(-MAX_LAT, Math.min(MAX_LAT, to.lat + north / (EARTH_R * RAD))),
+      lng: to.lng + east / (EARTH_R * RAD * Math.max(cosTo, 1e-6)),
+    };
+  });
+  return { ...polygonFeature(ring), properties: f.properties ? { ...f.properties } : {} };
+}
