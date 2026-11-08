@@ -1,3 +1,4 @@
+import { resolvePinLook, type PinLookColumns } from "@wadzzo/schemas/pin-look";
 import { Target, Calendar, Star, MapPin } from "lucide-react";
 import { PinType } from "@wadzzo/db"; // Import PinType enum
 
@@ -53,3 +54,23 @@ export const getDaysLeft = (deadline: string) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
 };
+
+/** How a brand's pin is drawn: its stored look with every fallback applied. */
+export function pinLookOf(pin: {
+  autoCollect: boolean;
+  locationGroup:
+    | (Partial<PinLookColumns> & {
+        image?: string | null;
+        creator?: { profileUrl: string | null } | null;
+        pinShape?: { path: string; anchor: string } | null;
+      })
+    | null;
+}) {
+  const g = pin.locationGroup;
+  return resolvePinLook(g, {
+    customShape: g?.pinShape ?? null,
+    brandImage: g?.creator?.profileUrl ?? null,
+    pinImage: g?.image ?? null,
+    autoCollect: pin.autoCollect,
+  });
+}

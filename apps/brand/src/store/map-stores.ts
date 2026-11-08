@@ -11,7 +11,7 @@ export type MapBounds = {
 export type LatLng = { lat: number; lng: number };
 
 /// Define Pin type for clarity and consistency with Prisma schema
-type Pin = {
+export type Pin = {
   locationGroup:
     | (LocationGroup & {
         creator: {
@@ -19,12 +19,50 @@ type Pin = {
           name?: string;
           coverUrl?: string | null;
         };
+        /** The brand's own pin shape, when the drop uses one. */
+        pinShape?: { path: string; anchor: string } | null;
       })
     | null;
   _count: {
     consumers: number;
   };
 } & Location;
+
+/**
+ * A pin as the map lists and draws it: only what that needs (see MAP_PIN_SELECT in the API).
+ * The details window works with the full `Pin`, fetched when a pin is opened.
+ */
+export type PinOnMap = Pick<
+  Location,
+  "id" | "latitude" | "longitude" | "autoCollect" | "hidden"
+> & {
+  _count: { consumers: number };
+  locationGroup:
+    | (Pick<
+        LocationGroup,
+        | "id"
+        | "title"
+        | "image"
+        | "optimizedImage"
+        | "type"
+        | "startDate"
+        | "endDate"
+        | "limit"
+        | "remaining"
+        | "approved"
+        | "hotspotId"
+        | "markerShape"
+        | "pinShapeId"
+        | "markerFill"
+        | "markerColor"
+        | "markerImageFit"
+        | "markerAutoBadge"
+      > & {
+        creator: { profileUrl: string | null };
+        pinShape: { path: string; anchor: string } | null;
+      })
+    | null;
+};
 
 // Re-defining ModalData here as use-modal-store.ts is being removed
 export type ModalData = {
@@ -50,16 +88,16 @@ export type ModalData = {
 };
 
 interface NearbyPinsState {
-  nearbyPins: Pin[];
+  nearbyPins: PinOnMap[];
   // Separate pin states for different contexts
-  myPins: Pin[]; // Creator's own pins
-  adminPins: Pin[]; // Admin-selected creator's pins
-  allPins: Pin[]; // Legacy - for nearby panel filtering
+  myPins: PinOnMap[]; // Creator's own pins
+  adminPins: PinOnMap[]; // Admin-selected creator's pins
+  allPins: PinOnMap[]; // Legacy - for nearby panel filtering
 
-  setMyPins: (pins: Pin[]) => void;
-  setAdminPins: (pins: Pin[]) => void;
-  setAllPins: (pins: Pin[]) => void;
-  setNearbyPins: (pins: Pin[]) => void;
+  setMyPins: (pins: PinOnMap[]) => void;
+  setAdminPins: (pins: PinOnMap[]) => void;
+  setAllPins: (pins: PinOnMap[]) => void;
+  setNearbyPins: (pins: PinOnMap[]) => void;
   filterNearbyPins: (center: MapBounds, source?: "my" | "admin") => void;
   clearAdminPins: () => void;
 }
@@ -70,9 +108,9 @@ export const useNearbyPinsStore = create<NearbyPinsState>((set, get) => ({
   adminPins: [],
   allPins: [], // Keep for backward compatibility
 
-  setNearbyPins: (pins: Pin[]) => set({ nearbyPins: pins }),
+  setNearbyPins: (pins: PinOnMap[]) => set({ nearbyPins: pins }),
 
-  setMyPins: (pins: Pin[]) => {
+  setMyPins: (pins: PinOnMap[]) => {
     const currentPins = get().myPins;
     if (
       pins.length !== currentPins.length ||
@@ -82,7 +120,7 @@ export const useNearbyPinsStore = create<NearbyPinsState>((set, get) => ({
     }
   },
 
-  setAdminPins: (pins: Pin[]) => {
+  setAdminPins: (pins: PinOnMap[]) => {
     const currentPins = get().adminPins;
     if (
       pins.length !== currentPins.length ||
@@ -92,7 +130,7 @@ export const useNearbyPinsStore = create<NearbyPinsState>((set, get) => ({
     }
   },
 
-  setAllPins: (pins: Pin[]) => {
+  setAllPins: (pins: PinOnMap[]) => {
     const currentPins = get().allPins;
     if (
       pins.length !== currentPins.length ||

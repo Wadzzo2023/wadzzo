@@ -2,11 +2,38 @@
 
 import { format } from "date-fns";
 import { ChevronDown, Clock, Hexagon, MapPin, Users } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 
 import { cn } from "@wadzzo/ui/lib/cn";
-import { useNearbyPinsStore } from "~/store/map-stores";
-import { platformBranding } from "@wadzzo/platform/branding";
+import { PinGlyph } from "@wadzzo/ui/patterns/pin-glyph";
+import { PIN_LOOK, pinLook, pinStateOf, shapeScale } from "~/components/map-kit/pin-marker";
+import { useNearbyPinsStore, type PinOnMap } from "~/store/map-stores";
+import { pinLookOf } from "~/utils/map-helpers";
+
+/** The most pins listed at once; with thousands in view, drawing them all would freeze the page. */
+const MAX_LISTED = 50;
+
+/** A pin as the map draws it (its shape, image or colour, state outline), small, for a list row. */
+function PinThumb({ pin, now }: { pin: PinOnMap; now: number }) {
+  const look = useMemo(() => pinLookOf(pin), [pin]);
+  const style = PIN_LOOK[pinLook(pinStateOf(pin, now))];
+  return (
+    <span className="flex size-11 shrink-0 items-center justify-center">
+      <PinGlyph
+        path={look.path}
+        size={Math.round(34 * shapeScale(look.path))}
+        color={look.color}
+        defaultColor="hsl(var(--surface-2, var(--muted)))"
+        imageUrl={look.imageUrl}
+        imageFit={look.imageFit}
+        ringColor={style.ring}
+        ringWidth={2}
+        badge={look.autoBadge}
+        className={cn(style.opacity, style.ring.includes("muted") && "grayscale")}
+      />
+    </span>
+  );
+}
 
 /**
  * "In view": the pins inside the visible map area (desktop). Click one to fly
@@ -21,6 +48,8 @@ export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
 }) {
   const { nearbyPins } = useNearbyPinsStore();
   const [open, setOpen] = useState(true);
+  // Taken once: whether a pin has expired is judged the same way on the map and here.
+  const [now] = useState(() => Date.now());
   return (
     <section
       className={cn(
@@ -54,24 +83,14 @@ export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
             </p>
           ) : (
             <ul className="divide-y">
-              {nearbyPins.map((pin) => (
+              {nearbyPins.slice(0, MAX_LISTED).map((pin) => (
                 <li key={pin.id}>
                   <button
                     type="button"
                     onClick={() => onSelectPlace({ lat: pin.latitude, lng: pin.longitude })}
                     className="hover:bg-accent flex w-full items-center gap-3 px-4 py-2.5 text-left"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={
-                        pin.locationGroup?.image ??
-                        pin.locationGroup?.creator.profileUrl ??
-                        platformBranding.assets.logo
-                      }
-                      alt=""
-                      className="size-9 shrink-0 rounded-lg object-cover"
-                      onError={(e) => (e.currentTarget.src = platformBranding.assets.logo)}
-                    />
+                    <PinThumb pin={pin} now={now} />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">
                         <span className="truncate text-sm font-medium">
@@ -99,6 +118,12 @@ export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
                 </li>
               ))}
             </ul>
+          )}
+          {nearbyPins.length > MAX_LISTED && (
+            <p className="text-muted-foreground border-t px-4 py-3 text-center text-xs">
+              Showing {MAX_LISTED} of {nearbyPins.length.toLocaleString("en-US")} — zoom in to see
+              the rest.
+            </p>
           )}
         </div>
       )}

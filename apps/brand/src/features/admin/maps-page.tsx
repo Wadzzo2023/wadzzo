@@ -1,6 +1,5 @@
 "use client";
 
-import { PinType } from "@wadzzo/db";
 import { Hexagon, Loader2, MapPinOff, Plus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,7 +9,7 @@ import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
 import { toMapboxFeature, type DrawShape, type StoredFeature } from "@wadzzo/geo/map-geometry";
 import { HotspotLayer } from "~/components/map-kit/hotspot-layer";
-import { PinLegend, PinMarker } from "~/components/map-kit/pin-marker";
+import { PinLayer } from "~/components/map-kit/pin-layer";
 import { PlaceSearch } from "~/components/map-kit/place-search";
 import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
@@ -26,9 +25,10 @@ import { AgentChat } from "~/features/agent/agent-chat";
 import { AgentMapLayer } from "~/features/agent/agent-map";
 import { useCopyCutModalStore } from "~/store/copy-cut-modal-store";
 import { useHotspotDraft } from "~/store/hotspot-draft";
-import { useMapInteractionStore, useNearbyPinsStore } from "~/store/map-stores";
+import { useMapInteractionStore, useNearbyPinsStore, type PinOnMap } from "~/store/map-stores";
+import toast from "react-hot-toast";
+
 import { api } from "~/utils/api";
-import { getPinIcon } from "~/utils/map-helpers";
 
 import { BrandPicker } from "./brand-picker";
 
@@ -102,6 +102,25 @@ export default function AdminMapsPage() {
     setAdminPins(pins.data ?? []);
   }, [pins.data, setAdminPins]);
   useEffect(() => clearAdminPins, [clearAdminPins]);
+
+  const utils = api.useUtils();
+  // The map carries only what it needs to draw a pin; the whole pin is fetched when it is opened.
+  const selectPin = useCallback(
+    (pin: PinOnMap) => {
+      const loading = toast.loading("Opening pin…");
+      utils.maps.pin.getPinDetail
+        .fetch({ id: pin.id })
+        .then((full) => {
+          openPinDetailModal(full);
+          setIsAutoCollect(full.autoCollect);
+        })
+        .catch((e: unknown) =>
+          toast.error(e instanceof Error ? e.message : "Couldn't open that pin"),
+        )
+        .finally(() => toast.dismiss(loading));
+    },
+    [utils, openPinDetailModal, setIsAutoCollect],
+  );
 
   const refreshInView = useCallback(() => {
     const b = map.current?.getBounds();
@@ -210,33 +229,7 @@ export default function AdminMapsPage() {
         {hotspots.data && (
           <HotspotLayer hotspots={hotspots.data} onSelect={drawing ? undefined : setHotspotId} />
         )}
-        {!drawing &&
-          adminPins.map((pin) => {
-            const g = pin.locationGroup;
-            return (
-              <PinMarker
-                key={pin.id}
-                lat={pin.latitude}
-                lng={pin.longitude}
-                image={g?.image ?? g?.creator?.profileUrl}
-                icon={getPinIcon(g?.type ?? PinType.OTHER)}
-                count={pin._count.consumers}
-                label={g?.title ?? "Pin"}
-                state={{
-                  expired: g?.endDate ? new Date(g.endDate) < new Date() : false,
-                  empty: g ? g.limit > 0 && g.remaining <= 0 : false, // limit 0 = no limit
-                  approved: g?.approved === true,
-                  rejected: g?.approved === false,
-                  hidden: pin.hidden === true,
-                  autoCollect: pin.autoCollect === true,
-                }}
-                onClick={() => {
-                  openPinDetailModal(pin);
-                  setIsAutoCollect(pin.autoCollect);
-                }}
-              />
-            );
-          })}
+        {!drawing && <PinLayer pins={adminPins} onSelect={selectPin} />}
         {!drawing && <AgentMapLayer />}
         {drawing && (
           <DrawTool initialShape={drawShape} onDone={onDrawn} onCancel={() => setDrawing(false)} />
@@ -313,7 +306,6 @@ export default function AdminMapsPage() {
           onSelectPlace={(c) => flyTo(c)}
         />
       )}
-      {!drawing && <PinLegend className="absolute bottom-8 left-14 z-10 hidden sm:block" />}
 
       <PinDetailAndActionsModal />
       <CopyCutPinModal />
