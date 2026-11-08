@@ -22,6 +22,8 @@ import {
   ScrollText,
   type LucideIcon,
   MapPinned,
+  LayoutTemplate,
+  Shapes,
 } from "lucide-react";
 
 /**
@@ -52,7 +54,12 @@ export const BRAND_NAV: NavGroup[] = [
   {
     label: "Drops",
     items: [
-      { href: "/pins", label: "Map", icon: Map, exclude: ["/pins/manage"] },
+      {
+        href: "/pins",
+        label: "Map",
+        icon: Map,
+        exclude: ["/pins/manage", "/pins/templates", "/pins/studio"],
+      },
       {
         href: "/pins/manage",
         label: "Pin management",
@@ -60,12 +67,21 @@ export const BRAND_NAV: NavGroup[] = [
         icon: MapPin,
       },
       { href: "/events", label: "Events", icon: CalendarDays },
+    ],
+  },
+  {
+    // Helpers for making and running drops.
+    label: "Tools",
+    items: [
+      { href: "/pins/templates", label: "Templates", icon: LayoutTemplate },
+      { href: "/pins/studio", label: "Pin shapes", icon: Shapes },
       {
         href: "/embeds",
         label: "Website Map",
         shortLabel: "Embeds",
         icon: Code2,
       },
+      { href: "/redeem", label: "Redeem", icon: Ticket },
     ],
   },
   {
@@ -85,10 +101,7 @@ export const BRAND_NAV: NavGroup[] = [
   },
   {
     label: "Insights",
-    items: [
-      { href: "/reports", label: "Reports", icon: BarChart3 },
-      { href: "/redeem", label: "Redeem", icon: Ticket },
-    ],
+    items: [{ href: "/reports", label: "Reports", icon: BarChart3 }],
   },
 ];
 
@@ -180,7 +193,12 @@ export function adminNavFor(isSuperAdmin: boolean): NavGroup {
 /** Phone tab bar: Map · Stores · [AR] · Bounties · Pins (decided; Create and Menu are in the header). */
 export const MOBILE_TABS: { left: NavItem[]; right: NavItem[] } = {
   left: [
-    { href: "/pins", label: "Map", icon: Map, exclude: ["/pins/manage"] },
+    {
+      href: "/pins",
+      label: "Map",
+      icon: Map,
+      exclude: ["/pins/manage", "/pins/templates", "/pins/studio"],
+    },
     { href: "/stores", label: "Stores", icon: Store, gated: true },
   ],
   right: [

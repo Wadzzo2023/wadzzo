@@ -82,7 +82,7 @@ export default function EmbedsPage() {
   return (
     <PageBody>
       <PageHeader
-        eyebrow="Drops"
+        eyebrow="Tools"
         title="Website Map"
         description={`Put the ${platformBranding.name} map on your own website — a homepage hero, a visitors page, anywhere. Paste one snippet; settings you change here update the live map.`}
         actions={

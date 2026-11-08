@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <PageBody>
       <PageHeader
-        eyebrow="Insights"
+        eyebrow="Tools"
         title="Redeem"
         description="Check a fan's code and redeem the reward they collected."
       />
