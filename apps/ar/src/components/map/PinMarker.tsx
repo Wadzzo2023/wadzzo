@@ -1,24 +1,26 @@
 import { motion } from "framer-motion";
 import { Check, Lock, Zap } from "lucide-react";
-import { useState } from "react";
 
 import { pinStatus, RARITY_META } from "@wadzzo/ar-core/ar/rarity";
 import type { ArPin } from "@wadzzo/ar-core/ar/types";
 import { cn } from "@wadzzo/ui/lib/cn";
+import { PinGlyph } from "@wadzzo/ui/patterns/pin-glyph";
 
 /**
  * ── PinMarker ──────────────────────────────────────────────────────────────
  *
- * A hex medallion carrying the brand's mark, ringed in its rarity colour and
- * standing on a ground shadow so it reads as an object placed on the map
- * rather than a dot drawn onto it.
+ * The brand's chosen shape (circle, star, their own outline…) carrying its
+ * image or colour, ringed in its rarity colour and standing on a ground
+ * shadow so it reads as an object placed on the map rather than a dot drawn
+ * onto it. The look comes resolved from the server (`pin.look`); without it
+ * the pin is a circle with the brand's image.
  *
  * States read at a glance, with the same opacities as the brand portal:
  *   available             100%  (sonar ring + floating when in range)
  *   collected by you       80%  gold tick
  *   locked (tier)          60%  padlock
  *   expired / all claimed  40%  desaturated, no glow
- * Shape says how it's collected: round = tap to collect, square = auto-collect.
+ * Auto-collect pins can carry a ⚡ badge — the brand decides (`look.autoBadge`).
  *
  * `inRange` is passed in rather than computed here because the map already
  * knows the distance to every pin and recomputing per marker per frame would
@@ -35,7 +37,6 @@ export function PinMarker({
   inRange: boolean;
   onSelect: () => void;
 }) {
-  const [failed, setFailed] = useState(false);
   const rarity = pin.rarity;
   const status = pinStatus(pin);
   const meta = RARITY_META[rarity];
@@ -54,8 +55,14 @@ export function PinMarker({
       : status === "collected"
         ? "opacity-80"
         : "opacity-100";
-  const outer = pin.autoCollect ? "rounded-[10px]" : "rounded-full";
-  const inner = pin.autoCollect ? "rounded-[6px]" : "rounded-full";
+  const look = pin.look;
+  const showBadge = look ? look.autoBadge : pin.autoCollect;
+  const standsOnTip = look?.anchor === "bottom";
+  const glow = selected
+    ? `drop-shadow(0 0 3px hsl(${ring} / 0.6)) drop-shadow(0 0 12px hsl(${ring} / 0.95))`
+    : live
+      ? `drop-shadow(0 0 7px hsl(${ring} / 0.8))`
+      : "drop-shadow(0 4px 5px rgba(0,0,0,0.9))";
 
   return (
     <button
@@ -87,12 +94,12 @@ export function PinMarker({
           <>
             <span
               aria-hidden
-              className={cn("animate-pulse-ring absolute inset-0 border-2", outer)}
+              className="animate-pulse-ring absolute inset-0 rounded-full border-2"
               style={{ borderColor: `hsl(${meta.hsl})` }}
             />
             <span
               aria-hidden
-              className={cn("animate-pulse-ring absolute inset-0 border", outer)}
+              className="animate-pulse-ring absolute inset-0 rounded-full border"
               style={{
                 borderColor: `hsl(${meta.hsl})`,
                 animationDelay: "1.1s",
@@ -101,56 +108,55 @@ export function PinMarker({
           </>
         )}
 
-        {/* Medallion */}
+        {/* The pin's shape */}
         <motion.span
           animate={{ scale: selected ? 1.22 : 1 }}
           transition={{ type: "spring", stiffness: 480, damping: 24 }}
           className={cn(
-            "relative flex h-[42px] w-[42px] items-center justify-center border-2 transition-opacity",
-            outer,
+            "relative flex h-[42px] w-[42px] items-center justify-center transition-opacity",
             opacity,
             dead && "saturate-0",
           )}
-          style={{
-            borderColor: `hsl(${ring})`,
-            background: `linear-gradient(180deg, hsl(var(--ar-surface-3)), hsl(var(--ar-void)))`,
-            boxShadow: selected
-              ? `0 0 0 3px hsl(${ring} / 0.3), 0 0 26px -2px hsl(${ring} / 0.95)`
-              : live
-                ? `0 0 16px -3px hsl(${ring} / 0.8)`
-                : "0 4px 10px -4px rgba(0,0,0,0.9)",
-          }}
+          style={{ filter: glow }}
         >
-          {failed ? (
-            <span className="font-hud text-[15px] font-bold" style={{ color: `hsl(${ring})` }}>
-              {pin.brandName.charAt(0)}
-            </span>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={pin.brandImageUrl}
-              alt=""
-              onError={() => setFailed(true)}
-              loading="lazy"
-              className={cn("h-[30px] w-[30px] object-cover", inner)}
-            />
-          )}
+          <PinGlyph
+            path={look?.path}
+            size={42}
+            color={look?.color}
+            defaultColor="hsl(var(--ar-surface-3))"
+            imageUrl={look ? look.imageUrl : pin.brandImageUrl}
+            imageFit={look?.imageFit}
+            ringColor={`hsl(${ring})`}
+            ringWidth={2}
+            className="[--pin-glyph-under:hsl(var(--ar-void))]"
+            // The initial stands in for an image that failed; a brand that chose
+            // a plain colour gets just the shape.
+            placeholder={
+              look && !look.imageUrl ? undefined : (
+                <span className="font-hud text-[15px] font-bold" style={{ color: `hsl(${ring})` }}>
+                  {pin.brandName.charAt(0)}
+                </span>
+              )
+            }
+          />
 
           {/* Corner flag */}
           {status === "collected" && <CornerFlag tone="gold" Icon={Check} />}
           {status === "locked" && <CornerFlag tone="muted" Icon={Lock} />}
-          {live && pin.autoCollect && <CornerFlag tone="green" Icon={Zap} />}
+          {live && showBadge && <CornerFlag tone="green" Icon={Zap} />}
         </motion.span>
 
-        {/* Stem — the medallion stands on a point, like a map pin should. */}
-        <span
-          aria-hidden
-          className="absolute -bottom-[5px] left-1/2 h-[9px] w-[2px] -translate-x-1/2 rounded-full"
-          style={{
-            background: `linear-gradient(180deg, hsl(${ring}), transparent)`,
-            opacity: dead ? 0.3 : 0.85,
-          }}
-        />
+        {/* Stem — the shape stands on a point, like a map pin should (a teardrop has its own). */}
+        {!standsOnTip && (
+          <span
+            aria-hidden
+            className="absolute -bottom-[5px] left-1/2 h-[9px] w-[2px] -translate-x-1/2 rounded-full"
+            style={{
+              background: `linear-gradient(180deg, hsl(${ring}), transparent)`,
+              opacity: dead ? 0.3 : 0.85,
+            }}
+          />
+        )}
       </motion.span>
     </button>
   );

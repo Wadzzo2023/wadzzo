@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "@wadzzo/ar-core/ar/rarity";
 import type { ArPin, Rarity } from "@wadzzo/ar-core/ar/types";
+import { resolvePinLook } from "@wadzzo/schemas/pin-look";
 import { generateRedeemCode } from "@wadzzo/utils/redeem-code";
 import { StellarAccount } from "@wadzzo/stellar/account";
 import { isInPlatformScope, platformScope, type PlatformContext } from "@wadzzo/platform/scope";
@@ -72,6 +73,8 @@ const groupInclude = {
       subscriptions: { select: { price: true } },
     },
   },
+  // the brand's own pin shape, if the drop uses one
+  pinShape: { select: { path: true, anchor: true } },
 } as const;
 
 const consumerSelect = {
@@ -234,6 +237,13 @@ function groupFacts(group: GroupWithLocations) {
     // Deduped and sorted so the same drop reads the same way every render —
     // the join can legitimately carry the same label twice via different rows.
     tags: [...new Set(group.locationGroupTags.map((t) => t.tag.label))].sort(),
+    // How the drop is drawn, resolved once; the badge is settled per location (auto-collect).
+    look: resolvePinLook(group, {
+      customShape: group.pinShape,
+      brandImage: group.creator.profileUrl ?? WADZZO_ICON,
+      pinImage: group.optimizedImage ?? group.image,
+      autoCollect: true,
+    }),
   };
 }
 
@@ -275,6 +285,7 @@ function toPin(
     rarity: facts.rarity,
 
     autoCollect: location.autoCollect,
+    look: { ...facts.look, autoBadge: facts.look.autoBadge && location.autoCollect },
     // No column backs this yet — every drop the reference system can produce
     // is claimed by standing near it.
     detection: "gps",

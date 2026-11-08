@@ -7,7 +7,7 @@
  * that was down for an hour, simply catches up on the next look.
  */
 
-import type { PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { generateRandomLocations } from "@wadzzo/geo";
 import {
   START_TOLERANCE_MS,
@@ -175,6 +175,13 @@ export async function dropPinsForHotspot(
       limit: lastGroup.limit,
       remaining: lastGroup.limit,
       subscriptionId: lastGroup.subscriptionId,
+      // How the pins are drawn: the hotspot's look (the brand may have changed it since).
+      markerShape: hotspot.markerShape,
+      pinShapeId: hotspot.pinShapeId,
+      markerFill: hotspot.markerFill,
+      markerColor: hotspot.markerColor,
+      markerImageFit: hotspot.markerImageFit ?? Prisma.DbNull,
+      markerAutoBadge: hotspot.markerAutoBadge,
       startDate: now,
       endDate: pinEndDate,
       locations: {

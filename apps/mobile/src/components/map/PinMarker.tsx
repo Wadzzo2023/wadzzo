@@ -1,7 +1,6 @@
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, Lock, Zap } from "lucide-react-native";
-import { memo, useEffect, useState, type ReactNode } from "react";
+import { memo, useEffect, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
   Easing,
@@ -20,14 +19,16 @@ import type { ArPin } from "~/lib/ar/types";
 import { useDecorativeMotion } from "~/lib/motion";
 import { useColors } from "~/theme/theme";
 
+import { DEFAULT_PIN_PATH, PinGlyph } from "./PinGlyph";
+
 /**
- * Port of the web's PinMarker: a hex-ish medallion with the brand mark,
- * rarity ring, stem and ground shadow. Four states readable at a glance —
+ * Port of the web's PinMarker: the brand's chosen shape (circle, star, their
+ * own outline…) carrying its image or colour, with a rarity ring, stem and
+ * ground shadow. The look comes resolved from the server (`pin.look`). Four states readable at a glance —
  * in range + claimable (full colour, sonar, floating), out of range (dimmed,
  * grounded), collected (desaturated, gold tick), locked/dead (flattened).
  *
- * Shape says how it's collected (same as the web): round = tap to collect,
- * square = auto-collect.
+ * Auto-collect pins can carry a ⚡ badge — the brand decides (`look.autoBadge`).
  *
  * GPU budget: up to 80 of these sit on the map at once, so only the selected
  * pin gets a blurred glow. Everything else is a crisp ring or flat fill —
@@ -37,7 +38,6 @@ import { useColors } from "~/theme/theme";
  */
 export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSelect }: { pin: ArPin; selected: boolean; inRange: boolean; onSelect: (id: string) => void }) {
   const { c, rarity: rc } = useColors();
-  const [failed, setFailed] = useState(false);
   const status = pinStatus(pin);
   const live = status === "collectible";
   const dead = status === "expired" || status === "depleted";
@@ -48,9 +48,9 @@ export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSel
   const scale = useAnimatedStyle(() => ({ transform: [{ scale: withSpring(selected ? 1.22 : 1, { stiffness: 480, damping: 24 }) }] }));
   // Leaf-level dimming (see the GPU note above).
   const dim = dead ? 0.45 : live ? 1 : 0.75;
-  // Square = auto-collect, round = tap (web: rounded-[10px] / rounded-full).
-  const square = pin.autoCollect;
-  const r = square ? { outer: 10, halo: 14, fill: 8, img: 6 } : { outer: 21, halo: 26, fill: 19, img: 15 };
+  const look = pin.look;
+  const showBadge = look ? look.autoBadge : pin.autoCollect;
+  const standsOnTip = look?.anchor === "bottom";
 
   return (
     <Pressable onPress={() => onSelect(pin.id)} accessibilityRole="button" accessibilityLabel={`${pin.title} — ${pin.brandName}`} hitSlop={6} style={{ width: 52, height: 58, alignItems: "center" }}>
@@ -77,9 +77,7 @@ export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSel
             {
               width: 42,
               height: 42,
-              borderRadius: r.outer,
-              borderWidth: 2,
-              borderColor: ringA(dim),
+              borderRadius: 21,
               alignItems: "center",
               justifyContent: "center",
               overflow: "visible",
@@ -90,26 +88,31 @@ export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSel
         >
           {/* Live pins: a crisp halo ring instead of a blurred glow. */}
           {live && !selected && (
-            <View pointerEvents="none" style={{ position: "absolute", inset: -5, borderRadius: r.halo, borderWidth: 2, borderColor: ringA(0.3) }} />
+            <View pointerEvents="none" style={{ position: "absolute", inset: -5, borderRadius: 26, borderWidth: 2, borderColor: ringA(0.3) }} />
           )}
-          <LinearGradient colors={[c("ar-surface-3"), c("ar-void")]} style={{ position: "absolute", inset: 0, borderRadius: r.fill, opacity: dim }} />
-          {failed ? (
-            <Text className="font-hud text-[15px] font-bold" style={{ color: ringA(dim) }}>
-              {pin.brandName.charAt(0)}
-            </Text>
-          ) : (
-            <Image
-              source={{ uri: pin.brandImageUrl }}
-              onError={() => setFailed(true)}
-              style={{ width: 30, height: 30, borderRadius: r.img, opacity: status === "collected" ? 0.45 : dim }}
-              contentFit="cover"
-            />
-          )}
+          <PinGlyph
+            path={look?.path ?? DEFAULT_PIN_PATH}
+            size={42}
+            fill={look?.color ?? c("ar-surface-3", dim)}
+            under={c("ar-void")}
+            imageUrl={look ? look.imageUrl : pin.brandImageUrl}
+            imageFit={look?.imageFit}
+            imageOpacity={status === "collected" ? 0.45 : dim}
+            ringColor={ringA(dim)}
+            placeholder={
+              look && !look.imageUrl ? undefined : (
+                <Text className="font-hud text-[15px] font-bold" style={{ color: ringA(dim) }}>
+                  {pin.brandName.charAt(0)}
+                </Text>
+              )
+            }
+          />
           {status === "collected" && <CornerFlag bg={c("rarity-legendary")} fg="hsl(30, 90%, 10%)" Icon={Check} />}
           {status === "locked" && <CornerFlag bg={c("ar-surface-3")} fg={c("ar-text-faint")} Icon={Lock} border={c("ar-line-bright")} />}
-          {live && pin.autoCollect && <CornerFlag bg={c("ar-green")} fg={c("ar-green-ink")} Icon={Zap} />}
+          {live && showBadge && <CornerFlag bg={c("ar-green")} fg={c("ar-green-ink")} Icon={Zap} />}
         </Animated.View>
-        <LinearGradient colors={[ring, ringA(0)]} style={{ position: "absolute", bottom: -5, left: 20, width: 2, height: 9, borderRadius: 1, opacity: dead ? 0.3 : 0.85 }} />
+        {/* Stem — a teardrop stands on its own tip. */}
+        {!standsOnTip && <LinearGradient colors={[ring, ringA(0)]} style={{ position: "absolute", bottom: -5, left: 20, width: 2, height: 9, borderRadius: 1, opacity: dead ? 0.3 : 0.85 }} />}
       </Lift>
     </Pressable>
   );

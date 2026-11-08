@@ -65,6 +65,12 @@ export interface ArPin {
 
   /** Claimed without tapping Capture, if the collector opted in. */
   autoCollect: boolean;
+  /**
+   * How the brand chose to draw the pin, resolved server-side with every
+   * fallback applied. Optional: older servers don't send it, and the maps then
+   * draw the default circle with the brand's image.
+   */
+  look?: PinMarkerLook;
   detection: DetectionMethod;
 
   /** ISO. Null means the drop never expires. */
@@ -234,4 +240,21 @@ export interface ArComment {
   createdAt: string;
   author: { id: string; name: string | null; image: string | null };
   mine: boolean;
+}
+
+/**
+ * A pin's marker: an outline in a 100×100 box (already checked server-side —
+ * see `resolvePinLook` in @wadzzo/schemas/pin-look), what fills it, and the badge.
+ */
+export interface PinMarkerLook {
+  path: string;
+  /** "bottom" shapes (a teardrop) stand on their tip; others sit centred on the spot. */
+  anchor: "center" | "bottom";
+  /** The brand's colour (fill without an image, outline with one). Null = the app's own. */
+  color: string | null;
+  /** The image inside the shape, or null for a solid colour. */
+  imageUrl: string | null;
+  imageFit: { zoom: number; x: number; y: number } | null;
+  /** Show the ⚡ auto-collect badge. */
+  autoBadge: boolean;
 }

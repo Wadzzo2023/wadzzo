@@ -71,6 +71,11 @@ export interface ArPin {
 
   /** Claimed without tapping Capture, if the collector opted in. */
   autoCollect: boolean;
+  /**
+   * How the brand chose to draw the pin, resolved by the server. Optional:
+   * older servers don't send it, and the map then draws the default circle.
+   */
+  look?: PinMarkerLook;
   detection: DetectionMethod;
 
   /** ISO. Null means the drop never expires. */
@@ -173,4 +178,17 @@ export interface GeoFix extends Coords {
   timestamp: number;
   /** The OS flagged this fix as simulated (Android mock provider). */
   mocked?: boolean;
+}
+
+/**
+ * A pin's marker (kept in sync with `PinMarkerLook` in packages/ar-core/src/ar/types.ts):
+ * an outline in a 100×100 box, already checked by the server, what fills it, and the badge.
+ */
+export interface PinMarkerLook {
+  path: string;
+  anchor: "center" | "bottom";
+  color: string | null;
+  imageUrl: string | null;
+  imageFit: { zoom: number; x: number; y: number } | null;
+  autoBadge: boolean;
 }
