@@ -212,6 +212,8 @@ export function useAgentChat(creatorId?: string) {
   );
 
   return {
+    /** The brand this chat acts for (an admin's pick); undefined = the signed-in brand. */
+    creatorId,
     conversationId: activeId,
     messages,
     actions: (activeId ? (conversation.data?.actions ?? {}) : {}) as Record<string, ActionState>,

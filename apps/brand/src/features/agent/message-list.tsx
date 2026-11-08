@@ -211,6 +211,7 @@ function Block({
       return (
         <ProposalCard
           block={block}
+          creatorId={chat.creatorId}
           state={chat.actions[block.actionId]}
           busy={chat.confirming === block.actionId}
           cancelling={chat.cancelling === block.actionId}

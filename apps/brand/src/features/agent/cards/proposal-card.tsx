@@ -10,6 +10,7 @@ import type {
   AgentBlock,
   NamedRef,
   PinDefaults,
+  PinLookChoice,
   ProposedAction,
 } from "@wadzzo/agent-contract";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -17,6 +18,7 @@ import { api } from "~/utils/api";
 
 import type { ActionState } from "../use-agent-chat";
 import { Card, ShortList, day, dayTime } from "./card-kit";
+import { LookChip, PinLookRow } from "./pin-look-row";
 import {
   ANNOUNCEMENT_FIELDS,
   DraftFields,
@@ -33,6 +35,7 @@ const DESTRUCTIVE: ProposedAction["type"][] = ["hide_pins", "delete_event", "del
 /** A change the agent prepared. Nothing happens until the person confirms here. */
 export function ProposalCard({
   block,
+  creatorId,
   state,
   busy,
   cancelling,
@@ -40,6 +43,8 @@ export function ProposalCard({
   onCancel,
 }: {
   block: Proposal;
+  /** The brand the chat acts for (an admin's pick); omitted for the signed-in brand. */
+  creatorId?: string;
   state: ActionState | undefined;
   /** Confirming right now. */
   busy: boolean;
@@ -112,6 +117,7 @@ export function ProposalCard({
     >
       <Body
         action={action}
+        creatorId={creatorId}
         keep={keep}
         setKeep={setKeep}
         defaults={defaults}
@@ -172,6 +178,7 @@ export function ProposalCard({
 
 function Body({
   action,
+  creatorId,
   keep,
   setKeep,
   defaults,
@@ -181,6 +188,7 @@ function Body({
   locked,
 }: {
   action: ProposedAction;
+  creatorId?: string;
   keep: Set<string>;
   setKeep: (k: Set<string>) => void;
   defaults: PinDefaults | null;
@@ -198,6 +206,14 @@ function Body({
             onChange={setDefaults}
             disabled={locked}
             hasEvents={action.items.some((i) => i.kind === "event")}
+          />
+          <PinLookRow
+            creatorId={creatorId}
+            value={defaults!.look}
+            onChange={(look) => setDefaults({ ...defaults!, look })}
+            autoCollect={defaults!.autoCollect}
+            pinImage={action.items.find((i) => i.image)?.image}
+            disabled={locked}
           />
           <PlacePicker items={action.items} keep={keep} onChange={setKeep} disabled={locked} />
         </>
@@ -228,12 +244,19 @@ function Body({
             onChange={setDraft}
             disabled={locked}
           />
+          <PinLookRow
+            creatorId={creatorId}
+            value={draft?.look as PinLookChoice | undefined}
+            onChange={(look) => setDraft({ ...draft!, look })}
+            autoCollect={Boolean(draft?.autoCollect)}
+            disabled={locked}
+          />
         </>
       );
     case "update_pins":
       return (
         <>
-          <Changes changes={action.changes} />
+          <Changes changes={action.changes} creatorId={creatorId} />
           <Names items={action.pins} />
         </>
       );
@@ -248,7 +271,7 @@ function Body({
         </>
       );
     case "update_hotspot":
-      return <Changes changes={action.changes} />;
+      return <Changes changes={action.changes} creatorId={creatorId} />;
     case "update_event":
       return <Changes changes={action.changes} />;
     case "update_announcement":
@@ -290,6 +313,7 @@ const LABEL: Record<string, string> = {
   image: "Image",
   collectionLimit: "Collection limit",
   autoCollect: "Auto-collect",
+  look: "Pin shape",
   dropEveryDays: "Drop every",
   pinDurationDays: "Each drop lasts",
   venueName: "Venue",
@@ -309,7 +333,7 @@ function show(key: string, value: unknown): string {
   return String(value);
 }
 
-function Changes({ changes }: { changes: Record<string, unknown> }) {
+function Changes({ changes, creatorId }: { changes: Record<string, unknown>; creatorId?: string }) {
   const rows = Object.entries(changes).filter(
     ([k, v]) => v !== undefined && k !== "lat" && k !== "lng",
   );
@@ -318,7 +342,13 @@ function Changes({ changes }: { changes: Record<string, unknown> }) {
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-muted-foreground">{LABEL[k] ?? k}</dt>
-          <dd className="truncate font-medium">{show(k, v)}</dd>
+          <dd className="truncate font-medium">
+            {k === "look" ? (
+              <LookChip look={v as PinLookChoice} creatorId={creatorId} />
+            ) : (
+              show(k, v)
+            )}
+          </dd>
         </div>
       ))}
     </dl>
