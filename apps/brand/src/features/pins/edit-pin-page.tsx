@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PinType } from "@wadzzo/db";
 import { Calendar, Loader2, MapPin, Settings, Sparkles } from "lucide-react";
@@ -30,6 +32,13 @@ import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
 import { toastFormErrors } from "~/utils/form-errors";
+
+import {
+  PinLookSection,
+  toLookValue,
+  usePinLookMarker,
+  type PinLookValue,
+} from "./look/pin-look-section";
 
 type EditForm = z.infer<typeof updateMapFormSchema>;
 type Pin = RouterOutputs["maps"]["pin"]["myPinForEdit"];
@@ -74,6 +83,7 @@ export default function EditPinPage({ id }: { id: string }) {
 
 function EditPinForm({ pin }: { pin: Pin }) {
   const router = useRouter();
+  const [look, setLook] = useState<PinLookValue>(() => toLookValue(pin.look));
   const { isAdmin } = usePortalAccess();
   const backHref = isAdmin ? "/admin/pins" : "/pins";
   const backLabel = isAdmin ? "Pin review" : "Pins";
@@ -118,9 +128,18 @@ function EditPinForm({ pin }: { pin: Pin }) {
         ...data,
         description: data.description ?? "",
         url: data.url ?? undefined,
+        look,
       }),
     toastFormErrors,
   );
+
+  // The location map shows the pin with its chosen look, as fans will see it.
+  const pinOnMap = usePinLookMarker(look, {
+    autoCollect: Boolean(values.autoCollect),
+    pinImage: values.image || null,
+    creatorId: pin.creatorId,
+    brandImage: pin.brandImage,
+  });
 
   const actions = (
     <>
@@ -156,6 +175,8 @@ function EditPinForm({ pin }: { pin: Pin }) {
           >
             <MapPicker
               value={{ lat: values.lat, lng: values.lng }}
+              marker={pinOnMap.marker}
+              markerAnchor={pinOnMap.anchor}
               onChange={(v) => {
                 setValue("lat", v.lat, {
                   shouldValidate: true,
@@ -292,6 +313,15 @@ function EditPinForm({ pin }: { pin: Pin }) {
             ))}
           </div>
         </FormSection>
+
+        <PinLookSection
+          value={look}
+          onChange={setLook}
+          autoCollect={Boolean(values.autoCollect)}
+          pinImage={values.image || null}
+          creatorId={pin.creatorId}
+          brandImage={pin.brandImage}
+        />
 
         <FormSection title="Collection" icon={Settings}>
           <Field

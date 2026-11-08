@@ -128,11 +128,62 @@ export function CollectionInputs({
   const {
     control,
     register,
+    watch,
+    setValue,
     formState: { errors },
   } = useFormContext<z.infer<typeof createPinFormSchema>>();
   const { getAssetBalance } = useCreatorStorageAcc();
   // Items are minted when a fan claims them, so what a pin can hand out is the stock plus what the item's limit still lets us mint.
   const items = api.fan.gift.items.useQuery(undefined, { retry: false });
+
+  /** The token for an asset id with its balance, or null when it isn't one of the brand's. */
+  const resolveToken = (assetId: number): (AssetType & { bal: number }) | null => {
+    if (assetId === PAGE_ASSET_NUM) {
+      const pageAsset = assetsQuery.data?.pageAsset;
+      if (!pageAsset) return null;
+      return {
+        bal: getAssetBalance({ code: pageAsset.code, issuer: pageAsset.issuer }),
+        code: pageAsset.code,
+        issuer: pageAsset.issuer,
+        id: PAGE_ASSET_NUM,
+        thumbnail: pageAsset.thumbnail ?? "",
+      };
+    }
+    const asset = assetsQuery.data?.shopAsset.find((a: AssetType) => a.id === assetId);
+    if (!asset) return null;
+    const item = items.data?.find((i) => i.id === asset.id);
+    const bal = item
+      ? item.mintable === null
+        ? OPEN_EDITION
+        : item.stock + item.mintable
+      : getAssetBalance({ code: asset.code, issuer: asset.issuer });
+    return { ...asset, bal };
+  };
+
+  // A token set from code (a template) picks up its balance once the brand's assets have
+  // loaded; one the brand no longer has is cleared, so the pin can't promise it.
+  const tokenValue = watch("token");
+  const assetsLoaded = Boolean(assetsQuery.data);
+  useEffect(() => {
+    if (tokenValue === undefined) {
+      if (selectedToken) {
+        setSelectedToken(undefined);
+        setRemainingBalance(0);
+      }
+      return;
+    }
+    if (selectedToken?.id === tokenValue || !assetsLoaded) return;
+    const token = resolveToken(tokenValue);
+    if (token) {
+      setSelectedToken(token);
+      setRemainingBalance(token.bal);
+    } else {
+      setValue("token", undefined);
+      toast("The saved token isn't available any more — choose another", { id: "token-missing" });
+    }
+    // resolveToken reads the same queries listed here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokenValue, assetsLoaded, items.data, selectedToken?.id]);
 
   return (
     <div className="space-y-4">
@@ -191,7 +242,7 @@ export function CollectionInputs({
                   setRemainingBalance(bal);
                 }
               }}
-              defaultValue={NO_ASSET.toString()}
+              value={(field.value ?? NO_ASSET).toString()}
             >
               <SelectTrigger className="bg-card border-border">
                 <SelectValue placeholder="Choose Token" />
@@ -374,6 +425,7 @@ export function TiersOptions({ creatorId }: { creatorId?: string } = {}) {
           control={control}
           render={({ field }) => (
             <Select
+              value={field.value ?? ""}
               onValueChange={(value) => {
                 field.onChange(value);
               }}
@@ -474,7 +526,13 @@ export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
   const description = watch("description");
   const type = watch("type");
 
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  // The form holds the selection, so a template or AI fill that sets "tags" shows here.
+  const { setValue } = useFormContext<CreatePinType>();
+  const selectedTagIds = watch("tags") ?? [];
+  const setSelectedTagIds = (next: string[] | ((prev: string[]) => string[])) => {
+    const prev = getValues("tags") ?? [];
+    setValue("tags", typeof next === "function" ? next(prev) : next);
+  };
   const [newTagInput, setNewTagInput] = useState("");
   const [aiTags, setAiTags] = useState<string[]>([]); // AI suggested labels
   // "Fill with AI" hands its tag ideas in here as one-click suggestions.
@@ -541,12 +599,6 @@ export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
   const toggleTag = (id: string) => {
     setSelectedTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
   };
-
-  // sync to form
-  const { setValue } = useFormContext<CreatePinType>();
-  useEffect(() => {
-    setValue("tags", selectedTagIds);
-  }, [selectedTagIds, setValue]);
 
   return (
     <Card>

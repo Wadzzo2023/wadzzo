@@ -5,6 +5,7 @@ import { PinType } from "@wadzzo/db";
 import { CalendarClock, Hexagon, Loader2, Repeat, Tag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import type { z } from "zod";
@@ -33,6 +34,8 @@ import { api, type RouterOutputs } from "~/utils/api";
 
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";
 import { toastFormErrors } from "~/utils/form-errors";
+
+import { PinLookSection, toLookValue, type PinLookValue } from "./look/pin-look-section";
 
 type UpdateForm = z.infer<typeof updateHotspotFormSchema>;
 type Hotspot = NonNullable<RouterOutputs["maps"]["pin"]["hotspotForEdit"]>;
@@ -81,6 +84,8 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
   const utils = api.useUtils();
 
   const template = h.template;
+  const [look, setLook] = useState<PinLookValue>(() => toLookValue(h.look));
+  const [lookChanged, setLookChanged] = useState(false);
 
   const defaultValues: UpdateForm = {
     title: template?.title ?? "Untitled hotspot",
@@ -138,6 +143,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       pinDurationDays: data.pinDurationDays,
       autoCollect: data.autoCollect,
       multiPin: data.multiPin,
+      ...(lookChanged ? { look } : {}),
       details: {
         title: data.title,
         description: data.description ?? null,
@@ -157,7 +163,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       <Button type="button" variant="ghost" onClick={() => router.push(`/pins?hotspot=${h.id}`)}>
         Cancel
       </Button>
-      <Button type="submit" disabled={update.isPending || !isDirty}>
+      <Button type="submit" disabled={update.isPending || (!isDirty && !lookChanged)}>
         {update.isPending && <Loader2 className="animate-spin" />}
         {update.isPending ? "Saving…" : "Save changes"}
       </Button>
@@ -392,6 +398,18 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
           <Input {...register("url")} placeholder="https://..." />
         </Field>
       </FormSection>
+
+      <PinLookSection
+        value={look}
+        onChange={(next) => {
+          setLook(next);
+          setLookChanged(true);
+        }}
+        autoCollect={Boolean(values.autoCollect)}
+        pinImage={values.image || null}
+        creatorId={h.creatorId}
+        brandImage={h.creator?.profileUrl ?? null}
+      />
 
       {/* Collection mode */}
       <FormSection

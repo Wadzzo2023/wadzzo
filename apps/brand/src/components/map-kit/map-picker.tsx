@@ -1,7 +1,7 @@
 "use client";
 
 import { LocateFixed, MapPin } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Layer, Marker, Source, type MapRef } from "react-map-gl/mapbox";
 
 import { Input } from "@wadzzo/ui/poster/input";
@@ -25,6 +25,8 @@ export function MapPicker({
   mapClassName,
   showInputs = true,
   onPlace,
+  marker,
+  markerAnchor = "bottom",
 }: {
   value: LatLng | null;
   onChange: (v: LatLng) => void;
@@ -34,6 +36,10 @@ export function MapPicker({
   showInputs?: boolean;
   /** Also called with the name/address when a search result is picked. */
   onPlace?: (place: Place) => void;
+  /** What to draw at the point (e.g. the pin with its chosen look); a map pin when left out. */
+  marker?: ReactNode;
+  /** Where `marker` touches the point. */
+  markerAnchor?: "center" | "bottom";
 }) {
   const map = useRef<MapRef>(null);
   const [locating, setLocating] = useState(false);
@@ -114,14 +120,16 @@ export function MapPicker({
             <Marker
               latitude={value.lat}
               longitude={value.lng}
-              anchor="bottom"
+              anchor={marker ? markerAnchor : "bottom"}
               draggable
               onDragEnd={(e) => set({ lat: e.lngLat.lat, lng: e.lngLat.lng })}
             >
-              <MapPin
-                className="fill-primary text-primary-foreground size-9 drop-shadow-md"
-                strokeWidth={1.5}
-              />
+              {marker ?? (
+                <MapPin
+                  className="fill-primary text-primary-foreground size-9 drop-shadow-md"
+                  strokeWidth={1.5}
+                />
+              )}
             </Marker>
           )}
         </BaseMap>

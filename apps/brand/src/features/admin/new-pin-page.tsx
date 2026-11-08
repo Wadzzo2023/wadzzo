@@ -39,6 +39,12 @@ import { BrandPicker } from "~/features/admin/brand-picker";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
+import {
+  DEFAULT_LOOK,
+  PinLookSection,
+  usePinLookMarker,
+  type PinLookValue,
+} from "~/features/pins/look/pin-look-section";
 
 const toInput = (d?: Date) => {
   if (!d) return "";
@@ -113,6 +119,13 @@ export default function AdminNewPinPage() {
   const { errors } = formState;
 
   const [collectionMode, setCollectionMode] = useState<"manual" | "auto">("manual");
+  const [look, setLook] = useState<PinLookValue>(DEFAULT_LOOK);
+  // Another brand's shapes don't apply: start over when the brand changes.
+  const [lookBrand, setLookBrand] = useState(selectedCreatorId);
+  if (lookBrand !== selectedCreatorId) {
+    setLookBrand(selectedCreatorId);
+    setLook(DEFAULT_LOOK);
+  }
   const [selectedToken, setSelectedToken] = useState<(AssetType & { bal: number }) | undefined>();
   const [remainingBalance, setRemainingBalance] = useState(0);
 
@@ -148,6 +161,7 @@ export default function AdminNewPinPage() {
       tokenAmount: selectedToken?.bal,
       creatorId: selectedCreatorId,
       autoCollect: collectionMode === "auto",
+      look,
       tags: data.tags ?? [],
     });
   }, toastFormErrors);
@@ -170,6 +184,14 @@ export default function AdminNewPinPage() {
   };
   const imagePrompt =
     imageBrief || [values.title, values.description?.slice(0, 400)].filter(Boolean).join(". ");
+
+  // The location map shows the pin with its chosen look, once a brand is picked.
+  const pinOnMap = usePinLookMarker(look, {
+    autoCollect: collectionMode === "auto",
+    pinImage: values.image,
+    creatorId: selectedCreatorId ?? undefined,
+    brandImage: selectedCreator?.profileUrl ?? null,
+  });
 
   const actions = (
     <>
@@ -200,6 +222,8 @@ export default function AdminNewPinPage() {
             >
               <MapPicker
                 value={location}
+                marker={selectedCreatorId ? pinOnMap.marker : undefined}
+                markerAnchor={pinOnMap.anchor}
                 radiusMetres={values.radius}
                 onChange={(v) => {
                   setValue("lat", v.lat, { shouldValidate: true });
@@ -398,6 +422,17 @@ export default function AdminNewPinPage() {
             ai={{ form: "pin", suggestedPrompt: imagePrompt }}
           />
         </FormSection>
+
+        {selectedCreatorId && (
+          <PinLookSection
+            value={look}
+            onChange={setLook}
+            autoCollect={collectionMode === "auto"}
+            pinImage={values.image}
+            creatorId={selectedCreatorId}
+            brandImage={selectedCreator?.profileUrl ?? null}
+          />
+        )}
 
         <FormSection
           title="Collection & tier"

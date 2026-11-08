@@ -46,6 +46,11 @@ import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { fromLocal } from "~/ui/ai/shared";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
+import {
+  DEFAULT_LOOK,
+  PinLookSection,
+  type PinLookValue,
+} from "~/features/pins/look/pin-look-section";
 import { toastFormErrors } from "~/utils/form-errors";
 import { api } from "~/utils/api";
 import { BrandPicker } from "~/features/admin/brand-picker";
@@ -178,6 +183,13 @@ function HotspotForm({
   const values = watch();
 
   const [collectionMode, setCollectionMode] = useState<"manual" | "auto">("manual");
+  const [look, setLook] = useState<PinLookValue>(DEFAULT_LOOK);
+  // Another brand's shapes don't apply: start over when the brand changes.
+  const [lookBrand, setLookBrand] = useState(selectedCreatorId);
+  if (lookBrand !== selectedCreatorId) {
+    setLookBrand(selectedCreatorId);
+    setLook(DEFAULT_LOOK);
+  }
   const [imageBrief, setImageBrief] = useState("");
   const aiContext = {
     title: values.title ?? "",
@@ -232,6 +244,7 @@ function HotspotForm({
       ...data,
       creatorId: selectedCreatorId,
       autoCollect: collectionMode === "auto",
+      look,
       description: data.description ?? "",
       url: data.url ?? undefined,
       image: data.image ?? undefined,
@@ -596,6 +609,17 @@ function HotspotForm({
             ai={{ form: "hotspot", suggestedPrompt: imagePrompt }}
           />
         </FormSection>
+
+        {selectedCreatorId && (
+          <PinLookSection
+            value={look}
+            onChange={setLook}
+            autoCollect={collectionMode === "auto"}
+            pinImage={values.image}
+            creatorId={selectedCreatorId}
+            brandImage={selectedCreator?.profileUrl ?? null}
+          />
+        )}
 
         <FormSection
           title="Collection & tier"
