@@ -1164,6 +1164,9 @@ importers:
       '@wadzzo/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
+      '@wadzzo/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       '@wadzzo/storage':
         specifier: workspace:*
         version: link:../../packages/storage

@@ -1,4 +1,5 @@
 // src/workers/create-pins-worker.ts
+import { Prisma } from "@prisma/client";
 import type { Job } from "../types/index";
 import { db } from "../lib/db";
 import { randomLocation } from "@wadzzo/geo";
@@ -30,10 +31,38 @@ export interface Pin {
   gPlaceId?: string;
 }
 
+/**
+ * How every pin of the job is drawn: the columns the brand app already checked
+ * (a brand shape belongs to the brand) and resolved. Missing = the default look.
+ */
+export interface PinLook {
+  markerShape: string | null;
+  pinShapeId: string | null;
+  markerFill: string;
+  markerColor: string | null;
+  markerImageFit: unknown;
+  markerAutoBadge: boolean;
+}
+
 export interface PinOptions {
   autoCollect: boolean;
   groupingMode: "per-location" | "single-group";
   pinNumber: number;
+  look?: PinLook;
+}
+
+/** The look as write data for a pin (nothing when the job has none, so the default applies). */
+export function lookData(look: PinLook | undefined) {
+  if (!look) return {};
+  return {
+    markerShape: look.markerShape,
+    pinShapeId: look.pinShapeId,
+    markerFill: look.markerFill,
+    markerColor: look.markerColor,
+    markerImageFit:
+      look.markerImageFit == null ? Prisma.DbNull : (look.markerImageFit as Prisma.InputJsonValue),
+    markerAutoBadge: look.markerAutoBadge,
+  };
 }
 
 interface CreatePinsPayload {
@@ -219,6 +248,7 @@ async function createPins(job: Job): Promise<unknown> {
         multiPin: false,
         type: (base.type ?? "OTHER") as never,
         approved: true,
+        ...lookData(pinOptions.look),
         locations: { createMany: { data: allLocations } },
       },
     });
@@ -273,6 +303,7 @@ async function createPins(job: Job): Promise<unknown> {
                 multiPin: false,
                 type: (pin.type ?? "OTHER") as never,
                 approved: true,
+                ...lookData(pinOptions.look),
                 locations: { createMany: { data: locations } },
               },
             });

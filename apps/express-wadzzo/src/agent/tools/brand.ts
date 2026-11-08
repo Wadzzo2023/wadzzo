@@ -6,7 +6,14 @@ import type { PinStatus } from "@wadzzo/agent-contract";
 import { boxAround } from "../area";
 import { geocode } from "../google";
 import { defineTool, plural } from "./define";
-import { findHotspots, findPins, PIN_TYPES } from "./scope";
+import {
+  builtInShapes,
+  findHotspots,
+  findPins,
+  listPinShapes,
+  matchShapes,
+  PIN_TYPES,
+} from "./scope";
 import { resolveArea } from "./search";
 
 const STATUSES = [
@@ -29,6 +36,54 @@ const STATUS_WORD: Record<(typeof STATUSES)[number], string> = {
 };
 
 export const brandTools = [
+  defineTool({
+    name: "list_pin_shapes",
+    description:
+      "The pin shapes the brand can give new pins: its OWN saved shapes (e.g. a troll or a logo outline) and the built-in ones " +
+      "(circle, square, hexagon, shield, star, teardrop). Returns an id and a name for each. Call it when the person mentions how pins should look, " +
+      "before proposing pins or a hotspot when the brand has shapes of its own, or to change the look of existing pins.",
+    schema: z.object({
+      words: z
+        .string()
+        .max(80)
+        .optional()
+        .describe(
+          'The person\'s own words about the look, e.g. "troll" or "Forest troll"; leave out if they didn\'t say. Matching shapes come back as `matches`.',
+        ),
+    }),
+    label: () => "Looking at your pin shapes…",
+    run: async (a, run) => {
+      const own = await listPinShapes(run.brand.creatorId);
+      const all = [...own, ...builtInShapes];
+      const matches = a.words ? matchShapes(a.words, all) : [];
+      return {
+        model: {
+          ...(a.words && {
+            matches: matches.map((s) => `${s.id} | ${s.name}`),
+            // Hard rule: with more than one match the person has to choose.
+            ambiguous: matches.length > 1,
+            ...(matches.length > 1 && {
+              mustAsk:
+                "More than one shape fits their words. Call ask_user now (the matching shape names as options, plus 'The default look') and stop; propose after they answer.",
+            }),
+          }),
+          yourShapes: own.map(
+            (s) => `${s.id} | ${s.name}${s.anchor === "bottom" ? " | stands on its tip" : ""}`,
+          ),
+          builtIn: builtInShapes.map((s) => `${s.id} | ${s.name}`),
+          how:
+            "Pass the id as `shape` to propose_pins, propose_hotspot or propose_pin_changes. " +
+            "If the person's words clearly name or describe one of the brand's shapes, use it. " +
+            "If the person mentioned a look but it could be more than one shape, ask once with ask_user (the option labels are the shape names, plus 'The default look'). " +
+            "If they didn't mention how pins look, or the brand has no shapes of its own, don't ask: leave `shape` out (the card lets them choose).",
+        },
+        detail: own.length
+          ? `${plural(own.length, "shape")} of your own`
+          : "Only the built-in shapes",
+      };
+    },
+  }),
+
   defineTool({
     name: "find_pins",
     description:

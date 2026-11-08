@@ -258,7 +258,7 @@ export function createMcpServer(session: Session, platform: Platform) {
       description:
         "Carries out a proposal the agent prepared (a `act_…` id from its reply). This changes the brand's live " +
         "data: get the person's go-ahead first. Edits: for create_pins, `keep` limits it to some place keys and " +
-        "`defaults` changes dates, type, radius and limits; for creating a hotspot, event or announcement, `draft` " +
+        "`defaults` changes dates, type, radius, limits and the pin shape (`look`); for creating a hotspot, event or announcement, `draft` " +
         "changes fields of the draft. A rejected edit can be fixed and confirmed again.",
       inputSchema: {
         actionId: z.string(),
@@ -290,6 +290,15 @@ export function createMcpServer(session: Session, platform: Platform) {
             pinNumber: z.number(),
             collectionLimit: z.number(),
             autoCollect: z.boolean(),
+            look: z
+              .object({
+                shape: z.string().describe('A built-in id such as "star", or a brand shape id'),
+                fill: z.enum(["BRAND", "PIN", "NONE"]),
+                color: z.string().nullable(),
+                autoBadge: z.boolean(),
+              })
+              .partial({ fill: true, color: true, autoBadge: true })
+              .describe("A hotspot's pin shape and what is shown inside it"),
           })
           .partial()
           .optional()

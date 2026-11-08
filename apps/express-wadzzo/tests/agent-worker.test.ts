@@ -10,6 +10,10 @@ const db = {
     count: vi.fn(async () => 0),
   },
   hotspot: { findMany: vi.fn(async (_query: Query): Promise<unknown[]> => []) },
+  pinShape: {
+    findMany: vi.fn(async (_query: Query): Promise<unknown[]> => []),
+    findFirst: vi.fn(async (_query: Query): Promise<unknown> => null),
+  },
   creatorEvent: {
     findFirst: vi.fn(async () => null),
     findMany: vi.fn(async () => []),
@@ -276,6 +280,125 @@ describe("proposals", () => {
     await expect(call(run, "propose_pins", { ref: "places_made_up" })).rejects.toThrow(
       /unknown ref/i,
     );
+  });
+});
+
+describe("pin shapes", () => {
+  const places = (run: RunT) =>
+    run.addResult({
+      kind: "places",
+      title: "parks",
+      items: [{ key: "a", title: "A", lat: 41.8, lng: -90.2, kind: "place" }],
+    });
+  const proposed = (run: RunT) => run.actions[0]!.action;
+
+  it("lists the brand's own shapes and the built-in ones, for this brand only", async () => {
+    db.pinShape.findMany.mockResolvedValueOnce([
+      { id: "shape_troll", name: "Forest troll", anchor: "bottom" },
+    ]);
+    const out = await call(newRun(), "list_pin_shapes", {});
+    expect(db.pinShape.findMany.mock.calls[0]![0].where).toEqual({
+      creatorId: "BRAND_A",
+      archived: false,
+    });
+    const model = out.model as { yourShapes: string[]; builtIn: string[] };
+    expect(model.yourShapes).toEqual(["shape_troll | Forest troll | stands on its tip"]);
+    expect(model.builtIn).toContain("star | Star");
+    expect(out.detail).toBe("1 shape of your own");
+  });
+
+  it("says when the person's words fit more than one shape, so the agent has to ask", async () => {
+    db.pinShape.findMany.mockResolvedValue([
+      { id: "s1", name: "Forest troll", anchor: "bottom" },
+      { id: "s2", name: "Shaggy forest troll", anchor: "center" },
+    ]);
+    const model = async (words: string) =>
+      (await call(newRun(), "list_pin_shapes", { words })).model as {
+        matches: string[];
+        ambiguous: boolean;
+        mustAsk?: string;
+      };
+
+    const vague = await model("troll pins");
+    expect(vague.matches).toEqual(["s1 | Forest troll", "s2 | Shaggy forest troll"]);
+    expect(vague.ambiguous).toBe(true);
+    expect(vague.mustAsk).toMatch(/ask_user/);
+
+    // A name typed in full is one shape, even though another name contains it.
+    const exact = await model("my Forest troll");
+    expect(exact.ambiguous).toBe(false);
+    expect((await model("Forest troll")).matches).toEqual(["s1 | Forest troll"]);
+
+    // Built-ins count too, and no words means nothing to match.
+    expect((await model("star")).matches).toEqual(["star | Star"]);
+    const none = (await call(newRun(), "list_pin_shapes", {})).model as Record<string, unknown>;
+    expect(none).not.toHaveProperty("ambiguous");
+    db.pinShape.findMany.mockResolvedValue([]);
+  });
+
+  it("gives new pins a built-in shape", async () => {
+    const run = newRun();
+    await call(run, "propose_pins", { ref: places(run), shape: "star" });
+    expect(proposed(run)).toMatchObject({
+      type: "create_pins",
+      defaults: { look: { shape: "star" } },
+    });
+  });
+
+  it("gives them one of the brand's own shapes, looked up for this brand", async () => {
+    db.pinShape.findFirst.mockResolvedValueOnce({ id: "shape_troll" });
+    const run = newRun();
+    await call(run, "propose_pins", { ref: places(run), shape: "shape_troll" });
+    expect(db.pinShape.findFirst.mock.calls[0]![0].where).toEqual({
+      id: "shape_troll",
+      creatorId: "BRAND_A",
+      archived: false,
+    });
+    expect(proposed(run)).toMatchObject({ defaults: { look: { shape: "shape_troll" } } });
+  });
+
+  it("won't use a shape that isn't the brand's, and says how to find the right one", async () => {
+    db.pinShape.findFirst.mockResolvedValueOnce(null);
+    const run = newRun();
+    await expect(
+      call(run, "propose_pins", { ref: places(run), shape: "shape_of_another_brand" }),
+    ).rejects.toThrow(/list_pin_shapes/);
+    expect(run.actions).toHaveLength(0);
+  });
+
+  it("proposes no look when no shape was named, so the brand's default applies", async () => {
+    const run = newRun();
+    await call(run, "propose_pins", { ref: places(run) });
+    expect((proposed(run) as { defaults: { look?: unknown } }).defaults.look).toBeUndefined();
+  });
+
+  it("can change only the shape of existing pins", async () => {
+    db.locationGroup.findMany.mockResolvedValueOnce([{ id: "p1", title: "Park" }]);
+    const run = newRun();
+    await call(run, "propose_pin_changes", {
+      mode: "update",
+      pinIds: ["p1"],
+      changes: { shape: "hexagon" },
+    });
+    expect(proposed(run)).toMatchObject({
+      type: "update_pins",
+      changes: { look: { shape: "hexagon" } },
+    });
+  });
+
+  it("gives a new hotspot a shape", async () => {
+    const run = newRun();
+    await call(run, "propose_hotspot", {
+      mode: "create",
+      title: "Riverfront",
+      lat: 41.84,
+      lng: -90.19,
+      shape: "shield",
+    });
+    expect(proposed(run)).toMatchObject({
+      type: "create_hotspot",
+      hotspot: { look: { shape: "shield" } },
+    });
   });
 });
 

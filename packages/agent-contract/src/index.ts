@@ -162,6 +162,23 @@ export type AgentBlockKind = AgentBlock["kind"];
 
 // ─── Proposed changes (carried out by the brand app after confirmation) ─────
 
+/**
+ * How new pins are drawn on the map: the shape, and what is shown inside it.
+ * Left out, pins get the brand's default look (a circle with its logo).
+ */
+export type PinLookChoice = {
+  /** A built-in shape id ("circle", "star"…) or the id of one of the brand's saved shapes. */
+  shape: string;
+  /** What fills the shape: the brand's logo, the pin's own image, or nothing. */
+  fill?: "BRAND" | "PIN" | "NONE";
+  /** A hex colour such as "#22c55e", or null for the app's own. */
+  color?: string | null;
+  /** The ⚡ badge on auto-collect pins. */
+  autoBadge?: boolean;
+  /** How the image sits inside the shape: zoom from 1 up, x and y from -1 to 1. */
+  imageFit?: { zoom: number; x: number; y: number } | null;
+};
+
 export type PinDefaults = {
   type: PinTypeName;
   startDate: string;
@@ -175,6 +192,8 @@ export type PinDefaults = {
   collectionLimit: number;
   /** One pin per place, or every place in one pin. */
   grouping: "per-location" | "single-group";
+  /** How the pins are drawn; the brand's default look when left out. */
+  look?: PinLookChoice;
 };
 
 /** The "unlimited" collection limit, as the pin tools have always stored it. */
@@ -189,6 +208,7 @@ export type PinChanges = {
   image?: string;
   collectionLimit?: number;
   autoCollect?: boolean;
+  look?: PinLookChoice;
 };
 
 export type HotspotChanges = {
@@ -197,6 +217,8 @@ export type HotspotChanges = {
   dropEveryDays?: number;
   pinDurationDays?: number;
   autoCollect?: boolean;
+  /** Applies to every drop, past and future. */
+  look?: PinLookChoice;
 };
 
 export type HotspotDraft = {
@@ -214,6 +236,7 @@ export type HotspotDraft = {
   pinNumber: number;
   collectionLimit: number;
   autoCollect: boolean;
+  look?: PinLookChoice;
 };
 
 export type EventDraft = {

@@ -5,12 +5,13 @@
  * the brand it acts for (ids must be the brand's own), the person's card edits
  * are validated, and the same input rules as the normal forms apply.
  */
-import { PinType } from "@wadzzo/db";
+import { PinType, type Prisma } from "@wadzzo/db";
 import { z } from "zod";
 
 import { circleAround } from "@wadzzo/geo/map-geometry";
 import { jobQueue } from "../../lib/jobs";
 import { hotspots } from "../hotspots";
+import { lookColumnsFor, lookData } from "../pin-look";
 import {
   UNLIMITED_COLLECTIONS,
   type ActionEdits,
@@ -21,6 +22,7 @@ import { AnnouncementInput, EventInput, announcementData, eventData } from "../.
 import type { Db } from "@wadzzo/db";
 import { createOptimizedImage } from "@wadzzo/storage";
 import { BADWORDS } from "@wadzzo/schemas/banned-word";
+import { pinLookInputSchema } from "@wadzzo/schemas/pin-look";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
 export type ActingBrand = { creatorId: string; platformId: string };
@@ -35,21 +37,29 @@ const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 // ─── Card edits ──────────────────────────────────────────────────────────────
 
+/**
+ * How a proposal says its pins should look. The shape is checked against the brand's own
+ * shapes when it is applied (see `lookColumnsFor`); the rest follows the pin form's rules.
+ */
+const LookChoiceInput = pinLookInputSchema
+  .pick({ fill: true, color: true, autoBadge: true, imageFit: true })
+  .extend({ shape: z.string().min(1).max(64) });
+
+const PinDefaultsInput = z.object({
+  type: z.enum(PinType),
+  startDate: day,
+  endDate: day,
+  autoCollect: z.boolean(),
+  pinNumber: z.number().int().min(1).max(200),
+  radius: z.number().min(0).max(5000),
+  collectionLimit: z.number().int().min(1).max(UNLIMITED_COLLECTIONS),
+  grouping: z.enum(["per-location", "single-group"]),
+  look: LookChoiceInput.optional(),
+});
+
 export const ActionEditsInput = z.object({
   keep: z.array(z.string()).max(200).optional(),
-  defaults: z
-    .object({
-      type: z.enum(PinType),
-      startDate: day,
-      endDate: day,
-      autoCollect: z.boolean(),
-      pinNumber: z.number().int().min(1).max(200),
-      radius: z.number().min(0).max(5000),
-      collectionLimit: z.number().int().min(1).max(UNLIMITED_COLLECTIONS),
-      grouping: z.enum(["per-location", "single-group"]),
-    })
-    .partial()
-    .optional(),
+  defaults: PinDefaultsInput.partial().optional(),
   draft: z.record(z.string(), z.unknown()).optional(),
 }) satisfies z.ZodType<ActionEdits>;
 
@@ -92,7 +102,9 @@ export async function executeAction(
     case "update_hotspot": {
       await ownHotspot(db, brand, action.hotspot.id);
       const c = action.changes;
+      const look = await lookColumnsFor(db, brand.creatorId, c.look);
       await hotspots(db).update(brand.creatorId, action.hotspot.id, {
+        ...(look && { look }),
         hotspotStartDate: c.startDate && new Date(c.startDate).toISOString(),
         hotspotEndDate: c.endDate && new Date(c.endDate).toISOString(),
         dropEveryDays: c.dropEveryDays,
@@ -155,7 +167,8 @@ async function createPins(
   rawDefaults: PinDefaults,
   keep?: string[],
 ): Promise<ActionResult> {
-  const defaults = ActionEditsInput.shape.defaults.unwrap().required().parse(rawDefaults);
+  const defaults = parse(PinDefaultsInput, rawDefaults);
+  const look = await lookColumnsFor(db, brand.creatorId, defaults.look);
   const start = new Date(defaults.startDate);
   const end = new Date(defaults.endDate);
   if (end <= start) throw badRequest("The pins must end after they start");
@@ -188,6 +201,8 @@ async function createPins(
     autoCollect: defaults.autoCollect,
     groupingMode: defaults.grouping,
     pinNumber: defaults.pinNumber,
+    // Plain column values: the task server writes them as they are.
+    ...(look && { look: look as Prisma.InputJsonObject }),
   };
 
   const job = await db.locationGroupJob.create({
@@ -239,6 +254,7 @@ async function updatePins(
     throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Those pins no longer exist" });
   if (changes.title && (changes.title.trim().length < 3 || bad(changes.title)))
     throw badRequest("That title isn't allowed");
+  const look = await lookColumnsFor(db, brand.creatorId, changes.look);
   for (const url of [changes.link, changes.image])
     if (url && !/^https?:\/\//i.test(url)) throw badRequest("Links must start with http(s)://");
 
@@ -267,6 +283,7 @@ async function updatePins(
             limit: changes.collectionLimit,
             remaining: Math.max(0, changes.collectionLimit - collected),
           }),
+          ...(look && lookData(look)),
         },
       });
     }
@@ -326,6 +343,7 @@ const HotspotDraftInput = z
     pinNumber: z.number().int().min(1).max(100),
     collectionLimit: z.number().int().min(1).max(UNLIMITED_COLLECTIONS),
     autoCollect: z.boolean(),
+    look: LookChoiceInput.optional(),
   })
   .refine((h) => new Date(h.endDate) > new Date(h.startDate), {
     message: "The hotspot must end after it starts",
@@ -334,7 +352,9 @@ const HotspotDraftInput = z
 
 async function createHotspot(db: Db, brand: ActingBrand, raw: unknown): Promise<ActionResult> {
   const h = parse(HotspotDraftInput, raw);
+  const look = await lookColumnsFor(db, brand.creatorId, h.look);
   const { hotspotId } = await hotspots(db).create(brand.creatorId, {
+    ...(look && { look }),
     title: h.title,
     description: h.description,
     type: h.type,

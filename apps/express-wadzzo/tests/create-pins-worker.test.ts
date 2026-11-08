@@ -79,4 +79,46 @@ describe("pin creation", () => {
       [{ data: { approved?: boolean } }] | undefined;
     expect(firstCall?.[0]?.data.approved).toBe(true);
   });
+
+  describe("pin look", () => {
+    const look = {
+      markerShape: null,
+      pinShapeId: "shape_1",
+      markerFill: "NONE",
+      markerColor: "#111827",
+      markerImageFit: null,
+      markerAutoBadge: false,
+    };
+    const withLook = (groupingMode: "per-location" | "single-group") => ({
+      ...job,
+      payload: {
+        ...job.payload,
+        pinOptions: { ...job.payload.pinOptions, groupingMode, look },
+      },
+    });
+    const created = () =>
+      (db.locationGroup.create.mock.calls.at(-1) as [{ data: Record<string, unknown> }])[0].data;
+
+    it.each(["per-location", "single-group"] as const)(
+      "draws every %s pin with the look the brand chose",
+      async (mode) => {
+        db.creator.findUniqueOrThrow.mockResolvedValueOnce({ platformId: "wadzzo" });
+        await runCreatePinsJob(withLook(mode) as never);
+        expect(created()).toMatchObject({
+          pinShapeId: "shape_1",
+          markerShape: null,
+          markerFill: "NONE",
+          markerColor: "#111827",
+          markerAutoBadge: false,
+        });
+      },
+    );
+
+    it("leaves the look columns out when the job has none, so the default look applies", async () => {
+      db.creator.findUniqueOrThrow.mockResolvedValueOnce({ platformId: "wadzzo" });
+      await runCreatePinsJob(job as never);
+      expect(Object.keys(created())).not.toContain("markerFill");
+      expect(Object.keys(created())).not.toContain("pinShapeId");
+    });
+  });
 });

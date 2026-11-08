@@ -6,7 +6,14 @@
 
 import type { Prisma } from "@prisma/client";
 import { db } from "../../lib/db";
-import type { HotspotItem, PinItem, PinStatus, PinTypeName } from "@wadzzo/agent-contract";
+import type {
+  HotspotItem,
+  PinItem,
+  PinLookChoice,
+  PinStatus,
+  PinTypeName,
+} from "@wadzzo/agent-contract";
+import { BUILTIN_SHAPE_IDS, BUILTIN_SHAPES, isBuiltinShape } from "@wadzzo/schemas/pin-look";
 import { inArea, type Box, type SearchArea } from "../area";
 
 export const PIN_TYPES = [
@@ -131,6 +138,84 @@ export async function findPins(
       hotspotId: r.hotspotId,
     })),
   };
+}
+
+/** The brand's own saved pin shapes (retired ones left out), most recently changed first. */
+export async function listPinShapes(creatorId: string) {
+  return db.pinShape.findMany({
+    where: { creatorId, archived: false },
+    select: { id: true, name: true, anchor: true },
+    orderBy: { updatedAt: "desc" },
+    take: 100,
+  });
+}
+
+const FILLER = new Set([
+  "the",
+  "a",
+  "an",
+  "my",
+  "our",
+  "your",
+  "pin",
+  "pins",
+  "shape",
+  "shapes",
+  "one",
+  "use",
+  "with",
+  "of",
+  "and",
+]);
+
+/**
+ * Which shapes the person's words point at. A name typed in full wins over partial
+ * matches ("Forest troll" is one shape even though "Shaggy forest troll" also has
+ * those words); otherwise every shape sharing a word with them matches. More than
+ * one match means the agent has to ask which.
+ */
+export function matchShapes<T extends { name: string }>(words: string, shapes: T[]): T[] {
+  const tokens = (text: string) =>
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((t) => t.length > 1 && !FILLER.has(t));
+  const wanted = tokens(words);
+  if (!wanted.length) return [];
+  const exact = shapes.filter((s) => tokens(s.name).join(" ") === wanted.join(" "));
+  if (exact.length) return exact;
+  return shapes.filter((s) => {
+    const name = s.name.toLowerCase();
+    return wanted.some((t) => name.includes(t));
+  });
+}
+
+/** The shapes every brand has. */
+export const builtInShapes = BUILTIN_SHAPE_IDS.map((id) => ({
+  id,
+  name: BUILTIN_SHAPES[id].name,
+}));
+
+/**
+ * The look a proposal asks for, from a shape id the model passed: a built-in shape
+ * or one of the brand's own. Anything else is an error the model can act on (the
+ * brand app checks again when the person confirms).
+ */
+export async function pinLookFor(
+  creatorId: string,
+  shape: string | undefined,
+): Promise<PinLookChoice | undefined> {
+  if (!shape) return undefined;
+  if (isBuiltinShape(shape)) return { shape };
+  const own = await db.pinShape.findFirst({
+    where: { id: shape, creatorId, archived: false },
+    select: { id: true },
+  });
+  if (!own)
+    throw new Error(
+      `"${shape}" isn't one of this brand's pin shapes or a built-in one. Use list_pin_shapes to get the right id.`,
+    );
+  return { shape: own.id };
 }
 
 /** Ids from `ids` that are the brand's own live pins, with their titles. */

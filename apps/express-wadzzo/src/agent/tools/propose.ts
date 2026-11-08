@@ -20,7 +20,7 @@ import {
 import { geocode } from "../google";
 import type { Run } from "../run";
 import { defineTool, isoDay, parseDate, plural } from "./define";
-import { findHotspots, ownPins, PIN_TYPES } from "./scope";
+import { findHotspots, ownPins, PIN_TYPES, pinLookFor } from "./scope";
 
 const MAX_PINS_PER_PROPOSAL = 200;
 const DAY = 86_400_000;
@@ -65,6 +65,14 @@ async function ownRow(table: "event" | "announcement", run: Run, id: string): Pr
     throw new Error(`That isn't one of this brand's ${table}s. Use find_${table}s to get its id.`);
   return row;
 }
+
+/** The `shape` argument every pin-making tool takes. */
+const shapeArg = z
+  .string()
+  .optional()
+  .describe(
+    "Pin shape id from list_pin_shapes: how the pins look on the map. Leave out for the brand's default look.",
+  );
 
 const done = (run: Run, summary: string) => ({
   model: {
@@ -112,6 +120,7 @@ export const proposeTools = [
         .enum(["per-location", "single-group"])
         .optional()
         .describe("One pin per place (default) or all places in one pin"),
+      shape: shapeArg,
     }),
     label: (a, run) => {
       const set = run.results.get(a.ref);
@@ -146,6 +155,7 @@ export const proposeTools = [
         radius: a.radiusMetres ?? 2,
         collectionLimit: a.collectionLimit ?? UNLIMITED_COLLECTIONS,
         grouping: a.grouping ?? "per-location",
+        look: await pinLookFor(run.brand.creatorId, a.shape),
       };
       const skipped = keyed.length - items.length;
       const summary = `Create ${plural(items.length, "pin")} from “${set.title}”${skipped ? ` (skipping ${skipped} already pinned)` : ""}`;
@@ -172,6 +182,7 @@ export const proposeTools = [
           image: httpUrl.optional(),
           collectionLimit: z.number().int().min(1).max(UNLIMITED_COLLECTIONS).optional(),
           autoCollect: z.boolean().optional(),
+          shape: shapeArg,
         })
         .optional(),
     }),
@@ -186,8 +197,10 @@ export const proposeTools = [
         run.propose({ type: "hide_pins", pins }, summary);
         return done(run, summary);
       }
-      const c = a.changes ?? {};
+      const { shape, ...c } = a.changes ?? {};
       const changes: PinChanges = { ...c };
+      const look = await pinLookFor(run.brand.creatorId, shape);
+      if (look) changes.look = look;
       if (c.startDate) changes.startDate = isoDay(parseDate(c.startDate, "startDate"));
       if (c.endDate) changes.endDate = isoDay(parseDate(c.endDate, "endDate"));
       if (changes.startDate && changes.endDate)
@@ -225,6 +238,7 @@ export const proposeTools = [
       dropEveryDays: z.number().int().min(1).max(365).optional(),
       pinDurationDays: z.number().int().min(1).max(365).optional(),
       autoCollect: z.boolean().optional(),
+      shape: shapeArg,
     }),
     label: (a) =>
       a.mode === "create"
@@ -241,6 +255,8 @@ export const proposeTools = [
           if (a.dropEveryDays) changes.dropEveryDays = a.dropEveryDays;
           if (a.pinDurationDays) changes.pinDurationDays = a.pinDurationDays;
           if (a.autoCollect !== undefined) changes.autoCollect = a.autoCollect;
+          const look = await pinLookFor(run.brand.creatorId, a.shape);
+          if (look) changes.look = look;
           if (Object.keys(changes).length === 0) throw new Error("No changes given.");
           const summary = `Change ${Object.keys(changes).join(", ")} on hotspot “${hotspot.title}”`;
           run.propose({ type: "update_hotspot", hotspot, changes }, summary);
@@ -279,6 +295,7 @@ export const proposeTools = [
         pinNumber: a.pinNumber ?? 1,
         collectionLimit: a.collectionLimit ?? UNLIMITED_COLLECTIONS,
         autoCollect: a.autoCollect ?? run.brand.habits?.autoCollect ?? false,
+        look: await pinLookFor(run.brand.creatorId, a.shape),
       };
       const summary = `Create hotspot “${a.title}” (${hotspot.radiusMetres} m), dropping every ${plural(hotspot.dropEveryDays, "day")}`;
       run.propose({ type: "create_hotspot", hotspot }, summary);

@@ -46,6 +46,11 @@ function makeDb() {
       update: vi.fn(async (_q: { data: Record<string, unknown> }) => ({})),
     },
     location: { updateMany: vi.fn(async () => ({ count: 1 })) },
+    pinShape: {
+      findFirst: vi.fn(async ({ where }: { where: { id: string; creatorId: string } }) =>
+        where.id === "shape_own" && where.creatorId === "BRAND_A" ? { id: "shape_own" } : null,
+      ),
+    },
     locationGroupJob: {
       create: vi.fn(async (_q: { data: Record<string, unknown> }) => ({
         id: "lgj_1",
@@ -174,6 +179,128 @@ describe("create_pins", () => {
     )[2].pins[0]!;
     expect(pin.startDate.slice(0, 10)).toBe("2026-12-01");
     expect(new Date(pin.endDate) > new Date("2026-12-02")).toBe(true);
+  });
+});
+
+describe("pin shapes on a proposal", () => {
+  type Payload = { pinOptions: { look?: Record<string, unknown> } };
+  const queued = () =>
+    (taskClient.enqueue.mock.calls[0] as unknown as [string, string, Payload])[2];
+  const create = (look?: { shape: string; fill?: "BRAND" | "PIN" | "NONE"; color?: string }) =>
+    run({ type: "create_pins", items: [place("a")], defaults: { ...defaults, look } });
+
+  it("draws the new pins with a built-in shape, handing the task server ready columns", async () => {
+    await create({ shape: "star", fill: "NONE", color: "#111827" });
+    expect(queued().pinOptions.look).toEqual({
+      markerShape: "star",
+      pinShapeId: null,
+      markerFill: "NONE",
+      markerColor: "#111827",
+      markerImageFit: null,
+      markerAutoBadge: true,
+    });
+  });
+
+  it("draws them with one of the brand's own shapes", async () => {
+    await create({ shape: "shape_own" });
+    expect(queued().pinOptions.look).toMatchObject({ pinShapeId: "shape_own", markerShape: null });
+  });
+
+  it("refuses another brand's shape, and queues nothing", async () => {
+    await expect(create({ shape: "shape_of_someone_else" })).rejects.toMatchObject({
+      code: "VALIDATION_FAILED",
+    });
+    expect(taskClient.enqueue).not.toHaveBeenCalled();
+    expect(db.locationGroupJob.create).not.toHaveBeenCalled();
+  });
+
+  it("sends no look when none was chosen, so the default look applies", async () => {
+    await create();
+    expect(queued().pinOptions).not.toHaveProperty("look");
+  });
+
+  it("uses the shape the person picked on the card over the agent's suggestion", async () => {
+    await run(
+      {
+        type: "create_pins",
+        items: [place("a")],
+        defaults: { ...defaults, look: { shape: "star" } },
+      },
+      { defaults: { look: { shape: "shape_own" } } },
+    );
+    expect(queued().pinOptions.look).toMatchObject({ pinShapeId: "shape_own" });
+  });
+
+  it("changes the shape of existing pins, only to a shape the brand has", async () => {
+    await run({
+      type: "update_pins",
+      pins: [{ id: "p1", title: "x" }],
+      changes: { look: { shape: "hexagon", fill: "NONE" } },
+    });
+    expect(db.locationGroup.update.mock.calls[0]![0].data).toMatchObject({
+      markerShape: "hexagon",
+      pinShapeId: null,
+      markerFill: "NONE",
+    });
+
+    await expect(
+      run({
+        type: "update_pins",
+        pins: [{ id: "p1", title: "x" }],
+        changes: { look: { shape: "shape_of_someone_else" } },
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+  });
+
+  it("leaves a pin's look alone when an edit doesn't mention it", async () => {
+    await run({
+      type: "update_pins",
+      pins: [{ id: "p1", title: "x" }],
+      changes: { collectionLimit: 20 },
+    });
+    expect(db.locationGroup.update.mock.calls[0]![0].data).not.toHaveProperty("markerShape");
+    expect(db.locationGroup.update.mock.calls[0]![0].data).not.toHaveProperty("pinShapeId");
+  });
+
+  it("applies a shape to a new hotspot and to an existing one", async () => {
+    const hotspot = {
+      title: "Riverfront",
+      lat: 41.84,
+      lng: -90.19,
+      radiusMetres: 400,
+      type: "LANDMARK" as const,
+      startDate: "2026-10-10",
+      endDate: "2027-01-10",
+      dropEveryDays: 7,
+      pinDurationDays: 7,
+      pinNumber: 1,
+      collectionLimit: 999_999,
+      autoCollect: false,
+    };
+    await run({ type: "create_hotspot", hotspot: { ...hotspot, look: { shape: "shape_own" } } });
+    const created = hotspotClient.create.mock.calls[0] as unknown as [
+      string,
+      { look?: Record<string, unknown> },
+    ];
+    expect(created[0]).toBe("BRAND_A");
+    expect(created[1].look).toMatchObject({ pinShapeId: "shape_own" });
+
+    await run({
+      type: "update_hotspot",
+      hotspot: { id: "h1", title: "x" },
+      changes: { look: { shape: "shield" } },
+    });
+    const updated = hotspotClient.update.mock.calls[0] as unknown as [
+      string,
+      string,
+      { look?: Record<string, unknown> },
+    ];
+    expect(updated.slice(0, 2)).toEqual(["BRAND_A", "h1"]);
+    expect(updated[2].look).toMatchObject({ markerShape: "shield" });
+
+    await expect(
+      run({ type: "create_hotspot", hotspot: { ...hotspot, look: { shape: "nope" } } }),
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
   });
 });
 

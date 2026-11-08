@@ -29,7 +29,7 @@ function describeAction(action: ProposedAction): string {
       const d = action.defaults;
       return [
         `Create pins at ${action.items.length} places (${d.grouping}), type ${d.type}, ${day(d.startDate)} → ${day(d.endDate)}, ` +
-          `${d.pinNumber} per place, radius ${d.radius} m, collection limit ${d.collectionLimit}, auto-collect ${d.autoCollect ? "on" : "off"}.`,
+          `${d.pinNumber} per place, radius ${d.radius} m, collection limit ${d.collectionLimit}, auto-collect ${d.autoCollect ? "on" : "off"}${d.look ? `, pin shape ${d.look.shape}` : ""}.`,
         list(action.items, (p) => `\`${p.key}\` ${p.title}${p.address ? `, ${p.address}` : ""}`),
       ].join("\n");
     }
