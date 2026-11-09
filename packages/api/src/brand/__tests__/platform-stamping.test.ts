@@ -29,6 +29,8 @@ const STAMPED = [
   "mcpToken",
   "pinTemplate",
   "pinShape",
+  "trail",
+  "trailRun",
 ];
 
 /** Copies an existing row (which already carries its platformId). */

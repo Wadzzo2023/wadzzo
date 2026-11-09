@@ -11,6 +11,9 @@ import { z } from "zod";
 import { circleAround } from "@wadzzo/geo/map-geometry";
 import { jobQueue } from "../../lib/jobs";
 import { hotspots } from "../hotspots";
+import { readPath, trails } from "../trails";
+import { straightSections } from "@wadzzo/geo/trail-geometry";
+import { readStopDefaults, saveTrailSchema } from "@wadzzo/schemas/trail";
 import { lookColumnsFor, lookData } from "../pin-look";
 import {
   UNLIMITED_COLLECTIONS,
@@ -155,7 +158,83 @@ export async function executeAction(
         message: `Deleted announcement “${action.announcement.title}”.`,
       };
     }
+    case "create_trail":
+    case "update_trail":
+      return saveTrail(db, brand, action);
   }
+}
+
+// ─── Trails ──────────────────────────────────────────────────────────────────
+
+/**
+ * Saves the agent's trail as a draft (create) or applies its changes (update). The stops go
+ * through the same checks as the builder's save: the brand's own regular pins only. The path
+ * is straight lines; the brand snaps it to streets and sends it for review in Trail mode.
+ */
+async function saveTrail(
+  db: Db,
+  brand: ActingBrand,
+  action: Extract<ProposedAction, { type: "create_trail" | "update_trail" }>,
+): Promise<ActionResult> {
+  const service = trails(db);
+  if (action.type === "create_trail") {
+    const t = action.trail;
+    const stops = t.stops.map((s) => ({ lat: s.lat, lng: s.lng }));
+    const input = parse(saveTrailSchema, {
+      title: t.title,
+      description: t.description ?? null,
+      mode: t.mode,
+      order: t.order,
+      startDate: t.startDate,
+      endDate: t.endDate,
+      stops: t.stops.map((s) => ({ pinId: s.id, required: true })),
+      path: straightSections(stops),
+    });
+    const saved = await service.save(brand, input);
+    return {
+      message: `Saved draft trail “${saved.title}” with ${plural(saved.stops.length, "stop")}.`,
+      id: saved.id,
+    };
+  }
+
+  const current = await service.find(action.trail.id);
+  if (current.creatorId !== brand.creatorId)
+    throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "That trail no longer exists" });
+  const c = action.changes;
+  const keep = current.stops.map((s) => ({
+    pinId: s.locationGroup.id,
+    required: s.required,
+    clue: s.clue,
+    lat: s.locationGroup.latitude,
+    lng: s.locationGroup.longitude,
+  }));
+  const stops = c.stops
+    ? c.stops.map((s) => ({ pinId: s.id, required: true, clue: null, lat: s.lat, lng: s.lng }))
+    : keep;
+  const input = parse(saveTrailSchema, {
+    id: current.id,
+    title: c.title ?? current.title,
+    description: c.description !== undefined ? c.description : current.description,
+    coverImage: current.coverImage,
+    mode: c.mode ?? current.mode,
+    order: c.order ?? current.order,
+    color: current.color,
+    startDate: current.startDate,
+    endDate: current.endDate,
+    stops: stops.map(({ pinId, required, clue }) => ({ pinId, required, clue })),
+    // New stops: straight lines again; same stops keep the saved path.
+    path: c.stops ? straightSections(stops) : readPath(current.path),
+    stopDefaults: readStopDefaults(current.stopDefaults),
+    reward: current.rewardGroup?.asset
+      ? {
+          assetId: current.rewardGroup.asset.id,
+          limit: current.rewardGroup.limit,
+          minStops: current.rewardMinStops,
+        }
+      : null,
+  });
+  await service.save(brand, input);
+  return { message: `Updated trail “${input.title}”.`, id: current.id };
 }
 
 // ─── Pins ────────────────────────────────────────────────────────────────────

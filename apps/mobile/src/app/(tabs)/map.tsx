@@ -1,5 +1,5 @@
 import { router, useIsFocused, useLocalSearchParams } from "expo-router";
-import { CalendarDays, MapPinOff, Trophy, type LucideIcon } from "lucide-react-native";
+import { CalendarDays, MapPinOff, Route, Trophy, type LucideIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Linking, Pressable, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,15 +16,18 @@ import { metersPerPixel } from "~/components/map/UserPuck";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { useTabBarHeight } from "~/components/shell/BottomTabBar";
+import { TrailFollowBar } from "~/components/trails/TrailFollowBar";
+import { TrailMapLine } from "~/components/trails/TrailMapLine";
 import { Glass } from "~/components/ui/surfaces";
 import { Text } from "~/components/ui/Text";
-import { useBountyAttention, useBrandsQuery, useCollectPin } from "~/lib/api/queries";
+import { useBountyAttention, useBrandsQuery, useCollectPin, useTrailQuery, useTrailsQuery } from "~/lib/api/queries";
 import { useFeedback, useSettings } from "~/lib/ar/feedback";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { warmArTextures } from "~/lib/ar/arTexture";
 import { FALLBACK_CENTER, useGeolocation, useHeading } from "~/lib/ar/location";
 import { filterPins, NEAR_RADIUS_KM, PIN_FILTERS, pinArea, sortByDistance, useDiscoveryPins, type PinFilterId } from "~/lib/ar/pins";
 import { pinStatus } from "~/lib/ar/rarity";
+import { useFollowTrail } from "~/lib/ar/trails";
 import type { ArPin, Coords, TravelMode } from "~/lib/ar/types";
 import { useSession } from "~/lib/auth/session";
 import { useMuralsInArea } from "~/lib/murals/api";
@@ -107,6 +110,26 @@ export default function MapScreen() {
   const signedIn = useSession((s) => Boolean(s.user));
   const { count: bountyAlerts } = useBountyAttention();
 
+  // ── Trails (docs/trails) ──
+  // The followed trail draws its path and the follow bar; stops an ordered
+  // trail hasn't unlocked yet are left out of auto-collect (the server would
+  // refuse them anyway, with "Collect stop N first").
+  const followTrailId = useFollowTrail((s) => s.trailId);
+  const stopFollowing = useFollowTrail((s) => s.stop);
+  const followed = useTrailQuery(followTrailId);
+  const trail = followed.data ?? null;
+  useEffect(() => {
+    // Ended or taken down since: nothing left to follow.
+    if (followTrailId && (followed.error as { status?: number } | null)?.status === 404) stopFollowing();
+  }, [followTrailId, followed.error, stopFollowing]);
+  const nearTrails = useTrailsQuery(signedIn && fix ? { lat: fix.lat, lng: fix.lng } : null);
+  const lockedPins = useMemo(() => {
+    const ids = new Set<string>();
+    for (const t of [...(nearTrails.data ?? []), ...(trail ? [trail] : [])])
+      for (const st of t.stops) if (st.lockReason && st.pinId) ids.add(st.pinId);
+    return ids;
+  }, [nearTrails.data, trail]);
+
   const mapRef = useRef<MapCanvasHandle>(null);
   const { mode: mapMode, is3d, toggle: toggleMapMode } = useMapMode();
   const { focus, mural: focusMural } = useLocalSearchParams<{ focus?: string; mural?: string }>();
@@ -168,7 +191,7 @@ export default function MapScreen() {
   const pending = useRef(false);
   useEffect(() => {
     if (!settings.autoCollect || !signedIn || !fix || pending.current) return;
-    const next = pins.find((p) => p.autoCollect && pinStatus(p) === "collectible" && distanceMeters(fix, p) <= AR_CAPTURE_RADIUS);
+    const next = pins.find((p) => p.autoCollect && !lockedPins.has(p.id) && pinStatus(p) === "collectible" && distanceMeters(fix, p) <= AR_CAPTURE_RADIUS);
     if (!next) return;
     pending.current = true;
     const id = setTimeout(() => {
@@ -190,7 +213,7 @@ export default function MapScreen() {
       clearTimeout(id);
       pending.current = false;
     };
-  }, [settings.autoCollect, signedIn, fix, pins, collectPin, feedback]);
+  }, [settings.autoCollect, signedIn, fix, pins, collectPin, feedback, lockedPins]);
 
   // `/map?focus=<id>` (from a card's "On the map"): open that pin once loaded.
   const focused = useRef<string | null>(null);
@@ -272,6 +295,18 @@ export default function MapScreen() {
   // Stable, so the memoized PinSheet doesn't re-render on every heading tick.
   const closeSheet = useCallback(() => setSelectedId(null), []);
 
+  // The follow bar's Go: open the next stop's pin (or fly there until it's loaded).
+  const handleTrailGo = useCallback(
+    (pinId: string) => {
+      if (pinsRef.current.some((p) => p.id === pinId)) return handleSelect(pinId);
+      const st = trail?.stops.find((x) => x.pinId === pinId);
+      if (!st) return;
+      setFollowing(false);
+      mapRef.current?.recenter({ lat: st.lat, lng: st.lng }, { zoom: 16 });
+    },
+    [trail, handleSelect],
+  );
+
   const handleDirections = useCallback((pin: ArPin, mode: TravelMode) => {
     setSelectedId(null);
     router.push({ pathname: "/directions/[id]", params: { id: pin.id, mode } });
@@ -303,6 +338,7 @@ export default function MapScreen() {
         selectedMuralId={selectedMuralId}
         onSelectMural={handleSelectMural}
         onBoundsIdle={setMuralBounds}
+        overlay={trail ? <TrailMapLine trail={trail} /> : null}
       />
 
       {!fix && <LocationGate status={status} reason={reason} onRetry={() => void retry()} />}
@@ -337,10 +373,11 @@ export default function MapScreen() {
         <ProfileButton balance />
       </View>
 
-      {/* Events, then Bounty, under the avatar capsule: icon and name on one line, right-aligned. */}
+      {/* Events, Trails, then Bounty, under the avatar capsule: icon and name on one line, right-aligned. */}
       {hudHeight > 0 && (
         <View pointerEvents="box-none" style={{ position: "absolute", top: hudHeight + 8, right: 16, alignItems: "flex-end", gap: 6, zIndex: 30 }}>
           <HudShortcut icon={CalendarDays} label="Events" onPress={() => router.push("/events")} />
+          <HudShortcut icon={Route} label="Trails" onPress={() => router.push("/trails")} />
           <HudShortcut icon={Trophy} label="Bounty" dot={bountyAlerts > 0} onPress={() => router.push("/bounty")} />
         </View>
       )}
@@ -372,6 +409,17 @@ export default function MapScreen() {
 
       {fix && (
         <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, bottom: tabBarHeight + 36, zIndex: 30 }}>
+          {trail && (
+            <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+              <TrailFollowBar
+                trail={trail}
+                fix={fix}
+                onOpen={() => router.push({ pathname: "/trails/[id]", params: { id: trail.id } })}
+                onGo={handleTrailGo}
+                onStop={stopFollowing}
+              />
+            </View>
+          )}
           <NearbyStrip items={nearby} selectedId={selectedId} onSelect={handleSelect} loading={isLoading} />
         </View>
       )}

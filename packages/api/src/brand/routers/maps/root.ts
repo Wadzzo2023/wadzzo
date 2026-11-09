@@ -3,6 +3,7 @@ import { pinRouter } from "./pin";
 import { reportRouter } from "./report";
 import { shapeRouter } from "./shape";
 import { templateRouter } from "./template";
+import { trailRouter } from "./trail";
 import { trxRouter } from "./transactions";
 
 /**
@@ -15,6 +16,7 @@ export const mapsRouter = createTRPCRouter({
   report: reportRouter,
   shape: shapeRouter,
   template: templateRouter,
+  trail: trailRouter,
   trx: trxRouter,
 });
 

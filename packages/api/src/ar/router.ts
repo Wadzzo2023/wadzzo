@@ -6,11 +6,13 @@ import { eventsRouter } from "./routers/events";
 import { muralsRouter } from "./routers/murals";
 import { claimRouter } from "./routers/claim";
 import { pinsRouter } from "./routers/pins";
+import { trailsRouter } from "./routers/trails";
 import { userRouter } from "./routers/user";
 import { createTRPCRouter } from "../trpc";
 
 export const appRouter = createTRPCRouter({
   pins: pinsRouter,
+  trails: trailsRouter,
   claim: claimRouter,
   brands: brandsRouter,
   user: userRouter,

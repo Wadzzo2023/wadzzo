@@ -14,6 +14,8 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../..";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
+import { assertTrailOrder, recordTrailCollect } from "../server/trails";
+
 /**
  * ── Pins ───────────────────────────────────────────────────────────────────
  *
@@ -370,6 +372,9 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
     throw new AppError(ErrorCodes.AUTH_FORBIDDEN, { message: lockReason });
   }
 
+  // A stop on an ordered trail waits for the stops before it (docs/trails).
+  await assertTrailOrder(db, userId, group.id);
+
   return { location, group };
 }
 
@@ -386,6 +391,8 @@ async function writeClaim(
   platformId: string,
 ) {
   const claim = await writeClaimRow(db, userId, location, group, platformId);
+  // Starts or finishes the fan's runs of trails this pin is a stop on (best effort).
+  await recordTrailCollect(db, userId, group.id, platformId);
   // Tell the brand (best effort; never fails the collect).
   const info = await db.locationGroup
     .findUnique({
@@ -405,7 +412,7 @@ async function writeClaim(
   return claim;
 }
 
-async function writeClaimRow(
+export async function writeClaimRow(
   db: Db,
   userId: string,
   location: { id: string },

@@ -135,6 +135,7 @@ export const PinMarker = memo(function PinMarker({
   onClick,
   label,
   mode = "full",
+  stop,
 }: {
   lat: number;
   lng: number;
@@ -149,6 +150,8 @@ export const PinMarker = memo(function PinMarker({
   label: string;
   /** The whole pin, or a small mark of its shape for zoomed-out maps. */
   mode?: "full" | "dot";
+  /** Its number on the selected trail (①②③), shown in the top-left corner. */
+  stop?: { position: number; color: string };
 }) {
   const stateLook = pinLook(state);
   const style = PIN_LOOK[stateLook];
@@ -166,8 +169,8 @@ export const PinMarker = memo(function PinMarker({
     >
       <button
         type="button"
-        aria-label={`${label} — ${style.label}, ${state.autoCollect ? "auto-collect" : "tap to collect"}`}
-        title={`${label} · ${style.label} · ${state.autoCollect ? "Auto-collect" : "Tap to collect"}`}
+        aria-label={`${stop ? `Stop ${stop.position}: ` : ""}${label} — ${style.label}, ${state.autoCollect ? "auto-collect" : "tap to collect"}`}
+        title={`${stop ? `Stop ${stop.position} · ` : ""}${label} · ${style.label} · ${state.autoCollect ? "Auto-collect" : "Tap to collect"}`}
         className={cn(
           "relative flex items-center justify-center transition-transform hover:scale-110 hover:opacity-100",
           style.opacity,
@@ -204,6 +207,18 @@ export const PinMarker = memo(function PinMarker({
         {count > 0 && !dot && (
           <span className="bg-primary font-hud text-primary-foreground absolute -bottom-1.5 -left-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold shadow">
             {count > 99 ? "99+" : count}
+          </span>
+        )}
+        {stop && (
+          <span
+            className={cn(
+              "font-hud absolute flex items-center justify-center rounded-full border-2 border-white font-bold text-white tabular-nums shadow",
+              dot ? "-top-2 -left-2 size-4 text-[9px]" : "-top-1.5 -left-1.5 size-5 text-[11px]",
+            )}
+            style={{ backgroundColor: stop.color }}
+            aria-hidden
+          >
+            {stop.position}
           </span>
         )}
       </button>

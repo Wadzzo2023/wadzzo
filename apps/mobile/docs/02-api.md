@@ -156,6 +156,34 @@ page; live on save (no approval). Dates are ISO strings. Router:
 full"). Add-to-calendar is plain HTTP outside `/api/mobile/v1`:
 `GET /api/events/:id/ics` → `text/calendar`.
 
+## Trails
+
+A brand's pins in order with the path between them (`docs/trails` at the repo
+root). Public to browse; starting and claiming need sign-in. Only live trails
+inside their dates come back. Router: `packages/api/src/ar/routers/trails.ts`.
+
+| Method | Path | Auth |
+|---|---|---|
+| GET | `/trails?lat=&lng=&radiusKm=50&brandId=` → `ArTrail[]`, nearest first | optional |
+| GET | `/trails/mine` → trails I've started, most recent first | ✓ |
+| GET | `/trails/:id` → `ArTrail` (404 once ended or hidden) | optional |
+| POST | `/trails/:id/start` → `ArTrail` (idempotent) | ✓ |
+| POST | `/trails/:id/claim-reward` → `{ pinId, redeemCode }` | ✓ |
+
+`ArTrail` (`src/lib/api/types.ts`): title, mode (`WALK`/`BIKE`/`DRIVE`), order
+(`ORDERED`/`ANY`), colour, `path` (one `[lng, lat][]` section per pair of
+stops), distance and minutes, the brand, `stops[]` (position, required, clue,
+title, image, `pinId` = the location id for `/pins/:id` and collect, `done`,
+`unavailable`, `lockReason`), `progress` (`done`, `total`, `requiredDone`,
+`requiredTotal`, `next`, `complete`), my `run`, and the `reward` (name, code,
+thumbnail, remaining, limit, claimed).
+
+Stops are collected with the usual `/pins/:id/collect` (or `collect-qr`);
+collecting one starts the run. On an `ORDERED` trail a required stop before
+the previous one is refused with `412 PRECONDITION_FAILED` "Collect stop N
+first (…)". The reward can be claimed once, when every required stop (or the
+brand's minimum) is collected: 409 if already claimed, 412 if not finished.
+
 ## Uploads
 
 `POST /uploads/sign` `{ kind: "avatar"|"cover"|"entry", files: [{ fileName, fileType, fileSize, checksum }] }`

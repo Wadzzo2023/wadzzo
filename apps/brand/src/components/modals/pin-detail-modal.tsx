@@ -33,6 +33,7 @@ import { ConfirmDialog } from "@wadzzo/ui/poster/confirm-dialog";
 import { Avatar } from "@wadzzo/ui/patterns/person";
 import { StatusPill } from "@wadzzo/ui/patterns/status-pill";
 import { api } from "~/utils/api";
+import { PinTrails } from "~/features/trails/pin-trails";
 import { platformBranding } from "@wadzzo/platform/branding";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -64,7 +65,8 @@ export default function PinDetailPanel() {
     openPinDetailModal,
   } = useMapInteractionStore();
   const router = useRouter();
-  const admin = (usePathname() ?? "").startsWith("/admin");
+  const pathname = usePathname() ?? "";
+  const admin = pathname.startsWith("/admin");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [now] = useState(() => Date.now());
@@ -275,6 +277,18 @@ export default function PinDetailPanel() {
                   )}
                 </div>
               </DialogDescription>
+
+              {g && (
+                <PinTrails
+                  pin={{
+                    latitude: pin.latitude,
+                    longitude: pin.longitude,
+                    group: { id: g.id, title: g.title, image: g.image, hotspotId: g.hotspotId },
+                  }}
+                  canStart={pathname === "/pins"}
+                  onStart={close}
+                />
+              )}
 
               {/* How fans collect it — the one setting worth flipping from here. */}
               <label className="bg-card border-foreground/10 flex cursor-pointer items-start gap-3 rounded-[1.4rem] border-2 p-3.5">

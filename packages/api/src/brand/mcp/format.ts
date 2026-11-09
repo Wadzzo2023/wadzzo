@@ -60,6 +60,16 @@ function describeAction(action: ProposedAction): string {
       return `Update announcement “${action.announcement.title}”: ${JSON.stringify(action.changes)}`;
     case "delete_announcement":
       return `Delete announcement “${action.announcement.title}”`;
+    case "create_trail":
+      return [
+        `Save draft trail “${action.trail.title}” (${action.trail.mode.toLowerCase()}, ${action.trail.order === "ORDERED" ? "in order" : "any order"}), ${day(action.trail.startDate)} → ${day(action.trail.endDate)}:`,
+        list(action.trail.stops, (s) => `\`${s.id}\` ${s.title}`),
+      ].join("\n");
+    case "update_trail":
+      return `Update trail “${action.trail.title}”: ${JSON.stringify({
+        ...action.changes,
+        stops: action.changes.stops?.map((s) => s.title),
+      })}`;
   }
 }
 

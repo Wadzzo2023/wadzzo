@@ -285,6 +285,32 @@ function Body({
     case "delete_event":
     case "delete_announcement":
       return <p className="text-muted-foreground px-3 pt-2 text-xs">This can&rsquo;t be undone.</p>;
+    case "create_trail":
+      return (
+        <>
+          <p className="text-muted-foreground px-3 pt-2 text-xs">
+            Saved as a draft trail with straight lines between the stops. Check it on the map
+            (Trails), snap it to streets, then send it for review.
+          </p>
+          <Names
+            items={action.trail.stops.map((s, i) => ({ id: s.id, title: `${i + 1}. ${s.title}` }))}
+          />
+        </>
+      );
+    case "update_trail":
+      return (
+        <>
+          <Changes
+            changes={{
+              ...action.changes,
+              stops: action.changes.stops?.map((s) => s.title).join(" → "),
+            }}
+          />
+          <p className="text-muted-foreground px-3 pt-2 text-xs">
+            Changing the stops of a live trail sends it back to review; fans keep seeing it.
+          </p>
+        </>
+      );
   }
 }
 

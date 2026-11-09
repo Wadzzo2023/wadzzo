@@ -167,6 +167,8 @@ export function useCollectPin() {
 
   return api.pins.collect.useMutation({
     onSuccess: (result, variables) => {
+      // A collect can move a trail on (docs/trails): progress is read from collects.
+      void utils.trails.invalidate();
       // Patch in place instead of invalidating: a refetch would drop the whole
       // list mid-celebration, and the server already told us exactly what
       // changed. `multiPin: false` groups collect every sibling at once, but
@@ -207,6 +209,7 @@ export function useCollectPinByQr() {
 
   return api.pins.collectByQr.useMutation({
     onSuccess: (result, variables) => {
+      void utils.trails.invalidate();
       utils.pins.list.setData(undefined, (prev) =>
         prev?.map((pin) =>
           pin.id === variables.locationId

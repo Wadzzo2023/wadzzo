@@ -580,6 +580,9 @@ importers:
       '@wadzzo/errors':
         specifier: workspace:*
         version: link:../../packages/errors
+      '@wadzzo/geo':
+        specifier: workspace:*
+        version: link:../../packages/geo
       '@wadzzo/platform':
         specifier: workspace:*
         version: link:../../packages/platform

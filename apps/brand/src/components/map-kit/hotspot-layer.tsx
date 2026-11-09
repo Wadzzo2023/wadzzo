@@ -5,6 +5,8 @@ import { Layer, Source, useMap } from "react-map-gl/mapbox";
 
 import { toMapboxFeature } from "@wadzzo/geo/map-geometry";
 
+import { TRAIL_HIT_LAYER } from "./trail-layer";
+
 export type HotspotShape = {
   id: string;
   geoJson: unknown;
@@ -42,6 +44,12 @@ export function HotspotLayer({
   useEffect(() => {
     if (!map || !onSelect) return;
     const click = (e: mapboxgl.MapLayerMouseEvent) => {
+      // A trail's line is drawn over the area: a click on it opens the trail, not the hotspot.
+      if (
+        map.getLayer(TRAIL_HIT_LAYER) &&
+        map.queryRenderedFeatures(e.point, { layers: [TRAIL_HIT_LAYER] }).length
+      )
+        return;
       const id = (e.features?.[0] as { properties?: { id?: string } } | undefined)?.properties?.id;
       if (id) onSelect(id);
     };

@@ -1,6 +1,7 @@
 import { Camera, MapView, MarkerView, LocationPuck, UserTrackingMode } from "@rnmapbox/maps";
 import {
   forwardRef,
+  type ReactNode,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -82,6 +83,8 @@ export const MapCanvas = forwardRef<
     selectedMuralId?: string | null;
     onSelectMural?: (id: string) => void;
     onBoundsIdle?: (b: { n: number; s: number; e: number; w: number }) => void;
+    /** Map layers drawn under the markers (the followed trail's line). */
+    overlay?: ReactNode;
   }
 >(function MapCanvas(
   {
@@ -102,6 +105,7 @@ export const MapCanvas = forwardRef<
     selectedMuralId,
     onSelectMural,
     onBoundsIdle,
+    overlay,
   },
   ref,
 ) {
@@ -470,6 +474,7 @@ export const MapCanvas = forwardRef<
         }}
       />
       {/* Invisible: gives the native follow camera its location; we draw our own puck. */}
+      {overlay}
       {nativeCompass && <LocationPuck visible={false} puckBearingEnabled puckBearing="heading" />}
       {fix && (
         <MarkerView

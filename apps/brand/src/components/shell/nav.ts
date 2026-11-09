@@ -24,6 +24,7 @@ import {
   MapPinned,
   LayoutTemplate,
   Shapes,
+  Route,
 } from "lucide-react";
 
 /**
@@ -58,7 +59,7 @@ export const BRAND_NAV: NavGroup[] = [
         href: "/pins",
         label: "Map",
         icon: Map,
-        exclude: ["/pins/manage", "/pins/templates", "/pins/studio"],
+        exclude: ["/pins/manage", "/pins/templates", "/pins/studio", "/pins/trails"],
       },
       {
         href: "/pins/manage",
@@ -66,6 +67,7 @@ export const BRAND_NAV: NavGroup[] = [
         shortLabel: "Pins",
         icon: MapPin,
       },
+      { href: "/pins/trails", label: "Trails", icon: Route },
       { href: "/events", label: "Events", icon: CalendarDays },
     ],
   },
@@ -122,6 +124,12 @@ export const ADMIN_NAV: NavGroup = {
       label: "Mural review",
       shortLabel: "Murals",
       icon: Frame,
+    },
+    {
+      href: "/admin/trails",
+      label: "Trail review",
+      shortLabel: "Trails",
+      icon: Route,
     },
     { href: "/admin/maps", label: "All maps", shortLabel: "Maps", icon: Map },
     {
@@ -197,7 +205,7 @@ export const MOBILE_TABS: { left: NavItem[]; right: NavItem[] } = {
       href: "/pins",
       label: "Map",
       icon: Map,
-      exclude: ["/pins/manage", "/pins/templates", "/pins/studio"],
+      exclude: ["/pins/manage", "/pins/templates", "/pins/studio", "/pins/trails"],
     },
     { href: "/stores", label: "Stores", icon: Store, gated: true },
   ],

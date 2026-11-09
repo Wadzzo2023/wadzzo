@@ -264,6 +264,31 @@ export type AnnouncementDraft = {
 /** Items named in a proposal, for showing what it touches. */
 export type NamedRef = { id: string; title: string };
 
+/**
+ * A map trail (docs/trails) the agent drafts: the brand's own pins in walking order. It is
+ * saved as a draft with straight lines between stops; the brand checks it in Trail mode and
+ * sends it for review. The agent never submits trails or sets rewards.
+ */
+export type TrailDraftProposal = {
+  title: string;
+  description?: string | null;
+  mode: "WALK" | "BIKE" | "DRIVE";
+  order: "ORDERED" | "ANY";
+  /** Stops in order (pins from find_pins; not hotspot drops). */
+  stops: (NamedRef & { lat: number; lng: number })[];
+  startDate: string;
+  endDate: string;
+};
+
+export type TrailChanges = {
+  title?: string;
+  description?: string | null;
+  order?: "ORDERED" | "ANY";
+  mode?: "WALK" | "BIKE" | "DRIVE";
+  /** The full new stop list, in order. */
+  stops?: (NamedRef & { lat: number; lng: number })[];
+};
+
 export type ProposedAction =
   | { type: "create_pins"; items: PlaceItem[]; defaults: PinDefaults }
   | { type: "update_pins"; pins: NamedRef[]; changes: PinChanges }
@@ -284,7 +309,9 @@ export type ProposedAction =
       announcement: NamedRef;
       changes: Partial<AnnouncementDraft>;
     }
-  | { type: "delete_announcement"; announcement: NamedRef };
+  | { type: "delete_announcement"; announcement: NamedRef }
+  | { type: "create_trail"; trail: TrailDraftProposal }
+  | { type: "update_trail"; trail: NamedRef; changes: TrailChanges };
 
 export type ProposedActionType = ProposedAction["type"];
 
@@ -294,7 +321,7 @@ export type ActionEdits = {
   keep?: string[];
   /** create_pins: changed defaults. */
   defaults?: Partial<PinDefaults>;
-  /** create_event / create_announcement / create_hotspot: changed draft fields. */
+  /** create_event / create_announcement / create_hotspot / create_trail: changed draft fields. */
   draft?: Record<string, unknown>;
 };
 

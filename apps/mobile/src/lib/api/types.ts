@@ -287,3 +287,65 @@ export interface MarketRelated {
   moreFromCreator: MarketListing[];
   similar: MarketListing[];
 }
+
+// ── Trails (/trails…; docs/trails) ───────────────────────────────────────
+
+export type TrailMode = "WALK" | "BIKE" | "DRIVE";
+export type TrailOrder = "ORDERED" | "ANY";
+
+export type ArTrailStop = {
+  position: number;
+  required: boolean;
+  clue: string | null;
+  title: string;
+  imageUrl: string;
+  /** The pin's id (a location), as /pins/:id and collect use it; null if it was taken down. */
+  pinId: string | null;
+  lat: number;
+  lng: number;
+  autoCollect: boolean;
+  done: boolean;
+  /** Not collected and can't be any more (taken down or expired). */
+  unavailable: boolean;
+  /** Why it can't be collected yet on an ordered trail ("Collect stop 2 first"). */
+  lockReason: string | null;
+};
+
+export type ArTrail = {
+  id: string;
+  title: string;
+  description: string | null;
+  coverImage: string | null;
+  mode: TrailMode;
+  order: TrailOrder;
+  color: string | null;
+  /** One section per pair of stops: [lng, lat] points from stop n to stop n+1. */
+  path: [number, number][][];
+  distanceMetres: number;
+  estMinutes: number;
+  bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number };
+  endDate: string;
+  brand: { id: string; name: string; imageUrl: string };
+  runners: number;
+  stops: ArTrailStop[];
+  progress: {
+    done: number;
+    total: number;
+    requiredDone: number;
+    requiredTotal: number;
+    next: number | null;
+    complete: boolean;
+  };
+  run: { startedAt: string; completedAt: string | null } | null;
+  reward: {
+    name: string;
+    code: string;
+    thumbnail: string | null;
+    remaining: number;
+    limit: number;
+    claimed: boolean;
+    pinId: string | null;
+  } | null;
+};
+
+export type TrailRewardClaim = { pinId: string; redeemCode: string | null };

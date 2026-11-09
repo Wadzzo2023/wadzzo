@@ -28,6 +28,9 @@ const MAX_MARKS = 600;
 
 type View = { bounds: ViewBounds; zoom: number; now: number };
 
+/** The selected trail's stops: drop (location group) id → its number, and the trail's colour. */
+export type TrailStops = { color: string; positions: ReadonlyMap<string, number> };
+
 /** A small image for a pin (the pin's own, or its brand's logo). */
 const imageOf = (pin: PinOnMap) =>
   pin.locationGroup?.optimizedImage ??
@@ -41,15 +44,25 @@ const PinMark = memo(function PinMark({
   mode,
   now,
   onSelect,
+  stopPosition,
+  stopColor,
 }: {
   pin: PinOnMap;
   mode: "full" | "dot";
   /** The time to judge "expired" by (ms), so every mark agrees and none reads the clock itself. */
   now: number;
   onSelect: (pin: PinOnMap) => void;
+  /** Its number on the selected trail, if it is a stop. */
+  stopPosition?: number;
+  stopColor?: string;
 }) {
   const g = pin.locationGroup;
   const look = useMemo(() => pinLookOf(pin), [pin]);
+  const stop = useMemo(
+    () =>
+      stopPosition != null && stopColor ? { position: stopPosition, color: stopColor } : undefined,
+    [stopPosition, stopColor],
+  );
   return (
     <PinMarker
       lat={pin.latitude}
@@ -62,6 +75,7 @@ const PinMark = memo(function PinMark({
       mode={mode}
       state={pinStateOf(pin, now)}
       onClick={() => onSelect(pin)}
+      stop={stop}
     />
   );
 });
@@ -74,13 +88,18 @@ const PinMark = memo(function PinMark({
  *
  * Put it inside the map. Pins are indexed once per list, so moving the map only
  * re-reads what is in view.
+ *
+ * `stops` marks the selected trail's stops: each gets its number, and they are never
+ * grouped into a cluster, so the trail's line never leads to a stop that isn't drawn.
  */
 export function PinLayer({
   pins,
   onSelect,
+  stops,
 }: {
   pins: PinOnMap[];
   onSelect: (pin: PinOnMap) => void;
+  stops?: TrailStops;
 }) {
   const { current: map } = useMap();
   const [view, setView] = useState<View | null>(null);
@@ -103,14 +122,23 @@ export function PinLayer({
     return () => void m.off("moveend", read);
   }, [map]);
 
+  // A trail's stops are drawn on their own (never clustered); the rest are indexed.
+  const [stopPins, clusterable] = useMemo(() => {
+    if (!stops?.positions.size) return [[], pins] as const;
+    const own: PinOnMap[] = [];
+    const rest: PinOnMap[] = [];
+    for (const p of pins) (stops.positions.has(p.locationGroup?.id ?? "") ? own : rest).push(p);
+    return [own, rest] as const;
+  }, [pins, stops]);
+
   const index = useMemo(
     () =>
       new PointIndex(
-        pins,
+        clusterable,
         (p) => ({ lat: p.latitude, lng: p.longitude }),
         (p) => p.id,
       ),
-    [pins],
+    [clusterable],
   );
 
   const marks = useMemo(() => {
@@ -186,6 +214,17 @@ export function PinLayer({
           <PinMark key={m.key} pin={m.item} mode={mode} now={view?.now ?? 0} onSelect={onSelect} />
         ),
       )}
+      {stopPins.map((pin) => (
+        <PinMark
+          key={pin.id}
+          pin={pin}
+          mode={mode}
+          now={view?.now ?? 0}
+          onSelect={onSelect}
+          stopPosition={stops?.positions.get(pin.locationGroup?.id ?? "")}
+          stopColor={stops?.color}
+        />
+      ))}
     </>
   );
 }

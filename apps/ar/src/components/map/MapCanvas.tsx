@@ -1,4 +1,12 @@
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import MapGL, { Marker, type MapRef, type ViewStateChangeEvent } from "react-map-gl/mapbox";
 import Supercluster, { type ClusterProperties } from "supercluster";
 
@@ -160,6 +168,8 @@ interface Props {
   onSelectMural?: (id: string) => void;
   /** The visible area, on load and after every pan/zoom settles. */
   onBoundsChange?: (b: { north: number; south: number; east: number; west: number }) => void;
+  /** Drawn inside the map under the pins (the followed trail). */
+  overlay?: ReactNode;
 }
 
 export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
@@ -178,6 +188,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     selectedMuralId,
     onSelectMural,
     onBoundsChange,
+    overlay,
   },
   ref,
 ) {
@@ -389,6 +400,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         reuseMaps
         style={{ width: "100%", height: "100%" }}
       >
+        {overlay}
+
         {muralLayer.groups.map((g) => (
           <Marker
             key={`mg-${g.id}`}

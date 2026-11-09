@@ -258,6 +258,7 @@ model Creator {
     locationTags       LocationTag[]
     events        CreatorEvent[]
     announcements CreatorAnnouncement[]
+    trails        Trail[]
     mapEmbeds          MapEmbed[]
     agentConversations AgentConversation[]
     issuer             CreatorIssuer?
@@ -362,6 +363,7 @@ model User {
     Admin            Admin[]
     followings       Follow[]
     LocationConsumer LocationConsumer[]
+    trailRuns        TrailRun[]
 
     actorNotificationObjects NotificationObject[]
     BountyParticipant        BountyParticipant[]
@@ -847,6 +849,9 @@ model LocationGroup {
     hotspotId         String?
     locationGroupTags LocationGroupTag[]
     events CreatorEvent[]
+    trailStops        TrailStop[]
+    /// set when this drop is a trail's finishing reward (see model Trail)
+    rewardForTrail    Trail?             @relation("TrailReward")
     // white-label platform this row belongs to (see model Platform)
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
@@ -889,6 +894,9 @@ model LocationConsumer {
 
     /// the CLAIM transaction (AssetTransaction.id) delivering this pin's item to the collector's wallet; unique = one claim per collect
     claimTxId String? @unique
+
+    /// the trail run whose finishing reward this collect is (see model TrailRun)
+    trailRun TrailRun? @relation("TrailRunReward")
 
     createdAt DateTime @default(now())
     // white-label platform this row belongs to (see model Platform)
@@ -1714,6 +1722,8 @@ model Platform {
     redeems            Redeem[]
     pinTemplates       PinTemplate[]
     pinShapes          PinShape[]
+    trails             Trail[]
+    trailRuns          TrailRun[]
     admins             Admin[]
     coinBalances       CoinBalance[]
     assetTransactions  AssetTransaction[]
@@ -1749,4 +1759,102 @@ model AuditLog {
     @@index([platformId, createdAt])
     @@index([entityType, entityId])
     @@index([actorId])
+}
+
+/// A brand's map trail (docs/trails): an ordered set of its pins plus the path between them.
+/// Stops are pins (LocationGroup), so collecting works as it always has; progress is read from
+/// LocationConsumer. The finishing reward is a drop of its own (`rewardGroup`, its point hidden
+/// from maps) that a finished run collects, so claiming it to a wallet is the pin claim.
+model Trail {
+    id          String  @id @default(cuid())
+    creatorId   String
+    creator     Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+    title       String
+    description String?
+    coverImage  String?
+
+    mode  String  @default("WALK") // WALK | BIKE | DRIVE
+    order String  @default("ORDERED") // ORDERED | ANY
+    color String?
+
+    /// one line per section, stop -> next stop: [lng, lat][][] (see @wadzzo/geo/trail-geometry)
+    path           Json
+    distanceMetres Float @default(0)
+    estMinutes     Int   @default(0)
+    /// bounds of the stops and path, for "trails in view"
+    minLat         Float @default(0)
+    maxLat         Float @default(0)
+    minLng         Float @default(0)
+    maxLng         Float @default(0)
+
+    startDate DateTime
+    endDate   DateTime
+
+    status      String    @default("DRAFT") // DRAFT | PENDING | LIVE | ENDED
+    reviewNote  String?
+    /// first approval; a published trail stays visible to fans while an edit is in review
+    publishedAt DateTime?
+    hidden      Boolean   @default(false)
+
+    /// what the New stop form starts from: look, type, collection (see @wadzzo/schemas/trail)
+    stopDefaults Json?
+
+    rewardGroupId  String?        @unique
+    rewardGroup    LocationGroup? @relation("TrailReward", fields: [rewardGroupId], references: [id], onDelete: SetNull)
+    /// required stops to finish for the reward; null = all of them
+    rewardMinStops Int?
+
+    stops TrailStop[]
+    runs  TrailRun[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // white-label platform this row belongs to (see model Platform)
+    platformId String   @default("wadzzo")
+    platform   Platform @relation(fields: [platformId], references: [id])
+
+    @@index([platformId])
+    @@index([creatorId, status])
+    @@index([status, minLat, maxLat])
+}
+
+/// A pin on a trail, in order.
+model TrailStop {
+    id              String        @id @default(cuid())
+    trailId         String
+    trail           Trail         @relation(fields: [trailId], references: [id], onDelete: Cascade)
+    locationGroupId String
+    locationGroup   LocationGroup @relation(fields: [locationGroupId], references: [id], onDelete: Cascade)
+    /// 1-based
+    position        Int
+    required        Boolean       @default(true)
+    clue            String?
+
+    @@unique([trailId, position])
+    @@unique([trailId, locationGroupId])
+    @@index([locationGroupId])
+}
+
+/// One fan's run of a trail: only the milestones (progress comes from their collects).
+model TrailRun {
+    id          String    @id @default(cuid())
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    trailId     String
+    trail       Trail     @relation(fields: [trailId], references: [id], onDelete: Cascade)
+    startedAt   DateTime  @default(now())
+    completedAt DateTime?
+
+    /// the collect of the trail's reward drop; unique = one reward per run
+    rewardConsumerId String?           @unique
+    rewardConsumer   LocationConsumer? @relation("TrailRunReward", fields: [rewardConsumerId], references: [id], onDelete: SetNull)
+
+    // white-label platform this row belongs to (see model Platform)
+    platformId String   @default("wadzzo")
+    platform   Platform @relation(fields: [platformId], references: [id])
+
+    @@unique([userId, trailId])
+    @@index([trailId, completedAt])
+    @@index([platformId])
 }

@@ -229,6 +229,49 @@ export const ROUTES: Route[] = [
     },
   },
 
+  // ── Trails (docs/trails; added routes, nothing above changes) ─────────────
+  {
+    method: "GET",
+    path: "/trails",
+    auth: "optional",
+    // `?lat=&lng=` → nearest first, within `radiusKm` (default 50).
+    handler: ({ caller, query }) =>
+      caller.trails.nearby({
+        lat: num(query.lat),
+        lng: num(query.lng),
+        radiusKm: num(query.radiusKm),
+        brandId: query.brandId || undefined,
+      }),
+  },
+  // Before /trails/:id — both are two segments and the first match wins.
+  {
+    method: "GET",
+    path: "/trails/mine",
+    auth: "required",
+    handler: ({ caller }) => caller.trails.mine(),
+  },
+  {
+    method: "GET",
+    path: "/trails/:id",
+    auth: "optional",
+    handler: ({ caller, params }) => caller.trails.get({ id: params.id! }),
+  },
+  {
+    method: "POST",
+    path: "/trails/:id/start",
+    auth: "required",
+    handler: ({ caller, params }) => caller.trails.start({ id: params.id! }),
+  },
+  {
+    method: "POST",
+    path: "/trails/:id/claim-reward",
+    auth: "required",
+    handler: ({ caller, params, session }) => {
+      rateLimit(`collect:${session!.user.id}`, 30, 60_000);
+      return caller.trails.claimReward({ id: params.id! });
+    },
+  },
+
   // ── Marketplace (read-only: buying happens in the marketplace app) ───────
   {
     method: "GET",

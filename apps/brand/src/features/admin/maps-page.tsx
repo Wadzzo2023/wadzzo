@@ -29,6 +29,9 @@ import { useMapInteractionStore, useNearbyPinsStore, type PinOnMap } from "~/sto
 import toast from "react-hot-toast";
 
 import { api } from "~/utils/api";
+import { TRAIL_HIT_LAYER, TrailLayer } from "~/components/map-kit/trail-layer";
+import { TrailCard } from "~/features/trails/trail-card";
+import { boundsOf, lineOf, stopsOf } from "~/features/trails/trail-lines";
 
 import { BrandPicker } from "./brand-picker";
 
@@ -97,6 +100,14 @@ export default function AdminMapsPage() {
     { creatorId: brand?.id ?? "" },
     { enabled: Boolean(brand), refetchOnWindowFocus: false },
   );
+  // The brand's trails (docs/trails); one clicked shows its stops' numbers and its card.
+  const trails = api.maps.trail.list.useQuery(
+    { creatorId: brand?.id ?? "" },
+    { enabled: Boolean(brand), refetchOnWindowFocus: false },
+  );
+  const [trailId, setTrailId] = useState<string | null>(null);
+  const shownTrails = (trails.data ?? []).filter((t) => t.status !== "ENDED" && t.path.length);
+  const selectedTrail = shownTrails.find((t) => t.id === trailId) ?? null;
 
   useEffect(() => {
     setAdminPins(pins.data ?? []);
@@ -222,6 +233,12 @@ export default function AdminMapsPage() {
             m.queryRenderedFeatures(e.point, { layers: ["hotspot-fill"] }).length
           )
             return;
+          if (
+            !drawing &&
+            m?.getLayer(TRAIL_HIT_LAYER) &&
+            m.queryRenderedFeatures(e.point, { layers: [TRAIL_HIT_LAYER] }).length
+          )
+            return;
           onMapClick(e.lngLat.lat, e.lngLat.lng);
         }}
         cursor={drawing ? "crosshair" : isPinCopied || isPinCut ? "copy" : "pointer"}
@@ -229,12 +246,37 @@ export default function AdminMapsPage() {
         {hotspots.data && (
           <HotspotLayer hotspots={hotspots.data} onSelect={drawing ? undefined : setHotspotId} />
         )}
-        {!drawing && <PinLayer pins={adminPins} onSelect={selectPin} />}
+        {!drawing && shownTrails.length > 0 && (
+          <TrailLayer trails={shownTrails.map(lineOf)} selectedId={trailId} onSelect={setTrailId} />
+        )}
+        {!drawing && (
+          <PinLayer
+            pins={adminPins}
+            onSelect={selectPin}
+            stops={selectedTrail ? stopsOf(selectedTrail) : undefined}
+          />
+        )}
         {!drawing && <AgentMapLayer />}
         {drawing && (
           <DrawTool initialShape={drawShape} onDone={onDrawn} onCancel={() => setDrawing(false)} />
         )}
       </BaseMap>
+
+      {selectedTrail && !drawing && (
+        <div className="absolute inset-x-3 bottom-4 z-10 flex justify-center lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4">
+          <TrailCard
+            trail={selectedTrail}
+            onFit={() => {
+              const box = boundsOf(
+                selectedTrail.stops.map((x) => ({ lat: x.pin.latitude, lng: x.pin.longitude })),
+                selectedTrail.path,
+              );
+              if (box) map.current?.fitBounds(box, { padding: 120, maxZoom: 17, duration: 700 });
+            }}
+            onClose={() => setTrailId(null)}
+          />
+        </div>
+      )}
 
       {/* Toolbar — same order as the brand's Map: context, search, filter … actions. */}
       {!drawing && (

@@ -2,7 +2,7 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, Trophy, type LucideIcon } from "lucide-react";
+import { CalendarDays, Route, Trophy, type LucideIcon } from "lucide-react";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -16,6 +16,9 @@ import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
+import { TrailFollowBar } from "~/components/trails/TrailFollowBar";
+import { TrailMapLayer } from "~/components/trails/TrailMapLayer";
+import { lockedPinIds, useFollowTrail } from "~/lib/ar/trails";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { FALLBACK_CENTER } from "~/lib/ar/mock";
@@ -203,6 +206,28 @@ export default function MapScreen() {
     announced.current = inRange;
   }, [pins, fix, feedback]);
 
+  // ── Trails (docs/trails) ───────────────────────────────────────────────
+  // The trail being followed draws on the map with a progress bar; trails nearby tell
+  // auto-collect which stops are still locked (an earlier stop first), so it skips them.
+  const followId = useFollowTrail((s) => s.trailId);
+  const stopFollowing = useFollowTrail((s) => s.stop);
+  const followed = api.trails.get.useQuery(
+    { id: followId ?? "" },
+    { enabled: Boolean(followId), retry: false },
+  );
+  useEffect(() => {
+    // An ended or withdrawn trail can't be followed any more.
+    if (followed.isError) stopFollowing();
+  }, [followed.isError, stopFollowing]);
+  const nearbyTrails = api.trails.nearby.useQuery(
+    { lat: fix?.lat, lng: fix?.lng, radiusKm: 25 },
+    { enabled: Boolean(fix) && signedIn, staleTime: 60_000, placeholderData: keepPreviousData },
+  );
+  const locked = useMemo(
+    () => lockedPinIds([...(nearbyTrails.data ?? []), ...(followed.data ? [followed.data] : [])]),
+    [nearbyTrails.data, followed.data],
+  );
+
   // ── Auto-collect ───────────────────────────────────────────────────────
   // Claims one eligible pin at a time so a dense cluster plays out as a
   // sequence. `pending` guards against a second timer being armed while one
@@ -214,6 +239,7 @@ export default function MapScreen() {
     const next = pins.find(
       (p) =>
         p.autoCollect &&
+        !locked.has(p.id) &&
         pinStatus(p) === "collectible" &&
         distanceMeters(fix, p) <= AR_CAPTURE_RADIUS,
     );
@@ -242,7 +268,7 @@ export default function MapScreen() {
       clearTimeout(id);
       pending.current = false;
     };
-  }, [settings.autoCollect, signedIn, fix, pins, collectPin, feedback]);
+  }, [settings.autoCollect, signedIn, fix, pins, collectPin, feedback, locked]);
 
   useEffect(() => {
     if (!toast) return;
@@ -389,6 +415,7 @@ export default function MapScreen() {
           selectedMuralId={selectedMuralId}
           onSelectMural={selectMural}
           onBoundsChange={setBounds}
+          overlay={followed.data ? <TrailMapLayer trail={followed.data} /> : null}
         />
 
         {/* No fix, no game: the map behind is centred on nothing meaningful,
@@ -428,6 +455,11 @@ export default function MapScreen() {
                 onClick={() => void router.push("/events")}
               />
               <HudShortcut
+                icon={Route}
+                label="Trails"
+                onClick={() => void router.push("/trails")}
+              />
+              <HudShortcut
                 icon={Trophy}
                 label="Bounty"
                 dot={bountyAlerts > 0}
@@ -446,6 +478,26 @@ export default function MapScreen() {
           mapMode={mapMode}
           onToggleMapMode={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
         />
+
+        {/* ── Followed trail ───────────────────────────────────────── */}
+        {followed.data && fix && (
+          <div
+            className="absolute inset-x-4 z-30"
+            style={{ bottom: "calc(var(--ar-tabbar-space) + 132px)" }}
+          >
+            <TrailFollowBar
+              trail={followed.data}
+              fix={fix}
+              onOpen={() => void router.push(`/trails/${followed.data.id}`)}
+              onCapture={(pinId) => {
+                if (!requireAuth("collect")) return;
+                void router.push(`/ar?target=${pinId}`);
+              }}
+              onDirections={(pinId) => void router.push(`/directions/${pinId}?mode=walk`)}
+              onStop={stopFollowing}
+            />
+          </div>
+        )}
 
         {/* ── Nearby rail ──────────────────────────────────────────── */}
         <div className="absolute inset-x-0 bottom-[var(--ar-tabbar-space)] z-30">

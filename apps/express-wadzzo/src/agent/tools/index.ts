@@ -4,6 +4,7 @@ import { brandTools } from "./brand";
 import type { AgentTool } from "./define";
 import { proposeTools } from "./propose";
 import { searchTools } from "./search";
+import { trailTools } from "./trails";
 import { uiTools } from "./ui";
 
 export const AGENT_TOOLS: AgentTool[] = [
@@ -12,4 +13,5 @@ export const AGENT_TOOLS: AgentTool[] = [
   ...analyticsTools,
   ...uiTools,
   ...proposeTools,
+  ...trailTools,
 ];

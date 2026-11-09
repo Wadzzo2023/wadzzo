@@ -36,6 +36,8 @@ const OPTIONAL = [
   "OPENAI_IMAGE_MODEL",
   "SUPPORT_EMAIL",
   "BRAND_APP_ORIGINS",
+  /** Server-only Mapbox token (trail routing); falls back to NEXT_PUBLIC_MAPBOX_API. */
+  "MAPBOX_TOKEN",
   "NEXT_PUBLIC_MAPBOX_API",
   "NEXT_PUBLIC_WADZZO_AR_URL",
   "NEXT_PUBLIC_PLATFORM_CREATOR_TERM",

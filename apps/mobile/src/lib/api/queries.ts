@@ -20,6 +20,7 @@ import type {
   ArCommentTarget,
   ArEventDetail,
   ArPin,
+  ArTrail,
   AttentionItem,
   Balance,
   BountyCard,
@@ -36,6 +37,7 @@ import type {
   PinPage,
   Profile,
   ThreadMessage,
+  TrailRewardClaim,
 } from "./types";
 
 /**
@@ -75,6 +77,9 @@ export const qk = {
   marketListings: (kind: string, search: string) => ["marketListings", kind, search] as const,
   marketItem: (id: number) => ["marketItem", id] as const,
   marketRelated: (id: number) => ["marketRelated", id] as const,
+  trails: (uid: string | null, lat: number | null, lng: number | null) => ["trails", uid, lat, lng] as const,
+  myTrails: (uid: string | null) => ["trails", "mine", uid] as const,
+  trail: (id: string, uid: string | null) => ["trail", id, uid] as const,
 };
 
 // ── Pins ─────────────────────────────────────────────────────────────────
@@ -166,7 +171,7 @@ export function useCollectByQr() {
 
 function invalidateAfterClaim(qc: ReturnType<typeof useQueryClient>) {
   return Promise.all(
-    ["pins", "pin", "collection", "brandPins", "profile", "brands", "brand"].map((k) =>
+    ["pins", "pin", "collection", "brandPins", "profile", "brands", "brand", "trails", "trail"].map((k) =>
       qc.invalidateQueries({ queryKey: [k] }),
     ),
   );
@@ -462,5 +467,64 @@ export function useMarketRelated(id: number, enabled: boolean) {
     queryFn: () => api<MarketRelated>(`/market/items/${id}/related`),
     enabled: Number.isInteger(id) && enabled,
     staleTime: 60_000,
+  });
+}
+
+// ── Trails (docs/trails) ─────────────────────────────────────────────────
+
+/**
+ * Live trails near a point (50 km). The point is rounded to ~1 km so a moving
+ * GPS fix doesn't refetch the list at every step.
+ */
+export function useTrailsQuery(near: { lat: number; lng: number } | null) {
+  const uid = useUid();
+  const lat = near ? Math.round(near.lat * 100) / 100 : null;
+  const lng = near ? Math.round(near.lng * 100) / 100 : null;
+  return useQuery({
+    queryKey: qk.trails(uid, lat, lng),
+    queryFn: () => api<ArTrail[]>("/trails", { query: { lat: lat ?? undefined, lng: lng ?? undefined } }),
+    enabled: lat != null,
+    staleTime: 30_000,
+  });
+}
+
+/** Trails the signed-in fan has started, most recent first. */
+export function useMyTrailsQuery() {
+  const uid = useUid();
+  return useQuery({
+    queryKey: qk.myTrails(uid),
+    queryFn: () => api<ArTrail[]>("/trails/mine"),
+    enabled: Boolean(uid),
+  });
+}
+
+export function useTrailQuery(id: string | null) {
+  const uid = useUid();
+  return useQuery({
+    queryKey: qk.trail(id ?? "", uid),
+    queryFn: () => api<ArTrail>(`/trails/${encodeURIComponent(id!)}`),
+    enabled: Boolean(id),
+    retry: (n, e) => (e as { status?: number }).status !== 404 && n < 2,
+  });
+}
+
+export function useStartTrail() {
+  const qc = useQueryClient();
+  const uid = useUid();
+  return useMutation({
+    mutationFn: (id: string) => api<ArTrail>(`/trails/${encodeURIComponent(id)}/start`, { method: "POST" }),
+    onSuccess: (t) => {
+      qc.setQueryData(qk.trail(t.id, uid), t);
+      return qc.invalidateQueries({ queryKey: ["trails"] });
+    },
+  });
+}
+
+export function useClaimTrailReward() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<TrailRewardClaim>(`/trails/${encodeURIComponent(id)}/claim-reward`, { method: "POST" }),
+    onSuccess: () => invalidateAfterClaim(qc),
   });
 }
