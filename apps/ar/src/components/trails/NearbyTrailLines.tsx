@@ -4,10 +4,19 @@ import { Route } from "lucide-react";
 import { useMemo } from "react";
 import { Layer, Marker, Source } from "react-map-gl/mapbox";
 
-import { trailColor, type FanTrail } from "~/lib/ar/trails";
+import { trailColor } from "~/lib/ar/trails";
+
+/** What a line needs: `trails.nearby` and `trails.inArea` both give this. */
+export type TrailLine = {
+  id: string;
+  title: string;
+  color: string | null;
+  path: [number, number][][];
+  stops: { lat: number; lng: number }[];
+};
 
 /**
- * Discover (docs/trails): trails near you as faint lines on the map, with a name chip at each
+ * Discover (docs/trails): trails near you and in view as faint lines on the map, with a name chip at each
  * one's first stop that opens the trail. Shown while you aren't following one, so the map
  * says "there's a trail here" without competing with the pins.
  */
@@ -15,7 +24,7 @@ export function NearbyTrailLines({
   trails,
   onOpen,
 }: {
-  trails: FanTrail[];
+  trails: TrailLine[];
   onOpen: (id: string) => void;
 }) {
   const data = useMemo<GeoJSON.FeatureCollection<GeoJSON.LineString>>(
