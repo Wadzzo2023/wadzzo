@@ -30,6 +30,7 @@ import {
   type PinLookValue,
 } from "~/features/pins/look/pin-look-section";
 import type { PinOnMap } from "~/store/map-stores";
+import { api } from "~/utils/api";
 
 import type { DraftStop, TrailDraft } from "./builder-store";
 
@@ -79,6 +80,13 @@ export function NewStopDialog({
   const [autoCollect, setAutoCollect] = useState(d.autoCollect ?? false);
   const [look, setLook] = useState<PinLookValue>(() => toLookValue(d.look ?? null));
   const [open, setOpen] = useState<"look" | "collect" | null>(null);
+  // A brand's own shape by its name, not its id.
+  const shapes = api.maps.shape.list.useQuery(
+    draft.creatorId ? { creatorId: draft.creatorId } : undefined,
+    { staleTime: 60_000 },
+  );
+  const shapeName = (id: string | null | undefined) =>
+    shapes.data?.find((sh) => sh.id === id)?.name ?? id ?? "circle";
 
   if (!at) return null;
   const now = new Date();
@@ -157,7 +165,7 @@ export function NewStopDialog({
 
           <Section
             title="Pin look"
-            summary={`${look.shape} · ${look.fill === "BRAND" ? "brand image" : look.fill === "PIN" ? "pin image" : "colour only"}`}
+            summary={`${shapeName(look.shape)} · ${look.fill === "BRAND" ? "brand image" : look.fill === "PIN" ? "pin image" : "colour only"}`}
             open={open === "look"}
             onToggle={() => setOpen(open === "look" ? null : "look")}
           >
