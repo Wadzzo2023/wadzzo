@@ -2,6 +2,7 @@
 // working copy (builder-store).
 
 import { trailBounds, type TrailLine } from "@wadzzo/geo/trail-geometry";
+import { lookToColumns } from "@wadzzo/schemas/pin-look";
 import { TRAIL_COLORS, type TrailStatus } from "@wadzzo/schemas/trail";
 import type { Tone } from "@wadzzo/ui/patterns/status-pill";
 
@@ -149,4 +150,45 @@ export function whyNotStop(p: PinOnMap, now = Date.now()): string | null {
   if (p.hidden) return "This pin was deleted";
   if (new Date(g.endDate).getTime() < now) return "This pin has ended";
   return null;
+}
+
+/**
+ * New stops not saved yet, as pins for the map (their real pins are made when the trail is
+ * saved): drawn like the others, numbered, in the look chosen for them. A brand's own shape
+ * shows as a circle until then (its outline comes with the saved pin).
+ */
+export function unsavedStopPins(d: TrailDraft, brandImage: string | null): PinOnMap[] {
+  const now = new Date();
+  return d.stops.flatMap((s) => {
+    const n = s.newPin;
+    if (!n) return [];
+    const look = lookToColumns(n.look, false);
+    return [
+      {
+        id: s.pinId,
+        latitude: s.lat,
+        longitude: s.lng,
+        autoCollect: n.autoCollect,
+        hidden: false,
+        _count: { consumers: 0 },
+        locationGroup: {
+          id: s.pinId,
+          title: s.title,
+          image: n.image ?? null,
+          optimizedImage: null,
+          type: "OTHER",
+          startDate: d.startDate > now ? d.startDate : now,
+          endDate: d.endDate,
+          limit: n.pinCollectionLimit,
+          remaining: n.pinCollectionLimit,
+          approved: true,
+          hotspotId: null,
+          ...look,
+          markerShape: look.markerShape ?? "circle",
+          creator: { profileUrl: brandImage },
+          pinShape: null,
+        },
+      },
+    ];
+  });
 }

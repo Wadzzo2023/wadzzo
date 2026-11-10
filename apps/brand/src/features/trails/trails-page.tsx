@@ -216,7 +216,7 @@ function TrailItem({ trail: t }: { trail: TrailView }) {
         open={confirm === "delete"}
         onOpenChange={(o) => !o && setConfirm(null)}
         title="Delete this trail?"
-        description={`“${t.title}” will be removed. Its stops stay on the map as ordinary pins.`}
+        description={`“${t.title}” will be removed, with the stops made in its builder. Pins that were yours already stay on the map.`}
         busy={remove.isPending}
         onConfirm={() => remove.mutate({ id: t.id })}
       />

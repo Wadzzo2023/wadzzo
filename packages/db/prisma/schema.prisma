@@ -852,11 +852,16 @@ model LocationGroup {
     trailStops        TrailStop[]
     /// set when this drop is a trail's finishing reward (see model Trail)
     rewardForTrail    Trail?             @relation("TrailReward")
+    /// set when this pin was made as a stop in a trail's builder: it belongs to that trail
+    /// (taking the stop off, or deleting the trail, deletes it; hides it once collected)
+    trailOwnerId      String?
+    trailOwner        Trail?             @relation("TrailOwnedPins", fields: [trailOwnerId], references: [id], onDelete: SetNull)
     // white-label platform this row belongs to (see model Platform)
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
     @@index([platformId])
     @@index([creatorId, endDate])
+    @@index([trailOwnerId])
 }
 
 model Location {
@@ -1806,6 +1811,8 @@ model Trail {
 
     stops TrailStop[]
     runs  TrailRun[]
+    /// pins made as stops in this trail's builder (see LocationGroup.trailOwnerId)
+    ownedPins LocationGroup[] @relation("TrailOwnedPins")
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
