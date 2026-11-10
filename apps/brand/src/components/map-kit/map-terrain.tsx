@@ -24,9 +24,15 @@ export function MapTerrain({ force = false }: { force?: boolean }) {
     if (!map) return;
     const loaded = () => {
       setStyleIn(true);
-      setBeforeId(map.getStyle()?.layers?.find((l) => l.type === "symbol")?.id);
+      setBeforeId(
+        map.getStyle()?.layers?.find((l) => l.type === "symbol" && !l.id.startsWith("map-terrain"))
+          ?.id,
+      );
     };
-    const loading = () => setStyleIn(false);
+    const loading = () => {
+      setStyleIn(false);
+      setBeforeId(undefined);
+    };
     if (map.isStyleLoaded()) loaded();
     map.on("style.load", loaded);
     map.on("styledataloading", loading);

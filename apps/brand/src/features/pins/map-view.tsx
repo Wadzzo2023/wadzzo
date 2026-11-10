@@ -65,6 +65,21 @@ import { TemplatePicker, type TemplateRow } from "./templates/template-picker";
  * pin there, draw an area to start a hotspot. Copied/cut pins paste where you
  * click. Pins in view are listed on the right (desktop).
  */
+/**
+ * Frames a trail's box, keeping the stops clear of the trail card: beside it on a wide screen,
+ * above it on a phone.
+ */
+function fitBox(m: MapRef | null, box: ReturnType<typeof boundsOf> | null | undefined) {
+  if (!m || !box) return;
+  m.fitBounds(box, {
+    padding: window.matchMedia("(min-width: 1024px)").matches
+      ? { top: 100, bottom: 80, left: 440, right: 400 }
+      : { top: 120, bottom: 360, left: 40, right: 40 },
+    maxZoom: 17,
+    duration: 700,
+  });
+}
+
 export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   const router = useRouter();
   const map = useRef<MapRef>(null);
@@ -155,11 +170,19 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   // /pins?trail=new opens Trail mode on a new trail; /pins?trail=<id> on that trail.
   // In an effect (after the leave-the-map cleanup below has run on a dev remount), not in render.
   const linkedTrail = search?.get("trail") ?? null;
+  const linkedBox = useRef<ReturnType<typeof boundsOf>>(null);
   useEffect(() => {
     if (!linkedTrail || (linkedTrail !== "new" && !trails.data)) return;
     const t = trails.data?.find((x) => x.id === linkedTrail);
     if (linkedTrail === "new") useTrailBuilder.getState().open(blankDraft());
-    else if (t) useTrailBuilder.getState().open(toDraft(t));
+    else if (t) {
+      useTrailBuilder.getState().open(toDraft(t));
+      // Frame it: now if the map is ready, else when it loads (see onLoad).
+      const d = useTrailBuilder.getState().draft;
+      const box = d && boundsOf(d.stops, draftPath(d));
+      if (map.current) fitBox(map.current, box);
+      else linkedBox.current = box;
+    }
     router.replace("/pins", { scroll: false });
   }, [linkedTrail, trails.data, router]);
   // Leaving the map leaves Trail mode.
@@ -260,14 +283,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   const fitTo = (box: ReturnType<typeof boundsOf>) => {
     if (!box) return;
     moved.current = true;
-    map.current?.fitBounds(box, {
-      // Keep the stops clear of the trail card: beside it on a wide screen, above it on a phone.
-      padding: window.matchMedia("(min-width: 1024px)").matches
-        ? { top: 100, bottom: 80, left: 440, right: 400 }
-        : { top: 120, bottom: 360, left: 40, right: 40 },
-      maxZoom: 17,
-      duration: 700,
-    });
+    fitBox(map.current, box);
   };
   const fitTrail = (t: TrailView) =>
     fitTo(
@@ -458,7 +474,11 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
             bearing: v.bearing,
           });
         }}
-        onLoad={refreshInView}
+        onLoad={() => {
+          refreshInView();
+          fitBox(map.current, linkedBox.current);
+          linkedBox.current = null;
+        }}
         cursor={
           drawing || pathDrawing
             ? "crosshair"

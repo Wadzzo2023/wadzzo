@@ -24,7 +24,8 @@ export default function TrailsScreen() {
   const { fix } = useGeolocation();
 
   const near = api.trails.nearby.useQuery(
-    { lat: fix?.lat, lng: fix?.lng, radiusKm: 50 },
+    // Every trail, nearest first (the server's widest radius: half the world round).
+    { lat: fix?.lat, lng: fix?.lng, radiusKm: 20_000 },
     { enabled: tab === "near", staleTime: 60_000 },
   );
   const mine = api.trails.mine.useQuery(undefined, { enabled: tab === "mine" && signedIn });
@@ -69,11 +70,11 @@ export default function TrailsScreen() {
             {!active.isLoading && !active.isError && items.length === 0 && (
               <div className="py-14 text-center">
                 <p className="font-hud text-ar-dim text-[13px] font-bold tracking-[0.14em] uppercase">
-                  {tab === "near" ? "No trails nearby" : "No trails yet"}
+                  No trails yet
                 </p>
                 <p className="text-ar-faint mx-auto mt-1.5 max-w-[17rem] text-[12.5px] leading-relaxed">
                   {tab === "near"
-                    ? "When brands near you publish a trail, it shows up here."
+                    ? "When brands publish a trail, it shows up here, nearest first."
                     : "Start a trail and it stays here until you finish."}
                 </p>
               </div>
