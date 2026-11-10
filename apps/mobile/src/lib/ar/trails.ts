@@ -28,7 +28,7 @@ export const trailColor = (t: { color: string | null }) => t.color ?? "#16a34a";
 
 export const distanceLabel = (m: number) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
 
-export const MODE_VERB: Record<string, string> = { WALK: "walk", BIKE: "ride", DRIVE: "drive" };
+export const MODE_VERB: Record<string, string> = { WALK: "walk", HIKE: "hike", BIKE: "ride", DRIVE: "drive" };
 
 /** The stop to go to next: the first not done that isn't locked (or the first not done). */
 export const nextStop = (t: ArTrail) =>

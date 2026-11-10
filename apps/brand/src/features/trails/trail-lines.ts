@@ -9,7 +9,7 @@ import type { TrailStops } from "~/components/map-kit/pin-layer";
 import type { PinOnMap } from "~/store/map-stores";
 import type { RouterOutputs } from "~/utils/api";
 
-import { draftPath, sectionKey, type TrailDraft } from "./builder-store";
+import { previewPath, sectionKey, type DrawingSection, type TrailDraft } from "./builder-store";
 
 export type TrailView = RouterOutputs["maps"]["trail"]["list"][number];
 
@@ -49,13 +49,14 @@ export function stopsOf(
   };
 }
 
-export function draftLine(d: TrailDraft): TrailLine {
+/** The trail being built, with the section being drawn shown as it stands. */
+export function draftLine(d: TrailDraft, drawing: DrawingSection | null = null): TrailLine {
   return {
     id: DRAFT_LINE_ID,
     color: d.color,
     draft: true,
     ordered: d.order === "ORDERED",
-    sections: draftPath(d),
+    sections: previewPath(d, drawing),
   };
 }
 

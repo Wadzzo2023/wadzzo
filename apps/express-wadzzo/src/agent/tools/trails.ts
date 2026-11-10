@@ -177,7 +177,7 @@ export const trailTools = [
       pinIds: z.array(z.string()).max(MAX_TRAIL_STOPS).optional(),
       ref: z.string().optional().describe("A find_pins ref instead of pinIds"),
       sortByDistance: z.boolean().default(false),
-      mode: z.enum(["WALK", "BIKE", "DRIVE"]).default("WALK"),
+      mode: z.enum(["WALK", "HIKE", "BIKE", "DRIVE"]).default("WALK"),
       order: z.enum(["ORDERED", "ANY"]).default("ORDERED"),
       startDate: z.string().optional().describe("YYYY-MM-DD, default today"),
       endDate: z.string().optional().describe("YYYY-MM-DD, default 30 days after the start"),
@@ -228,7 +228,7 @@ export const trailTools = [
       title: z.string().min(3).max(80).optional(),
       description: z.string().max(600).optional(),
       order: z.enum(["ORDERED", "ANY"]).optional(),
-      mode: z.enum(["WALK", "BIKE", "DRIVE"]).optional(),
+      mode: z.enum(["WALK", "HIKE", "BIKE", "DRIVE"]).optional(),
       pinIds: z
         .array(z.string())
         .max(MAX_TRAIL_STOPS)

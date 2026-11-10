@@ -56,8 +56,9 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
 import { formatDuration, formatNavDistance } from "~/lib/ar/navigation";
 import { RARITY_META } from "@wadzzo/ar-core/ar/rarity";
-import { MapModeButton } from "~/components/map/MapModeButton";
-import { mapStyleFor, setMapMode, useMapMode, useResolvedTheme } from "~/lib/ar/theme";
+import { MapLayersButton, MapViewProbe } from "~/components/map/MapLayersSheet";
+import { MapTerrain } from "~/components/map/MapTerrain";
+import { mapStyleFor, useMapBase, useMapMode, useResolvedTheme } from "~/lib/ar/theme";
 import type { TravelMode } from "@wadzzo/ar-core/ar/types";
 import {
   firstText,
@@ -184,7 +185,7 @@ export default function DirectionsScreen() {
   // and adding a layer then throws "Style is not done loading" (mapbox validates the whole
   // style, imports included). So the route layers mount only once `style.load` has fired
   // for the current style URL.
-  const styleUrl = mapStyleFor(mapMode, theme);
+  const styleUrl = mapStyleFor(mapMode, theme, useMapBase());
   const styleUrlRef = useRef(styleUrl);
   styleUrlRef.current = styleUrl;
   const [loadedStyle, setLoadedStyle] = useState<string | null>(null);
@@ -624,6 +625,8 @@ export default function DirectionsScreen() {
             style={{ width: "100%", height: "100%" }}
           >
             {/* Alternatives, walked, connectors, route — mounted together, in this order, once the style is ready. */}
+            {styleReady && <MapTerrain />}
+            <MapViewProbe />
             {styleReady && (
               <>
                 <Source
@@ -1056,7 +1059,7 @@ export default function DirectionsScreen() {
               onClick={onCompass}
               northUp={navigating && orientation === "north"}
             />
-            <MapModeButton mode={mapMode} onToggle={() => setMapMode(is3d ? "2d" : "3d")} />
+            <MapLayersButton />
             {!navigating && (
               <MapIconButton
                 icon={LocateFixed}

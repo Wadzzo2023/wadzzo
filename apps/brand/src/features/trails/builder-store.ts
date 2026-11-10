@@ -4,6 +4,8 @@
 import { create } from "zustand";
 
 import { straightSections, type TrailSection } from "@wadzzo/geo/trail-geometry";
+import { cutTrack, fitPoints } from "@wadzzo/geo/trail-track";
+import { MAX_SECTION_POINTS } from "@wadzzo/schemas/trail";
 import type { StopDefaults, TrailMode, TrailOrder, TrailStatus } from "@wadzzo/schemas/trail";
 
 export type DraftStop = {
@@ -34,11 +36,24 @@ export type TrailDraft = {
   startDate: Date;
   endDate: Date;
   stops: DraftStop[];
-  /** Street paths found by "Snap to streets", per pair of stops ("a>b"); others are straight. */
+  /**
+   * Shaped sections per pair of stops ("a>b"): street paths, hand-drawn lines or pieces of an
+   * imported GPX track. A pair with none is a straight line.
+   */
   routes: Record<string, TrailSection>;
+  /** How each shaped section was made (for its label); unknown for trails saved earlier. */
+  kinds?: Record<string, SectionKind>;
+  /** An imported GPX track, shown as a guide while building; not saved (its pieces are). */
+  track?: [number, number][] | null;
   stopDefaults: StopDefaults;
   reward: DraftReward | null;
 };
+
+/** How a shaped section was made. */
+export type SectionKind = "streets" | "drawn" | "track";
+
+/** A section being drawn by hand: the pair it joins and the bends clicked so far. */
+export type DrawingSection = { key: string; index: number; points: [number, number][] };
 
 const MAX_HISTORY = 60;
 
@@ -61,8 +76,34 @@ export function unroutedPairs(d: Pick<TrailDraft, "stops" | "routes">) {
   return pairs;
 }
 
+/** What a section is: straight, or how it was shaped ("path" when saved before kinds existed). */
+export function sectionKindOf(d: Pick<TrailDraft, "routes" | "kinds">, key: string) {
+  if (!d.routes[key]) return "straight" as const;
+  return d.kinds?.[key] ?? ("path" as const);
+}
+
+/** The path with the section being drawn shown as it stands (stop, the bends, next stop). */
+export function previewPath(d: TrailDraft, drawing: DrawingSection | null): TrailSection[] {
+  const path = draftPath(d);
+  if (!drawing) return path;
+  const a = d.stops[drawing.index];
+  const b = d.stops[drawing.index + 1];
+  if (!a || !b) return path;
+  return path.map((s, i) =>
+    i === drawing.index ? [[a.lng, a.lat], ...drawing.points, [b.lng, b.lat]] : s,
+  );
+}
+
 type BuilderState = {
   draft: TrailDraft | null;
+  /** Drawing one section by hand: map clicks add bends to it. */
+  drawing: DrawingSection | null;
+  startDrawing: (index: number) => void;
+  addBend: (p: [number, number]) => void;
+  undoBend: () => void;
+  /** Keep what was drawn (one undoable change). */
+  finishDrawing: () => void;
+  cancelDrawing: () => void;
   /** Saved as it is now (no unsaved changes). */
   clean: boolean;
   past: TrailDraft[];
@@ -77,13 +118,48 @@ type BuilderState = {
   redo: () => void;
 };
 
-export const useTrailBuilder = create<BuilderState>((set) => ({
+export const useTrailBuilder = create<BuilderState>((set, get) => ({
   draft: null,
+  drawing: null,
+  startDrawing: (index) => {
+    const d = get().draft;
+    const a = d?.stops[index];
+    const b = d?.stops[index + 1];
+    if (!d || !a || !b) return;
+    const key = sectionKey(a, b);
+    // Start from the bends already there, so a drawn line can be extended or trimmed.
+    const current = d.kinds?.[key] === "drawn" ? (d.routes[key]?.slice(1, -1) ?? []) : [];
+    set({ drawing: { key, index, points: current } });
+  },
+  addBend: (p) =>
+    set((s) =>
+      s.drawing && s.drawing.points.length < MAX_SECTION_POINTS - 2
+        ? { drawing: { ...s.drawing, points: [...s.drawing.points, p] } }
+        : s,
+    ),
+  undoBend: () =>
+    set((s) =>
+      s.drawing ? { drawing: { ...s.drawing, points: s.drawing.points.slice(0, -1) } } : s,
+    ),
+  finishDrawing: () => {
+    const { drawing, draft, change } = get();
+    if (!drawing || !draft) return set({ drawing: null });
+    const a = draft.stops[drawing.index];
+    const b = draft.stops[drawing.index + 1];
+    set({ drawing: null });
+    if (!a || !b) return;
+    change((d) =>
+      drawing.points.length
+        ? setSection(d, drawing.key, [[a.lng, a.lat], ...drawing.points, [b.lng, b.lat]], "drawn")
+        : setSection(d, drawing.key, null),
+    );
+  },
+  cancelDrawing: () => set({ drawing: null }),
   clean: true,
   past: [],
   future: [],
-  open: (d) => set({ draft: d, clean: true, past: [], future: [] }),
-  close: () => set({ draft: null, clean: true, past: [], future: [] }),
+  open: (d) => set({ draft: d, drawing: null, clean: true, past: [], future: [] }),
+  close: () => set({ draft: null, drawing: null, clean: true, past: [], future: [] }),
   change: (fn) =>
     set((s) => {
       if (!s.draft) return s;
@@ -118,20 +194,21 @@ export const useTrailBuilder = create<BuilderState>((set) => ({
 
 // ── Changes ─────────────────────────────────────────────────────────────
 
-export const addStop = (d: TrailDraft, stop: DraftStop): TrailDraft =>
-  d.stops.some((s) => s.pinId === stop.pinId) ? d : { ...d, stops: [...d.stops, stop] };
+/** With a GPX track loaded, sections between stops near it follow it as the stops change. */
+const alongTrack = (d: TrailDraft): TrailDraft => (d.track ? followTrack(d).draft : d);
 
-export const removeStop = (d: TrailDraft, pinId: string): TrailDraft => ({
-  ...d,
-  stops: d.stops.filter((s) => s.pinId !== pinId),
-});
+export const addStop = (d: TrailDraft, stop: DraftStop): TrailDraft =>
+  d.stops.some((s) => s.pinId === stop.pinId) ? d : alongTrack({ ...d, stops: [...d.stops, stop] });
+
+export const removeStop = (d: TrailDraft, pinId: string): TrailDraft =>
+  alongTrack({ ...d, stops: d.stops.filter((s) => s.pinId !== pinId) });
 
 export const moveStop = (d: TrailDraft, from: number, to: number): TrailDraft => {
   if (to < 0 || to >= d.stops.length || from === to) return d;
   const stops = [...d.stops];
   const [s] = stops.splice(from, 1);
   stops.splice(to, 0, s!);
-  return { ...d, stops };
+  return alongTrack({ ...d, stops });
 };
 
 export const updateStop = (
@@ -143,12 +220,64 @@ export const updateStop = (
   stops: d.stops.map((s) => (s.pinId === pinId ? { ...s, ...patch } : s)),
 });
 
+/** Shape one section (null: back to a straight line). */
+export function setSection(
+  d: TrailDraft,
+  key: string,
+  section: TrailSection | null,
+  kind?: SectionKind,
+): TrailDraft {
+  const routes = { ...d.routes };
+  const kinds = { ...d.kinds };
+  if (section) {
+    routes[key] = section;
+    if (kind) kinds[key] = kind;
+  } else {
+    delete routes[key];
+    delete kinds[key];
+  }
+  return { ...d, routes, kinds };
+}
+
+/**
+ * The imported track laid along the stops: every section whose two stops are near the track
+ * follows it. As stops change only straight sections (and earlier track pieces) are redone, so
+ * streets and drawn sections are kept; `all` (a fresh import) lays the track over every
+ * section. Returns the draft and how many sections now follow the track out of those tried.
+ */
+export function followTrack(
+  d: TrailDraft,
+  all = false,
+): { draft: TrailDraft; followed: number; tried: number } {
+  if (!d.track || d.stops.length < 2) return { draft: d, followed: 0, tried: 0 };
+  const pieces = cutTrack(d.track, d.stops);
+  let next = d;
+  let followed = 0;
+  let tried = 0;
+  pieces.forEach((piece, i) => {
+    const key = sectionKey(d.stops[i]!, d.stops[i + 1]!);
+    const kind = sectionKindOf(d, key);
+    if (!all && kind !== "straight" && kind !== "track") return;
+    tried++;
+    if (!piece) return;
+    followed++;
+    next = setSection(next, key, fitPoints(piece, MAX_SECTION_POINTS), "track");
+  });
+  return { draft: next, followed, tried };
+}
+
 /** Reverse the walking direction; routed sections are kept, walked the other way. */
 export const reverseStops = (d: TrailDraft): TrailDraft => {
   const routes = { ...d.routes };
+  const kinds = { ...d.kinds };
   for (const [key, section] of Object.entries(d.routes)) {
     const [a, b] = key.split(">");
-    routes[`${b}>${a}`] ??= [...section].reverse();
+    const back = `${b}>${a}`;
+    if (!routes[back]) {
+      routes[back] = [...section].reverse();
+      const kind = d.kinds?.[key];
+      if (kind) kinds[back] = kind;
+    }
   }
-  return { ...d, stops: [...d.stops].reverse(), routes };
+  return alongTrack({ ...d, stops: [...d.stops].reverse(), routes, kinds });
 };

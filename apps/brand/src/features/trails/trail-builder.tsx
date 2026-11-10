@@ -4,10 +4,12 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  FileUp,
   Gift,
   Loader2,
   Maximize2,
   Minus,
+  PenLine,
   Redo2,
   Route,
   Save,
@@ -18,10 +20,11 @@ import {
   Waypoints,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import { estimateMinutes, pathMetres } from "@wadzzo/geo/trail-geometry";
+import { estimateMinutes, pathMetres, sectionMetres } from "@wadzzo/geo/trail-geometry";
+import { fitPoints, parseGpx } from "@wadzzo/geo/trail-track";
 import {
   MAX_TRAIL_STOPS,
   submitProblems,
@@ -54,13 +57,17 @@ import { api } from "~/utils/api";
 
 import {
   draftPath,
+  followTrack,
   moveStop,
   removeStop,
   reverseStops,
   sectionKey,
+  sectionKindOf,
+  setSection,
   unroutedPairs,
   updateStop,
   useTrailBuilder,
+  type DraftStop,
   type TrailDraft,
 } from "./builder-store";
 import { distanceLabel, STATUS_TONE, type TrailView } from "./trail-lines";
@@ -123,6 +130,10 @@ export function TrailBuilder({
   });
   const assist = api.maps.trail.assist.useMutation({ onError: (e) => toast.error(e.message) });
   const [routing, setRouting] = useState(false);
+  const [routingKey, setRoutingKey] = useState<string | null>(null);
+  const gpxInput = useRef<HTMLInputElement>(null);
+  const drawing = useTrailBuilder((s) => s.drawing);
+  const { startDrawing } = useTrailBuilder.getState();
 
   if (!draft) return null;
   const set = (patch: Partial<TrailDraft>) => change((d) => ({ ...d, ...patch }));
@@ -181,13 +192,57 @@ export function TrailBuilder({
       else missed++;
     }
     setRouting(false);
-    if (Object.keys(found).length) change((d) => ({ ...d, routes: { ...d.routes, ...found } }));
+    if (Object.keys(found).length)
+      change((d) =>
+        Object.entries(found).reduce((acc, [k, sec]) => setSection(acc, k, sec, "streets"), d),
+      );
     if (missed)
       toast(
-        `${missed} section${missed === 1 ? "" : "s"} had no street route, so they stay straight`,
+        `${missed} section${missed === 1 ? "" : "s"} had no street or path route, so they stay straight. Draw them instead.`,
       );
   };
-  const straighten = () => change((d) => ({ ...d, routes: {} }));
+  const straighten = () => change((d) => ({ ...d, routes: {}, kinds: {} }));
+
+  /** One section along streets and paths. */
+  const snapOne = async (a: DraftStop, b: DraftStop) => {
+    const key = sectionKey(a, b);
+    setRoutingKey(key);
+    const section = await route
+      .mutateAsync({
+        mode: draft.mode,
+        points: [
+          [a.lng, a.lat],
+          [b.lng, b.lat],
+        ],
+      })
+      .catch(() => null);
+    setRoutingKey(null);
+    if (section) change((d) => setSection(d, key, section, "streets"));
+    else toast("No street or path route here. Draw this section instead.");
+  };
+
+  /** A GPX file: its track becomes the guide, and sections between stops near it follow it. */
+  const importGpx = async (file: File) => {
+    const points = parseGpx(await file.text().catch(() => ""));
+    if (points.length < 2) {
+      toast.error("No track or route found in that file. Export it as GPX and try again.");
+      return;
+    }
+    const track = fitPoints(points, 5_000);
+    const r = followTrack({ ...draft, track }, true);
+    change(() => r.draft);
+    onFit();
+    if (draft.stops.length < 2)
+      toast.success("Track loaded. Add stops along it: the line between them follows the track.");
+    else if (r.followed === r.tried)
+      toast.success(
+        `The trail now follows your track (${r.followed} section${r.followed === 1 ? "" : "s"}).`,
+      );
+    else
+      toast(
+        `${r.followed} of ${r.tried} sections follow your track. Sections with a stop more than 150 m from it are kept as they were: move the stop closer or draw them.`,
+      );
+  };
   const routed = Object.keys(draft.routes).length > 0;
 
   const setDefaults = (patch: Partial<StopDefaults>) =>
@@ -257,7 +312,8 @@ export function TrailBuilder({
 
         {/* ── Stops ── */}
         <TabsContent value="stops" className="min-h-0 flex-1 overflow-y-auto p-3">
-          <div className="mb-3 flex flex-wrap items-center gap-1">
+          {/* History and direction */}
+          <div className="mb-2 flex items-center gap-1">
             <Button
               size="icon-sm"
               variant="ghost"
@@ -279,27 +335,77 @@ export function TrailBuilder({
             <Button
               size="sm"
               variant="ghost"
+              className="ml-auto"
               disabled={draft.stops.length < 2}
               onClick={() => change(reverseStops)}
             >
               <ArrowUpDown /> Reverse
             </Button>
-            {routed ? (
-              <Button size="sm" variant="ghost" onClick={straighten}>
-                <Minus /> Straight lines
-              </Button>
-            ) : null}
-            {/* Only while some section is still straight: once all follow streets, there's nothing to snap. */}
-            {(routing || unroutedPairs(draft).length > 0) && (
+          </div>
+
+          {/* The whole path at once (each section can also be set under its stop) */}
+          <div className="bg-muted/50 mb-3 rounded-xl p-2">
+            <p className="text-muted-foreground mb-1.5 px-1 text-[11px] font-semibold tracking-wider uppercase">
+              Path
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
               <Button
                 size="sm"
                 variant="outline"
-                className="ml-auto"
-                disabled={draft.stops.length < 2 || routing}
+                className="px-2"
+                title="Every straight section along streets and paths"
+                disabled={draft.stops.length < 2 || routing || unroutedPairs(draft).length === 0}
                 onClick={() => void snap()}
               >
-                {routing ? <Loader2 className="animate-spin" /> : <Waypoints />} Snap to streets
+                {routing ? <Loader2 className="animate-spin" /> : <Waypoints />} Streets
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="px-2"
+                title="Use a track recorded on a hike or downloaded from a park's site (.gpx)"
+                onClick={() => gpxInput.current?.click()}
+              >
+                <FileUp /> GPX
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="px-2"
+                title="Every section as a straight line"
+                disabled={!routed}
+                onClick={straighten}
+              >
+                <Minus /> Straight
+              </Button>
+            </div>
+            <input
+              ref={gpxInput}
+              type="file"
+              accept=".gpx,application/gpx+xml"
+              className="hidden"
+              aria-label="GPX file"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) void importGpx(f);
+              }}
+            />
+            {draft.track && (
+              <div className="text-muted-foreground mt-2 flex items-center gap-1.5 px-1 text-xs">
+                <span
+                  aria-hidden
+                  className="inline-block h-0 w-4 border-t-2 border-dashed border-gray-500"
+                />
+                <span className="flex-1">GPX track shown · stops near it follow it</span>
+                <button
+                  type="button"
+                  className="text-foreground font-medium underline-offset-2 hover:underline"
+                  onClick={() => change((d) => ({ ...d, track: null }))}
+                >
+                  Hide
+                </button>
+              </div>
             )}
           </div>
 
@@ -374,6 +480,20 @@ export function TrailBuilder({
                       change((d) => updateStop(d, s.pinId, { clue: e.target.value || null }))
                     }
                   />
+                  {draft.stops[i + 1] && (
+                    <SectionRow
+                      index={i}
+                      kind={sectionKindOf(draft, sectionKey(s, draft.stops[i + 1]!))}
+                      metres={sectionMetres(path[i]!)}
+                      busy={routingKey === sectionKey(s, draft.stops[i + 1]!)}
+                      drawing={drawing?.index === i}
+                      onStreets={() => void snapOne(s, draft.stops[i + 1]!)}
+                      onDraw={() => startDrawing(i)}
+                      onStraight={() =>
+                        change((d) => setSection(d, sectionKey(s, draft.stops[i + 1]!), null))
+                      }
+                    />
+                  )}
                 </li>
               ))}
             </ol>
@@ -431,10 +551,17 @@ export function TrailBuilder({
               onChange={(mode) => set({ mode })}
               options={[
                 { id: "WALK", label: "Walk" },
+                { id: "HIKE", label: "Hike" },
                 { id: "BIKE", label: "Bike" },
                 { id: "DRIVE", label: "Drive" },
               ]}
             />
+            {draft.mode === "HIKE" && (
+              <p className="text-muted-foreground text-xs">
+                Off-road: fans see the terrain, a compass to the next stop and how far they are from
+                your line, instead of street directions. Import a GPX track or draw the path.
+              </p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label>Stops</Label>
@@ -620,6 +747,100 @@ export function TrailBuilder({
         }}
       />
     </aside>
+  );
+}
+
+const KIND_LABEL = {
+  straight: "straight",
+  streets: "streets & paths",
+  drawn: "drawn",
+  track: "GPX track",
+  path: "follows a path",
+} as const;
+
+/**
+ * Under a stop: the section to the next one (length and how it's shaped) and a small switch
+ * to reshape it: along streets and paths, drawn by hand, or straight.
+ */
+function SectionRow({
+  index,
+  kind,
+  metres,
+  busy,
+  drawing,
+  onStreets,
+  onDraw,
+  onStraight,
+}: {
+  index: number;
+  kind: keyof typeof KIND_LABEL;
+  metres: number;
+  busy: boolean;
+  drawing: boolean;
+  onStreets: () => void;
+  onDraw: () => void;
+  onStraight: () => void;
+}) {
+  const to = `to stop ${index + 2}`;
+  const options = [
+    { id: "streets", label: "Streets", icon: Waypoints, on: kind === "streets", run: onStreets },
+    { id: "drawn", label: "Draw", icon: PenLine, on: kind === "drawn" || drawing, run: onDraw },
+    {
+      id: "straight",
+      label: "Straight",
+      icon: Minus,
+      on: kind === "straight" && !drawing,
+      run: onStraight,
+    },
+  ] as const;
+  return (
+    <div className="mt-2 flex items-center gap-2 pl-8 text-xs">
+      {/* The switch shows Streets / Draw / Straight; a GPX piece or a saved path gets a tag. */}
+      <span className="text-muted-foreground flex min-w-0 flex-1 items-center gap-1.5">
+        <span className="shrink-0">↳ {distanceLabel(metres)}</span>
+        {!drawing && (kind === "track" || kind === "path") && (
+          <span className="bg-muted text-foreground truncate rounded-full px-1.5 py-px text-[10px] font-medium">
+            {kind === "track" ? "GPX" : "path"}
+          </span>
+        )}
+      </span>
+      <div
+        role="group"
+        aria-label={`Path ${to}: ${drawing ? "drawing" : KIND_LABEL[kind]}`}
+        className="border-foreground/10 inline-flex shrink-0 rounded-full border p-0.5"
+      >
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            aria-pressed={o.on}
+            aria-label={`${o.label} ${to}`}
+            title={
+              o.id === "streets"
+                ? "Follow streets and paths"
+                : o.id === "drawn"
+                  ? "Draw it: click the map along the path"
+                  : "Straight line"
+            }
+            disabled={drawing || (o.id === "streets" && busy) || (o.id === "straight" && o.on)}
+            onClick={o.run}
+            className={cn(
+              "flex h-6 items-center gap-1 rounded-full px-2 text-[11px] font-medium transition-colors disabled:opacity-60",
+              o.on
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {o.id === "streets" && busy ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <o.icon className="size-3" />
+            )}
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

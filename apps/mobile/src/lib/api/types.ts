@@ -290,7 +290,7 @@ export interface MarketRelated {
 
 // ── Trails (/trails…; docs/trails) ───────────────────────────────────────
 
-export type TrailMode = "WALK" | "BIKE" | "DRIVE";
+export type TrailMode = "WALK" | "HIKE" | "BIKE" | "DRIVE";
 export type TrailOrder = "ORDERED" | "ANY";
 
 export type ArTrailStop = {

@@ -10,6 +10,8 @@ import { env } from "../../env";
 
 const PROFILE: Record<TrailMode, string> = {
   WALK: "walking",
+  // Mapbox walking takes footpaths and hiking trails where OpenStreetMap has them.
+  HIKE: "walking",
   BIKE: "cycling",
   DRIVE: "driving",
 };

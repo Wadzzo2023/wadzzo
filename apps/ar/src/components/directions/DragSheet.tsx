@@ -59,6 +59,8 @@ export function DragSheet({
     t: number;
     lastY: number;
     lastT: number;
+    /** Started on the grab handle: a tap there cycles the sheet. */
+    handle: boolean;
   } | null>(null);
   const scroller = useRef<HTMLDivElement | null>(null);
   const visible = drag ?? snaps[index] ?? 0;
@@ -68,14 +70,16 @@ export function DragSheet({
     // At full height the content scrolls; only the header drags the sheet.
     // Below full, the content doesn't scroll, so dragging it moves the sheet.
     if (fromContent && atFull) return;
-    // Let buttons/links inside take their tap.
-    if ((e.target as HTMLElement).closest("button, a, input") && fromContent) return;
+    // Let buttons/links inside take their tap (only the grab handle drags from a button).
+    const control = (e.target as HTMLElement).closest("button, a, input");
+    if (control && !control.hasAttribute("data-sheet-handle")) return;
     start.current = {
       y: e.clientY,
       h: visible,
       t: performance.now(),
       lastY: e.clientY,
       lastT: performance.now(),
+      handle: Boolean(control),
     };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -94,6 +98,8 @@ export function DragSheet({
     const moved = Math.abs(e.clientY - s.y);
     if (moved <= 4) {
       setDrag(null);
+      // The pointer capture keeps the handle's own click from landing, so a tap is handled here.
+      if (s.handle) setIndex(index === snaps.length - 1 ? 0 : index + 1);
       return;
     }
     const v = (s.y - e.clientY) / Math.max(1, performance.now() - s.t); // px/ms, + = up
@@ -135,8 +141,14 @@ export function DragSheet({
       >
         <button
           type="button"
+          data-sheet-handle
           aria-label={atFull ? "Collapse" : "Expand"}
-          onClick={() => setIndex(index === snaps.length - 1 ? 0 : index + 1)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIndex(index === snaps.length - 1 ? 0 : index + 1);
+            }
+          }}
           className="bg-ar-line-bright/70 mx-auto mb-2.5 block h-1.5 w-11 rounded-full"
         />
         {header}

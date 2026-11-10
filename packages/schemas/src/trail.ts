@@ -8,7 +8,7 @@ import { pinTemplateDataSchema, readTemplateData, type PinTemplateData } from ".
  * applies the same rules.
  */
 
-export const TRAIL_MODES = ["WALK", "BIKE", "DRIVE"] as const;
+export const TRAIL_MODES = ["WALK", "HIKE", "BIKE", "DRIVE"] as const;
 export type TrailMode = (typeof TRAIL_MODES)[number];
 
 export const TRAIL_ORDERS = ["ORDERED", "ANY"] as const;
@@ -27,6 +27,7 @@ export const MAX_TRAILS_PER_BRAND = 200;
 
 export const TRAIL_MODE_LABEL: Record<TrailMode, string> = {
   WALK: "Walk",
+  HIKE: "Hike",
   BIKE: "Bike",
   DRIVE: "Drive",
 };

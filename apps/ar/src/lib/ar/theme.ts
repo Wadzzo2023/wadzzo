@@ -71,9 +71,110 @@ export const MAP_STYLE_2D: Record<ResolvedTheme, string> = {
   light: "mapbox://styles/mapbox/light-v11",
 };
 
-/** The basemap style for a mode + live theme. */
-export function mapStyleFor(mode: MapMode, theme: ResolvedTheme): string {
-  return mode === "3d" ? MAP_STYLE[theme] : MAP_STYLE_2D[theme];
+/**
+ * ── Map type and terrain (the Layers panel) ────────────────────────────────
+ *
+ * "default" is the app's own look (above: Mapbox Light / Dark flat, Wadzzo 3D tilted). The
+ * others are Mapbox's own styles; Streets and Satellite have a 3D (Mapbox Standard) version,
+ * Outdoors, Light and Dark are tilted flat in 3D. Terrain adds hill shading and contour lines
+ * over any of them. Both are stored per device and shared by every map, like 2D/3D.
+ */
+export const MAP_BASES = ["default", "streets", "outdoors", "satellite", "light", "dark"] as const;
+export type MapBase = (typeof MAP_BASES)[number];
+
+export const MAP_BASE_LABEL: Record<MapBase, string> = {
+  default: "Default",
+  streets: "Streets",
+  outdoors: "Outdoors",
+  satellite: "Satellite",
+  light: "Light",
+  dark: "Dark",
+};
+
+const MAPBOX_2D: Record<Exclude<MapBase, "default">, string> = {
+  streets: "mapbox://styles/mapbox/streets-v12",
+  outdoors: "mapbox://styles/mapbox/outdoors-v12",
+  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+  light: "mapbox://styles/mapbox/light-v11",
+  dark: "mapbox://styles/mapbox/dark-v11",
+};
+
+const MAPBOX_3D: Partial<Record<MapBase, string>> = {
+  streets: "mapbox://styles/mapbox/standard",
+  satellite: "mapbox://styles/mapbox/standard-satellite",
+};
+
+/** The basemap style for a mode + live theme + map type. */
+export function mapStyleFor(
+  mode: MapMode,
+  theme: ResolvedTheme,
+  base: MapBase = "default",
+): string {
+  if (base === "default") return mode === "3d" ? MAP_STYLE[theme] : MAP_STYLE_2D[theme];
+  return (mode === "3d" ? MAPBOX_3D[base] : undefined) ?? MAPBOX_2D[base];
+}
+
+/** Whether that style is Mapbox Standard (it has slots: extra layers go in "bottom"). */
+export function isStandardStyle(mode: MapMode, base: MapBase): boolean {
+  return mode === "3d" && (base === "default" || Boolean(MAPBOX_3D[base]));
+}
+
+/** A small stored choice, kept per device and shared live between every map. */
+function storedChoice<T extends string>(key: string, fallback: T, valid: readonly T[]) {
+  const listeners = new Set<() => void>();
+  let memory: T | null = null;
+  const read = (): T => {
+    if (memory) return memory;
+    try {
+      const v = window.localStorage.getItem(key) as T | null;
+      return v && valid.includes(v) ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const subscribe = (listener: () => void) => {
+    listeners.add(listener);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === key) {
+        memory = null;
+        listener();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+      listeners.delete(listener);
+      window.removeEventListener("storage", onStorage);
+    };
+  };
+  const write = (v: T) => {
+    memory = v;
+    try {
+      window.localStorage.setItem(key, v);
+    } catch {
+      // Storage blocked: the choice lasts until the page is closed.
+    }
+    listeners.forEach((l) => l());
+  };
+  const use = () => useSyncExternalStore(subscribe, read, () => fallback);
+  return { use, write };
+}
+
+const mapBase = storedChoice<MapBase>("wadzzo-ar-map-base", "default", MAP_BASES);
+const mapTerrain = storedChoice<"on" | "off">("wadzzo-ar-map-terrain", "off", ["on", "off"]);
+
+/** The map type every map uses. */
+export const useMapBase = mapBase.use;
+export const setMapBase = mapBase.write;
+/** Hill shading and contours over the map. */
+export const useMapTerrain = () => mapTerrain.use() === "on";
+export const setMapTerrain = (on: boolean) => mapTerrain.write(on ? "on" : "off");
+
+/** The style URL for the live mode, theme and map type. */
+export function useMapStyle(): string {
+  const mode = useMapMode();
+  const theme = useResolvedTheme();
+  const base = useMapBase();
+  return mapStyleFor(mode, theme, base);
 }
 
 const mapModeListeners = new Set<() => void>();

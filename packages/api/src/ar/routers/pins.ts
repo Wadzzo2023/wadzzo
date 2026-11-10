@@ -14,7 +14,12 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../..";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 
-import { assertTrailOrder, recordTrailCollect } from "../server/trails";
+import {
+  assertTrailOrder,
+  hiddenByTrail,
+  recordTrailCollect,
+  trailApprovalGate,
+} from "../server/trails";
 
 /**
  * ── Pins ───────────────────────────────────────────────────────────────────
@@ -219,6 +224,8 @@ const liveGroupWhere = (ctx: PlatformContext) =>
     endDate: { gte: new Date() },
     remaining: { gt: 0 },
     hidden: false,
+    // Not a stop of a trail that's still a draft or in review (docs/trails).
+    ...trailApprovalGate(),
   }) satisfies Prisma.LocationGroupWhereInput;
 
 /**
@@ -351,7 +358,12 @@ async function assertClaimable(db: Db, userId: string, locationId: string, ctx: 
   // Same gate `list` applies, so a pin that was never claimable can't be
   // claimed by calling this directly.
   const now = new Date();
-  if (group.hidden || group.approved !== true || group.endDate < now) {
+  if (
+    group.hidden ||
+    group.approved !== true ||
+    group.endDate < now ||
+    (await hiddenByTrail(db, group.id))
+  ) {
     throw new AppError(ErrorCodes.ITEM_NOT_AVAILABLE, { message: "This drop isn't available" });
   }
   if (group.startDate > now) {
@@ -722,7 +734,15 @@ export const pinsRouter = createTRPCRouter({
             include: groupWithLocationsInclude,
           })
         : null;
-      if (!group || group.approved !== true || !isInPlatformScope(ctx, group.platformId)) {
+      if (
+        !group ||
+        group.approved !== true ||
+        !isInPlatformScope(ctx, group.platformId) ||
+        // Held back while its trail isn't approved, except from fans who already collected it
+        // (their collection still opens it).
+        (!group.locations.some((l) => l.consumers.some((c) => c.userId === userId)) &&
+          (await hiddenByTrail(ctx.db, group.id)))
+      ) {
         throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Drop not found" });
       }
 

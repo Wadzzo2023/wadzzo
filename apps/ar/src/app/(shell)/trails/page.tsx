@@ -3,8 +3,7 @@
 import { useState } from "react";
 
 import { AppShell, ScreenHeader } from "~/components/shell/AppShell";
-import { TrailCard } from "~/components/trails/TrailCard";
-import { Skeleton } from "~/components/ui/Skeleton";
+import { TrailCard, TrailCardSkeleton } from "~/components/trails/TrailCard";
 import { SegmentedTabs } from "~/components/ui/SegmentedTabs";
 import { useAuth } from "~/lib/ar/store";
 import { useGeolocation } from "~/lib/ar/useGeolocation";
@@ -52,11 +51,9 @@ export default function TrailsScreen() {
           />
           <div className="mt-3.5 space-y-3 px-5">
             {active.isLoading &&
-              Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-[88px] w-full" />
-              ))}
+              Array.from({ length: 3 }).map((_, i) => <TrailCardSkeleton key={i} />)}
             {items.map((t) => (
-              <TrailCard key={t.id} trail={t} />
+              <TrailCard key={t.id} trail={t} fix={fix} />
             ))}
             {active.isError && (
               <div className="rounded-ar border-ar-danger/40 bg-ar-danger/10 flex items-center justify-between gap-3 border px-3.5 py-2.5">

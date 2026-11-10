@@ -16,7 +16,10 @@ import { PinSheet } from "~/components/map/PinSheet";
 import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
-import { TrailFollowBar } from "~/components/trails/TrailFollowBar";
+import { muralQueryBox } from "~/lib/murals/area";
+import { NearbyTrailLines } from "~/components/trails/NearbyTrailLines";
+import { TrailCompleteSheet } from "~/components/trails/TrailCompleteSheet";
+import { TrailNextCard, TrailProgressPill } from "~/components/trails/TrailFollowBar";
 import { TrailMapLayer } from "~/components/trails/TrailMapLayer";
 import { lockedPinIds, useFollowTrail } from "~/lib/ar/trails";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
@@ -24,7 +27,6 @@ import { LocationGate } from "~/components/shell/LocationGate";
 import { FALLBACK_CENTER } from "~/lib/ar/mock";
 import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { useFeedback } from "~/lib/ar/feedback";
-import { setMapMode, useMapMode } from "~/lib/ar/theme";
 import { useDeviceHeading } from "~/lib/ar/useDeviceHeading";
 import { useAuth, useMuralLayer, useSettings } from "~/lib/ar/store";
 import type { ArPin, TravelMode } from "@wadzzo/ar-core/ar/types";
@@ -101,7 +103,6 @@ export default function MapScreen() {
   const signedIn = useAuth((s) => Boolean(s.user));
 
   const mapRef = useRef<MapCanvasHandle>(null);
-  const mapMode = useMapMode();
   const [filter, setFilter] = useState<PinFilterId>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
@@ -216,13 +217,20 @@ export default function MapScreen() {
     { enabled: Boolean(followId), retry: false },
   );
   useEffect(() => {
-    // An ended or withdrawn trail can't be followed any more.
-    if (followed.isError) stopFollowing();
-  }, [followed.isError, stopFollowing]);
+    // An ended or withdrawn trail can't be followed any more (only "not found": a network
+    // blip mustn't drop someone off their trail).
+    if (followed.error?.data?.code === "NOT_FOUND") stopFollowing();
+  }, [followed.error, stopFollowing]);
+  // Also drawn as faint lines while you aren't following one (Discover), so signed out too.
   const nearbyTrails = api.trails.nearby.useQuery(
     { lat: fix?.lat, lng: fix?.lng, radiusKm: 25 },
-    { enabled: Boolean(fix) && signedIn, staleTime: 60_000, placeholderData: keepPreviousData },
+    { enabled: Boolean(fix), staleTime: 60_000, placeholderData: keepPreviousData },
   );
+  // Finish: "Trail complete!" once per trail, when the followed trail is done.
+  const celebrated = useFollowTrail((s) => s.celebrated);
+  const markCelebrated = useFollowTrail((s) => s.markCelebrated);
+  const finished = followed.data?.progress.complete ? followed.data : null;
+  const celebrate = Boolean(finished && !celebrated.includes(finished.id));
   const locked = useMemo(
     () => lockedPinIds([...(nearbyTrails.data ?? []), ...(followed.data ? [followed.data] : [])]),
     [nearbyTrails.data, followed.data],
@@ -302,13 +310,8 @@ export default function MapScreen() {
     east: number;
     west: number;
   } | null>(null);
-  // Rounded so a nudge of the map doesn't refetch; ~1 km grid.
-  const muralArea = bounds && {
-    north: Math.ceil(bounds.north * 100) / 100,
-    south: Math.floor(bounds.south * 100) / 100,
-    east: Math.ceil(bounds.east * 100) / 100,
-    west: Math.floor(bounds.west * 100) / 100,
-  };
+  // Rounded (~1 km) and kept in range when the zoomed-out globe runs past the date line.
+  const muralArea = bounds && muralQueryBox(bounds);
   const muralsQuery = api.murals.inArea.useQuery(
     {
       ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }),
@@ -415,7 +418,17 @@ export default function MapScreen() {
           selectedMuralId={selectedMuralId}
           onSelectMural={selectMural}
           onBoundsChange={setBounds}
-          overlay={followed.data ? <TrailMapLayer trail={followed.data} /> : null}
+          terrain={followed.data?.mode === "HIKE"}
+          overlay={
+            followed.data ? (
+              <TrailMapLayer trail={followed.data} />
+            ) : nearbyTrails.data?.length ? (
+              <NearbyTrailLines
+                trails={nearbyTrails.data}
+                onOpen={(id) => void router.push(`/trails/${id}`)}
+              />
+            ) : null
+          }
         />
 
         {/* No fix, no game: the map behind is centred on nothing meaningful,
@@ -475,28 +488,39 @@ export default function MapScreen() {
           onToggleCompass={handleToggleCompass}
           following={following}
           refetching={refetching}
-          mapMode={mapMode}
-          onToggleMapMode={() => setMapMode(mapMode === "3d" ? "2d" : "3d")}
         />
 
-        {/* ── Followed trail ───────────────────────────────────────── */}
-        {followed.data && fix && (
+        {/* ── Followed trail: one compact group above the nearby rail ── */}
+        {followed.data && (
           <div
-            className="absolute inset-x-4 z-30"
+            className="absolute inset-x-4 z-30 flex flex-col gap-2"
             style={{ bottom: "calc(var(--ar-tabbar-space) + 132px)" }}
           >
-            <TrailFollowBar
+            <TrailProgressPill
               trail={followed.data}
-              fix={fix}
               onOpen={() => void router.push(`/trails/${followed.data.id}`)}
-              onCapture={(pinId) => {
-                if (!requireAuth("collect")) return;
-                void router.push(`/ar?target=${pinId}`);
-              }}
-              onDirections={(pinId) => void router.push(`/directions/${pinId}?mode=walk`)}
               onStop={stopFollowing}
             />
+            {fix && !followed.data.progress.complete && (
+              <TrailNextCard
+                trail={followed.data}
+                fix={fix}
+                heading={compass.source === "sensor" ? compass.heading : null}
+                onCapture={(pinId) => {
+                  if (!requireAuth("collect")) return;
+                  void router.push(`/ar?target=${pinId}`);
+                }}
+                onDirections={(pinId) => void router.push(`/directions/${pinId}?mode=walk`)}
+              />
+            )}
           </div>
+        )}
+        {finished && (
+          <TrailCompleteSheet
+            trail={finished}
+            open={celebrate}
+            onClose={() => markCelebrated(finished.id)}
+          />
         )}
 
         {/* ── Nearby rail ──────────────────────────────────────────── */}

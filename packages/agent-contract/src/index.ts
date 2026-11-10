@@ -272,7 +272,7 @@ export type NamedRef = { id: string; title: string };
 export type TrailDraftProposal = {
   title: string;
   description?: string | null;
-  mode: "WALK" | "BIKE" | "DRIVE";
+  mode: "WALK" | "HIKE" | "BIKE" | "DRIVE";
   order: "ORDERED" | "ANY";
   /** Stops in order (pins from find_pins; not hotspot drops). */
   stops: (NamedRef & { lat: number; lng: number })[];
@@ -284,7 +284,7 @@ export type TrailChanges = {
   title?: string;
   description?: string | null;
   order?: "ORDERED" | "ANY";
-  mode?: "WALK" | "BIKE" | "DRIVE";
+  mode?: "WALK" | "HIKE" | "BIKE" | "DRIVE";
   /** The full new stop list, in order. */
   stops?: (NamedRef & { lat: number; lng: number })[];
 };

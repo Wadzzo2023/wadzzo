@@ -97,7 +97,7 @@ sequenceDiagram
 
 - **The order lock lives in `assertClaimable`**, which `pins.collect` and `pins.collectByQr` both run. Put once there, AR, auto-collect, QR, web and mobile all obey it.
 - **Completion is set in the same transaction as the collect**, so a quick double-collect can't skip it.
-- **The reward claim** collects the trail's hidden reward drop with the same code as a pin collect (`writeClaimRow`). `rewardConsumerId` is unique (claimed once), stock goes down the same way pin limits do, and the item reaches the wallet through the existing *Claim to wallet*.
+- **The reward claim** collects the trail's hidden reward drop with the same code as a pin collect (`writeClaimRow`). `rewardConsumerId` is unique (claimed once), stock goes down the same way pin limits do, and the item reaches the wallet through the existing _Claim to wallet_.
 - **Pins collected before the trail existed count too** (the fan starts ahead).
 - Collecting any stop of a trail the fan hasn't started **starts it automatically** ("You started Coffee Trail").
 
@@ -118,4 +118,6 @@ It lives in `packages/schemas/src/trail.ts` and is pure, so the server, AR web a
 - The AR app's **nearby strip** labels trail pins: "Stop 3 of 4 · Coffee Trail".
 - A locked stop always says **why**.
 - **Directions** opens the existing `/directions/<pin>` screen for the next stop.
+- **Off-road (Hike trails):** no street directions. The map adds terrain (hill shading, contours with heights), and the next-stop card shows a **compass arrow and distance** to the next stop (it turns with the phone once the compass is on, else it's north-up) and "You're on the trail" or "You're 80 m off the trail" (more than 40 m, or the GPS accuracy if worse, from the line).
+- **A straight leg** on any other trail (the brand didn't shape it) also gets the arrow, with "as the crow flies, so pick a safe way".
 - Progress shows wherever the trail appears: the list, the trail page and the map card.

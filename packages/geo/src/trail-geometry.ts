@@ -59,9 +59,15 @@ export function pathMetres(sections: TrailSection[]): number {
   return sections.reduce((sum, s) => sum + sectionMetres(s), 0);
 }
 
-/** About how long a path takes, in minutes, at walking (~4.8 km/h), cycling or driving pace. */
-export function estimateMinutes(metres: number, mode: "WALK" | "BIKE" | "DRIVE" = "WALK"): number {
-  const metresPerMinute = mode === "WALK" ? 80 : mode === "BIKE" ? 250 : 500;
+/**
+ * About how long a path takes, in minutes: walking (~4.8 km/h), hiking (~3 km/h, for slopes
+ * and rough ground), cycling or driving pace.
+ */
+export function estimateMinutes(
+  metres: number,
+  mode: "WALK" | "HIKE" | "BIKE" | "DRIVE" = "WALK",
+): number {
+  const metresPerMinute = { WALK: 80, HIKE: 50, BIKE: 250, DRIVE: 500 }[mode] ?? 80;
   return Math.max(1, Math.round(metres / metresPerMinute));
 }
 

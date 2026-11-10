@@ -1,9 +1,9 @@
 import type { IControl } from "mapbox-gl";
 
-export type StackButtonId = "locate" | "mode" | "zoomIn" | "zoomOut";
+export type StackButtonId = "locate" | "zoomIn" | "zoomOut";
 
 /** Top to bottom, whichever are present. */
-const ORDER: readonly StackButtonId[] = ["locate", "mode", "zoomIn", "zoomOut"];
+const ORDER: readonly StackButtonId[] = ["locate", "zoomIn", "zoomOut"];
 
 export type StackButton = {
   /** Tooltip and accessible name. */
@@ -21,7 +21,7 @@ export type StackButton = {
 };
 
 /**
- * All of a map's corner buttons (locate, 2D/3D, zoom) as ONE Mapbox control: a single rounded box
+ * A map's corner buttons (locate, zoom) as ONE Mapbox control: a single rounded box
  * with a hairline between buttons, like Mapbox's own zoom control. Separate controls would be
  * separate boxes, each with its own margin, corners and shadow, and could never line up as one.
  *

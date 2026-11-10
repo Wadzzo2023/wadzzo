@@ -2,11 +2,44 @@
 // stored, it is read from the fan's collects, so it can't drift; a run only records when the
 // fan started, finished and claimed the reward.
 
-import type { Db } from "@wadzzo/db";
+import type { Db, Prisma } from "@wadzzo/db";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
 import { orderLockReason, trailProgress, type ProgressStop } from "@wadzzo/schemas/trail";
 
 import { fanVisible } from "../../brand/server/trails";
+
+/**
+ * Pins on a trail that isn't approved yet stay off the fan apps (docs/trails): a pin that is a
+ * stop of a draft or in-review trail is hidden, unless it is also a stop of a trail fans can
+ * already see (so a draft never pulls a pin out of a live trail). Stops of ended trails are
+ * ordinary pins again. Spread into a LocationGroup filter; it sets only `OR`.
+ */
+export function trailApprovalGate(now = new Date()) {
+  return {
+    OR: [
+      {
+        trailStops: {
+          none: {
+            trail: {
+              hidden: false,
+              OR: [{ status: "DRAFT" }, { status: "PENDING", publishedAt: null }],
+            },
+          },
+        },
+      },
+      { trailStops: { some: { trail: fanVisible(now) } } },
+    ],
+  } satisfies Prisma.LocationGroupWhereInput;
+}
+
+/** Whether a pin is held back because its only trails aren't approved yet. */
+export async function hiddenByTrail(db: Db, groupId: string) {
+  const shown = await db.locationGroup.findFirst({
+    where: { id: groupId, ...trailApprovalGate() },
+    select: { id: true },
+  });
+  return !shown;
+}
 
 type TrailForProgress = {
   id: string;

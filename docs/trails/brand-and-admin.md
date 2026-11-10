@@ -33,7 +33,7 @@ No new map. The brand map (`apps/brand/src/features/pins/map-view.tsx`) and the 
 | **〰 Trail** button                                             | An empty trail. The first stop added becomes ①.                                                         |
 | Trail card → **Edit**                                           | The trail opens with its stops and path.                                                                |
 | Pin details window → **Add to trail…** / **Start a trail here** | Adds this pin to a chosen trail, or starts a new one with it as ①. The window also shows "On 2 trails". |
-| `/pins/trails` list → **New** / **Edit**                            | Opens the map in Trail mode with that trail.                                                            |
+| `/pins/trails` list → **New** / **Edit**                        | Opens the map in Trail mode with that trail.                                                            |
 | AI chat → **Open on map**                                       | A proposed trail opens as a draft (see [AI](./ai.md)).                                                  |
 
 ## Trail mode (desktop)
@@ -60,17 +60,19 @@ No new map. The brand map (`apps/brand/src/features/pins/map-view.tsx`) and the 
 
 While Trail mode is open, search and the nearby-locations panel are hidden. Hotspot areas stay visible but can't be clicked. Pins that can't join (another brand's, expired or hidden) are dimmed.
 
-| Action                                  | Result                                                                                                                                                                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Click a bright pin                      | It becomes the next stop; it gets a number badge and the line extends to it. If its look differs from the trail's style, the brand is asked whether to switch it (see [Existing pins as stops](#existing-pins-as-stops)). |
-| Click empty map                         | The **New stop** form opens at that spot (see below).                                                                                                                                                                     |
-| Drag ⠿ in the list                      | Reorders stops; numbers and the line update live. Only the affected sections are re-routed.                                                                                                                               |
-| Drag a ○ bend point                     | Reshapes that section by hand (it becomes "custom").                                                                                                                                                                      |
-| Click "snapped / straight" under a stop | Switches that one section.                                                                                                                                                                                                |
-| ✕ on a stop                             | Removes it from the trail. **The pin is not deleted.**                                                                                                                                                                    |
-| ↶ ↷                                     | Undo / redo (same pattern as Pin Studio's `use-shape-history`).                                                                                                                                                           |
-| ⟲ Close loop · ⇄ Reverse                | Joins the end back to ①, or reverses the order.                                                                                                                                                                           |
-| Esc / ← with changes                    | "Keep your draft?" Drafts are also saved locally, so a reload loses nothing.                                                                                                                                              |
+| Action                     | Result                                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Click a bright pin         | It becomes the next stop; it gets a number badge and the line extends to it. If its look differs from the trail's style, the brand is asked whether to switch it (see [Existing pins as stops](#existing-pins-as-stops)). |
+| Click empty map            | The **New stop** form opens at that spot (see below).                                                                                                                                                                     |
+| Drag ⠿ in the list         | Reorders stops; numbers and the line update live. Only the affected sections are re-routed.                                                                                                                               |
+| Under a stop: ⌁ / ✎ / –    | Shapes the section to the next stop: **⌁** along streets and paths (Mapbox), **✎ Draw** it by hand, or **–** back to a straight line. The row says which it is ("streets & paths", "drawn", "GPX track", "straight").     |
+| ✎ Draw, then click the map | Each click adds a bend (a pin on the way counts too); the line follows the clicks from this stop to the next. **Undo bend** (Backspace), **Cancel** (Esc), **Done** (Enter). Drawing again starts from the drawn bends.   |
+| Import GPX                 | A track from a hike recorder or a park's site (.gpx) is shown as a dashed grey guide. Every section whose two stops are within 150 m of it follows it, now and as stops are added or moved. Others stay straight.         |
+| Layers button (map corner) | Map type (Default, Streets, Outdoors, Satellite, Light, Dark), 2D / 3D and Terrain, shared by every map. Satellite helps to see the paths to draw; a **Hike** trail turns Terrain on by itself.                           |
+| ✕ on a stop                | Removes it from the trail. **The pin is not deleted.**                                                                                                                                                                    |
+| ↶ ↷                        | Undo / redo (same pattern as Pin Studio's `use-shape-history`).                                                                                                                                                           |
+| ⟲ Close loop · ⇄ Reverse   | Joins the end back to ①, or reverses the order.                                                                                                                                                                           |
+| Esc / ← with changes       | "Keep your draft?" Drafts are also saved locally, so a reload loses nothing.                                                                                                                                              |
 
 ### Panel tabs
 

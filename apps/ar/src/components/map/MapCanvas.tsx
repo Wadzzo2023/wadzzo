@@ -15,11 +15,15 @@ import type { ArPin, Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import {
   mapStyleFor,
   type ResolvedTheme,
+  useMapBase,
   useMapMode,
   useResolvedTheme,
   useThemeRead,
 } from "~/lib/ar/theme";
 import { cn } from "@wadzzo/ui/lib/cn";
+
+import { MapViewProbe } from "./MapLayersSheet";
+import { MapTerrain } from "./MapTerrain";
 import { ClusterBillboard } from "./ClusterBillboard";
 import { MuralMarker, type MapMural } from "./MuralMarker";
 import { PinMarker } from "./PinMarker";
@@ -170,6 +174,8 @@ interface Props {
   onBoundsChange?: (b: { north: number; south: number; east: number; west: number }) => void;
   /** Drawn inside the map under the pins (the followed trail). */
   overlay?: ReactNode;
+  /** Show terrain whatever the Layers choice (a Hike trail is being followed). */
+  terrain?: boolean;
 }
 
 export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
@@ -189,6 +195,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     onSelectMural,
     onBoundsChange,
     overlay,
+    terrain = false,
   },
   ref,
 ) {
@@ -201,6 +208,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
   const mapMode = useMapMode();
+  const mapBase = useMapBase();
   const is3d = mapMode === "3d";
 
   // Imperative handle rather than prop-driven view state: a controlled
@@ -374,7 +382,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
           pitch: is3d ? 48 : 0,
           bearing: is3d ? -14 : 0,
         }}
-        mapStyle={mapStyleFor(mapMode, theme)}
+        mapStyle={mapStyleFor(mapMode, theme, mapBase)}
         attributionControl={false}
         onLoad={() => {
           setReady(true);
@@ -400,6 +408,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
         reuseMaps
         style={{ width: "100%", height: "100%" }}
       >
+        <MapTerrain force={terrain} />
+        <MapViewProbe />
         {overlay}
 
         {muralLayer.groups.map((g) => (

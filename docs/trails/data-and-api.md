@@ -23,7 +23,7 @@ erDiagram
     string title
     string description
     string coverImage
-    string mode "WALK | BIKE | DRIVE"
+    string mode "WALK | HIKE | BIKE | DRIVE"
     string order "ORDERED | ANY"
     json path "one line per section"
     float distanceMetres
@@ -69,7 +69,7 @@ Why it's shaped this way:
 - **Progress isn't stored:** it's computed from `LocationConsumer`, so there's no counter to drift.
 - **`TrailRun` stores only milestones:** started, finished, reward claim.
 - **`minLat`…`maxLng`** make "trails in view" a cheap query, like pins.
-- **The reward is a hidden drop.** `rewardGroupId` points to a `LocationGroup` (asset, limit, remaining) whose single `Location` is `hidden`, so it never shows on a map. Claiming it writes an ordinary `LocationConsumer` (`TrailRun.rewardConsumerId`), so stock, redeem codes and *Claim to wallet* (`claim.forPin`) work exactly as for any pin.
+- **The reward is a hidden drop.** `rewardGroupId` points to a `LocationGroup` (asset, limit, remaining) whose single `Location` is `hidden`, so it never shows on a map. Claiming it writes an ordinary `LocationConsumer` (`TrailRun.rewardConsumerId`), so stock, redeem codes and _Claim to wallet_ (`claim.forPin`) work exactly as for any pin.
 - **`stopDefaults`** holds the values the New stop form starts from (see [brand doc](./brand-and-admin.md#stop-defaults-set-the-look-once-for-the-whole-trail)). It uses the same shapes as `@wadzzo/schemas/pin-look` and pin templates.
 - **Every table has `platformId`**, for white-label platforms, as pins do.
 
@@ -86,18 +86,19 @@ stateDiagram-v2
 ```
 
 - While an edit to a live trail is in review (`PENDING` with `publishedAt` set), fans keep seeing it, so a trail never disappears mid-run.
+- A trail's stops stay off the fan map until it's approved: any pin that is a stop of a `DRAFT` or never-approved `PENDING` trail is left out of `pins.list` / `search` / `byBrand` and can't be claimed, unless it is also a stop of a live trail (`trailApprovalGate` in `packages/api/src/ar/server/trails.ts`). A fan who already collected it can still open its card.
 - Send back (reject) returns it to `DRAFT` with the note; delete is only possible before any fan has started it.
 - Text, cover and colour edits go live at once.
 
 ## API (tRPC)
 
-| Router                                                         | Procedures                                                                                                                                                                                                                                                                 |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Router                                                         | Procedures                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/api/src/brand/routers/maps/trail.ts` (brand + admin) | `list` · `listInView(bounds)` · `get(id)` · `save` (create/update; stops + path + defaults + reward in one call) · `routeSection(mode, points)` · `submit` · `archive` · `delete` (no runs yet) · `applyStyle(pinIds, look)` · `assist` (✦ title, description, clues) · `stats(id)` · `trailsForPin(pinId)` |
-| same router (admin only)                                       | `reviewQueue` · `approve(id)` · `reject(id, note)`                                                                                                                                                                                                                         |
-| `packages/api/src/ar/routers/trails.ts` (fans)                 | `nearby(lat, lng, radiusKm)` · `get(id)` (with my progress) · `mine` · `start(id)` · `claimReward(id)` → `{ pinId, redeemCode }`                                                                                                                                                                        |
-| `packages/api/src/ar/routers/pins.ts` (existing)               | `assertClaimable` + order lock (`ar/server/trails.ts`) · `TrailRun` started/finished after a collect. Response shapes are unchanged; the apps read progress from `trails.get`                                                                 |
-| `apps/ar/src/app/api/mobile/v1`                                | **New** routes: `GET /trails`, `GET /trails/mine`, `GET /trails/:id`, `POST /trails/:id/start`, `POST /trails/:id/claim-reward` (`packages/api/src/ar/mobile/routes.ts`). Existing mobile contracts are not changed (see `apps/ar/AGENTS.md`).                                                                                                                                                                            |
+| same router (admin only)                                       | `reviewQueue` · `approve(id)` · `reject(id, note)`                                                                                                                                                                                                                                                          |
+| `packages/api/src/ar/routers/trails.ts` (fans)                 | `nearby(lat, lng, radiusKm)` · `get(id)` (with my progress) · `mine` · `start(id)` · `claimReward(id)` → `{ pinId, redeemCode }`                                                                                                                                                                            |
+| `packages/api/src/ar/routers/pins.ts` (existing)               | `assertClaimable` + order lock (`ar/server/trails.ts`) · `TrailRun` started/finished after a collect. Response shapes are unchanged; the apps read progress from `trails.get`                                                                                                                               |
+| `apps/ar/src/app/api/mobile/v1`                                | **New** routes: `GET /trails`, `GET /trails/mine`, `GET /trails/:id`, `POST /trails/:id/start`, `POST /trails/:id/claim-reward` (`packages/api/src/ar/mobile/routes.ts`). Existing mobile contracts are not changed (see `apps/ar/AGENTS.md`).                                                              |
 
 New stops created from Trail mode use the **existing** `api.maps.pin.createPin`. No second way of creating pins.
 

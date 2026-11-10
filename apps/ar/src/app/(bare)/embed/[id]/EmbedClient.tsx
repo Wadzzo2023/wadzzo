@@ -21,6 +21,7 @@ import type { MapMural } from "~/components/map/MuralMarker";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { RarityPlate } from "~/components/ui/Badges";
 import { distanceMeters, formatDistance } from "@wadzzo/ar-core/ar/geo";
+import { muralQueryBox } from "~/lib/murals/area";
 import { applyTheme, setMapMode, useMapMode } from "~/lib/ar/theme";
 import type { ArPin, ArPinType, Coords, GeoFix } from "@wadzzo/ar-core/ar/types";
 import {
@@ -168,14 +169,12 @@ export function EmbedClient({
           const r = viewport.radiusKm * 1.15;
           const dLat = r / 111;
           const dLng = r / (111 * Math.max(0.01, Math.cos((viewport.center.lat * Math.PI) / 180)));
-          const up = (v: number) => Math.ceil(v * 100) / 100;
-          const down = (v: number) => Math.floor(v * 100) / 100;
-          return {
-            north: up(viewport.center.lat + dLat),
-            south: down(viewport.center.lat - dLat),
-            east: up(viewport.center.lng + dLng),
-            west: down(viewport.center.lng - dLng),
-          };
+          return muralQueryBox({
+            north: viewport.center.lat + dLat,
+            south: viewport.center.lat - dLat,
+            east: viewport.center.lng + dLng,
+            west: viewport.center.lng - dLng,
+          });
         })()
       : null;
   const muralsQuery = api.murals.inArea.useQuery(

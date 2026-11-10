@@ -17,6 +17,7 @@ import { Layer, Source } from "react-map-gl/mapbox";
 import { HotspotLayer } from "~/components/map-kit/hotspot-layer";
 import { PinLayer } from "~/components/map-kit/pin-layer";
 import { PlaceSearch } from "~/components/map-kit/place-search";
+import { TrailBuildLayers } from "~/components/map-kit/trail-build-layers";
 import { TRAIL_HIT_LAYER, TrailLayer } from "~/components/map-kit/trail-layer";
 import { SearchedPlaceMarker } from "~/components/map-kit/searched-place-marker";
 import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
@@ -102,6 +103,9 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   const [trailId, setTrailId] = useState<string | null>(null);
   const draft = useTrailBuilder((s) => s.draft);
   const trailMode = draft !== null;
+  // Drawing one section of the trail by hand: map clicks add bends to it.
+  const pathDrawing = useTrailBuilder((s) => s.drawing);
+
   const [newStopAt, setNewStopAt] = useState<{ lat: number; lng: number } | null>(null);
   const [styleAsk, setStyleAsk] = useState<PinOnMap | null>(null);
 
@@ -206,13 +210,17 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   }, [filterNearbyPins]);
   useEffect(refreshInView, [myPins, refreshInView]);
 
-  // Start near the brand's pins, else near the browser's location.
+  // Start near the brand's pins, else near the browser's location. Not when the map has
+  // already been moved (by the brand, or by Trail mode fitting a trail or a GPX track) before
+  // the pins arrived: on a slow connection that would yank the map away.
   const centred = useRef(false);
+  const moved = useRef(false);
   useEffect(() => {
     if (centred.current || !pins.data || !hotspots.data || !map.current) return;
     centred.current = true;
     if (search?.get("hotspot")) return; // the deep link frames its own area
     if (savedView) return; // the brand was already looking somewhere
+    if (moved.current || useTrailBuilder.getState().draft) return;
     // Every pin plus every hotspot corner.
     const points = [
       ...pins.data.map((p) => [p.longitude, p.latitude] as const),
@@ -244,11 +252,14 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     }
   }, [pins.data, hotspots.data, search, savedView]);
 
-  const flyTo = (c: { lat: number; lng: number }, zoom = 15) =>
+  const flyTo = (c: { lat: number; lng: number }, zoom = 15) => {
+    moved.current = true;
     map.current?.flyTo({ center: [c.lng, c.lat], zoom, duration: 700 });
+  };
 
   const fitTo = (box: ReturnType<typeof boundsOf>) => {
     if (!box) return;
+    moved.current = true;
     map.current?.fitBounds(box, {
       // Keep the stops clear of the trail card: beside it on a wide screen, above it on a phone.
       padding: window.matchMedia("(min-width: 1024px)").matches
@@ -265,7 +276,12 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         t.path,
       ),
     );
-  const fitDraft = () => draft && fitTo(boundsOf(draft.stops, draftPath(draft)));
+  // Read from the store: it may have changed in this same event (a GPX import fits the map).
+  const fitDraft = () => {
+    const d = useTrailBuilder.getState().draft;
+    if (!d) return;
+    fitTo(boundsOf(d.stops, [...draftPath(d), ...(d.track ? [d.track] : [])]));
+  };
 
   const editTrail = (t: TrailView) => {
     setTrailId(null);
@@ -280,6 +296,11 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   /** Trail mode: a click on one of the brand's pins makes it the next stop. */
   const pinAsStop = (pin: PinOnMap) => {
     if (!draft) return;
+    // Drawing: a pin on the way is just another bend.
+    if (useTrailBuilder.getState().drawing) {
+      useTrailBuilder.getState().addBend([pin.longitude, pin.latitude]);
+      return;
+    }
     const groupId = pin.locationGroup?.id;
     const at = draft.stops.findIndex((s) => s.pinId === groupId);
     if (at >= 0) {
@@ -360,6 +381,10 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
 
   const onMapClick = (lat: number, lng: number) => {
     if (drawing) return;
+    if (pathDrawing) {
+      useTrailBuilder.getState().addBend([lng, lat]);
+      return;
+    }
     if (trailMode) {
       setNewStopAt({ lat, lng });
       return;
@@ -393,6 +418,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         ref={map}
         controlsPosition="bottom-left"
         locate
+        forceTerrain={draft?.mode === "HIKE"}
         initialViewState={savedView ?? WORLD_VIEW}
         onClick={(e) => {
           // A click on a hotspot area opens that hotspot (HotspotLayer handles
@@ -410,11 +436,16 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           if (
             !drawing &&
             !placing &&
+            !pathDrawing &&
             m?.getLayer(TRAIL_HIT_LAYER) &&
             m.queryRenderedFeatures(e.point, { layers: [TRAIL_HIT_LAYER] }).length
           )
             return;
           onMapClick(e.lngLat.lat, e.lngLat.lng);
+        }}
+        onMoveStart={(e) => {
+          // A drag, scroll or pinch by the brand.
+          if ((e as { originalEvent?: unknown }).originalEvent) moved.current = true;
         }}
         onMoveEnd={(e) => {
           refreshInView();
@@ -428,7 +459,13 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           });
         }}
         onLoad={refreshInView}
-        cursor={drawing ? "crosshair" : placing || isPinCopied || isPinCut ? "copy" : "pointer"}
+        cursor={
+          drawing || pathDrawing
+            ? "crosshair"
+            : placing || isPinCopied || isPinCut
+              ? "copy"
+              : "pointer"
+        }
       >
         {hotspots.data && (
           <HotspotLayer
@@ -460,10 +497,17 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           <TrailLayer
             trails={[
               ...(showTrails ? shownTrails.map(lineOf) : []),
-              ...(draft ? [draftLine(draft)] : []),
+              ...(draft ? [draftLine(draft, pathDrawing)] : []),
             ]}
             selectedId={trailMode ? DRAFT_LINE_ID : trailId}
             onSelect={placing || trailMode ? undefined : setTrailId}
+          />
+        )}
+        {draft && !drawing && (
+          <TrailBuildLayers
+            track={draft.track}
+            bends={pathDrawing?.points ?? null}
+            color={draft.color}
           />
         )}
         {!drawing && (
@@ -601,9 +645,14 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       {/* Trail mode */}
       {trailMode && !drawing && (
         <>
-          <div className="bg-primary font-hud text-primary-foreground pointer-events-none absolute top-3 left-1/2 z-10 hidden -translate-x-1/2 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg lg:block">
-            Click your pins to add them as stops · click empty map for a new stop
-          </div>
+          {pathDrawing ? (
+            <DrawPathBar stop={pathDrawing.index + 1} bends={pathDrawing.points.length} />
+          ) : (
+            <div className="bg-primary font-hud text-primary-foreground pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg lg:block">
+              Click your pins to add them as stops · click empty map for a new stop
+            </div>
+          )}
+
           <div className="absolute inset-x-3 bottom-3 z-20 flex max-h-[58%] lg:inset-x-auto lg:top-4 lg:bottom-4 lg:left-4 lg:max-h-none">
             <TrailBuilder
               onFit={fitDraft}
@@ -679,6 +728,49 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         hotspotId={hotspotId}
       />
       <AgentChat />
+    </div>
+  );
+}
+
+/**
+ * Drawing one section of a trail: click the map along the path, then Done. Bottom centre of
+ * the map (above the builder panel on a phone, where it sits at the bottom). Enter keeps it,
+ * Esc cancels, Backspace takes the last bend off.
+ */
+function DrawPathBar({ stop, bends }: { stop: number; bends: number }) {
+  const { undoBend, finishDrawing, cancelDrawing } = useTrailBuilder.getState();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, [contenteditable]")) return;
+      if (e.key === "Escape") cancelDrawing();
+      else if (e.key === "Enter") finishDrawing();
+      else if (e.key === "Backspace") {
+        e.preventDefault();
+        undoBend();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undoBend, finishDrawing, cancelDrawing]);
+  return (
+    <div
+      role="status"
+      className="bg-primary text-primary-foreground absolute bottom-[calc(58%+1.5rem)] left-1/2 z-30 flex max-w-[calc(100%-1.5rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold shadow-lg lg:bottom-6"
+    >
+      <span className="font-hud px-1">
+        Drawing stop {stop} → {stop + 1}: click along the path
+        {bends ? ` · ${bends} bend${bends === 1 ? "" : "s"}` : ""}
+      </span>
+      <Button size="sm" variant="secondary" disabled={!bends} onClick={undoBend}>
+        Undo bend
+      </Button>
+      <Button size="sm" variant="secondary" onClick={cancelDrawing}>
+        Cancel
+      </Button>
+      <Button size="sm" variant="outline" onClick={finishDrawing}>
+        Done
+      </Button>
     </div>
   );
 }

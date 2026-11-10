@@ -391,50 +391,57 @@ export function trails(db: Db) {
         rewardMinStops: input.reward?.minStops ?? null,
       };
 
-      const id = await db.$transaction(async (tx) => {
-        const trail = before
-          ? await tx.trail.update({ where: { id: before.id }, data, select: { id: true } })
-          : await tx.trail.create({
-              data: {
-                ...data,
-                creatorId: who.creatorId,
-                platformId: who.platformId,
-              },
-              select: { id: true },
+      const id = await db.$transaction(
+        async (tx) => {
+          const trail = before
+            ? await tx.trail.update({ where: { id: before.id }, data, select: { id: true } })
+            : await tx.trail.create({
+                data: {
+                  ...data,
+                  creatorId: who.creatorId,
+                  platformId: who.platformId,
+                },
+                select: { id: true },
+              });
+          await tx.trailStop.deleteMany({ where: { trailId: trail.id } });
+          if (input.stops.length)
+            await tx.trailStop.createMany({
+              data: input.stops.map((s, i) => ({
+                trailId: trail.id,
+                locationGroupId: s.pinId,
+                position: i + 1,
+                required: s.required,
+                clue: s.clue?.trim() ? s.clue.trim() : null,
+              })),
             });
-        await tx.trailStop.deleteMany({ where: { trailId: trail.id } });
-        if (input.stops.length)
-          await tx.trailStop.createMany({
-            data: input.stops.map((s, i) => ({
-              trailId: trail.id,
-              locationGroupId: s.pinId,
-              position: i + 1,
-              required: s.required,
-              clue: s.clue?.trim() ? s.clue.trim() : null,
-            })),
+          const rewardGroupId = await syncReward(
+            tx,
+            {
+              id: trail.id,
+              creatorId: who.creatorId,
+              platformId: who.platformId,
+              title: input.title,
+              coverImage: input.coverImage ?? null,
+              startDate: input.startDate,
+              endDate: input.endDate,
+              rewardGroupId: before?.rewardGroup?.id ?? null,
+              live: status === "LIVE",
+            },
+            input.reward,
+            last,
+          );
+          await tx.trail.update({
+            where: { id: trail.id },
+            data: {
+              rewardGroupId: input.reward ? rewardGroupId : (before?.rewardGroup?.id ?? null),
+            },
           });
-        const rewardGroupId = await syncReward(
-          tx,
-          {
-            id: trail.id,
-            creatorId: who.creatorId,
-            platformId: who.platformId,
-            title: input.title,
-            coverImage: input.coverImage ?? null,
-            startDate: input.startDate,
-            endDate: input.endDate,
-            rewardGroupId: before?.rewardGroup?.id ?? null,
-            live: status === "LIVE",
-          },
-          input.reward,
-          last,
-        );
-        await tx.trail.update({
-          where: { id: trail.id },
-          data: { rewardGroupId: input.reward ? rewardGroupId : (before?.rewardGroup?.id ?? null) },
-        });
-        return trail.id;
-      });
+          return trail.id;
+          // About eight queries in a row (trail, stops, the reward drop): more than Prisma's 5 s
+          // default allows on a far-away or busy database, like the other multi-step writes here.
+        },
+        { timeout: 20_000, maxWait: 10_000 },
+      );
       return toTrail(await find(id));
     },
 

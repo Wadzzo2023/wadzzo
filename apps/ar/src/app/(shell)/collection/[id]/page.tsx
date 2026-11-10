@@ -37,7 +37,13 @@ import {
 import { BottomSheet } from "~/components/ui/BottomSheet";
 import { Skeleton, SkeletonText } from "~/components/ui/Skeleton";
 import { pinStatus, RARITY_META, timeRemaining } from "@wadzzo/ar-core/ar/rarity";
-import { mapStyleFor, useMapMode, useResolvedTheme, useThemeRead } from "~/lib/ar/theme";
+import {
+  mapStyleFor,
+  useMapBase,
+  useMapMode,
+  useResolvedTheme,
+  useThemeRead,
+} from "~/lib/ar/theme";
 import { useAuth } from "~/lib/ar/store";
 import { useDragScroll } from "~/lib/ar/useDragScroll";
 import { useBrandsQuery, usePinsQuery, useToggleFollow } from "~/lib/ar/usePins";
@@ -78,6 +84,7 @@ export default function CollectionDetail() {
   const theme = useResolvedTheme();
   const themeRead = useThemeRead();
   const mapMode = useMapMode();
+  const mapBase = useMapBase();
   const id = typeof urlQuery.id === "string" ? urlQuery.id : null;
 
   const { pins, isLoading: pinsLoading } = usePinsQuery();
@@ -401,7 +408,7 @@ export default function CollectionDetail() {
                     zoom: 15.4,
                     pitch: mapMode === "3d" ? 40 : 0,
                   }}
-                  mapStyle={mapStyleFor(mapMode, theme)}
+                  mapStyle={mapStyleFor(mapMode, theme, mapBase)}
                   attributionControl={false}
                   interactive={false}
                   style={{ width: "100%", height: "100%" }}

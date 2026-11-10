@@ -3,23 +3,24 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useTheme } from "next-themes";
-import { forwardRef, useEffect, useRef, type ReactNode } from "react";
+import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react";
 import MapGL, { useControl, useMap, type MapProps, type MapRef } from "react-map-gl/mapbox";
 
 import { env } from "~/env";
 import { MapControlStack } from "./map-control-stack";
 import { MapControlStackContext } from "./map-control-stack-context";
+import { DEFAULT_PREVIEW, MapLayersPanel, type PreviewView } from "./map-layers-panel";
+import { MapTerrain } from "./map-terrain";
 import { UserLocationLayer } from "./user-location";
 import { cn } from "@wadzzo/ui/lib/cn";
 
-import {
-  mapStyleFor,
-  readMapMode,
-  setMapMode,
-  useIsClient,
-  useMapMode,
-  type MapMode,
-} from "./map-mode";
+import type { IControl } from "mapbox-gl";
+
+import { mapStyleFor, useIsClient, useMapBase, useMapMode, type MapMode } from "./map-mode";
+
+/** Lucide's "layers" icon, for the Layers button (plain HTML). */
+const LAYERS_ICON =
+  '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin:auto"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>';
 
 export { MAP_STYLE_2D, MAP_STYLE_3D } from "./map-mode";
 
@@ -67,30 +68,19 @@ function ApplyMapMode({ mode }: { mode: MapMode }) {
 }
 
 /**
- * The corner buttons as one box: [locate, from a child layer] 2D/3D, zoom in, zoom out.
+ * The corner buttons as one box: [locate, from a child layer] zoom in, zoom out. The Layers
+ * button is its own box beside it (LayersControl).
  * `children` are rendered with the stack available through `useMapControlStack`.
  */
 function MapControls({
-  mode,
   position,
   children,
 }: {
-  mode: MapMode;
   position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   children?: ReactNode;
 }) {
   const { current } = useMap();
   const stack = useControl<MapControlStack>(() => new MapControlStack(), { position });
-
-  // Shows the mode a click switches to, the way map apps do.
-  useEffect(() => {
-    const next = mode === "3d" ? "2D" : "3D";
-    stack.set("mode", {
-      label: `Switch to the ${next} map`,
-      html: `<span style="font-size:11px;font-weight:700;letter-spacing:0.02em">${next}</span>`,
-      onPress: () => setMapMode(readMapMode() === "3d" ? "2d" : "3d"),
-    });
-  }, [stack, mode]);
 
   useEffect(() => {
     const map = current?.getMap();
@@ -122,10 +112,53 @@ function MapControls({
   );
 }
 
+/** The Layers button: its own box, next to (above, in a bottom corner) the zoom buttons. */
+class LayersControl implements IControl {
+  private el?: HTMLDivElement;
+  constructor(private readonly press: { current: () => void }) {}
+  onAdd() {
+    const el = document.createElement("div");
+    el.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = "Map layers";
+    button.setAttribute("aria-label", "Map layers");
+    button.setAttribute("data-layers-button", "");
+    button.innerHTML = LAYERS_ICON;
+    // Laid out and coloured like the zoom buttons (see MapControlStack).
+    button.style.display = "flex";
+    button.style.alignItems = "center";
+    button.style.justifyContent = "center";
+    button.style.color = "#111";
+    button.addEventListener("click", () => this.press.current());
+    el.appendChild(button);
+    this.el = el;
+    return el;
+  }
+  onRemove() {
+    this.el?.remove();
+  }
+}
+
+function LayersButton({
+  position,
+  onPress,
+}: {
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  onPress: () => void;
+}) {
+  const press = useRef(onPress);
+  useEffect(() => {
+    press.current = onPress;
+  });
+  useControl(() => new LayersControl(press), { position });
+  return null;
+}
+
 /**
  * The portal's one map: Mapbox, themed, with the same token everywhere.
- * Flat 2D (day / night) by default; a corner button switches every map to the
- * 3D city style and back.
+ * Flat 2D (day / night) by default; the Layers button by the zoom buttons picks the map type
+ * (Default, Streets, Outdoors, Satellite, Light, Dark), 2D / 3D and terrain for every map.
  * Children are react-map-gl layers/markers/controls.
  */
 export const BaseMap = forwardRef<
@@ -137,6 +170,8 @@ export const BaseMap = forwardRef<
     /** Add a "show my location" button and the blue puck at the viewer's position. */
     locate?: boolean;
     controlsPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+    /** Show terrain whatever the Layers choice (a Hike trail being built). */
+    forceTerrain?: boolean;
   }
 >(function BaseMap(
   {
@@ -145,12 +180,29 @@ export const BaseMap = forwardRef<
     controls = true,
     locate = false,
     controlsPosition = "bottom-right",
+    forceTerrain = false,
     ...props
   },
   ref,
 ) {
   const { resolvedTheme } = useTheme();
   const mode = useMapMode();
+  const base = useMapBase();
+  // The Layers panel, opened at the current view (its previews show this place).
+  const [layersAt, setLayersAt] = useState<PreviewView | null>(null);
+  const inner = useRef<MapRef | null>(null);
+  const setRef = (m: MapRef | null) => {
+    inner.current = m;
+    if (typeof ref === "function") ref(m);
+    else if (ref) ref.current = m;
+  };
+  const toggleLayers = () =>
+    setLayersAt((open) => {
+      if (open) return null;
+      const m = inner.current;
+      const c = m?.getCenter();
+      return c ? { lng: c.lng, lat: c.lat, zoom: m!.getZoom() } : DEFAULT_PREVIEW;
+    });
   // Wait for the browser so the map is created with the real theme and mode;
   // swapping the style while it loads breaks Mapbox Standard.
   const mounted = useIsClient();
@@ -161,9 +213,9 @@ export const BaseMap = forwardRef<
   return (
     <div className={cn("relative size-full", className)}>
       <MapGL
-        ref={ref}
+        ref={setRef}
         mapboxAccessToken={env.NEXT_PUBLIC_MAPBOX_API}
-        mapStyle={mapStyleFor(mode, resolvedTheme === "dark" ? "dark" : "light")}
+        mapStyle={mapStyleFor(mode, resolvedTheme === "dark" ? "dark" : "light", base)}
         style={{ width: "100%", height: "100%" }}
         attributionControl={false}
         minZoom={1.5}
@@ -180,15 +232,29 @@ export const BaseMap = forwardRef<
       >
         <FollowContainerSize />
         <ApplyMapMode mode={mode} />
+        <MapTerrain force={forceTerrain} />
         {controls ? (
-          <MapControls mode={mode} position={controlsPosition}>
-            {locate && <UserLocationLayer />}
-          </MapControls>
+          <>
+            <MapControls position={controlsPosition}>{locate && <UserLocationLayer />}</MapControls>
+            <LayersButton position={controlsPosition} onPress={toggleLayers} />
+          </>
         ) : (
           locate && <UserLocationLayer />
         )}
         {children}
       </MapGL>
+      {layersAt && (
+        <MapLayersPanel
+          theme={resolvedTheme === "dark" ? "dark" : "light"}
+          view={layersAt}
+          onClose={() => setLayersAt(null)}
+          className={cn(
+            "absolute",
+            controlsPosition.startsWith("top") ? "top-3" : "bottom-3",
+            controlsPosition.endsWith("left") ? "left-16" : "right-16",
+          )}
+        />
+      )}
     </div>
   );
 });
