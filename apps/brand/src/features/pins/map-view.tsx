@@ -164,16 +164,26 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     (t) => t.status !== "ENDED" && t.path.length > 0 && t.id !== draft?.id,
   );
   const selectedTrail = trails.data?.find((t) => t.id === trailId) ?? null;
-  // Trail mode: new stops not saved yet are drawn as pins too (their pins are made on save).
+  // Trail mode: new stops not saved yet are drawn as pins too (their pins are made on save),
+  // in the brand's own shapes when they use one.
+  const hasNewStops = Boolean(draft?.stops.some((s) => s.newPin));
+  const brandShapes = api.maps.shape.list.useQuery(
+    draft?.creatorId ? { creatorId: draft.creatorId } : undefined,
+    { enabled: hasNewStops, staleTime: 60_000 },
+  );
   const draftPins = useMemo(
     () =>
-      draft?.stops.some((s) => s.newPin)
+      draft && hasNewStops
         ? [
             ...myPins,
-            ...unsavedStopPins(draft, myPins[0]?.locationGroup?.creator.profileUrl ?? null),
+            ...unsavedStopPins(
+              draft,
+              myPins[0]?.locationGroup?.creator.profileUrl ?? null,
+              new Map((brandShapes.data ?? []).map((sh) => [sh.id, sh])),
+            ),
           ]
         : myPins,
-    [draft, myPins],
+    [draft, hasNewStops, myPins, brandShapes.data],
   );
   const applyStyle = api.maps.trail.applyStyle.useMutation({
     onError: (e) => toast.error(e.message),
