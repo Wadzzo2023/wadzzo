@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 import { columnsToLook, type PinLookInput } from "@wadzzo/schemas/pin-look";
 import { describeMinutes } from "@wadzzo/schemas/pin-template";
-import type { StopDefaults } from "@wadzzo/schemas/trail";
+import { NEW_STOP_PREFIX, newStopPinSchema, type StopDefaults } from "@wadzzo/schemas/trail";
 import { Label } from "@wadzzo/ui/components/label";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -30,7 +30,6 @@ import {
   type PinLookValue,
 } from "~/features/pins/look/pin-look-section";
 import type { PinOnMap } from "~/store/map-stores";
-import { api } from "~/utils/api";
 
 import type { DraftStop, TrailDraft } from "./builder-store";
 
@@ -57,8 +56,8 @@ export function matchesTrailStyle(pin: PinOnMap, defaults: StopDefaults) {
 /**
  * The short form for a stop made where the brand clicked (docs/trails, "New stop"): only the
  * title is needed; everything else comes from the trail's Stop defaults, shown collapsed with
- * their values, and can be changed for this stop. The pin is created with the usual
- * `createPin`, so it is an ordinary pin that is also stop N.
+ * their values, and can be changed for this stop. The pin is made when the trail is saved
+ * and belongs to the trail: taking the stop off (or deleting the trail) removes it.
  */
 export function NewStopDialog({
   at,
@@ -81,53 +80,40 @@ export function NewStopDialog({
   const [look, setLook] = useState<PinLookValue>(() => toLookValue(d.look ?? null));
   const [open, setOpen] = useState<"look" | "collect" | null>(null);
 
-  const create = api.maps.pin.createPin.useMutation({
-    onSuccess: (g) => {
-      toast.success(`Stop ${position} added`);
-      onCreated({
-        pinId: g.id,
-        title: g.title,
-        lat: g.latitude,
-        lng: g.longitude,
-        image: g.image,
-        required: true,
-        clue: null,
-      });
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
   if (!at) return null;
   const now = new Date();
   const start = draft.startDate > now ? draft.startDate : now;
   const limit = d.pinCollectionLimit && d.pinCollectionLimit > 0 ? d.pinCollectionLimit : NO_LIMIT;
 
+  // Nothing is written yet: the pin is made with the trail when it is saved (docs/trails).
   const submit = () => {
-    if (title.trim().length < 3) {
-      toast.error("Give the stop a title (3 characters or more)");
-      return;
-    }
-    create.mutate({
-      creatorId: draft.creatorId,
+    const pin = newStopPinSchema.safeParse({
       lat: at.lat,
       lng: at.lng,
       title: title.trim(),
       description: description.trim() || (d.description ?? ""),
       image,
       url: d.url,
-      startDate: start,
-      // A stop runs as long as its trail.
-      endDate: draft.endDate,
       autoCollect,
-      pinNumber: 1,
-      // Exactly where it was put: fans walk the trail from point to point.
-      radius: 0,
       pinCollectionLimit: limit,
       tier: d.tier,
       token: d.token,
-      multiPin: false,
       tags: d.tags ?? [],
       look,
+    });
+    if (!pin.success) {
+      toast.error(pin.error.issues[0]?.message ?? "Check the stop's details");
+      return;
+    }
+    onCreated({
+      pinId: `${NEW_STOP_PREFIX}${crypto.randomUUID()}`,
+      title: pin.data.title,
+      lat: at.lat,
+      lng: at.lng,
+      image: image ?? null,
+      required: true,
+      clue: null,
+      newPin: pin.data,
     });
   };
 
@@ -139,7 +125,8 @@ export function NewStopDialog({
         <DialogHeader>
           <DialogTitle>New stop {position}</DialogTitle>
           <DialogDescription>
-            A new pin here, set up from the trail&apos;s stop defaults. Only the title is needed.
+            A new pin here, set up from the trail&apos;s stop defaults. Only the title is needed. It
+            is made when you save the trail, and goes if you take the stop off.
           </DialogDescription>
         </DialogHeader>
 
@@ -218,8 +205,8 @@ export function NewStopDialog({
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={submit} disabled={create.isPending}>
-            {create.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
+          <Button onClick={submit}>
+            <Plus />
             Add stop {position}
           </Button>
         </DialogFooter>

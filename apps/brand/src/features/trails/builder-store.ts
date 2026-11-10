@@ -6,7 +6,13 @@ import { create } from "zustand";
 import { straightSections, type TrailSection } from "@wadzzo/geo/trail-geometry";
 import { cutTrack, fitPoints } from "@wadzzo/geo/trail-track";
 import { MAX_SECTION_POINTS } from "@wadzzo/schemas/trail";
-import type { StopDefaults, TrailMode, TrailOrder, TrailStatus } from "@wadzzo/schemas/trail";
+import type {
+  NewStopPin,
+  StopDefaults,
+  TrailMode,
+  TrailOrder,
+  TrailStatus,
+} from "@wadzzo/schemas/trail";
 
 export type DraftStop = {
   /** The pin (location group). */
@@ -17,6 +23,8 @@ export type DraftStop = {
   image?: string | null;
   required: boolean;
   clue: string | null;
+  /** A New stop not saved yet (`pinId` is `new:…`): the pin made when the trail is saved. */
+  newPin?: NewStopPin;
 };
 
 export type DraftReward = { assetId: number; limit: number; minStops: number | null };
@@ -172,7 +180,14 @@ export const useTrailBuilder = create<BuilderState>((set, get) => ({
         future: [],
       };
     }),
-  saved: (d) => set({ draft: d, clean: true }),
+  // New stops' pins were made by this save: their `new:` ids are gone, so is the history
+  // that holds them (undoing to one would make its pin again).
+  saved: (d) =>
+    set((st) =>
+      st.draft?.stops.some((x) => x.newPin)
+        ? { draft: d, clean: true, past: [], future: [] }
+        : { draft: d, clean: true },
+    ),
   undo: () =>
     set((s) => {
       const prev = s.past[s.past.length - 1];
@@ -281,3 +296,38 @@ export const reverseStops = (d: TrailDraft): TrailDraft => {
   }
   return alongTrack({ ...d, stops: [...d.stops].reverse(), routes, kinds });
 };
+
+/**
+ * The draft after a save: new stops take the ids of the pins the save made (the server's stops
+ * are in the same order), with their sections re-keyed, and their `newPin` dropped.
+ */
+export function adoptSaved(
+  d: TrailDraft,
+  saved: { id: string; updatedAt: Date; status: TrailStatus; stopPinIds: string[] },
+): TrailDraft {
+  const ids = new Map<string, string>();
+  const stops = d.stops.map((s, i) => {
+    const real = saved.stopPinIds[i];
+    if (!s.newPin || !real) return s;
+    ids.set(s.pinId, real);
+    const { newPin: _made, ...rest } = s;
+    return { ...rest, pinId: real };
+  });
+  const rekey = <T>(m: Record<string, T> | undefined) =>
+    m &&
+    Object.fromEntries(
+      Object.entries(m).map(([k, v]) => {
+        const [a, b] = k.split(">");
+        return [`${ids.get(a!) ?? a}>${ids.get(b!) ?? b}`, v];
+      }),
+    );
+  return {
+    ...d,
+    id: saved.id,
+    updatedAt: saved.updatedAt,
+    status: saved.status,
+    stops,
+    routes: rekey(d.routes) ?? {},
+    kinds: rekey(d.kinds),
+  };
+}

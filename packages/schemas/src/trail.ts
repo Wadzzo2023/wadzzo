@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { BADWORDS } from "./banned-word";
+import { pinLookInputSchema } from "./pin-look";
 import { pinTemplateDataSchema, readTemplateData, type PinTemplateData } from "./pin-template";
 
 /**
@@ -58,11 +60,45 @@ const lngLat = z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(9
 /** One section of the path: [lng, lat] points from one stop to the next. */
 export const trailSectionSchema = z.array(lngLat).min(2).max(MAX_SECTION_POINTS);
 
+/** The id a new stop has in the builder until the trail is saved and its pin made. */
+export const NEW_STOP_PREFIX = "new:";
+export const isNewStopId = (pinId: string) => pinId.startsWith(NEW_STOP_PREFIX);
+
+/**
+ * A stop made in the builder ("New stop"): the pin it becomes. Nothing is written until the
+ * trail is saved; then the pin is made with the trail and belongs to it (docs/trails). It runs
+ * from the trail's start (or now) to the trail's end, exactly where it was put.
+ */
+export const newStopPinSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Give the stop a title (3 characters or more)")
+    .max(120)
+    .refine((v) => !BADWORDS.some((w) => v.includes(w)), {
+      message: "Input contains banned words.",
+    }),
+  description: z.string().max(2_000).default(""),
+  image: z.url().optional(),
+  url: z.url().optional(),
+  autoCollect: z.boolean().default(false),
+  /** 0 or less: no limit (the caller passes its "no limit" number). */
+  pinCollectionLimit: z.number().int().min(0),
+  tier: z.string().optional(),
+  token: z.number().optional(),
+  tags: z.array(z.string()).default([]),
+  look: pinLookInputSchema.optional(),
+});
+export type NewStopPin = z.infer<typeof newStopPinSchema>;
+
 export const trailStopInputSchema = z.object({
-  /** The pin (LocationGroup) this stop is. */
+  /** The pin (LocationGroup) this stop is; `new:…` with `newPin` for one made on save. */
   pinId: z.string().min(1),
   required: z.boolean().default(true),
   clue: z.string().trim().max(280).optional().nullable(),
+  newPin: newStopPinSchema.optional(),
 });
 export type TrailStopInput = z.infer<typeof trailStopInputSchema>;
 
@@ -137,6 +173,12 @@ export const saveTrailSchema = trailDetailsSchema
           message: "A pin can be a stop only once",
         });
       ids.add(s.pinId);
+      if (isNewStopId(s.pinId) !== Boolean(s.newPin))
+        ctx.addIssue({
+          code: "custom",
+          path: ["stops", i],
+          message: "A new stop needs its pin's details",
+        });
     });
     // A path, when there is one, has a section between every pair of stops.
     if (t.path.length && t.path.length !== Math.max(0, t.stops.length - 1))

@@ -19,6 +19,7 @@ import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
 import { columnsToLook, pinLookInputSchema } from "@wadzzo/schemas/pin-look";
 import { lookColumnsFor, lookData } from "../../server/pin-look";
+import { attachTags, newPinData, PAGE_ASSET_NUM } from "../../server/pin-create";
 import { hotspotSchedule, isPendingFirstDrop } from "@wadzzo/geo/hotspot-schedule";
 import { hotspots } from "../../server/hotspots";
 import { buildPinScanUrl, renderPinQR } from "../../lib/qr-generator";
@@ -85,24 +86,7 @@ export const createPinFormSchema = z.object({
   look: pinLookInputSchema.optional(),
 });
 
-/**
- * Links tags to a new drop. Ids that no longer exist (a tag deleted since a
- * template was saved) are skipped instead of failing the whole create.
- */
-async function attachTags(db: Db, locationGroupId: string, tagIds: string[] | undefined) {
-  if (!tagIds?.length) return;
-  const existing = await db.locationTag.findMany({
-    where: { id: { in: tagIds } },
-    select: { id: true },
-  });
-  if (!existing.length) return;
-  await db.locationGroupTag.createMany({
-    data: existing.map((t) => ({ locationGroupId, tagId: t.id })),
-    skipDuplicates: true,
-  });
-}
-
-export const PAGE_ASSET_NUM = -10;
+export { PAGE_ASSET_NUM };
 export const NO_ASSET = -99;
 
 /**
@@ -596,37 +580,6 @@ export const pinRouter = createTRPCRouter({
   // ─── Pin mutations → Prisma DB directly (unchanged) ────────────────────────
 
   createPin: creatorProcedure.input(createPinFormSchema).mutation(async ({ ctx, input }) => {
-    const { pinNumber, pinCollectionLimit, token, tier, multiPin } = input;
-
-    let tierId: number | undefined;
-    let privacy: ItemPrivacy = ItemPrivacy.PUBLIC;
-    if (!tier || tier === "public") privacy = ItemPrivacy.PUBLIC;
-    else if (tier === "private") privacy = ItemPrivacy.PRIVATE;
-    else {
-      tierId = Number(tier);
-      privacy = ItemPrivacy.TIER;
-    }
-
-    let assetId = token;
-    let pageAsset = false;
-    if (token === PAGE_ASSET_NUM) {
-      assetId = undefined;
-      pageAsset = true;
-    }
-
-    const locations = Array.from({ length: pinNumber }).map(() => {
-      const loc = getLocationInLatLngRad(input.lat, input.lng, input.radius);
-      return {
-        autoCollect: input.autoCollect,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-      };
-    });
-
-    const optimizedImage = input.image
-      ? await createOptimizedImage(input.image).catch(() => null)
-      : null;
-
     const targetCreatorId = input.creatorId ?? ctx.session.user.id;
     await assertOwnerOrAdmin(ctx, targetCreatorId);
     // A pin lives on its brand's platform (an admin may create one for another brand).
@@ -635,32 +588,13 @@ export const pinRouter = createTRPCRouter({
       select: { platformId: true },
     });
 
-    const look = await lookColumnsFor(ctx.db, targetCreatorId, input.look);
+    const data = await newPinData(ctx.db, {
+      ...input,
+      creatorId: targetCreatorId,
+      platformId: target.platformId,
+    });
     const locationGroup = await ctx.db.locationGroup.create({
-      data: {
-        creatorId: targetCreatorId,
-        platformId: target.platformId,
-        ...(look ? lookData(look) : {}),
-        endDate: input.endDate,
-        startDate: input.startDate,
-        title: input.title,
-        description: input.description,
-        assetId,
-        pageAsset,
-        limit: pinCollectionLimit,
-        image: input.image,
-        optimizedImage,
-        link: input.url,
-        latitude: input.lat,
-        longitude: input.lng,
-        radius: input.radius,
-        locations: { createMany: { data: locations } },
-        subscriptionId: tierId,
-        privacy,
-        remaining: pinCollectionLimit,
-        multiPin,
-        approved: true,
-      },
+      data: { ...data, platformId: target.platformId },
     });
     await attachTags(ctx.db, locationGroup.id, input.tags);
     return locationGroup;
