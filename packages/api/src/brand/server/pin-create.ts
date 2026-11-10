@@ -105,3 +105,23 @@ export async function attachTags(db: TagDb, locationGroupId: string, tagIds: str
     skipDuplicates: true,
   });
 }
+
+/** `attachTags` for several new drops at once: one lookup and one insert. */
+export async function attachTagsToMany(
+  db: TagDb,
+  drops: { locationGroupId: string; tagIds: string[] | undefined }[],
+) {
+  const wanted = [...new Set(drops.flatMap((d) => d.tagIds ?? []))];
+  if (!wanted.length) return;
+  const existing = new Set(
+    (await db.locationTag.findMany({ where: { id: { in: wanted } }, select: { id: true } })).map(
+      (t) => t.id,
+    ),
+  );
+  const data = drops.flatMap((d) =>
+    (d.tagIds ?? [])
+      .filter((t) => existing.has(t))
+      .map((tagId) => ({ locationGroupId: d.locationGroupId, tagId })),
+  );
+  if (data.length) await db.locationGroupTag.createMany({ data, skipDuplicates: true });
+}

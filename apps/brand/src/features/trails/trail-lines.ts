@@ -152,17 +152,25 @@ export function whyNotStop(p: PinOnMap, now = Date.now()): string | null {
   return null;
 }
 
+/** A brand's own pin shape, as the map draws it. */
+export type BrandShape = { id: string; path: string; anchor: string };
+
 /**
  * New stops not saved yet, as pins for the map (their real pins are made when the trail is
- * saved): drawn like the others, numbered, in the look chosen for them. A brand's own shape
- * shows as a circle until then (its outline comes with the saved pin).
+ * saved): drawn like the others, numbered, in the look chosen for them, a brand's own shape
+ * included (from `shapes`).
  */
-export function unsavedStopPins(d: TrailDraft, brandImage: string | null): PinOnMap[] {
+export function unsavedStopPins(
+  d: TrailDraft,
+  brandImage: string | null,
+  shapes: ReadonlyMap<string, BrandShape>,
+): PinOnMap[] {
   const now = new Date();
   return d.stops.flatMap((s) => {
     const n = s.newPin;
     if (!n) return [];
-    const look = lookToColumns(n.look, false);
+    const own = n.look?.shape ? shapes.get(n.look.shape) : undefined;
+    const look = lookToColumns(n.look, Boolean(own));
     return [
       {
         id: s.pinId,
@@ -184,9 +192,9 @@ export function unsavedStopPins(d: TrailDraft, brandImage: string | null): PinOn
           approved: true,
           hotspotId: null,
           ...look,
-          markerShape: look.markerShape ?? "circle",
+          markerShape: own ? null : (look.markerShape ?? "circle"),
           creator: { profileUrl: brandImage },
-          pinShape: null,
+          pinShape: own ? { path: own.path, anchor: own.anchor } : null,
         },
       },
     ];

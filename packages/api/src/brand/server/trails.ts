@@ -21,7 +21,9 @@ import {
   type TrailStatus,
 } from "@wadzzo/schemas/trail";
 
-import { attachTags, newPinData } from "./pin-create";
+import { randomUUID } from "node:crypto";
+
+import { attachTagsToMany, newPinData } from "./pin-create";
 
 /** What every view of a trail reads: details, stops in order, path and reward. */
 export const TRAIL_SELECT = {
@@ -455,16 +457,30 @@ export function trails(db: Db) {
                 },
                 select: { id: true },
               });
-          // New stops become pins that belong to the trail.
-          const realId = new Map<string, string>();
-          for (const [tempId, { data: pin, tags }] of newPins) {
-            const g = await tx.locationGroup.create({
-              data: { ...pin, platformId: who.platformId, trailOwnerId: trail.id },
-              select: { id: true },
+          // New stops become pins that belong to the trail: all of them in a few batched
+          // writes (pins, their points, their tags), however many there are, so the
+          // transaction stays short on a far-away database.
+          const made = [...newPins].map(([tempId, m]) => ({ tempId, id: randomUUID(), ...m }));
+          if (made.length) {
+            await tx.locationGroup.createMany({
+              data: made.map(({ id, data: { locations: _points, ...pin } }) => ({
+                ...pin,
+                id,
+                platformId: who.platformId,
+                trailOwnerId: trail.id,
+              })),
             });
-            await attachTags(tx, g.id, tags);
-            realId.set(tempId, g.id);
+            await tx.location.createMany({
+              data: made.flatMap(({ id, data }) =>
+                data.locations.createMany.data.map((p) => ({ ...p, locationGroupId: id })),
+              ),
+            });
+            await attachTagsToMany(
+              tx,
+              made.map((m) => ({ locationGroupId: m.id, tagIds: m.tags })),
+            );
           }
+          const realId = new Map(made.map((m) => [m.tempId, m.id]));
           const stopIds = input.stops.map((s) => realId.get(s.pinId) ?? s.pinId);
           await tx.trailStop.deleteMany({ where: { trailId: trail.id } });
           // Pins it made that are no longer stops go (or hide, once collected).
