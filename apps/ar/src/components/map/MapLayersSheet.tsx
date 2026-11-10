@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Check, Layers } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useMap } from "react-map-gl/mapbox";
 
 import { cn } from "@wadzzo/ui/lib/cn";
@@ -23,6 +24,8 @@ import {
 } from "~/lib/ar/theme";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API;
+
+const noSubscribe = () => () => undefined;
 
 /** Where the previews look: the last map's centre and zoom (a hilly town before any map). */
 type PreviewView = { lng: number; lat: number; zoom: number };
@@ -73,6 +76,12 @@ export function MapLayersButton({
 }) {
   // Opened at the place on screen right now (the previews show it).
   const [at, setAt] = useState<PreviewView | null>(null);
+  // Only in the browser (the portal needs the document; the server renders no sheet).
+  const client = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
   return (
     <>
       <motion.button
@@ -89,7 +98,13 @@ export function MapLayersButton({
       >
         <Layers size={18} strokeWidth={2.1} />
       </motion.button>
-      <MapLayersSheet open={at !== null} view={at ?? lastView} onClose={() => setAt(null)} />
+      {/* Into the phone screen, not here: a sheet fills its nearest positioned box, and the
+          map rail (absolute, translated) would squeeze it into the button's capsule. */}
+      {client &&
+        createPortal(
+          <MapLayersSheet open={at !== null} view={at ?? lastView} onClose={() => setAt(null)} />,
+          document.querySelector("[data-ar-app-frame]") ?? document.body,
+        )}
     </>
   );
 }

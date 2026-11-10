@@ -17,13 +17,25 @@ export function MapTerrain({ force = false }: { force?: boolean }) {
   const base = useMapBase();
   const standard = isStandardStyle(mode, base);
   const { current } = useMap();
-  // Layers can only be added once the style (and Standard's import) has loaded.
+  // Layers can only be added once the style (and Standard's import) has loaded. Without slots
+  // they go under the style's first label layer, looked up as each style comes in (never one
+  // of these layers, which would put the contour labels before themselves).
   const [styleIn, setStyleIn] = useState(false);
+  const [beforeId, setBeforeId] = useState<string | undefined>();
   useEffect(() => {
     const map = current?.getMap();
     if (!map) return;
-    const loaded = () => setStyleIn(true);
-    const loading = () => setStyleIn(false);
+    const loaded = () => {
+      setStyleIn(true);
+      setBeforeId(
+        map.getStyle()?.layers?.find((l) => l.type === "symbol" && !l.id.startsWith("map-terrain"))
+          ?.id,
+      );
+    };
+    const loading = () => {
+      setStyleIn(false);
+      setBeforeId(undefined);
+    };
     if (map.isStyleLoaded()) loaded();
     map.on("style.load", loaded);
     map.on("styledataloading", loading);
@@ -32,19 +44,6 @@ export function MapTerrain({ force = false }: { force?: boolean }) {
       map.off("styledataloading", loading);
     };
   }, [current]);
-  // Without slots: slide under the style's first label layer once the style is in.
-  const [beforeId, setBeforeId] = useState<string | undefined>();
-  useEffect(() => {
-    const map = current?.getMap();
-    if (!map || standard || !on) return;
-    const find = () => {
-      if (!map.isStyleLoaded()) return;
-      setBeforeId(map.getStyle()?.layers?.find((l) => l.type === "symbol")?.id);
-    };
-    find();
-    map.on("styledata", find);
-    return () => void map.off("styledata", find);
-  }, [current, standard, on]);
 
   if (!on || !styleIn) return null;
   const place = standard ? { slot: "bottom" } : { beforeId };

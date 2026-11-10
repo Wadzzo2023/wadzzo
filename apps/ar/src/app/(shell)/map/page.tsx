@@ -17,7 +17,7 @@ import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { muralQueryBox } from "~/lib/murals/area";
-import { NearbyTrailLines } from "~/components/trails/NearbyTrailLines";
+import { NearbyTrailLines, type TrailLine } from "~/components/trails/NearbyTrailLines";
 import { TrailCompleteSheet } from "~/components/trails/TrailCompleteSheet";
 import { TrailNextCard, TrailProgressPill } from "~/components/trails/TrailFollowBar";
 import { TrailMapLayer } from "~/components/trails/TrailMapLayer";
@@ -312,6 +312,21 @@ export default function MapScreen() {
   } | null>(null);
   // Rounded (~1 km) and kept in range when the zoomed-out globe runs past the date line.
   const muralArea = bounds && muralQueryBox(bounds);
+  // Every trail in view draws as a line too (not only those near you): the same rounded box.
+  const trailsInView = api.trails.inArea.useQuery(
+    muralArea ?? { north: 0, south: 0, east: 0, west: 0 },
+    {
+      enabled: Boolean(muralArea),
+      placeholderData: keepPreviousData,
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  );
+  const trailLines = useMemo(() => {
+    const byId = new Map<string, TrailLine>((nearbyTrails.data ?? []).map((t) => [t.id, t]));
+    for (const t of trailsInView.data ?? []) if (!byId.has(t.id)) byId.set(t.id, t);
+    return [...byId.values()];
+  }, [nearbyTrails.data, trailsInView.data]);
   const muralsQuery = api.murals.inArea.useQuery(
     {
       ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }),
@@ -422,9 +437,9 @@ export default function MapScreen() {
           overlay={
             followed.data ? (
               <TrailMapLayer trail={followed.data} />
-            ) : nearbyTrails.data?.length ? (
+            ) : trailLines.length ? (
               <NearbyTrailLines
-                trails={nearbyTrails.data}
+                trails={trailLines}
                 onOpen={(id) => void router.push(`/trails/${id}`)}
               />
             ) : null

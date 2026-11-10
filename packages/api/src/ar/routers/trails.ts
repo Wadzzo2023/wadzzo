@@ -2,6 +2,7 @@ import type { Prisma } from "@wadzzo/db";
 import { z } from "zod";
 
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { haversineMetres } from "@wadzzo/geo/map-geometry";
 import { isInPlatformScope, platformScope } from "@wadzzo/platform/scope";
 import { orderLockReason, trailProgress } from "@wadzzo/schemas/trail";
 
@@ -175,7 +176,8 @@ export const trailsRouter = createTRPCRouter({
         .object({
           lat: z.number().min(-90).max(90).optional(),
           lng: z.number().min(-180).max(180).optional(),
-          radiusKm: z.number().positive().max(2000).default(50),
+          // Up to half the world round (20 000 km): every trail, nearest first.
+          radiusKm: z.number().positive().max(20_000).default(50),
           brandId: z.string().optional(),
         })
         .optional(),
@@ -203,19 +205,73 @@ export const trailsRouter = createTRPCRouter({
         },
         select: SELECT,
         orderBy: { publishedAt: "desc" },
-        take: 50,
+        // With a place: sort them all by distance first, so the nearest 50 are kept.
+        take: at ? 1000 : 50,
       });
-      const trails = await Promise.all(rows.map((row) => fanTrail(ctx.db, row, userId)));
-      if (!at) return trails;
-      const centre = (t: FanTrail) => ({
-        lat: (t.bounds.minLat + t.bounds.maxLat) / 2,
-        lng: (t.bounds.minLng + t.bounds.maxLng) / 2,
+      if (at) {
+        const away = new Map(
+          rows.map((t) => [
+            t.id,
+            haversineMetres(at, {
+              lat: (t.minLat + t.maxLat) / 2,
+              lng: (t.minLng + t.maxLng) / 2,
+            }),
+          ]),
+        );
+        rows.sort((a, b) => away.get(a.id)! - away.get(b.id)!);
+      }
+      return Promise.all(rows.slice(0, 50).map((row) => fanTrail(ctx.db, row, userId)));
+    }),
+
+  /**
+   * Trails whose bounds overlap a map's view, as lines (id, title, colour, path, stop points),
+   * so the map draws every trail wherever it is looked at, not only those near the viewer. West > east is a view across the date line: then
+   * any longitude matches (as `murals.inArea`).
+   */
+  inArea: publicProcedure
+    .input(
+      z.object({
+        north: z.number().min(-90).max(90),
+        south: z.number().min(-90).max(90),
+        east: z.number().min(-180).max(180),
+        west: z.number().min(-180).max(180),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const rows = await ctx.db.trail.findMany({
+        where: {
+          ...fanVisible(),
+          ...platformScope(ctx),
+          minLat: { lte: input.north },
+          maxLat: { gte: input.south },
+          ...(input.west <= input.east
+            ? { minLng: { lte: input.east }, maxLng: { gte: input.west } }
+            : {}),
+        },
+        // Only what a line needs (one query, no progress): the map asks for this on every pan.
+        select: {
+          id: true,
+          title: true,
+          color: true,
+          path: true,
+          stops: {
+            orderBy: { position: "asc" },
+            select: { locationGroup: { select: { latitude: true, longitude: true } } },
+          },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 100,
       });
-      const d = (t: FanTrail) => {
-        const c = centre(t);
-        return (c.lat - at.lat) ** 2 + ((c.lng - at.lng) * Math.cos((at.lat * Math.PI) / 180)) ** 2;
-      };
-      return trails.sort((a, b) => d(a) - d(b));
+      return rows.map((t) => ({
+        id: t.id,
+        title: t.title,
+        color: t.color,
+        path: readPath(t.path),
+        stops: t.stops.map((s) => ({
+          lat: s.locationGroup.latitude,
+          lng: s.locationGroup.longitude,
+        })),
+      }));
     }),
 
   get: publicProcedure.input(z.object({ id: z.string().min(1) })).query(async ({ ctx, input }) => {
