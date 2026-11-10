@@ -57,6 +57,7 @@ import { api } from "~/utils/api";
 
 import {
   draftPath,
+  adoptSaved,
   followTrack,
   moveStop,
   removeStop,
@@ -91,7 +92,12 @@ export function saveInput(d: TrailDraft) {
     color: d.color,
     startDate: d.startDate,
     endDate: d.endDate,
-    stops: d.stops.map((s) => ({ pinId: s.pinId, required: s.required, clue: s.clue })),
+    stops: d.stops.map((s) => ({
+      pinId: s.pinId,
+      required: s.required,
+      clue: s.clue,
+      ...(s.newPin ? { newPin: s.newPin } : {}),
+    })),
     path: draftPath(d),
     stopDefaults: d.stopDefaults,
     reward: d.reward,
@@ -143,11 +149,20 @@ export function TrailBuilder({
   const problems = submitProblems({ stops: draft.stops, path, endDate: draft.endDate });
 
   const persist = async () => {
+    const madePins = draft.stops.some((s) => s.newPin);
     const t = await save.mutateAsync(saveInput(draft));
     void utils.maps.trail.list.invalidate();
-    saved({ ...draft, id: t.id, updatedAt: new Date(t.updatedAt), status: t.status });
+    // New stops are pins now: on the map, under their real ids.
+    if (madePins) void utils.maps.pin.getMyPins.invalidate();
+    const next = adoptSaved(draft, {
+      id: t.id,
+      updatedAt: new Date(t.updatedAt),
+      status: t.status,
+      stopPinIds: t.stops.map((s) => s.pin.id),
+    });
+    saved(next);
     onSaved(t);
-    return t;
+    return next;
   };
 
   const onSave = async () => {
@@ -161,10 +176,10 @@ export function TrailBuilder({
 
   const onSubmit = async () => {
     try {
-      const t = await persist();
-      await submit.mutateAsync({ id: t.id });
+      const next = await persist();
+      await submit.mutateAsync({ id: next.id! });
       void utils.maps.trail.list.invalidate();
-      saved({ ...draft, id: t.id, updatedAt: new Date(), status: "PENDING" });
+      saved({ ...next, updatedAt: new Date(), status: "PENDING" });
       toast.success("Sent for review. Fans see the trail once it's approved.");
     } catch {
       // shown by onError
@@ -643,22 +658,38 @@ export function TrailBuilder({
               <Button
                 size="sm"
                 disabled={applyStyle.isPending}
-                onClick={() =>
+                onClick={() => {
+                  const look = draft.stopDefaults.look ?? {};
+                  // New stops take it in the draft (their pins are made on save).
+                  const fresh = draft.stops.filter((s) => s.newPin).length;
+                  if (fresh)
+                    change((d) => ({
+                      ...d,
+                      stops: d.stops.map((s) =>
+                        s.newPin
+                          ? {
+                              ...s,
+                              newPin: { ...s.newPin, look: d.stopDefaults.look ?? s.newPin.look },
+                            }
+                          : s,
+                      ),
+                    }));
+                  const pinIds = draft.stops.filter((s) => !s.newPin).map((s) => s.pinId);
+                  const done = (count: number) => {
+                    setRestyle(false);
+                    toast.success(`Updated ${count} stop${count === 1 ? "" : "s"}`);
+                  };
+                  if (!pinIds.length) return done(fresh);
                   applyStyle.mutate(
-                    {
-                      creatorId: draft.creatorId,
-                      look: draft.stopDefaults.look ?? {},
-                      pinIds: draft.stops.map((s) => s.pinId),
-                    },
+                    { creatorId: draft.creatorId, look, pinIds },
                     {
                       onSuccess: (r) => {
-                        setRestyle(false);
                         void utils.maps.pin.getMyPins.invalidate();
-                        toast.success(`Updated ${r.count} stop${r.count === 1 ? "" : "s"}`);
+                        done(r.count + fresh);
                       },
                     },
-                  )
-                }
+                  );
+                }}
               >
                 Update all
               </Button>

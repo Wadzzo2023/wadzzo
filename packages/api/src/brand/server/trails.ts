@@ -12,6 +12,7 @@ import {
   type TrailSection,
 } from "@wadzzo/geo/trail-geometry";
 import {
+  isNewStopId,
   MAX_TRAILS_PER_BRAND,
   readStopDefaults,
   submitProblems,
@@ -19,6 +20,8 @@ import {
   type TrailMode,
   type TrailStatus,
 } from "@wadzzo/schemas/trail";
+
+import { attachTags, newPinData } from "./pin-create";
 
 /** What every view of a trail reads: details, stops in order, path and reward. */
 export const TRAIL_SELECT = {
@@ -185,6 +188,29 @@ function routeChanged(
   return a !== b || JSON.stringify(readPath(before.path)) !== JSON.stringify(input.path);
 }
 
+/**
+ * Pins this trail made (New stop in its builder) that aren't among `keep` any more: deleted, or
+ * hidden once a fan has collected one (their collects stay). One another trail also uses
+ * becomes an ordinary pin of the brand instead.
+ */
+async function releaseOwnedPins(tx: Prisma.TransactionClient, trailId: string, keep: string[]) {
+  const owned = await tx.locationGroup.findMany({
+    where: { trailOwnerId: trailId, id: { notIn: keep } },
+    select: {
+      id: true,
+      _count: { select: { trailStops: { where: { trailId: { not: trailId } } } } },
+      locations: { select: { _count: { select: { consumers: true } } } },
+    },
+  });
+  for (const p of owned) {
+    if (p._count.trailStops > 0)
+      await tx.locationGroup.update({ where: { id: p.id }, data: { trailOwnerId: null } });
+    else if (p.locations.some((l) => l._count.consumers > 0))
+      await tx.locationGroup.update({ where: { id: p.id }, data: { hidden: true } });
+    else await tx.locationGroup.delete({ where: { id: p.id } });
+  }
+}
+
 export function trails(db: Db) {
   async function find(id: string) {
     const row = await db.trail.findUnique({ where: { id }, select: TRAIL_SELECT });
@@ -328,10 +354,38 @@ export function trails(db: Db) {
       const pins = await checkStopPins(
         db,
         who.creatorId,
-        input.stops.map((s) => s.pinId),
+        input.stops.filter((s) => !isNewStopId(s.pinId)).map((s) => s.pinId),
       );
-      const stopPoints = input.stops.map((s) => {
+      // New stops' pins are made with the trail (they run from its start, or now, to its end,
+      // exactly where they were put). Their columns are worked out first: outside the transaction.
+      const now = new Date();
+      const newPins = new Map(
+        await Promise.all(
+          input.stops
+            .filter((s) => s.newPin)
+            .map(async (s) => {
+              const n = s.newPin!;
+              const data = await newPinData(db, {
+                ...n,
+                creatorId: who.creatorId,
+                platformId: who.platformId,
+                radius: 0,
+                pinNumber: 1,
+                multiPin: false,
+                startDate: input.startDate > now ? input.startDate : now,
+                endDate: input.endDate,
+              });
+              return [s.pinId, { data, tags: n.tags }] as const;
+            }),
+        ),
+      );
+      const pointOf = (s: SaveTrailInput["stops"][number]) => {
+        if (s.newPin) return { latitude: s.newPin.lat, longitude: s.newPin.lng };
         const p = pins.get(s.pinId)!;
+        return { latitude: p.latitude, longitude: p.longitude };
+      };
+      const stopPoints = input.stops.map((s) => {
+        const p = pointOf(s);
         return { lat: p.latitude, lng: p.longitude };
       });
       const metres = pathMetres(input.path);
@@ -341,9 +395,7 @@ export function trails(db: Db) {
         minLng: 0,
         maxLng: 0,
       };
-      const last = input.stops.length
-        ? pins.get(input.stops[input.stops.length - 1]!.pinId)!
-        : null;
+      const last = input.stops.length ? pointOf(input.stops[input.stops.length - 1]!) : null;
 
       const before = input.id ? await find(input.id) : null;
       if (before) {
@@ -403,12 +455,25 @@ export function trails(db: Db) {
                 },
                 select: { id: true },
               });
+          // New stops become pins that belong to the trail.
+          const realId = new Map<string, string>();
+          for (const [tempId, { data: pin, tags }] of newPins) {
+            const g = await tx.locationGroup.create({
+              data: { ...pin, platformId: who.platformId, trailOwnerId: trail.id },
+              select: { id: true },
+            });
+            await attachTags(tx, g.id, tags);
+            realId.set(tempId, g.id);
+          }
+          const stopIds = input.stops.map((s) => realId.get(s.pinId) ?? s.pinId);
           await tx.trailStop.deleteMany({ where: { trailId: trail.id } });
+          // Pins it made that are no longer stops go (or hide, once collected).
+          await releaseOwnedPins(tx, trail.id, stopIds);
           if (input.stops.length)
             await tx.trailStop.createMany({
               data: input.stops.map((s, i) => ({
                 trailId: trail.id,
-                locationGroupId: s.pinId,
+                locationGroupId: stopIds[i]!,
                 position: i + 1,
                 required: s.required,
                 clue: s.clue?.trim() ? s.clue.trim() : null,
@@ -500,19 +565,29 @@ export function trails(db: Db) {
       return toTrail(await find(id));
     },
 
-    /** Deletes a trail nobody has started (its stops stay: they are ordinary pins). */
+    /**
+     * Deletes a trail nobody has started. Pins it made (New stop) go with it; pins that were
+     * the brand's already stay, as ordinary pins.
+     */
     async remove(id: string) {
       const t = await find(id);
       if (t._count.runs > 0)
         throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "Fans have started this trail: end it instead",
         });
-      await db.$transaction([
-        db.trail.delete({ where: { id } }),
-        ...(t.rewardGroup
-          ? [db.locationGroup.update({ where: { id: t.rewardGroup.id }, data: { hidden: true } })]
-          : []),
-      ]);
+      await db.$transaction(
+        async (tx) => {
+          await tx.trailStop.deleteMany({ where: { trailId: id } });
+          await releaseOwnedPins(tx, id, []);
+          await tx.trail.delete({ where: { id } });
+          if (t.rewardGroup)
+            await tx.locationGroup.update({
+              where: { id: t.rewardGroup.id },
+              data: { hidden: true },
+            });
+        },
+        { timeout: 20_000, maxWait: 10_000 },
+      );
       return { id };
     },
 

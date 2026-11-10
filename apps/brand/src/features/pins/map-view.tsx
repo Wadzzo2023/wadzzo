@@ -2,7 +2,7 @@
 
 import { Hexagon, Plus, Route, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
@@ -42,6 +42,7 @@ import {
   lineOf,
   stopsOf,
   toDraft,
+  unsavedStopPins,
   whyNotStop,
   type TrailView,
 } from "~/features/trails/trail-lines";
@@ -163,6 +164,17 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     (t) => t.status !== "ENDED" && t.path.length > 0 && t.id !== draft?.id,
   );
   const selectedTrail = trails.data?.find((t) => t.id === trailId) ?? null;
+  // Trail mode: new stops not saved yet are drawn as pins too (their pins are made on save).
+  const draftPins = useMemo(
+    () =>
+      draft?.stops.some((s) => s.newPin)
+        ? [
+            ...myPins,
+            ...unsavedStopPins(draft, myPins[0]?.locationGroup?.creator.profileUrl ?? null),
+          ]
+        : myPins,
+    [draft, myPins],
+  );
   const applyStyle = api.maps.trail.applyStyle.useMutation({
     onError: (e) => toast.error(e.message),
   });
@@ -532,7 +544,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         )}
         {!drawing && (
           <PinLayer
-            pins={myPins}
+            pins={draftPins}
             onSelect={trailMode ? pinAsStop : selectPin}
             stops={draft ? draftStops(draft) : selectedTrail ? stopsOf(selectedTrail) : undefined}
           />
@@ -682,8 +694,10 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           </div>
         </>
       )}
-      {draft && (
+      {draft && newStopAt && (
         <NewStopDialog
+          // A fresh form for every new stop.
+          key={`${newStopAt.lat},${newStopAt.lng}`}
           at={newStopAt}
           draft={draft}
           position={draft.stops.length + 1}
@@ -691,7 +705,6 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           onCreated={(stop) => {
             setNewStopAt(null);
             useTrailBuilder.getState().change((d) => addStop(d, stop));
-            void utils.maps.pin.getMyPins.invalidate();
           }}
         />
       )}

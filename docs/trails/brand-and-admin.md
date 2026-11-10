@@ -105,7 +105,9 @@ When a brand clicks empty map (or picks a searched place), they don't leave the 
 
 - the same form schema and validation (`createPinFormSchema` in `components/pins/pin-form-parts.tsx`);
 - the same sections (`ImageUploadField`, `PinLookSection` with the shape picker, `CollectionInputs`, `TiersOptions`, `PinTypeToggles`, `TagsSection`);
-- the same save call (`api.maps.pin.createPin`).
+- the same pin columns (`newPinData` in `packages/api/src/brand/server/pin-create.ts`, which `createPin` uses too), but **nothing is written when the stop is added**.
+
+**Saved with the trail.** A new stop lives in the draft (id `new:…`, its pin's details in `newPin`) and is drawn on the map like the other stops. The pin is made by **Save draft** / **Send for review**, in the same transaction as the trail, and belongs to it (`LocationGroup.trailOwnerId`). Taking that stop off and saving deletes the pin, or hides it if a fan already collected it. Deleting the trail does the same for every pin it made. Closing the builder without saving leaves nothing behind. Pins the brand already had stay ordinary pins either way.
 
 The difference is the **layout**: only what changes from stop to stop is open; everything else starts from the trail's **Stop defaults** and is folded away.
 
