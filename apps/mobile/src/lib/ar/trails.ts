@@ -46,3 +46,47 @@ export function trailLines(t: ArTrail): GeoJSON.FeatureCollection {
   }
   return { type: "FeatureCollection", features };
 }
+
+/** Google's encoded polyline (what Mapbox's static `path` overlay takes), [lng, lat] in. */
+function encodePolyline(points: [number, number][]) {
+  let out = "";
+  let prevLat = 0;
+  let prevLng = 0;
+  const enc = (v: number) => {
+    let n = v < 0 ? ~(v << 1) : v << 1;
+    while (n >= 0x20) {
+      out += String.fromCharCode((0x20 | (n & 0x1f)) + 63);
+      n >>= 5;
+    }
+    out += String.fromCharCode(n + 63);
+  };
+  for (const [lng, lat] of points) {
+    const la = Math.round(lat * 1e5);
+    const ln = Math.round(lng * 1e5);
+    enc(la - prevLat);
+    enc(ln - prevLng);
+    prevLat = la;
+    prevLng = ln;
+  }
+  return out;
+}
+
+/**
+ * A static picture of the trail on the map (list cards), as on the web: the path over a white
+ * outline and a numbered pin per stop, framed to fit. A picture, not a live map: a list doesn't pan.
+ */
+export function routeMapImage(t: Pick<ArTrail, "path" | "stops" | "color">, token: string, theme: "dark" | "light", size = { w: 600, h: 240 }) {
+  const hex = trailColor(t).replace("#", "");
+  const line: [number, number][] = t.path.length ? t.path.flat() : t.stops.map((s) => [s.lng, s.lat] as [number, number]);
+  // Keep the URL short: a card needs the shape, not every bend.
+  const step = Math.max(1, Math.ceil(line.length / 120));
+  const pts = line.filter((_, i) => i % step === 0 || i === line.length - 1);
+  const poly = encodeURIComponent(encodePolyline(pts));
+  const overlays = [
+    `path-9+ffffff-0.85(${poly})`,
+    `path-5+${hex}-1(${poly})`,
+    ...t.stops.map((s) => `pin-s-${s.position}+${hex}(${s.lng.toFixed(5)},${s.lat.toFixed(5)})`),
+  ].join(",");
+  const style = theme === "dark" ? "dark-v11" : "light-v11";
+  return `https://api.mapbox.com/styles/v1/mapbox/${style}/static/${overlays}/auto/${size.w}x${size.h}@2x?padding=36&access_token=${token}&attribution=false&logo=false`;
+}
