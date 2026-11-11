@@ -9,7 +9,7 @@ import { trailColor, trailLines } from "~/lib/ar/trails";
  * trail's colour (walked sections dimmed) and a numbered dot under each stop's
  * pin. Drawn below the pin markers, which stay the things you tap.
  */
-export function TrailMapLine({ trail }: { trail: ArTrail }) {
+export function TrailMapLine({ trail, onStop }: { trail: ArTrail; /** A stop's dot tapped (the trail page). */ onStop?: (position: number) => void }) {
   const color = trailColor(trail);
   const lines = useMemo(() => trailLines(trail), [trail]);
   const stops = useMemo<GeoJSON.FeatureCollection>(
@@ -40,7 +40,17 @@ export function TrailMapLine({ trail }: { trail: ArTrail }) {
           }}
         />
       </ShapeSource>
-      <ShapeSource id="trail-stops" shape={stops}>
+      <ShapeSource
+        id="trail-stops"
+        shape={stops}
+        onPress={
+          onStop &&
+          ((e) => {
+            const n = Number(e.features[0]?.properties?.n);
+            if (Number.isFinite(n)) onStop(n);
+          })
+        }
+      >
         <CircleLayer
           id="trail-stop-dot"
           style={{
