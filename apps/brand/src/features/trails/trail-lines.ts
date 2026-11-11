@@ -80,7 +80,8 @@ export function boundsOf(
 }
 
 /** A new trail: two weeks from now, the theme's colour, nothing else yet. */
-export function blankDraft(creatorId?: string): TrailDraft {
+/** A new trail; made with a layer picked on the map, it goes in that layer (docs/layers). */
+export function blankDraft(creatorId?: string, layerId: string | null = null): TrailDraft {
   const now = new Date();
   return {
     creatorId,
@@ -97,6 +98,7 @@ export function blankDraft(creatorId?: string): TrailDraft {
     routes: {},
     stopDefaults: {},
     reward: null,
+    layerId,
   };
 }
 
@@ -138,6 +140,7 @@ export function toDraft(t: TrailView): TrailDraft {
     reward: t.reward
       ? { assetId: t.reward.asset.id, limit: t.reward.limit, minStops: t.reward.minStops }
       : null,
+    layerId: t.layerId,
   };
 }
 
@@ -191,6 +194,8 @@ export function unsavedStopPins(
           remaining: n.pinCollectionLimit,
           approved: true,
           hotspotId: null,
+          // new stops are made in the trail's layer (docs/layers)
+          layerId: d.layerId ?? null,
           ...look,
           markerShape: own ? null : (look.markerShape ?? "circle"),
           creator: { profileUrl: brandImage },

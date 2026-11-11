@@ -259,6 +259,8 @@ model Creator {
     events        CreatorEvent[]
     announcements CreatorAnnouncement[]
     trails        Trail[]
+    /// the brand's map layers (see model PinLayer)
+    pinLayers     PinLayer[]
     mapEmbeds          MapEmbed[]
     agentConversations AgentConversation[]
     issuer             CreatorIssuer?
@@ -709,9 +711,42 @@ model Hotspot {
     updatedAt        DateTime @updatedAt
 
     locationGroups LocationGroup[]
+    /// the map layer every drop of this hotspot goes in (see model PinLayer)
+    layerId        String?
+    layer          PinLayer?       @relation(fields: [layerId], references: [id], onDelete: SetNull)
     // white-label platform this row belongs to (see model Platform)
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
+    @@index([platformId])
+}
+
+/// A brand's map layer (Hospital, School, Sports…). On its base map the brand selects a layer and
+/// everything it makes there (pins, hotspots, trails) goes in it; the fan map shows regular
+/// (layer-less) things by default and one layer's while its chip is picked (docs/layers). Names
+/// are free: two brands (or one) can both have a "Hospital". Deleting a layer makes its pins,
+/// hotspots and trails regular again.
+model PinLayer {
+    id         String   @id @default(cuid())
+    // white-label platform this row belongs to (see model Platform)
+    platformId String
+    platform   Platform @relation(fields: [platformId], references: [id])
+    creatorId  String
+    creator    Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+    name      String
+    /// one of LAYER_ICONS in @wadzzo/schemas/layer
+    icon      String
+    /// #rrggbb
+    color     String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    locationGroups LocationGroup[]
+    hotspots       Hotspot[]
+    trails         Trail[]
+
+    @@index([creatorId])
     @@index([platformId])
 }
 
@@ -856,12 +891,16 @@ model LocationGroup {
     /// (taking the stop off, or deleting the trail, deletes it; hides it once collected)
     trailOwnerId      String?
     trailOwner        Trail?             @relation("TrailOwnedPins", fields: [trailOwnerId], references: [id], onDelete: SetNull)
+    /// the map layer (Hospital, School…) this pin is in; null = a regular map pin (see model PinLayer)
+    layerId           String?
+    layer             PinLayer?          @relation(fields: [layerId], references: [id], onDelete: SetNull)
     // white-label platform this row belongs to (see model Platform)
     platformId String   @default("wadzzo")
     platform   Platform @relation(fields: [platformId], references: [id])
     @@index([platformId])
     @@index([creatorId, endDate])
     @@index([trailOwnerId])
+    @@index([layerId])
 }
 
 model Location {
@@ -1727,6 +1766,7 @@ model Platform {
     redeems            Redeem[]
     pinTemplates       PinTemplate[]
     pinShapes          PinShape[]
+    pinLayers          PinLayer[]
     trails             Trail[]
     trailRuns          TrailRun[]
     admins             Admin[]
@@ -1813,6 +1853,9 @@ model Trail {
     runs  TrailRun[]
     /// pins made as stops in this trail's builder (see LocationGroup.trailOwnerId)
     ownedPins LocationGroup[] @relation("TrailOwnedPins")
+    /// the map layer the whole trail is in (see model PinLayer); null = a regular trail
+    layerId   String?
+    layer     PinLayer?       @relation(fields: [layerId], references: [id], onDelete: SetNull)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -1824,6 +1867,7 @@ model Trail {
     @@index([platformId])
     @@index([creatorId, status])
     @@index([status, minLat, maxLat])
+    @@index([layerId])
 }
 
 /// A pin on a trail, in order.

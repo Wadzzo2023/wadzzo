@@ -51,6 +51,7 @@ export type PinOnMap = Pick<
         | "remaining"
         | "approved"
         | "hotspotId"
+        | "layerId"
         | "markerShape"
         | "pinShapeId"
         | "markerFill"
@@ -110,14 +111,10 @@ export const useNearbyPinsStore = create<NearbyPinsState>((set, get) => ({
 
   setNearbyPins: (pins: PinOnMap[]) => set({ nearbyPins: pins }),
 
+  // By reference: the query keeps the same array while nothing changed, and a new one when a
+  // pin was edited (its layer, look or spot), so edits show without a reload.
   setMyPins: (pins: PinOnMap[]) => {
-    const currentPins = get().myPins;
-    if (
-      pins.length !== currentPins.length ||
-      pins.map((pin) => pin.id).join(",") !== currentPins.map((pin) => pin.id).join(",")
-    ) {
-      set({ myPins: pins, allPins: pins });
-    }
+    if (pins !== get().myPins) set({ myPins: pins, allPins: pins });
   },
 
   setAdminPins: (pins: PinOnMap[]) => {

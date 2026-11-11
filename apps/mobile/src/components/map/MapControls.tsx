@@ -1,5 +1,5 @@
 import { Compass, Crosshair } from "lucide-react-native";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 
@@ -23,6 +23,7 @@ export function MapControls({
   following,
   mapMode,
   onToggleMapMode,
+  layers,
 }: {
   onRecenter: () => void;
   compassMode: boolean;
@@ -32,6 +33,8 @@ export function MapControls({
   /** Flat 2D or tilted 3D basemap. */
   mapMode?: MapMode;
   onToggleMapMode?: () => void;
+  /** The Layers button (docs/layers: which drops the map shows), below 2D / 3D. */
+  layers?: ReactNode;
 }) {
   const { c } = useColors();
   const spin = useSharedValue(0);
@@ -88,6 +91,13 @@ export function MapControls({
           <>
             {divider}
             <MapModeButton bare mode={mapMode} onToggle={onToggleMapMode} />
+          </>
+        )}
+
+        {layers && (
+          <>
+            {divider}
+            {layers}
           </>
         )}
       </View>

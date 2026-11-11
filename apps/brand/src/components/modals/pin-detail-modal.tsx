@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useMapFormCard } from "~/features/pins/map-form-card";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -363,7 +364,18 @@ export default function PinDetailPanel() {
                 </Link>
               </Button>
               <Button className="flex-1" asChild>
-                <Link href={`/pins/${pin.id}/edit`} onClick={close}>
+                <Link
+                  href={`/pins/${pin.id}/edit`}
+                  onClick={(e) => {
+                    close();
+                    // On the base map the edit form opens there as a card (docs/layers).
+                    const card = useMapFormCard.getState();
+                    if (card.hosted) {
+                      e.preventDefault();
+                      card.open({ kind: "editPin", id: pin.id });
+                    }
+                  }}
+                >
                   <Pencil /> Edit pin
                 </Link>
               </Button>

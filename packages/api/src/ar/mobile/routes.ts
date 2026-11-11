@@ -182,8 +182,24 @@ export const ROUTES: Route[] = [
     auth: "optional",
     // `?lat=&lng=&radiusKm=` → only pins in that circle. Without them (older
     // app builds), every live pin, as before.
+    // `?layer=none` → regular (layer-less) pins only; `?layer=<chip id>` → only
+    // that layer's pins (docs/layers). Without it — the App Store build — every
+    // pin, layer pins included, exactly as before.
     handler: ({ caller, query }) =>
       caller.pins.list({
+        lat: num(query.lat),
+        lng: num(query.lng),
+        radiusKm: num(query.radiusKm),
+        layer: query.layer ? query.layer : undefined,
+      }),
+  },
+  // The map's layer chips: layers with live pins (in the circle, when given).
+  {
+    method: "GET",
+    path: "/layers",
+    auth: "optional",
+    handler: ({ caller, query }) =>
+      caller.pins.layers({
         lat: num(query.lat),
         lng: num(query.lng),
         radiusKm: num(query.radiusKm),

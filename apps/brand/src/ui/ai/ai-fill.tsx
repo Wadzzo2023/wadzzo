@@ -4,11 +4,13 @@ import { Loader2, Sparkles, Undo2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Button } from "@wadzzo/ui/poster/button";
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import type { FillForm, FillResult } from "@wadzzo/schemas/ai-forms";
 import { api } from "~/utils/api";
 
+import { useFormCard } from "../form-card";
 import { localNow, AiQuota } from "./shared";
 
 /**
@@ -30,6 +32,7 @@ export function AiFillCard<F extends FillForm>({
   examples?: string[];
   placeholder?: string;
 }) {
+  const card = useFormCard();
   const [prompt, setPrompt] = useState("");
   const [undo, setUndo] = useState<(() => void) | null>(null);
   const fill = api.ai.fillForm.useMutation({
@@ -44,7 +47,13 @@ export function AiFillCard<F extends FillForm>({
   const run = () => fill.mutate({ form, prompt, ...localNow(), context: context ?? {} });
 
   return (
-    <section className="border-primary/30 from-primary/10 via-card to-card relative overflow-hidden rounded-xl border bg-linear-to-br p-5">
+    <section
+      className={cn(
+        "border-primary/30 from-primary/10 via-card to-card relative overflow-hidden rounded-xl border bg-linear-to-br",
+        // Tighter in a map card (~/ui/form-card).
+        card ? "p-3" : "p-5",
+      )}
+    >
       <div className="mb-3 flex items-center gap-2">
         <span className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-lg">
           <Sparkles className="size-4" />

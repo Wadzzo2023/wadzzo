@@ -75,7 +75,8 @@ everyone out — the only kill switch.
 
 | Method | Path | Auth | → tRPC |
 |---|---|---|---|
-| GET | `/pins` | optional | `pins.list`. Signed-out gets public pins; signed-in adds tier/private + `collected`/`locked`. |
+| GET | `/pins` | optional | `pins.list`. Signed-out gets public pins; signed-in adds tier/private + `collected`/`locked`. Each pin may carry `layer: { id, name, icon, color } \| null`. Optional `?layer=none` (regular pins only) or `?layer=<chip id>` (that layer only); without it, every pin as before (docs/layers). |
+| GET | `/layers?lat=&lng=&radiusKm=` | optional | `pins.layers`: the map's layers, one per brand layer, `[{ id, name, icon, color, brand, brandImage, pinCount }]` by name then brand (`brandImage` = the brand's logo, added later; may be missing from an older server). Empty when none are in use. |
 | GET | `/pins/search?q=&lat=&lng=&limit=` | optional | `pins.search` — every live drop (not just the loaded area), matched on title / brand / description / tags, each word must match, best match first; one result per drop (nearest point to `lat`/`lng`). `q` ≥ 2 chars, `limit` ≤ 30. |
 | GET | `/pins/:id` | optional | new `pins.byId` (web currently finds it in the list) |
 | GET | `/brands/:id/pins?tab=live\|yours&cursor=` | optional | `pins.byBrand` |
@@ -177,6 +178,8 @@ title, image, `pinId` = the location id for `/pins/:id` and collect, `done`,
 `unavailable`, `lockReason`), `progress` (`done`, `total`, `requiredDone`,
 `requiredTotal`, `next`, `complete`), my `run`, and the `reward` (name, code,
 thumbnail, remaining, limit, claimed).
+Newer servers also send `layerId` (the trail's map layer, or null; docs/layers).
+Optional: older app builds ignore it, and every trail still comes back.
 
 Stops are collected with the usual `/pins/:id/collect` (or `collect-qr`);
 collecting one starts the run. On an `ORDERED` trail a required stop before

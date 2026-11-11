@@ -225,6 +225,25 @@ describe("update", () => {
     expect(db.hotspot.update).not.toHaveBeenCalled();
   });
 
+  it("accepts the unchanged start date the edit form always sends", async () => {
+    const db = makeDb(started);
+    await hotspots(db as never).update("BRAND_A", "h1", {
+      hotspotStartDate: started.hotspotStartDate.toISOString(),
+      hotspotEndDate: "2026-12-10T00:00:00.000Z",
+    });
+    expect(db.hotspot.update).toHaveBeenCalled();
+  });
+
+  it("moves the hotspot and every drop to a new map layer", async () => {
+    const db = makeDb(started);
+    await hotspots(db as never).update("BRAND_A", "h1", { layerId: "L1" });
+    expect(db.hotspot.update.mock.calls[0]![0].data).toMatchObject({ layerId: "L1" });
+    expect(db.locationGroup.updateMany).toHaveBeenCalledWith({
+      where: { hotspotId: "h1" },
+      data: { layerId: "L1" },
+    });
+  });
+
   it("moves a waiting first drop to the new start", async () => {
     const waiting = {
       id: "g1",

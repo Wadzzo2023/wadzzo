@@ -27,6 +27,7 @@ import { createOptimizedImage } from "@wadzzo/storage";
 import { BADWORDS } from "@wadzzo/schemas/banned-word";
 import { pinLookInputSchema } from "@wadzzo/schemas/pin-look";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { checkLayer } from "../../../shared/layers";
 
 export type ActingBrand = { creatorId: string; platformId: string };
 export type ActionResult = { message: string; pinJobId?: string; id?: string };
@@ -73,6 +74,8 @@ export async function executeAction(
   brand: ActingBrand,
   action: ProposedAction,
   edits: ActionEdits = {},
+  /** The map layer the brand is in (docs/layers): new pins, hotspots and trails go in it. */
+  layerId: string | null = null,
 ): Promise<ActionResult> {
   switch (action.type) {
     case "create_pins":
@@ -82,6 +85,7 @@ export async function executeAction(
         action.items,
         { ...action.defaults, ...edits.defaults },
         edits.keep,
+        layerId,
       );
     case "update_pins":
       return updatePins(
@@ -118,10 +122,12 @@ export async function executeAction(
       return { message: `Updated hotspot “${action.hotspot.title}”.` };
     }
     case "create_hotspot":
-      return createHotspot(db, brand, {
-        ...action.hotspot,
-        ...(edits.draft as object),
-      });
+      return createHotspot(
+        db,
+        brand,
+        { ...action.hotspot, ...(edits.draft as object) },
+        layerId,
+      );
     case "create_event":
       return createEvent(db, brand, {
         ...action.event,
@@ -160,7 +166,7 @@ export async function executeAction(
     }
     case "create_trail":
     case "update_trail":
-      return saveTrail(db, brand, action);
+      return saveTrail(db, brand, action, layerId);
   }
 }
 
@@ -175,6 +181,7 @@ async function saveTrail(
   db: Db,
   brand: ActingBrand,
   action: Extract<ProposedAction, { type: "create_trail" | "update_trail" }>,
+  layerId: string | null,
 ): Promise<ActionResult> {
   const service = trails(db);
   if (action.type === "create_trail") {
@@ -189,6 +196,8 @@ async function saveTrail(
       endDate: t.endDate,
       stops: t.stops.map((s) => ({ pinId: s.id, required: true })),
       path: straightSections(stops),
+      // A new trail goes in the layer the brand is in; an update keeps its layer.
+      layerId,
     });
     const saved = await service.save(brand, input);
     return {
@@ -245,8 +254,10 @@ async function createPins(
   items: Extract<ProposedAction, { type: "create_pins" }>["items"],
   rawDefaults: PinDefaults,
   keep?: string[],
+  rawLayerId: string | null = null,
 ): Promise<ActionResult> {
   const defaults = parse(PinDefaultsInput, rawDefaults);
+  const layerId = (await checkLayer(db, brand.creatorId, rawLayerId)) ?? null;
   const look = await lookColumnsFor(db, brand.creatorId, defaults.look);
   const start = new Date(defaults.startDate);
   const end = new Date(defaults.endDate);
@@ -280,6 +291,8 @@ async function createPins(
     autoCollect: defaults.autoCollect,
     groupingMode: defaults.grouping,
     pinNumber: defaults.pinNumber,
+    // The worker puts the pins in this layer (docs/layers); left out = regular.
+    ...(layerId && { layerId }),
     // Plain column values: the task server writes them as they are.
     ...(look && { look: look as Prisma.InputJsonObject }),
   };
@@ -429,8 +442,14 @@ const HotspotDraftInput = z
   })
   .refine((h) => !bad(h.title), { message: "That title isn't allowed" });
 
-async function createHotspot(db: Db, brand: ActingBrand, raw: unknown): Promise<ActionResult> {
+async function createHotspot(
+  db: Db,
+  brand: ActingBrand,
+  raw: unknown,
+  rawLayerId: string | null = null,
+): Promise<ActionResult> {
   const h = parse(HotspotDraftInput, raw);
+  const layerId = (await checkLayer(db, brand.creatorId, rawLayerId)) ?? null;
   const look = await lookColumnsFor(db, brand.creatorId, h.look);
   const { hotspotId } = await hotspots(db).create(brand.creatorId, {
     ...(look && { look }),
@@ -447,6 +466,7 @@ async function createHotspot(db: Db, brand: ActingBrand, raw: unknown): Promise<
     hotspotShape: "circle",
     geoJson: circleAround({ lat: h.lat, lng: h.lng }, h.radiusMetres),
     creatorId: brand.creatorId,
+    layerId,
   });
   return { message: `Hotspot “${h.title}” created.`, id: hotspotId };
 }

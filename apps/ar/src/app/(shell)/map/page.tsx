@@ -8,6 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
+import { LayerSheetButton } from "~/components/map/LayerSheet";
+import { inLayer, trailInLayer, useMapLayer, useMapLayers } from "~/lib/ar/layers";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { MapControls } from "~/components/map/MapControls";
 import { MuralSheet } from "~/components/map/MuralSheet";
@@ -104,6 +106,13 @@ export default function MapScreen() {
 
   const mapRef = useRef<MapCanvasHandle>(null);
   const [filter, setFilter] = useState<PinFilterId>("all");
+  const { layers: mapLayers, loaded: layersLoaded } = useMapLayers();
+  // Which drops show (docs/layers): regular ones, plus the layers turned on in the Layers sheet.
+  const layerView = useMapLayer((s) => s.view);
+  // A layer whose drops have all ended isn't listed any more: forget it.
+  useEffect(() => {
+    if (layersLoaded) useMapLayer.getState().keepOnly(mapLayers.map((l) => l.id));
+  }, [mapLayers, layersLoaded]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
   const [refetching, setRefetching] = useState(false);
@@ -325,8 +334,9 @@ export default function MapScreen() {
   const trailLines = useMemo(() => {
     const byId = new Map<string, TrailLine>((nearbyTrails.data ?? []).map((t) => [t.id, t]));
     for (const t of trailsInView.data ?? []) if (!byId.has(t.id)) byId.set(t.id, t);
-    return [...byId.values()];
-  }, [nearbyTrails.data, trailsInView.data]);
+    // A layer's trail shows only with its layer on (docs/layers), like its pins.
+    return [...byId.values()].filter((t) => trailInLayer(t, layerView));
+  }, [nearbyTrails.data, trailsInView.data, layerView]);
   const muralsQuery = api.murals.inArea.useQuery(
     {
       ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }),
@@ -455,7 +465,8 @@ export default function MapScreen() {
             The All / Following filter leads the row (where the GPS "Live"
             pill used to be: with no fix the location gate covers the map
             anyway, so the pill only ever said "Live"), then search, and the
-            avatar on the right with Events and Bounty stacked under it. */}
+            avatar on the right with Events, Trails and Bounty stacked under it.
+            Map layers (docs/layers) are in the Layers button on the right-hand rail. */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-2 px-4"
           style={{ paddingTop: "calc(var(--ar-top-inset) + 14px)" }}
@@ -503,6 +514,7 @@ export default function MapScreen() {
           onToggleCompass={handleToggleCompass}
           following={following}
           refetching={refetching}
+          layers={<LayerSheetButton layers={mapLayers} bare />}
         />
 
         {/* ── Followed trail: one compact group above the nearby rail ── */}
@@ -594,6 +606,8 @@ export default function MapScreen() {
           if (filterPins([pin], filter, followedIds).length === 0 && !settings.followingOnly) {
             setFilter("all");
           }
+          // Same for its layer: turn on the layer it's in (or regular drops).
+          if (!inLayer(pin, layerView)) useMapLayer.getState().reveal(pin.layer?.id ?? null);
           setSearchPin(pin);
           setSelectedId(pin.id);
           setFollowing(false);
@@ -637,7 +651,7 @@ export default function MapScreen() {
   );
 }
 
-/** A shortcut pill under the avatar (Events, Bounty): icon and name on one line. */
+/** A shortcut pill under the avatar (Events, Trails, Bounty): icon and name on one line. */
 function HudShortcut({
   icon: Icon,
   label,

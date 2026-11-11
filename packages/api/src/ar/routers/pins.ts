@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { deriveRarity, pinStatus, RARITY_ORDER } from "@wadzzo/ar-core/ar/rarity";
-import type { ArPin, Rarity } from "@wadzzo/ar-core/ar/types";
+import type { ArMapLayer, ArPin, Rarity } from "@wadzzo/ar-core/ar/types";
 import { resolvePinLook } from "@wadzzo/schemas/pin-look";
 import { generateRedeemCode } from "@wadzzo/utils/redeem-code";
 import { StellarAccount } from "@wadzzo/stellar/account";
@@ -13,6 +13,7 @@ import { notifyBrand } from "@wadzzo/platform/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../..";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { AppError, ErrorCodes } from "@wadzzo/errors";
+import { LAYER_REF_SELECT, layerFilterWhere, mapLayerChips } from "../../shared/layers";
 
 import {
   assertTrailOrder,
@@ -82,6 +83,8 @@ const groupInclude = {
   },
   // the brand's own pin shape, if the drop uses one
   pinShape: { select: { path: true, anchor: true } },
+  // the map layer (docs/layers), if the drop is in one
+  layer: { select: LAYER_REF_SELECT },
 } as const;
 
 const consumerSelect = {
@@ -186,6 +189,12 @@ const areaInput = z.object({
   types: z.array(z.enum(PinType)).max(6).optional(),
   /** Only this brand's pins (a website embed set to "only my brand"). */
   brandId: z.string().min(1).optional(),
+  /**
+   * Map layers (docs/layers): "none" = regular pins only, a layer chip's id = only its pins.
+   * Left out = every pin, as before: the App Store mobile app sends none and must keep
+   * getting layer pins (its contract doesn't change).
+   */
+  layer: z.string().min(1).max(1000).optional(),
 });
 
 /**
@@ -311,6 +320,7 @@ function toPin(
     lockReason: claim == null ? lockReason : null,
 
     tags: facts.tags,
+    layer: group.layer ?? null,
   };
 }
 
@@ -600,6 +610,7 @@ export const pinsRouter = createTRPCRouter({
           ...liveGroupWhere(ctx),
           ...(input?.types?.length ? { type: { in: input.types } } : {}),
           ...(input?.brandId ? { creatorId: input.brandId } : {}),
+          ...layerFilterWhere(input?.layer),
           locations: { some: locationWhere },
         },
         include: box
@@ -621,6 +632,25 @@ export const pinsRouter = createTRPCRouter({
         ),
       );
       return area ? pins.filter((p) => distanceMeters(area, p) <= area.radiusKm * 1000) : pins;
+    }),
+
+  /**
+   * The fan map's layer chips (docs/layers): brands' layers that have live pins (in the area,
+   * when one is given), one chip per brand layer, by name, with how many drops each has. Pass a
+   * chip's `id` back to `list` as `layer`. Empty when no layer is in use.
+   */
+  layers: publicProcedure
+    .input(areaInput.pick({ lat: true, lng: true, radiusKm: true }).optional())
+    .query(async ({ ctx, input }): Promise<ArMapLayer[]> => {
+      const area =
+        input?.lat != null && input.lng != null && input.radiusKm != null
+          ? { lat: input.lat, lng: input.lng, radiusKm: input.radiusKm }
+          : null;
+      const box = area ? boundingBox(area) : null;
+      return mapLayerChips(ctx.db, {
+        ...liveGroupWhere(ctx),
+        locations: { some: { hidden: false, ...(box ?? {}) } },
+      });
     }),
 
   /**

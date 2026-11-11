@@ -12,6 +12,7 @@
 import type { Prisma } from "@wadzzo/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { layerIdInput } from "@wadzzo/schemas/layer";
 
 import type {
   AgentBlock,
@@ -286,6 +287,8 @@ export const agentRouter = createTRPCRouter({
       BrandInput.extend({
         actionId: z.string(),
         edits: ActionEditsInput.optional(),
+        /** The map layer the brand is in (docs/layers); new drops go in it. */
+        layerId: layerIdInput,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -317,6 +320,7 @@ export const agentRouter = createTRPCRouter({
           brand,
           action.payload as unknown as ProposedAction,
           input.edits,
+          input.layerId ?? null,
         );
         await ctx.db.agentAction.update({
           where: { id: action.id },

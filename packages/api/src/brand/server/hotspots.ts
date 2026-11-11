@@ -36,6 +36,8 @@ export interface CreateHotspotInput {
   creatorId: string;
   /** Pin look for every drop (already checked; see lookColumnsFor). Default look when left out. */
   look?: PinLookColumns;
+  /** Map layer for every drop (already checked; see checkLayer); null = regular pins. */
+  layerId?: string | null;
 }
 
 export interface UpdateHotspotInput {
@@ -49,6 +51,8 @@ export interface UpdateHotspotInput {
   scope?: "future_drops" | "all_drops";
   /** New pin look; applies to every drop, past and future (it's only how they're drawn). */
   look?: PinLookColumns;
+  /** New map layer (already checked); every drop moves with it. Left out = unchanged. */
+  layerId?: string | null;
 }
 
 export interface HotspotActionResult {
@@ -118,6 +122,7 @@ export function hotspots(db: Db) {
           shape: input.hotspotShape,
           geoJson: (input.geoJson as Prisma.InputJsonValue | undefined) ?? Prisma.JsonNull,
           isActive: true,
+          layerId: input.layerId ?? null,
           ...(input.look ? lookData(input.look) : {}),
           locationGroups: {
             create: {
@@ -142,6 +147,7 @@ export function hotspots(db: Db) {
               endDate: firstDropEnd,
               hidden: startsLater,
               approved: true,
+              layerId: input.layerId ?? null,
               ...(input.look ? lookData(input.look) : {}),
               locations: {
                 createMany: {
@@ -206,14 +212,12 @@ export function hotspots(db: Db) {
         ? new Date(input.hotspotStartDate)
         : hotspot.hotspotStartDate;
       const end = input.hotspotEndDate ? new Date(input.hotspotEndDate) : hotspot.hotspotEndDate;
-      if (
-        input.hotspotStartDate &&
-        !pending &&
-        start.getTime() !== hotspot.hotspotStartDate.getTime()
-      )
+      // The edit form always sends the start date: only a changed one is checked.
+      const startChanged =
+        Boolean(input.hotspotStartDate) && start.getTime() !== hotspot.hotspotStartDate.getTime();
+      if (startChanged && !pending)
         throw invalid("The hotspot has already started — its start date can't change.");
-      if (input.hotspotStartDate && start < now)
-        throw invalid("The start date must be in the future.");
+      if (startChanged && start < now) throw invalid("The start date must be in the future.");
       if (end <= start) throw invalid("The end date must be after the start date.");
 
       await db.hotspot.update({
@@ -226,12 +230,16 @@ export function hotspots(db: Db) {
           autoCollect: input.autoCollect,
           multiPin: input.multiPin,
           ...(input.look ? lookData(input.look) : {}),
+          ...(input.layerId !== undefined && { layerId: input.layerId }),
         },
       });
-      if (input.look)
+      if (input.look || input.layerId !== undefined)
         await db.locationGroup.updateMany({
           where: { hotspotId: hotspot.id },
-          data: lookData(input.look),
+          data: {
+            ...(input.look ? lookData(input.look) : {}),
+            ...(input.layerId !== undefined && { layerId: input.layerId }),
+          },
         });
 
       // The first drop is waiting for the start: keep it dated for the (new) start.

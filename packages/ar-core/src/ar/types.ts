@@ -96,6 +96,33 @@ export interface ArPin {
    * what *this* drop was tagged with.
    */
   tags: string[];
+
+  /**
+   * The map layer (Hospital, School…) this drop is in, or null for a regular map pin. Optional:
+   * older servers don't send it. The fan map shows regular pins by default and a layer's pins
+   * only while that layer is picked (docs/layers).
+   */
+  layer?: ArPinLayer | null;
+}
+
+/** A map layer as fan clients draw it: a chip with an icon (a lucide name) and a colour. */
+export interface ArPinLayer {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
+/**
+ * A chip on the fan map's layer row (`GET /layers`): one brand's layer. `brand` is its brand's
+ * name (two brands can both have a "Hospital"); pass `id` back to the pin list as `layer`.
+ */
+export interface ArMapLayer extends ArPinLayer {
+  /** The brand's name (missing from an older server). */
+  brand?: string;
+  /** The brand's logo (missing from an older server). */
+  brandImage?: string | null;
+  pinCount: number;
 }
 
 export interface ArBrand {

@@ -55,6 +55,8 @@ export type TrailDraft = {
   track?: [number, number][] | null;
   stopDefaults: StopDefaults;
   reward: DraftReward | null;
+  /** The map layer the whole trail is in (docs/layers); null = a regular trail. */
+  layerId?: string | null;
 };
 
 /** How a shaped section was made. */

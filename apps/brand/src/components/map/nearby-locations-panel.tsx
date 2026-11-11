@@ -42,11 +42,21 @@ function PinThumb({ pin, now }: { pin: PinOnMap; now: number }) {
 export const NearbyLocationsPanel = memo(function NearbyLocationsPanel({
   onSelectPlace,
   className,
+  showLayer,
 }: {
   onSelectPlace: (coords: { lat: number; lng: number }) => void;
   className?: string;
+  /**
+   * The base map's layers (docs/layers): whether a pin in this layer (null = regular) is on the
+   * map. Left out, every pin is listed.
+   */
+  showLayer?: (layerId: string | null) => boolean;
 }) {
-  const { nearbyPins } = useNearbyPinsStore();
+  const { nearbyPins: inView } = useNearbyPinsStore();
+  const nearbyPins = useMemo(
+    () => (showLayer ? inView.filter((p) => showLayer(p.locationGroup?.layerId ?? null)) : inView),
+    [inView, showLayer],
+  );
   const [open, setOpen] = useState(true);
   // Taken once: whether a pin has expired is judged the same way on the map and here.
   const [now] = useState(() => Date.now());
