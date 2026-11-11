@@ -280,6 +280,8 @@ describe("a brand", () => {
       { creatorId: "CLINTON_BRAND", platformId: "clintoncounty" },
       expect.anything(),
       undefined,
+      // No map layer picked: the drops are regular (docs/layers).
+      null,
     );
 
     await expect(
