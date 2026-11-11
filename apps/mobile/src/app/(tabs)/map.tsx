@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
+import { LayerSheetButton } from "~/components/map/LayerSheet";
 import { MapControls } from "~/components/map/MapControls";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { MapToast } from "~/components/map/MapHud";
@@ -25,6 +26,7 @@ import { useFeedback, useSettings } from "~/lib/ar/feedback";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "~/lib/ar/geo";
 import { warmArTextures } from "~/lib/ar/arTexture";
 import { FALLBACK_CENTER, useGeolocation, useHeading } from "~/lib/ar/location";
+import { inLayer, useMapLayer, useMapLayers } from "~/lib/ar/layers";
 import { filterPins, NEAR_RADIUS_KM, PIN_FILTERS, pinArea, sortByDistance, useDiscoveryPins, type PinFilterId } from "~/lib/ar/pins";
 import { pinStatus } from "~/lib/ar/rarity";
 import { useFollowTrail } from "~/lib/ar/trails";
@@ -134,6 +136,13 @@ export default function MapScreen() {
   const { mode: mapMode, is3d, toggle: toggleMapMode } = useMapMode();
   const { focus, mural: focusMural } = useLocalSearchParams<{ focus?: string; mural?: string }>();
   const [filter, setFilter] = useState<PinFilterId>("all");
+  const { layers: mapLayers, loaded: layersLoaded } = useMapLayers(area);
+  // Which drops show (docs/layers): regular ones, plus the layers turned on in the Layers sheet.
+  const layerView = useMapLayer((s) => s.view);
+  // A layer with no live drops here any more isn't listed: forget it.
+  useEffect(() => {
+    if (layersLoaded) useMapLayer.getState().keepOnly(mapLayers.map((l) => l.id));
+  }, [mapLayers, layersLoaded]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [following, setFollowing] = useState(true);
   const [refetching, setRefetching] = useState(false);
@@ -389,6 +398,8 @@ export default function MapScreen() {
             toggleMapMode();
             setToast(is3d ? "2D map" : "3D map");
           }}
+          // Below 2D / 3D: the map layers (docs/layers).
+          layers={<LayerSheetButton layers={mapLayers} />}
           onRecenter={handleRecenter}
           compassMode={settings.compassMode}
           onToggleCompass={() => {
@@ -433,6 +444,8 @@ export default function MapScreen() {
         onPickPin={(pin) => {
           // A match the current filter hides would open a sheet with no marker.
           if (filterPins([pin], filter, followedIds).length === 0 && !settings.followingOnly) setFilter("all");
+          // Same for its layer: turn on the layer it's in (or regular drops).
+          if (!inLayer(pin, layerView)) useMapLayer.getState().reveal(pin.layer?.id ?? null);
           setSearchPin(pin);
           setSelectedId(pin.id);
           setFollowing(false);
@@ -451,7 +464,7 @@ export default function MapScreen() {
   );
 }
 
-/** A shortcut pill under the avatar (Events, Bounty): icon and name on one line, as on the web. */
+/** A shortcut pill under the avatar (Events, Trails, Bounty): icon and name on one line, as on the web. */
 function HudShortcut({ icon: Icon, label, onPress, dot = false }: { icon: LucideIcon; label: string; onPress: () => void; dot?: boolean }) {
   const { c } = useColors();
   return (

@@ -118,119 +118,135 @@ export function MapLayersSheet({
   view: PreviewView;
   onClose: () => void;
 }) {
-  const base = useMapBase();
-  const mode = useMapMode();
-  const terrain = useMapTerrain();
-  const theme = useResolvedTheme();
-  const label = "font-hud text-ar-faint text-[10px] font-semibold tracking-[0.2em] uppercase";
   return (
     <BottomSheet open={open} onClose={onClose} labelledBy="map-layers-title">
       <div className="px-5 pt-1 pb-3">
         <h2 id="map-layers-title" className="font-hud text-ar-text text-[16px] font-bold">
           Map layers
         </h2>
-
-        <p className={cn(label, "mt-4")}>Map type</p>
-        <div className="mt-2 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Map type">
-          {MAP_BASES.map((b) => {
-            const on = b === base;
-            return (
-              <button
-                key={b}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => setMapBase(b)}
-                className="group text-left"
-              >
-                <span
-                  className={cn(
-                    "relative block aspect-[160/104] overflow-hidden rounded-[12px] border-2 bg-white/5",
-                    on ? "border-ar-green-hot" : "border-transparent",
-                  )}
-                >
-                  {MAPBOX_TOKEN && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={previewUrl(b, theme, view)}
-                      alt=""
-                      loading="lazy"
-                      className="size-full object-cover"
-                    />
-                  )}
-                  {on && (
-                    <span className="bg-ar-green-hot absolute top-1 right-1 flex size-4 items-center justify-center rounded-full text-black">
-                      <Check size={11} strokeWidth={3.5} />
-                    </span>
-                  )}
-                </span>
-                <span
-                  className={cn(
-                    "mt-1 block text-[11.5px] font-semibold",
-                    on ? "text-ar-green-hot" : "text-ar-dim",
-                  )}
-                >
-                  {MAP_BASE_LABEL[b]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="border-ar-line mt-4 flex items-center justify-between gap-3 border-t pt-4">
-          <div>
-            <p className={label}>View</p>
-            <p className="text-ar-dim mt-0.5 text-[11.5px]">
-              3D tilts the map
-              {base === "default" || base === "streets" || base === "satellite"
-                ? " and raises buildings"
-                : ""}
-            </p>
-          </div>
-          <div className="ar-bevel flex rounded-full p-0.5" role="radiogroup" aria-label="View">
-            {(["2d", "3d"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="radio"
-                aria-checked={mode === m}
-                onClick={() => setMapMode(m)}
-                className={cn(
-                  "font-hud h-8 w-12 rounded-full text-[12px] font-bold",
-                  mode === m ? "bg-ar-green-hot text-black" : "text-ar-dim",
-                )}
-              >
-                {m.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-ar-line mt-4 flex items-center justify-between gap-3 border-t pt-4">
-          <div>
-            <p className={label}>Terrain</p>
-            <p className="text-ar-dim mt-0.5 text-[11.5px]">Hills and contour lines with heights</p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={terrain}
-            aria-label="Terrain"
-            onClick={() => setMapTerrain(!terrain)}
-            className={cn(
-              "relative h-7 w-12 rounded-full transition-colors",
-              terrain ? "bg-ar-green-hot" : "bg-white/15",
-            )}
-          >
-            <span
-              className={cn(
-                "absolute top-1 size-5 rounded-full bg-white shadow transition-[left]",
-                terrain ? "left-6" : "left-1",
-              )}
-            />
-          </button>
-        </div>
+        <MapStyleOptions view={view} />
       </div>
     </BottomSheet>
+  );
+}
+
+/** Where the map was last looked at, for the map type previews (Settings has no map). */
+export function lastMapView(): PreviewView {
+  return lastView;
+}
+
+/**
+ * The map type (with a preview of each at `view`), 2D / 3D and Terrain. In the map style sheet
+ * (trail and directions maps) and under Map in Settings; every map in the app shares the choice.
+ */
+export function MapStyleOptions({ view }: { view: PreviewView }) {
+  const base = useMapBase();
+  const mode = useMapMode();
+  const terrain = useMapTerrain();
+  const theme = useResolvedTheme();
+  const label = "font-hud text-ar-faint text-[10px] font-semibold tracking-[0.2em] uppercase";
+  return (
+    <>
+      <p className={cn(label, "mt-4")}>Map type</p>
+      <div className="mt-2 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Map type">
+        {MAP_BASES.map((b) => {
+          const on = b === base;
+          return (
+            <button
+              key={b}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => setMapBase(b)}
+              className="group text-left"
+            >
+              <span
+                className={cn(
+                  "relative block aspect-[160/104] overflow-hidden rounded-[12px] border-2 bg-white/5",
+                  on ? "border-ar-green-hot" : "border-transparent",
+                )}
+              >
+                {MAPBOX_TOKEN && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewUrl(b, theme, view)}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-cover"
+                  />
+                )}
+                {on && (
+                  <span className="bg-ar-green-hot absolute top-1 right-1 flex size-4 items-center justify-center rounded-full text-black">
+                    <Check size={11} strokeWidth={3.5} />
+                  </span>
+                )}
+              </span>
+              <span
+                className={cn(
+                  "mt-1 block text-[11.5px] font-semibold",
+                  on ? "text-ar-green-hot" : "text-ar-dim",
+                )}
+              >
+                {MAP_BASE_LABEL[b]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="border-ar-line mt-4 flex items-center justify-between gap-3 border-t pt-4">
+        <div>
+          <p className={label}>View</p>
+          <p className="text-ar-dim mt-0.5 text-[11.5px]">
+            3D tilts the map
+            {base === "default" || base === "streets" || base === "satellite"
+              ? " and raises buildings"
+              : ""}
+          </p>
+        </div>
+        <div className="ar-bevel flex rounded-full p-0.5" role="radiogroup" aria-label="View">
+          {(["2d", "3d"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              onClick={() => setMapMode(m)}
+              className={cn(
+                "font-hud h-8 w-12 rounded-full text-[12px] font-bold",
+                mode === m ? "bg-ar-green-hot text-black" : "text-ar-dim",
+              )}
+            >
+              {m.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-ar-line mt-4 flex items-center justify-between gap-3 border-t pt-4">
+        <div>
+          <p className={label}>Terrain</p>
+          <p className="text-ar-dim mt-0.5 text-[11.5px]">Hills and contour lines with heights</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={terrain}
+          aria-label="Terrain"
+          onClick={() => setMapTerrain(!terrain)}
+          className={cn(
+            "relative h-7 w-12 rounded-full transition-colors",
+            terrain ? "bg-ar-green-hot" : "bg-white/15",
+          )}
+        >
+          <span
+            className={cn(
+              "absolute top-1 size-5 rounded-full bg-white shadow transition-[left]",
+              terrain ? "left-6" : "left-1",
+            )}
+          />
+        </button>
+      </div>
+    </>
   );
 }

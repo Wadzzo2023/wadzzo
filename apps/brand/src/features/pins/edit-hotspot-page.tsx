@@ -6,7 +6,7 @@ import { CalendarClock, Hexagon, Loader2, Repeat, Tag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import type { z } from "zod";
 
@@ -28,6 +28,7 @@ import { cn } from "@wadzzo/ui/lib/cn";
 import { updateHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { ErrorState } from "@wadzzo/ui/poster/error-state";
+import { useFormCard } from "~/ui/form-card";
 import { Field, FormPage, FormSection } from "~/ui/form-page";
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
@@ -35,17 +36,47 @@ import { api, type RouterOutputs } from "~/utils/api";
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";
 import { toastFormErrors } from "~/utils/form-errors";
 
+import { LayerField } from "./layers/layer-field";
 import { PinLookSection, toLookValue, type PinLookValue } from "./look/pin-look-section";
 
 type UpdateForm = z.infer<typeof updateHotspotFormSchema>;
+
+/** The form's tabs in a map card (~/ui/form-card). */
+const CARD_TABS = [
+  { id: "details", label: "Details" },
+  { id: "look", label: "Look" },
+  { id: "collect", label: "Collect" },
+  { id: "schedule", label: "Schedule" },
+];
 type Hotspot = NonNullable<RouterOutputs["maps"]["pin"]["hotspotForEdit"]>;
 
 const typeLabel = (t: string) => t.charAt(0) + t.slice(1).toLowerCase();
 
+/** Edit a hotspot, on its own page or in a floating card on the base map (~/ui/form-card). */
 export default function EditHotspotPage({ hotspotId }: { hotspotId: string }) {
   const hotspotQuery = api.maps.pin.hotspotForEdit.useQuery(hotspotId);
+  const card = useFormCard();
 
-  if (hotspotQuery.isLoading) return <CenteredSpinner />;
+  if (hotspotQuery.isLoading)
+    return card ? (
+      <div className="bg-card text-muted-foreground flex w-full items-center gap-2 rounded-[1.2rem] border-2 p-4 text-sm shadow-lg lg:w-[380px]">
+        <Loader2 className="size-4 animate-spin" /> Opening hotspot…
+      </div>
+    ) : (
+      <CenteredSpinner />
+    );
+
+  if (card && (hotspotQuery.isError || !hotspotQuery.data))
+    return (
+      <div className="bg-card flex w-full items-center gap-2 rounded-[1.2rem] border-2 p-4 text-sm shadow-lg lg:w-[380px]">
+        <span className="flex-1">
+          {hotspotQuery.error?.message ?? "That hotspot couldn't be opened."}
+        </span>
+        <Button size="sm" variant="ghost" onClick={card.onClose}>
+          Close
+        </Button>
+      </div>
+    );
 
   if (hotspotQuery.isError) {
     return (
@@ -81,6 +112,7 @@ export default function EditHotspotPage({ hotspotId }: { hotspotId: string }) {
 
 function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
   const router = useRouter();
+  const card = useFormCard();
   const utils = api.useUtils();
 
   const template = h.template;
@@ -101,6 +133,7 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
     hotspotStartDate: new Date(h.hotspotStartDate),
     hotspotEndDate: new Date(h.hotspotEndDate),
     scope: "future_drops",
+    layerId: h.layerId,
   };
 
   const methods = useForm<z.input<typeof updateHotspotFormSchema>, unknown, UpdateForm>({
@@ -118,7 +151,12 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       void utils.maps.pin.hotspotForEdit.invalidate(h.id);
       void utils.maps.pin.getHotspot.invalidate({ hotspotId: h.id });
       void utils.maps.pin.myHotspots.invalidate();
-      router.push(`/pins?hotspot=${h.id}`);
+      void utils.maps.pin.getMyPins.invalidate();
+      void utils.maps.pin.getCreatorPins.invalidate();
+      void utils.maps.pin.getCreatorHotspots.invalidate();
+      void utils.maps.layer.list.invalidate();
+      if (card) card.onDone();
+      else router.push(`/pins?hotspot=${h.id}`);
     },
     onError: (err) => {
       toast.error(err.message || "Failed to update hotspot");
@@ -144,11 +182,14 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
       autoCollect: data.autoCollect,
       multiPin: data.multiPin,
       ...(lookChanged ? { look } : {}),
+      // Only when changed: an unchanged layer leaves the drops alone.
+      ...(data.layerId !== h.layerId ? { layerId: data.layerId ?? null } : {}),
       details: {
         title: data.title,
         description: data.description ?? null,
-        image: data.image ?? null,
-        link: data.url ?? null,
+        // An empty field means none (the server wants a URL or null).
+        image: data.image || null,
+        link: data.url || null,
         type: data.type,
         limit: data.limit,
       },
@@ -160,7 +201,11 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
 
   const actions = (
     <>
-      <Button type="button" variant="ghost" onClick={() => router.push(`/pins?hotspot=${h.id}`)}>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => (card ? card.onClose() : router.push(`/pins?hotspot=${h.id}`))}
+      >
         Cancel
       </Button>
       <Button type="submit" disabled={update.isPending || (!isDirty && !lookChanged)}>
@@ -171,286 +216,303 @@ function EditHotspotForm({ hotspot: h }: { hotspot: Hotspot }) {
   );
 
   return (
-    <FormPage
-      title={`Edit ${template?.title ?? "hotspot"}`}
-      description="Update the drop schedule, collection rules, or pin template."
-      back={{ href: "/pins/manage?tab=hotspot", label: "Hotspots" }}
-      actions={actions}
-      onSubmit={handleSubmit(onSubmit, toastFormErrors)}
-      aside={
-        <aside className="space-y-4">
-          {feature && (
-            <div className="bg-card border-foreground/10 space-y-2 rounded-[1.4rem] border-2 p-4">
-              <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                Area
-              </p>
-              <AreaPreview feature={feature} />
-              <p className="text-muted-foreground text-xs">
-                <AreaSize
-                  feature={feature}
-                  shape={(h.shape.toLowerCase() as "circle" | "rectangle" | "polygon") ?? "polygon"}
-                />
-              </p>
-            </div>
-          )}
-
-          <div className="bg-card border-foreground/10 space-y-3 rounded-[1.4rem] border-2 p-4">
-            <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-              Stats
-            </p>
-            <div className="grid grid-cols-3 divide-x rounded-lg border text-center">
-              <div className="p-2">
-                <p className="font-hud text-lg font-bold">{stats.drops}</p>
-                <p className="text-muted-foreground text-[11px]">Drops</p>
-              </div>
-              <div className="p-2">
-                <p className="font-hud text-primary text-lg font-bold">{stats.live}</p>
-                <p className="text-muted-foreground text-[11px]">Live</p>
-              </div>
-              <div className="p-2">
-                <p className="font-hud text-lg font-bold">{stats.collected}</p>
-                <p className="text-muted-foreground text-[11px]">Collected</p>
-              </div>
-            </div>
-          </div>
-        </aside>
-      }
-    >
-      {/* Drop schedule */}
-      <FormSection
-        title="Drop schedule"
-        icon={CalendarClock}
-        description="When the hotspot runs and how often it drops a new pin."
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Starts" required error={errors.hotspotStartDate?.message}>
-            <Input
-              type="datetime-local"
-              value={toInput(values.hotspotStartDate)}
-              onChange={(e) => {
-                const d = e.target.value ? new Date(e.target.value) : undefined;
-                if (d) setValue("hotspotStartDate", d, { shouldValidate: true });
-              }}
-            />
-          </Field>
-
-          <Field label="Ends" required error={errors.hotspotEndDate?.message}>
-            <Input
-              type="datetime-local"
-              value={toInput(values.hotspotEndDate)}
-              onChange={(e) => {
-                const d = e.target.value ? new Date(e.target.value) : undefined;
-                if (d) setValue("hotspotEndDate", d, { shouldValidate: true });
-              }}
-            />
-          </Field>
-
-          <Field label="Drop frequency" required error={errors.dropEveryDays?.message}>
-            <Select
-              value={String(values.dropEveryDays)}
-              onValueChange={(v) => setValue("dropEveryDays", Number(v), { shouldValidate: true })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DROP_EVERY.map(([days, label]) => (
-                  <SelectItem key={days} value={String(days)}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label="Pin lifetime" required error={errors.pinDurationDays?.message}>
-            <Select
-              value={String(values.pinDurationDays)}
-              onValueChange={(v) =>
-                setValue("pinDurationDays", Number(v), { shouldValidate: true })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LIFETIME.map(([days, label]) => (
-                  <SelectItem key={days} value={String(days)}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
-
-        <Field
-          label="Apply changes to"
-          hint="Choose whether modifications affect only upcoming drops or all past and upcoming drops."
-        >
-          <div className="grid gap-2 sm:grid-cols-2">
-            {[
-              {
-                id: "future_drops",
-                label: "Future drops only",
-                desc: "Keep past drops unchanged; apply new timing to future drops",
-              },
-              {
-                id: "all_drops",
-                label: "All drops",
-                desc: "Cascade settings to existing drops as well as future drops",
-              },
-            ].map((opt) => (
-              <label
-                key={opt.id}
-                className={cn(
-                  "flex cursor-pointer flex-col gap-1 rounded-lg border p-3 transition-colors",
-                  values.scope === opt.id
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:bg-muted/40",
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="scope"
-                    value={opt.id}
-                    checked={values.scope === opt.id}
-                    onChange={() =>
-                      setValue("scope", opt.id as "future_drops" | "all_drops", {
-                        shouldValidate: true,
-                      })
+    <FormProvider {...methods}>
+      <FormPage
+        title={`Edit ${template?.title ?? "hotspot"}`}
+        icon={Hexagon}
+        description="Update the drop schedule, collection rules, or pin template."
+        back={{ href: "/pins/manage?tab=hotspot", label: "Hotspots" }}
+        actions={actions}
+        cardTabs={CARD_TABS}
+        onSubmit={handleSubmit(onSubmit, toastFormErrors)}
+        aside={
+          <aside className="space-y-4">
+            {feature && (
+              <div className="bg-card border-foreground/10 space-y-2 rounded-[1.4rem] border-2 p-4">
+                <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  Area
+                </p>
+                <AreaPreview feature={feature} />
+                <p className="text-muted-foreground text-xs">
+                  <AreaSize
+                    feature={feature}
+                    shape={
+                      (h.shape.toLowerCase() as "circle" | "rectangle" | "polygon") ?? "polygon"
                     }
-                    className="accent-primary"
                   />
-                  <span className="text-sm font-medium">{opt.label}</span>
+                </p>
+              </div>
+            )}
+
+            <div className="bg-card border-foreground/10 space-y-3 rounded-[1.4rem] border-2 p-4">
+              <p className="font-hud text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                Stats
+              </p>
+              <div className="grid grid-cols-3 divide-x rounded-lg border text-center">
+                <div className="p-2">
+                  <p className="font-hud text-lg font-bold">{stats.drops}</p>
+                  <p className="text-muted-foreground text-[11px]">Drops</p>
                 </div>
-                <span className="text-muted-foreground text-xs">{opt.desc}</span>
-              </label>
-            ))}
-          </div>
-        </Field>
-      </FormSection>
-
-      {/* Pin template */}
-      <FormSection
-        title="Pin template"
-        icon={Tag}
-        description="The appearance and details for pins generated by this hotspot."
+                <div className="p-2">
+                  <p className="font-hud text-primary text-lg font-bold">{stats.live}</p>
+                  <p className="text-muted-foreground text-[11px]">Live</p>
+                </div>
+                <div className="p-2">
+                  <p className="font-hud text-lg font-bold">{stats.collected}</p>
+                  <p className="text-muted-foreground text-[11px]">Collected</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        }
       >
-        <Field label="Title" required error={errors.title?.message}>
-          <Input {...register("title")} placeholder="e.g. Daily Coffee Reward" />
-        </Field>
-
-        <Field label="Description" error={errors.description?.message}>
-          <Textarea
-            {...register("description")}
-            rows={3}
-            placeholder="Tell fans what they can collect here..."
-          />
-        </Field>
-
-        <Field
-          label="Image"
-          hint="Square artwork or brand icon shown on the map pin and card."
-          error={errors.image?.message}
+        {/* Drop schedule */}
+        <FormSection
+          tab="schedule"
+          title="Drop schedule"
+          icon={CalendarClock}
+          description="When the hotspot runs and how often it drops a new pin."
         >
-          <ImageUploadField
-            value={values.image}
-            onChange={(url) => setValue("image", url, { shouldValidate: true })}
-          />
-        </Field>
+          <div className="grid gap-4 @md:grid-cols-2">
+            <Field label="Starts" required error={errors.hotspotStartDate?.message}>
+              <Input
+                type="datetime-local"
+                value={toInput(values.hotspotStartDate)}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value) : undefined;
+                  if (d) setValue("hotspotStartDate", d, { shouldValidate: true });
+                }}
+              />
+            </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Pin type" required error={errors.type?.message}>
-            <Select
-              value={values.type}
-              onValueChange={(t) => setValue("type", t as PinType, { shouldValidate: true })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(PinType).map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {typeLabel(t)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Field label="Ends" required error={errors.hotspotEndDate?.message}>
+              <Input
+                type="datetime-local"
+                value={toInput(values.hotspotEndDate)}
+                onChange={(e) => {
+                  const d = e.target.value ? new Date(e.target.value) : undefined;
+                  if (d) setValue("hotspotEndDate", d, { shouldValidate: true });
+                }}
+              />
+            </Field>
+
+            <Field label="Drop frequency" required error={errors.dropEveryDays?.message}>
+              <Select
+                value={String(values.dropEveryDays)}
+                onValueChange={(v) =>
+                  setValue("dropEveryDays", Number(v), { shouldValidate: true })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DROP_EVERY.map(([days, label]) => (
+                    <SelectItem key={days} value={String(days)}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label="Pin lifetime" required error={errors.pinDurationDays?.message}>
+              <Select
+                value={String(values.pinDurationDays)}
+                onValueChange={(v) =>
+                  setValue("pinDurationDays", Number(v), { shouldValidate: true })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIFETIME.map(([days, label]) => (
+                    <SelectItem key={days} value={String(days)}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <Field
+            label="Apply changes to"
+            hint="Choose whether modifications affect only upcoming drops or all past and upcoming drops."
+          >
+            <div className="grid gap-2 @md:grid-cols-2">
+              {[
+                {
+                  id: "future_drops",
+                  label: "Future drops only",
+                  desc: "Keep past drops unchanged; apply new timing to future drops",
+                },
+                {
+                  id: "all_drops",
+                  label: "All drops",
+                  desc: "Cascade settings to existing drops as well as future drops",
+                },
+              ].map((opt) => (
+                <label
+                  key={opt.id}
+                  className={cn(
+                    "flex cursor-pointer flex-col gap-1 rounded-lg border p-3 transition-colors",
+                    values.scope === opt.id
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted/40",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="scope"
+                      value={opt.id}
+                      checked={values.scope === opt.id}
+                      onChange={() =>
+                        setValue("scope", opt.id as "future_drops" | "all_drops", {
+                          shouldValidate: true,
+                        })
+                      }
+                      className="accent-primary"
+                    />
+                    <span className="text-sm font-medium">{opt.label}</span>
+                  </div>
+                  <span className="text-muted-foreground text-xs">{opt.desc}</span>
+                </label>
+              ))}
+            </div>
+          </Field>
+        </FormSection>
+
+        {/* Pin template */}
+        <FormSection
+          tab="details"
+          title="Pin template"
+          icon={Tag}
+          description="The appearance and details for pins generated by this hotspot."
+        >
+          <Field label="Title" required error={errors.title?.message}>
+            <Input {...register("title")} placeholder="e.g. Daily Coffee Reward" />
+          </Field>
+
+          <Field label="Description" error={errors.description?.message}>
+            <Textarea
+              {...register("description")}
+              rows={3}
+              placeholder="Tell fans what they can collect here..."
+            />
           </Field>
 
           <Field
-            label="Collection limit"
-            hint="0 for unlimited collections per pin."
-            error={errors.limit?.message}
+            label="Image"
+            hint="Square artwork or brand icon shown on the map pin and card."
+            error={errors.image?.message}
           >
-            <Input
-              type="number"
-              min={0}
-              {...register("limit", { valueAsNumber: true })}
-              placeholder="0"
+            <ImageUploadField
+              value={values.image}
+              onChange={(url) => setValue("image", url, { shouldValidate: true })}
             />
           </Field>
-        </div>
 
-        <Field label="Website / Action URL" error={errors.url?.message}>
-          <Input {...register("url")} placeholder="https://..." />
-        </Field>
-      </FormSection>
+          <LayerField
+            creatorId={h.creatorId}
+            hint="The hotspot and all its drops, past and future, move to this layer."
+          />
 
-      <PinLookSection
-        value={look}
-        onChange={(next) => {
-          setLook(next);
-          setLookChanged(true);
-        }}
-        autoCollect={Boolean(values.autoCollect)}
-        pinImage={values.image || null}
-        creatorId={h.creatorId}
-        brandImage={h.creator?.profileUrl ?? null}
-      />
+          <div className="grid gap-4 @md:grid-cols-2">
+            <Field label="Pin type" required error={errors.type?.message}>
+              <Select
+                value={values.type}
+                onValueChange={(t) => setValue("type", t as PinType, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(PinType).map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {typeLabel(t)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-      {/* Collection mode */}
-      <FormSection
-        title="Collection rules"
-        icon={Repeat}
-        description="How fans interact with and claim pins in this hotspot."
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <Label htmlFor="auto-collect-switch" className="text-sm font-medium">
-                Auto-collect
-              </Label>
-              <p className="text-muted-foreground text-xs">
-                Fans collect pins automatically when walking within GPS range.
-              </p>
-            </div>
-            <Switch
-              id="auto-collect-switch"
-              checked={values.autoCollect}
-              onCheckedChange={(c) => setValue("autoCollect", c, { shouldValidate: true })}
-            />
+            <Field
+              label="Collection limit"
+              hint="0 for unlimited collections per pin."
+              error={errors.limit?.message}
+            >
+              <Input
+                type="number"
+                min={0}
+                {...register("limit", { valueAsNumber: true })}
+                placeholder="0"
+              />
+            </Field>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <Label htmlFor="multi-pin-switch" className="text-sm font-medium">
-                Allow multiple claims
-              </Label>
-              <p className="text-muted-foreground text-xs">
-                Fans can collect multiple drops from this hotspot across days.
-              </p>
+          <Field label="Website / Action URL" error={errors.url?.message}>
+            <Input {...register("url")} placeholder="https://..." />
+          </Field>
+        </FormSection>
+
+        <PinLookSection
+          tab="look"
+          value={look}
+          onChange={(next) => {
+            setLook(next);
+            setLookChanged(true);
+          }}
+          autoCollect={Boolean(values.autoCollect)}
+          pinImage={values.image || null}
+          creatorId={h.creatorId}
+          brandImage={h.creator?.profileUrl ?? null}
+        />
+
+        {/* Collection mode */}
+        <FormSection
+          tab="collect"
+          title="Collection rules"
+          icon={Repeat}
+          description="How fans interact with and claim pins in this hotspot."
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <Label htmlFor="auto-collect-switch" className="text-sm font-medium">
+                  Auto-collect
+                </Label>
+                <p className="text-muted-foreground text-xs">
+                  Fans collect pins automatically when walking within GPS range.
+                </p>
+              </div>
+              <Switch
+                id="auto-collect-switch"
+                checked={values.autoCollect}
+                onCheckedChange={(c) => setValue("autoCollect", c, { shouldValidate: true })}
+              />
             </div>
-            <Switch
-              id="multi-pin-switch"
-              checked={values.multiPin}
-              onCheckedChange={(c) => setValue("multiPin", c, { shouldValidate: true })}
-            />
+
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <Label htmlFor="multi-pin-switch" className="text-sm font-medium">
+                  Allow multiple claims
+                </Label>
+                <p className="text-muted-foreground text-xs">
+                  Fans can collect multiple drops from this hotspot across days.
+                </p>
+              </div>
+              <Switch
+                id="multi-pin-switch"
+                checked={values.multiPin}
+                onCheckedChange={(c) => setValue("multiPin", c, { shouldValidate: true })}
+              />
+            </div>
           </div>
-        </div>
-      </FormSection>
-    </FormPage>
+        </FormSection>
+      </FormPage>
+    </FormProvider>
   );
 }

@@ -38,7 +38,8 @@ export function FilterMenu({
 
   return (
     <>
-      <View ref={anchor} collapsable={false}>
+      {/* A solid backing under the translucent chip, so it reads over a light map. */}
+      <View ref={anchor} collapsable={false} className="rounded-full bg-ar-surface">
         <Chip active onPress={() => (pos ? close() : open())}>
           <Text className="font-hud text-[11px] font-semibold uppercase tracking-[1.1px]" style={{ color: c("ar-green-hot") }}>
             {current?.label}

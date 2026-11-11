@@ -45,14 +45,17 @@ export function FilterMenu({
 
   return (
     <div ref={root} className={cn("relative", className)}>
-      <Chip active onClick={() => setOpen((o) => !o)}>
-        {current?.label}
-        <ChevronDown
-          size={13}
-          strokeWidth={2.6}
-          className={cn("transition-transform", open && "rotate-180")}
-        />
-      </Chip>
+      {/* A solid backing under the translucent chip, so it reads over a light map. */}
+      <div className="bg-ar-surface/85 rounded-full backdrop-blur">
+        <Chip active onClick={() => setOpen((o) => !o)}>
+          {current?.label}
+          <ChevronDown
+            size={13}
+            strokeWidth={2.6}
+            className={cn("transition-transform", open && "rotate-180")}
+          />
+        </Chip>
+      </div>
 
       <AnimatePresence>
         {open && (

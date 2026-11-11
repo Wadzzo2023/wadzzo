@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useMapFormCard } from "~/features/pins/map-form-card";
 import { useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Layer, Source, type MapRef } from "react-map-gl/mapbox";
@@ -197,7 +198,18 @@ export default function HotspotDetailModal({ isOpen, setIsOpen, hotspotId }: Pro
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/pins/hotspots/${hotspotId}/edit`} onClick={() => close(false)}>
+                    <Link
+                      href={`/pins/hotspots/${hotspotId}/edit`}
+                      onClick={(e) => {
+                        close(false);
+                        // On the base map the edit form opens there as a card (docs/layers).
+                        const card = useMapFormCard.getState();
+                        if (card.hosted && hotspotId) {
+                          e.preventDefault();
+                          card.open({ kind: "editHotspot", id: hotspotId });
+                        }
+                      }}
+                    >
                       <Pencil className="size-3.5" /> Edit
                     </Link>
                   </Button>

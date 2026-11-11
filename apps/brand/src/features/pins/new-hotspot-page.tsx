@@ -49,7 +49,8 @@ import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 import { AiFillCard } from "~/ui/ai/ai-fill";
 import { AiTextButton } from "~/ui/ai/ai-text";
 import { fromLocal } from "~/ui/ai/shared";
-import { Field, FormPage, FormSection } from "~/ui/form-page";
+import { useFormCard } from "~/ui/form-card";
+import { CardTab, Field, FormPage, FormSection } from "~/ui/form-page";
 
 import { AreaPreview, AreaSize, DROP_EVERY, LIFETIME, toInput } from "./hotspot-parts";
 import { toastFormErrors } from "~/utils/form-errors";
@@ -62,6 +63,7 @@ import {
   toLookValue,
   type PinLookValue,
 } from "./look/pin-look-section";
+import { LayerNote } from "./layers/layer-field";
 import { AreaDrawDialog } from "./templates/area-draw-dialog";
 import {
   hotspotFormToTemplate,
@@ -98,6 +100,7 @@ export default function NewHotspotPage({
 }: { editTemplate?: HotspotTemplateRow } = {}) {
   const { feature, shape, set: setDraft } = useHotspotDraft();
   const search = useSearchParams();
+  const card = useFormCard();
   const templateId = editTemplate ? null : (search?.get("template") ?? null);
   const linked = api.maps.template.get.useQuery(
     { id: templateId ?? "" },
@@ -117,7 +120,7 @@ export default function NewHotspotPage({
     if (usingLinkedArea && linkedArea) setDraft(linkedArea.feature, linkedArea.shape);
   }, [usingLinkedArea, linkedArea, setDraft]);
 
-  if (!ready || usingLinkedArea) return <CenteredSpinner />;
+  if (!ready || usingLinkedArea) return card ? null : <CenteredSpinner />;
   if (editTemplate) {
     const area = templateArea(editTemplate.data);
     return (
@@ -152,6 +155,14 @@ export default function NewHotspotPage({
 
 const DAY_MS = 86_400_000;
 
+/** The form's tabs in a map card (~/ui/form-card). */
+const CARD_TABS = [
+  { id: "details", label: "Details" },
+  { id: "look", label: "Look" },
+  { id: "collect", label: "Collect" },
+  { id: "schedule", label: "Schedule" },
+];
+
 function HotspotForm({
   feature: initialFeature,
   shape: initialShape,
@@ -165,6 +176,11 @@ function HotspotForm({
   editTemplate?: HotspotTemplateRow;
 }) {
   const router = useRouter();
+  const search = useSearchParams();
+  // On the base map's card (~/ui/form-card), or its own page.
+  const card = useFormCard();
+  // An admin acting for a brand on Admin › All maps: that brand's tokens, tiers and shapes.
+  const brand = card?.brand;
   const editing = Boolean(editTemplate);
   const [area, setArea] = useState<{ feature: StoredFeature; shape: DrawShape } | null>(
     initialFeature ? { feature: initialFeature, shape: initialShape } : null,
@@ -202,11 +218,19 @@ function HotspotForm({
       hotspotStartDate: today,
       hotspotEndDate: inOneYear,
       url: "",
+      // The map layer (docs/layers): the one picked on the map, or `?layer=` on the page.
+      layerId: card ? (card.layerId ?? null) : (search?.get("layer") ?? null),
     },
   });
   const { register, handleSubmit, setValue, watch, control, setError, formState } = methods;
   const { errors } = formState;
   const values = watch();
+
+  // Card: the hotspot goes in the layer picked in the map's layer switcher, even if it changes.
+  const cardLayer = card ? (card.layerId ?? null) : undefined;
+  useEffect(() => {
+    if (cardLayer !== undefined && !editing) setValue("layerId", cardLayer);
+  }, [cardLayer, editing, setValue]);
 
   const [collectionMode, setCollectionMode] = useState<"manual" | "auto">("manual");
   const [look, setLook] = useState<PinLookValue>(() =>
@@ -217,8 +241,9 @@ function HotspotForm({
   useEffect(() => {
     if (lookTouched.current) return;
     lookTouched.current = true;
-    setLook(loadLastLook());
-  }, []);
+    // The last look is the signed-in brand's (its shapes); acting for another brand starts plain.
+    if (!brand) setLook(loadLastLook());
+  }, [brand]);
   const changeLook = (next: PinLookValue) => {
     lookTouched.current = true;
     setLook(next);
@@ -309,7 +334,14 @@ function HotspotForm({
     DAY_OPTIONS.reduce((a, b) => (Math.abs(b - n) < Math.abs(a - n) ? b : a));
   const [selectedToken, setSelectedToken] = useState<(AssetType & { bal: number }) | undefined>();
   const [remainingBalance, setRemainingBalance] = useState(0);
-  const assetsQuery = api.fan.asset.myAssets.useQuery();
+  const myAssets = api.fan.asset.myAssets.useQuery(undefined, { enabled: !brand });
+  const brandAssets = api.fan.asset.getCreatorPageAsset.useQuery(
+    { creatorId: brand?.id ?? "" },
+    { enabled: Boolean(brand) },
+  );
+  const assetsQuery = (brand ? { data: brandAssets.data ?? undefined } : myAssets) as Parameters<
+    typeof CollectionInputs
+  >[0]["assetsQuery"];
 
   useEffect(() => {
     setRemainingBalance(selectedToken ? selectedToken.bal - (values.pinCollectionLimit ?? 0) : 0);
@@ -319,9 +351,20 @@ function HotspotForm({
   const create = api.maps.pin.createHotspot.useMutation({
     onSuccess: () => {
       clearDraft();
-      saveLastLook(look);
-      toast.success("Hotspot created — the first pins drop on schedule");
-      router.push("/pins");
+      if (!brand) saveLastLook(look);
+      toast.success(
+        brand
+          ? `Hotspot created for ${brand.name} — the first pins drop on schedule`
+          : "Hotspot created — the first pins drop on schedule",
+      );
+      if (card) {
+        void utils.maps.pin.myHotspots.invalidate();
+        void utils.maps.pin.getCreatorHotspots.invalidate();
+        void utils.maps.pin.getMyPins.invalidate();
+        void utils.maps.pin.getCreatorPins.invalidate();
+        void utils.maps.layer.list.invalidate();
+        card.onDone();
+      } else router.push("/pins");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -352,6 +395,8 @@ function HotspotForm({
       url: data.url ?? "",
       hotspotShape: shape,
       geoJson: feature,
+      // Acting for a brand: made for it (as the admin New hotspot page does).
+      ...(brand && { creatorId: brand.id }),
     });
   }, toastFormErrors);
 
@@ -379,15 +424,19 @@ function HotspotForm({
         variant="ghost"
         onClick={() => {
           clearDraft();
-          router.push("/pins");
+          if (card) card.onClose();
+          else router.push("/pins");
         }}
       >
         Cancel
       </Button>
-      <Button type="button" variant="outline" onClick={() => setSaveOpen(true)}>
-        <LayoutTemplate /> <span className="hidden sm:inline">Save as template</span>
-        <span className="sm:hidden">Template</span>
-      </Button>
+      {/* Templates are the signed-in brand's: not offered when acting for another brand. */}
+      {!brand && (
+        <Button type="button" variant="outline" onClick={() => setSaveOpen(true)}>
+          <LayoutTemplate /> <span className="hidden sm:inline">Save as template</span>
+          <span className="sm:hidden">Template</span>
+        </Button>
+      )}
       <Button type="submit" disabled={create.isPending || remainingBalance < 0}>
         {create.isPending && <Loader2 className="animate-spin" />}
         {create.isPending ? "Creating…" : "Create hotspot"}
@@ -395,11 +444,71 @@ function HotspotForm({
     </>
   );
 
+  const aiFill = (
+    <AiFillCard
+      form="hotspot"
+      context={aiContext}
+      examples={[
+        "Daily coffee coupons around our 3 cafés for a month",
+        "Weekly art drops in the park all summer",
+        "Festival weekend: new pins every day, auto collect",
+      ]}
+      apply={(r) => {
+        const before = { ...values, mode: collectionMode };
+        setValue("title", r.title, { shouldValidate: true });
+        setValue("description", r.description);
+        setValue("type", r.type);
+        if (r.url) setValue("url", r.url);
+        const start = fromLocal(r.hotspotStartDate);
+        const end = fromLocal(r.hotspotEndDate);
+        if (start) setValue("hotspotStartDate", start, { shouldValidate: true });
+        if (end) setValue("hotspotEndDate", end, { shouldValidate: true });
+        setValue("dropEveryDays", nearestDays(r.dropEveryDays));
+        setValue("pinDurationDays", nearestDays(r.pinDurationDays));
+        setValue("pinNumber", r.pinNumber);
+        setValue("pinCollectionLimit", r.pinCollectionLimit);
+        setValue("multiPin", r.multiPin);
+        setCollectionMode(r.autoCollect ? "auto" : "manual");
+        setImageBrief(r.imagePrompt);
+        return () => {
+          (
+            [
+              "title",
+              "description",
+              "type",
+              "url",
+              "hotspotStartDate",
+              "hotspotEndDate",
+              "dropEveryDays",
+              "pinDurationDays",
+              "pinNumber",
+              "pinCollectionLimit",
+              "multiPin",
+            ] as const
+          ).forEach((k) => setValue(k, before[k] as never));
+          setCollectionMode(before.mode);
+        };
+      }}
+    />
+  );
+  // The template picker: a full button on the page, a small one in a map card's header.
+  const templatePicker = (
+    <TemplatePicker
+      formType="HOTSPOT"
+      label={card ? "Template" : undefined}
+      onPick={(t) => {
+        applyTemplate(t);
+        toast.success(`Filled from “${t.name}”`);
+      }}
+    />
+  );
+
   return (
     // CollectionInputs / TiersOptions / PinTypeToggles share field names with the pin form.
     <FormProvider {...(methods as unknown as ReturnType<typeof useForm<CreatePinType>>)}>
       <FormPage
         title={editing ? "Edit hotspot template" : "New hotspot"}
+        icon={Hexagon}
         description={
           editing
             ? "Change what hotspots made from this template start with."
@@ -417,6 +526,8 @@ function HotspotForm({
           } else void onSubmit(e);
         }}
         actions={actions}
+        cardTabs={CARD_TABS}
+        cardHeaderAction={editing || brand ? undefined : templatePicker}
         aside={
           <>
             <FormSection
@@ -517,6 +628,31 @@ function HotspotForm({
           </>
         }
       >
+        {!editing && values.layerId && (
+          <CardTab tab="details">
+            <LayerNote layerId={values.layerId} creatorId={brand?.id} what="hotspot and its pins" />
+          </CardTab>
+        )}
+        {/* In a map card, Fill with AI comes first. */}
+        {card && <CardTab tab="details">{aiFill}</CardTab>}
+        {card && (
+          <FormSection
+            tab="details"
+            title="Area"
+            icon={Hexagon}
+            description={feature ? <AreaSize feature={feature} shape={shape} /> : undefined}
+          >
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setDrawOpen(true)}
+            >
+              <PencilLine /> {feature ? "Redraw the area" : "Draw the area"}
+            </Button>
+          </FormSection>
+        )}
         {editing ? (
           <FormSection title="Template" icon={LayoutTemplate}>
             <Field label="Template name" htmlFor="template-name" required>
@@ -529,68 +665,20 @@ function HotspotForm({
             </Field>
           </FormSection>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <TemplatePicker
-              formType="HOTSPOT"
-              onPick={(t) => {
-                applyTemplate(t);
-                toast.success(`Filled from “${t.name}”`);
-              }}
-            />
-            {applied && (
-              <span className="text-muted-foreground text-xs">
-                From template <strong className="text-foreground">{applied.name}</strong>
-              </span>
-            )}
-          </div>
+          <CardTab tab="details">
+            <div className="flex flex-wrap items-center gap-2 empty:hidden">
+              {!card && templatePicker}
+              {applied && (
+                <span className="text-muted-foreground text-xs">
+                  From template <strong className="text-foreground">{applied.name}</strong>
+                </span>
+              )}
+            </div>
+          </CardTab>
         )}
-        <AiFillCard
-          form="hotspot"
-          context={aiContext}
-          examples={[
-            "Daily coffee coupons around our 3 cafés for a month",
-            "Weekly art drops in the park all summer",
-            "Festival weekend: new pins every day, auto collect",
-          ]}
-          apply={(r) => {
-            const before = { ...values, mode: collectionMode };
-            setValue("title", r.title, { shouldValidate: true });
-            setValue("description", r.description);
-            setValue("type", r.type);
-            if (r.url) setValue("url", r.url);
-            const start = fromLocal(r.hotspotStartDate);
-            const end = fromLocal(r.hotspotEndDate);
-            if (start) setValue("hotspotStartDate", start, { shouldValidate: true });
-            if (end) setValue("hotspotEndDate", end, { shouldValidate: true });
-            setValue("dropEveryDays", nearestDays(r.dropEveryDays));
-            setValue("pinDurationDays", nearestDays(r.pinDurationDays));
-            setValue("pinNumber", r.pinNumber);
-            setValue("pinCollectionLimit", r.pinCollectionLimit);
-            setValue("multiPin", r.multiPin);
-            setCollectionMode(r.autoCollect ? "auto" : "manual");
-            setImageBrief(r.imagePrompt);
-            return () => {
-              (
-                [
-                  "title",
-                  "description",
-                  "type",
-                  "url",
-                  "hotspotStartDate",
-                  "hotspotEndDate",
-                  "dropEveryDays",
-                  "pinDurationDays",
-                  "pinNumber",
-                  "pinCollectionLimit",
-                  "multiPin",
-                ] as const
-              ).forEach((k) => setValue(k, before[k] as never));
-              setCollectionMode(before.mode);
-            };
-          }}
-        />
+        {!card && aiFill}
 
-        <FormSection title="How fans collect it" icon={Settings}>
+        <FormSection title="How fans collect it" icon={Settings} tab="collect">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Collection mode">
             {(
               [
@@ -619,11 +707,12 @@ function HotspotForm({
         </FormSection>
 
         <FormSection
+          tab="schedule"
           title="Drop schedule"
           icon={CalendarClock}
           description="When the hotspot runs and how often it drops a new pin."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 @md:grid-cols-2">
             {editing && (
               <Field
                 label="Keeps dropping for (days)"
@@ -713,6 +802,7 @@ function HotspotForm({
         </FormSection>
 
         <FormSection
+          tab="details"
           title="Pin details"
           icon={Sparkles}
           description="What every dropped pin looks like."
@@ -757,7 +847,7 @@ function HotspotForm({
               {...register("description")}
             />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 @md:grid-cols-2">
             <Field label="Pin type">
               <Controller
                 name="type"
@@ -795,19 +885,23 @@ function HotspotForm({
         </FormSection>
 
         <PinLookSection
+          tab="look"
           value={look}
           onChange={changeLook}
           autoCollect={collectionMode === "auto"}
           pinImage={values.image}
+          creatorId={brand?.id}
+          brandImage={brand ? brand.profileUrl : undefined}
         />
 
         <FormSection
+          tab="collect"
           title="Collection & tier"
           icon={Tag}
           description="Who can collect, how many, and what they get."
         >
-          <TiersOptions />
           <CollectionInputs
+            tier={<TiersOptions creatorId={brand?.id} />}
             setSelectedToken={setSelectedToken}
             setRemainingBalance={setRemainingBalance}
             assetsQuery={assetsQuery}

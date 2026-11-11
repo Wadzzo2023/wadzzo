@@ -45,6 +45,7 @@ import { PageBody, PageHeader } from "@wadzzo/ui/poster/page-header";
 import { Skeleton } from "@wadzzo/ui/patterns/skeleton";
 import { Spinner } from "@wadzzo/ui/patterns/spinner";
 import { api, type RouterOutputs } from "~/utils/api";
+import { LayerTag } from "./layers/layer-tag";
 
 type Kind = "general" | "landmark" | "event" | "hotspot";
 type Group = RouterOutputs["maps"]["pin"]["getLocationGroups"]["groups"][number];
@@ -406,6 +407,7 @@ function GroupRow({
             <span className="truncate font-medium">{g.title}</span>
             <Pill tone={t.tone}>{t.label}</Pill>
             {review && <Pill tone={review.tone}>{review.label}</Pill>}
+            <LayerTag layer={g.layer} />
           </span>
           <span className="text-muted-foreground mt-0.5 block truncate text-xs">
             {fmt(g.startDate)} → {fmt(g.endDate)} · {plural(g.locations.length, "pin")} ·{" "}

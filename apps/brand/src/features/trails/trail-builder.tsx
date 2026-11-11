@@ -52,6 +52,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@wadzzo/ui/poster/tabs
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 
 import { ImageUploadField } from "~/components/pins/pin-form-parts";
+import { LayerNote, LayerSelect } from "~/features/pins/layers/layer-field";
+import { useBrandLayers } from "~/features/pins/layers/selected-layer";
 import { PinLookEditor, toLookValue } from "~/features/pins/look/pin-look-section";
 import { api } from "~/utils/api";
 
@@ -101,6 +103,7 @@ export function saveInput(d: TrailDraft) {
     path: draftPath(d),
     stopDefaults: d.stopDefaults,
     reward: d.reward,
+    layerId: d.layerId ?? null,
   };
 }
 
@@ -135,6 +138,8 @@ export function TrailBuilder({
     onError: (e) => toast.error(e.message),
   });
   const assist = api.maps.trail.assist.useMutation({ onError: (e) => toast.error(e.message) });
+  // The brand's map layers (docs/layers), for the Details tab.
+  const layers = useBrandLayers(draft?.creatorId);
   const [routing, setRouting] = useState(false);
   const [routingKey, setRoutingKey] = useState<string | null>(null);
   const gpxInput = useRef<HTMLInputElement>(null);
@@ -554,6 +559,24 @@ export function TrailBuilder({
               onChange={(e) => set({ description: e.target.value })}
             />
           </div>
+          {/* A new trail goes in the layer picked on the map; an existing one can be moved. */}
+          {!draft.id ? (
+            <LayerNote layerId={draft.layerId} what="trail" />
+          ) : layers.data?.length ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="trail-layer">Map layer</Label>
+              <LayerSelect
+                id="trail-layer"
+                layers={layers.data}
+                value={draft.layerId}
+                onChange={(layerId) => set({ layerId })}
+              />
+              <p className="text-muted-foreground text-xs">
+                The whole trail and its new stops. Fans see it only when they pick this layer&apos;s
+                chip above their map.
+              </p>
+            </div>
+          ) : null}
           <ImageUploadField
             value={draft.coverImage ?? undefined}
             onChange={(url) => set({ coverImage: url ?? null })}

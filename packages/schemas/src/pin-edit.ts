@@ -2,6 +2,7 @@ import { PinType as PinTypeEnum } from "@wadzzo/db";
 import { z } from "zod";
 
 import { BADWORDS } from "./banned-word";
+import { layerIdInput } from "./layer";
 import { pinLookInputSchema } from "./pin-look";
 
 /** Editing a pin: shared by the edit page and the API. */
@@ -44,4 +45,6 @@ export const updateMapFormSchema = z.object({
   type: z.enum(PinTypeEnum).default(PinTypeEnum.OTHER), // Added new type field
   /** New pin look; left out = unchanged. */
   look: pinLookInputSchema.optional(),
+  /** New map layer (docs/layers; null = a regular pin); left out = unchanged. */
+  layerId: layerIdInput,
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PinType } from "@wadzzo/db";
@@ -27,7 +27,9 @@ import { Switch } from "@wadzzo/ui/components/switch";
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { EmptyState } from "@wadzzo/ui/poster/empty-state";
 import { AiTextButton } from "~/ui/ai/ai-text";
-import { Field, FormPage, FormSection } from "~/ui/form-page";
+import { useFormCard } from "~/ui/form-card";
+import { CardTab, Field, FormPage, FormSection } from "~/ui/form-page";
+import { SpotNote } from "./spot-note";
 import { FormSkeleton } from "@wadzzo/ui/patterns/skeleton";
 import { api, type RouterOutputs } from "~/utils/api";
 import { usePortalAccess } from "~/components/shell/use-portal-access";
@@ -39,8 +41,18 @@ import {
   usePinLookMarker,
   type PinLookValue,
 } from "./look/pin-look-section";
+import { LayerField } from "./layers/layer-field";
 
 type EditForm = z.infer<typeof updateMapFormSchema>;
+
+/** The form's tabs in a map card (~/ui/form-card). */
+const CARD_TABS = [
+  { id: "details", label: "Details" },
+  { id: "look", label: "Look" },
+  { id: "collect", label: "Collect" },
+  { id: "schedule", label: "Schedule" },
+];
+
 type Pin = RouterOutputs["maps"]["pin"]["myPinForEdit"];
 
 const toInput = (d?: Date) => {
@@ -50,13 +62,32 @@ const toInput = (d?: Date) => {
 };
 const typeLabel = (t: string) => t.charAt(0) + t.slice(1).toLowerCase();
 
-/** Pins › Edit pin: details, location, schedule and collection options on one page. */
+/**
+ * Pins › Edit pin: details, location, schedule and collection options on one page, or in a
+ * floating card on the base map (see ~/ui/form-card).
+ */
 export default function EditPinPage({ id }: { id: string }) {
   const pin = api.maps.pin.myPinForEdit.useQuery(id, { retry: false });
   const { isAdmin } = usePortalAccess();
+  const card = useFormCard();
   if (pin.isLoading) {
-    return <FormSkeleton />;
+    return card ? (
+      <div className="bg-card text-muted-foreground flex w-full items-center gap-2 rounded-[1.2rem] border-2 p-4 text-sm shadow-lg lg:w-[380px]">
+        <Loader2 className="size-4 animate-spin" /> Opening pin…
+      </div>
+    ) : (
+      <FormSkeleton />
+    );
   }
+  if (!pin.data && card)
+    return (
+      <div className="bg-card flex w-full items-center gap-2 rounded-[1.2rem] border-2 p-4 text-sm shadow-lg lg:w-[380px]">
+        <span className="flex-1">That pin couldn&apos;t be opened. It may have been deleted.</span>
+        <Button size="sm" variant="ghost" onClick={card.onClose}>
+          Close
+        </Button>
+      </div>
+    );
   if (!pin.data)
     return (
       <div className="mx-auto w-full max-w-3xl px-4 pt-10 sm:px-6">
@@ -83,6 +114,7 @@ export default function EditPinPage({ id }: { id: string }) {
 
 function EditPinForm({ pin }: { pin: Pin }) {
   const router = useRouter();
+  const card = useFormCard();
   const [look, setLook] = useState<PinLookValue>(() => toLookValue(pin.look));
   const { isAdmin } = usePortalAccess();
   const backHref = isAdmin ? "/admin/pins" : "/pins";
@@ -104,20 +136,32 @@ function EditPinForm({ pin }: { pin: Pin }) {
       autoCollect: pin.autoCollect,
       multiPin: pin.multiPin,
       pinRemainingLimit: pin.remaining,
+      // A hotspot's drop follows its hotspot's layer: edited on the hotspot, not here.
+      layerId: pin.hotspotId ? undefined : pin.layerId,
     },
   });
   const { register, handleSubmit, setValue, watch, control, formState } = methods;
   const { errors } = formState;
   const values = watch();
+  // Card: a click on the base map moves the pin there.
+  const cardAt = card?.at;
+  useEffect(() => {
+    if (!cardAt) return;
+    setValue("lat", cardAt.lat, { shouldValidate: true, shouldDirty: true });
+    setValue("lng", cardAt.lng, { shouldValidate: true, shouldDirty: true });
+  }, [cardAt, setValue]);
 
   const utils = api.useUtils();
   const update = api.maps.pin.updatePin.useMutation({
     onSuccess: () => {
       void utils.maps.pin.getMyPins.invalidate();
+      void utils.maps.pin.getCreatorPins.invalidate();
       void utils.maps.pin.myPinForEdit.invalidate(pin.id);
       void utils.maps.pin.getAdminLocationGroups.invalidate();
+      void utils.maps.layer.list.invalidate();
       toast.success("Pin updated");
-      router.push(backHref);
+      if (card) card.onDone();
+      else router.push(backHref);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -143,7 +187,11 @@ function EditPinForm({ pin }: { pin: Pin }) {
 
   const actions = (
     <>
-      <Button type="button" variant="ghost" onClick={() => router.push(backHref)}>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => (card ? card.onClose() : router.push(backHref))}
+      >
         Cancel
       </Button>
       <Button type="submit" disabled={update.isPending}>
@@ -157,6 +205,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
     <FormProvider {...methods}>
       <FormPage
         title="Edit pin"
+        icon={MapPin}
         description={
           isAdmin && pin.creatorName
             ? `Editing pin for creator "${pin.creatorName}".`
@@ -167,6 +216,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
         back={{ href: backHref, label: backLabel }}
         onSubmit={(e) => void onSubmit(e)}
         actions={actions}
+        cardTabs={CARD_TABS}
         aside={
           <FormSection
             title="Location"
@@ -194,7 +244,12 @@ function EditPinForm({ pin }: { pin: Pin }) {
           </FormSection>
         }
       >
-        <FormSection title="Details" icon={Sparkles}>
+        {card && (
+          <CardTab tab="details">
+            <SpotNote at={{ lat: values.lat, lng: values.lng }} />
+          </CardTab>
+        )}
+        <FormSection title="Details" icon={Sparkles} tab="details">
           <Field
             label="Title"
             htmlFor="title"
@@ -239,7 +294,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
               {...register("description")}
             />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 @md:grid-cols-2">
             <Field label="Pin type">
               <Controller
                 name="type"
@@ -286,10 +341,11 @@ function EditPinForm({ pin }: { pin: Pin }) {
                 .join(". "),
             }}
           />
+          {pin.hotspotId ? null : <LayerField creatorId={pin.creatorId} />}
         </FormSection>
 
-        <FormSection title="Schedule" icon={Calendar}>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <FormSection title="Schedule" icon={Calendar} tab="schedule">
+          <div className="grid gap-4 @md:grid-cols-2">
             {(["startDate", "endDate"] as const).map((name) => (
               <Field
                 key={name}
@@ -315,6 +371,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
         </FormSection>
 
         <PinLookSection
+          tab="look"
           value={look}
           onChange={setLook}
           autoCollect={Boolean(values.autoCollect)}
@@ -323,7 +380,7 @@ function EditPinForm({ pin }: { pin: Pin }) {
           brandImage={pin.brandImage}
         />
 
-        <FormSection title="Collection" icon={Settings}>
+        <FormSection title="Collection" icon={Settings} tab="collect">
           <Field
             label="Collections left"
             htmlFor="pinRemainingLimit"

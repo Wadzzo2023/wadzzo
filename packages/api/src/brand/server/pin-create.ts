@@ -29,6 +29,8 @@ export type NewPinFields = {
   token?: number;
   multiPin?: boolean;
   look?: PinLookInput;
+  /** Already checked (see checkLayer in shared/layers); null/absent = a regular map pin. */
+  layerId?: string | null;
 };
 
 /**
@@ -84,6 +86,7 @@ export async function newPinData(db: Db, f: NewPinFields) {
     remaining: f.pinCollectionLimit,
     multiPin: f.multiPin,
     approved: true,
+    layerId: f.layerId ?? null,
   };
 }
 

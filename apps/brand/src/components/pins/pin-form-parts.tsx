@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Controller,
@@ -23,12 +23,14 @@ import {
   Tag,
   Plus,
 } from "lucide-react";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Input } from "@wadzzo/ui/poster/input";
 import { Label } from "@wadzzo/ui/components/label";
 import { Textarea } from "@wadzzo/ui/poster/textarea";
 import { Button } from "@wadzzo/ui/poster/button";
 import { useCreatorStorageAcc } from "~/lib/state/wallet/stellar-balances";
 import { api } from "~/utils/api";
+import { useFormCard } from "~/ui/form-card";
 import { BADWORDS } from "@wadzzo/schemas/banned-word";
 import { PinType } from "@wadzzo/db";
 import {
@@ -90,6 +92,8 @@ export const createPinFormSchema = z.object({
   multiPin: z.boolean().default(false),
   type: z.enum(PinType).default(PinType.OTHER),
   tags: z.array(z.string()).default([]),
+  /** The map layer (docs/layers); null = a regular pin. */
+  layerId: z.string().nullable().optional(),
 });
 export type CreatePinType = z.infer<typeof createPinFormSchema>;
 
@@ -101,6 +105,7 @@ export function CollectionInputs({
   selectedToken,
   remainingBalance,
   showRadius = true,
+  tier,
 }: {
   setSelectedToken: (asset: (AssetType & { bal: number }) | undefined) => void;
   setRemainingBalance: (balance: number) => void;
@@ -124,6 +129,12 @@ export function CollectionInputs({
    * element in sync, so the first stops reflecting edits.
    */
   showRadius?: boolean;
+  /**
+   * The tier picker (`<TiersOptions />`). Given, it sits beside the token picker and the
+   * number of pins sits beside the collection limit (two compact rows). Left out, the
+   * older layout is kept (the admin pages).
+   */
+  tier?: ReactNode;
 }) {
   const {
     control,
@@ -185,155 +196,194 @@ export function CollectionInputs({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenValue, assetsLoaded, items.data, selectedToken?.id]);
 
-  return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Choose Token</Label>
-        <Controller
-          name="token"
-          control={control}
-          render={({ field }) => (
-            <Select
-              onValueChange={(value) => {
-                const selectedAssetId = Number(value);
-                field.onChange(selectedAssetId === NO_ASSET ? undefined : selectedAssetId);
+  const paired = tier !== undefined;
+  const tokenField = (
+    <div className="min-w-0 space-y-2">
+      <Label className="text-sm font-medium">Choose Token</Label>
+      <Controller
+        name="token"
+        control={control}
+        render={({ field }) => (
+          <Select
+            onValueChange={(value) => {
+              const selectedAssetId = Number(value);
+              field.onChange(selectedAssetId === NO_ASSET ? undefined : selectedAssetId);
 
-                if (selectedAssetId === NO_ASSET) {
-                  setSelectedToken(undefined);
-                  setRemainingBalance(0);
-                  return;
-                }
+              if (selectedAssetId === NO_ASSET) {
+                setSelectedToken(undefined);
+                setRemainingBalance(0);
+                return;
+              }
 
-                if (selectedAssetId === PAGE_ASSET_NUM) {
-                  const pageAsset = assetsQuery.data?.pageAsset;
-                  if (pageAsset) {
-                    const bal = getAssetBalance({
-                      code: pageAsset.code,
-                      issuer: pageAsset.issuer,
-                    });
-                    setSelectedToken({
-                      bal,
-                      code: pageAsset.code,
-                      issuer: pageAsset.issuer,
-                      id: PAGE_ASSET_NUM,
-                      thumbnail: pageAsset.thumbnail ?? "",
-                    });
-                    setRemainingBalance(bal);
-                  } else {
-                    toast.error("No page asset found");
-                  }
-                  return;
-                }
-
-                const selectedAsset = assetsQuery.data?.shopAsset.find(
-                  (asset: AssetType) => asset.id === selectedAssetId,
-                );
-                if (selectedAsset) {
-                  const item = items.data?.find((i) => i.id === selectedAsset.id);
-                  const bal = item
-                    ? item.mintable === null
-                      ? OPEN_EDITION
-                      : item.stock + item.mintable
-                    : getAssetBalance({
-                        code: selectedAsset.code,
-                        issuer: selectedAsset.issuer,
-                      });
-                  setSelectedToken({ ...selectedAsset, bal: bal });
+              if (selectedAssetId === PAGE_ASSET_NUM) {
+                const pageAsset = assetsQuery.data?.pageAsset;
+                if (pageAsset) {
+                  const bal = getAssetBalance({
+                    code: pageAsset.code,
+                    issuer: pageAsset.issuer,
+                  });
+                  setSelectedToken({
+                    bal,
+                    code: pageAsset.code,
+                    issuer: pageAsset.issuer,
+                    id: PAGE_ASSET_NUM,
+                    thumbnail: pageAsset.thumbnail ?? "",
+                  });
                   setRemainingBalance(bal);
+                } else {
+                  toast.error("No page asset found");
                 }
-              }}
-              value={(field.value ?? NO_ASSET).toString()}
-            >
-              <SelectTrigger className="bg-card border-border">
-                <SelectValue placeholder="Choose Token" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NO_ASSET.toString()}>Pin (No asset)</SelectItem>
-                {assetsQuery.data?.pageAsset && (
-                  <SelectItem value={PAGE_ASSET_NUM.toString()}>
-                    {assetsQuery.data.pageAsset.code} - Page Asset
-                  </SelectItem>
-                )}
-                {assetsQuery.data?.shopAsset?.map((asset: AssetType) => (
-                  <SelectItem key={asset.id} value={asset.id.toString()}>
-                    {asset.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
+                return;
+              }
 
-      <div className={showRadius ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-4"}>
-        {showRadius && (
-          <div className="space-y-2">
-            <Label htmlFor="radius" className="text-sm font-medium">
-              Radius (meters)
-            </Label>
-            <Input
-              type="number"
-              id="radius"
-              min={0}
-              {...register("radius", { valueAsNumber: true })}
-              className="bg-card border-border focus:ring-ring"
-              placeholder="50"
-            />
-            {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
-          </div>
+              const selectedAsset = assetsQuery.data?.shopAsset.find(
+                (asset: AssetType) => asset.id === selectedAssetId,
+              );
+              if (selectedAsset) {
+                const item = items.data?.find((i) => i.id === selectedAsset.id);
+                const bal = item
+                  ? item.mintable === null
+                    ? OPEN_EDITION
+                    : item.stock + item.mintable
+                  : getAssetBalance({
+                      code: selectedAsset.code,
+                      issuer: selectedAsset.issuer,
+                    });
+                setSelectedToken({ ...selectedAsset, bal: bal });
+                setRemainingBalance(bal);
+              }
+            }}
+            value={(field.value ?? NO_ASSET).toString()}
+          >
+            <SelectTrigger className="bg-card border-border">
+              <SelectValue placeholder="Choose Token" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_ASSET.toString()}>Pin (No asset)</SelectItem>
+              {assetsQuery.data?.pageAsset && (
+                <SelectItem value={PAGE_ASSET_NUM.toString()}>
+                  {assetsQuery.data.pageAsset.code} - Page Asset
+                </SelectItem>
+              )}
+              {assetsQuery.data?.shopAsset?.map((asset: AssetType) => (
+                <SelectItem key={asset.id} value={asset.id.toString()}>
+                  {asset.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
+      />
+    </div>
+  );
+  const radiusField = (
+    <div className="space-y-2">
+      <Label htmlFor="radius" className="text-sm font-medium">
+        Radius (meters)
+      </Label>
+      <Input
+        type="number"
+        id="radius"
+        min={0}
+        {...register("radius", { valueAsNumber: true })}
+        className="bg-card border-border focus:ring-ring"
+        placeholder="50"
+      />
+      {errors.radius && <p className="text-destructive text-sm">{errors.radius.message}</p>}
+    </div>
+  );
+  const pinNumberField = (
+    <div className="min-w-0 space-y-2">
+      <Label htmlFor="pinNumber" className="text-sm font-medium">
+        Number of Pins
+      </Label>
+      <Input
+        type="number"
+        id="pinNumber"
+        min={1}
+        {...register("pinNumber", { valueAsNumber: true })}
+        className="bg-card border-border focus:ring-ring"
+        placeholder="1"
+      />
+      {errors.pinNumber && <p className="text-destructive text-sm">{errors.pinNumber.message}</p>}
+    </div>
+  );
+  const limitInput = (
+    <Input
+      type="number"
+      id="pinCollectionLimit"
+      min={0}
+      {...register("pinCollectionLimit", { valueAsNumber: true })}
+      className="bg-card border-border focus:ring-ring"
+      placeholder={paired ? "0" : "Enter collection limit"}
+    />
+  );
+  const limitLabel = (
+    <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
+      Pin Collection Limit
+    </Label>
+  );
+  const limitNotes = (
+    <>
+      {selectedToken && (
+        <div className="bg-muted space-y-1 rounded p-2 text-xs">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Available Balance:</span>
+            <span className="font-medium">{selectedToken.bal}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Remaining Balance:</span>
+            <span
+              className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-accent"}`}
+            >
+              {remainingBalance}
+            </span>
+          </div>
+        </div>
+      )}
+      {selectedToken && remainingBalance < 0 && (
+        <p className="text-destructive text-sm">Insufficient token balance</p>
+      )}
+      {errors.pinCollectionLimit && (
+        <p className="text-destructive text-sm">{errors.pinCollectionLimit.message}</p>
+      )}
+    </>
+  );
+
+  if (paired)
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 [&_[data-slot=select-trigger]]:w-full">
+          <div className="min-w-0">{tier}</div>
+          {tokenField}
+        </div>
+        {showRadius && radiusField}
         <div className="space-y-2">
-          <Label htmlFor="pinNumber" className="text-sm font-medium">
-            Number of Pins
-          </Label>
-          <Input
-            type="number"
-            id="pinNumber"
-            min={1}
-            {...register("pinNumber", { valueAsNumber: true })}
-            className="bg-card border-border focus:ring-ring"
-            placeholder="1"
-          />
-          {errors.pinNumber && (
-            <p className="text-destructive text-sm">{errors.pinNumber.message}</p>
-          )}
+          <div className="grid grid-cols-2 items-start gap-3">
+            {pinNumberField}
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
+                Collection limit
+              </Label>
+              {limitInput}
+            </div>
+          </div>
+          {limitNotes}
         </div>
       </div>
+    );
 
+  return (
+    <div className="space-y-4">
+      {tokenField}
+      <div className={showRadius ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-4"}>
+        {showRadius && radiusField}
+        {pinNumberField}
+      </div>
       <div className="space-y-2">
-        <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
-          Pin Collection Limit
-        </Label>
-        <Input
-          type="number"
-          id="pinCollectionLimit"
-          min={0}
-          {...register("pinCollectionLimit", { valueAsNumber: true })}
-          className="bg-card border-border focus:ring-ring"
-          placeholder="Enter collection limit"
-        />
-        {selectedToken && (
-          <div className="bg-muted space-y-1 rounded p-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Available Balance:</span>
-              <span className="font-medium">{selectedToken.bal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Remaining Balance:</span>
-              <span
-                className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-accent"}`}
-              >
-                {remainingBalance}
-              </span>
-            </div>
-          </div>
-        )}
-        {selectedToken && remainingBalance < 0 && (
-          <p className="text-destructive text-sm">Insufficient token balance</p>
-        )}
-        {errors.pinCollectionLimit && (
-          <p className="text-destructive text-sm">{errors.pinCollectionLimit.message}</p>
-        )}
+        {limitLabel}
+        {limitInput}
+        {limitNotes}
       </div>
     </div>
   );
@@ -521,6 +571,7 @@ export function EnhanceDescriptionButton({ className }: { className?: string }) 
   );
 }
 export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
+  const card = useFormCard();
   const { watch, getValues } = useFormContext<CreatePinType>();
   const title = watch("title");
   const description = watch("description");
@@ -600,6 +651,110 @@ export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
     setSelectedTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
   };
 
+  const content = (
+    <>
+      {/* Action buttons (wrapping in a narrow map card) */}
+      <div className="flex flex-wrap gap-2">
+        <div
+          className={cn("flex flex-1 items-center gap-2", card ? "basis-full" : "min-w-[220px]")}
+        >
+          <Input
+            placeholder="New tag name..."
+            value={newTagInput}
+            onChange={(e) => setNewTagInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
+            className="bg-card border-border"
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleCreateTag}
+            disabled={!newTagInput.trim() || createTagM.isPending}
+          >
+            {createTagM.isPending ? (
+              <Loader className="h-3 w-3 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            New Tag
+          </Button>
+        </div>
+
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handleAiGenerate}
+          disabled={!title || aiGenerateM.isPending}
+          className="border-primary/40 text-primary hover:bg-primary/10"
+        >
+          {aiGenerateM.isPending ? (
+            <Loader className="mr-1 h-3 w-3 animate-spin" />
+          ) : (
+            <Wand2 className="mr-1 h-3 w-3" />
+          )}
+          AI Tags
+        </Button>
+      </div>
+
+      {/* AI suggested tags */}
+      {aiTags.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-muted-foreground text-xs font-medium">
+            AI Suggestions — click to add:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {aiTags.map((label) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => handleAddAiTag(label)}
+                className="border-primary/50 text-primary hover:bg-primary/10 flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-xs transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Creator's existing tags */}
+      {myTagsQuery.isLoading && <p className="text-muted-foreground text-xs">Loading tags...</p>}
+      {myTagsQuery.data && myTagsQuery.data.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-muted-foreground text-xs font-medium">Your tags:</p>
+          <div className="flex flex-wrap gap-2">
+            {myTagsQuery.data.map((tag) => {
+              const selected = selectedTagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    selected
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-muted-foreground border-border hover:border-primary/50"
+                  }`}
+                >
+                  {selected && <span className="mr-1">✓</span>}
+                  {tag.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {selectedTagIds.length > 0 && (
+        <p className="text-muted-foreground text-xs">{selectedTagIds.length} tag(s) selected</p>
+      )}
+    </>
+  );
+  // In a map card the section around it is already titled: no card of its own.
+  if (card) return <div className="space-y-4">{content}</div>;
   return (
     <Card>
       <CardHeader>
@@ -608,104 +763,7 @@ export function TagsSection({ suggestions }: { suggestions?: string[] } = {}) {
           Tags
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          <div className="flex flex-1 items-center gap-2">
-            <Input
-              placeholder="New tag name..."
-              value={newTagInput}
-              onChange={(e) => setNewTagInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
-              className="bg-card border-border"
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={handleCreateTag}
-              disabled={!newTagInput.trim() || createTagM.isPending}
-            >
-              {createTagM.isPending ? (
-                <Loader className="h-3 w-3 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-              New Tag
-            </Button>
-          </div>
-
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleAiGenerate}
-            disabled={!title || aiGenerateM.isPending}
-            className="border-primary/40 text-primary hover:bg-primary/10"
-          >
-            {aiGenerateM.isPending ? (
-              <Loader className="mr-1 h-3 w-3 animate-spin" />
-            ) : (
-              <Wand2 className="mr-1 h-3 w-3" />
-            )}
-            AI Tags
-          </Button>
-        </div>
-
-        {/* AI suggested tags */}
-        {aiTags.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-muted-foreground text-xs font-medium">
-              AI Suggestions — click to add:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {aiTags.map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => handleAddAiTag(label)}
-                  className="border-primary/50 text-primary hover:bg-primary/10 flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-xs transition-colors"
-                >
-                  <Plus className="h-3 w-3" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Creator's existing tags */}
-        {myTagsQuery.isLoading && <p className="text-muted-foreground text-xs">Loading tags...</p>}
-        {myTagsQuery.data && myTagsQuery.data.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-muted-foreground text-xs font-medium">Your tags:</p>
-            <div className="flex flex-wrap gap-2">
-              {myTagsQuery.data.map((tag) => {
-                const selected = selectedTagIds.includes(tag.id);
-                return (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => toggleTag(tag.id)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      selected
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-muted-foreground border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {selected && <span className="mr-1">✓</span>}
-                    {tag.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {selectedTagIds.length > 0 && (
-          <p className="text-muted-foreground text-xs">{selectedTagIds.length} tag(s) selected</p>
-        )}
-      </CardContent>
+      <CardContent className="space-y-4">{content}</CardContent>
     </Card>
   );
 }

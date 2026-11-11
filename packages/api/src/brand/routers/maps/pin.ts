@@ -18,6 +18,8 @@ import { createOptimizedImage } from "@wadzzo/storage";
 import { createHotspotFormSchema } from "@wadzzo/schemas/hotspot";
 import { updateMapFormSchema } from "@wadzzo/schemas/pin-edit";
 import { columnsToLook, pinLookInputSchema } from "@wadzzo/schemas/pin-look";
+import { checkLayer, LAYER_REF_SELECT } from "../../../shared/layers";
+import { layerIdInput } from "@wadzzo/schemas/layer";
 import { lookColumnsFor, lookData } from "../../server/pin-look";
 import { attachTags, newPinData, PAGE_ASSET_NUM } from "../../server/pin-create";
 import { hotspotSchedule, isPendingFirstDrop } from "@wadzzo/geo/hotspot-schedule";
@@ -84,6 +86,8 @@ export const createPinFormSchema = z.object({
   tags: z.array(z.string()).default([]),
   /** Shape, fill, colour, image fit and badge (see @wadzzo/schemas/pin-look). */
   look: pinLookInputSchema.optional(),
+  /** The map layer (docs/layers); null/absent = a regular map pin. */
+  layerId: layerIdInput,
 });
 
 export { PAGE_ASSET_NUM };
@@ -154,6 +158,8 @@ export const createAdminPinFormSchema = z.object({
   creatorId: z.string(),
   tags: z.array(z.string()).default([]),
   look: pinLookInputSchema.optional(),
+  /** The brand's map layer (docs/layers); left out or null = a regular pin. */
+  layerId: layerIdInput,
 });
 
 type AuthCtx = Parameters<typeof assertOwnerOrAdmin>[0];
@@ -162,7 +168,7 @@ type AuthCtx = Parameters<typeof assertOwnerOrAdmin>[0];
 async function manageableHotspot(ctx: AuthCtx, hotspotId: string) {
   const h = await ctx.db.hotspot.findUnique({
     where: { id: hotspotId },
-    select: { id: true, creatorId: true, isActive: true },
+    select: { id: true, creatorId: true, isActive: true, layerId: true },
   });
   if (!h) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Hotspot not found" });
   await assertOwnerOrAdmin(ctx, h.creatorId);
@@ -219,6 +225,8 @@ const MAP_PIN_SELECT = {
       markerColor: true,
       markerImageFit: true,
       markerAutoBadge: true,
+      // the map layer (docs/layers): the base map shows one layer at a time
+      layerId: true,
       creator: { select: { profileUrl: true } },
       pinShape: { select: { path: true, anchor: true } },
     },
@@ -241,6 +249,7 @@ export const pinRouter = createTRPCRouter({
         throw new AppError(ErrorCodes.VALIDATION_FAILED, {
           message: "The hotspot must end after it starts",
         });
+      const layerId = await checkLayer(ctx.db, creatorId, input.layerId);
 
       try {
         const result = await hotspots(ctx.db).create(creatorId, {
@@ -264,6 +273,7 @@ export const pinRouter = createTRPCRouter({
           tier: input.tier,
           creatorId,
           look: await lookColumnsFor(ctx.db, creatorId, input.look),
+          layerId: layerId ?? null,
         });
 
         return { hotspotId: result.hotspotId };
@@ -281,6 +291,7 @@ export const pinRouter = createTRPCRouter({
         id: true,
         creatorId: true,
         isActive: true,
+        layerId: true,
         dropEveryDays: true,
         pinDurationDays: true,
         hotspotStartDate: true,
@@ -314,6 +325,7 @@ export const pinRouter = createTRPCRouter({
           geoJson: true,
           autoCollect: true,
           multiPin: true,
+          layerId: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -394,6 +406,7 @@ export const pinRouter = createTRPCRouter({
         markerColor: true,
         markerImageFit: true,
         markerAutoBadge: true,
+        layerId: true,
       },
     });
     if (!h) throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Hotspot not found" });
@@ -461,6 +474,8 @@ export const pinRouter = createTRPCRouter({
         multiPin: z.boolean().optional(),
         /** New pin look for every drop; left out = unchanged. */
         look: pinLookInputSchema.optional(),
+        /** New map layer for the hotspot and every drop (null = regular); left out = unchanged. */
+        layerId: layerIdInput,
         details: z
           .object({
             title: z.string().trim().min(3).max(120),
@@ -475,10 +490,21 @@ export const pinRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const h = await manageableHotspot(ctx, input.hotspotId);
-      const { hotspotId, scope, details, look: lookInput, ...settings } = input;
+      const {
+        hotspotId,
+        scope,
+        details,
+        look: lookInput,
+        layerId: layerInput,
+        ...settings
+      } = input;
       const look = await lookColumnsFor(ctx.db, h.creatorId, lookInput);
+      const layerId = await checkLayer(ctx.db, h.creatorId, layerInput, h.layerId);
 
-      const hasSettings = Object.values(settings).some((v) => v !== undefined) || Boolean(look);
+      const hasSettings =
+        Object.values(settings).some((v) => v !== undefined) ||
+        Boolean(look) ||
+        layerId !== undefined;
       if (hasSettings) {
         try {
           await hotspots(ctx.db).update(h.creatorId, hotspotId, {
@@ -487,6 +513,7 @@ export const pinRouter = createTRPCRouter({
             hotspotEndDate: settings.hotspotEndDate?.toISOString(),
             scope,
             look,
+            layerId,
           });
         } catch (err) {
           throw new AppError(ErrorCodes.VALIDATION_FAILED, {
@@ -588,10 +615,12 @@ export const pinRouter = createTRPCRouter({
       select: { platformId: true },
     });
 
+    const layerId = await checkLayer(ctx.db, targetCreatorId, input.layerId);
     const data = await newPinData(ctx.db, {
       ...input,
       creatorId: targetCreatorId,
       platformId: target.platformId,
+      layerId,
     });
     const locationGroup = await ctx.db.locationGroup.create({
       data: { ...data, platformId: target.platformId },
@@ -613,6 +642,7 @@ export const pinRouter = createTRPCRouter({
           message: "Creator not found",
         });
       assertInPlatformScope(ctx, creator.platformId);
+      const layerId = await checkLayer(ctx.db, creatorId, input.layerId);
 
       let tierId: number | undefined;
       let privacy: ItemPrivacy = ItemPrivacy.PUBLIC;
@@ -668,6 +698,7 @@ export const pinRouter = createTRPCRouter({
           remaining: pinCollectionLimit,
           multiPin,
           approved: true,
+          layerId: layerId ?? null,
         },
       });
       await attachTags(ctx.db, locationGroup.id, input.tags);
@@ -797,6 +828,9 @@ export const pinRouter = createTRPCRouter({
       approved: g.approved,
       look: columnsToLook(g),
       brandImage: g.creator?.profileUrl ?? null,
+      // a hotspot's drop follows its hotspot's layer (set on the hotspot)
+      hotspotId: g.hotspotId,
+      layerId: g.layerId,
     };
   }),
 
@@ -815,6 +849,7 @@ export const pinRouter = createTRPCRouter({
       autoCollect,
       multiPin,
       look: lookInput,
+      layerId: layerInput,
     } = input;
 
     try {
@@ -845,6 +880,13 @@ export const pinRouter = createTRPCRouter({
       }
 
       const look = await lookColumnsFor(ctx.db, findLocation.locationGroup.creatorId, lookInput);
+      // A hotspot's drop follows its hotspot's layer: it's changed on the hotspot.
+      const layerId = await checkLayer(
+        ctx.db,
+        findLocation.locationGroup.creatorId,
+        findLocation.locationGroup.hotspotId ? undefined : layerInput,
+        findLocation.locationGroup.layerId,
+      );
       const imageChanged = image !== undefined && image !== findLocation.locationGroup.image;
       const optimizedImage = imageChanged
         ? await createOptimizedImage(image).catch(() => null)
@@ -864,6 +906,7 @@ export const pinRouter = createTRPCRouter({
           link: url,
           multiPin,
           ...(look ? lookData(look) : {}),
+          ...(layerId !== undefined && { layerId }),
         },
       });
     } catch (e) {
@@ -2069,6 +2112,8 @@ export const pinRouter = createTRPCRouter({
             where: { hidden: false },
             include: { _count: { select: { consumers: true } } },
           },
+          // the map layer (docs/layers), shown as a tag
+          layer: { select: LAYER_REF_SELECT },
         },
         orderBy: { createdAt: "desc" },
         take: input.limit + 1,

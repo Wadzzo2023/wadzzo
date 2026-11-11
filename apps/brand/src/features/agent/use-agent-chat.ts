@@ -7,6 +7,8 @@ import type { ActionEdits, ActionStatus, AgentStep } from "@wadzzo/agent-contrac
 import type { AgentMessage } from "@wadzzo/api/brand/routers/agent";
 import { api } from "~/utils/api";
 
+import { useSelectedLayer } from "~/features/pins/layers/selected-layer";
+
 import { useStored } from "./use-stored";
 
 /** How often to check on a running answer, so progress steps feel live. */
@@ -169,6 +171,8 @@ export function useAgentChat(creatorId?: string) {
           creatorId,
           actionId,
           edits,
+          // New pins, hotspots and trails go in the layer the brand is in (docs/layers).
+          layerId: useSelectedLayer.getState().id,
         });
         setActionState(actionId, {
           status: "done",
@@ -177,6 +181,8 @@ export function useAgentChat(creatorId?: string) {
         toast.success(r.message);
         // Pins, hotspots and events may have changed.
         void utils.maps.pin.invalidate();
+        void utils.maps.layer.invalidate();
+        void utils.maps.trail.invalidate();
         void utils.events.invalidate();
         return true;
       } catch (err) {
