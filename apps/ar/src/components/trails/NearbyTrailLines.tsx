@@ -13,6 +13,8 @@ export type TrailLine = {
   color: string | null;
   path: [number, number][][];
   stops: { lat: number; lng: number }[];
+  /** Its map layer (docs/layers), or null/absent for a regular trail. */
+  layerId?: string | null;
 };
 
 /**

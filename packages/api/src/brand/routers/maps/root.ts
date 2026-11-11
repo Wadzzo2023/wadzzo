@@ -1,4 +1,5 @@
 import { createTRPCRouter } from "../../trpc";
+import { layerRouter } from "./layer";
 import { pinRouter } from "./pin";
 import { reportRouter } from "./report";
 import { shapeRouter } from "./shape";
@@ -12,6 +13,7 @@ import { trxRouter } from "./transactions";
  * All routers added in /api/routers should be manually added here.
  */
 export const mapsRouter = createTRPCRouter({
+  layer: layerRouter,
   pin: pinRouter,
   report: reportRouter,
   shape: shapeRouter,

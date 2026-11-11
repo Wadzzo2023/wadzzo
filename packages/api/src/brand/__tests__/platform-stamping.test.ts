@@ -28,6 +28,7 @@ const STAMPED = [
   "admin",
   "mcpToken",
   "pinTemplate",
+  "pinLayer",
   "pinShape",
   "trail",
   "trailRun",

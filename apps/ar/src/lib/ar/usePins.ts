@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { signAndSubmitTransaction } from "@wadzzo/wallet";
 
 import { api } from "~/utils/api";
+import { inLayer, useMapLayer } from "./layers";
 import { distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { pinStatus } from "@wadzzo/ar-core/ar/rarity";
 import { useSettings } from "./store";
@@ -395,11 +396,15 @@ export function useDiscoveryPinsQuery(): DiscoveryPinsResult {
   const followingOnly = useSettings((s) => s.followingOnly);
   const { brands, isLoading: brandsLoading } = useBrandsQuery();
 
+  // Map layers (docs/layers): regular drops plus the layers the fan turned on.
+  const layerView = useMapLayer((s) => s.view);
+
   const discovered = useMemo(() => {
-    if (!followingOnly || brandsLoading) return pins;
+    const layered = pins.filter((p) => inLayer(p, layerView));
+    if (!followingOnly || brandsLoading) return layered;
     const followed = new Set(brands.filter((b) => b.followed).map((b) => b.id));
-    return pins.filter((p) => followed.has(p.brandId));
-  }, [pins, followingOnly, brands, brandsLoading]);
+    return layered.filter((p) => followed.has(p.brandId));
+  }, [pins, layerView, followingOnly, brands, brandsLoading]);
 
   return { pins: discovered, isLoading, isError, refetch };
 }

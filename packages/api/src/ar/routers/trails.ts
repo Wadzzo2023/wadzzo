@@ -39,6 +39,7 @@ const SELECT = {
   endDate: true,
   platformId: true,
   rewardMinStops: true,
+  layerId: true,
   creator: { select: { id: true, name: true, profileUrl: true } },
   rewardGroup: {
     select: {
@@ -108,6 +109,8 @@ async function fanTrail(db: Db, row: Row, userId: string | null) {
     path: readPath(row.path),
     distanceMetres: row.distanceMetres,
     estMinutes: row.estMinutes,
+    /** Its map layer (docs/layers), or null. Additive: older apps ignore it. */
+    layerId: row.layerId,
     bounds: { minLat: row.minLat, maxLat: row.maxLat, minLng: row.minLng, maxLng: row.maxLng },
     endDate: row.endDate.toISOString(),
     brand: {
@@ -254,6 +257,7 @@ export const trailsRouter = createTRPCRouter({
           title: true,
           color: true,
           path: true,
+          layerId: true,
           stops: {
             orderBy: { position: "asc" },
             select: { locationGroup: { select: { latitude: true, longitude: true } } },
@@ -267,6 +271,7 @@ export const trailsRouter = createTRPCRouter({
         title: t.title,
         color: t.color,
         path: readPath(t.path),
+        layerId: t.layerId,
         stops: t.stops.map((s) => ({
           lat: s.locationGroup.latitude,
           lng: s.locationGroup.longitude,

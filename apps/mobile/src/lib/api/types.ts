@@ -323,6 +323,8 @@ export type ArTrail = {
   path: [number, number][][];
   distanceMetres: number;
   estMinutes: number;
+  /** Its map layer (docs/layers), or null. Absent from servers without layers. */
+  layerId?: string | null;
   bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number };
   endDate: string;
   brand: { id: string; name: string; imageUrl: string };

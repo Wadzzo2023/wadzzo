@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { BADWORDS } from "./banned-word";
+import { layerIdInput } from "./layer";
 import { pinLookInputSchema } from "./pin-look";
 import { pinTemplateDataSchema, readTemplateData, type PinTemplateData } from "./pin-template";
 
@@ -156,6 +157,8 @@ export const saveTrailSchema = trailDetailsSchema
     path: z.array(trailSectionSchema),
     stopDefaults: stopDefaultsSchema.optional().nullable(),
     reward: trailRewardSchema.optional().nullable(),
+    /** The map layer the whole trail (and its new stop pins) goes in; null = a regular trail. */
+    layerId: layerIdInput,
   })
   .superRefine((t, ctx) => {
     if (t.endDate <= t.startDate)

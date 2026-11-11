@@ -14,7 +14,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "sync:platform": "node ../../packages/platform/scripts/sync-platform-assets.mjs ar",
     "predev": "pnpm sync:platform",
-    "prebuild": "pnpm sync:platform",
+    "prebuild": "pnpm --filter @wadzzo/db generate && pnpm sync:platform",
     "test:watch": "vitest"
   },
   "dependencies": {

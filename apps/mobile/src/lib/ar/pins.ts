@@ -6,6 +6,7 @@ import { useSettings } from "./feedback";
 import { distanceMeters } from "./geo";
 import { pinStatus } from "./rarity";
 import type { ArPin, Coords, GeoFix } from "./types";
+import { inLayer, useMapLayer } from "./layers";
 
 /** Ported from wadzzoAR/src/lib/ar/usePins.ts — same filters and rules. */
 
@@ -63,11 +64,14 @@ export function useDiscoveryPins(area: PinArea | null) {
   const { pins, isLoading, isFetching, isError, refetch } = usePinsQuery(area);
   const followingOnly = useSettings((s) => s.followingOnly);
   const { brands, isLoading: brandsLoading } = useBrandsQuery();
+  // Map layers (docs/layers): regular drops plus the layers the fan turned on.
+  const layerView = useMapLayer((s) => s.view);
   const discovered = useMemo(() => {
-    if (!followingOnly || brandsLoading) return pins;
+    const layered = pins.filter((p) => inLayer(p, layerView));
+    if (!followingOnly || brandsLoading) return layered;
     const followed = new Set(brands.filter((b) => b.followed).map((b) => b.id));
-    return pins.filter((p) => followed.has(p.brandId));
-  }, [pins, followingOnly, brands, brandsLoading]);
+    return layered.filter((p) => followed.has(p.brandId));
+  }, [pins, layerView, followingOnly, brands, brandsLoading]);
   // isFetching: any request in flight (first load, a new area, a background refresh).
   return { pins: discovered, isLoading, isFetching, isError, refetch };
 }

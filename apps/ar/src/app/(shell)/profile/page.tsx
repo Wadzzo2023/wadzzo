@@ -23,6 +23,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HoloCard } from "~/components/cards/HoloCard";
 import { MuralPackSettings } from "~/components/murals/MuralPackSettings";
+import { lastMapView, MapStyleOptions } from "~/components/map/MapLayersSheet";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { AppShell, BackButton, ScreenHeader } from "~/components/shell/AppShell";
 import { ArButton, ArLinkButton } from "~/components/ui/ArButton";
@@ -417,6 +418,16 @@ export default function ProfileScreen() {
             <MuralLayerSetting />
 
             {SHOW_FEEDBACK_TEST && <FeedbackTest />}
+          </div>
+        </section>
+
+        {/* ── Map: type, 2D / 3D, terrain (was the map rail's Layers button) ── */}
+        <section className="mt-5 px-5">
+          <h2 className="font-hud text-ar-faint mb-2.5 text-[9.5px] font-semibold tracking-[0.24em] uppercase">
+            Map
+          </h2>
+          <div className="ar-bevel rounded-ar px-3.5 pt-0.5 pb-3.5">
+            <MapStyleOptions view={lastMapView()} />
           </div>
         </section>
 

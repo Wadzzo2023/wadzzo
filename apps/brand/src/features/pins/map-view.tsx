@@ -3,7 +3,7 @@
 import { Hexagon, Plus, Route, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { MapRef } from "react-map-gl/mapbox";
+import { Marker, type MapRef } from "react-map-gl/mapbox";
 
 import { BaseMap, WORLD_VIEW } from "~/components/map-kit/base-map";
 import { DrawTool } from "~/components/map-kit/draw-tool";
@@ -24,6 +24,7 @@ import { NearbyLocationsPanel } from "~/components/map/nearby-locations-panel";
 import CopyCutPinModal from "~/components/modals/copy-cut-pin-modal";
 import HotspotDetailModal from "~/components/modals/hotspot-details-modal";
 import PinDetailAndActionsModal from "~/components/modals/pin-detail-modal";
+import { cn } from "@wadzzo/ui/lib/cn";
 import { Button } from "@wadzzo/ui/poster/button";
 import { Label } from "@wadzzo/ui/components/label";
 import { Switch } from "@wadzzo/ui/components/switch";
@@ -31,6 +32,9 @@ import { AgentChat } from "~/features/agent/agent-chat";
 import { AgentMapLayer } from "~/features/agent/agent-map";
 import { addStop, draftPath, useTrailBuilder } from "~/features/trails/builder-store";
 import { matchesTrailStyle, NewStopDialog, UseStyleDialog } from "~/features/trails/stop-dialogs";
+import { LayerSwitcher } from "~/features/pins/layers/layer-switcher";
+import { onSelectedLayer, useSelectedLayer } from "~/features/pins/layers/selected-layer";
+import { FormCardProvider, type ActingBrand } from "~/ui/form-card";
 import { TrailBuilder } from "~/features/trails/trail-builder";
 import { TrailCard } from "~/features/trails/trail-card";
 import {
@@ -58,13 +62,22 @@ import toast from "react-hot-toast";
 
 import { api } from "~/utils/api";
 
+import EditHotspotPage from "./edit-hotspot-page";
+import EditPinPage from "./edit-pin-page";
+import { useMapFormCard, type MapFormCard } from "./map-form-card";
+import NewHotspotPage from "./new-hotspot-page";
+import NewPinPage from "./new-pin-page";
 import { templateArea } from "./templates/mapping";
 import { TemplatePicker, type TemplateRow } from "./templates/template-picker";
 
 /**
  * Pins › Map (Mapbox). Your pins and hotspot areas; click the map to start a
- * pin there, draw an area to start a hotspot. Copied/cut pins paste where you
- * click. Pins in view are listed on the right (desktop).
+ * pin there, draw an area to start a hotspot (both open as a floating card, like the trail
+ * builder; the full pages are still there). Copied/cut pins paste where you click. Pins in
+ * view are listed on the right (desktop).
+ *
+ * Map layers (docs/layers): with a layer picked on the toolbar the map shows only that layer's
+ * pins, hotspots and trails, and new ones are made in it. No layer is the regular map.
  */
 /**
  * Frames a trail's box, keeping the stops clear of the trail card: beside it on a wide screen,
@@ -81,8 +94,24 @@ function fitBox(m: MapRef | null, box: ReturnType<typeof boundsOf> | null | unde
   });
 }
 
-export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
+export default function MapView({
+  toolbarEnd,
+  toolbarStart,
+  brand,
+}: {
+  toolbarEnd?: ReactNode;
+  /** Before the search (Admin › All maps puts its brand picker here). */
+  toolbarStart?: ReactNode;
+  /**
+   * The brand an admin is acting for (Admin › All maps): its pins, hotspots, trails and layers,
+   * and everything made here is made for it. Undefined: the signed-in brand's own map.
+   * Remount (key) per brand.
+   */
+  brand?: ActingBrand;
+}) {
   const router = useRouter();
+  // Where this map lives, for tidying the URL after a deep link.
+  const home = brand ? `/admin/maps?brand=${encodeURIComponent(brand.id)}` : "/pins";
   const map = useRef<MapRef>(null);
   const [showExpired, setShowExpired] = useState(false);
   const search = useSearchParams();
@@ -105,8 +134,8 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     }
   }
   useEffect(() => {
-    if (search?.get("draw") === "1") router.replace("/pins", { scroll: false });
-  }, [search, router]);
+    if (search?.get("draw") === "1") router.replace(home, { scroll: false });
+  }, [search, router, home]);
   const [hotspotId, setHotspotId] = useState<string | null>(null);
   /** A template being placed: the next map click drops it there. */
   const [placing, setPlacing] = useState<TemplateRow | null>(null);
@@ -123,12 +152,26 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   const pathDrawing = useTrailBuilder((s) => s.drawing);
 
   const [newStopAt, setNewStopAt] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Map layers (docs/layers): the layer picked on the toolbar, or null for the regular map.
+  const selectedLayer = useSelectedLayer((s) => s.id);
+  // Other layers switched on with their eye, shown alongside (what's made still goes in the
+  // selected one).
+  const shownLayers = useSelectedLayer((s) => s.shown);
+  const showLayer = useCallback(
+    (layerId: string | null | undefined) => onSelectedLayer(layerId, selectedLayer, shownLayers),
+    [selectedLayer, shownLayers],
+  );
+  // The pin or hotspot form open as a floating card, and the spot last clicked for it.
+  const formCard = useMapFormCard((s) => s.card);
+  const cardAt = useMapFormCard((s) => s.at);
   const [styleAsk, setStyleAsk] = useState<PinOnMap | null>(null);
 
   // Coming back from /pins/new (or anywhere) restores the camera and the
   // searched place instead of re-fitting all the pins. Read once: the view is
   // saved on every move, and subscribing would re-render the map each time.
-  const [savedView] = useState(() => usePinsMapViewStore.getState().view);
+  // Not for an admin acting for a brand: each brand's map opens framed on its own pins.
+  const [savedView] = useState(() => (brand ? null : usePinsMapViewStore.getState().view));
   const saveView = usePinsMapViewStore((s) => s.setView);
   const place = usePinsMapViewStore((s) => s.place);
   const setPlace = usePinsMapViewStore((s) => s.setPlace);
@@ -157,11 +200,26 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   );
   const setDraft = useHotspotDraft((s) => s.set);
 
-  const pins = api.maps.pin.getMyPins.useQuery({ showExpired });
-  const hotspots = api.maps.pin.myHotspots.useQuery();
-  const trails = api.maps.trail.list.useQuery();
+  // The signed-in brand's own, or (an admin acting for a brand) that brand's.
+  const myPinsQuery = api.maps.pin.getMyPins.useQuery({ showExpired }, { enabled: !brand });
+  const brandPinsQuery = api.maps.pin.getCreatorPins.useQuery(
+    { creator_id: brand?.id ?? "", showExpired },
+    { enabled: Boolean(brand) },
+  );
+  const pins = brand ? brandPinsQuery : myPinsQuery;
+  const myHotspots = api.maps.pin.myHotspots.useQuery(undefined, { enabled: !brand });
+  const brandHotspots = api.maps.pin.getCreatorHotspots.useQuery(
+    { creatorId: brand?.id ?? "" },
+    { enabled: Boolean(brand) },
+  );
+  const hotspots = brand ? brandHotspots : myHotspots;
+  const shownHotspots = useMemo(
+    () => hotspots.data?.filter((h) => showLayer(h.layerId)),
+    [hotspots.data, showLayer],
+  );
+  const trails = api.maps.trail.list.useQuery(brand ? { creatorId: brand.id } : undefined);
   const shownTrails = (trails.data ?? []).filter(
-    (t) => t.status !== "ENDED" && t.path.length > 0 && t.id !== draft?.id,
+    (t) => t.status !== "ENDED" && t.path.length > 0 && t.id !== draft?.id && showLayer(t.layerId),
   );
   const selectedTrail = trails.data?.find((t) => t.id === trailId) ?? null;
   // Trail mode: new stops not saved yet are drawn as pins too (their pins are made on save),
@@ -171,20 +229,24 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     draft?.creatorId ? { creatorId: draft.creatorId } : undefined,
     { enabled: hasNewStops, staleTime: 60_000 },
   );
-  const draftPins = useMemo(
-    () =>
-      draft && hasNewStops
-        ? [
-            ...myPins,
-            ...unsavedStopPins(
-              draft,
-              myPins[0]?.locationGroup?.creator.profileUrl ?? null,
-              new Map((brandShapes.data ?? []).map((sh) => [sh.id, sh])),
-            ),
-          ]
-        : myPins,
-    [draft, hasNewStops, myPins, brandShapes.data],
-  );
+  // The picked layer's pins (or the regular ones), plus the stops of the trail being built
+  // wherever they are, plus its new stops not saved yet.
+  const draftPins = useMemo(() => {
+    const stopIds = new Set(draft?.stops.map((s) => s.pinId));
+    const shown = myPins.filter(
+      (p) => showLayer(p.locationGroup?.layerId) || stopIds.has(p.locationGroup?.id ?? ""),
+    );
+    return draft && hasNewStops
+      ? [
+          ...shown,
+          ...unsavedStopPins(
+            draft,
+            myPins[0]?.locationGroup?.creator.profileUrl ?? null,
+            new Map((brandShapes.data ?? []).map((sh) => [sh.id, sh])),
+          ),
+        ]
+      : shown;
+  }, [draft, hasNewStops, myPins, brandShapes.data, showLayer]);
   const applyStyle = api.maps.trail.applyStyle.useMutation({
     onError: (e) => toast.error(e.message),
   });
@@ -196,7 +258,8 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
   useEffect(() => {
     if (!linkedTrail || (linkedTrail !== "new" && !trails.data)) return;
     const t = trails.data?.find((x) => x.id === linkedTrail);
-    if (linkedTrail === "new") useTrailBuilder.getState().open(blankDraft());
+    if (linkedTrail === "new")
+      useTrailBuilder.getState().open(blankDraft(brand?.id, useSelectedLayer.getState().id));
     else if (t) {
       useTrailBuilder.getState().open(toDraft(t));
       // Frame it: now if the map is ready, else when it loads (see onLoad).
@@ -205,10 +268,27 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       if (map.current) fitBox(map.current, box);
       else linkedBox.current = box;
     }
-    router.replace("/pins", { scroll: false });
-  }, [linkedTrail, trails.data, router]);
-  // Leaving the map leaves Trail mode.
-  useEffect(() => () => useTrailBuilder.getState().close(), []);
+    router.replace(home, { scroll: false });
+  }, [linkedTrail, trails.data, router, home, brand?.id]);
+  // Leaving the map leaves Trail mode and closes the form card. While the map is here, Edit in
+  // the pin and hotspot details opens the card instead of the edit page.
+  useEffect(() => {
+    useMapFormCard.getState().setHosted(true);
+    return () => {
+      useTrailBuilder.getState().close();
+      useMapFormCard.getState().close();
+      useMapFormCard.getState().setHosted(false);
+    };
+  }, []);
+  const actingId = brand?.id;
+  // Acting for a brand: start on its regular map, without the last brand's pins, and leave
+  // no other brand's layer picked behind (the layer choice is shared with the brand's own map).
+  useEffect(() => {
+    if (!actingId) return;
+    useSelectedLayer.getState().reset();
+    useNearbyPinsStore.getState().setMyPins([]);
+    return () => useSelectedLayer.getState().reset();
+  }, [actingId]);
 
   // /pins?hotspot=<id> opens that hotspot and frames its area.
   const linkedHotspot = search?.get("hotspot");
@@ -321,14 +401,18 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
     fitTo(boundsOf(d.stops, [...draftPath(d), ...(d.track ? [d.track] : [])]));
   };
 
-  const editTrail = (t: TrailView) => {
-    setTrailId(null);
-    useTrailBuilder.getState().open(toDraft(t));
-  };
+  const editTrail = (t: TrailView) => openTrailMode(toDraft(t));
   const closeTrailMode = () => {
     useTrailBuilder.getState().close();
     setNewStopAt(null);
     setStyleAsk(null);
+  };
+
+  /** Opens Trail mode (closing any form card: the builder takes the left side). */
+  const openTrailMode = (d: ReturnType<typeof blankDraft>) => {
+    setTrailId(null);
+    useMapFormCard.getState().close();
+    useTrailBuilder.getState().open(d);
   };
 
   /** Trail mode: a click on one of the brand's pins makes it the next stop. */
@@ -436,16 +520,19 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       openCopyCut(true);
       return;
     }
-    router.push(`/pins/new?lat=${lat.toFixed(6)}&lng=${lng.toFixed(6)}`);
+    // A pin card open: the click says where the pin goes. Otherwise a new pin here.
+    const card = useMapFormCard.getState();
+    if (card.card?.kind === "newPin" || card.card?.kind === "editPin") card.moveTo({ lat, lng });
+    else if (!card.card) card.open({ kind: "newPin" }, { lat, lng });
   };
 
   const onDrawn = useCallback(
     (feature: StoredFeature, shape: DrawShape) => {
       setDraft(feature, shape);
       setDrawing(false);
-      router.push(
-        drawTemplateId ? `/pins/hotspots/new?template=${drawTemplateId}` : "/pins/hotspots/new",
-      );
+      // A template carries on to its page; otherwise the hotspot form opens as a card.
+      if (drawTemplateId) router.push(`/pins/hotspots/new?template=${drawTemplateId}`);
+      else useMapFormCard.getState().open({ kind: "newHotspot" });
     },
     [router, setDraft, drawTemplateId],
   );
@@ -488,13 +575,15 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         onMoveEnd={(e) => {
           refreshInView();
           const v = e.viewState;
-          saveView({
-            longitude: v.longitude,
-            latitude: v.latitude,
-            zoom: v.zoom,
-            pitch: v.pitch,
-            bearing: v.bearing,
-          });
+          // The brand's own map remembers where it was; an admin's view of a brand doesn't.
+          if (!brand)
+            saveView({
+              longitude: v.longitude,
+              latitude: v.latitude,
+              zoom: v.zoom,
+              pitch: v.pitch,
+              bearing: v.bearing,
+            });
         }}
         onLoad={() => {
           refreshInView();
@@ -509,9 +598,9 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
               : "pointer"
         }
       >
-        {hotspots.data && (
+        {shownHotspots && (
           <HotspotLayer
-            hotspots={hotspots.data}
+            hotspots={shownHotspots}
             onSelect={drawing || placing || trailMode ? undefined : setHotspotId}
           />
         )}
@@ -559,11 +648,22 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
             stops={draft ? draftStops(draft) : selectedTrail ? stopsOf(selectedTrail) : undefined}
           />
         )}
+        {/* Where the pin in the card goes (the spot last clicked). */}
+        {!drawing && formCard && cardAt && (
+          <Marker latitude={cardAt.lat} longitude={cardAt.lng} anchor="bottom">
+            <span
+              aria-hidden
+              className="bg-primary border-background block size-5 rounded-full border-[3px] shadow-lg ring-2 ring-black/20"
+            />
+          </Marker>
+        )}
         {!drawing && place && (
           <SearchedPlaceMarker
             place={place}
             onClear={() => setPlace(null)}
-            onDrop={(p) => router.push(`/pins/new?lat=${p.lat.toFixed(6)}&lng=${p.lng.toFixed(6)}`)}
+            onDrop={(p) =>
+              useMapFormCard.getState().open({ kind: "newPin" }, { lat: p.lat, lng: p.lng })
+            }
           />
         )}
         {!drawing && <AgentMapLayer />}
@@ -581,9 +681,16 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
 
       {/* Toolbar */}
       {!drawing && !placing && !trailMode && (
-        <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-2 lg:inset-x-4 lg:top-4">
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-2 lg:inset-x-4 lg:top-4",
+            // A form card takes the left side (as the trail builder): the toolbar moves over.
+            formCard && "lg:left-[calc(380px+2rem)]",
+          )}
+        >
+          {toolbarStart}
           <PlaceSearch
-            className="pointer-events-auto w-full sm:w-80"
+            className={cn("pointer-events-auto w-full", formCard ? "sm:w-64" : "sm:w-80")}
             initialQuery={place?.name}
             onSelect={(p) => {
               setPlace(p);
@@ -612,38 +719,45 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
           </div>
           <div className="pointer-events-auto ml-auto flex items-center gap-2">
             {toolbarEnd}
-            <TemplatePicker
-              label="Templates"
-              align="end"
-              className="bg-card shadow-sm"
-              onPick={pickTemplate}
-            />
-            <Button
-              variant="outline"
-              className="shadow-sm"
-              onClick={() => {
-                setTrailId(null);
-                useTrailBuilder.getState().open(blankDraft());
-              }}
-            >
-              <Route /> <span className="hidden sm:inline">New trail</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="shadow-sm"
-              onClick={() => {
-                setDrawTemplateId(null);
-                setDrawing(true);
-              }}
-            >
-              <Hexagon /> <span className="hidden sm:inline">Draw hotspot</span>
-            </Button>
-            <Button
-              className="hidden shadow-sm sm:inline-flex"
-              onClick={() => router.push("/pins/new")}
-            >
-              <Plus /> New pin
-            </Button>
+            {/* With a form card open the create buttons step aside (as in Trail mode), so the
+                toolbar fits on one row beside the card; the layer switcher stays. */}
+            {/* Templates are the signed-in brand's own: not offered when acting for a brand. */}
+            {!formCard && !brand && (
+              <TemplatePicker
+                label="Templates"
+                align="end"
+                className="bg-card shadow-sm"
+                onPick={pickTemplate}
+              />
+            )}
+            <LayerSwitcher className="bg-card shadow-sm" creatorId={brand?.id} />
+            {!formCard && (
+              <>
+                <Button
+                  variant="outline"
+                  className="shadow-sm"
+                  onClick={() => openTrailMode(blankDraft(brand?.id, selectedLayer))}
+                >
+                  <Route /> <span className="hidden sm:inline">New trail</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="shadow-sm"
+                  onClick={() => {
+                    setDrawTemplateId(null);
+                    setDrawing(true);
+                  }}
+                >
+                  <Hexagon /> <span className="hidden sm:inline">Draw hotspot</span>
+                </Button>
+                <Button
+                  className="hidden shadow-sm sm:inline-flex"
+                  onClick={() => useMapFormCard.getState().open({ kind: "newPin" })}
+                >
+                  <Plus /> New pin
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -673,7 +787,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
       )}
 
       {/* The selected trail */}
-      {selectedTrail && !trailMode && !drawing && !placing && (
+      {selectedTrail && !trailMode && !drawing && !placing && !formCard && (
         <div className="absolute inset-x-3 bottom-4 z-10 flex justify-center lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4">
           <TrailCard
             trail={selectedTrail}
@@ -701,6 +815,21 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
               onClose={closeTrailMode}
               onSaved={() => void utils.maps.trail.list.invalidate()}
             />
+          </div>
+        </>
+      )}
+      {/* A pin or hotspot form as a floating card (left, like the trail builder) */}
+      {formCard && !trailMode && !drawing && (
+        <>
+          {(formCard.kind === "newPin" || formCard.kind === "editPin") && (
+            <div className="bg-primary font-hud text-primary-foreground pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg lg:block">
+              {formCard.kind === "newPin" && !cardAt
+                ? "Click the map where the pin goes"
+                : "Click the map to move the pin"}
+            </div>
+          )}
+          <div className="absolute inset-x-3 bottom-3 z-20 flex max-h-[62%] lg:inset-x-auto lg:top-4 lg:bottom-4 lg:left-4 lg:max-h-none">
+            <MapFormCardHost card={formCard} at={cardAt} layerId={selectedLayer} brand={brand} />
           </div>
         </>
       )}
@@ -742,6 +871,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
                   addPinStop(pin);
                   setStyleAsk(null);
                   void utils.maps.pin.getMyPins.invalidate();
+                  void utils.maps.pin.getCreatorPins.invalidate();
                 },
               },
             );
@@ -756,10 +886,11 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         </div>
       )}
 
-      {!drawing && !trailMode && (
+      {!drawing && !trailMode && !formCard && (
         <NearbyLocationsPanel
           className="absolute top-20 right-4 z-10"
           onSelectPlace={(c) => flyTo(c)}
+          showLayer={showLayer}
         />
       )}
 
@@ -770,7 +901,7 @@ export default function MapView({ toolbarEnd }: { toolbarEnd?: ReactNode }) {
         setIsOpen={(o: boolean) => !o && setHotspotId(null)}
         hotspotId={hotspotId}
       />
-      <AgentChat />
+      <AgentChat creatorId={brand?.id} />
     </div>
   );
 }
@@ -815,5 +946,42 @@ function DrawPathBar({ stop, bends }: { stop: number; bends: number }) {
         Done
       </Button>
     </div>
+  );
+}
+
+/**
+ * The form card's content: the same pages as /pins/new, /pins/[id]/edit, /pins/hotspots/new and
+ * /pins/hotspots/[id]/edit, in card mode (~/ui/form-card). Keyed per form, so each opens fresh.
+ */
+function MapFormCardHost({
+  card,
+  at,
+  layerId,
+  brand,
+}: {
+  card: MapFormCard;
+  at: { lat: number; lng: number } | null;
+  layerId: string | null;
+  brand?: ActingBrand;
+}) {
+  const close = useMapFormCard((s) => s.close);
+  // A form reads its layer once, when it opens: switching layers later doesn't move it.
+  const value = useMemo(
+    () => ({ onClose: close, onDone: close, at, layerId, brand }),
+    [close, at, layerId, brand],
+  );
+  const key = card.kind + ("id" in card ? card.id : "");
+  return (
+    <FormCardProvider value={value}>
+      {card.kind === "newPin" ? (
+        <NewPinPage key={key} />
+      ) : card.kind === "editPin" ? (
+        <EditPinPage key={key} id={card.id} />
+      ) : card.kind === "newHotspot" ? (
+        <NewHotspotPage key={key} />
+      ) : (
+        <EditHotspotPage key={key} hotspotId={card.id} />
+      )}
+    </FormCardProvider>
   );
 }

@@ -85,7 +85,7 @@ export function AgentChat({ creatorId }: { creatorId?: string }) {
     <section
       className={cn(
         "bg-background fixed inset-0 z-40 flex flex-col",
-        "lg:bg-card/95 lg:absolute lg:inset-auto lg:right-4 lg:bottom-4 lg:z-20 lg:h-[min(720px,calc(100%-6rem))] lg:w-[420px] lg:overflow-hidden lg:rounded-2xl lg:border lg:shadow-2xl",
+        "lg:bg-card/95 lg:absolute lg:inset-auto lg:right-4 lg:bottom-4 lg:z-20 lg:h-[min(720px,calc(100%-6rem))] lg:w-[380px] lg:overflow-hidden lg:rounded-2xl lg:border lg:shadow-2xl",
       )}
       aria-label="Map assistant"
     >

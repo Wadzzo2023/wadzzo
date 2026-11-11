@@ -16,6 +16,9 @@ import type {
 import { cn } from "@wadzzo/ui/lib/cn";
 import { api } from "~/utils/api";
 
+import { LayerNote } from "~/features/pins/layers/layer-field";
+import { useSelectedLayer } from "~/features/pins/layers/selected-layer";
+
 import type { ActionState } from "../use-agent-chat";
 import { Card, ShortList, day, dayTime } from "./card-kit";
 import { LookChip, PinLookRow } from "./pin-look-row";
@@ -76,6 +79,18 @@ export function ProposalCard({
     [action],
   );
   const [draft, setDraft] = useState(initialDraft);
+  // New drops go in the layer the brand is in on the map (docs/layers).
+  const layerId = useSelectedLayer((s) => s.id);
+  const layerLead =
+    action.type === "create_pins"
+      ? keep.size === 1
+        ? "This pin goes in layer"
+        : "These pins go in layer"
+      : action.type === "create_hotspot"
+        ? "This hotspot goes in layer"
+        : action.type === "create_trail"
+          ? "This trail goes in layer"
+          : null;
 
   const destructive =
     DESTRUCTIVE.includes(action.type) ||
@@ -126,6 +141,12 @@ export function ProposalCard({
         setDraft={setDraft}
         locked={locked}
       />
+
+      {open && layerLead && (
+        <div className="px-3 pt-2">
+          <LayerNote layerId={layerId} creatorId={creatorId} lead={layerLead} />
+        </div>
+      )}
 
       <footer className="flex flex-wrap items-center gap-2 px-3 py-2.5">
         {status === "pending" && (

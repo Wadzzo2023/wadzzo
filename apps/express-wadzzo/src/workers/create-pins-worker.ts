@@ -49,6 +49,8 @@ export interface PinOptions {
   groupingMode: "per-location" | "single-group";
   pinNumber: number;
   look?: PinLook;
+  /** The map layer the pins go in (docs/layers). Left out (older jobs too) = regular. */
+  layerId?: string;
 }
 
 /** The look as write data for a pin (nothing when the job has none, so the default applies). */
@@ -249,6 +251,7 @@ async function createPins(job: Job): Promise<unknown> {
         type: (base.type ?? "OTHER") as never,
         approved: true,
         ...lookData(pinOptions.look),
+        layerId: pinOptions.layerId ?? null,
         locations: { createMany: { data: allLocations } },
       },
     });
@@ -304,6 +307,7 @@ async function createPins(job: Job): Promise<unknown> {
                 type: (pin.type ?? "OTHER") as never,
                 approved: true,
                 ...lookData(pinOptions.look),
+                layerId: pinOptions.layerId ?? null,
                 locations: { createMany: { data: locations } },
               },
             });

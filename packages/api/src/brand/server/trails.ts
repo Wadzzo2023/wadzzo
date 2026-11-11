@@ -23,6 +23,7 @@ import {
 
 import { randomUUID } from "node:crypto";
 
+import { checkLayer } from "../../shared/layers";
 import { attachTagsToMany, newPinData } from "./pin-create";
 
 /** What every view of a trail reads: details, stops in order, path and reward. */
@@ -50,6 +51,8 @@ export const TRAIL_SELECT = {
   publishedAt: true,
   stopDefaults: true,
   rewardMinStops: true,
+  // the map layer the whole trail is in (docs/layers)
+  layerId: true,
   createdAt: true,
   updatedAt: true,
   creator: { select: { id: true, name: true, profileUrl: true } },
@@ -358,6 +361,13 @@ export function trails(db: Db) {
         who.creatorId,
         input.stops.filter((s) => !isNewStopId(s.pinId)).map((s) => s.pinId),
       );
+      // The map layer (docs/layers): the whole trail and the pins made as its stops go in it.
+      const prevLayer = input.id
+        ? ((await db.trail.findUnique({ where: { id: input.id }, select: { layerId: true } }))
+            ?.layerId ?? null)
+        : null;
+      const layerId = await checkLayer(db, who.creatorId, input.layerId, prevLayer);
+      const stopLayer = layerId !== undefined ? layerId : prevLayer;
       // New stops' pins are made with the trail (they run from its start, or now, to its end,
       // exactly where they were put). Their columns are worked out first: outside the transaction.
       const now = new Date();
@@ -376,6 +386,7 @@ export function trails(db: Db) {
                 multiPin: false,
                 startDate: input.startDate > now ? input.startDate : now,
                 endDate: input.endDate,
+                layerId: stopLayer,
               });
               return [s.pinId, { data, tags: n.tags }] as const;
             }),
@@ -443,6 +454,7 @@ export function trails(db: Db) {
           ? (input.stopDefaults as Prisma.InputJsonValue)
           : Prisma.DbNull,
         rewardMinStops: input.reward?.minStops ?? null,
+        ...(layerId !== undefined && { layerId }),
       };
 
       const id = await db.$transaction(
@@ -480,6 +492,12 @@ export function trails(db: Db) {
               made.map((m) => ({ locationGroupId: m.id, tagIds: m.tags })),
             );
           }
+          // A new layer for the trail: the pins it made as stops move with it.
+          if (layerId !== undefined && layerId !== prevLayer)
+            await tx.locationGroup.updateMany({
+              where: { trailOwnerId: trail.id },
+              data: { layerId },
+            });
           const realId = new Map(made.map((m) => [m.tempId, m.id]));
           const stopIds = input.stops.map((s) => realId.get(s.pinId) ?? s.pinId);
           await tx.trailStop.deleteMany({ where: { trailId: trail.id } });

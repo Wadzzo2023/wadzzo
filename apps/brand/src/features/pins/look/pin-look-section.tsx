@@ -18,6 +18,7 @@ import { RangeField } from "@wadzzo/ui/patterns/range-field";
 import { Segmented } from "@wadzzo/ui/patterns/segmented";
 
 import { api } from "~/utils/api";
+import { useFormCard } from "~/ui/form-card";
 import { FormSection } from "~/ui/form-page";
 
 import { ShapeStudio } from "../studio/shape-studio";
@@ -169,14 +170,17 @@ type PinLookProps = {
 };
 
 /** "Pin look" as a form section. */
-export function PinLookSection(props: PinLookProps) {
+export function PinLookSection({ tab, ...props }: PinLookProps & { tab?: string }) {
+  // In a narrow map card the preview sits above the controls (as in the trail builder).
+  const card = useFormCard();
   return (
     <FormSection
       title="Pin look"
       icon={Shapes}
+      tab={tab}
       description="How the pin shows on the map. Fans see exactly this."
     >
-      <PinLookEditor {...props} />
+      <PinLookEditor {...props} compact={Boolean(card)} />
     </FormSection>
   );
 }

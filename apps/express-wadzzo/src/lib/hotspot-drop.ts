@@ -182,6 +182,8 @@ export async function dropPinsForHotspot(
       markerColor: hotspot.markerColor,
       markerImageFit: hotspot.markerImageFit ?? Prisma.DbNull,
       markerAutoBadge: hotspot.markerAutoBadge,
+      // The map layer: the hotspot's (the brand may have changed it since).
+      layerId: hotspot.layerId,
       startDate: now,
       endDate: pinEndDate,
       locations: {

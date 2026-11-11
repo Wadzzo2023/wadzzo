@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Camera, Coins, Footprints, Frame, LogOut, MonitorSmartphone, Moon, Pencil, Sun, Trash2, Users, Vibrate, Volume2, Wallet, Zap, type LucideIcon } from "lucide-react-native";
+import { Box, Camera, Coins, Footprints, Frame, LogOut, MonitorSmartphone, Moon, Pencil, Sun, Trash2, Users, Vibrate, Volume2, Wallet, Zap, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,7 +26,7 @@ import { RARITY_META, RARITY_ORDER } from "~/lib/ar/rarity";
 import type { ArSettings } from "~/lib/ar/types";
 import { useSession } from "~/lib/auth/session";
 import { pickFromLibrary } from "~/lib/media";
-import { useColors, useResolvedTheme, useThemePreference, type ThemePreference } from "~/theme/theme";
+import { useColors, useMapMode, useResolvedTheme, useThemePreference, type ThemePreference } from "~/theme/theme";
 
 const AVATAR_FALLBACK = require("../../assets/brand/wadzzo-mark.png");
 
@@ -215,6 +215,11 @@ function SignedIn() {
           </Bevel>
         </Section>
 
+        {/* Map: 2D / 3D (was a button on the map's rail, which now opens the map layers). */}
+        <Section title="Map">
+          <MapViewSetting />
+        </Section>
+
         <Section title="Downloads">
           <MuralPackSettings />
         </Section>
@@ -266,6 +271,32 @@ function MuralLayerSetting() {
         </View>
       </View>
     </View>
+  );
+}
+
+/** The map's view: flat 2D or tilted 3D. A segmented control like Theme's. */
+function MapViewSetting() {
+  const { c } = useColors();
+  const { mode, setMode } = useMapMode();
+  return (
+    <Bevel className="flex-row items-start gap-3 rounded-ar p-3.5" style={{ borderRadius: 16 }}>
+      <IconTile icon={Box} on={mode === "3d"} />
+      <View className="min-w-0 flex-1">
+        <Text className="font-hud text-[12.5px] font-bold uppercase tracking-[1.2px] text-ar-text">Map view</Text>
+        <Text className="mt-1 text-[11.5px] leading-5 text-ar-faint">3D tilts the map and raises buildings.</Text>
+        <View className="mt-3 flex-row gap-1 rounded-[12px] border border-ar-line-bright bg-ar-surface-3 p-1" accessibilityRole="radiogroup" accessibilityLabel="Map view">
+          {(["2d", "3d"] as const).map((m) => {
+            const active = mode === m;
+            const fg = active ? c("ar-green-hot") : c("ar-text-faint");
+            return (
+              <Pressable key={m} onPress={() => setMode(m)} accessibilityRole="radio" accessibilityState={{ checked: active }} className="flex-1 items-center justify-center rounded-[9px] py-2" style={{ backgroundColor: active ? c("ar-green", 0.2) : "transparent" }}>
+                <Text className="font-hud text-[10px] font-bold uppercase tracking-[0.8px]" style={{ color: fg }}>{m.toUpperCase()}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    </Bevel>
   );
 }
 
