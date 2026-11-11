@@ -66,7 +66,7 @@ export default function TrailsScreen() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         renderItem={({ item }) => (
           <View className="px-5">
-            <TrailCard trail={item} />
+            <TrailCard trail={item} fix={fix} />
           </View>
         )}
         onRefresh={() => void active.refetch()}

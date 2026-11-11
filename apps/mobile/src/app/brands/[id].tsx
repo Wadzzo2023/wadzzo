@@ -2,8 +2,8 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { BadgeCheck, Share2 } from "lucide-react-native";
-import { useState } from "react";
-import { FlatList, Pressable, Share, StyleSheet, View } from "react-native";
+import { useCallback, useDeferredValue, useState } from "react";
+import { FlatList, Pressable, Share, StyleSheet, View, type ListRenderItem } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +19,7 @@ import { Text } from "~/components/ui/Text";
 import { useToggleFollow } from "~/lib/api/follow";
 import { useBrandPinsQuery, useBrandQuery } from "~/lib/api/queries";
 import { useSession } from "~/lib/auth/session";
+import type { ArPin } from "~/lib/ar/types";
 import { useColors } from "~/theme/theme";
 
 const compact = (n: number) => (n >= 1_000 ? `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n));
@@ -36,8 +37,21 @@ export default function BrandScreen() {
   const [tab, setTab] = useState<"live" | "yours">("live");
   const live = useBrandPinsQuery({ brandId: id ?? null, tab: "live", pageSize: PAGE_SIZE });
   const yours = useBrandPinsQuery({ brandId: signedIn ? (id ?? null) : null, tab: "yours", pageSize: PAGE_SIZE });
-  const active = tab === "live" ? live : yours;
+  // The tab pill moves at once; the card grid (heavy foil cards) follows in a deferred render,
+  // so switching tabs doesn't wait for the new cards to mount.
+  const shownTab = useDeferredValue(tab);
+  const active = shownTab === "live" ? live : yours;
   const remaining = active.total - active.pins.length;
+
+  // Stable, so a tab or count change doesn't re-render the cards already on screen.
+  const renderCard = useCallback<ListRenderItem<ArPin>>(
+    ({ item }) => (
+      <View style={{ flex: 1, maxWidth: "50%" }}>
+        <HoloCard pin={item} oneFace onPress={() => router.push(`/collection/${item.id}`)} />
+      </View>
+    ),
+    [],
+  );
 
   if (isLoading) {
     return (
@@ -158,11 +172,13 @@ export default function BrandScreen() {
       ListHeaderComponent={header}
       columnWrapperStyle={{ gap: 14, paddingHorizontal: 20 }}
       contentContainerStyle={{ gap: 14, paddingBottom: insets.bottom + 32 }}
-      renderItem={({ item }) => (
-        <View style={{ flex: 1, maxWidth: "50%" }}>
-          <HoloCard pin={item} oneFace onPress={() => router.push(`/collection/${item.id}`)} />
-        </View>
-      )}
+      renderItem={renderCard}
+      // As on Collection: each card stacks blend-mode foil layers, so mount a few at a time and
+      // keep ~3 screens of them instead of the default ~21.
+      initialNumToRender={6}
+      maxToRenderPerBatch={6}
+      windowSize={7}
+      removeClippedSubviews
       ListEmptyComponent={
         active.isLoading ? (
           <View className="flex-row flex-wrap gap-3.5 px-5">
@@ -174,9 +190,9 @@ export default function BrandScreen() {
           </View>
         ) : (
           <View className="items-center py-12">
-            <Text className="font-hud text-[13px] font-bold uppercase tracking-[1.8px] text-ar-dim">{tab === "live" ? "Nothing live right now" : "None yet"}</Text>
+            <Text className="font-hud text-[13px] font-bold uppercase tracking-[1.8px] text-ar-dim">{shownTab === "live" ? "Nothing live right now" : "None yet"}</Text>
             <Text className="mt-1.5 max-w-[17rem] text-center text-[12.5px] leading-5 text-ar-faint">
-              {tab === "live" ? `Follow ${brand.name} and you'll see their next drop the moment it lands.` : `Capture one of ${brand.name}'s pins and it'll show up here.`}
+              {shownTab === "live" ? `Follow ${brand.name} and you'll see their next drop the moment it lands.` : `Capture one of ${brand.name}'s pins and it'll show up here.`}
             </Text>
           </View>
         )
