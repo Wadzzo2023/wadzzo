@@ -15,6 +15,7 @@ import Animated, {
 import { PulseRing } from "~/components/ui/PulseDot";
 import { Text } from "~/components/ui/Text";
 import { pinStatus } from "~/lib/ar/rarity";
+import { usePinImage } from "~/lib/ar/pinImage";
 import type { ArPin } from "~/lib/ar/types";
 import { useDecorativeMotion } from "~/lib/motion";
 import { useColors } from "~/theme/theme";
@@ -51,6 +52,8 @@ export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSel
   const look = pin.look;
   const showBadge = look ? look.autoBadge : pin.autoCollect;
   const standsOnTip = look?.anchor === "bottom";
+  // A small thumbnail, not the (often large) original: see lib/ar/pinImage.
+  const image = usePinImage(look ? look.imageUrl : pin.brandImageUrl);
 
   return (
     <Pressable onPress={() => onSelect(pin.id)} accessibilityRole="button" accessibilityLabel={`${pin.title} — ${pin.brandName}`} hitSlop={6} style={{ width: 52, height: 58, alignItems: "center" }}>
@@ -95,7 +98,7 @@ export const PinMarker = memo(function PinMarker({ pin, selected, inRange, onSel
             size={42}
             fill={look?.color ?? c("ar-surface-3", dim)}
             under={c("ar-void")}
-            imageUrl={look ? look.imageUrl : pin.brandImageUrl}
+            imageUrl={image}
             imageFit={look?.imageFit}
             imageOpacity={status === "collected" ? 0.45 : dim}
             ringColor={ringA(dim)}
