@@ -1,6 +1,6 @@
 "use client";
 
-import { Hexagon, Plus, Route, X } from "lucide-react";
+import { Hexagon, Plus, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Marker, type MapRef } from "react-map-gl/mapbox";
@@ -144,7 +144,8 @@ export default function MapView({
   // Map trails (docs/trails): the brand's trails drawn on the map; one clicked opens its card.
   // Trail mode (the builder) is open while `draft` is set: clicking pins adds them as stops,
   // clicking empty map makes a new stop there.
-  const [showTrails, setShowTrails] = useState(true);
+  // Trails are hidden for now: their lines are not drawn and Trail mode can't be opened.
+  const showTrails = false;
   const [trailId, setTrailId] = useState<string | null>(null);
   const draft = useTrailBuilder((s) => s.draft);
   const trailMode = draft !== null;
@@ -217,7 +218,9 @@ export default function MapView({
     () => hotspots.data?.filter((h) => showLayer(h.layerId)),
     [hotspots.data, showLayer],
   );
-  const trails = api.maps.trail.list.useQuery(brand ? { creatorId: brand.id } : undefined);
+  const trails = api.maps.trail.list.useQuery(brand ? { creatorId: brand.id } : undefined, {
+    enabled: showTrails,
+  });
   const shownTrails = (trails.data ?? []).filter(
     (t) => t.status !== "ENDED" && t.path.length > 0 && t.id !== draft?.id && showLayer(t.layerId),
   );
@@ -256,7 +259,12 @@ export default function MapView({
   const linkedTrail = search?.get("trail") ?? null;
   const linkedBox = useRef<ReturnType<typeof boundsOf>>(null);
   useEffect(() => {
-    if (!linkedTrail || (linkedTrail !== "new" && !trails.data)) return;
+    if (!linkedTrail) return;
+    if (!showTrails) {
+      router.replace(home, { scroll: false });
+      return;
+    }
+    if (linkedTrail !== "new" && !trails.data) return;
     const t = trails.data?.find((x) => x.id === linkedTrail);
     if (linkedTrail === "new")
       useTrailBuilder.getState().open(blankDraft(brand?.id, useSelectedLayer.getState().id));
@@ -269,7 +277,7 @@ export default function MapView({
       else linkedBox.current = box;
     }
     router.replace(home, { scroll: false });
-  }, [linkedTrail, trails.data, router, home, brand?.id]);
+  }, [linkedTrail, trails.data, router, home, brand?.id, showTrails]);
   // Leaving the map leaves Trail mode and closes the form card. While the map is here, Edit in
   // the pin and hotspot details opens the card instead of the edit page.
   useEffect(() => {
@@ -704,19 +712,6 @@ export default function MapView({
               Show expired
             </Label>
           </div>
-          <div className="bg-card pointer-events-auto flex h-10 items-center gap-2 rounded-lg border px-3 shadow-sm">
-            <Switch
-              id="show-trails"
-              checked={showTrails}
-              onCheckedChange={(on) => {
-                setShowTrails(on);
-                if (!on) setTrailId(null);
-              }}
-            />
-            <Label htmlFor="show-trails" className="flex items-center gap-1 text-xs font-medium">
-              <Route className="size-3.5" aria-hidden /> Trails
-            </Label>
-          </div>
           <div className="pointer-events-auto ml-auto flex items-center gap-2">
             {toolbarEnd}
             {/* With a form card open the create buttons step aside (as in Trail mode), so the
@@ -733,13 +728,6 @@ export default function MapView({
             <LayerSwitcher className="bg-card shadow-sm" creatorId={brand?.id} />
             {!formCard && (
               <>
-                <Button
-                  variant="outline"
-                  className="shadow-sm"
-                  onClick={() => openTrailMode(blankDraft(brand?.id, selectedLayer))}
-                >
-                  <Route /> <span className="hidden sm:inline">New trail</span>
-                </Button>
                 <Button
                   variant="outline"
                   className="shadow-sm"

@@ -2,14 +2,14 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, Route, Trophy, type LucideIcon } from "lucide-react";
+import { CalendarDays, Trophy, type LucideIcon } from "lucide-react";
 import { useQueryParams, useRouter } from "~/lib/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MapCanvas, type MapCanvasHandle } from "~/components/map/MapCanvas";
 import { FilterMenu } from "~/components/map/FilterMenu";
 import { LayerSheetButton } from "~/components/map/LayerSheet";
-import { inLayer, trailInLayer, useMapLayer, useMapLayers } from "~/lib/ar/layers";
+import { inLayer, useMapLayer, useMapLayers } from "~/lib/ar/layers";
 import { MapSearch, MapSearchButton } from "~/components/map/MapSearch";
 import { MapControls } from "~/components/map/MapControls";
 import { MuralSheet } from "~/components/map/MuralSheet";
@@ -19,11 +19,7 @@ import { AppShell } from "~/components/shell/AppShell";
 import { ProfileButton } from "~/components/shell/ProfileButton";
 import { CollectCelebration } from "~/components/fx/CollectCelebration";
 import { muralQueryBox } from "~/lib/murals/area";
-import { NearbyTrailLines, type TrailLine } from "~/components/trails/NearbyTrailLines";
-import { TrailCompleteSheet } from "~/components/trails/TrailCompleteSheet";
-import { TrailNextCard, TrailProgressPill } from "~/components/trails/TrailFollowBar";
-import { TrailMapLayer } from "~/components/trails/TrailMapLayer";
-import { lockedPinIds, useFollowTrail } from "~/lib/ar/trails";
+import { lockedPinIds } from "~/lib/ar/trails";
 import { AR_CAPTURE_RADIUS, distanceMeters } from "@wadzzo/ar-core/ar/geo";
 import { LocationGate } from "~/components/shell/LocationGate";
 import { FALLBACK_CENTER } from "~/lib/ar/mock";
@@ -217,33 +213,13 @@ export default function MapScreen() {
   }, [pins, fix, feedback]);
 
   // ── Trails (docs/trails) ───────────────────────────────────────────────
-  // The trail being followed draws on the map with a progress bar; trails nearby tell
-  // auto-collect which stops are still locked (an earlier stop first), so it skips them.
-  const followId = useFollowTrail((s) => s.trailId);
-  const stopFollowing = useFollowTrail((s) => s.stop);
-  const followed = api.trails.get.useQuery(
-    { id: followId ?? "" },
-    { enabled: Boolean(followId), retry: false },
-  );
-  useEffect(() => {
-    // An ended or withdrawn trail can't be followed any more (only "not found": a network
-    // blip mustn't drop someone off their trail).
-    if (followed.error?.data?.code === "NOT_FOUND") stopFollowing();
-  }, [followed.error, stopFollowing]);
-  // Also drawn as faint lines while you aren't following one (Discover), so signed out too.
+  // Trails are hidden for now: nothing about them is drawn. Trails nearby still tell
+  // auto-collect which stops are locked (an earlier stop first), so it skips them.
   const nearbyTrails = api.trails.nearby.useQuery(
     { lat: fix?.lat, lng: fix?.lng, radiusKm: 25 },
     { enabled: Boolean(fix), staleTime: 60_000, placeholderData: keepPreviousData },
   );
-  // Finish: "Trail complete!" once per trail, when the followed trail is done.
-  const celebrated = useFollowTrail((s) => s.celebrated);
-  const markCelebrated = useFollowTrail((s) => s.markCelebrated);
-  const finished = followed.data?.progress.complete ? followed.data : null;
-  const celebrate = Boolean(finished && !celebrated.includes(finished.id));
-  const locked = useMemo(
-    () => lockedPinIds([...(nearbyTrails.data ?? []), ...(followed.data ? [followed.data] : [])]),
-    [nearbyTrails.data, followed.data],
-  );
+  const locked = useMemo(() => lockedPinIds(nearbyTrails.data ?? []), [nearbyTrails.data]);
 
   // ── Auto-collect ───────────────────────────────────────────────────────
   // Claims one eligible pin at a time so a dense cluster plays out as a
@@ -321,22 +297,6 @@ export default function MapScreen() {
   } | null>(null);
   // Rounded (~1 km) and kept in range when the zoomed-out globe runs past the date line.
   const muralArea = bounds && muralQueryBox(bounds);
-  // Every trail in view draws as a line too (not only those near you): the same rounded box.
-  const trailsInView = api.trails.inArea.useQuery(
-    muralArea ?? { north: 0, south: 0, east: 0, west: 0 },
-    {
-      enabled: Boolean(muralArea),
-      placeholderData: keepPreviousData,
-      staleTime: 60_000,
-      refetchOnWindowFocus: false,
-    },
-  );
-  const trailLines = useMemo(() => {
-    const byId = new Map<string, TrailLine>((nearbyTrails.data ?? []).map((t) => [t.id, t]));
-    for (const t of trailsInView.data ?? []) if (!byId.has(t.id)) byId.set(t.id, t);
-    // A layer's trail shows only with its layer on (docs/layers), like its pins.
-    return [...byId.values()].filter((t) => trailInLayer(t, layerView));
-  }, [nearbyTrails.data, trailsInView.data, layerView]);
   const muralsQuery = api.murals.inArea.useQuery(
     {
       ...(muralArea ?? { north: 0, south: 0, east: 0, west: 0 }),
@@ -443,17 +403,6 @@ export default function MapScreen() {
           selectedMuralId={selectedMuralId}
           onSelectMural={selectMural}
           onBoundsChange={setBounds}
-          terrain={followed.data?.mode === "HIKE"}
-          overlay={
-            followed.data ? (
-              <TrailMapLayer trail={followed.data} />
-            ) : trailLines.length ? (
-              <NearbyTrailLines
-                trails={trailLines}
-                onOpen={(id) => void router.push(`/trails/${id}`)}
-              />
-            ) : null
-          }
         />
 
         {/* No fix, no game: the map behind is centred on nothing meaningful,
@@ -465,7 +414,7 @@ export default function MapScreen() {
             The All / Following filter leads the row (where the GPS "Live"
             pill used to be: with no fix the location gate covers the map
             anyway, so the pill only ever said "Live"), then search, and the
-            avatar on the right with Events, Trails and Bounty stacked under it.
+            avatar on the right with Events and Bounty stacked under it.
             Map layers (docs/layers) are in the Layers button on the right-hand rail. */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-2 px-4"
@@ -494,11 +443,6 @@ export default function MapScreen() {
                 onClick={() => void router.push("/events")}
               />
               <HudShortcut
-                icon={Route}
-                label="Trails"
-                onClick={() => void router.push("/trails")}
-              />
-              <HudShortcut
                 icon={Trophy}
                 label="Bounty"
                 dot={bountyAlerts > 0}
@@ -516,39 +460,6 @@ export default function MapScreen() {
           refetching={refetching}
           layers={<LayerSheetButton layers={mapLayers} bare />}
         />
-
-        {/* ── Followed trail: one compact group above the nearby rail ── */}
-        {followed.data && (
-          <div
-            className="absolute inset-x-4 z-30 flex flex-col gap-2"
-            style={{ bottom: "calc(var(--ar-tabbar-space) + 132px)" }}
-          >
-            <TrailProgressPill
-              trail={followed.data}
-              onOpen={() => void router.push(`/trails/${followed.data.id}`)}
-              onStop={stopFollowing}
-            />
-            {fix && !followed.data.progress.complete && (
-              <TrailNextCard
-                trail={followed.data}
-                fix={fix}
-                heading={compass.source === "sensor" ? compass.heading : null}
-                onCapture={(pinId) => {
-                  if (!requireAuth("collect")) return;
-                  void router.push(`/ar?target=${pinId}`);
-                }}
-                onDirections={(pinId) => void router.push(`/directions/${pinId}?mode=walk`)}
-              />
-            )}
-          </div>
-        )}
-        {finished && (
-          <TrailCompleteSheet
-            trail={finished}
-            open={celebrate}
-            onClose={() => markCelebrated(finished.id)}
-          />
-        )}
 
         {/* ── Nearby rail ──────────────────────────────────────────── */}
         <div className="absolute inset-x-0 bottom-[var(--ar-tabbar-space)] z-30">
@@ -651,7 +562,7 @@ export default function MapScreen() {
   );
 }
 
-/** A shortcut pill under the avatar (Events, Trails, Bounty): icon and name on one line. */
+/** A shortcut pill under the avatar (Events, Bounty): icon and name on one line. */
 function HudShortcut({
   icon: Icon,
   label,
