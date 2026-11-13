@@ -145,7 +145,7 @@ export function LayerSwitcher({
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">{l.name}</span>
                       <span className="text-muted-foreground block text-xs">
-                        {l.pins + l.hotspots + l.trails ? describeCounts(l) : "Empty"}
+                        {l.pins + l.hotspots ? describeCounts(l) : "Empty"}
                       </span>
                     </span>
                     {selected === l.id && <Check className="size-4" />}

@@ -99,7 +99,7 @@ export function LayerDialog({
     }
   };
 
-  const inIt = layer ? layer.pins + layer.hotspots + layer.trails : 0;
+  const inIt = layer ? layer.pins + layer.hotspots : 0;
 
   return (
     <>
@@ -111,8 +111,8 @@ export function LayerDialog({
               {layer ? "Edit layer" : "New layer"}
             </DialogTitle>
             <DialogDescription>
-              Fans see it as a chip above their map. Tapping it shows only this layer&apos;s pins,
-              hotspots and trails.
+              Fans see it as a chip above their map. Tapping it shows only this layer&apos;s pins and
+              hotspots.
             </DialogDescription>
           </DialogHeader>
 
@@ -234,13 +234,12 @@ export function LayerDialog({
   );
 }
 
-/** "3 pins, 1 hotspot and 2 trails". */
-export function describeCounts(l: { pins: number; hotspots: number; trails: number }) {
+/** "3 pins and 1 hotspot". Trails are hidden for now, so they aren't counted. */
+export function describeCounts(l: { pins: number; hotspots: number }) {
   const parts = (
     [
       [l.pins, "pin"],
       [l.hotspots, "hotspot"],
-      [l.trails, "trail"],
     ] as const
   )
     .filter(([n]) => n > 0)

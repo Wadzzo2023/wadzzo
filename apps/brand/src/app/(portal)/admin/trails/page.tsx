@@ -1,7 +1,6 @@
-import Page from "~/features/admin/trails-page";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Trail review" };
-
-export default function Route() {
-  return <Page />;
+// Trails are hidden for now; the old link goes back to /admin.
+export default function Page() {
+  redirect("/admin");
 }

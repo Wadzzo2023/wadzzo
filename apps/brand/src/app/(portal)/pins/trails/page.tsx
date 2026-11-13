@@ -1,7 +1,6 @@
-import TrailsPage from "~/features/trails/trails-page";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Trails" };
-
+// Trails are hidden for now; the old link goes back to /pins.
 export default function Page() {
-  return <TrailsPage />;
+  redirect("/pins");
 }
