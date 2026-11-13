@@ -42,7 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Wadzzo",
   slug: "Wadzzo",
-  version: "6.0.1",
+  version: "6.1.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
   scheme: SCHEME,
