@@ -181,7 +181,8 @@ function EventForm({ event }: { event: EditableEvent | null }) {
   const end = fromLocalInput(form.end);
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     title: form.title,
     description: form.description,
@@ -191,7 +192,9 @@ function EventForm({ event }: { event: EditableEvent | null }) {
       : "online",
   };
   const imagePrompt =
-    imageBrief || [form.title, form.description.slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === form.title
+      ? imageBrief.prompt
+      : [form.title, form.description.slice(0, 400)].filter(Boolean).join(". ");
 
   const actions = (
     <>
@@ -297,8 +300,12 @@ function EventForm({ event }: { event: EditableEvent | null }) {
             limitSpots: r.capacity != null,
             capacity: r.capacity != null ? String(r.capacity) : f.capacity,
           }));
-          setImageBrief(r.imagePrompt);
-          return () => setForm(before);
+          const prevBrief = imageBrief;
+          setImageBrief({ prompt: r.imagePrompt, title: r.title });
+          return () => {
+            setForm(before);
+            setImageBrief(prevBrief);
+          };
         }}
       />
 

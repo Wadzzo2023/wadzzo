@@ -183,7 +183,8 @@ export default function MuralReviewPage() {
         description="Street art people found with the Murals camera. It lands here once enough different people have scanned it."
       />
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      {/* The six views need the full width; the search goes on its own row under them. */}
+      <div className="mt-6 flex flex-col gap-3">
         <FilterChips
           label="View"
           value={view}
@@ -218,9 +219,7 @@ export default function MuralReviewPage() {
           ]}
         />
         {LISTS.has(view) && (
-          <div className="sm:ml-auto">
-            <SearchInput onSearch={setSearch} placeholder="Search title or artist" />
-          </div>
+          <SearchInput onSearch={setSearch} placeholder="Search title or artist" />
         )}
       </div>
 

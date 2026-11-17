@@ -104,19 +104,22 @@ export function HomeAreaAdminPage() {
           ) : undefined
         }
       />
-      {platform.isPending ? (
-        <CenteredSpinner />
-      ) : platform.isError ? (
-        <ErrorState message={platform.error.message} onRetry={() => void platform.refetch()} />
-      ) : (
-        <HomeAreaEditor
-          key={platform.data.id}
-          current={platform.data.area}
-          onSave={(area) => save.mutateAsync({ platformId: platform.data.id, area })}
-          removeLabel="Remove default area"
-          emptyText={`${platform.data.name} has no default — brands without their own area will be asked where to search`}
-        />
-      )}
+      {/* The same gap under the header as the other pages. */}
+      <div className="mt-6">
+        {platform.isPending ? (
+          <CenteredSpinner />
+        ) : platform.isError ? (
+          <ErrorState message={platform.error.message} onRetry={() => void platform.refetch()} />
+        ) : (
+          <HomeAreaEditor
+            key={platform.data.id}
+            current={platform.data.area}
+            onSave={(area) => save.mutateAsync({ platformId: platform.data.id, area })}
+            removeLabel="Remove default area"
+            emptyText={`${platform.data.name} has no default — brands without their own area will be asked where to search`}
+          />
+        )}
+      </div>
     </PageBody>
   );
 }

@@ -13,6 +13,7 @@ import RequestApprovalCard from "~/components/brand/request-approval";
 import { Button } from "@wadzzo/ui/poster/button";
 import { PageSkeleton } from "@wadzzo/ui/patterns/skeleton";
 
+import { getPortalLandingRoute } from "./access-rules";
 import type { usePortalAccess } from "./use-portal-access";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { WadzzoMark } from "~/ui/wadzzo-mark";
@@ -66,11 +67,10 @@ export function CreatorGate({ access, children }: { access: Access; children: Re
   const hasBrandHere = Boolean(c && c.onThisPlatform && c.approved !== false);
   const shouldRedirectAdmin = access.isAdmin && isSettled && !isApproved && !hasBrandHere;
 
-  // If user is an admin but NOT an approved creator, they only have access to
-  // their admin section, not the creator section. Redirect them to /admin/creators.
+  // An admin without a brand here only has the admin side: send them to the admin map.
   useEffect(() => {
     if (shouldRedirectAdmin) {
-      router.replace("/admin/creators");
+      router.replace(getPortalLandingRoute({ isAdmin: true, isApprovedCreator: false }));
     }
   }, [shouldRedirectAdmin, router]);
 
@@ -79,6 +79,9 @@ export function CreatorGate({ access, children }: { access: Access; children: Re
   // refuses anything this brand may not do).
   if (creator.isLoading && access.approved) return <>{children}</>;
   if (isApproved) return <>{children}</>;
+  // Not a working brand: wait for the admin check before choosing a screen. Otherwise an
+  // admin whose brand check answers first is shown "Join", which bounces them to onboarding.
+  if (!access.adminSettled) return <PageSkeleton />;
 
   if (shouldRedirectAdmin) {
     return (
@@ -153,7 +156,10 @@ export function OnboardingGate({ access, children }: { access: Access; children:
 
   const hasSubmittedOrIsCreator = Boolean(c?.id) || Boolean(c?.aprovalSend);
   const isApproved = Boolean(c?.id && c.aprovalSend && c.approved === true);
-  const destination = access.isAdmin && !isApproved ? "/admin/creators" : "/pins";
+  const destination = getPortalLandingRoute({
+    isAdmin: access.isAdmin,
+    isApprovedCreator: isApproved,
+  });
   // A brand that belongs to another platform: explain, rather than bouncing them away.
   const otherPlatform = c && !c.onThisPlatform ? c.platform.name : null;
 

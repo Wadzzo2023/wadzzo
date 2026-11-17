@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { MapPicker } from "~/components/map-kit/map-picker";
 import {
   CollectionInputs,
+  formatLimit,
   createPinFormSchema,
   ImageUploadField,
   PinTypeToggles,
@@ -526,7 +527,7 @@ function Summary({
         {row("Collection", mode === "auto" ? "Auto" : "Manual")}
         {row("Type", values.type ? typeLabel(values.type) : "—")}
         {row("Pins", values.pinNumber ?? 1)}
-        {row("Limit per pin", values.pinCollectionLimit ?? 0)}
+        {row("Limit per pin", formatLimit(values.pinCollectionLimit))}
         {row("Starts", values.startDate ? values.startDate.toLocaleString() : "—")}
         {row("Ends", values.endDate ? values.endDate.toLocaleString() : "—")}
         {token &&

@@ -67,6 +67,12 @@ interface PostCardProps {
   fullHeight?: boolean; // Optional prop to control height
 }
 
+/**
+ * The post body: a block (the rich-text preview renders divs, which a <p> can't hold), with
+ * the editor's own padding removed so the text lines up with the title above it.
+ */
+const BODY = "text-foreground cursor-pointer [&_.ql-editor]:p-0!";
+
 export default function PostCard({
   post,
   creator,
@@ -200,9 +206,9 @@ export default function PostCard({
                   {post.content && post.content.length > 400 && !expanded ? (
                     <>
                       <Link href={postUrl}>
-                        <p className="text-foreground cursor-pointer">
+                        <div className={BODY}>
                           <Preview value={post.content.substring(0, 400)} />
-                        </p>
+                        </div>
                       </Link>
                       <Button
                         variant="link"
@@ -215,10 +221,9 @@ export default function PostCard({
                     </>
                   ) : (
                     <Link href={postUrl}>
-                      {" "}
-                      <p className="text-foreground cursor-pointer">
+                      <div className={BODY}>
                         <Preview value={post.content} />
-                      </p>{" "}
+                      </div>
                     </Link>
                   )}
 

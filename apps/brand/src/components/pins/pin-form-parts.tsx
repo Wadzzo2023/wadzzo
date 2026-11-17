@@ -47,6 +47,16 @@ import { Dropzone } from "~/ui/upload/dropzone";
 import { AiImageButton } from "~/ui/ai/ai-image";
 import { Switch } from "@wadzzo/ui/components/switch";
 import { LocationAddressDisplay } from "~/components/map/address-display";
+import { UNLIMITED_COLLECTIONS } from "@wadzzo/agent-contract";
+
+export { UNLIMITED_COLLECTIONS };
+/** The collection limit as people read it ("Unlimited" for the platform's no-cap value). */
+export const formatLimit = (limit?: number) =>
+  limit === undefined || Number.isNaN(limit)
+    ? "—"
+    : limit >= UNLIMITED_COLLECTIONS
+      ? "Unlimited"
+      : limit;
 
 // Define types for assets and pins
 export type AssetType = {
@@ -87,7 +97,10 @@ export const createPinFormSchema = z.object({
   tokenAmount: z.number().nonnegative().optional(),
   pinNumber: z.number().nonnegative().min(1, "Number of pins must be at least 1"),
   radius: z.number().nonnegative("Radius cannot be negative").default(50), // Set default radius to 50
-  pinCollectionLimit: z.number().min(1, "Collection limit must be greater than 0"),
+  /** Collections allowed per pin; UNLIMITED_COLLECTIONS = no cap. */
+  pinCollectionLimit: z
+    .number({ error: "Set a collection limit, or turn on Unlimited" })
+    .min(1, "Collection limit must be greater than 0"),
   tier: z.string().optional(),
   multiPin: z.boolean().default(false),
   type: z.enum(PinType).default(PinType.OTHER),
@@ -308,40 +321,125 @@ export function CollectionInputs({
       {errors.pinNumber && <p className="text-destructive text-sm">{errors.pinNumber.message}</p>}
     </div>
   );
-  const limitInput = (
-    <Input
-      type="number"
-      id="pinCollectionLimit"
-      min={0}
-      {...register("pinCollectionLimit", { valueAsNumber: true })}
-      className="bg-card border-border focus:ring-ring"
-      placeholder={paired ? "0" : "Enter collection limit"}
-    />
-  );
-  const limitLabel = (
+  // Unlimited is the platform's no-cap value. A token runs out, so a pin that gives one away
+  // needs a real limit (an open-edition item is the exception: it never runs out).
+  const limit = watch("pinCollectionLimit");
+  const unlimited = limit >= UNLIMITED_COLLECTIONS;
+  const tokenRunsOut = Boolean(selectedToken && selectedToken.bal < UNLIMITED_COLLECTIONS);
+  const setLimit = (value: number) =>
+    setValue("pinCollectionLimit", value, { shouldValidate: true, shouldDirty: true });
+  // Only the label above the field, so it lines up with "Number of Pins" beside it; the
+  // Unlimited switch sits under the field (a narrow map card has no room for both).
+  const limitHeader = (
     <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
-      Pin Collection Limit
+      {paired ? "Collection limit" : "Pin Collection Limit"}
     </Label>
+  );
+  const unlimitedSwitch = (
+    <label className="text-muted-foreground flex w-fit cursor-pointer items-center gap-2 text-xs font-medium">
+      <Switch
+        checked={unlimited}
+        disabled={tokenRunsOut && !unlimited}
+        onCheckedChange={(on) =>
+          // Off: an empty field to fill in (submitting it empty asks for a number).
+          on
+            ? setLimit(UNLIMITED_COLLECTIONS)
+            : setValue("pinCollectionLimit", NaN, { shouldDirty: true })
+        }
+        aria-label="Unlimited collections"
+      />
+      Unlimited
+    </label>
+  );
+  // A token picked while the limit is unlimited: bring the warning into view (in a map card
+  // it's otherwise below the fold, and all the brand sees is a disabled Create button).
+  const blockedByToken = Boolean(selectedToken && unlimited && tokenRunsOut);
+  const warningRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (blockedByToken)
+      warningRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [blockedByToken, selectedToken?.id]);
+  const limitInput = (
+    <Controller
+      name="pinCollectionLimit"
+      control={control}
+      render={({ field }) => (
+        <Input
+          type="number"
+          id="pinCollectionLimit"
+          min={1}
+          max={tokenRunsOut ? selectedToken?.bal : undefined}
+          name={field.name}
+          ref={field.ref}
+          onBlur={field.onBlur}
+          disabled={unlimited}
+          value={unlimited || Number.isNaN(field.value) ? "" : field.value}
+          onChange={(e) => field.onChange(e.target.value === "" ? NaN : Number(e.target.value))}
+          className="bg-card border-border focus:ring-ring"
+          placeholder={
+            unlimited ? "Unlimited" : tokenRunsOut ? `Up to ${selectedToken?.bal}` : "e.g. 100"
+          }
+        />
+      )}
+    />
   );
   const limitNotes = (
     <>
-      {selectedToken && (
+      {selectedToken && blockedByToken && (
+        <div
+          ref={warningRef}
+          role="alert"
+          className="border-warning/40 bg-warning/10 space-y-2 rounded-md border p-3 text-xs"
+        >
+          <p className="text-foreground">
+            {selectedToken.bal > 0 ? (
+              <>
+                <strong>{selectedToken.code}</strong> has {selectedToken.bal} left to give, so this
+                pin can&apos;t be unlimited. Set a limit of up to {selectedToken.bal}.
+              </>
+            ) : (
+              <>
+                <strong>{selectedToken.code}</strong> has none left to give, so this pin can&apos;t
+                hand it out. Choose another token, or add more {selectedToken.code} first.
+              </>
+            )}
+          </p>
+          {selectedToken.bal > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 px-2.5 text-xs"
+              onClick={() => setLimit(selectedToken.bal)}
+            >
+              Set limit to {selectedToken.bal}
+            </Button>
+          )}
+        </div>
+      )}
+      {selectedToken && !blockedByToken && (
         <div className="bg-muted space-y-1 rounded p-2 text-xs">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Available Balance:</span>
-            <span className="font-medium">{selectedToken.bal}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Remaining Balance:</span>
-            <span
-              className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-accent"}`}
-            >
-              {remainingBalance}
+            <span className="font-medium">
+              {selectedToken.bal === OPEN_EDITION
+                ? "Open edition"
+                : selectedToken.bal.toLocaleString()}
             </span>
           </div>
+          {tokenRunsOut && !Number.isNaN(remainingBalance) && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Remaining Balance:</span>
+              <span
+                className={`font-medium ${remainingBalance < 0 ? "text-destructive" : "text-foreground"}`}
+              >
+                {remainingBalance}
+              </span>
+            </div>
+          )}
         </div>
       )}
-      {selectedToken && remainingBalance < 0 && (
+      {selectedToken && !unlimited && remainingBalance < 0 && (
         <p className="text-destructive text-sm">Insufficient token balance</p>
       )}
       {errors.pinCollectionLimit && (
@@ -362,10 +460,9 @@ export function CollectionInputs({
           <div className="grid grid-cols-2 items-start gap-3">
             {pinNumberField}
             <div className="min-w-0 space-y-2">
-              <Label htmlFor="pinCollectionLimit" className="text-sm font-medium">
-                Collection limit
-              </Label>
+              {limitHeader}
               {limitInput}
+              {unlimitedSwitch}
             </div>
           </div>
           {limitNotes}
@@ -381,8 +478,9 @@ export function CollectionInputs({
         {pinNumberField}
       </div>
       <div className="space-y-2">
-        {limitLabel}
+        {limitHeader}
         {limitInput}
+        {unlimitedSwitch}
         {limitNotes}
       </div>
     </div>

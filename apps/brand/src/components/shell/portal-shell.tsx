@@ -5,6 +5,7 @@ import { useState, useSyncExternalStore, type ReactNode } from "react";
 
 import { CenteredSpinner } from "@wadzzo/ui/patterns/spinner";
 
+import { getPortalLandingRoute } from "./access-rules";
 import { AdminGate, CreatorGate, OnboardingGate, SignInScreen } from "./gates";
 import { MobileTabBar, MobileTopBar } from "./mobile-nav";
 import { PortalMark, Sidebar } from "./sidebar";
@@ -81,7 +82,10 @@ export function PortalShell({ children }: { children: ReactNode }) {
     <CreatorGate access={access}>{children}</CreatorGate>
   );
 
-  const homeHref = access.isAdmin && !access.approved ? "/admin/creators" : "/pins";
+  const homeHref = getPortalLandingRoute({
+    isAdmin: access.isAdmin,
+    isApprovedCreator: access.approved,
+  });
 
   return (
     <div className="bg-background flex min-h-dvh">

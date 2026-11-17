@@ -53,7 +53,7 @@ export default function AdminMapsPage() {
 
   const picker = (
     <BrandPicker
-      className="pointer-events-auto w-56 sm:w-64"
+      className="pointer-events-auto w-56 shrink-0 sm:w-64 lg:w-52"
       brands={brands.data}
       value={brand}
       onChange={pickBrand}

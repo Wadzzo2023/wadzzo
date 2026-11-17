@@ -100,14 +100,17 @@ function AnnouncementForm({ announcement }: { announcement: EditableAnnouncement
     setForm((f) => ({ ...f, [key]: value }));
   const [uploadKey, setUploadKey] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     title: form.title,
     message: form.body,
     button: form.withCta ? form.ctaLabel : "",
   };
   const imagePrompt =
-    imageBrief || [form.title, form.body.slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === form.title
+      ? imageBrief.prompt
+      : [form.title, form.body.slice(0, 400)].filter(Boolean).join(". ");
 
   const utils = api.useUtils();
   const done = (msg: string) => {
@@ -210,8 +213,12 @@ function AnnouncementForm({ announcement }: { announcement: EditableAnnouncement
             ctaLabel: r.ctaLabel ?? f.ctaLabel,
             ctaUrl: r.ctaUrl ?? f.ctaUrl,
           }));
-          setImageBrief(r.imagePrompt);
-          return () => setForm(before);
+          const prevBrief = imageBrief;
+          setImageBrief({ prompt: r.imagePrompt, title: r.title });
+          return () => {
+            setForm(before);
+            setImageBrief(prevBrief);
+          };
         }}
       />
 

@@ -60,7 +60,50 @@ export async function aiRemaining(userId: string) {
 }
 
 /**
- * Run `work` if the brand has quota left, and count it only if it succeeds.
+ * Take one of today's generations in a single statement, so two requests at once can't both
+ * pass the limit or lose each other's count. A new UTC day starts the counts again; other
+ * extraFields keys are kept. False when the limit is reached.
+ */
+async function reserve(userId: string, kind: AiKind): Promise<boolean> {
+  const day = today();
+  const rows = await db.$executeRaw`
+    UPDATE "Creator"
+    SET "extraFields" = jsonb_set(
+      COALESCE("extraFields", '{}'::jsonb),
+      '{aiUsage}',
+      CASE WHEN "extraFields"->'aiUsage'->>'day' = ${day}
+        THEN jsonb_set(
+          "extraFields"->'aiUsage',
+          ARRAY[${kind}::text],
+          to_jsonb(COALESCE(("extraFields"->'aiUsage'->>${kind}::text)::int, 0) + 1)
+        )
+        ELSE jsonb_build_object('day', ${day}::text, 'text', 0, 'image', 0)
+          || jsonb_build_object(${kind}::text, 1)
+      END
+    )
+    WHERE id = ${userId}
+      AND (
+        "extraFields"->'aiUsage'->>'day' IS DISTINCT FROM ${day}
+        OR COALESCE(("extraFields"->'aiUsage'->>${kind}::text)::int, 0) < ${AI_DAILY_LIMIT[kind]}
+      )`;
+  return rows > 0;
+}
+
+/** Give back a reserved generation that failed (only if it is still the same day). */
+async function refund(userId: string, kind: AiKind) {
+  const day = today();
+  await db.$executeRaw`
+    UPDATE "Creator"
+    SET "extraFields" = jsonb_set(
+      "extraFields",
+      ARRAY['aiUsage', ${kind}::text],
+      to_jsonb(GREATEST(COALESCE(("extraFields"->'aiUsage'->>${kind}::text)::int, 0) - 1, 0))
+    )
+    WHERE id = ${userId} AND "extraFields"->'aiUsage'->>'day' = ${day}`;
+}
+
+/**
+ * Run `work` if the brand has quota left; it only counts if it succeeds.
  * Usage lives in Creator.extraFields.aiUsage (no schema change; other keys kept).
  */
 export async function withAiQuota<T>(
@@ -68,23 +111,16 @@ export async function withAiQuota<T>(
   kind: AiKind,
   work: () => Promise<T>,
 ): Promise<T> {
-  const admin = await isAdmin(userId);
-  if (!admin) {
-    const creator = await db.creator.findUnique({
-      where: { id: userId },
-      select: { extraFields: true },
+  const counted = !(await isAdmin(userId));
+  if (counted && !(await reserve(userId, kind)))
+    throw new AppError(ErrorCodes.RATE_LIMITED, {
+      message: `You've used today's ${AI_DAILY_LIMIT[kind]} AI ${kind === "image" ? "images" : "generations"}. It resets at midnight UTC.`,
     });
-    const u = readUsage(creator?.extraFields);
-    if (u[kind] >= AI_DAILY_LIMIT[kind])
-      throw new AppError(ErrorCodes.RATE_LIMITED, {
-        message: `You've used today's ${AI_DAILY_LIMIT[kind]} AI ${kind === "image" ? "images" : "generations"}. It resets at midnight UTC.`,
-      });
-  }
 
-  let result: T;
   try {
-    result = await work();
+    return await work();
   } catch (e) {
+    if (counted) await refund(userId, kind).catch((err) => console.error("[ai] refund", err));
     if (isKnownError(e)) throw e;
     console.error("[ai]", e);
     throw new AppError(ErrorCodes.AI_GENERATION_FAILED, {
@@ -94,23 +130,6 @@ export async function withAiQuota<T>(
           : "The AI couldn't finish that. Try again.",
     });
   }
-
-  if (!admin) {
-    // Re-read so a concurrent request's count isn't lost, and keep other keys.
-    const creator = await db.creator.findUnique({
-      where: { id: userId },
-      select: { extraFields: true },
-    });
-    const current = (creator?.extraFields as Record<string, unknown> | null) ?? {};
-    const u = readUsage(current);
-    await db.creator.update({
-      where: { id: userId },
-      data: {
-        extraFields: { ...current, aiUsage: { ...u, [kind]: u[kind] + 1 } },
-      },
-    });
-  }
-  return result;
 }
 
 function friendlyOpenAiError(e: { status?: number; message: string }) {

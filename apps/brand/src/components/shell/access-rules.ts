@@ -22,11 +22,15 @@ export function canAccessAdminSide(isAdmin: boolean): boolean {
   return isAdmin;
 }
 
-/** Default landing route when user enters the portal. */
+/** Where an admin without a working brand of their own lands: the admin map. */
+export const ADMIN_HOME = "/admin/maps";
+
+/**
+ * Default landing route: a brand (with or without admin access) gets its map, /pins;
+ * an admin without an approved brand gets the admin map.
+ */
 export function getPortalLandingRoute({ isAdmin, isApprovedCreator }: PortalAccessState): string {
-  if (isAdmin && !isApprovedCreator) {
-    return "/admin/creators";
-  }
+  if (isAdmin && !isApprovedCreator) return ADMIN_HOME;
   return "/pins";
 }
 

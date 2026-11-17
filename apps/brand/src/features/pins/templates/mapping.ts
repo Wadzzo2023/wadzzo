@@ -1,3 +1,4 @@
+import { UNLIMITED_COLLECTIONS } from "@wadzzo/agent-contract";
 import { PinType } from "@wadzzo/db";
 import type { DrawShape, StoredFeature } from "@wadzzo/geo/map-geometry";
 import {
@@ -129,7 +130,8 @@ export function templateToPinForm(
       type: d.type,
       radius: d.radius,
       pinNumber: d.pinNumber,
-      pinCollectionLimit: d.pinCollectionLimit,
+      // 0 is a template saved without a limit: start it as unlimited.
+      pinCollectionLimit: d.pinCollectionLimit || UNLIMITED_COLLECTIONS,
       tier: d.tier,
       token: d.token,
       multiPin: d.multiPin,

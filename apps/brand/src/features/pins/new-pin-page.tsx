@@ -24,10 +24,13 @@ import { MapPicker } from "~/components/map-kit/map-picker";
 import {
   CollectionInputs,
   createPinFormSchema,
+  formatLimit,
   ImageUploadField,
+  OPEN_EDITION,
   PinTypeToggles,
   TagsSection,
   TiersOptions,
+  UNLIMITED_COLLECTIONS,
   type AssetType,
   type CreatePinType,
 } from "~/components/pins/pin-form-parts";
@@ -136,7 +139,7 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     lng: undefined as number | undefined,
     radius: 50,
     pinNumber: 1,
-    pinCollectionLimit: 0,
+    pinCollectionLimit: UNLIMITED_COLLECTIONS,
     title: "",
     description: "",
     image: undefined as string | undefined,
@@ -182,6 +185,11 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     setLook(next);
   };
 
+  // Fill with AI's ideas: an image description (used while the title it was written for is
+  // unchanged) and tags to offer. Clear, a template and Undo drop them.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
+  const [tagIdeas, setTagIdeas] = useState<string[]>([]);
+
   // ── Templates ──────────────────────────────────────────────────────────
   const [saveOpen, setSaveOpen] = useState(false);
   const [appliedName, setAppliedName] = useState<string | null>(null);
@@ -214,6 +222,8 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     setCollectionMode(mode);
     setAppliedName(t.name);
     setFromLast(false);
+    setImageBrief(null);
+    setTagIdeas([]);
   };
 
   /** Card: back to a blank form, keeping the spot and the layer. */
@@ -223,6 +233,8 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     setCollectionMode("manual");
     setAppliedName(null);
     setFromLast(false);
+    setImageBrief(null);
+    setTagIdeas([]);
   };
 
   // Card: a click on the base map moves the new pin there.
@@ -306,7 +318,7 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     if (prevData.radius) setValue("radius", prevData.radius);
     if (prevData.url) setValue("url", prevData.url);
     if (prevData.pinNumber) setValue("pinNumber", prevData.pinNumber);
-    setValue("pinCollectionLimit", prevData.pinCollectionLimit ?? 0);
+    setValue("pinCollectionLimit", prevData.pinCollectionLimit || UNLIMITED_COLLECTIONS);
     if (prevData.tier) setValue("tier", prevData.tier.toString());
     setValue("startDate", toDate(prevData.startDate) ?? today);
     setValue("endDate", toDate(prevData.endDate) ?? tomorrow);
@@ -349,6 +361,16 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
   const creating = create.isPending || createForBrand.isPending;
 
   const onSubmit = handleSubmit((data) => {
+    if (
+      selectedToken &&
+      selectedToken.bal < UNLIMITED_COLLECTIONS &&
+      data.pinCollectionLimit >= UNLIMITED_COLLECTIONS
+    ) {
+      const message = `${selectedToken.code} runs out, so this pin can't be unlimited. Set a limit of up to ${selectedToken.bal}.`;
+      setError("pinCollectionLimit", { message });
+      toast.error(message);
+      return;
+    }
     if (selectedToken && data.pinCollectionLimit > selectedToken.bal) {
       setError("pinCollectionLimit", {
         message: "Collection limit can't be more than your token balance",
@@ -387,8 +409,6 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
       ? { lat, lng }
       : null;
 
-  const [imageBrief, setImageBrief] = useState("");
-  const [tagIdeas, setTagIdeas] = useState<string[]>([]);
   const aiContext = {
     title: values.title ?? "",
     description: values.description ?? "",
@@ -396,7 +416,9 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
     location: location ? `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}` : "",
   };
   const imagePrompt =
-    imageBrief || [values.title, values.description?.slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === values.title
+      ? imageBrief.prompt
+      : [values.title, values.description?.slice(0, 400)].filter(Boolean).join(". ");
 
   const actions = editing ? (
     <>
@@ -516,7 +538,7 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
         "Concert-night pin near the venue, auto collect",
       ]}
       apply={(r) => {
-        const before = { ...values, mode: collectionMode };
+        const before = { ...values, mode: collectionMode, imageBrief, tagIdeas };
         setValue("title", r.title, { shouldValidate: true });
         setValue("description", r.description);
         setValue("type", r.type);
@@ -526,12 +548,13 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
         if (start) setValue("startDate", start, { shouldValidate: true });
         if (end) setValue("endDate", end, { shouldValidate: true });
         setValue("pinNumber", r.pinNumber);
-        setValue("pinCollectionLimit", r.pinCollectionLimit);
+        // The AI uses 0 for "no limit".
+        setValue("pinCollectionLimit", r.pinCollectionLimit || UNLIMITED_COLLECTIONS);
         setValue("radius", r.radius);
         setValue("multiPin", r.multiPin);
         setCollectionMode(r.autoCollect ? "auto" : "manual");
         setTagIdeas(r.tags);
-        setImageBrief(r.imagePrompt);
+        setImageBrief({ prompt: r.imagePrompt, title: r.title });
         return () => {
           (
             [
@@ -548,7 +571,8 @@ export default function NewPinPage({ editTemplate }: { editTemplate?: PinTemplat
             ] as const
           ).forEach((k) => setValue(k, before[k] as never));
           setCollectionMode(before.mode);
-          setTagIdeas([]);
+          setTagIdeas(before.tagIdeas);
+          setImageBrief(before.imageBrief);
         };
       }}
     />
@@ -913,7 +937,7 @@ function Summary({
         {row("Collection", mode === "auto" ? "Auto" : "Manual")}
         {row("Type", values.type ? typeLabel(values.type) : "—")}
         {row("Pins", values.pinNumber ?? 1)}
-        {row("Limit per pin", values.pinCollectionLimit ?? 0)}
+        {row("Limit per pin", formatLimit(values.pinCollectionLimit))}
         {runsFor ? (
           row("Each pin runs", runsFor)
         ) : (
@@ -925,7 +949,7 @@ function Summary({
         {token &&
           row(
             "Token",
-            `${token.code} · ${token.bal >= 1_000_000 ? "open edition" : `${token.bal} available`}`,
+            `${token.code} · ${token.bal === OPEN_EDITION ? "open edition" : `${token.bal.toLocaleString()} available`}`,
           )}
         {token &&
           row(

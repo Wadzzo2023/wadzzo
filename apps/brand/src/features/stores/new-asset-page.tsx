@@ -136,7 +136,8 @@ export default function NewAssetPage() {
   const [step, setStep] = useState<"idle" | "creating" | "signing" | "confirming">("idle");
 
   const kind = KINDS.find((k) => k.type === values.mediaType) ?? KINDS[0]!;
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     name: values.name,
     description: values.description,
@@ -144,7 +145,9 @@ export default function NewAssetPage() {
     code: values.code,
   };
   const imagePrompt =
-    imageBrief || [values.name, values.description.slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === values.name
+      ? imageBrief.prompt
+      : [values.name, values.description.slice(0, 400)].filter(Boolean).join(". ");
 
   const limit = values.openEdition ? null : values.limit;
   const mintNow = values.mintMode === "now" ? values.mintNow : 0;
@@ -369,8 +372,10 @@ export default function NewAssetPage() {
             setValue("priceUSD", r.priceUSD);
             // Only switch the content type if nothing's been uploaded yet.
             if (!values.mediaUrl) setValue("mediaType", r.mediaType);
-            setImageBrief(r.imagePrompt);
+            const prevBrief = imageBrief;
+            setImageBrief({ prompt: r.imagePrompt, title: r.name });
             return () => {
+              setImageBrief(prevBrief);
               setValue("name", before.name);
               setValue("description", before.description);
               setValue("code", before.code);

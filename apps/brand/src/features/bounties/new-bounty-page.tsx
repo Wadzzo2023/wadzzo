@@ -92,7 +92,8 @@ export default function NewBountyPage() {
   });
   const { errors } = formState;
   const values = watch();
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     title: values.title ?? "",
     description: htmlToText(values.content ?? ""),
@@ -100,8 +101,9 @@ export default function NewBountyPage() {
     winners: String(values.totalWinner ?? ""),
   };
   const imagePrompt =
-    imageBrief ||
-    [values.title, htmlToText(values.content ?? "").slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === values.title
+      ? imageBrief.prompt
+      : [values.title, htmlToText(values.content ?? "").slice(0, 400)].filter(Boolean).join(". ");
 
   const assetFees = 2 * Number(TrxBaseFeeInPlatformAsset) + Number(PLATFORM_FEE);
   const xlmFee = 2 * SIMPLIFIED_FEE_IN_XLM; // now, and again when paying winners
@@ -268,8 +270,10 @@ export default function NewBountyPage() {
               shouldValidate: true,
             });
             if (r.prizeInUSD) setPrizeUsd(String(r.prizeInUSD));
-            setImageBrief(r.imagePrompt);
+            const prevBrief = imageBrief;
+            setImageBrief({ prompt: r.imagePrompt, title: r.title.slice(0, 65) });
             return () => {
+              setImageBrief(prevBrief);
               setValue("title", before.title);
               setValue("content", before.content);
               setValue("totalWinner", before.totalWinner);

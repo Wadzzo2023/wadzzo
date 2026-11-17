@@ -61,7 +61,7 @@ const config = {
         destination: "/admin/reports/:id",
         permanent: true,
       },
-      { source: "/admin", destination: "/admin/creators", permanent: false },
+      { source: "/admin", destination: "/admin/maps", permanent: false },
     ];
   },
 

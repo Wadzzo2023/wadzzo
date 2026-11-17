@@ -691,14 +691,19 @@ export default function MapView({
       {!drawing && !placing && !trailMode && (
         <div
           className={cn(
-            "pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-2 lg:inset-x-4 lg:top-4",
+            // One row on a desktop (the search box gives up width first), so the "In view"
+            // panel below always clears it.
+            "pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start gap-2 lg:inset-x-4 lg:top-4 lg:flex-nowrap",
             // A form card takes the left side (as the trail builder): the toolbar moves over.
             formCard && "lg:left-[calc(380px+2rem)]",
           )}
         >
           {toolbarStart}
           <PlaceSearch
-            className={cn("pointer-events-auto w-full", formCard ? "sm:w-64" : "sm:w-80")}
+            className={cn(
+              "pointer-events-auto w-full lg:w-auto lg:min-w-40 lg:flex-1",
+              formCard ? "sm:w-64 lg:max-w-64" : "sm:w-80 lg:max-w-80",
+            )}
             initialQuery={place?.name}
             onSelect={(p) => {
               setPlace(p);
@@ -706,13 +711,13 @@ export default function MapView({
             }}
             onClear={() => setPlace(null)}
           />
-          <div className="bg-card pointer-events-auto flex h-10 items-center gap-2 rounded-lg border px-3 shadow-sm">
+          <div className="bg-card pointer-events-auto flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 whitespace-nowrap shadow-sm">
             <Switch id="show-expired" checked={showExpired} onCheckedChange={setShowExpired} />
             <Label htmlFor="show-expired" className="text-xs font-medium">
               Show expired
             </Label>
           </div>
-          <div className="pointer-events-auto ml-auto flex items-center gap-2">
+          <div className="pointer-events-auto ml-auto flex shrink-0 items-center gap-2">
             {toolbarEnd}
             {/* With a form card open the create buttons step aside (as in Trail mode), so the
                 toolbar fits on one row beside the card; the layer switcher stays. */}
@@ -731,12 +736,16 @@ export default function MapView({
                 <Button
                   variant="outline"
                   className="shadow-sm"
+                  aria-label="Draw hotspot"
+                  title="Draw hotspot"
                   onClick={() => {
                     setDrawTemplateId(null);
                     setDrawing(true);
                   }}
                 >
-                  <Hexagon /> <span className="hidden sm:inline">Draw hotspot</span>
+                  {/* Icon only on a narrow desktop, so the toolbar stays on one row. */}
+                  <Hexagon />{" "}
+                  <span className="hidden sm:inline lg:hidden xl:inline">Draw hotspot</span>
                 </Button>
                 <Button
                   className="hidden shadow-sm sm:inline-flex"

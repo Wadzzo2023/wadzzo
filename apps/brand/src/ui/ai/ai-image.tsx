@@ -51,6 +51,8 @@ export function AiImageButton({
 }) {
   const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState(suggestedPrompt);
+  // Once the brand types its own description, reopening keeps it instead of the form's brief.
+  const [edited, setEdited] = useState(false);
   const [result, setResult] = useState<{
     url: string;
     ipfsHash: string | null;
@@ -64,9 +66,10 @@ export function AiImageButton({
     onError: (e) => toast.error(e.message),
   });
 
-  // Each time it opens, start from the latest form content (unless an image is already showing).
+  // Each time it opens, start from the latest form content (unless an image is already
+  // showing or the brand wrote its own description).
   const openDialog = () => {
-    if (!result && suggestedPrompt) setPrompt(suggestedPrompt);
+    if (!result && !edited && suggestedPrompt) setPrompt(suggestedPrompt);
     setOpen(true);
   };
 
@@ -121,7 +124,10 @@ export function AiImageButton({
 
           <Textarea
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              setEdited(true);
+            }}
             rows={3}
             maxLength={1500}
             className="resize-none"
@@ -154,6 +160,7 @@ export function AiImageButton({
                     onImage(result.url, result.ipfsHash ?? undefined);
                     setOpen(false);
                     setResult(null);
+                    setEdited(false);
                   }}
                 >
                   <Check /> Use this image

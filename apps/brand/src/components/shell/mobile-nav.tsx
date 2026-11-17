@@ -177,7 +177,7 @@ const tab =
 /**
  * Phone tab bar, the same floating green bar as the marketplace's: Map · Stores · [AR, raised] ·
  * Bounties · Pins (decided; Create and Menu are in the header). Pure admins (admin, not an approved
- * creator) get Creators · Users · [AR] · Review · Maps. Tabs the brand can't open yet (no nav
+ * creator) get Maps · Review · [AR] · Creators · Users. Tabs the brand can't open yet (no nav
  * permission) are swapped for ones it can.
  */
 export function MobileTabBar({ isAdmin, navPermission, isApprovedCreator = false }: Access) {
@@ -187,8 +187,8 @@ export function MobileTabBar({ isAdmin, navPermission, isApprovedCreator = false
   let right: NavItem[];
   if (isAdmin && !isApprovedCreator) {
     const pick = (href: string) => ADMIN_NAV.items.find((i) => i.href === href)!;
-    left = [pick("/admin/creators"), pick("/admin/users")];
-    right = [pick("/admin/pins"), pick("/admin/maps")];
+    left = [pick("/admin/maps"), pick("/admin/pins")];
+    right = [pick("/admin/creators"), pick("/admin/users")];
   } else {
     const allowed = (i: NavItem) => !i.gated || navPermission;
     const taken = new Set([...MOBILE_TABS.left, ...MOBILE_TABS.right].map((t) => t.href));

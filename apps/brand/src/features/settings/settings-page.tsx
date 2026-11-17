@@ -288,10 +288,15 @@ function Profile({ data }: { data: Overview }) {
       <Tabs value={tab} onValueChange={setTab} className="mt-8">
         <TabsList
           variant="line"
-          className="no-scrollbar w-full justify-start overflow-x-auto overflow-y-hidden"
+          className="h-auto w-full flex-wrap justify-start"
         >
           {visible.map((t) => (
-            <TabsTrigger key={t.id} value={t.id} className="flex-none">
+            // Nine tabs: the smaller line-tab size keeps them on one row on a desktop; narrower, they wrap.
+            <TabsTrigger
+              key={t.id}
+              value={t.id}
+              className="flex-none group-data-[variant=line]/tabs-list:px-2.5 group-data-[variant=line]/tabs-list:text-base"
+            >
               <t.icon /> {t.label}
             </TabsTrigger>
           ))}

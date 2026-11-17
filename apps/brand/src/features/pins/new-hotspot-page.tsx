@@ -274,6 +274,7 @@ function HotspotForm({
     }
     setCollectionMode(mode);
     setApplied(t);
+    setImageBrief(null);
   };
   const appliedFor = useRef<string | null>(null);
   useEffect(() => {
@@ -319,7 +320,8 @@ function HotspotForm({
       }),
     });
   };
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     title: values.title ?? "",
     description: values.description ?? "",
@@ -328,7 +330,9 @@ function HotspotForm({
       : "",
   };
   const imagePrompt =
-    imageBrief || [values.title, values.description?.slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === values.title
+      ? imageBrief.prompt
+      : [values.title, values.description?.slice(0, 400)].filter(Boolean).join(". ");
   const DAY_OPTIONS = [1, 2, 3, 5, 7, 14, 30];
   const nearestDays = (n: number) =>
     DAY_OPTIONS.reduce((a, b) => (Math.abs(b - n) < Math.abs(a - n) ? b : a));
@@ -469,8 +473,10 @@ function HotspotForm({
         setValue("pinCollectionLimit", r.pinCollectionLimit);
         setValue("multiPin", r.multiPin);
         setCollectionMode(r.autoCollect ? "auto" : "manual");
-        setImageBrief(r.imagePrompt);
+        const prevBrief = imageBrief;
+        setImageBrief({ prompt: r.imagePrompt, title: r.title });
         return () => {
+          setImageBrief(prevBrief);
           (
             [
               "title",

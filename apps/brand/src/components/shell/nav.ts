@@ -107,10 +107,15 @@ export const BRAND_NAV: NavGroup[] = [
 
 export const ADMIN_NAV: NavGroup = {
   label: "Admin",
+  // The admin map first (as a brand's Map), then review queues, then people, then platform-wide.
   items: [
-    { href: "/admin/creators", label: "Creators", icon: UserCheck },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/admins", label: "Admins", icon: Shield },
+    { href: "/admin/maps", label: "All maps", shortLabel: "Maps", icon: Map },
+    {
+      href: "/admin/home-area",
+      label: "Home area",
+      shortLabel: "Area",
+      icon: MapPinned,
+    },
     {
       href: "/admin/pins",
       label: "Pin review",
@@ -123,19 +128,15 @@ export const ADMIN_NAV: NavGroup = {
       shortLabel: "Murals",
       icon: Frame,
     },
-    { href: "/admin/maps", label: "All maps", shortLabel: "Maps", icon: Map },
-    {
-      href: "/admin/home-area",
-      label: "Home area",
-      shortLabel: "Area",
-      icon: MapPinned,
-    },
     {
       href: "/admin/reports",
       label: "Collection reports",
       shortLabel: "Reports",
       icon: Flag,
     },
+    { href: "/admin/creators", label: "Creators", icon: UserCheck },
+    { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/admins", label: "Admins", icon: Shield },
     {
       href: "/admin/audit",
       label: "Audit log",

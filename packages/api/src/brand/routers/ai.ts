@@ -61,7 +61,7 @@ export const aiRouter = createTRPCRouter({
           input: [
             {
               role: "system",
-              content: `You fill in the form for ${FORM_BRIEF[input.form]} on {platformBranding.name}, a brand portal. ${await brandLine(ctx.db, ctx.session.user.id)}
+              content: `You fill in the form for ${FORM_BRIEF[input.form]} on ${platformBranding.name}, a brand portal. ${await brandLine(ctx.db, ctx.session.user.id)}
 It is now ${input.now} (${input.timeZone}). Choose sensible defaults for anything the brand didn't specify, and dates in the future.
 ${RULES}`,
             },
@@ -112,7 +112,7 @@ ${RULES}`,
           input: [
             {
               role: "system",
-              content: `You write copy for ${FORM_BRIEF[input.form]} on Wadzzo. ${await brandLine(ctx.db, ctx.session.user.id)}
+              content: `You write copy for ${FORM_BRIEF[input.form]} on ${platformBranding.name}. ${await brandLine(ctx.db, ctx.session.user.id)}
 ${RULES}
 ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Return only the ${input.field} itself.`,
             },
@@ -149,12 +149,18 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
         wide: "1536x1024",
         portrait: "1024x1536",
       }[input.aspect] as "1024x1024" | "1536x1024" | "1024x1536";
+      // Pin and hotspot covers are shown small (a map thumbnail, a sheet cover), so the much
+      // faster "low" quality is enough; everything else keeps "medium".
+      const quality = input.form === "pin" || input.form === "hotspot" ? "low" : "medium";
       return withAiQuota(ctx.session.user.id, "image", async () => {
         const res = await openai.images.generate({
           model: IMAGE_MODEL,
           prompt: `${input.prompt}\n\nFor ${FORM_BRIEF[input.form]}. High quality, eye-catching, no words, letters, logos or watermarks.`,
           size,
-          quality: "medium",
+          quality,
+          // JPEG instead of PNG: a fraction of the bytes to send back, upload and load.
+          output_format: "jpeg",
+          output_compression: 85,
           n: 1,
         });
         const b64 = res.data?.[0]?.b64_json;
@@ -166,12 +172,12 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
 
         if (input.destination === "ipfs") {
           const stream = Object.assign(Readable.from(bytes), {
-            path: "ai-thumbnail.png",
+            path: "ai-thumbnail.jpg",
           });
           const pinned = await (
             await pinataClient(env.PINATA_JWT)
           ).pinFileToIPFS(stream, {
-            pinataMetadata: { name: "ai-thumbnail.png" },
+            pinataMetadata: { name: "ai-thumbnail.jpg" },
           });
           return {
             url: ipfsHashToPinataGatewayUrl(pinned.IpfsHash),
@@ -179,7 +185,7 @@ ${format}${input.maxChars ? ` Stay under ${input.maxChars} characters.` : ""} Re
           };
         }
         return {
-          url: await uploadBufferToS3(bytes, "image/png"),
+          url: await uploadBufferToS3(bytes, "image/jpeg"),
           ipfsHash: null,
         };
       });

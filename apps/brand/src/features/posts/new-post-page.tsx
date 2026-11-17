@@ -119,14 +119,16 @@ export default function NewPostPage() {
     return `${t.name} · ${t.price} ${code ?? ""}`.trim();
   };
   const activeKind = MEDIA_KINDS.find((k) => k.type === kind)!;
-  const [imageBrief, setImageBrief] = useState("");
+  // Fill with AI's image description, used while the title it was written for is unchanged.
+  const [imageBrief, setImageBrief] = useState<{ prompt: string; title: string } | null>(null);
   const aiContext = {
     title: values.heading ?? "",
     content: htmlToText(values.content ?? ""),
   };
   const imagePrompt =
-    imageBrief ||
-    [values.heading, htmlToText(values.content ?? "").slice(0, 400)].filter(Boolean).join(". ");
+    imageBrief && imageBrief.title === values.heading
+      ? imageBrief.prompt
+      : [values.heading, htmlToText(values.content ?? "").slice(0, 400)].filter(Boolean).join(". ");
 
   const actions = (
     <>
@@ -199,8 +201,10 @@ export default function NewPostPage() {
           const before = { heading: values.heading, content: values.content };
           setValue("heading", r.heading, { shouldValidate: true });
           setValue("content", r.contentHtml, { shouldValidate: true });
-          setImageBrief(r.imagePrompt);
+          const prevBrief = imageBrief;
+          setImageBrief({ prompt: r.imagePrompt, title: r.heading });
           return () => {
+            setImageBrief(prevBrief);
             setValue("heading", before.heading);
             setValue("content", before.content);
           };
