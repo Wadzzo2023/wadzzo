@@ -45,6 +45,13 @@ function ctxFor(
         findUnique: vi.fn(async ({ where }: { where: { id: string } }) => ({
           id: where.id,
         })),
+        findFirst: vi.fn(async ({ where }: { where: { email: { equals: string } } }) =>
+          (extra.emailUsers as Record<string, string> | undefined)?.[
+            where.email.equals.toLowerCase()
+          ]
+            ? { id: (extra.emailUsers as Record<string, string>)[where.email.equals.toLowerCase()] }
+            : null,
+        ),
       },
       auditLog: { create: vi.fn() },
     },
@@ -55,7 +62,7 @@ let panel: (ctx: never) => Promise<unknown>;
 let platforms: (ctx: never) => Promise<unknown>;
 let makeAdmin: (
   ctx: never,
-  input: { pubkey: string; platformId?: string },
+  input: { pubkey?: string; email?: string; platformId?: string },
 ) => Promise<{ moved: boolean }>;
 
 beforeAll(async () => {
@@ -168,6 +175,31 @@ describe("adding admins", () => {
         pubkey: "GCALLER",
         platformId: "clintoncounty",
       }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("adds an admin by email, resolving it to the account's public key", async () => {
+    const ctx = ctxFor(CLINTON, CLINTON, { emailUsers: { "alice@example.com": ALICE } });
+    const r = await makeAdmin(ctx as never, { email: "Alice@Example.com" });
+    expect(r.moved).toBe(false);
+    expect(ctx.db.admin.create).toHaveBeenCalledWith({
+      data: { id: ALICE, platformId: "clintoncounty" },
+    });
+  });
+
+  it("errors when no account uses that email", async () => {
+    const ctx = ctxFor(CLINTON, CLINTON);
+    await expect(makeAdmin(ctx as never, { email: "nobody@example.com" })).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+    expect(ctx.db.admin.create).not.toHaveBeenCalled();
+  });
+
+  it("needs exactly one of public key or email", async () => {
+    const ctx = ctxFor(CLINTON, CLINTON);
+    await expect(makeAdmin(ctx as never, {})).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      makeAdmin(ctx as never, { pubkey: ALICE, email: "alice@example.com" }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });

@@ -25,11 +25,17 @@ export const adminRouter = createTRPCRouter({
   }),
   makeAdmin: adminProcedure
     .input(
-      z.object({
-        pubkey: z.string().trim().length(56),
-        /** Wadzzo admins may add an admin to another platform; defaults to this one. */
-        platformId: z.string().optional(),
-      }),
+      z
+        .object({
+          pubkey: z.string().trim().length(56).optional(),
+          /** Alternative to `pubkey`: the email of an existing account, resolved to its public key. */
+          email: z.string().trim().email().optional(),
+          /** Wadzzo admins may add an admin to another platform; defaults to this one. */
+          platformId: z.string().optional(),
+        })
+        .refine((v) => Boolean(v.pubkey) !== Boolean(v.email), {
+          message: "Give either a public key or an email.",
+        }),
     )
     .mutation(async ({ input, ctx }) => {
       const platformId = input.platformId ?? ctx.platform.id;
@@ -46,16 +52,24 @@ export const adminRouter = createTRPCRouter({
       ) {
         throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, { message: "Unknown platform." });
       }
-      const user = await ctx.db.user.findUnique({
-        where: { id: input.pubkey },
-        select: { id: true },
-      });
+      const user = input.email
+        ? await ctx.db.user.findFirst({
+            where: { email: { equals: input.email, mode: "insensitive" } },
+            select: { id: true },
+          })
+        : await ctx.db.user.findUnique({
+            where: { id: input.pubkey },
+            select: { id: true },
+          });
       if (!user)
         throw new AppError(ErrorCodes.RESOURCE_NOT_FOUND, {
-          message: "No account has that public key — they need to sign in once first.",
+          message: input.email
+            ? "No account uses that email — they need to sign up with it first."
+            : "No account has that public key — they need to sign in once first.",
         });
+      const pubkey = user.id;
       const existing = await ctx.db.admin.findUnique({
-        where: { id: input.pubkey },
+        where: { id: pubkey },
         select: { platformId: true },
       });
       if (existing) {
@@ -69,28 +83,28 @@ export const adminRouter = createTRPCRouter({
           throw new AppError(ErrorCodes.RESOURCE_CONFLICT, {
             message: `That account is already an admin of ${existing.platformId}.`,
           });
-        if (input.pubkey === ctx.session.user.id)
+        if (pubkey === ctx.session.user.id)
           throw new AppError(ErrorCodes.VALIDATION_FAILED, {
             message: "You can't change your own admin platform.",
           });
         await ctx.db.admin.update({
-          where: { id: input.pubkey },
+          where: { id: pubkey },
           data: { platformId },
         });
         await logAudit(ctx, {
           action: "admin.move",
           entityType: "Admin",
-          entityId: input.pubkey,
+          entityId: pubkey,
           targetPlatformId: platformId,
           meta: { from: existing.platformId, to: platformId },
         });
         return { moved: true as const, from: existing.platformId };
       }
-      await ctx.db.admin.create({ data: { id: input.pubkey, platformId } });
+      await ctx.db.admin.create({ data: { id: pubkey, platformId } });
       await logAudit(ctx, {
         action: "admin.add",
         entityType: "Admin",
-        entityId: input.pubkey,
+        entityId: pubkey,
         targetPlatformId: platformId,
       });
       return { moved: false as const, from: null };

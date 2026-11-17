@@ -35,6 +35,7 @@ import { abbreviateAddress } from "@wadzzo/utils/address";
 
 type Admin = RouterOutputs["wallet"]["admin"]["admins"][number];
 const PUBKEY = /^G[A-Z2-7]{55}$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Admin › Admins: who can approve brands and manage the platform. */
 export default function AdminsPage() {
@@ -162,7 +163,7 @@ export default function AdminsPage() {
         empty={{
           icon: Shield,
           title: "No admins",
-          description: "Add someone's public key to make them an admin.",
+          description: "Add someone's public key or email to make them an admin.",
         }}
       />
 
@@ -202,8 +203,14 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const k = key.trim();
-    if (!PUBKEY.test(k)) return setError("A Stellar public key: 56 characters starting with G.");
-    add.mutate({ pubkey: k, platformId: target });
+    if (k.includes("@")) {
+      if (!EMAIL.test(k)) return setError("That doesn't look like an email address.");
+      return add.mutate({ email: k, platformId: target });
+    }
+    const pubkey = k.toUpperCase();
+    if (!PUBKEY.test(pubkey))
+      return setError("A Stellar public key (56 characters starting with G) or an email.");
+    add.mutate({ pubkey, platformId: target });
   };
 
   return (
@@ -215,7 +222,8 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
               <ShieldCheck className="text-primary size-5" /> Add an admin
             </DialogTitle>
             <DialogDescription>
-              They need an account already — ask them to sign in once, then paste their public key.
+              They need an account already — paste their public key or the email they signed up
+              with.
             </DialogDescription>
           </DialogHeader>
           {isSuperAdmin && platforms.data && platforms.data.length > 1 && (
@@ -241,18 +249,18 @@ function AddAdminDialog({ onClose }: { onClose: () => void }) {
             </div>
           )}
           <div className="my-5">
-            <Field label="Public key" htmlFor="admin-key" required error={error}>
+            <Field label="Public key or email" htmlFor="admin-key" required error={error}>
               <Input
                 id="admin-key"
                 value={key}
                 autoFocus
                 spellCheck={false}
                 onChange={(e) => {
-                  setKey(e.target.value.toUpperCase());
+                  setKey(e.target.value);
                   setError(undefined);
                 }}
-                placeholder="GABC…"
-                className="font-mono text-xs"
+                placeholder="GABC… or name@example.com"
+                className={key.includes("@") ? "text-sm" : "font-mono text-xs"}
               />
             </Field>
           </div>
