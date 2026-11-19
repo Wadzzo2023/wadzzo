@@ -3,8 +3,8 @@ import {
   Bungee_Shade,
   Chakra_Petch,
   Cormorant_Upright,
-  Montserrat,
-  Roboto_Slab,
+  Federo,
+  Quicksand,
   Sora,
 } from "next/font/google";
 
@@ -30,7 +30,10 @@ import {
  * so nothing downstream knows which one is active.
  *
  *  · wadzzo         Chakra Petch (display) + Sora (body)
- *  · clintoncounty  Roboto Slab (display) + Montserrat (body): the county's own faces
+ *  · clintoncounty  Federo (display) + Quicksand (body): free stand-ins for the Grow
+ *                   Clinton brand faces, Luxia and Typograph Pro. The Clinton theme
+ *                   (themes/clintoncounty/ar.css) sets interface labels in Quicksand
+ *                   SemiBold and keeps Federo for titles.
  */
 const wadzzoDisplay = Chakra_Petch({
   subsets: ["latin"],
@@ -44,13 +47,13 @@ const wadzzoBody = Sora({
   display: "swap",
   variable: "--nf-body",
 });
-const countyDisplay = Roboto_Slab({
+const countyDisplay = Federo({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400"],
   display: "swap",
   variable: "--nf-display",
 });
-const countyBody = Montserrat({
+const countyBody = Quicksand({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
@@ -94,3 +97,10 @@ export const fontVariables = [
   creatorTitleFont.variable,
   creatorDescriptionFont.variable,
 ].join(" ");
+
+/**
+ * Font variables for <body>. `body` reads `var(--nf-body)` (arcade.css), which only
+ * resolves when the variables are on <body> itself, not on the wrapper inside it.
+ * Clinton sets them here so its body text is Quicksand; Wadzzo keeps its current look.
+ */
+export const bodyFontVariables = isCounty ? fontVariables : "";

@@ -1,69 +1,110 @@
 /*
- * Clinton County AR theme: county maroon in place of Wadzzo green. Loaded after the app's own stylesheet, so these declarations win
- * on equal specificity. Generated from the differences between the platform's
- * look and the default Wadzzo look; edit values here, never fork the app.
+ * Clinton County AR theme, from the Grow Clinton brand sheet. Its three logo panels are
+ * the three themes:
+ *   Light          white page, navy #27566e (200 48% 29%) and gold #c6ab7c (38 39% 63%)
+ *   Dark           black page, the brand's navy for black backgrounds #326f87 (197 46% 36%)
+ *                  and gold
+ *   High contrast  navy #27566e page, white type, gold accents
+ * Type: Federo for titles and the wordmark, Quicksand for everything else (free
+ * stand-ins for the brand's Luxia and Typograph Pro; loaded in apps/ar/src/lib/fonts.ts).
+ * Loaded after the app's own stylesheet, so these declarations win on equal specificity.
+ * Edit values here, never fork the app.
  */
 
+/* ── Light: white page, navy and gold ─────────────────────────────────────── */
 :root {
   --ar-void: 0 0% 97%;
-  --ar-bg: 0 0% 96%;
+  --ar-bg: 0 0% 98%;
+  --ar-surface: 0 0% 100%;
   --ar-surface-2: 0 0% 97%;
-  --ar-surface-3: 0 0% 92%;
-  --ar-line: 0 0% 86%;
-  --ar-line-bright: 0 0% 72%;
-  --ar-text: 188 24% 10%;
-  --ar-text-dim: 188 14% 30%;
-  --ar-text-faint: 188 8% 44%;
-  --ar-green: 346 48% 34%;
-  --ar-green-hot: 346 48% 44%;
-  --ar-green-deep: 346 52% 26%;
+  --ar-surface-3: 200 12% 93%;
+  --ar-line: 200 10% 86%;
+  --ar-line-bright: 200 8% 72%;
+  --ar-text: 200 30% 12%;
+  --ar-text-dim: 200 14% 30%;
+  --ar-text-faint: 200 8% 44%;
+  --ar-green: 200 48% 29%;
+  --ar-green-hot: 197 46% 36%;
+  --ar-green-deep: 200 52% 20%;
   --ar-green-ink: 0 0% 100%;
-  --rarity-common: 188 12% 38%;
+  --rarity-common: 200 12% 38%;
   --rarity-rare: 205 65% 34%;
-  --rarity-epic: 346 48% 34%;
-  --rarity-legendary: 42 72% 30%;
+  --rarity-epic: 200 48% 29%;
+  --rarity-legendary: 38 45% 36%;
   --rarity-mythic: 322 62% 40%;
-}
-.dark {
-  --ar-void: 346 10% 3%;
-  --ar-bg: 346 8% 5%;
-  --ar-surface: 346 6% 9%;
-  --ar-surface-2: 346 5% 12%;
-  --ar-surface-3: 346 4% 17%;
-  --ar-line: 346 4% 22%;
-  --ar-line-bright: 346 4% 33%;
-  --ar-text: 346 12% 96%;
-  --ar-text-dim: 346 8% 70%;
-  --ar-text-faint: 346 6% 50%;
-  --ar-green: 346 52% 56%;
-  --ar-green-hot: 346 62% 66%;
-  --ar-green-deep: 346 52% 34%;
-  --ar-green-ink: 0 0% 100%;
-  --rarity-common: 190 10% 62%;
-  --rarity-rare: 205 80% 64%;
-  --rarity-epic: 346 62% 64%;
-  --rarity-legendary: 46 62% 62%;
-  --rarity-mythic: 322 78% 66%;
+  --hero-panel-start: hsl(200 48% 29%);
 }
 
-:root {
-  --hero-panel-start: hsl(346 48% 34%);
-}
+/* ── Dark: black page, #326f87 and gold ───────────────────────────────────── */
 .dark {
-  --hero-panel-start: hsl(346 52% 56%);
-}
-
-/* High contrast (the shared theme choice): a pure black page with white type, as Clinton's
-   marketplace and brand portal contrast theme. Neutrals only; the county accents stay. */
-.dark.contrast {
   --ar-void: 0 0% 0%;
-  --ar-bg: 0 0% 2%;
-  --ar-surface: 0 0% 7%;
-  --ar-surface-2: 0 0% 10%;
-  --ar-surface-3: 0 0% 14%;
-  --ar-line: 0 0% 38%;
-  --ar-line-bright: 0 0% 62%;
+  --ar-bg: 0 0% 3%;
+  --ar-surface: 0 0% 8%;
+  --ar-surface-2: 0 0% 11%;
+  --ar-surface-3: 0 0% 15%;
+  --ar-line: 0 0% 20%;
+  --ar-line-bright: 0 0% 32%;
+  --ar-text: 0 0% 96%;
+  --ar-text-dim: 0 0% 72%;
+  --ar-text-faint: 0 0% 52%;
+  /* #326f87 lifted for readable text on black; #326f87 itself fills buttons and panels */
+  --ar-green: 197 46% 52%;
+  --ar-green-hot: 197 50% 62%;
+  --ar-green-deep: 197 46% 36%;
+  --ar-green-ink: 0 0% 100%;
+  --rarity-common: 0 0% 62%;
+  --rarity-rare: 205 80% 64%;
+  --rarity-epic: 197 50% 62%;
+  --rarity-legendary: 38 45% 63%;
+  --rarity-mythic: 322 78% 66%;
+  --hero-panel-start: hsl(197 46% 36%);
+}
+
+/* ── High contrast: navy page, white type, gold accents ───────────────────── */
+.dark.contrast {
+  --ar-void: 200 50% 20%;
+  --ar-bg: 200 48% 29%;
+  --ar-surface: 200 46% 24%;
+  --ar-surface-2: 200 44% 21%;
+  --ar-surface-3: 200 42% 34%;
+  --ar-line: 200 30% 55%;
+  --ar-line-bright: 200 25% 75%;
   --ar-text: 0 0% 100%;
-  --ar-text-dim: 0 0% 88%;
-  --ar-text-faint: 0 0% 72%;
+  --ar-text-dim: 0 0% 92%;
+  --ar-text-faint: 200 20% 82%;
+  /* gold, brightened so it reads on navy; navy type on gold fills */
+  --ar-green: 38 55% 72%;
+  --ar-green-hot: 38 65% 80%;
+  --ar-green-deep: 38 39% 63%;
+  --ar-green-ink: 200 50% 14%;
+  --rarity-common: 0 0% 88%;
+  --rarity-rare: 197 80% 82%;
+  --rarity-epic: 38 55% 72%;
+  --rarity-legendary: 46 90% 70%;
+  --rarity-mythic: 322 80% 84%;
+  --hero-panel-start: hsl(38 39% 63%);
+}
+
+/* ── Type ─────────────────────────────────────────────────────────────────── */
+/* Interface labels, tabs and counters: Quicksand (Typograph Pro's role), at the weights the app sets. */
+.font-hud {
+  font-family: var(--nf-body), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+/* Screen titles and the CLINTON wordmark: Federo (Luxia's role). It has one weight, so it
+   is never faux-bolded. */
+h1.font-hud,
+h2.font-hud,
+.ar-wordmark {
+  font-family: var(--nf-display), Georgia, serif;
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+/* The desktop phone frame (DeviceFrame): a dark navy bezel and a gold halo, not Wadzzo green. */
+:root {
+  --frame-bezel: #151c20;
+  --frame-key: #222b31;
+  --frame-lens: #0d161b;
+  --frame-glow: rgba(198, 171, 124, 0.1);
 }

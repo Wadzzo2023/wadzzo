@@ -329,7 +329,7 @@ function Wordmark({ phase }: { phase: Phase }) {
         <motion.span
           key={color}
           aria-hidden
-          className="font-hud pointer-events-none absolute text-[52px] leading-none font-bold tracking-[0.04em] mix-blend-screen"
+          className="font-hud ar-wordmark pointer-events-none absolute text-[52px] leading-none font-bold tracking-[0.04em] mix-blend-screen"
           style={{ color }}
           initial={{ x: dx * 3, opacity: 0 }}
           animate={{
@@ -342,7 +342,7 @@ function Wordmark({ phase }: { phase: Phase }) {
         </motion.span>
       ))}
 
-      <h1 className="font-hud text-ar-text relative flex text-[52px] leading-none font-bold tracking-[0.04em]">
+      <h1 className="font-hud ar-wordmark text-ar-text relative flex text-[52px] leading-none font-bold tracking-[0.04em]">
         {WORDMARK.map((letter, i) => (
           <motion.span
             key={`${letter}-${i}`}

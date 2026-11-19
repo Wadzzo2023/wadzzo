@@ -32,6 +32,12 @@ export interface PlatformBranding {
     readonly logo: string;
     /** Small loading / app icon. */
     readonly loading: string;
+    /**
+     * One-colour version of the mark for places that draw it as a mask in the text colour
+     * (balances and prices in the brand portal). Its shapes must be cut out of a transparent
+     * background; without it, `loading` is used.
+     */
+    readonly token?: string;
     /** Placeholder for a user without a picture. */
     readonly avatar: string;
     readonly favicon: string;

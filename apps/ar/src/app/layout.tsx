@@ -7,7 +7,7 @@ import "~/styles/platform-theme.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
-import { fontVariables } from "~/lib/fonts";
+import { bodyFontVariables, fontVariables } from "~/lib/fonts";
 import { TRPCReactProvider } from "~/trpc/provider";
 import { platformBranding } from "@wadzzo/platform/branding";
 import { SHARED_THEME_COOKIE } from "@wadzzo/ui/lib/shared-theme";
@@ -90,7 +90,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Runs before body paints — see the comment on `themeBootScript`. */}
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
-      <body className="bg-ar-void">
+      <body className={`bg-ar-void ${bodyFontVariables}`.trim()}>
         <TRPCReactProvider>
           <div className={fontVariables}>{children}</div>
         </TRPCReactProvider>

@@ -1,4 +1,113 @@
 /*
- * Clinton County brand portal theme (no overrides: its look comes from poster.css).
- * Loaded after the app's own stylesheet. Edit values here, never fork the app.
+ * Clinton County brand portal theme: the poster look (poster.css, shared with the
+ * marketplace) in the Grow Clinton brand, for the portal only. The brand sheet's three logo
+ * panels are the three themes:
+ *   Light          white cards, navy #27566e (200 48% 29%) sidebar and buttons, gold
+ *                  #c6ab7c (38 39% 63%) for the current page, tags and stickers
+ *   Dark           black page, the brand's navy for black backgrounds #326f87 (197 46% 36%)
+ *   High contrast  navy #27566e page, white type, gold sidebar and buttons with navy type
+ * Type: Federo for display titles, Quicksand for text, labels and notes (free stand-ins
+ * for the brand's Luxia and Typograph Pro).
+ * Loaded after poster.css and the app's own stylesheet. Edit values here, never fork the app.
  */
+
+@import "@fontsource/federo/400.css";
+@import "@fontsource-variable/quicksand";
+
+/* ── Light ────────────────────────────────────────────────────────────────── */
+:root {
+  --cc-maroon: 200 48% 29%; /* poster.css's main colour; navy here */
+  --cc-gold: 38 39% 63%;
+  --ink-mint: 200 52% 20%;
+  --rarity-legendary: 38 45% 36%;
+
+  --font-display: "Federo";
+  --font-display-leading: 1.02;
+  --font-body: "Quicksand Variable";
+  --font-label: "Quicksand Variable";
+  --font-marker: "Quicksand Variable";
+  --font-marker-weight: 700;
+  --font-marker-tracking: 0.06em;
+  /* Federo is far wider than the poster's condensed face */
+  --side-title-size: 1.55rem;
+  --side-nav-size: 1.15rem;
+}
+
+/* ── Dark: black page, #326f87 ────────────────────────────────────────────── */
+.dark {
+  --ar-void: 0 0% 0%;
+  --ar-bg: 0 0% 3%;
+  --ar-surface: 0 0% 8%;
+  --ar-surface-2: 0 0% 11%;
+  --ar-surface-3: 0 0% 15%;
+  --ar-line: 0 0% 20%;
+  --ar-line-bright: 0 0% 32%;
+
+  --primary: 197 46% 36%;
+  --primary-text: 197 50% 64%;
+  --ring: 197 46% 46%;
+
+  --side-bg: 197 46% 36%;
+  --side-mint: 197 46% 24%;
+  --ink: 197 46% 36%;
+  --ink-mint: 197 46% 26%;
+
+  /* stickers keep white type, so #326f87 rather than gold */
+  --ar-pink: 197 46% 36%;
+  --ar-violet: 197 50% 64%;
+  --rarity-legendary: 38 45% 63%;
+}
+
+/* ── High contrast: navy page, white type, gold ───────────────────────────── */
+.contrast {
+  --ar-void: 200 50% 20%;
+  --ar-bg: 200 48% 29%;
+  --ar-surface: 200 46% 24%;
+  --ar-surface-2: 200 44% 21%;
+  --ar-surface-3: 200 42% 34%;
+  --ar-line: 200 30% 55%;
+  --ar-line-bright: 200 25% 75%;
+  --ar-text: 0 0% 100%;
+  --ar-text-dim: 0 0% 92%;
+  --ar-text-faint: 200 20% 82%;
+
+  --ar-green: 145 60% 62%;
+  --ar-green-hot: 145 65% 70%;
+  --primary: 38 55% 72%;
+  --primary-foreground: 200 50% 14%;
+  --primary-text: 38 65% 78%;
+  --ring: 38 55% 72%;
+
+  /* gold sidebar and brand blocks with navy type */
+  --side-bg: 38 55% 72%;
+  --side-ink: 200 50% 14%;
+  --side-mint: 38 50% 88%;
+  --ink: 38 55% 72%;
+  --ink-fg: 200 50% 14%;
+  --ink-mint: 38 45% 60%;
+  /* the current page in the nav: navy with gold type */
+  --side-active-bg: 200 50% 14%;
+  --side-active-fg: 38 65% 78%;
+
+  --ar-pink: 38 55% 72%;
+  --ar-violet: 197 70% 82%;
+  --ar-cyan: 197 80% 80%;
+  --rarity-legendary: 46 90% 70%;
+}
+
+/* ── Sidebar type ─────────────────────────────────────────────────────────── */
+/* Menu items, the account name and other big labels in the sidebar, mobile menu and tab bar:
+   Quicksand SemiBold (Typograph Pro SemiBold's role). The sidebar title keeps Federo, like
+   the logo. */
+.side-scope .display {
+  font-family: var(--font-body), ui-sans-serif, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+.side-scope a[aria-label$="portal home"] .display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: var(--font-display-leading, 0.9);
+}

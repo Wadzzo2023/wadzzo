@@ -60,7 +60,7 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <p className="font-hud text-ar-text text-4xl leading-none font-bold tracking-tight">
+          <p className="font-hud ar-wordmark text-ar-text text-4xl leading-none font-bold tracking-tight">
             {platformBranding.wordmark.letters.join("")}
           </p>
           <span
@@ -104,17 +104,18 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
           "sm:border-ar-line sm:border sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.95)]",
           // Desktop: a real phone shell.
           "lg:h-[min(100dvh-4rem,932px)] lg:w-[430px] lg:rounded-[56px]",
-          "lg:border-[11px] lg:border-[#171d19]",
+          "lg:border-[11px] lg:border-[color:var(--frame-bezel,#171d19)]",
           // Two rings on the bezel: a bright inner one that reads as the
           // polished edge of the glass, and a soft green outer one that lifts
           // the whole object off a background almost as dark as it is.
-          "lg:shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_0_0_4px_rgba(120,255,150,0.07),0_50px_140px_-30px_rgba(0,0,0,1),inset_0_0_0_1px_rgba(255,255,255,0.1)]",
+          // The bezel colours are CSS variables a platform theme may set (themes/<slug>/ar.css).
+          "lg:shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_0_0_4px_var(--frame-glow,rgba(120,255,150,0.07)),0_50px_140px_-30px_rgba(0,0,0,1),inset_0_0_0_1px_rgba(255,255,255,0.1)]",
         ].join(" ")}
       >
         {/* Side keys — desktop only, purely to sell the object. */}
-        <span className="absolute top-[132px] -left-[15px] hidden h-12 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
-        <span className="absolute top-[196px] -left-[15px] hidden h-20 w-[4px] rounded-l-sm bg-[#242b26] lg:block" />
-        <span className="absolute top-[176px] -right-[15px] hidden h-28 w-[4px] rounded-r-sm bg-[#242b26] lg:block" />
+        <span className="absolute top-[132px] -left-[15px] hidden h-12 w-[4px] rounded-l-sm bg-[color:var(--frame-key,#242b26)] lg:block" />
+        <span className="absolute top-[196px] -left-[15px] hidden h-20 w-[4px] rounded-l-sm bg-[color:var(--frame-key,#242b26)] lg:block" />
+        <span className="absolute top-[176px] -right-[15px] hidden h-28 w-[4px] rounded-r-sm bg-[color:var(--frame-key,#242b26)] lg:block" />
 
         {/* Screen. `isolate` keeps the app's blend modes (holo foil, camera
             overlays) from reaching the bezel and backdrop behind it.
@@ -135,7 +136,7 @@ export function DeviceFrame({ children }: { children: ReactNode }) {
 
           {/* Dynamic island, drawn over the app the way the real one is. */}
           <div className="pointer-events-none absolute top-[11px] left-1/2 z-50 hidden h-[30px] w-[112px] -translate-x-1/2 rounded-full bg-black lg:block">
-            <span className="absolute top-1/2 right-[13px] h-[9px] w-[9px] -translate-y-1/2 rounded-full bg-[#0d1a12] ring-1 ring-white/10" />
+            <span className="absolute top-1/2 right-[13px] h-[9px] w-[9px] -translate-y-1/2 rounded-full bg-[color:var(--frame-lens,#0d1a12)] ring-1 ring-white/10" />
           </div>
         </div>
       </div>
