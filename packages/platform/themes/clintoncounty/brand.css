@@ -6,13 +6,34 @@
  *                  #c6ab7c (38 39% 63%) for the current page, tags and stickers
  *   Dark           black page, the brand's navy for black backgrounds #326f87 (197 46% 36%)
  *   High contrast  navy #27566e page, white type, gold sidebar and buttons with navy type
- * Type: Federo for display titles, Quicksand for text, labels and notes (free stand-ins
- * for the brand's Luxia and Typograph Pro).
+ * Type, as the brand sheet: Luxia for display titles, Typograph Pro Light for text and
+ * Typograph Pro SemiBold for labels, menus and notes.
  * Loaded after poster.css and the app's own stylesheet. Edit values here, never fork the app.
  */
 
 @import "@fontsource/federo/400.css";
 @import "@fontsource-variable/quicksand";
+
+/* The brand fonts (files in assets/clintoncounty/<app>/fonts, served at /platform/fonts; see
+   FONTS.md). Federo and Quicksand stay loaded as fallbacks for missing characters. */
+@font-face {
+  font-family: "Luxia";
+  src: url("/platform/fonts/luxia-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Typograph Pro";
+  src: url("/platform/fonts/typograph-pro-light.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Typograph Pro";
+  src: url("/platform/fonts/typograph-pro-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
 
 /* ── Light ────────────────────────────────────────────────────────────────── */
 :root {
@@ -21,16 +42,16 @@
   --ink-mint: 200 52% 20%;
   --rarity-legendary: 38 45% 36%;
 
-  --font-display: "Federo";
+  --font-display: "Luxia", "Federo";
   --font-display-leading: 1.02;
-  --font-body: "Quicksand Variable";
-  --font-label: "Quicksand Variable";
-  --font-marker: "Quicksand Variable";
-  --font-marker-weight: 700;
+  --font-body: "Typograph Pro", "Quicksand Variable";
+  --font-label: "Typograph Pro", "Quicksand Variable";
+  --font-marker: "Typograph Pro", "Quicksand Variable";
+  --font-marker-weight: 600;
   --font-marker-tracking: 0.06em;
-  /* Federo is far wider than the poster's condensed face */
+  /* Luxia is far wider than the poster's condensed face */
   --side-title-size: 1.55rem;
-  --side-nav-size: 1.15rem;
+  --side-nav-size: 1.02rem;
 }
 
 /* ── Dark: black page, #326f87 ────────────────────────────────────────────── */
@@ -97,12 +118,12 @@
 
 /* ── Sidebar type ─────────────────────────────────────────────────────────── */
 /* Menu items, the account name and other big labels in the sidebar, mobile menu and tab bar:
-   Quicksand SemiBold (Typograph Pro SemiBold's role). The sidebar title keeps Federo, like
+   Typograph Pro SemiBold. The sidebar title keeps Luxia, like
    the logo. */
 .side-scope .display {
   font-family: var(--font-body), ui-sans-serif, sans-serif;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.01em;
   line-height: 1.1;
 }
 .side-scope a[aria-label$="portal home"] .display {

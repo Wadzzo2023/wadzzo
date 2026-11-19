@@ -5,8 +5,9 @@
  *   Dark           black page, the brand's navy for black backgrounds #326f87 (197 46% 36%)
  *                  and gold
  *   High contrast  navy #27566e page, white type, gold accents
- * Type: Federo for titles and the wordmark, Quicksand for everything else (free
- * stand-ins for the brand's Luxia and Typograph Pro; loaded in apps/ar/src/lib/fonts.ts).
+ * Type, as the brand sheet: Luxia for titles and the wordmark, Typograph Pro Light for text
+ * and Typograph Pro SemiBold for labels. Federo and Quicksand (apps/ar/src/lib/fonts.ts) are
+ * the fallbacks.
  * Loaded after the app's own stylesheet, so these declarations win on equal specificity.
  * Edit values here, never fork the app.
  */
@@ -86,17 +87,42 @@
 }
 
 /* ── Type ─────────────────────────────────────────────────────────────────── */
-/* Interface labels, tabs and counters: Quicksand (Typograph Pro's role), at the weights the app sets. */
+/* The brand fonts (files in assets/clintoncounty/<app>/fonts, served at /platform/fonts; see
+   FONTS.md). Federo and Quicksand stay loaded as fallbacks for missing characters. */
+@font-face {
+  font-family: "Luxia";
+  src: url("/platform/fonts/luxia-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Typograph Pro";
+  src: url("/platform/fonts/typograph-pro-light.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Typograph Pro";
+  src: url("/platform/fonts/typograph-pro-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* Text: Typograph Pro (Light for regular text, SemiBold for medium weights and up). */
+body {
+  font-family: "Typograph Pro", var(--nf-body), ui-sans-serif, system-ui, sans-serif;
+}
+/* Interface labels, tabs and counters: Typograph Pro at the weights the app sets. */
 .font-hud {
-  font-family: var(--nf-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: "Typograph Pro", var(--nf-body), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0.01em;
 }
-/* Screen titles and the CLINTON wordmark: Federo (Luxia's role). It has one weight, so it
-   is never faux-bolded. */
+/* Screen titles and the CLINTON wordmark: Luxia. It has one weight, so it is never
+   faux-bolded. */
 h1.font-hud,
 h2.font-hud,
 .ar-wordmark {
-  font-family: var(--nf-display), Georgia, serif;
+  font-family: "Luxia", var(--nf-display), Georgia, serif;
   font-weight: 400;
   font-synthesis: none;
 }
